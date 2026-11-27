@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 118 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 146 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1405,6 +1405,34 @@
     "Egress · An underground building's means of egress: A person checks this (Gordium doesn't decide it): Means of egress per 405.7.1 and 405.7.2: a person's check.",
     "Egress · Two exits on each floor level: A person checks this (Gordium doesn't decide it): Each floor level has at least two exits; where 405.4 asks compartments, each has an exit and an exit access doorway into the adjoining compartment: a person's check of the compartments.",
     "Egress · Smokeproof enclosures for stairways below 30 ft: A person checks this (Gordium doesn't decide it): Every required stairway serving floor levels more than 30 ft below its level of exit discharge is a smokeproof enclosure (1023.12): a person's check.",
+    "Egress · Group I-2: A person checks this (Gordium doesn't decide it): The building may be Group I-2 (hospitals, nursing homes, detoxification facilities): Sections 407.1 to 407.11 apply besides the rest of the code: a person's check.",
+    "Egress · Group I-2 corridors continuous to the exits and separated: A person checks this (Gordium doesn't decide it): Group I-2 corridors run continuous to the exits and are separated from other areas per 407.3, but the spaces 407.2.1 to 407.2.6 let open to them: a person's check.",
+    "Egress · Waiting and similar areas open to a Group I-2 corridor: A person checks this (Gordium doesn't decide it): A waiting, public-use or group meeting space built as a corridor may be open to it only if it isn't a sleeping, treatment, incidental or hazardous use, has fire detection (907), its corridors have detection or quick-response sprinklers, and it doesn't obstruct access to the exits: a person's check.",
+    "Egress · Care providers' stations open to a Group I-2 corridor: A person checks this (Gordium doesn't decide it): Care providers', staff, charting and clerical spaces built as a corridor may be open to it: a person's check.",
+    "Egress · Psychiatric treatment areas open to a Group I-2 corridor: A person checks this (Gordium doesn't decide it): A supervised psychiatric treatment area may be open to the corridor only at 1,500 sq ft or less, supervised, not obstructing access to the exits, with fire detection (907.2), one per smoke compartment, its walls and ceilings built as a corridor's: a person's check.",
+    "Egress · Gift shops open to a Group I-2 corridor: A person checks this (Gordium doesn't decide it): A gift shop and its storage under 500 sq ft, built as a corridor, may be open to it: a person's check.",
+    "Egress · Nursing home shared spaces open to the corridor: A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, shared living, group meeting or therapy spaces may be open to the corridor only if built as a corridor, not a sleeping, treatment, incidental or hazardous use, with fire detection, their corridors detected or sprinklered with quick response, and not obstructing access to the exits: a person's check.",
+    "Egress · Nursing home cooking facilities open to the corridor: A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a space with domestic cooking may be open to the corridor only for 30 care recipients or fewer in the smoke compartment and served, one per smoke compartment, the corridor clearly marked, access to the exit unobstructed, its appliances per 407.2.7: a person's check.",
+    "Egress · Domestic cooking appliances in Group I-2: A person checks this (Gordium doesn't decide it): Domestic cooking appliances limited to ovens, cooktops, ranges, warmers and microwaves, with hoods, protection, a staff-only shut-off, a timer of at most 120 minutes and a fire extinguisher within 30 ft (exceptions for compartments without patient sleeping or care areas, and for training): a person's check.",
+    "Egress · Group I-2 corridor walls as smoke partitions: A person checks this (Gordium doesn't decide it): Corridor walls are smoke partitions per 710: a person's check.",
+    "Egress · Group I-2 corridor doors limiting smoke: A person checks this (Gordium doesn't decide it): Corridor doors (other than in rated walls) limit the transfer of smoke and latch positively, no roller latches; other doors per 716: a person's check.",
+    "Egress · Group I-2 corridor door construction: A person checks this (Gordium doesn't decide it): Unrated corridor doors: solid with close-fitting stops; Dutch doors with an astragal and latching both halves as one leaf; louvers or an undercut of at most 2/3 in only for makeup air (1020.6 exception 1): a person's check.",
+    "Egress · Group I-2 means of egress: A person checks this (Gordium doesn't decide it): Means of egress per Chapter 10 and 407.4.1 to 407.4.4, and the fire safety and evacuation plans (1002.2) name the building components a defend-in-place response needs: a person's check.",
+    "Egress · A Group I-2 habitable room's door directly to a corridor: A person checks this (Gordium doesn't decide it): Each habitable room has an exit access door leading directly to a corridor, but rooms with exit doors directly outside at ground level and rooms in a care suite: a person's check of which rooms are habitable.",
+    "Egress · Locks on a care recipient's room never restricting egress: A person checks this (Gordium doesn't decide it): A lock restricting access to a care recipient's room from the corridor, operable only by staff, never restricts egress from the room (not in psychiatric treatment areas, or per 1010.2.13): a person's check.",
+    "Egress · Furniture in nursing home corridors at least 96 in wide: A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a corridor at least 96 in wide may hold fixed furniture on one side only, leaving 72 in clear (or 1005.7's encroachments), each group of at most 50 sq ft and 10 ft apart, in the fire and safety plans: a person's check.",
+    "Egress · Group I-2 care suites: A person checks this (Gordium doesn't decide it): Care suites meet 407.4.4.1 to 407.4.4.5 and either 407.4.4.6 or 407.4.4.7: a person's check.",
+    "Egress · No exit access from elsewhere through a care suite: A person checks this (Gordium doesn't decide it): Exit access from any part of the building not a care suite never passes through one: a person's check.",
+    "Egress · Care suites separated by smoke partitions: A person checks this (Gordium doesn't decide it): Each care suite is separated from the rest of the building, other suites included, by a smoke partition (710): a person's check.",
+    "Egress · A care suite's door to a corridor: A person checks this (Gordium doesn't decide it): Every care suite has a door directly to an exit access corridor or horizontal exit, at most 100 ft of travel from any habitable room in it; a second door required by 407.4.4.6.2 or 407.4.4.7.2 leads to a corridor, an exit or an adjacent suite: a person's check.",
+    "Egress · Circulation paths within a care suite at least 36 in: A person checks this (Gordium doesn't decide it): Paths to the suite's doors are at least 36 in wide and need not meet a corridor's or an aisle's requirements: a person's check.",
+    "Egress · Doors within care suites: A person checks this (Gordium doesn't decide it): Doors serving habitable rooms in a care suite may be manual horizontal sliding doors (1010.1.2 exception 9), power-operated doors (exception 7) or doors per 1010: a person's check.",
+    "Egress · Care suites containing sleeping rooms: A person checks this (Gordium doesn't decide it): Sleeping rooms may be grouped into a care suite only where it serves as exit access for at most eight beds, or gives constant visual supervision, or has smoke detection in the sleeping rooms (NFPA 72): a person's check.",
+    "Egress · A sleeping care suite at most 7: A person checks this (Gordium doesn't decide it): A care suite with sleeping rooms is at most 7,500 sq ft (10,000 sq ft with smoke detection throughout): a person's check.",
+    "Egress · Two doors from a sleeping care suite over 1: A person checks this (Gordium doesn't decide it): A sleeping room, or a care suite with sleeping rooms, over 1,000 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+    "Egress · Care suites without sleeping rooms: A person checks this (Gordium doesn't decide it): Treatment areas and their rooms and circulation may be grouped into a care suite within 407.4.4.7.1 and 407.4.4.7.2: a person's check.",
+    "Egress · A treatment care suite at most 12: A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms is at most 12,500 sq ft (15,000 sq ft with smoke detection throughout, 907): a person's check.",
+    "Egress · Two doors from a treatment care suite over 2: A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms over 2,500 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
     "Egress · Each accessory occupancy classified on its own: A person checks this (Gordium doesn't decide it): Each accessory occupancy's classification (Section 302.1, not brought in) is the architect's statement.",
     "Egress · Accessory occupancies: allowable height: A person checks this (Gordium doesn't decide it): Section 504 is not brought in: a person checks.",
     "Egress · Accessory occupancies within Table 506.2's values: A person checks this (Gordium doesn't decide it): Table 506.2's tabular values for nonsprinklered buildings, for each accessory occupancy (Section 506, not brought in): a person checks.",
@@ -66533,6 +66561,1970 @@
      }
     },
     {
+     "id": "egress.general.bc_407_1_group_i2",
+     "rule": "general.bc_407_1_group_i2",
+     "name": "Egress · Group I-2, Sections 407.1 to 407.11 (BCNYS 407.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The building may be Group I-2 (hospitals, nursing homes, detoxification facilities): Sections 407.1 to 407.11 apply besides the rest of the code: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The building may be Group I-2 (hospitals, nursing homes, detoxification facilities): Sections 407.1 to 407.11 apply besides the rest of the code: a person's check.",
+      "quotes": [
+       {
+        "text": "407.1 General. Occupancies in Group I-2 shall comply with the provisions of Sections 407.1 through 407.11 and other applicable provisions of this code.",
+        "where": "407.1, 2025 Building Code of New York State (BCNYS), PDF p.98"
+       }
+      ],
+      "citation": "407.1, 2025 Building Code of New York State (BCNYS), PDF p.98",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.1",
+      "quote": "407.1 General. Occupancies in Group I-2 shall comply with the provisions of Sections 407.1 through 407.11 and other applicable provisions of this code."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_1_group_i2",
+       "words": "A person checks this (Gordium doesn't decide it): The building may be Group I-2 (hospitals, nursing homes, detoxification facilities): Sections 407.1 to 407.11 apply besides the rest of the code: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_1_group_i2",
+       "why": "A person checks this (Gordium doesn't decide it): The building may be Group I-2 (hospitals, nursing homes, detoxification facilities): Sections 407.1 to 407.11 apply besides the rest of the code: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Group I-2, Sections 407.1 to 407.11",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.1",
+      "piece_title": "General"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_2_corridor_continuity_and_separation",
+     "rule": "general.bc_407_2_corridor_continuity_and_separation",
+     "name": "Egress · Group I-2 corridors continuous to the exits and separated (BCNYS 407.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Group I-2 corridors run continuous to the exits and are separated from other areas per 407.3, but the spaces 407.2.1 to 407.2.6 let open to them: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Group I-2 corridors run continuous to the exits and are separated from other areas per 407.3, but the spaces 407.2.1 to 407.2.6 let open to them: a person's check.",
+      "quotes": [
+       {
+        "text": "407.2 Corridors continuity and separation. Corridors in occupancies in Group I-2 shall be continuous to the exits and shall be sepa- rated from other areas in accordance with Section 407.3 except spaces conforming to Sections 407.2.1 through 407.2.6.",
+        "where": "407.2, 2025 Building Code of New York State (BCNYS), PDF p.98"
+       }
+      ],
+      "citation": "407.2, 2025 Building Code of New York State (BCNYS), PDF p.98",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.2",
+      "quote": "407.2 Corridors continuity and separation. Corridors in occupancies in Group I-2 shall be continuous to the exits and shall be sepa- rated from other areas in accordance with Section 407.3 except spaces conforming to Sections 407.2.1 through 407.2.6."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_2_corridor_continuity_and_separation",
+       "words": "A person checks this (Gordium doesn't decide it): Group I-2 corridors run continuous to the exits and are separated from other areas per 407.3, but the spaces 407.2.1 to 407.2.6 let open to them: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_2_corridor_continuity_and_separation",
+       "why": "A person checks this (Gordium doesn't decide it): Group I-2 corridors run continuous to the exits and are separated from other areas per 407.3, but the spaces 407.2.1 to 407.2.6 let open to them: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Group I-2 corridors continuous to the exits and separated",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.2",
+      "piece_title": "Corridors continuity and separation"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_2_1_waiting_areas_open_to_a_corridor",
+     "rule": "general.bc_407_2_1_waiting_areas_open_to_a_corridor",
+     "name": "Egress · Waiting and similar areas open to a Group I-2 corridor (BCNYS 407.2.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A waiting, public-use or group meeting space built as a corridor may be open to it only if it isn't a sleeping, treatment, incidental or hazardous use, has fire detection (907), its corridors have detection or quick-response sprinklers, and it doesn't obstruct access to the exits: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A waiting, public-use or group meeting space built as a corridor may be open to it only if it isn't a sleeping, treatment, incidental or hazardous use, has fire detection (907), its corridors have detection or quick-response sprinklers, and it doesn't obstruct access to the exits: a person's check.",
+      "quotes": [
+       {
+        "text": "407.2.1 Waiting and similar areas. Waiting areas, public-use areas or group meeting spaces constructed as required for corridors shall be permitted to be open to a corridor, only where all of the following criteria are met: 1. The spaces are not occupied as care recipient’s sleeping rooms, treatment rooms, incidental uses in accordance with Section 509, or hazardous uses. 2. The open space is protected by an automatic fire detection system installed in accordance with Section 907. 3. The corridors onto which the spaces open, in the same smoke compartment, are protected by an automatic fire detection system installed in accordance with Section 907, or the smoke compartment in which the spaces are located is equipped throughout with quick-response sprinklers in accordance with Section 903.3.2. 4. The space is arranged so as not to obstruct access to the required exits.",
+        "where": "407.2.1, 2025 Building Code of New York State (BCNYS), PDF p.98"
+       }
+      ],
+      "citation": "407.2.1, 2025 Building Code of New York State (BCNYS), PDF p.98",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.2.1",
+      "quote": "407.2.1 Waiting and similar areas. Waiting areas, public-use areas or group meeting spaces constructed as required for corridors shall be permitted to be open to a corridor, only where all of the following criteria are met: 1. The spaces are not occupied as care recipient’s sleeping rooms, treatment rooms, incidental uses in accordance with Section 509, or hazardous uses. 2. The open space is protected by an automatic fire detection system installed in accordance with Section 907. 3. The corridors onto which the spaces open, in the same smoke compartment, are protected by an automatic fire detection system installed in accordance with Section 907, or the smoke compartment in which the spaces are located is equipped throughout with quick-response sprinklers in accordance with Section 903.3.2. 4. The space is arranged so as not to obstruct access to the required exits."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_2_1_waiting_areas_open_to_a_corridor",
+       "words": "A person checks this (Gordium doesn't decide it): A waiting, public-use or group meeting space built as a corridor may be open to it only if it isn't a sleeping, treatment, incidental or hazardous use, has fire detection (907), its corridors have detection or quick-response sprinklers, and it doesn't obstruct access to the exits: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_2_1_waiting_areas_open_to_a_corridor",
+       "why": "A person checks this (Gordium doesn't decide it): A waiting, public-use or group meeting space built as a corridor may be open to it only if it isn't a sleeping, treatment, incidental or hazardous use, has fire detection (907), its corridors have detection or quick-response sprinklers, and it doesn't obstruct access to the exits: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Waiting and similar areas open to a Group I-2 corridor",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.2.1",
+      "piece_title": "Waiting and similar areas"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_2_2_care_providers_stations",
+     "rule": "general.bc_407_2_2_care_providers_stations",
+     "name": "Egress · Care providers' stations open to a Group I-2 corridor (BCNYS 407.2.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Care providers', staff, charting and clerical spaces built as a corridor may be open to it: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Care providers', staff, charting and clerical spaces built as a corridor may be open to it: a person's check.",
+      "quotes": [
+       {
+        "text": "407.2.2 Care providers’ stations. Spaces for care providers’, supervisory staff, doctors’ and nurses’ charting, communications and related clerical areas shall be permitted to be open to the corridor, where such spaces are constructed as required for corridors.",
+        "where": "407.2.2, 2025 Building Code of New York State (BCNYS), PDF p.98"
+       }
+      ],
+      "citation": "407.2.2, 2025 Building Code of New York State (BCNYS), PDF p.98",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.2.2",
+      "quote": "407.2.2 Care providers’ stations. Spaces for care providers’, supervisory staff, doctors’ and nurses’ charting, communications and related clerical areas shall be permitted to be open to the corridor, where such spaces are constructed as required for corridors."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_2_2_care_providers_stations",
+       "words": "A person checks this (Gordium doesn't decide it): Care providers', staff, charting and clerical spaces built as a corridor may be open to it: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_2_2_care_providers_stations",
+       "why": "A person checks this (Gordium doesn't decide it): Care providers', staff, charting and clerical spaces built as a corridor may be open to it: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Care providers' stations open to a Group I-2 corridor",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.2.2",
+      "piece_title": "Care providers’ stations"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_2_3_psychiatric_treatment_areas",
+     "rule": "general.bc_407_2_3_psychiatric_treatment_areas",
+     "name": "Egress · Psychiatric treatment areas open to a Group I-2 corridor (BCNYS 407.2.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A supervised psychiatric treatment area may be open to the corridor only at 1,500 sq ft or less, supervised, not obstructing access to the exits, with fire detection (907.2), one per smoke compartment, its walls and ceilings built as a corridor's: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A supervised psychiatric treatment area may be open to the corridor only at 1,500 sq ft or less, supervised, not obstructing access to the exits, with fire detection (907.2), one per smoke compartment, its walls and ceilings built as a corridor's: a person's check.",
+      "quotes": [
+       {
+        "text": "407.2.3 Psychiatric treatment areas. Areas wherein psychiatric care recipients who are incapable of self-preservation are housed, or group meeting or multipurpose therapeutic spaces other than incidental uses in accordance with Section 509, under continuous supervision by facility staff, shall be permitted to be open to the corridor, where the following criteria are met: 1. Each area does not exceed 1,500 square feet (140 m[fn2]). 2. The area is located to permit supervision by the facility staff. 3. The area is arranged so as not to obstruct any access to the required exits. 4. The area is equipped with an automatic fire detection system installed in accordance with Section 907.2. 5. Not more than one such space is permitted in any one smoke compartment. 6. The walls and ceilings of the space are constructed as required for corridors.",
+        "where": "407.2.3, 2025 Building Code of New York State (BCNYS), PDF p.98"
+       }
+      ],
+      "citation": "407.2.3, 2025 Building Code of New York State (BCNYS), PDF p.98",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.2.3",
+      "quote": "407.2.3 Psychiatric treatment areas. Areas wherein psychiatric care recipients who are incapable of self-preservation are housed, or group meeting or multipurpose therapeutic spaces other than incidental uses in accordance with Section 509, under continuous supervision by facility staff, shall be permitted to be open to the corridor, where the following criteria are met: 1. Each area does not exceed 1,500 square feet (140 m[fn2]). 2. The area is located to permit supervision by the facility staff. 3. The area is arranged so as not to obstruct any access to the required exits. 4. The area is equipped with an automatic fire detection system installed in accordance with Section 907.2. 5. Not more than one such space is permitted in any one smoke compartment. 6. The walls and ceilings of the space are constructed as required for corridors."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_2_3_psychiatric_treatment_areas",
+       "words": "A person checks this (Gordium doesn't decide it): A supervised psychiatric treatment area may be open to the corridor only at 1,500 sq ft or less, supervised, not obstructing access to the exits, with fire detection (907.2), one per smoke compartment, its walls and ceilings built as a corridor's: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_2_3_psychiatric_treatment_areas",
+       "why": "A person checks this (Gordium doesn't decide it): A supervised psychiatric treatment area may be open to the corridor only at 1,500 sq ft or less, supervised, not obstructing access to the exits, with fire detection (907.2), one per smoke compartment, its walls and ceilings built as a corridor's: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Psychiatric treatment areas open to a Group I-2 corridor",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.2.3",
+      "piece_title": "Psychiatric treatment areas"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_2_4_gift_shops",
+     "rule": "general.bc_407_2_4_gift_shops",
+     "name": "Egress · Gift shops open to a Group I-2 corridor (BCNYS 407.2.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A gift shop and its storage under 500 sq ft, built as a corridor, may be open to it: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A gift shop and its storage under 500 sq ft, built as a corridor, may be open to it: a person's check.",
+      "quotes": [
+       {
+        "text": "407.2.4 Gift shops. Gift shops and associated storage that are less than 500 square feet (455 m[fn2]) in area shall be permitted to be open to the corridor where such spaces are constructed as required for corridors.",
+        "where": "407.2.4, 2025 Building Code of New York State (BCNYS), PDF p.98"
+       }
+      ],
+      "citation": "407.2.4, 2025 Building Code of New York State (BCNYS), PDF p.98",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.2.4",
+      "quote": "407.2.4 Gift shops. Gift shops and associated storage that are less than 500 square feet (455 m[fn2]) in area shall be permitted to be open to the corridor where such spaces are constructed as required for corridors."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_2_4_gift_shops",
+       "words": "A person checks this (Gordium doesn't decide it): A gift shop and its storage under 500 sq ft, built as a corridor, may be open to it: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_2_4_gift_shops",
+       "why": "A person checks this (Gordium doesn't decide it): A gift shop and its storage under 500 sq ft, built as a corridor, may be open to it: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Gift shops open to a Group I-2 corridor",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.2.4",
+      "piece_title": "Gift shops"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_2_5_nursing_home_housing_units",
+     "rule": "general.bc_407_2_5_nursing_home_housing_units",
+     "name": "Egress · Nursing home shared spaces open to the corridor (BCNYS 407.2.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, shared living, group meeting or therapy spaces may be open to the corridor only if built as a corridor, not a sleeping, treatment, incidental or hazardous use, with fire detection, their corridors detected or sprinklered with quick response, and not obstructing access to the exits: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, shared living, group meeting or therapy spaces may be open to the corridor only if built as a corridor, not a sleeping, treatment, incidental or hazardous use, with fire detection, their corridors detected or sprinklered with quick response, and not obstructing access to the exits: a person's check.",
+      "quotes": [
+       {
+        "text": "407.2.5 Nursing home housing units. In Group I-2, Condition 1 occupancies, in areas where nursing home residents are housed, shared living spaces, group meeting or multipurpose therapeutic spaces shall be permitted to be open to the corridor, where all of the following criteria are met: 1. The walls and ceilings of the space are constructed as required for corridors. 2. The spaces are not occupied as resident sleeping rooms, treatment rooms, incidental uses in accordance with Section 509, or hazardous uses. 3. The open space is protected by an automatic fire detection system installed in accordance with Section 907. 4. The corridors onto which the spaces open, in the same smoke compartment, are protected by an automatic fire detection system installed in accordance with Section 907, or the smoke compartment in which the spaces are located is equipped throughout with quick-response sprinklers in accordance with Section 903.3.2. 5. The space is arranged so as not to obstruct access to the required exits.",
+        "where": "407.2.5, 2025 Building Code of New York State (BCNYS), PDF p.98"
+       }
+      ],
+      "citation": "407.2.5, 2025 Building Code of New York State (BCNYS), PDF p.98",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.2.5",
+      "quote": "407.2.5 Nursing home housing units. In Group I-2, Condition 1 occupancies, in areas where nursing home residents are housed, shared living spaces, group meeting or multipurpose therapeutic spaces shall be permitted to be open to the corridor, where all of the following criteria are met: 1. The walls and ceilings of the space are constructed as required for corridors. 2. The spaces are not occupied as resident sleeping rooms, treatment rooms, incidental uses in accordance with Section 509, or hazardous uses. 3. The open space is protected by an automatic fire detection system installed in accordance with Section 907. 4. The corridors onto which the spaces open, in the same smoke compartment, are protected by an automatic fire detection system installed in accordance with Section 907, or the smoke compartment in which the spaces are located is equipped throughout with quick-response sprinklers in accordance with Section 903.3.2. 5. The space is arranged so as not to obstruct access to the required exits."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_2_5_nursing_home_housing_units",
+       "words": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, shared living, group meeting or therapy spaces may be open to the corridor only if built as a corridor, not a sleeping, treatment, incidental or hazardous use, with fire detection, their corridors detected or sprinklered with quick response, and not obstructing access to the exits: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_2_5_nursing_home_housing_units",
+       "why": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, shared living, group meeting or therapy spaces may be open to the corridor only if built as a corridor, not a sleeping, treatment, incidental or hazardous use, with fire detection, their corridors detected or sprinklered with quick response, and not obstructing access to the exits: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Nursing home shared spaces open to the corridor",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.2.5",
+      "piece_title": "Nursing home housing units"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_2_6_nursing_home_cooking_facilities",
+     "rule": "general.bc_407_2_6_nursing_home_cooking_facilities",
+     "name": "Egress · Nursing home cooking facilities open to the corridor (BCNYS 407.2.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a space with domestic cooking may be open to the corridor only for 30 care recipients or fewer in the smoke compartment and served, one per smoke compartment, the corridor clearly marked, access to the exit unobstructed, its appliances per 407.2.7: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a space with domestic cooking may be open to the corridor only for 30 care recipients or fewer in the smoke compartment and served, one per smoke compartment, the corridor clearly marked, access to the exit unobstructed, its appliances per 407.2.7: a person's check.",
+      "quotes": [
+       {
+        "text": "407.2.6 Nursing home cooking facilities. In Group I-2, Condition 1 occupancies, rooms or spaces that contain a cooking facility with domestic cooking appliances shall be permitted to be open to the corridor where all of the following criteria are met: 1. The number of care recipients housed in the smoke compartment shall not be greater than 30. 2. The number of care recipients served by the cooking facility shall not be greater than 30. 3. Not more than one cooking facility area shall be permitted in a smoke compartment. 4. The corridor shall be a clearly identified space delineated by construction or floor pattern, material or color. 5. The space containing the domestic cooking facility shall be arranged so as not to obstruct access to the required exit.",
+        "where": "407.2.6, 2025 Building Code of New York State (BCNYS), PDF p.98"
+       },
+       {
+        "text": "6. The cooking appliance shall comply with Section 407.2.7.",
+        "where": "407.2.6, 2025 Building Code of New York State (BCNYS), PDF p.99"
+       }
+      ],
+      "citation": "407.2.6, 2025 Building Code of New York State (BCNYS), PDF p.98",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.2.6",
+      "quote": "407.2.6 Nursing home cooking facilities. In Group I-2, Condition 1 occupancies, rooms or spaces that contain a cooking facility with domestic cooking appliances shall be permitted to be open to the corridor where all of the following criteria are met: 1. The number of care recipients housed in the smoke compartment shall not be greater than 30. 2. The number of care recipients served by the cooking facility shall not be greater than 30. 3. Not more than one cooking facility area shall be permitted in a smoke compartment. 4. The corridor shall be a clearly identified space delineated by construction or floor pattern, material or color. 5. The space containing the domestic cooking facility shall be arranged so as not to obstruct access to the required exit."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_2_6_nursing_home_cooking_facilities",
+       "words": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a space with domestic cooking may be open to the corridor only for 30 care recipients or fewer in the smoke compartment and served, one per smoke compartment, the corridor clearly marked, access to the exit unobstructed, its appliances per 407.2.7: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_2_6_nursing_home_cooking_facilities",
+       "why": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a space with domestic cooking may be open to the corridor only for 30 care recipients or fewer in the smoke compartment and served, one per smoke compartment, the corridor clearly marked, access to the exit unobstructed, its appliances per 407.2.7: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Nursing home cooking facilities open to the corridor",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.2.6",
+      "piece_title": "Nursing home cooking facilities"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_2_7_domestic_cooking_appliances",
+     "rule": "general.bc_407_2_7_domestic_cooking_appliances",
+     "name": "Egress · Domestic cooking appliances in Group I-2 (BCNYS 407.2.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Domestic cooking appliances limited to ovens, cooktops, ranges, warmers and microwaves, with hoods, protection, a staff-only shut-off, a timer of at most 120 minutes and a fire extinguisher within 30 ft (exceptions for compartments without patient sleeping or care areas, and for training): a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Domestic cooking appliances limited to ovens, cooktops, ranges, warmers and microwaves, with hoods, protection, a staff-only shut-off, a timer of at most 120 minutes and a fire extinguisher within 30 ft (exceptions for compartments without patient sleeping or care areas, and for training): a person's check.",
+      "quotes": [
+       {
+        "text": "407.2.7 Domestic cooking appliances. In Group I-2 occupancies, installation of cooking appliances used in domestic cooking facilities shall comply with all of the following: 1. The types of cooking appliances permitted shall be limited to ovens, cooktops, ranges, warmers and microwaves. 2. Domestic cooking hoods installed and constructed in accordance with Section 505 of the Mechanical Code of New York State shall be provided over cooktops and ranges. 3. Cooktops and ranges shall be protected in accordance with Section 904.15. 4. A shut-off for the fuel and electrical power supply to the cooking equipment shall be provided in a location to which only staff has access. 5. A timer shall be provided that automatically deactivates the cooking appliances within a period of not more than 120 minutes. 6. A portable fire extinguisher shall be provided. Installation shall be in accordance with Section 906, and the extinguisher shall be located a distance of travel of 30 feet (9144 mm) or less from each domestic cooking appliance. Exceptions: 1. Cooktops and ranges located within smoke compartments with no patient sleeping or patient care areas are not required to comply with this section. 2. Cooktops and ranges used for care recipient training or nutritional counseling are not required to comply with Item 3 of this section.",
+        "where": "407.2.7, 2025 Building Code of New York State (BCNYS), PDF p.99"
+       }
+      ],
+      "citation": "407.2.7, 2025 Building Code of New York State (BCNYS), PDF p.99",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.2.7",
+      "quote": "407.2.7 Domestic cooking appliances. In Group I-2 occupancies, installation of cooking appliances used in domestic cooking facilities shall comply with all of the following: 1. The types of cooking appliances permitted shall be limited to ovens, cooktops, ranges, warmers and microwaves. 2. Domestic cooking hoods installed and constructed in accordance with Section 505 of the Mechanical Code of New York State shall be provided over cooktops and ranges. 3. Cooktops and ranges shall be protected in accordance with Section 904.15. 4. A shut-off for the fuel and electrical power supply to the cooking equipment shall be provided in a location to which only staff has access. 5. A timer shall be provided that automatically deactivates the cooking appliances within a period of not more than 120 minutes. 6. A portable fire extinguisher shall be provided. Installation shall be in accordance with Section 906, and the extinguisher shall be located a distance of travel of 30 feet (9144 mm) or less from each domestic cooking appliance. Exceptions: 1. Cooktops and ranges located within smoke compartments with no patient sleeping or patient care areas are not required to comply with this section. 2. Cooktops and ranges used for care recipient training or nutritional counseling are not required to comply with Item 3 of this section."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_2_7_domestic_cooking_appliances",
+       "words": "A person checks this (Gordium doesn't decide it): Domestic cooking appliances limited to ovens, cooktops, ranges, warmers and microwaves, with hoods, protection, a staff-only shut-off, a timer of at most 120 minutes and a fire extinguisher within 30 ft (exceptions for compartments without patient sleeping or care areas, and for training): a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_2_7_domestic_cooking_appliances",
+       "why": "A person checks this (Gordium doesn't decide it): Domestic cooking appliances limited to ovens, cooktops, ranges, warmers and microwaves, with hoods, protection, a staff-only shut-off, a timer of at most 120 minutes and a fire extinguisher within 30 ft (exceptions for compartments without patient sleeping or care areas, and for training): a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Domestic cooking appliances in Group I-2",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.2.7",
+      "piece_title": "Domestic cooking appliances"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_3_corridor_wall_construction",
+     "rule": "general.bc_407_3_corridor_wall_construction",
+     "name": "Egress · Group I-2 corridor walls as smoke partitions (BCNYS 407.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Corridor walls are smoke partitions per 710: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Corridor walls are smoke partitions per 710: a person's check.",
+      "quotes": [
+       {
+        "text": "407.3 Corridor wall construction. Corridor walls shall be constructed as smoke partitions in accordance with Section 710.",
+        "where": "407.3, 2025 Building Code of New York State (BCNYS), PDF p.99"
+       }
+      ],
+      "citation": "407.3, 2025 Building Code of New York State (BCNYS), PDF p.99",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.3",
+      "quote": "407.3 Corridor wall construction. Corridor walls shall be constructed as smoke partitions in accordance with Section 710."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_3_corridor_wall_construction",
+       "words": "A person checks this (Gordium doesn't decide it): Corridor walls are smoke partitions per 710: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_3_corridor_wall_construction",
+       "why": "A person checks this (Gordium doesn't decide it): Corridor walls are smoke partitions per 710: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Group I-2 corridor walls as smoke partitions",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.3",
+      "piece_title": "Corridor wall construction"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_3_1_corridor_doors",
+     "rule": "general.bc_407_3_1_corridor_doors",
+     "name": "Egress · Group I-2 corridor doors limiting smoke, positive latching (BCNYS 407.3.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Corridor doors (other than in rated walls) limit the transfer of smoke and latch positively, no roller latches; other doors per 716: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Corridor doors (other than in rated walls) limit the transfer of smoke and latch positively, no roller latches; other doors per 716: a person's check.",
+      "quotes": [
+       {
+        "text": "407.3.1 Corridor doors. Corridor doors, other than those in a wall required to be rated by Section 509.4 or for the enclosure of a vertical opening or an exit, shall not have a required fire protection rating and shall not be required to be equipped with self-clos- ing or automatic-closing devices, but shall provide an effective barrier to limit the transfer of smoke and shall be equipped with positive latching. Roller latches are not permitted. Other doors shall conform to Section 716.",
+        "where": "407.3.1, 2025 Building Code of New York State (BCNYS), PDF p.99"
+       }
+      ],
+      "citation": "407.3.1, 2025 Building Code of New York State (BCNYS), PDF p.99",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.3.1",
+      "quote": "407.3.1 Corridor doors. Corridor doors, other than those in a wall required to be rated by Section 509.4 or for the enclosure of a vertical opening or an exit, shall not have a required fire protection rating and shall not be required to be equipped with self-clos- ing or automatic-closing devices, but shall provide an effective barrier to limit the transfer of smoke and shall be equipped with positive latching. Roller latches are not permitted. Other doors shall conform to Section 716."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_3_1_corridor_doors",
+       "words": "A person checks this (Gordium doesn't decide it): Corridor doors (other than in rated walls) limit the transfer of smoke and latch positively, no roller latches; other doors per 716: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_3_1_corridor_doors",
+       "why": "A person checks this (Gordium doesn't decide it): Corridor doors (other than in rated walls) limit the transfer of smoke and latch positively, no roller latches; other doors per 716: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Group I-2 corridor doors limiting smoke, positive latching",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.3.1",
+      "piece_title": "Corridor doors"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_3_1_1_corridor_door_construction",
+     "rule": "general.bc_407_3_1_1_corridor_door_construction",
+     "name": "Egress · Group I-2 corridor door construction (BCNYS 407.3.1.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Unrated corridor doors: solid with close-fitting stops; Dutch doors with an astragal and latching both halves as one leaf; louvers or an undercut of at most 2/3 in only for makeup air (1020.6 exception 1): a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Unrated corridor doors: solid with close-fitting stops; Dutch doors with an astragal and latching both halves as one leaf; louvers or an undercut of at most 2/3 in only for makeup air (1020.6 exception 1): a person's check.",
+      "quotes": [
+       {
+        "text": "407.3.1.1 Door construction. Doors in corridors not required to have a fire protection rating shall comply with the following: 1. Solid doors shall have close-fitting operational tolerances, head and jamb stops. 2. Dutch-style doors shall have an astragal, rabbet or bevel at the meeting edges of the upper and lower door sections. Both the upper and lower door sections shall have latching hardware. Dutch-style doors shall have hardware that connects the upper and lower sections to function as a single leaf. 3. To provide makeup air for exhaust systems in accordance with Section 1020.6, Exception 1, doors are permitted to have louvers or to have a clearance between the bottom of the door and the floor surface that is 2/3 inch (19.1 mm) maximum.",
+        "where": "407.3.1.1, 2025 Building Code of New York State (BCNYS), PDF p.99"
+       }
+      ],
+      "citation": "407.3.1.1, 2025 Building Code of New York State (BCNYS), PDF p.99",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.3.1.1",
+      "quote": "407.3.1.1 Door construction. Doors in corridors not required to have a fire protection rating shall comply with the following: 1. Solid doors shall have close-fitting operational tolerances, head and jamb stops. 2. Dutch-style doors shall have an astragal, rabbet or bevel at the meeting edges of the upper and lower door sections. Both the upper and lower door sections shall have latching hardware. Dutch-style doors shall have hardware that connects the upper and lower sections to function as a single leaf. 3. To provide makeup air for exhaust systems in accordance with Section 1020.6, Exception 1, doors are permitted to have louvers or to have a clearance between the bottom of the door and the floor surface that is 2/3 inch (19.1 mm) maximum."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_3_1_1_corridor_door_construction",
+       "words": "A person checks this (Gordium doesn't decide it): Unrated corridor doors: solid with close-fitting stops; Dutch doors with an astragal and latching both halves as one leaf; louvers or an undercut of at most 2/3 in only for makeup air (1020.6 exception 1): a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_3_1_1_corridor_door_construction",
+       "why": "A person checks this (Gordium doesn't decide it): Unrated corridor doors: solid with close-fitting stops; Dutch doors with an astragal and latching both halves as one leaf; louvers or an undercut of at most 2/3 in only for makeup air (1020.6 exception 1): a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Group I-2 corridor door construction",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.3.1.1",
+      "piece_title": "Door construction"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_means_of_egress",
+     "rule": "general.bc_407_4_means_of_egress",
+     "name": "Egress · Group I-2 means of egress, and the defend-in-place plan (BCNYS 407.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Means of egress per Chapter 10 and 407.4.1 to 407.4.4, and the fire safety and evacuation plans (1002.2) name the building components a defend-in-place response needs: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Means of egress per Chapter 10 and 407.4.1 to 407.4.4, and the fire safety and evacuation plans (1002.2) name the building components a defend-in-place response needs: a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4 Means of egress. Group I-2 occupancies shall be provided with means of egress complying with Chapter 10 and Sections 407.4.1 through 407.4.4. The fire safety and evacuation plans provided in accordance with Section 1002.2 shall identify the building components necessary to support a defend-in-place emergency response in accordance with Sections 403 and 404 of the Fire Code of New York State.",
+        "where": "407.4, 2025 Building Code of New York State (BCNYS), PDF p.99"
+       }
+      ],
+      "citation": "407.4, 2025 Building Code of New York State (BCNYS), PDF p.99",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4",
+      "quote": "[BE] 407.4 Means of egress. Group I-2 occupancies shall be provided with means of egress complying with Chapter 10 and Sections 407.4.1 through 407.4.4. The fire safety and evacuation plans provided in accordance with Section 1002.2 shall identify the building components necessary to support a defend-in-place emergency response in accordance with Sections 403 and 404 of the Fire Code of New York State."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_means_of_egress",
+       "words": "A person checks this (Gordium doesn't decide it): Means of egress per Chapter 10 and 407.4.1 to 407.4.4, and the fire safety and evacuation plans (1002.2) name the building components a defend-in-place response needs: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_means_of_egress",
+       "why": "A person checks this (Gordium doesn't decide it): Means of egress per Chapter 10 and 407.4.1 to 407.4.4, and the fire safety and evacuation plans (1002.2) name the building components a defend-in-place response needs: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Group I-2 means of egress, and the defend-in-place plan",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4",
+      "piece_title": "Means of egress"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_1_direct_access_to_a_corridor",
+     "rule": "general.bc_407_4_1_direct_access_to_a_corridor",
+     "name": "Egress · A Group I-2 habitable room's door directly to a corridor (BCNYS 407.4.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Each habitable room has an exit access door leading directly to a corridor, but rooms with exit doors directly outside at ground level and rooms in a care suite: a person's check of which rooms are habitable.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Each habitable room has an exit access door leading directly to a corridor, but rooms with exit doors directly outside at ground level and rooms in a care suite: a person's check of which rooms are habitable.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.1 Direct access to a corridor. Habitable rooms in Group I-2 occupancies shall have an exit access door leading directly to a corridor. Exceptions: 1. Rooms with exit doors opening directly to the outside at ground level. 2. Rooms arranged as care suites complying with Section 407.4.4.",
+        "where": "407.4.1, 2025 Building Code of New York State (BCNYS), PDF p.99"
+       }
+      ],
+      "citation": "407.4.1, 2025 Building Code of New York State (BCNYS), PDF p.99",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.1",
+      "quote": "[BE] 407.4.1 Direct access to a corridor. Habitable rooms in Group I-2 occupancies shall have an exit access door leading directly to a corridor. Exceptions: 1. Rooms with exit doors opening directly to the outside at ground level. 2. Rooms arranged as care suites complying with Section 407.4.4."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_1_direct_access_to_a_corridor",
+       "words": "A person checks this (Gordium doesn't decide it): Each habitable room has an exit access door leading directly to a corridor, but rooms with exit doors directly outside at ground level and rooms in a care suite: a person's check of which rooms are habitable.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_1_direct_access_to_a_corridor",
+       "why": "A person checks this (Gordium doesn't decide it): Each habitable room has an exit access door leading directly to a corridor, but rooms with exit doors directly outside at ground level and rooms in a care suite: a person's check of which rooms are habitable.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "A Group I-2 habitable room's door directly to a corridor",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.1",
+      "piece_title": "Direct access to a corridor"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_1_1_locking_devices",
+     "rule": "general.bc_407_4_1_1_locking_devices",
+     "name": "Egress · Locks on a care recipient's room never restricting egress (BCNYS 407.4.1.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A lock restricting access to a care recipient's room from the corridor, operable only by staff, never restricts egress from the room (not in psychiatric treatment areas, or per 1010.2.13): a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A lock restricting access to a care recipient's room from the corridor, operable only by staff, never restricts egress from the room (not in psychiatric treatment areas, or per 1010.2.13): a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.1.1 Locking devices. Locking devices that restrict access to a care recipient’s room from the corridor and that are operable only by staff from the corridor side shall not restrict the means of egress from the care recipient’s room. Exceptions: 1. This section shall not apply to rooms in psychiatric treatment and similar care areas. 2. Locking arrangements in accordance with Section 1010.2.13.",
+        "where": "407.4.1.1, 2025 Building Code of New York State (BCNYS), PDF p.99"
+       }
+      ],
+      "citation": "407.4.1.1, 2025 Building Code of New York State (BCNYS), PDF p.99",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.1.1",
+      "quote": "[BE] 407.4.1.1 Locking devices. Locking devices that restrict access to a care recipient’s room from the corridor and that are operable only by staff from the corridor side shall not restrict the means of egress from the care recipient’s room. Exceptions: 1. This section shall not apply to rooms in psychiatric treatment and similar care areas. 2. Locking arrangements in accordance with Section 1010.2.13."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_1_1_locking_devices",
+       "words": "A person checks this (Gordium doesn't decide it): A lock restricting access to a care recipient's room from the corridor, operable only by staff, never restricts egress from the room (not in psychiatric treatment areas, or per 1010.2.13): a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_1_1_locking_devices",
+       "why": "A person checks this (Gordium doesn't decide it): A lock restricting access to a care recipient's room from the corridor, operable only by staff, never restricts egress from the room (not in psychiatric treatment areas, or per 1010.2.13): a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Locks on a care recipient's room never restricting egress",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.1.1",
+      "piece_title": "Locking devices"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_3_projections_in_nursing_home_corridors",
+     "rule": "general.bc_407_4_3_projections_in_nursing_home_corridors",
+     "name": "Egress · Furniture in nursing home corridors at least 96 in wide (BCNYS 407.4.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a corridor at least 96 in wide may hold fixed furniture on one side only, leaving 72 in clear (or 1005.7's encroachments), each group of at most 50 sq ft and 10 ft apart, in the fire and safety plans: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a corridor at least 96 in wide may hold fixed furniture on one side only, leaving 72 in clear (or 1005.7's encroachments), each group of at most 50 sq ft and 10 ft apart, in the fire and safety plans: a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.3 Projections in nursing home corridors. In Group I-2, Condition 1 occupancies, where the corridor width is not less than 96 inches (2440 mm), projections shall be permitted for furniture where all of the following criteria are met: 1. The furniture is attached to the floor or to the wall. 2. The furniture does not reduce the clear width of the corridor to less than 72 inches (1830 mm) except where other encroachments are permitted in accordance with Section 1005.7. 3. The furniture is positioned on only one side of the corridor. 4. Each arrangement of furniture is 50 square feet (4.6 m[fn2]) maximum in area. 5. Furniture arrangements are separated by 10 feet (3048 mm) minimum. 6. Placement of furniture is considered as part of the fire and safety plans in accordance with Section 1002.2.",
+        "where": "407.4.3, 2025 Building Code of New York State (BCNYS), PDF p.99"
+       }
+      ],
+      "citation": "407.4.3, 2025 Building Code of New York State (BCNYS), PDF p.99",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.3",
+      "quote": "[BE] 407.4.3 Projections in nursing home corridors. In Group I-2, Condition 1 occupancies, where the corridor width is not less than 96 inches (2440 mm), projections shall be permitted for furniture where all of the following criteria are met: 1. The furniture is attached to the floor or to the wall. 2. The furniture does not reduce the clear width of the corridor to less than 72 inches (1830 mm) except where other encroachments are permitted in accordance with Section 1005.7. 3. The furniture is positioned on only one side of the corridor. 4. Each arrangement of furniture is 50 square feet (4.6 m[fn2]) maximum in area. 5. Furniture arrangements are separated by 10 feet (3048 mm) minimum. 6. Placement of furniture is considered as part of the fire and safety plans in accordance with Section 1002.2."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_3_projections_in_nursing_home_corridors",
+       "words": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a corridor at least 96 in wide may hold fixed furniture on one side only, leaving 72 in clear (or 1005.7's encroachments), each group of at most 50 sq ft and 10 ft apart, in the fire and safety plans: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_3_projections_in_nursing_home_corridors",
+       "why": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a corridor at least 96 in wide may hold fixed furniture on one side only, leaving 72 in clear (or 1005.7's encroachments), each group of at most 50 sq ft and 10 ft apart, in the fire and safety plans: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Furniture in nursing home corridors at least 96 in wide",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.3",
+      "piece_title": "Projections in nursing home corridors"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_care_suites",
+     "rule": "general.bc_407_4_4_care_suites",
+     "name": "Egress · Group I-2 care suites (BCNYS 407.4.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Care suites meet 407.4.4.1 to 407.4.4.5 and either 407.4.4.6 or 407.4.4.7: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Care suites meet 407.4.4.1 to 407.4.4.5 and either 407.4.4.6 or 407.4.4.7: a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4 Group I-2 care suites. Care suites in Group I-2 shall comply with Sections 407.4.4.1 through 407.4.4.5 and either Section 407.4.4.6 or 407.4.4.7.",
+        "where": "407.4.4, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4",
+      "quote": "[BE] 407.4.4 Group I-2 care suites. Care suites in Group I-2 shall comply with Sections 407.4.4.1 through 407.4.4.5 and either Section 407.4.4.6 or 407.4.4.7."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_care_suites",
+       "words": "A person checks this (Gordium doesn't decide it): Care suites meet 407.4.4.1 to 407.4.4.5 and either 407.4.4.6 or 407.4.4.7: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_care_suites",
+       "why": "A person checks this (Gordium doesn't decide it): Care suites meet 407.4.4.1 to 407.4.4.5 and either 407.4.4.6 or 407.4.4.7: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Group I-2 care suites",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4",
+      "piece_title": "Group I-2 care suites"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_1_exit_access_through_care_suites",
+     "rule": "general.bc_407_4_4_1_exit_access_through_care_suites",
+     "name": "Egress · No exit access from elsewhere through a care suite (BCNYS 407.4.4.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Exit access from any part of the building not a care suite never passes through one: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Exit access from any part of the building not a care suite never passes through one: a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4.1 Exit access through care suites. Exit access from all other portions of a building not classified as a care suite shall not pass through a care suite.",
+        "where": "407.4.4.1, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4.1, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4.1",
+      "quote": "[BE] 407.4.4.1 Exit access through care suites. Exit access from all other portions of a building not classified as a care suite shall not pass through a care suite."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_1_exit_access_through_care_suites",
+       "words": "A person checks this (Gordium doesn't decide it): Exit access from any part of the building not a care suite never passes through one: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_1_exit_access_through_care_suites",
+       "why": "A person checks this (Gordium doesn't decide it): Exit access from any part of the building not a care suite never passes through one: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "No exit access from elsewhere through a care suite",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4.1",
+      "piece_title": "Exit access through care suites"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_2_care_suite_separation",
+     "rule": "general.bc_407_4_4_2_care_suite_separation",
+     "name": "Egress · Care suites separated by smoke partitions (BCNYS 407.4.4.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Each care suite is separated from the rest of the building, other suites included, by a smoke partition (710): a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Each care suite is separated from the rest of the building, other suites included, by a smoke partition (710): a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4.2 Separation. Care suites shall be separated from other portions of the building, including other care suites, by a smoke partition complying with Section 710.",
+        "where": "407.4.4.2, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4.2, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4.2",
+      "quote": "[BE] 407.4.4.2 Separation. Care suites shall be separated from other portions of the building, including other care suites, by a smoke partition complying with Section 710."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_2_care_suite_separation",
+       "words": "A person checks this (Gordium doesn't decide it): Each care suite is separated from the rest of the building, other suites included, by a smoke partition (710): a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_2_care_suite_separation",
+       "why": "A person checks this (Gordium doesn't decide it): Each care suite is separated from the rest of the building, other suites included, by a smoke partition (710): a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Care suites separated by smoke partitions",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4.2",
+      "piece_title": "Separation"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_3_care_suite_access_to_corridor",
+     "rule": "general.bc_407_4_4_3_care_suite_access_to_corridor",
+     "name": "Egress · A care suite's door to a corridor, within 100 ft (BCNYS 407.4.4.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Every care suite has a door directly to an exit access corridor or horizontal exit, at most 100 ft of travel from any habitable room in it; a second door required by 407.4.4.6.2 or 407.4.4.7.2 leads to a corridor, an exit or an adjacent suite: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Every care suite has a door directly to an exit access corridor or horizontal exit, at most 100 ft of travel from any habitable room in it; a second door required by 407.4.4.6.2 or 407.4.4.7.2 leads to a corridor, an exit or an adjacent suite: a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4.3 Access to corridor. Every care suite shall have a door leading directly to an exit access corridor or horizontal exit. Movement from habitable rooms within a care suite shall not require more than 100 feet (30 480 mm) of travel within the care suite to a door leading to the exit access corridor or horizontal exit. Where a care suite is required to have more than one exit access door by Section 407.4.4.6.2 or 407.4.4.7.2, the additional door shall lead directly to an exit access corridor, exit or an adjacent suite.",
+        "where": "407.4.4.3, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4.3, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4.3",
+      "quote": "[BE] 407.4.4.3 Access to corridor. Every care suite shall have a door leading directly to an exit access corridor or horizontal exit. Movement from habitable rooms within a care suite shall not require more than 100 feet (30 480 mm) of travel within the care suite to a door leading to the exit access corridor or horizontal exit. Where a care suite is required to have more than one exit access door by Section 407.4.4.6.2 or 407.4.4.7.2, the additional door shall lead directly to an exit access corridor, exit or an adjacent suite."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_3_care_suite_access_to_corridor",
+       "words": "A person checks this (Gordium doesn't decide it): Every care suite has a door directly to an exit access corridor or horizontal exit, at most 100 ft of travel from any habitable room in it; a second door required by 407.4.4.6.2 or 407.4.4.7.2 leads to a corridor, an exit or an adjacent suite: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_3_care_suite_access_to_corridor",
+       "why": "A person checks this (Gordium doesn't decide it): Every care suite has a door directly to an exit access corridor or horizontal exit, at most 100 ft of travel from any habitable room in it; a second door required by 407.4.4.6.2 or 407.4.4.7.2 leads to a corridor, an exit or an adjacent suite: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "A care suite's door to a corridor, within 100 ft",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4.3",
+      "piece_title": "Access to corridor"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_4_care_suite_circulation_paths",
+     "rule": "general.bc_407_4_4_4_care_suite_circulation_paths",
+     "name": "Egress · Circulation paths within a care suite at least 36 in (BCNYS 407.4.4.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Paths to the suite's doors are at least 36 in wide and need not meet a corridor's or an aisle's requirements: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Paths to the suite's doors are at least 36 in wide and need not meet a corridor's or an aisle's requirements: a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4.4 Circulation paths within a care suite. The circulation paths within a care suite providing the access to doors required in Section 407.4.4.3 shall have a minimum width of 36 inches (914 mm) and shall not be required to meet the require- ments for a corridor or an aisle.",
+        "where": "407.4.4.4, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4.4, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4.4",
+      "quote": "[BE] 407.4.4.4 Circulation paths within a care suite. The circulation paths within a care suite providing the access to doors required in Section 407.4.4.3 shall have a minimum width of 36 inches (914 mm) and shall not be required to meet the require- ments for a corridor or an aisle."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_4_care_suite_circulation_paths",
+       "words": "A person checks this (Gordium doesn't decide it): Paths to the suite's doors are at least 36 in wide and need not meet a corridor's or an aisle's requirements: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_4_care_suite_circulation_paths",
+       "why": "A person checks this (Gordium doesn't decide it): Paths to the suite's doors are at least 36 in wide and need not meet a corridor's or an aisle's requirements: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Circulation paths within a care suite at least 36 in",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4.4",
+      "piece_title": "Circulation paths within a care suite"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_5_doors_within_care_suites",
+     "rule": "general.bc_407_4_4_5_doors_within_care_suites",
+     "name": "Egress · Doors within care suites (BCNYS 407.4.4.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Doors serving habitable rooms in a care suite may be manual horizontal sliding doors (1010.1.2 exception 9), power-operated doors (exception 7) or doors per 1010: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Doors serving habitable rooms in a care suite may be manual horizontal sliding doors (1010.1.2 exception 9), power-operated doors (exception 7) or doors per 1010: a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4.5 Doors within care suites. Doors in care suites serving habitable rooms shall be permitted to comply with one of the following: 1. Manually operated horizontal sliding doors permitted in accordance with Exception 9 to Section 1010.1.2. 2. Power-operated doors permitted in accordance with Section 1010.1.2, Exception 7. 3. Means of egress doors complying with Section 1010.",
+        "where": "407.4.4.5, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4.5, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4.5",
+      "quote": "[BE] 407.4.4.5 Doors within care suites. Doors in care suites serving habitable rooms shall be permitted to comply with one of the following: 1. Manually operated horizontal sliding doors permitted in accordance with Exception 9 to Section 1010.1.2. 2. Power-operated doors permitted in accordance with Section 1010.1.2, Exception 7. 3. Means of egress doors complying with Section 1010."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_5_doors_within_care_suites",
+       "words": "A person checks this (Gordium doesn't decide it): Doors serving habitable rooms in a care suite may be manual horizontal sliding doors (1010.1.2 exception 9), power-operated doors (exception 7) or doors per 1010: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_5_doors_within_care_suites",
+       "why": "A person checks this (Gordium doesn't decide it): Doors serving habitable rooms in a care suite may be manual horizontal sliding doors (1010.1.2 exception 9), power-operated doors (exception 7) or doors per 1010: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Doors within care suites",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4.5",
+      "piece_title": "Doors within care suites"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_6_care_suites_with_sleeping_rooms",
+     "rule": "general.bc_407_4_4_6_care_suites_with_sleeping_rooms",
+     "name": "Egress · Care suites containing sleeping rooms (BCNYS 407.4.4.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Sleeping rooms may be grouped into a care suite only where it serves as exit access for at most eight beds, or gives constant visual supervision, or has smoke detection in the sleeping rooms (NFPA 72): a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Sleeping rooms may be grouped into a care suite only where it serves as exit access for at most eight beds, or gives constant visual supervision, or has smoke detection in the sleeping rooms (NFPA 72): a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4.6 Care suites containing sleeping room areas. Sleeping rooms shall be permitted to be grouped into care suites where one of the following criteria is met: 1. The care suite is not used as an exit access for more than eight care recipient beds. 2. The arrangement of the care suite allows for direct and constant visual supervision into the sleeping rooms by care providers. 3. An automatic smoke detection system is provided in the sleeping rooms and installed in accordance with NFPA 72.",
+        "where": "407.4.4.6, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4.6, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4.6",
+      "quote": "[BE] 407.4.4.6 Care suites containing sleeping room areas. Sleeping rooms shall be permitted to be grouped into care suites where one of the following criteria is met: 1. The care suite is not used as an exit access for more than eight care recipient beds. 2. The arrangement of the care suite allows for direct and constant visual supervision into the sleeping rooms by care providers. 3. An automatic smoke detection system is provided in the sleeping rooms and installed in accordance with NFPA 72."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_6_care_suites_with_sleeping_rooms",
+       "words": "A person checks this (Gordium doesn't decide it): Sleeping rooms may be grouped into a care suite only where it serves as exit access for at most eight beds, or gives constant visual supervision, or has smoke detection in the sleeping rooms (NFPA 72): a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_6_care_suites_with_sleeping_rooms",
+       "why": "A person checks this (Gordium doesn't decide it): Sleeping rooms may be grouped into a care suite only where it serves as exit access for at most eight beds, or gives constant visual supervision, or has smoke detection in the sleeping rooms (NFPA 72): a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Care suites containing sleeping rooms",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4.6",
+      "piece_title": "Care suites containing sleeping room areas"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_6_1_sleeping_care_suite_area",
+     "rule": "general.bc_407_4_4_6_1_sleeping_care_suite_area",
+     "name": "Egress · A sleeping care suite at most 7,500 sq ft (BCNYS 407.4.4.6.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A care suite with sleeping rooms is at most 7,500 sq ft (10,000 sq ft with smoke detection throughout): a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A care suite with sleeping rooms is at most 7,500 sq ft (10,000 sq ft with smoke detection throughout): a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4.6.1 Area. Care suites containing sleeping rooms shall be not greater than 7,500 square feet (696 m[fn2]) in area. Exception: Care suites containing sleeping rooms shall be permitted to be not greater than 10,000 square feet (929 m[fn2]) in area where an automatic smoke detection system is provided throughout the care suite and installed in accordance with NFPA 72.",
+        "where": "407.4.4.6.1, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4.6.1, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4.6.1",
+      "quote": "[BE] 407.4.4.6.1 Area. Care suites containing sleeping rooms shall be not greater than 7,500 square feet (696 m[fn2]) in area. Exception: Care suites containing sleeping rooms shall be permitted to be not greater than 10,000 square feet (929 m[fn2]) in area where an automatic smoke detection system is provided throughout the care suite and installed in accordance with NFPA 72."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_6_1_sleeping_care_suite_area",
+       "words": "A person checks this (Gordium doesn't decide it): A care suite with sleeping rooms is at most 7,500 sq ft (10,000 sq ft with smoke detection throughout): a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_6_1_sleeping_care_suite_area",
+       "why": "A person checks this (Gordium doesn't decide it): A care suite with sleeping rooms is at most 7,500 sq ft (10,000 sq ft with smoke detection throughout): a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "A sleeping care suite at most 7,500 sq ft",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4.6.1",
+      "piece_title": "Area"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_6_2_sleeping_care_suite_exit_access",
+     "rule": "general.bc_407_4_4_6_2_sleeping_care_suite_exit_access",
+     "name": "Egress · Two doors from a sleeping care suite over 1,000 sq ft (BCNYS 407.4.4.6.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A sleeping room, or a care suite with sleeping rooms, over 1,000 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A sleeping room, or a care suite with sleeping rooms, over 1,000 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4.6.2 Exit access. Any sleeping room, or any care suite that contains sleeping rooms, of more than 1,000 square feet (93 m[fn2]) shall have not fewer than two exit access doors from the care suite located in accordance with Section 1007.",
+        "where": "407.4.4.6.2, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4.6.2, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4.6.2",
+      "quote": "[BE] 407.4.4.6.2 Exit access. Any sleeping room, or any care suite that contains sleeping rooms, of more than 1,000 square feet (93 m[fn2]) shall have not fewer than two exit access doors from the care suite located in accordance with Section 1007."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_6_2_sleeping_care_suite_exit_access",
+       "words": "A person checks this (Gordium doesn't decide it): A sleeping room, or a care suite with sleeping rooms, over 1,000 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_6_2_sleeping_care_suite_exit_access",
+       "why": "A person checks this (Gordium doesn't decide it): A sleeping room, or a care suite with sleeping rooms, over 1,000 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Two doors from a sleeping care suite over 1,000 sq ft",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4.6.2",
+      "piece_title": "Exit access"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_7_care_suites_without_sleeping_rooms",
+     "rule": "general.bc_407_4_4_7_care_suites_without_sleeping_rooms",
+     "name": "Egress · Care suites without sleeping rooms (BCNYS 407.4.4.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Treatment areas and their rooms and circulation may be grouped into a care suite within 407.4.4.7.1 and 407.4.4.7.2: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Treatment areas and their rooms and circulation may be grouped into a care suite within 407.4.4.7.1 and 407.4.4.7.2: a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4.7 Care suites not containing sleeping rooms. Areas not containing sleeping rooms, but only treatment areas and the associated rooms, spaces or circulation space, shall be permitted to be grouped into care suites and shall conform to the limitations in Sections 407.4.4.7.1 and 407.4.4.7.2.",
+        "where": "407.4.4.7, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4.7, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4.7",
+      "quote": "[BE] 407.4.4.7 Care suites not containing sleeping rooms. Areas not containing sleeping rooms, but only treatment areas and the associated rooms, spaces or circulation space, shall be permitted to be grouped into care suites and shall conform to the limitations in Sections 407.4.4.7.1 and 407.4.4.7.2."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_7_care_suites_without_sleeping_rooms",
+       "words": "A person checks this (Gordium doesn't decide it): Treatment areas and their rooms and circulation may be grouped into a care suite within 407.4.4.7.1 and 407.4.4.7.2: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_7_care_suites_without_sleeping_rooms",
+       "why": "A person checks this (Gordium doesn't decide it): Treatment areas and their rooms and circulation may be grouped into a care suite within 407.4.4.7.1 and 407.4.4.7.2: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Care suites without sleeping rooms",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4.7",
+      "piece_title": "Care suites not containing sleeping rooms"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_7_1_treatment_care_suite_area",
+     "rule": "general.bc_407_4_4_7_1_treatment_care_suite_area",
+     "name": "Egress · A treatment care suite at most 12,500 sq ft (BCNYS 407.4.4.7.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms is at most 12,500 sq ft (15,000 sq ft with smoke detection throughout, 907): a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms is at most 12,500 sq ft (15,000 sq ft with smoke detection throughout, 907): a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4.7.1 Area. Care suites of rooms, other than sleeping rooms, shall have an area not greater than 12,500 square feet (1161 m[fn2]). Exception: Care suites not containing sleeping rooms shall be permitted to be not greater than 15,000 square feet (1394 m[fn2]) in area where an automatic smoke detection system is provided throughout the care suite in accordance with Section 907.",
+        "where": "407.4.4.7.1, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4.7.1, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4.7.1",
+      "quote": "[BE] 407.4.4.7.1 Area. Care suites of rooms, other than sleeping rooms, shall have an area not greater than 12,500 square feet (1161 m[fn2]). Exception: Care suites not containing sleeping rooms shall be permitted to be not greater than 15,000 square feet (1394 m[fn2]) in area where an automatic smoke detection system is provided throughout the care suite in accordance with Section 907."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_7_1_treatment_care_suite_area",
+       "words": "A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms is at most 12,500 sq ft (15,000 sq ft with smoke detection throughout, 907): a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_7_1_treatment_care_suite_area",
+       "why": "A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms is at most 12,500 sq ft (15,000 sq ft with smoke detection throughout, 907): a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "A treatment care suite at most 12,500 sq ft",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4.7.1",
+      "piece_title": "Area"
+     }
+    },
+    {
+     "id": "egress.general.bc_407_4_4_7_2_treatment_care_suite_exit_access",
+     "rule": "general.bc_407_4_4_7_2_treatment_care_suite_exit_access",
+     "name": "Egress · Two doors from a treatment care suite over 2,500 sq ft (BCNYS 407.4.4.7.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms over 2,500 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms over 2,500 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+      "quotes": [
+       {
+        "text": "[BE] 407.4.4.7.2 Exit access. Care suites, other than sleeping rooms, with an area of more than 2,500 square feet (232 m[fn2]) shall have not fewer than two exit access doors from the care suite located in accordance with Section 1007.",
+        "where": "407.4.4.7.2, 2025 Building Code of New York State (BCNYS), PDF p.100"
+       }
+      ],
+      "citation": "407.4.4.7.2, 2025 Building Code of New York State (BCNYS), PDF p.100",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "407.4.4.7.2",
+      "quote": "[BE] 407.4.4.7.2 Exit access. Care suites, other than sleeping rooms, with an area of more than 2,500 square feet (232 m[fn2]) shall have not fewer than two exit access doors from the care suite located in accordance with Section 1007."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_407_4_4_7_2_treatment_care_suite_exit_access",
+       "words": "A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms over 2,500 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_407_4_4_7_2_treatment_care_suite_exit_access",
+       "why": "A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms over 2,500 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Two doors from a treatment care suite over 2,500 sq ft",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "4",
+      "chapter_title": "SPECIAL DETAILED REQUIREMENTS BASED ON OCCUPANCY AND USE",
+      "section": "407",
+      "section_title": "Group I-2",
+      "piece": "407.4.4.7.2",
+      "piece_title": "Exit access"
+     }
+    },
+    {
      "id": "egress.general.bc_508_2_1_classification",
      "rule": "general.bc_508_2_1_classification",
      "name": "Egress · Each accessory occupancy classified on its own (BCNYS 508.2.1)",
@@ -74204,7 +76196,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 118 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 146 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -74761,6 +76753,34 @@
       "egress.general.bc_405_7_means_of_egress",
       "egress.general.bc_405_7_1_two_exits_on_each_floor_level",
       "egress.general.bc_405_7_2_smokeproof_enclosures",
+      "egress.general.bc_407_1_group_i2",
+      "egress.general.bc_407_2_corridor_continuity_and_separation",
+      "egress.general.bc_407_2_1_waiting_areas_open_to_a_corridor",
+      "egress.general.bc_407_2_2_care_providers_stations",
+      "egress.general.bc_407_2_3_psychiatric_treatment_areas",
+      "egress.general.bc_407_2_4_gift_shops",
+      "egress.general.bc_407_2_5_nursing_home_housing_units",
+      "egress.general.bc_407_2_6_nursing_home_cooking_facilities",
+      "egress.general.bc_407_2_7_domestic_cooking_appliances",
+      "egress.general.bc_407_3_corridor_wall_construction",
+      "egress.general.bc_407_3_1_corridor_doors",
+      "egress.general.bc_407_3_1_1_corridor_door_construction",
+      "egress.general.bc_407_4_means_of_egress",
+      "egress.general.bc_407_4_1_direct_access_to_a_corridor",
+      "egress.general.bc_407_4_1_1_locking_devices",
+      "egress.general.bc_407_4_3_projections_in_nursing_home_corridors",
+      "egress.general.bc_407_4_4_care_suites",
+      "egress.general.bc_407_4_4_1_exit_access_through_care_suites",
+      "egress.general.bc_407_4_4_2_care_suite_separation",
+      "egress.general.bc_407_4_4_3_care_suite_access_to_corridor",
+      "egress.general.bc_407_4_4_4_care_suite_circulation_paths",
+      "egress.general.bc_407_4_4_5_doors_within_care_suites",
+      "egress.general.bc_407_4_4_6_care_suites_with_sleeping_rooms",
+      "egress.general.bc_407_4_4_6_1_sleeping_care_suite_area",
+      "egress.general.bc_407_4_4_6_2_sleeping_care_suite_exit_access",
+      "egress.general.bc_407_4_4_7_care_suites_without_sleeping_rooms",
+      "egress.general.bc_407_4_4_7_1_treatment_care_suite_area",
+      "egress.general.bc_407_4_4_7_2_treatment_care_suite_exit_access",
       "egress.general.bc_508_2_1_classification",
       "egress.general.bc_508_2_2_height",
       "egress.general.bc_508_2_3_tabular_values",
@@ -75934,6 +77954,370 @@
        "name": "Egress · Smokeproof enclosures for stairways below 30 ft (BCNYS 405.7.2)"
       },
       {
+       "key": "review#7cc892631a",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_1_group_i2"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Group I-2, Sections 407.1 to 407.11 (BCNYS 407.1): A person checks this (Gordium doesn't decide it): The building may be Group I-2 (hospitals, nursing homes, detoxification facilities): Sections 407.1 to 407.11 apply besides the rest of the code: a person's check.",
+       "mark": "?",
+       "name": "Egress · Group I-2, Sections 407.1 to 407.11 (BCNYS 407.1)"
+      },
+      {
+       "key": "review#a31e7dbd5f",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_2_corridor_continuity_and_separation"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Group I-2 corridors continuous to the exits and separated (BCNYS 407.2): A person checks this (Gordium doesn't decide it): Group I-2 corridors run continuous to the exits and are separated from other areas per 407.3, but the spaces 407.2.1 to 407.2.6 let open to them: a person's check.",
+       "mark": "?",
+       "name": "Egress · Group I-2 corridors continuous to the exits and separated (BCNYS 407.2)"
+      },
+      {
+       "key": "review#b6d35502ca",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_2_1_waiting_areas_open_to_a_corridor"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Waiting and similar areas open to a Group I-2 corridor (BCNYS 407.2.1): A person checks this (Gordium doesn't decide it): A waiting, public-use or group meeting space built as a corridor may be open to it only if it isn't a sleeping, treatment, incidental or hazardous use, has fire detection (907), its corridors have detection or quick-response sprinklers, and it doesn't obstruct access to the exits: a person's check.",
+       "mark": "?",
+       "name": "Egress · Waiting and similar areas open to a Group I-2 corridor (BCNYS 407.2.1)"
+      },
+      {
+       "key": "review#933b19cd83",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_2_2_care_providers_stations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Care providers' stations open to a Group I-2 corridor (BCNYS 407.2.2): A person checks this (Gordium doesn't decide it): Care providers', staff, charting and clerical spaces built as a corridor may be open to it: a person's check.",
+       "mark": "?",
+       "name": "Egress · Care providers' stations open to a Group I-2 corridor (BCNYS 407.2.2)"
+      },
+      {
+       "key": "review#0863770843",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_2_3_psychiatric_treatment_areas"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Psychiatric treatment areas open to a Group I-2 corridor (BCNYS 407.2.3): A person checks this (Gordium doesn't decide it): A supervised psychiatric treatment area may be open to the corridor only at 1,500 sq ft or less, supervised, not obstructing access to the exits, with fire detection (907.2), one per smoke compartment, its walls and ceilings built as a corridor's: a person's check.",
+       "mark": "?",
+       "name": "Egress · Psychiatric treatment areas open to a Group I-2 corridor (BCNYS 407.2.3)"
+      },
+      {
+       "key": "review#ea2b3db440",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_2_4_gift_shops"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Gift shops open to a Group I-2 corridor (BCNYS 407.2.4): A person checks this (Gordium doesn't decide it): A gift shop and its storage under 500 sq ft, built as a corridor, may be open to it: a person's check.",
+       "mark": "?",
+       "name": "Egress · Gift shops open to a Group I-2 corridor (BCNYS 407.2.4)"
+      },
+      {
+       "key": "review#8a23b825d9",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_2_5_nursing_home_housing_units"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Nursing home shared spaces open to the corridor (BCNYS 407.2.5): A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, shared living, group meeting or therapy spaces may be open to the corridor only if built as a corridor, not a sleeping, treatment, incidental or hazardous use, with fire detection, their corridors detected or sprinklered with quick response, and not obstructing access to the exits: a person's check.",
+       "mark": "?",
+       "name": "Egress · Nursing home shared spaces open to the corridor (BCNYS 407.2.5)"
+      },
+      {
+       "key": "review#c292a22cd3",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_2_6_nursing_home_cooking_facilities"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Nursing home cooking facilities open to the corridor (BCNYS 407.2.6): A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a space with domestic cooking may be open to the corridor only for 30 care recipients or fewer in the smoke compartment and served, one per smoke compartment, the corridor clearly marked, access to the exit unobstructed, its appliances per 407.2.7: a person's check.",
+       "mark": "?",
+       "name": "Egress · Nursing home cooking facilities open to the corridor (BCNYS 407.2.6)"
+      },
+      {
+       "key": "review#b9e856707c",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_2_7_domestic_cooking_appliances"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Domestic cooking appliances in Group I-2 (BCNYS 407.2.7): A person checks this (Gordium doesn't decide it): Domestic cooking appliances limited to ovens, cooktops, ranges, warmers and microwaves, with hoods, protection, a staff-only shut-off, a timer of at most 120 minutes and a fire extinguisher within 30 ft (exceptions for compartments without patient sleeping or care areas, and for training): a person's check.",
+       "mark": "?",
+       "name": "Egress · Domestic cooking appliances in Group I-2 (BCNYS 407.2.7)"
+      },
+      {
+       "key": "review#b2f4610589",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_3_corridor_wall_construction"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Group I-2 corridor walls as smoke partitions (BCNYS 407.3): A person checks this (Gordium doesn't decide it): Corridor walls are smoke partitions per 710: a person's check.",
+       "mark": "?",
+       "name": "Egress · Group I-2 corridor walls as smoke partitions (BCNYS 407.3)"
+      },
+      {
+       "key": "review#5b1bbb4466",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_3_1_corridor_doors"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Group I-2 corridor doors limiting smoke, positive latching (BCNYS 407.3.1): A person checks this (Gordium doesn't decide it): Corridor doors (other than in rated walls) limit the transfer of smoke and latch positively, no roller latches; other doors per 716: a person's check.",
+       "mark": "?",
+       "name": "Egress · Group I-2 corridor doors limiting smoke, positive latching (BCNYS 407.3.1)"
+      },
+      {
+       "key": "review#41f75ef630",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_3_1_1_corridor_door_construction"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Group I-2 corridor door construction (BCNYS 407.3.1.1): A person checks this (Gordium doesn't decide it): Unrated corridor doors: solid with close-fitting stops; Dutch doors with an astragal and latching both halves as one leaf; louvers or an undercut of at most 2/3 in only for makeup air (1020.6 exception 1): a person's check.",
+       "mark": "?",
+       "name": "Egress · Group I-2 corridor door construction (BCNYS 407.3.1.1)"
+      },
+      {
+       "key": "review#4517176984",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_means_of_egress"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Group I-2 means of egress, and the defend-in-place plan (BCNYS 407.4): A person checks this (Gordium doesn't decide it): Means of egress per Chapter 10 and 407.4.1 to 407.4.4, and the fire safety and evacuation plans (1002.2) name the building components a defend-in-place response needs: a person's check.",
+       "mark": "?",
+       "name": "Egress · Group I-2 means of egress, and the defend-in-place plan (BCNYS 407.4)"
+      },
+      {
+       "key": "review#c7db54feb6",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_1_direct_access_to_a_corridor"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · A Group I-2 habitable room's door directly to a corridor (BCNYS 407.4.1): A person checks this (Gordium doesn't decide it): Each habitable room has an exit access door leading directly to a corridor, but rooms with exit doors directly outside at ground level and rooms in a care suite: a person's check of which rooms are habitable.",
+       "mark": "?",
+       "name": "Egress · A Group I-2 habitable room's door directly to a corridor (BCNYS 407.4.1)"
+      },
+      {
+       "key": "review#9e5612f940",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_1_1_locking_devices"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Locks on a care recipient's room never restricting egress (BCNYS 407.4.1.1): A person checks this (Gordium doesn't decide it): A lock restricting access to a care recipient's room from the corridor, operable only by staff, never restricts egress from the room (not in psychiatric treatment areas, or per 1010.2.13): a person's check.",
+       "mark": "?",
+       "name": "Egress · Locks on a care recipient's room never restricting egress (BCNYS 407.4.1.1)"
+      },
+      {
+       "key": "review#e1f7af2c1e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_3_projections_in_nursing_home_corridors"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Furniture in nursing home corridors at least 96 in wide (BCNYS 407.4.3): A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a corridor at least 96 in wide may hold fixed furniture on one side only, leaving 72 in clear (or 1005.7's encroachments), each group of at most 50 sq ft and 10 ft apart, in the fire and safety plans: a person's check.",
+       "mark": "?",
+       "name": "Egress · Furniture in nursing home corridors at least 96 in wide (BCNYS 407.4.3)"
+      },
+      {
+       "key": "review#914d2eed31",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_care_suites"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Group I-2 care suites (BCNYS 407.4.4): A person checks this (Gordium doesn't decide it): Care suites meet 407.4.4.1 to 407.4.4.5 and either 407.4.4.6 or 407.4.4.7: a person's check.",
+       "mark": "?",
+       "name": "Egress · Group I-2 care suites (BCNYS 407.4.4)"
+      },
+      {
+       "key": "review#5b4a6ac3d9",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_1_exit_access_through_care_suites"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · No exit access from elsewhere through a care suite (BCNYS 407.4.4.1): A person checks this (Gordium doesn't decide it): Exit access from any part of the building not a care suite never passes through one: a person's check.",
+       "mark": "?",
+       "name": "Egress · No exit access from elsewhere through a care suite (BCNYS 407.4.4.1)"
+      },
+      {
+       "key": "review#f8743901eb",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_2_care_suite_separation"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Care suites separated by smoke partitions (BCNYS 407.4.4.2): A person checks this (Gordium doesn't decide it): Each care suite is separated from the rest of the building, other suites included, by a smoke partition (710): a person's check.",
+       "mark": "?",
+       "name": "Egress · Care suites separated by smoke partitions (BCNYS 407.4.4.2)"
+      },
+      {
+       "key": "review#4af23959ce",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_3_care_suite_access_to_corridor"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · A care suite's door to a corridor, within 100 ft (BCNYS 407.4.4.3): A person checks this (Gordium doesn't decide it): Every care suite has a door directly to an exit access corridor or horizontal exit, at most 100 ft of travel from any habitable room in it; a second door required by 407.4.4.6.2 or 407.4.4.7.2 leads to a corridor, an exit or an adjacent suite: a person's check.",
+       "mark": "?",
+       "name": "Egress · A care suite's door to a corridor, within 100 ft (BCNYS 407.4.4.3)"
+      },
+      {
+       "key": "review#590a08abde",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_4_care_suite_circulation_paths"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Circulation paths within a care suite at least 36 in (BCNYS 407.4.4.4): A person checks this (Gordium doesn't decide it): Paths to the suite's doors are at least 36 in wide and need not meet a corridor's or an aisle's requirements: a person's check.",
+       "mark": "?",
+       "name": "Egress · Circulation paths within a care suite at least 36 in (BCNYS 407.4.4.4)"
+      },
+      {
+       "key": "review#7982450111",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_5_doors_within_care_suites"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Doors within care suites (BCNYS 407.4.4.5): A person checks this (Gordium doesn't decide it): Doors serving habitable rooms in a care suite may be manual horizontal sliding doors (1010.1.2 exception 9), power-operated doors (exception 7) or doors per 1010: a person's check.",
+       "mark": "?",
+       "name": "Egress · Doors within care suites (BCNYS 407.4.4.5)"
+      },
+      {
+       "key": "review#4d9717c9b8",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_6_care_suites_with_sleeping_rooms"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Care suites containing sleeping rooms (BCNYS 407.4.4.6): A person checks this (Gordium doesn't decide it): Sleeping rooms may be grouped into a care suite only where it serves as exit access for at most eight beds, or gives constant visual supervision, or has smoke detection in the sleeping rooms (NFPA 72): a person's check.",
+       "mark": "?",
+       "name": "Egress · Care suites containing sleeping rooms (BCNYS 407.4.4.6)"
+      },
+      {
+       "key": "review#8156de93e4",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_6_1_sleeping_care_suite_area"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · A sleeping care suite at most 7,500 sq ft (BCNYS 407.4.4.6.1): A person checks this (Gordium doesn't decide it): A care suite with sleeping rooms is at most 7,500 sq ft (10,000 sq ft with smoke detection throughout): a person's check.",
+       "mark": "?",
+       "name": "Egress · A sleeping care suite at most 7,500 sq ft (BCNYS 407.4.4.6.1)"
+      },
+      {
+       "key": "review#024b043886",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_6_2_sleeping_care_suite_exit_access"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Two doors from a sleeping care suite over 1,000 sq ft (BCNYS 407.4.4.6.2): A person checks this (Gordium doesn't decide it): A sleeping room, or a care suite with sleeping rooms, over 1,000 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+       "mark": "?",
+       "name": "Egress · Two doors from a sleeping care suite over 1,000 sq ft (BCNYS 407.4.4.6.2)"
+      },
+      {
+       "key": "review#4c4aa0e5ab",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_7_care_suites_without_sleeping_rooms"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Care suites without sleeping rooms (BCNYS 407.4.4.7): A person checks this (Gordium doesn't decide it): Treatment areas and their rooms and circulation may be grouped into a care suite within 407.4.4.7.1 and 407.4.4.7.2: a person's check.",
+       "mark": "?",
+       "name": "Egress · Care suites without sleeping rooms (BCNYS 407.4.4.7)"
+      },
+      {
+       "key": "review#d2bfadd060",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_7_1_treatment_care_suite_area"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · A treatment care suite at most 12,500 sq ft (BCNYS 407.4.4.7.1): A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms is at most 12,500 sq ft (15,000 sq ft with smoke detection throughout, 907): a person's check.",
+       "mark": "?",
+       "name": "Egress · A treatment care suite at most 12,500 sq ft (BCNYS 407.4.4.7.1)"
+      },
+      {
+       "key": "review#3b9eb0d222",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_407_4_4_7_2_treatment_care_suite_exit_access"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Two doors from a treatment care suite over 2,500 sq ft (BCNYS 407.4.4.7.2): A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms over 2,500 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+       "mark": "?",
+       "name": "Egress · Two doors from a treatment care suite over 2,500 sq ft (BCNYS 407.4.4.7.2)"
+      },
+      {
        "key": "review#5ddb7b5496",
        "tier": "review",
        "items": [
@@ -76532,7 +78916,7 @@
        "name": "Egress · Nothing projects into a door's clear opening (BCNYS 1010.1.1.1)"
       }
      ],
-     "count": 118,
+     "count": 146,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -77357,6 +79741,286 @@
        "rules": 1
       },
       {
+       "key": "reason:egress.general.bc_407_1_group_i2",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The building may be Group I-2 (hospitals, nursing homes, detoxification facilities): Sections 407.1 to 407.11 apply besides the rest of the code: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_1_group_i2"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_2_corridor_continuity_and_separation",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Group I-2 corridors run continuous to the exits and are separated from other areas per 407.3, but the spaces 407.2.1 to 407.2.6 let open to them: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_2_corridor_continuity_and_separation"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_2_1_waiting_areas_open_to_a_corridor",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A waiting, public-use or group meeting space built as a corridor may be open to it only if it isn't a sleeping, treatment, incidental or hazardous use, has fire detection (907), its corridors have detection or quick-response sprinklers, and it doesn't obstruct access to the exits: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_2_1_waiting_areas_open_to_a_corridor"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_2_2_care_providers_stations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Care providers', staff, charting and clerical spaces built as a corridor may be open to it: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_2_2_care_providers_stations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_2_3_psychiatric_treatment_areas",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A supervised psychiatric treatment area may be open to the corridor only at 1,500 sq ft or less, supervised, not obstructing access to the exits, with fire detection (907.2), one per smoke compartment, its walls and ceilings built as a corridor's: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_2_3_psychiatric_treatment_areas"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_2_4_gift_shops",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A gift shop and its storage under 500 sq ft, built as a corridor, may be open to it: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_2_4_gift_shops"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_2_5_nursing_home_housing_units",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, shared living, group meeting or therapy spaces may be open to the corridor only if built as a corridor, not a sleeping, treatment, incidental or hazardous use, with fire detection, their corridors detected or sprinklered with quick response, and not obstructing access to the exits: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_2_5_nursing_home_housing_units"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_2_6_nursing_home_cooking_facilities",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a space with domestic cooking may be open to the corridor only for 30 care recipients or fewer in the smoke compartment and served, one per smoke compartment, the corridor clearly marked, access to the exit unobstructed, its appliances per 407.2.7: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_2_6_nursing_home_cooking_facilities"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_2_7_domestic_cooking_appliances",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Domestic cooking appliances limited to ovens, cooktops, ranges, warmers and microwaves, with hoods, protection, a staff-only shut-off, a timer of at most 120 minutes and a fire extinguisher within 30 ft (exceptions for compartments without patient sleeping or care areas, and for training): a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_2_7_domestic_cooking_appliances"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_3_corridor_wall_construction",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Corridor walls are smoke partitions per 710: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_3_corridor_wall_construction"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_3_1_corridor_doors",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Corridor doors (other than in rated walls) limit the transfer of smoke and latch positively, no roller latches; other doors per 716: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_3_1_corridor_doors"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_3_1_1_corridor_door_construction",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Unrated corridor doors: solid with close-fitting stops; Dutch doors with an astragal and latching both halves as one leaf; louvers or an undercut of at most 2/3 in only for makeup air (1020.6 exception 1): a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_3_1_1_corridor_door_construction"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_means_of_egress",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Means of egress per Chapter 10 and 407.4.1 to 407.4.4, and the fire safety and evacuation plans (1002.2) name the building components a defend-in-place response needs: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_means_of_egress"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_1_direct_access_to_a_corridor",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Each habitable room has an exit access door leading directly to a corridor, but rooms with exit doors directly outside at ground level and rooms in a care suite: a person's check of which rooms are habitable.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_1_direct_access_to_a_corridor"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_1_1_locking_devices",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A lock restricting access to a care recipient's room from the corridor, operable only by staff, never restricts egress from the room (not in psychiatric treatment areas, or per 1010.2.13): a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_1_1_locking_devices"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_3_projections_in_nursing_home_corridors",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): In Group I-2, Condition 1, a corridor at least 96 in wide may hold fixed furniture on one side only, leaving 72 in clear (or 1005.7's encroachments), each group of at most 50 sq ft and 10 ft apart, in the fire and safety plans: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_3_projections_in_nursing_home_corridors"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_care_suites",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Care suites meet 407.4.4.1 to 407.4.4.5 and either 407.4.4.6 or 407.4.4.7: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_care_suites"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_1_exit_access_through_care_suites",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Exit access from any part of the building not a care suite never passes through one: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_1_exit_access_through_care_suites"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_2_care_suite_separation",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Each care suite is separated from the rest of the building, other suites included, by a smoke partition (710): a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_2_care_suite_separation"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_3_care_suite_access_to_corridor",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Every care suite has a door directly to an exit access corridor or horizontal exit, at most 100 ft of travel from any habitable room in it; a second door required by 407.4.4.6.2 or 407.4.4.7.2 leads to a corridor, an exit or an adjacent suite: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_3_care_suite_access_to_corridor"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_4_care_suite_circulation_paths",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Paths to the suite's doors are at least 36 in wide and need not meet a corridor's or an aisle's requirements: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_4_care_suite_circulation_paths"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_5_doors_within_care_suites",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Doors serving habitable rooms in a care suite may be manual horizontal sliding doors (1010.1.2 exception 9), power-operated doors (exception 7) or doors per 1010: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_5_doors_within_care_suites"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_6_care_suites_with_sleeping_rooms",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Sleeping rooms may be grouped into a care suite only where it serves as exit access for at most eight beds, or gives constant visual supervision, or has smoke detection in the sleeping rooms (NFPA 72): a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_6_care_suites_with_sleeping_rooms"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_6_1_sleeping_care_suite_area",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A care suite with sleeping rooms is at most 7,500 sq ft (10,000 sq ft with smoke detection throughout): a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_6_1_sleeping_care_suite_area"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_6_2_sleeping_care_suite_exit_access",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A sleeping room, or a care suite with sleeping rooms, over 1,000 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_6_2_sleeping_care_suite_exit_access"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_7_care_suites_without_sleeping_rooms",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Treatment areas and their rooms and circulation may be grouped into a care suite within 407.4.4.7.1 and 407.4.4.7.2: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_7_care_suites_without_sleeping_rooms"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_7_1_treatment_care_suite_area",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms is at most 12,500 sq ft (15,000 sq ft with smoke detection throughout, 907): a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_7_1_treatment_care_suite_area"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_407_4_4_7_2_treatment_care_suite_exit_access",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A care suite without sleeping rooms over 2,500 sq ft has at least two exit access doors from the suite, placed per 1007: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_407_4_4_7_2_treatment_care_suite_exit_access"
+       ],
+       "rules": 1
+      },
+      {
        "key": "reason:egress.general.bc_508_2_1_classification",
        "kind": "decide",
        "words": "A person checks this (Gordium doesn't decide it): Each accessory occupancy's classification (Section 302.1, not brought in) is the architect's statement.",
@@ -78168,7 +80832,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "118 to review · 30 comply"
+     "summary": "146 to review · 30 comply"
     }
    ],
    "contents": [
@@ -90435,7 +93099,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 189
+          "not_for_checking": 204
          },
          "pieces": [
           {
@@ -90541,8 +93205,20 @@
            "rules": []
           },
           {
+           "id": "202:authority_having_jurisdiction",
+           "title": "AUTHORITY HAVING JURISDICTION",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:automatic",
            "title": "AUTOMATIC",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:automatic_smoke_detection_system",
+           "title": "AUTOMATIC SMOKE DETECTION SYSTEM",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -90621,6 +93297,24 @@
           {
            "id": "202:care_suite",
            "title": "CARE SUITE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:cell_group_i_3_occupancy",
+           "title": "CELL (Group I-3 occupancy)",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:cell_masonry",
+           "title": "CELL (masonry)",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:circulation_path",
+           "title": "CIRCULATION PATH",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -90847,8 +93541,20 @@
            "rules": []
           },
           {
+           "id": "202:fire_alarm_system",
+           "title": "FIRE ALARM SYSTEM",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:fire_barrier",
            "title": "FIRE BARRIER",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_code_of_new_york_state",
+           "title": "FIRE CODE OF NEW YORK STATE",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -91029,6 +93735,12 @@
           {
            "id": "202:horizontal_exit",
            "title": "HORIZONTAL EXIT",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:housing_unit",
+           "title": "HOUSING UNIT",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -91237,8 +93949,26 @@
            "rules": []
           },
           {
+           "id": "202:part_1203",
+           "title": "PART 1203",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:part_1203_compliant_code_enforcement_program",
+           "title": "PART 1203—COMPLIANT CODE ENFORCEMENT PROGRAM",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:penthouse",
            "title": "PENTHOUSE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:permit",
+           "title": "PERMIT",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -91287,6 +94017,12 @@
           {
            "id": "202:public_way",
            "title": "PUBLIC WAY",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:public_use_areas",
+           "title": "PUBLIC-USE AREAS",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -91393,8 +94129,20 @@
            "rules": []
           },
           {
+           "id": "202:smoke_compartment",
+           "title": "SMOKE COMPARTMENT",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:smoke_detector",
            "title": "SMOKE DETECTOR",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:smoke_partition",
+           "title": "SMOKE PARTITION",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -91485,6 +94233,12 @@
           {
            "id": "202:structure",
            "title": "STRUCTURE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:supervisory_signal_initiating_device",
+           "title": "SUPERVISORY SIGNAL-INITIATING DEVICE",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -92191,15 +94945,240 @@
          "coverage": "rules",
          "whole": false,
          "counts": {
-          "rules": 1
+          "rules": 1,
+          "flag": 28
          },
          "pieces": [
+          {
+           "id": "407.1",
+           "title": "General",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_1_group_i2"
+           ]
+          },
+          {
+           "id": "407.2",
+           "title": "Corridors continuity and separation",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_2_corridor_continuity_and_separation"
+           ]
+          },
+          {
+           "id": "407.2.1",
+           "title": "Waiting and similar areas",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_2_1_waiting_areas_open_to_a_corridor"
+           ]
+          },
+          {
+           "id": "407.2.2",
+           "title": "Care providers’ stations",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_2_2_care_providers_stations"
+           ]
+          },
+          {
+           "id": "407.2.3",
+           "title": "Psychiatric treatment areas",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_2_3_psychiatric_treatment_areas"
+           ]
+          },
+          {
+           "id": "407.2.4",
+           "title": "Gift shops",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_2_4_gift_shops"
+           ]
+          },
+          {
+           "id": "407.2.5",
+           "title": "Nursing home housing units",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_2_5_nursing_home_housing_units"
+           ]
+          },
+          {
+           "id": "407.2.6",
+           "title": "Nursing home cooking facilities",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_2_6_nursing_home_cooking_facilities"
+           ]
+          },
+          {
+           "id": "407.2.7",
+           "title": "Domestic cooking appliances",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_2_7_domestic_cooking_appliances"
+           ]
+          },
+          {
+           "id": "407.3",
+           "title": "Corridor wall construction",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_3_corridor_wall_construction"
+           ]
+          },
+          {
+           "id": "407.3.1",
+           "title": "Corridor doors",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_3_1_corridor_doors"
+           ]
+          },
+          {
+           "id": "407.3.1.1",
+           "title": "Door construction",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_3_1_1_corridor_door_construction"
+           ]
+          },
+          {
+           "id": "407.4",
+           "title": "Means of egress",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_means_of_egress"
+           ]
+          },
+          {
+           "id": "407.4.1",
+           "title": "Direct access to a corridor",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_1_direct_access_to_a_corridor"
+           ]
+          },
+          {
+           "id": "407.4.1.1",
+           "title": "Locking devices",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_1_1_locking_devices"
+           ]
+          },
           {
            "id": "407.4.2",
            "title": "Distance of travel",
            "coverage": "rules",
            "rules": [
             "general.bc_407_4_2_sleeping_room_travel"
+           ]
+          },
+          {
+           "id": "407.4.3",
+           "title": "Projections in nursing home corridors",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_3_projections_in_nursing_home_corridors"
+           ]
+          },
+          {
+           "id": "407.4.4",
+           "title": "Group I-2 care suites",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_care_suites"
+           ]
+          },
+          {
+           "id": "407.4.4.1",
+           "title": "Exit access through care suites",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_1_exit_access_through_care_suites"
+           ]
+          },
+          {
+           "id": "407.4.4.2",
+           "title": "Separation",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_2_care_suite_separation"
+           ]
+          },
+          {
+           "id": "407.4.4.3",
+           "title": "Access to corridor",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_3_care_suite_access_to_corridor"
+           ]
+          },
+          {
+           "id": "407.4.4.4",
+           "title": "Circulation paths within a care suite",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_4_care_suite_circulation_paths"
+           ]
+          },
+          {
+           "id": "407.4.4.5",
+           "title": "Doors within care suites",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_5_doors_within_care_suites"
+           ]
+          },
+          {
+           "id": "407.4.4.6",
+           "title": "Care suites containing sleeping room areas",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_6_care_suites_with_sleeping_rooms"
+           ]
+          },
+          {
+           "id": "407.4.4.6.1",
+           "title": "Area",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_6_1_sleeping_care_suite_area"
+           ]
+          },
+          {
+           "id": "407.4.4.6.2",
+           "title": "Exit access",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_6_2_sleeping_care_suite_exit_access"
+           ]
+          },
+          {
+           "id": "407.4.4.7",
+           "title": "Care suites not containing sleeping rooms",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_7_care_suites_without_sleeping_rooms"
+           ]
+          },
+          {
+           "id": "407.4.4.7.1",
+           "title": "Area",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_7_1_treatment_care_suite_area"
+           ]
+          },
+          {
+           "id": "407.4.4.7.2",
+           "title": "Exit access",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_407_4_4_7_2_treatment_care_suite_exit_access"
            ]
           }
          ]
@@ -97938,6 +100917,34 @@
    "egress.general.bc_405_7_means_of_egress": "needs_review",
    "egress.general.bc_405_7_1_two_exits_on_each_floor_level": "needs_review",
    "egress.general.bc_405_7_2_smokeproof_enclosures": "needs_review",
+   "egress.general.bc_407_1_group_i2": "needs_review",
+   "egress.general.bc_407_2_corridor_continuity_and_separation": "needs_review",
+   "egress.general.bc_407_2_1_waiting_areas_open_to_a_corridor": "needs_review",
+   "egress.general.bc_407_2_2_care_providers_stations": "needs_review",
+   "egress.general.bc_407_2_3_psychiatric_treatment_areas": "needs_review",
+   "egress.general.bc_407_2_4_gift_shops": "needs_review",
+   "egress.general.bc_407_2_5_nursing_home_housing_units": "needs_review",
+   "egress.general.bc_407_2_6_nursing_home_cooking_facilities": "needs_review",
+   "egress.general.bc_407_2_7_domestic_cooking_appliances": "needs_review",
+   "egress.general.bc_407_3_corridor_wall_construction": "needs_review",
+   "egress.general.bc_407_3_1_corridor_doors": "needs_review",
+   "egress.general.bc_407_3_1_1_corridor_door_construction": "needs_review",
+   "egress.general.bc_407_4_means_of_egress": "needs_review",
+   "egress.general.bc_407_4_1_direct_access_to_a_corridor": "needs_review",
+   "egress.general.bc_407_4_1_1_locking_devices": "needs_review",
+   "egress.general.bc_407_4_3_projections_in_nursing_home_corridors": "needs_review",
+   "egress.general.bc_407_4_4_care_suites": "needs_review",
+   "egress.general.bc_407_4_4_1_exit_access_through_care_suites": "needs_review",
+   "egress.general.bc_407_4_4_2_care_suite_separation": "needs_review",
+   "egress.general.bc_407_4_4_3_care_suite_access_to_corridor": "needs_review",
+   "egress.general.bc_407_4_4_4_care_suite_circulation_paths": "needs_review",
+   "egress.general.bc_407_4_4_5_doors_within_care_suites": "needs_review",
+   "egress.general.bc_407_4_4_6_care_suites_with_sleeping_rooms": "needs_review",
+   "egress.general.bc_407_4_4_6_1_sleeping_care_suite_area": "needs_review",
+   "egress.general.bc_407_4_4_6_2_sleeping_care_suite_exit_access": "needs_review",
+   "egress.general.bc_407_4_4_7_care_suites_without_sleeping_rooms": "needs_review",
+   "egress.general.bc_407_4_4_7_1_treatment_care_suite_area": "needs_review",
+   "egress.general.bc_407_4_4_7_2_treatment_care_suite_exit_access": "needs_review",
    "egress.general.bc_508_2_1_classification": "needs_review",
    "egress.general.bc_508_2_2_height": "needs_review",
    "egress.general.bc_508_2_3_tabular_values": "needs_review",
@@ -98028,7 +101035,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "118 to review · 30 comply"
+    "summary": "146 to review · 30 comply"
    }
   ],
   "egress": {
@@ -102786,6 +105793,34 @@
     "general.bc_405_7_means_of_egress": "needs_review",
     "general.bc_405_7_1_two_exits_on_each_floor_level": "needs_review",
     "general.bc_405_7_2_smokeproof_enclosures": "needs_review",
+    "general.bc_407_1_group_i2": "needs_review",
+    "general.bc_407_2_corridor_continuity_and_separation": "needs_review",
+    "general.bc_407_2_1_waiting_areas_open_to_a_corridor": "needs_review",
+    "general.bc_407_2_2_care_providers_stations": "needs_review",
+    "general.bc_407_2_3_psychiatric_treatment_areas": "needs_review",
+    "general.bc_407_2_4_gift_shops": "needs_review",
+    "general.bc_407_2_5_nursing_home_housing_units": "needs_review",
+    "general.bc_407_2_6_nursing_home_cooking_facilities": "needs_review",
+    "general.bc_407_2_7_domestic_cooking_appliances": "needs_review",
+    "general.bc_407_3_corridor_wall_construction": "needs_review",
+    "general.bc_407_3_1_corridor_doors": "needs_review",
+    "general.bc_407_3_1_1_corridor_door_construction": "needs_review",
+    "general.bc_407_4_means_of_egress": "needs_review",
+    "general.bc_407_4_1_direct_access_to_a_corridor": "needs_review",
+    "general.bc_407_4_1_1_locking_devices": "needs_review",
+    "general.bc_407_4_3_projections_in_nursing_home_corridors": "needs_review",
+    "general.bc_407_4_4_care_suites": "needs_review",
+    "general.bc_407_4_4_1_exit_access_through_care_suites": "needs_review",
+    "general.bc_407_4_4_2_care_suite_separation": "needs_review",
+    "general.bc_407_4_4_3_care_suite_access_to_corridor": "needs_review",
+    "general.bc_407_4_4_4_care_suite_circulation_paths": "needs_review",
+    "general.bc_407_4_4_5_doors_within_care_suites": "needs_review",
+    "general.bc_407_4_4_6_care_suites_with_sleeping_rooms": "needs_review",
+    "general.bc_407_4_4_6_1_sleeping_care_suite_area": "needs_review",
+    "general.bc_407_4_4_6_2_sleeping_care_suite_exit_access": "needs_review",
+    "general.bc_407_4_4_7_care_suites_without_sleeping_rooms": "needs_review",
+    "general.bc_407_4_4_7_1_treatment_care_suite_area": "needs_review",
+    "general.bc_407_4_4_7_2_treatment_care_suite_exit_access": "needs_review",
     "general.bc_508_2_1_classification": "needs_review",
     "general.bc_508_2_2_height": "needs_review",
     "general.bc_508_2_3_tabular_values": "needs_review",
@@ -106747,7 +109782,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "90350a4e202a40d0fe5f980decdd414912c496d9a7255f46405d0ff9a7138428",
   "rulebook": {
-   "new_york/ithaca_city": "2c1ea6006d702d2c40c1c349e88b242143825db81e2744e0b4ef6dbc3d111a4a"
+   "new_york/ithaca_city": "44a8968647ba97becb1fb4413fa7adae6e68aeffe75a91849fcfdec7bdc6ee40"
   }
  }
 }

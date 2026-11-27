@@ -2917,7 +2917,7 @@ rules:
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2 note a''s 407.4 for Group I-2: 407.4.2 holds a sleeping room not in a care suite to 50 ft from any
-    point to its exit access door, measured as the travel within a sleeping room; a care suite (407.4.4, not brought in) is
+    point to its exit access door, measured as the travel within a sleeping room; a care suite (407.4.4: flags of Chapter 4 part c) is
     such a space'' (review). Hand-drafted in a Claude Code session (2026-11-23, review round 1).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -5049,7 +5049,7 @@ rules:
       and where only the sprinklered column would pass, a person checks the system.'
   - when: not space_is_exit and space_exit_count < 2 and occupancy_group == "I-2" and space_occupant_load <= 10 and (sprinklered_903_3_1_1
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75
-    reason: 'A Group I-2 space with one exit, within the row: note d''s 407.4 (care suites, not brought in) limits it further,
+    reason: 'A Group I-2 space with one exit, within the row: note d''s 407.4 (care suites: flags of Chapter 4 part c) limits it further,
       a person''s check.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and (space_occupant_load <= 10 and (sprinklered_903_3_1_1
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75)
@@ -5373,8 +5373,8 @@ rules:
     path over the value needs review (open question 1); a space that is itself an exit (an exit stair enclosure) is not one
     1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load
     (1004.2) is in the space''s occupant load. The row also names I-4, whose rule is the rule “Two exits over 10 occupants
-    or a 75-ft common path, I-4 (BCNYS 1006.2.1)” (unchanged). Note d: Group I-2''s travel limits are 407.4''s (not brought
-    in), so a Group I-2 space with one exit needs review. Hand-drafted in a Claude Code session (2026-11-23). Review round
+    or a 75-ft common path, I-4 (BCNYS 1006.2.1)” (unchanged). Note d: Group I-2''s travel limits are 407.4''s (flags of
+    Chapter 4 part c), so a Group I-2 space with one exit needs review. Hand-drafted in a Claude Code session (2026-11-23). Review round
     1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23):
     a room with fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft). Review round
     3 (2026-11-23): with fixed seating stated or not ruled out, the row needs review at any common path, as its travel does
@@ -15380,7 +15380,7 @@ rules:
     expect: not_applicable
     note: 'No corridor: with none, the rule doesn''t apply.'
   notes: 'Table 1020.2''s row for Group I-2: Not Permitted without a sprinkler system, 0 hours with one. Note a''s 407.2 and
-    407.3 (not brought in) are the flag of their own. Hand-drafted in a Claude Code session (2026-11-25).'
+    407.3 (flags of Chapter 4 part c) are the flag of their own. Hand-drafted in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1020_2_i1_i3
@@ -15653,7 +15653,7 @@ rules:
   - given:
       occupancy_group: I-2
     expect: needs_review
-    note: 'Note a sends Group I-2 corridors to 407.2 and 407.3 (not brought in): a person checks.'
+    note: 'Note a sends Group I-2 corridors to 407.2 and 407.3 (flags of Chapter 4 part c): a person checks.'
   - given:
       occupancy_group: B
     expect: not_applicable
@@ -16803,8 +16803,8 @@ rules:
       per 407.4.3): projections aren''t drawn, so a person''s check.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 5c. Projections aren''t drawn: the corridor''s
     measured width is between its finished walls and what is drawn in it, so trim within 1 1/2 inches each side and handrails
-    as 1014.9 allows (not brought in) are a person''s check; Group I-2 Condition 1 corridors'' projections per 407.4.3 (not
-    brought in) too.'
+    as 1014.9 allows (not brought in) are a person''s check; Group I-2 Condition 1 corridors'' projections per 407.4.3 (a
+    flag of Chapter 4 part c) too.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1005_7_3_protruding_objects
