@@ -91,20 +91,36 @@ def _given(description: dict, kind: str, problems: list):
 SAME_FLOOR = 0.5      # in: rooms' floors this close are one floor (a threshold's change in level, never a step)
 
 
-def _stairs_against_floors(rooms, reader) -> str | None:
-    """Why "no stairs" (an empty list of stairs) can't be taken beside these rooms, or None: rooms on two or more
-    stories (`level`, as the Building Code's description places them), or rooms' floors more than 1/2 in apart
-    (`floor_elevation`, as a house's gives them; a change of floor that size is a step, or a ramp). Rooms on more
-    than one floor are joined by a stair or a ramp, or each floor has its own way out at grade, and the model shows
-    none of that, so the claim needs review, never a stair rule set aside. Rooms that can't be read, or whose floor
-    can't be read, show nothing against it (the rooms' own problems say so)."""
-    if not isinstance(rooms, list):
+def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
+    """Why "no stairs" (an empty list of stairs) can't be taken beside what the description shows, or None. A stair
+    or a ramp joins floors, or each floor has its own way out at grade, which the model doesn't show, so where the
+    building may have more than one floor the claim needs review, never a stair rule set aside:
+    - its rooms or enclosed spaces with no room drawn (`unknown_spaces`) are on two or more `level`s (as the Building
+      Code's description and the Revit add-in place them), named from `levels` where it names them;
+    - its rooms' floors are more than 1/2 in apart (`floor_elevation`, as a house's gives them; a change of floor
+      that size is a step, or a ramp), or a room's floor is given but can't be read (it may be on another floor);
+    - the check states two or more stories (`stated_stories`: the architect's count above grade plane, or the place's).
+    Rooms with neither level nor floor given show nothing against it (not given is never a second floor)."""
+    if type(stated_stories) in (int, float) and stated_stories >= 2:
+        return Stop("stairs_none_several_floors", what=f"the building is stated to have {stated_stories:g} "
+                                                       "stories").reason
+    if not isinstance(whole, dict):
         return None
-    rooms = [r for r in rooms if isinstance(r, dict)]
-    levels = sorted({r["level"] for r in rooms if isinstance(r.get("level"), str) and r["level"].strip()})
+    rooms = [r for r in whole.get("rooms") if isinstance(r, dict)] if isinstance(whole.get("rooms"), list) else []
+    spaces = [u for u in whole.get("unknown_spaces") if isinstance(u, dict)]         if isinstance(whole.get("unknown_spaces"), list) else []
+    levels = {r["level"] for r in rooms + spaces if isinstance(r.get("level"), str) and r["level"].strip()
+              or type(r.get("level")) is int}               # an id as text or a whole number (never a yes/no)
     if len(levels) > 1:
-        shown = ", ".join(levels[:3]) + (f" and {len(levels) - 3} more" if len(levels) > 3 else "")
-        return Stop("stairs_none_several_floors", what=f"rooms on levels {shown}").reason
+        listed = {lv.get("id"): lv for lv in whole.get("levels") or [] if isinstance(lv, dict)}             if isinstance(whole.get("levels"), list) else {}
+
+        def named(level_id):
+            lv = listed.get(level_id) or {}
+            name = lv.get("name") if isinstance(lv.get("name"), str) and lv["name"].strip() else str(level_id)
+            z = lv.get("elevation")
+            return (0, z, name) if type(z) in (int, float) and math.isfinite(z) else (1, 0, name)
+        order = [n for _, _, n in sorted(named(lv) for lv in levels)]
+        shown = " and ".join(order) if len(order) <= 3 else ", ".join(order[:3]) + f" and {len(order) - 3} more"
+        return Stop("stairs_none_several_floors", what=f"its rooms are on {len(order)} levels ({shown})").reason
     floors = []
     for r in rooms:
         if r.get("floor_elevation") is None:
@@ -112,12 +128,14 @@ def _stairs_against_floors(rooms, reader) -> str | None:
         try:
             floors.append((floor_elevation(r, reader), name_of(r)))
         except Stop:
-            continue
+            return Stop("stairs_none_several_floors", what=f"{name_of(r)}'s floor height can't be read, so it may "
+                                                           "be on another floor").reason
     if floors:
         (low, low_name), (high, high_name) = min(floors), max(floors)
         if high - low > SAME_FLOOR:
-            return Stop("stairs_none_several_floors", what=f"{low_name}'s floor at {tidy(low):g} in, {high_name}'s "
-                                                           f"at {tidy(high):g} in").reason
+            return Stop("stairs_none_several_floors", what=f"its rooms' floors are at different heights ({low_name}'s "
+                                                           f"at {tidy(low):g} in, {high_name}'s at {tidy(high):g} "
+                                                           "in)").reason
     return None
 
 
@@ -168,10 +186,11 @@ def _door(item: dict, measured) -> dict:
     return part
 
 
-def measure(description, stories=None) -> dict:
-    """The description measured (the module's account). `stories`: the rooms an empty list of stairs is read against
-    (_stairs_against_floors), where the description given isn't the whole one (the Building Code's stairs and guards
-    are measured on a description with its rooms left out); None: the description's own rooms."""
+def measure(description, whole=None, stated_stories=None) -> dict:
+    """The description measured (the module's account). An empty list of stairs is read against the floors
+    (_stairs_against_floors): those of `whole`, where the description given isn't the whole one (the Building
+    Code's stairs and guards are measured on a description with its rooms left out; None: the description itself),
+    and `stated_stories`, the stories the check states (None: none stated)."""
     out = {"format": MEASURED_FORMAT, "units": {"length": "in", "area": "sf"},
            "parts": {k: None for k in KINDS}, "problems": [], "not_checked": [], "has_none": {}}
     problems = out["problems"]
@@ -231,8 +250,9 @@ def measure(description, stories=None) -> dict:
             parts["emergency_escape_opening"].append(_part(o, measure_opening(o, reader, floor_of), o.get("room")))
 
     stairs = _given(description, "stair", problems)
+    against = None
     if stairs == []:                                  # "no stairs": never beside rooms on more than one floor
-        against = _stairs_against_floors(description.get("rooms") if stories is None else stories, reader)
+        against = _stairs_against_floors(description if whole is None else whole, reader, stated_stories)
         if against:
             problems.append(against)
             stairs = None
@@ -258,8 +278,8 @@ def measure(description, stories=None) -> dict:
     guards = _given(description, "guard", problems)
     if guards is not None:
         if stairs is None and any(g.get("stair") is not None for g in guards):
-            flights = {g.get("stair"): Stop("not_read", what="stairs", key="stairs").reason for g in guards
-                       if isinstance(g.get("stair"), str)}
+            why = against or Stop("not_read", what="stairs", key="stairs").reason   # "none" refused: says why
+            flights = {g.get("stair"): why for g in guards if isinstance(g.get("stair"), str)}
         parts["guard"] = [_part(g, measure_guard(g, reader, flights)) for g in guards]
     _claimed(parts, claims)
     out["has_none"] = claims

@@ -375,11 +375,12 @@ def test_a_law_whose_every_row_is_not_applicable_never_vanishes_from_the_answer(
     stairs = [r for r in found["laws"][0]["rules"] if r.get("for_each") == "stair"]
     found["laws"][0]["rules"] = stairs                          # a house with no stairs: every row not applicable
     house = dict(ranch(), stairs=[])
-    got = egress.check(found, house, dict(egress_house.HOUSE), egress_house.ALLOWED)
+    one_story = dict(egress_house.HOUSE, stories_above_grade_plane=1)   # "no stairs" is never beside two or more
+    got = egress.check(found, house, one_story, egress_house.ALLOWED)
     assert [(i["id"], i["status"]) for i in got["items"]] == [("egress.nothing_applied", present.REVIEW),
                                                               ("egress.not_checked_yet", present.REVIEW)]
     found["laws"][0]["not_checked_yet"] = []     # this pin is about nothing_applied alone: every section checked
-    got = egress.check(found, house, dict(egress_house.HOUSE), egress_house.ALLOWED)
+    got = egress.check(found, house, one_story, egress_house.ALLOWED)
     assert [(i["id"], i["status"]) for i in got["items"]] == [("egress.nothing_applied", present.REVIEW)]
     view = {"items": [{"id": "z", "rule": "z", "name": "Rear yard", "group": "building", "status": present.COMPLIES}]}
     egress.add_to_view(view, got, "City of Ithaca")
@@ -483,8 +484,9 @@ def test_no_stairs_beside_rooms_on_two_floors_leaves_every_stair_row_to_review()
     stair_rules = {r["id"] for r in found["laws"][0]["rules"] if r.get("for_each") == "stair"}
     assert stair_rules
 
-    def results(house):
-        got = egress.check(found, house, dict(egress_house.HOUSE), egress_house.ALLOWED)
+    def results(house, stories=1):
+        values = dict(egress_house.HOUSE, stories_above_grade_plane=stories)
+        got = egress.check(found, house, values, egress_house.ALLOWED)
         return got, {k: v for k, v in got["results"].items() if k in stair_rules}
 
     flat = dict(ranch(), stairs=[], guards=[])
@@ -494,9 +496,13 @@ def test_no_stairs_beside_rooms_on_two_floors_leaves_every_stair_row_to_review()
     two["rooms"][-1]["floor_elevation"] = 108                     # one room 9 ft up: a second floor
     got, two_floors = results(two)
     assert set(two_floors) == stair_rules and set(two_floors.values()) == {"needs_review"}, two_floors
-    assert any(p.startswith("the model says there are no stairs, yet its rooms are on more than one floor")
+    assert any(p.startswith("the model says there are no stairs, yet its rooms' floors are at different heights")
                for p in got["interior"]["problems"]), got["interior"]["problems"]
     assert any("no stairs, yet" in (i.get("reason") or "") for i in got["items"])       # said to the architect
+    # skeptic A, round 1: a house stated as 3 stories, drawn with its ground floor alone, never sets them aside
+    got, stated = results(flat, stories=3)
+    assert set(stated.values()) == {"needs_review"}, stated
+    assert any("the building is stated to have 3 stories" in p for p in got["interior"]["problems"])
 
 
 def test_the_building_codes_stairs_none_is_read_against_its_rooms_levels():
@@ -508,6 +514,12 @@ def test_the_building_codes_stairs_none_is_read_against_its_rooms_levels():
     assert egress._stairs_and_guards(one)["parts"]["stair"] == []
     two = copy.deepcopy(one)
     two["rooms"][1]["level"] = "L2"
+    two["levels"] = [{"id": "L2", "name": "Level 2", "elevation": 120}, {"id": "L1", "name": "Level 1", "elevation": 0}]
     got = egress._stairs_and_guards(two)
     assert got["parts"]["stair"] is None
-    assert any("rooms on levels L1, L2" in p for p in got["problems"]), got["problems"]
+    assert any("its rooms are on 2 levels (Level 1 and Level 2)" in p for p in got["problems"]), got["problems"]
+    undrawn = dict(one, unknown_spaces=[{"id": "u", "level": "L2"}])     # skeptic A/B: an upper floor, no room drawn
+    assert egress._stairs_and_guards(undrawn)["parts"]["stair"] is None
+    assert egress._stairs_and_guards(one, stated_stories=2)["parts"]["stair"] is None
+    assert egress._stated_stories({"building": {"stories_above_grade_plane": 2}}, {"stories": 1}) == 2
+    assert egress._stated_stories({}, {"stories": True}) is None                     # a yes/no is no count

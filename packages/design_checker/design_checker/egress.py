@@ -37,6 +37,7 @@ Design: docs/decisions/2026-11-12_building_code_text.md (item 6), docs/interior/
 
 import hashlib
 import json
+import math
 from pathlib import Path
 
 from model_measurement.interior import measure as measure_interior
@@ -319,18 +320,28 @@ def _reads_interior(law: dict) -> bool:
                for r in law.get("rules") or [])
 
 
-def _stairs_and_guards(interior) -> dict:
+def _stated_stories(interior, values: dict | None):
+    """The most stories the check states for the building (the architect's count above grade plane, in the check's
+    values or the description's `building` block, or the place's own count, Ithaca's `stories`), or None: "no stairs"
+    beside two or more is a contradiction (model_measurement.interior._stairs_against_floors)."""
+    block = interior.get("building") if isinstance(interior, dict) else None
+    given = [(values or {}).get("stories_above_grade_plane"), (values or {}).get("stories"),
+             block.get("stories_above_grade_plane") if isinstance(block, dict) else None]
+    counts = [v for v in given if type(v) in (int, float) and math.isfinite(v)]
+    return max(counts) if counts else None
+
+
+def _stairs_and_guards(interior, stated_stories=None) -> dict:
     """The interior measuring of the description's stairs and guards alone (BUILDING_INTERIOR_KINDS): the measuring
     run on the description with its rooms, openings and doors given as none and no `has_none` (a house's claims), so
     its only parts and problems are the stairs' and guards' own. A kind the description doesn't give is not read
     (None, with the measuring's problem saying so): its rules need review, never pass. A description that isn't a
     mapping is measured as it is (its problem said)."""
-    stories = None
+    whole = interior                          # "no stairs" is read against the whole description's floors
     if isinstance(interior, dict):
         keep = {k: interior[k] for k in ("format", "units", "stairs", "guards") if k in interior}
-        stories = interior.get("rooms")       # "no stairs" is read against the rooms' stories, never against none
         interior = {**keep, "rooms": [], "openings": [], "doors": []}
-    got = measure_interior(interior, stories=stories)
+    got = measure_interior(interior, whole=whole, stated_stories=stated_stories)
     return {"parts": {k: got["parts"].get(k) for k in BUILDING_INTERIOR_KINDS}, "problems": got["problems"]}
 
 
@@ -353,13 +364,13 @@ def _measured(law: dict, interior, readings: dict, ground: dict | None = None, v
                 stated = {**{k: v for k, v in (values or {}).items() if k in code_scope.FACTS},
                           **(block if isinstance(block, dict) else {})}       # as _law_values merges them
                 occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors), block, stated)
-            inside = _stairs_and_guards(interior) if kind == ROUTES_AND_INTERIOR else {"parts": {}, "problems": []}
+            inside = _stairs_and_guards(interior, _stated_stories(interior, values)) if kind == ROUTES_AND_INTERIOR                 else {"parts": {}, "problems": []}
             problems = [str(p) for p in got["problems"]]
             problems += [str(p) for p in inside["problems"] if str(p) not in problems]
             readings[kind] = {"parts": {**got["parts"], **inside["parts"]}, "problems": problems,
                               "not_checked": [], "has_none": {}}
         else:
-            readings[kind] = measure_interior(interior)
+            readings[kind] = measure_interior(interior, stated_stories=_stated_stories(interior, values))
     return readings[kind]
 
 

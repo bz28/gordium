@@ -2286,6 +2286,9 @@ def test_a_no_sleeping_lofts_claim_cant_stand_beside_a_room_drawn_within_another
 
 # ---- "no stairs" beside rooms on more than one floor (_stairs_against_floors) ---------------------------------------
 
+REFUSED = "the model says there are no stairs, yet "
+
+
 def _no_stairs(**floors):
     d = base()
     d.update(stairs=[], guards=[])
@@ -2295,40 +2298,62 @@ def _no_stairs(**floors):
     return d
 
 
+def _refused(got):
+    why = [p for p in got["problems"] if p.startswith(REFUSED)]
+    assert got["parts"]["stair"] is None and len(why) == 1 and "isn't taken" in why[0], got["problems"]
+    return why[0]
+
+
 def test_no_stairs_is_taken_on_one_floor_and_never_beside_rooms_on_two():
     """An empty list of stairs says the house has none: taken where every room's floor is within 1/2 in of the
     others (a threshold's change in level), so the stair rules are set aside; refused where a room's floor is higher
-    than that (a step, a stair or a ramp joins them, or each floor has its own way out at grade, none of which the
-    model shows): the stairs aren't read, so every stair rule needs review, never not applicable."""
+    or lower than that (a step, a stair or a ramp joins them, or each floor has its own way out at grade, none of
+    which the model shows), or a floor given can't be read (skeptic A, round 1: it may be on another floor): the
+    stairs aren't read, so every stair rule needs review, never not applicable."""
     for flat in ({}, {"kitchen": 0.5}, {"kitchen": -0.5}):
         got = measure(_no_stairs(**flat))
-        assert got["parts"]["stair"] == [], flat
-        assert not any("no stairs" in p for p in got["problems"]), flat
+        assert got["parts"]["stair"] == [] and not any(p.startswith(REFUSED) for p in got["problems"]), flat
     for apart in ({"kitchen": 0.51}, {"kitchen": 108}, {"den": -96}, {"kitchen": 108, "loft": 216}):
-        got = measure(_no_stairs(**apart))
-        assert got["parts"]["stair"] is None, apart
-        why = [p for p in got["problems"] if p.startswith("the model says there are no stairs, yet")]
-        assert len(why) == 1 and "isn't taken" in why[0], (apart, got["problems"])
-    got = measure(_no_stairs(kitchen=108))
-    assert "Bedroom's floor at 0 in, Kitchen's at 108 in" in got["problems"][-1]
+        _refused(measure(_no_stairs(**apart)))
+    assert "(Bedroom's at 0 in, Kitchen's at 108 in)" in _refused(measure(_no_stairs(kitchen=108)))
+    for unreadable in ("108", True, float("nan"), 1e12, [108]):
+        assert "Den's floor height can't be read" in _refused(measure(_no_stairs(den=unreadable))), unreadable
+    d = _no_stairs()
+    d["rooms"].append({"id": "x", "name": "Hall", "sleeping": False})        # no floor given: nothing against it
+    assert measure(d)["parts"]["stair"] == []
 
 
 def test_no_stairs_beside_rooms_on_two_levels_as_the_building_code_places_them():
-    """A description that places its rooms on levels (the Building Code's): rooms on two levels refuse "no stairs";
-    rooms all on one level, or with no level or a level that isn't text, show nothing against it. The stories can be
-    given apart from the description (the Building Code's stairs are measured with its rooms left out)."""
+    """A description that places its rooms (or enclosed spaces with no room drawn) on levels: two levels refuse
+    "no stairs", named from `levels` in height order where it names them (skeptic A: never Revit's ids); rooms all
+    on one level, or with no level or one that isn't text, show nothing against it. The floors can be read from the
+    whole description apart from the one measured (the Building Code's stairs are measured with its rooms left out)."""
     d = base()
     d.update(stairs=[], guards=[], rooms=[])
-    on = lambda *levels: [{"id": f"r{n}", "level": lv} for n, lv in enumerate(levels)]
-    assert measure(d, stories=on("L1", "L1"))["parts"]["stair"] == []
-    assert measure(d, stories=on("L1", None, 5, ["L2"]))["parts"]["stair"] == []
-    for stories in (on("L1", "L2"), on("L2", "L1", "L3", "L4", "L5")):
-        got = measure(d, stories=stories)
-        assert got["parts"]["stair"] is None
-        assert "rooms on levels L1, L2" in got["problems"][-1]
-    assert "L1, L2, L3 and 2 more" in measure(d, stories=on("L1", "L2", "L3", "L4", "L5"))["problems"][-1]
-    assert measure(d, stories="x")["parts"]["stair"] == []          # rooms that can't be read show nothing
-    # stairs given (not none) are measured as before, whatever the floors
-    d2 = base()
+    whole = lambda *levels, **more: {"rooms": [{"id": f"r{n}", "level": lv} for n, lv in enumerate(levels)], **more}
+    assert measure(d, whole=whole("L1", "L1"))["parts"]["stair"] == []
+    assert measure(d, whole=whole("L1", None, True, ["L2"], " "))["parts"]["stair"] == []
+    assert "(1 and 2)" in _refused(measure(d, whole=whole(1, 2)))            # skeptic B: number ids are levels too
+    assert "its rooms are on 2 levels (L1 and L2)" in _refused(measure(d, whole=whole("L2", "L1")))
+    named = [{"id": "u2", "name": "Level 2", "elevation": 120}, {"id": "u1", "name": "Level 1", "elevation": 0}]
+    assert "(Level 1 and Level 2)" in _refused(measure(d, whole=whole("u2", "u1", levels=named)))
+    assert "L1, L2, L3 and 2 more" in _refused(measure(d, whole=whole("L1", "L2", "L3", "L4", "L5")))
+    upstairs = whole("L1", unknown_spaces=[{"id": "a2", "level": "L2"}])          # skeptic A: an upper floor undrawn
+    assert "(L1 and L2)" in _refused(measure(d, whole=upstairs))
+    assert measure(d, whole="x")["parts"]["stair"] == []                         # rooms that can't be read
+    d2 = base()                                         # stairs given (not none) are measured as before
     d2["rooms"].append({"id": "k", "name": "Kitchen", "sleeping": False, "floor_elevation": 108})
     assert len(measure(d2)["parts"]["stair"]) == 1
+
+
+def test_no_stairs_beside_two_stories_stated_and_a_guard_on_a_stair_says_why():
+    """Two or more stories stated for the check refuse "no stairs" though the drawing shows one floor (skeptic A: a
+    house stated as 3 stories, drawn with its ground floor alone); one stated keeps it. A guard naming a stair
+    where "none" was refused says the refusal, never that the model didn't say these are all the stairs."""
+    assert measure(_no_stairs(), stated_stories=1)["parts"]["stair"] == []
+    assert "the building is stated to have 3 stories" in _refused(measure(_no_stairs(), stated_stories=3))
+    d = _no_stairs(kitchen=108)
+    d["guards"] = [{"id": "g", "name": "Stair guard", "stair": "s", "top_line": [[0, 36, 41], [30, 36, 64]]}]
+    why = _refused(measure(d))
+    said = set(one(d, "guard")["not_measured"].values())
+    assert said and all(why in w for w in said) and not any("these are all the stairs" in w for w in said), said
