@@ -1551,7 +1551,8 @@ internal static class RevitInterior
         var name = doc.GetElement(e.GetTypeId())?.Name ?? e.Name;
         return new GroundRecord(e.UniqueId, kind, name, failed || triangles.Count == 0 ? null : triangles,
                                 Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id),
-                                host is null || host == ElementId.InvalidElementId ? null : doc.GetElement(host)?.UniqueId);
+                                host is null || host == ElementId.InvalidElementId ? null : doc.GetElement(host)?.UniqueId,
+                                Id(e.CreatedPhaseId));
     }
 
     /// <summary>Every model element (not view-specific) whose box meets the instance's own box widened

@@ -459,6 +459,80 @@ public sealed class GroundTests
         Assert.Contains("if (!kept && (e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model }))", source);
     }
 
+    // ---- the phases (Ben, 2026-11-26): derived first where Revit shows it --------------------------------------------
+
+    /// <summary>House 5 with its survey's ground (made in phase-1, demolished in the last phase, 0.3 ft higher) and the
+    /// regraded ground (made in the last phase), each over the whole drawing; the mark as given.</summary>
+    private static FakeHouse Phased(bool? mark, string? madeIn = FakeHouse.LastPhase)
+    {
+        var house = FakeHouse.Draw("5_basement_window_well");
+        house.Grounds =
+        [
+            house.Toposolid((_, _) => 0.3, "topo-old", "Existing grade") with { PhaseCreated = "phase-1", PhaseDemolished = FakeHouse.LastPhase },
+            house.Toposolid((_, _) => 0, "topo-new", "Finished grade") with { PhaseCreated = madeIn },
+        ];
+        house.FinishedGround(mark);
+        return house;
+    }
+
+    /// <summary>Phased, mark blank: the ground made in the last phase is the finished ground, and the existing one,
+    /// demolished, is never read.</summary>
+    [Fact]
+    public void With_the_existing_ground_demolished_the_last_phases_ground_is_the_finished_ground()
+    {
+        var read = InteriorReader.Read(Phased(null).Model());
+        Assert.Equal([0.0, 0.0, 0.0], Ground(read, "we1"));
+        Assert.Null(Why(read, "we1"));
+        Assert.Equal("phases", read.Evidence[FakeHouse.Uid("we1")]!["ground"]!["finished_by"]!.GetValue<string>());
+        // the mark Yes is the architect's word, and says so
+        read = InteriorReader.Read(Phased(true).Model());
+        Assert.Equal([0.0, 0.0, 0.0], Ground(read, "we1"));
+        Assert.Equal("stated", read.Evidence[FakeHouse.Uid("we1")]!["ground"]!["finished_by"]!.GetValue<string>());
+    }
+
+    /// <summary>Phased, the mark No: the two disagree, so the ground isn't read, the reason naming both.</summary>
+    [Fact]
+    public void The_mark_no_where_the_phases_show_the_finished_ground_is_needs_review()
+    {
+        var read = InteriorReader.Read(Phased(false).Model());
+        Assert.Null(Ground(read, "we1"));
+        Assert.StartsWith("Gordium: Toposolid is finished ground is No on Project Information, yet the phases show the ground drawn " +
+                          "(Toposolid \"Finished grade\") as the finished ground", Why(read, "we1"));
+        Assert.EndsWith("which is right isn't clear, so it isn't read", Why(read, "we1"));
+    }
+
+    /// <summary>Where the phases don't show it, it is the mark or nothing, as before: no existing ground drawn in an
+    /// earlier phase (every template has two phases: they alone say nothing), a project of one phase, a ground of the
+    /// design made in an earlier phase and never demolished, or one with no phase.</summary>
+    [Fact]
+    public void Where_the_phases_dont_show_it_it_is_the_mark_or_nothing()
+    {
+        var unphased = FakeHouse.Draw("5_basement_window_well");
+        unphased.Grounds = [unphased.Toposolid((_, _) => 0) with { PhaseCreated = FakeHouse.LastPhase }];
+        unphased.FinishedGround(null);
+        Assert.StartsWith("Gordium: Toposolid is finished ground isn't Yes on Project Information", Why(InteriorReader.Read(unphased.Model()), "we1"));
+        Assert.Contains("nor do the phases show it", Why(InteriorReader.Read(unphased.Model()), "we1"));
+        var onePhase = Phased(null);
+        Assert.NotNull(Why(InteriorReader.Read(onePhase.Model() with { Phases = [FakeHouse.LastPhase] }), "we1"));
+        Assert.NotNull(Why(InteriorReader.Read(Phased(null, madeIn: "phase-1").Model()), "we1"));   // made earlier, kept
+        Assert.NotNull(Why(InteriorReader.Read(Phased(null, madeIn: null).Model()), "we1"));        // no phase read
+        // and where they don't, the mark No and Yes stand as before
+        Assert.NotNull(Why(InteriorReader.Read(Phased(false, madeIn: "phase-1").Model()), "we1"));
+        Assert.Equal([0.0, 0.0, 0.0], Ground(InteriorReader.Read(Phased(true, madeIn: "phase-1").Model()), "we1"));
+    }
+
+    /// <summary>The existing ground, demolished, is never read, even with the mark Yes: with no other ground drawn,
+    /// nothing is (no ground, nothing said).</summary>
+    [Fact]
+    public void A_demolished_existing_ground_is_never_read()
+    {
+        var house = Phased(true);
+        house.Grounds!.RemoveAt(1);
+        var read = InteriorReader.Read(house.Model());
+        Assert.Null(Ground(read, "we1"));
+        Assert.Null(Why(read, "we1"));
+    }
+
     [Fact]
     public void Only_an_escape_opening_says_why_its_ground_isnt_read()
     {

@@ -83,8 +83,11 @@ public sealed record InteriorRecords
 /// <param name="DesignOption"><c>Element.DesignOption</c>'s id.</param>
 /// <param name="Host">A Toposolid subdivision's host Toposolid (<c>Toposolid.HostTopoId</c>), by <c>UniqueId</c>, or
 /// null: a subdivision lies on its host (a path, a lawn), so over it the subdivision's top is the ground.</param>
+/// <param name="PhaseCreated"><c>Element.CreatedPhaseId</c>, or null: the phases may show which ground is the
+/// finished one (<see cref="GroundReader.PhasesShow"/>).</param>
 public sealed record GroundRecord(string UniqueId, string Kind, string? Name, IReadOnlyList<GroundTriangle>? Triangles,
-                                  string? PhaseDemolished = null, string? DesignOption = null, string? Host = null);
+                                  string? PhaseDemolished = null, string? DesignOption = null, string? Host = null,
+                                  string? PhaseCreated = null);
 
 /// <summary>A triangle of a ground's surface, its three corners (internal coordinates, feet).</summary>
 public sealed record GroundTriangle(Xyz A, Xyz B, Xyz C);

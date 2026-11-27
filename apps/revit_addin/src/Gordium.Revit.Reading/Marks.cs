@@ -116,7 +116,8 @@ public static class Marks
         "Yes when the Toposolids (or older topography surfaces) in this design show the finished ground, as it will be built after any regrading, not the existing ground of a survey. " +
         "RCNYS R202: \"GRADE. The finished ground level adjoining the building at all exterior walls.\" " +
         "Yes: Gordium reads the ground just outside each window from them (a door's isn't read yet: its clear bottom isn't sent), so whether an escape window is below grade, and how deep its area well is at least, are measured (a Gordium: Below grade or Well depth mark set on the opening wins, and one that disagrees with the ground needs review). " +
-        "Blank or No: the ground drawn isn't read, and the Gordium: Below grade and Well marks are what the area well rules use.");
+        "Blank: read where the project's phases show it (its existing ground drawn in an earlier phase and demolished in a later one, every Toposolid of the design made in the last phase), else not read. " +
+        "No: not read; No where the phases show it is the finished ground needs review. Not read, the Gordium: Below grade and Well marks are what the area well rules use.");
 
     // ---- an escape opening's place below the ground and its area well (BCNYS 1031.5; RCNYS R319.4 for a house): set on
     // each window or door, sent as openings[].stated_well. A well isn't in Revit's vocabulary (firms draw it as a generic

@@ -16,7 +16,9 @@ namespace Gordium.Revit.Reading;
 ///
 /// Never a guess: nothing is sent unless every one of these holds, and why not is said for an escape opening.
 /// <list type="bullet">
-/// <item>The architect states the ground drawn is the finished one (a survey's existing ground is never read as it).</item>
+/// <item>The architect states the ground drawn is the finished one, or the phases show it (<see cref="PhasesShow"/>: the
+/// existing ground drawn in an earlier phase and demolished, every ground of the design checked made in the last); a
+/// statement wins, and one the phases contradict leaves it unread (a survey's existing ground is never read as it).</item>
 /// <item>Which side of its wall is outside is known: its one room on one side only, no room or enclosed space drawn on
 /// the other (as the escape routes tell a door to outside, <see cref="RouteReader.Sides"/>).</item>
 /// <item>Out to <see cref="Reach"/> from the face, at each place along it, a finished ground is drawn, one ground only
@@ -58,6 +60,9 @@ public static class GroundReader
     {
         internal List<(GroundRecord Record, List<(Xyz A, Xyz B, Xyz C)> Triangles)> Each { get; } = [];
         public string? Why { get; internal set; }
+
+        /// <summary>What says the grounds are the finished ones: the architect's mark ("stated") or the phases ("phases").</summary>
+        public string? By { get; internal set; }
     }
 
     public static Grounds? Of(RevitModel model)
@@ -67,12 +72,26 @@ public static class GroundReader
         if (drawn.Count == 0)
             return null;
         var set = new Grounds();
-        if (Marks.YesNo(model.ProjectMarks.GetValueOrDefault(Marks.ToposolidFinished.Guid)) is not true)
+        // the architect's word wins; else the phases, where they show it (PhasesShow); a word the phases contradict
+        // leaves which is right unclear (Ben, 2026-11-26)
+        var stated = Marks.YesNo(model.ProjectMarks.GetValueOrDefault(Marks.ToposolidFinished.Guid));
+        var shown = PhasesShow(model, drawn);
+        var names = Named(drawn[0]) + (drawn.Count > 1 ? $" and {drawn.Count - 1} more" : "");
+        if (stated is false && shown)
         {
-            set.Why = $"{Marks.ToposolidFinished.Name} isn't Yes on Project Information, so the ground drawn ({Named(drawn[0])}" +
-                      (drawn.Count > 1 ? $" and {drawn.Count - 1} more" : "") + ") isn't read: it may be the existing ground of a survey, not the finished ground";
+            set.Why = $"{Marks.ToposolidFinished.Name} is No on Project Information, yet the phases show the ground drawn ({names}) " +
+                      "as the finished ground (created in the last phase, the existing ground drawn in an earlier one and demolished): " +
+                      "which is right isn't clear, so it isn't read";
             return set;
         }
+        if (stated is not true && !shown)
+        {
+            set.Why = $"{Marks.ToposolidFinished.Name} isn't Yes on Project Information, so the ground drawn ({names}) isn't read: " +
+                      "it may be the existing ground of a survey, not the finished ground (nor do the phases show it: a ground " +
+                      "created in the last phase, the existing ground drawn in an earlier one and demolished)";
+            return set;
+        }
+        set.By = stated is true ? "stated" : "phases";
         var t = model.InternalToShared;
         foreach (var g in drawn)
         {
@@ -87,6 +106,23 @@ public static class GroundReader
     }
 
     private static string Named(GroundRecord g) => $"{g.Kind} \"{g.Name ?? g.UniqueId}\"";
+
+    /// <summary>Whether the phases show the grounds of the design checked (<paramref name="drawn"/>) to be the finished
+    /// ground (Ben, 2026-11-26): the project draws its existing ground in an earlier phase (a ground created before the
+    /// last phase and demolished since, which is never read: SiteReader.InDesignChecked), and every ground of the design
+    /// checked was created in the last phase, the regraded ground. A project's phases alone say nothing (every template
+    /// has two, and a survey's ground is often made in the last one); a ground of the design checked made earlier and
+    /// never demolished may be the existing ground kept or not updated, so then they don't show it either.</summary>
+    internal static bool PhasesShow(RevitModel model, IReadOnlyList<GroundRecord> drawn)
+    {
+        if (model.Phases.Count < 2)
+            return false;
+        var last = model.Phases[^1];
+        var earlier = model.Phases.Take(model.Phases.Count - 1).ToHashSet(StringComparer.Ordinal);
+        var existing = (model.Interior?.Grounds ?? []).Any(g => g.PhaseCreated is { } made && earlier.Contains(made)
+                                                                && g.PhaseDemolished is { } gone && model.Phases.Contains(gone));
+        return existing && drawn.All(g => g.PhaseCreated == last);
+    }
 
     /// <summary>The ground outside the opening (shared, ft): at one end, the middle and the other end, and the highest
     /// and lowest along its width where they are neither; or null with why. <paramref name="evidence"/> takes every
@@ -152,7 +188,7 @@ public static class GroundReader
         }
         var bottom = rec.Placed!.Select(t.Apply).Min(q => q.Z) - Below;
         var samples = new JsonArray();
-        evidence["ground"] = new JsonObject { ["samples"] = samples };
+        evidence["ground"] = new JsonObject { ["samples"] = samples, ["finished_by"] = set.By };
         var faces = new List<double>();
         var lowest = double.PositiveInfinity;
         P2 At(double a, double d) => new(p.Centre.X + (a - uc) * p.Along.X + (p.Thickness / 2 + d) * outward.X,
