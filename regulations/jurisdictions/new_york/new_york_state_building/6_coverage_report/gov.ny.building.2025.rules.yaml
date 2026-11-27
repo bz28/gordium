@@ -125,6 +125,161 @@ pieces:
     heading: Ducts and air transfer openings
     rules:
     - general.bc_707_10_ducts
+  '708.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_708_1_which_walls_are_fire_partitions
+  '708.3':
+    label: flag
+    heading: Fire-resistance rating
+    rules:
+    - general.bc_708_3_fire_partition_rating
+  '708.4':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_708_4_fire_partition_continuity
+  708.4.1:
+    label: flag
+    heading: Continuity › Fire partition walls enclosing elevator lobbies
+    rules:
+    - general.bc_708_4_1_elevator_lobby_fire_partitions
+  708.4.2:
+    label: flag
+    heading: Continuity › Supporting construction
+    rules:
+    - general.bc_708_4_2_fire_partition_support
+  708.4.3:
+    label: flag
+    heading: Continuity › Fireblocks and draftstops in combustible construction
+    rules:
+    - general.bc_708_4_3_fireblocks_draftstops
+  '708.5':
+    label: flag
+    heading: Exterior walls
+    rules:
+    - general.bc_708_5_fire_partition_exterior_walls
+  '708.6':
+    label: flag
+    heading: Openings
+    rules:
+    - general.bc_708_6_fire_partition_openings
+  '708.7':
+    label: flag
+    heading: Penetrations
+    rules:
+    - general.bc_708_7_fire_partition_penetrations
+  '708.8':
+    label: flag
+    heading: Joints
+    rules:
+    - general.bc_708_8_fire_partition_joints
+  '708.9':
+    label: flag
+    heading: Ducts and air transfer openings
+    rules:
+    - general.bc_708_9_fire_partition_ducts
+  '709.3':
+    label: flag
+    heading: Fire-resistance rating
+    rules:
+    - general.bc_709_3_smoke_barrier_rating
+  '709.4':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_709_4_smoke_barrier_continuity
+  709.4.1:
+    label: flag
+    heading: Continuity › Smoke-barrier assemblies separating smoke compartments
+    rules:
+    - general.bc_709_4_1_smoke_compartment_barriers
+  709.4.2:
+    label: flag
+    heading: Continuity › Smoke-barrier walls enclosing areas of refuge or elevator lobbies
+    rules:
+    - general.bc_709_4_2_refuge_lobby_smoke_barriers
+  '709.5':
+    label: flag
+    heading: Openings
+    rules:
+    - general.bc_709_5_smoke_barrier_openings
+  709.5.1:
+    label: flag
+    heading: Openings › Group I-2 and ambulatory care facilities
+    rules:
+    - general.bc_709_5_1_i2_smoke_barrier_doors
+  '709.6':
+    label: flag
+    heading: Penetrations
+    rules:
+    - general.bc_709_6_smoke_barrier_penetrations
+  '709.7':
+    label: flag
+    heading: Joints
+    rules:
+    - general.bc_709_7_smoke_barrier_joints
+  '709.8':
+    label: flag
+    heading: Ducts and air transfer openings
+    rules:
+    - general.bc_709_8_smoke_barrier_ducts
+  '710.3':
+    label: flag
+    heading: Fire-resistance rating
+    rules:
+    - general.bc_710_3_smoke_partition_rating
+  '710.4':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_710_4_smoke_partition_continuity
+  710.4.1:
+    label: flag
+    heading: Continuity › Smoke partition walls enclosing elevator lobbies
+    rules:
+    - general.bc_710_4_1_elevator_lobby_smoke_partitions
+  710.5.1:
+    label: flag
+    heading: Openings › Windows
+    rules:
+    - general.bc_710_5_1_smoke_partition_windows
+  710.5.2.1:
+    label: flag
+    heading: Doors › Louvers
+    rules:
+    - general.bc_710_5_2_1_smoke_partition_door_louvers
+  710.5.2.2:
+    label: flag
+    heading: Doors › Smoke and draft control doors
+    rules:
+    - general.bc_710_5_2_2_smoke_partition_draft_control_doors
+  710.5.2.3:
+    label: flag
+    heading: Doors › Self- or automatic-closing doors
+    rules:
+    - general.bc_710_5_2_3_smoke_partition_self_closing_doors
+  710.5.3:
+    label: flag
+    heading: Openings › Pass-through openings in Group I-2, Condition 2
+    rules:
+    - general.bc_710_5_3_i2_pass_through_openings
+  '710.6':
+    label: flag
+    heading: Penetrations
+    rules:
+    - general.bc_710_6_smoke_partition_penetrations
+  '710.7':
+    label: flag
+    heading: Joints
+    rules:
+    - general.bc_710_7_smoke_partition_joints
+  '710.8':
+    label: flag
+    heading: Ducts and air transfer openings
+    rules:
+    - general.bc_710_8_smoke_partition_ducts
   '713.1':
     label: flag
     heading: General

@@ -19,8 +19,9 @@ LABELS = NY / "3_section_labels/gov.ny.building.2025.yaml"
 CHAPTER_7 = re.compile(r"(Table )?7\d\d(\.\d+)*(\(\d\))?$")       # 707.6, Table 716.1(2)
 # The only facts a Chapter 7 flag may be narrowed by, each one the architect states (never a fact the model could get
 # wrong): a corridor's stated rating (Table 716.1(2)'s corridor row), the sprinkler system and group (716.2.2.3's
-# exception)
-NARROWED_BY = {"corridor_fire_rating_hours", "sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "occupancy_group"}
+# exception), an ambulatory care facility (709.5.1)
+NARROWED_BY = {"corridor_fire_rating_hours", "sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "occupancy_group",
+               "ambulatory_care_facility"}
 
 
 @pytest.fixture(scope="module")
@@ -163,7 +164,8 @@ def test_every_chapter_7_flag_is_a_persons_check_for_every_building(labels, book
                 assert row["outcome"] == "needs_review", r["id"]
             else:
                 assert outcome(r, {}, allowed) == "needs_review", r["id"]
-    assert sorted(narrowed) == ["general.bc_716_2_2_3_exit_enclosure_door_temperature_rise",
+    assert sorted(narrowed) == ["general.bc_709_5_1_i2_smoke_barrier_doors", "general.bc_710_5_3_i2_pass_through_openings",
+                                "general.bc_716_2_2_3_exit_enclosure_door_temperature_rise",
                                 "general.bc_table_716_1_2__corridors"]
 
 
@@ -220,3 +222,19 @@ def test_review_round_1s_notes_say_what_the_law_says(book, labels):
     assert "used for nothing else" in bottom and "needs no rated separation" in bottom
     assert "unless another section" in _note(book, "general.bc_707_5_1_supporting_construction")
     assert labels["713.1"]["label"] == "flag" and _flags(book, "713.1")
+
+
+def test_part_cs_group_i2_flags_never_set_aside_an_i2_or_unstated_building(book, ctx):
+    """709.5.1 (Group I-2 and ambulatory care smoke barrier doors) and 710.5.3 (Group I-2 Condition 2 pass-through
+    openings) are set aside only where the stated group rules them out: Group I-2, a building of two or more groups,
+    no group stated, or (709.5.1) an ambulatory care facility stated or not ruled out, all need review."""
+    allowed = ctx.allowed()
+    doors, passes = ([r for r in book if r["id"] == i][0] for i in
+                     ("general.bc_709_5_1_i2_smoke_barrier_doors", "general.bc_710_5_3_i2_pass_through_openings"))
+    for given in ({}, {"occupancy_group": "I-2"}, {"occupancy_group": "mixed"}):
+        assert outcome(doors, given, allowed) == "needs_review" and outcome(passes, given, allowed) == "needs_review"
+    for group in ("B", "R-2", "A-3"):
+        assert outcome(doors, {"occupancy_group": group}, allowed) == "needs_review", group      # ambulatory unstated
+        assert outcome(doors, {"occupancy_group": group, "ambulatory_care_facility": True}, allowed) == "needs_review"
+        assert outcome(doors, {"occupancy_group": group, "ambulatory_care_facility": False}, allowed) == "not_applicable"
+        assert outcome(passes, {"occupancy_group": group}, allowed) == "not_applicable"

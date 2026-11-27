@@ -1766,6 +1766,779 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_708_1_which_walls_are_fire_partitions
+  kind: flag
+  topic: means_of_egress
+  title: Which walls are fire partitions (BCNYS 708.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 173
+    lines:
+    - 13
+    - 21
+    quote: '708.1 General. The following wall assemblies shall comply with this section: 1. Separation walls as required by
+      Section 420.2 for Group I-1 and Group R occupancies. 2. Walls separating tenant spaces in covered and open mall buildings
+      as required by Section 402.4.2.1. 3. Corridor walls as required by Section 1020.3. 4. Enclosed elevator lobby separation
+      as required by Section 3006.3. 5. Egress balconies as required by Section 1021.2 6. Walls separating ambulatory care
+      facilities from adjacent spaces, corridors or tenants as required by Section 422.2. 7. Walls separating dwelling and
+      sleeping units in Groups R-1 and R-2 in accordance with Sections 907.2.8.1 and 907.2.9.1. 8. Vestibules in accordance
+      with Section 1028.2.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'These walls are fire partitions and meet Section 708: dwelling and sleeping unit separations in Groups I-1 and
+      R (420.2), tenant separations in covered and open mall buildings (402.4.2.1), corridor walls (the book''s words name
+      1020.3; 1020.2 sends rated corridor walls here), enclosed elevator lobbies (3006.3), egress balconies (1021.2), walls
+      around ambulatory care facilities (422.2), walls between dwelling and sleeping units in Groups R-1 and R-2 (907.2.8.1,
+      907.2.9.1) and vestibules (1028.2): which walls are which isn''t in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 420.2, 402.4.2.1, 1020.3''s rated corridors
+    (1020.2), 3006.3, 1021.2, 422.2, 907.2.8.1, 907.2.9.1 and 1028.2: 1020.2 and 1020.3 are brought in, the others aren''t.
+    Shown for every building.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_708_3_fire_partition_rating
+  kind: flag
+  topic: means_of_egress
+  title: Fire partitions rated at least 1 hour (BCNYS 708.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 173
+    lines:
+    - 23
+    - 28
+    quote: '708.3 Fire-resistance rating. Fire partitions shall have a fire-resistance rating of not less than 1 hour. Exceptions:
+      1. Corridor walls permitted to have a 1/2-hour fire-resistance rating by Table 1020.2. 2. Dwelling unit and sleeping
+      unit separations in buildings of Types IIB, IIIB and VB construction shall have fire-resistance ratings of not less
+      than 1/2 hour in buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A fire partition is rated at least 1 hour, except corridor walls Table 1020.2 lets be rated 1/2 hour, and dwelling
+      and sleeping unit separations in Types IIB, IIIB and VB, which may be 1/2 hour in a building sprinklered throughout
+      per 903.3.1.1: the walls'' ratings aren''t in the model, so a person''s check (a rated corridor''s own rating is Table
+      1020.2''s rule).'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. Shown for every building: unit separations,
+    elevator lobbies, vestibules and the like are fire partitions in any group, and a corridor''s stated rating is only the
+    corridor''s.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_708_4_fire_partition_continuity
+  kind: flag
+  topic: means_of_egress
+  title: Fire partitions run to the deck above, or a rated ceiling (BCNYS 708.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 173
+    lines:
+    - 29
+    - 50
+    quote: '708.4 Continuity. Fire partitions shall extend from the top of the foundation or floor/ceiling assembly below
+      and be securely attached to one of the following: 1. The underside of the floor or roof sheathing, deck or slab above.
+      2. The underside of a floor/ceiling or roof/ceiling assembly having a fire-resistance rating that is not less than the
+      fire-resis- tance rating of the fire partition. Exceptions: 1. Fire partitions shall not be required to extend into
+      a crawl space below where the floor above the crawl space has a mini- mum 1-hour fire-resistance rating. 2. Fire partitions
+      serving as a corridor wall shall not be required to extend above the lower membrane of a corridor ceiling provided that
+      the corridor ceiling membrane is equivalent to corridor wall membrane, and either of the following condi- tions is met:
+      2.1. The room-side membrane of the corridor wall extends to the underside of the floor or roof sheathing, deck or slab
+      of a fire-resistance-rated floor or roof above. 2.2. The building is equipped with an automatic sprinkler system installed
+      throughout in accordance with Section 903.3.1.1 or 903.3.1.2, including automatic sprinklers installed in the space
+      between the top of the fire partition and underside of the floor or roof sheathing, deck or slab above. 3. Fire partitions
+      serving as a corridor wall shall be permitted to terminate at the upper membrane of the corridor ceiling assembly where
+      the corridor ceiling is constructed as required for the corridor wall. 4. Fire partitions separating tenant spaces in
+      a covered or open mall building complying with Section 402.4.2.1 shall not be required to extend above the underside
+      of a ceiling. Such ceiling shall not be required to be part of a fire-resistance-rated assembly, and the attic or space
+      above the ceiling at tenant separation walls shall not be required to be subdivided by fire partitions.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A fire partition runs from the foundation or floor below to the underside of the floor or roof sheathing, deck
+      or slab above, or to a floor/ceiling or roof/ceiling assembly rated at least as the partition, fastened to it; except
+      above a crawl space whose floor is rated at least 1 hour; a corridor wall whose ceiling membrane equals the wall''s,
+      where the room side of the wall reaches a rated floor or roof above, or the building is sprinklered throughout per 903.3.1.1
+      or 903.3.1.2 with sprinklers above the partition; a corridor wall ending at the upper membrane of a ceiling built as
+      the wall; and mall tenant separations per 402.4.2.1, which may stop at the ceiling: heights above the ceiling aren''t
+      in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 402.4.2.1 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_708_4_1_elevator_lobby_fire_partitions
+  kind: flag
+  topic: means_of_egress
+  title: Fire partitions enclosing elevator lobbies (BCNYS 708.4.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 173
+    lines:
+    - 51
+    - 53
+    quote: 708.4.1 Fire partition walls enclosing elevator lobbies. Fire partition walls used to enclose elevator lobbies
+      in accordance with Section 3006.3 shall form an enclosure that terminates at a fire barrier or fire partition having
+      a fire-resistance rating of not less than 1 hour, or an outside wall.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire partitions enclosing an elevator lobby per 3006.3 form an enclosure ending at a fire barrier or fire partition
+      rated at least 1 hour, or an outside wall: the elevators aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 3006.3 isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_708_4_2_fire_partition_support
+  kind: flag
+  topic: means_of_egress
+  title: What holds up a fire partition has its rating (BCNYS 708.4.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 173
+    lines:
+    - 54
+    - 57
+    quote: '708.4.2 Supporting construction. The supporting construction for a fire partition shall have a fire-resistance
+      rating that is equal to or greater than the required fire-resistance rating of the supported fire partition. Exception:
+      In buildings of Types IIB, IIIB and VB construction, the supporting construction requirement shall not apply to fire
+      partitions separating tenant spaces in covered and open mall buildings, fire partitions separating dwelling units, fire
+      partitions'
+  - file: gov.ny.building.2025.pdf
+    page: 174
+    lines:
+    - 3
+    - 5
+    quote: separating sleeping units, fire partitions serving as corridor walls, fire partitions separating ambulatory care
+      facilities from adja- cent spaces or corridors, fire partitions separating dwelling and sleeping units from Group R-1
+      and R-2 occupancies and fire partitions separating vestibules from the level of exit discharge.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The construction supporting a fire partition is rated at least as the partition; except, in Types IIB, IIIB and
+      VB, for partitions separating mall tenants, dwelling units, sleeping units, ambulatory care facilities from adjoining
+      spaces or corridors, units of Groups R-1 and R-2, and vestibules from the level of exit discharge, and for corridor
+      walls: the structure isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_708_4_3_fireblocks_draftstops
+  kind: flag
+  topic: means_of_egress
+  title: Fireblocks or draftstops above fire partitions (BCNYS 708.4.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 174
+    lines:
+    - 6
+    - 25
+    quote: '708.4.3 Fireblocks and draftstops in combustible construction. In combustible construction where fire partitions
+      do not extend to the underside of the floor or roof sheathing, deck or slab above, the space above and along the line
+      of the fire partition shall be provided with one of the following: 1. Fireblocking up to the underside of the floor
+      or roof sheathing, deck or slab above using materials complying with Section 718.2.1. 2. Draftstops up to the underside
+      of the floor or roof sheathing, deck or slab above using materials complying with Section 718.3.1 for floors or Section
+      718.4.1 for attics. Exceptions: 1. Buildings equipped with an automatic sprinkler system installed throughout in accordance
+      with Section 903.3.1.1, or in accordance with Section 903.3.1.2 provided that protection is provided in the space between
+      the top of the fire partition and underside of the floor or roof sheathing, deck or slab above as required for systems
+      complying with Section 903.3.1.1. 2. Where corridor walls provide a sleeping unit or dwelling unit separation, draftstops
+      shall only be required above one of the corridor walls. 3. In Group R-2 occupancies with fewer than four dwelling units,
+      fireblocking and draftstops shall not be required. 4. In Group R-2 occupancies up to and including four stories in height
+      in buildings not exceeding 60 feet (18 288 mm) in height above grade plane, the attic space shall be subdivided by draftstops
+      into areas not exceeding 3,000 square feet (279 m[fn2]) or above every two dwelling units, whichever is smaller. 5.
+      In Group R-3 occupancies with fewer than three dwelling units, fireblocking and draftstops shall not be required in
+      floor assemblies.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In combustible construction, where a fire partition stops short of the deck above, the space above it and along
+      its line is fireblocked to the deck (718.2.1 materials) or draftstopped (718.3.1 for floors, 718.4.1 for attics); except
+      a building sprinklered throughout per 903.3.1.1, or per 903.3.1.2 with sprinklers above the partition as 903.3.1.1 asks;
+      where corridor walls separate units, a draftstop above one of them only; Group R-2 with fewer than four dwelling units,
+      none; Group R-2 up to four stories and 60 feet above grade plane, the attic draftstopped into areas of at most 3,000
+      square feet or above every two units, whichever is smaller; Group R-3 with fewer than three units, none in floor assemblies:
+      the construction isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 718.2.1, 718.3.1 and 718.4.1 aren't brought
+    in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_708_5_fire_partition_exterior_walls
+  kind: flag
+  topic: means_of_egress
+  title: Exterior walls that are part of a rated separation (BCNYS 708.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 174
+    lines:
+    - 26
+    - 29
+    quote: '708.5 Exterior walls. Where exterior walls serve as a part of a required fire-resistance-rated separation, such
+      walls shall comply with the requirements of Section 705 for exterior walls, and the fire-resistance-rated separation
+      requirements shall not apply. Exception: Exterior walls required to be fire-resistance rated in accordance with Section
+      1021.2 for exterior egress balconies, Section 1023.7 for interior exit stairways and ramps and Section 1027.6 for exterior
+      exit stairways and ramps.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An exterior wall that is part of a required rated separation follows Section 705 for exterior walls instead, except
+      where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways
+      and ramps) asks the exterior wall itself to be rated: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 705, 1021.2, 1023.7 and 1027.6 aren't brought
+    in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_708_6_fire_partition_openings
+  kind: flag
+  topic: means_of_egress
+  title: Openings in fire partitions protected per Section 716 (BCNYS 708.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 174
+    lines:
+    - 30
+    - 30
+    quote: 708.6 Openings. Openings in a fire partition shall be protected in accordance with Section 716.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Openings in a fire partition are protected per Section 716 (Table 716.1(2): a corridor wall''s doors at least 20
+      minutes, another fire partition''s 3/4 hour in a 1-hour wall): the doors'' ratings aren''t in the model, so a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 716's fire door ratings and tests are Chapter
+    7 part b's flags. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_708_7_fire_partition_penetrations
+  kind: flag
+  topic: means_of_egress
+  title: Penetrations of fire partitions (BCNYS 708.7)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 174
+    lines:
+    - 31
+    - 31
+    quote: 708.7 Penetrations. Penetrations of fire partitions shall comply with Section 714.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Penetrations of a fire partition meet Section 714: not in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 714 isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_708_8_fire_partition_joints
+  kind: flag
+  topic: means_of_egress
+  title: Joints in fire partitions (BCNYS 708.8)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 174
+    lines:
+    - 32
+    - 32
+    quote: 708.8 Joints. Joints made in or between fire partitions shall comply with Section 715.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Joints in or between fire partitions meet Section 715: not in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 715 isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_708_9_fire_partition_ducts
+  kind: flag
+  topic: means_of_egress
+  title: Ducts and air transfer openings through fire partitions (BCNYS 708.9)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 174
+    lines:
+    - 33
+    - 34
+    quote: 708.9 Ducts and air transfer openings. Penetrations in a fire partition by ducts and air transfer openings shall
+      comply with Section 717.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Ducts and air transfer openings through a fire partition meet Section 717: not in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 717 isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_709_3_smoke_barrier_rating
+  kind: flag
+  topic: means_of_egress
+  title: Smoke barriers rated 1 hour (BCNYS 709.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 174
+    lines:
+    - 38
+    - 39
+    quote: '709.3 Fire-resistance rating. A 1-hour fire-resistance rating is required for smoke barriers. Exception: Smoke
+      barriers constructed of minimum 0.10-inch-thick (2.5 mm) steel in Group I-3 buildings.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A smoke barrier is rated 1 hour, except one of steel at least 0.10 inch thick in a Group I-3 building. Smoke barriers
+      enclose areas of refuge (1009.6.4) and some elevator lobbies, and divide Group I-1, I-2 and I-3 buildings and ambulatory
+      care facilities into smoke compartments: which walls are smoke barriers, and their ratings, aren''t in the model, so
+      a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 1009.6.4 isn''t brought in. Shown for every
+    building: an area of refuge may be in any group.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_709_4_smoke_barrier_continuity
+  kind: flag
+  topic: means_of_egress
+  title: Smoke barriers continuous from floor to the deck above (BCNYS 709.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 174
+    lines:
+    - 40
+    - 49
+    quote: '709.4 Continuity. Smoke barriers shall form an effective membrane continuous from the top of the foundation or
+      floor/ceiling assembly below to the underside of the floor or roof sheathing, deck or slab above, including continuity
+      through concealed spaces, such as those found above suspended ceilings, and interstitial structural and mechanical spaces.
+      The supporting construction shall be protected to afford the required fire-resistance rating of the wall or floor supported
+      in buildings of other than Type IIB, IIIB or VB construction. Smoke-barrier walls used to separate smoke compartments
+      shall comply with Section 709.4.1. Smoke-barrier walls used to enclose areas of refuge in accordance with Section 1009.6.4
+      or to enclose elevator lobbies in accordance with Section 405.4.3, 3007.6.2, or 3008.6.2 shall comply with Section 709.4.2.
+      Exception: Smoke-barrier walls are not required in interstitial spaces where such spaces are designed and constructed
+      with ceil- ings or exterior walls that provide resistance to the passage of fire and smoke equivalent to that provided
+      by the smoke-barrier walls.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A smoke barrier is an effective membrane from the foundation or floor below to the underside of the floor or roof
+      sheathing, deck or slab above, through concealed and interstitial spaces, its supporting construction rated as the wall
+      or floor it supports (but in Types IIB, IIIB and VB); walls dividing smoke compartments meet 709.4.1, walls enclosing
+      areas of refuge (1009.6.4) or elevator lobbies (405.4.3, 3007.6.2, 3008.6.2) meet 709.4.2; except none is needed in
+      an interstitial space whose ceilings or exterior walls resist fire and smoke as well: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 1009.6.4, 405.4.3, 3007.6.2 and 3008.6.2 aren't
+    brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_709_4_1_smoke_compartment_barriers
+  kind: flag
+  topic: means_of_egress
+  title: Smoke barriers dividing smoke compartments, wall to wall (BCNYS 709.4.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 174
+    lines:
+    - 50
+    - 52
+    quote: 709.4.1 Smoke-barrier assemblies separating smoke compartments. Smoke-barrier assemblies used to separate smoke
+      compartments shall form an effective membrane enclosure that is continuous from an outside wall or smoke barrier wall
+      to an outside wall or another smoke barrier wall and to the horizontal assemblies.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Smoke barriers dividing smoke compartments form a membrane continuous from an outside wall or smoke barrier to
+      an outside wall or another smoke barrier, and to the floors and roof: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_709_4_2_refuge_lobby_smoke_barriers
+  kind: flag
+  topic: means_of_egress
+  title: Smoke barriers around areas of refuge and elevator lobbies (BCNYS 709.4.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 174
+    lines:
+    - 53
+    - 58
+    quote: 709.4.2 Smoke-barrier walls enclosing areas of refuge or elevator lobbies. Smoke-barrier walls used to enclose
+      areas of refuge in accordance with Section 1009.6.4, or to enclose elevator lobbies in accordance with Section 405.4.3,
+      3007.6.2, or 3008.6.2, shall form an effective membrane enclosure that terminates at a fire barrier wall having a fire
+      resistance rating not less than 1 hour, another smoke barrier wall or an outside wall. A smoke and draft control door
+      assembly as specified in Section 716.2.2.1.1 shall not be required at each elevator hoistway door where protected by
+      an elevator lobby, at each exit door opening into a protected lobby or at each exit doorway between an area of refuge
+      and the exit enclosure.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Smoke barrier walls enclosing an area of refuge (1009.6.4) or an elevator lobby (405.4.3, 3007.6.2, 3008.6.2) end
+      at a fire barrier rated at least 1 hour, another smoke barrier or an outside wall; a smoke and draft control door (716.2.2.1.1)
+      isn''t required at each elevator hoistway door protected by a lobby, at each exit door into a protected lobby, or at
+      each exit doorway between an area of refuge and the exit enclosure: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 1009.6.4, 405.4.3, 3007.6.2 and 3008.6.2 aren't
+    brought in; 716.2.2.1.1 is (its own flag). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_709_5_smoke_barrier_openings
+  kind: flag
+  topic: means_of_egress
+  title: Openings in smoke barriers protected per Section 716 (BCNYS 709.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 3
+    - 12
+    quote: '709.5 Openings. Openings in a smoke barrier shall be protected in accordance with Section 716. Exceptions: 1.
+      In Group I-1, Condition 2, Group I-2 and ambulatory care facilities, where a pair of opposite-swinging doors are installed
+      across a corridor in accordance with Section 709.5.1, the doors shall not be required to be protected in accordance
+      with Section 716. The doors shall be close fitting within operational tolerances, and shall not have a center mullion
+      or under- cuts in excess of 3/4 inch (19.1 mm), louvers or grilles. The doors shall have head and jamb stops, and astragals
+      or rabbets at meeting edges. Positive latching devices are not required. Factory-applied or field-applied protective
+      plates are not required to be labeled. 2. In Group I-1, Condition 2, Group I-2 and ambulatory care facilities, special
+      purpose horizontal sliding, accordion or fold- ing doors installed in accordance with Section 1010.3.3 and protected
+      in accordance with Section 716.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Openings in a smoke barrier are protected per Section 716 (Table 716.1(2): a door at least 20 minutes); except,
+      in Group I-1 Condition 2, Group I-2 and ambulatory care facilities, a pair of opposite-swinging doors across a corridor
+      per 709.5.1, close fitting, with no center mullion, undercuts over 3/4 inch, louvers or grilles, with head and jamb
+      stops and astragals or rabbets at the meeting edges (positive latching not required; protective plates need no label),
+      and special-purpose horizontal sliding, accordion or folding doors per 1010.3.3 protected per 716: the doors aren''t
+      in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 1010.3.3 isn't brought in; 709.5.1 and 716's
+    door ratings are (their own flags). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_709_5_1_i2_smoke_barrier_doors
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2 and ambulatory care smoke barrier doors held open (BCNYS 709.5.1)
+  applies_when: occupancy_group in ["I-2", "mixed"] or ambulatory_care_facility
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 13
+    - 16
+    quote: 709.5.1 Group I-2 and ambulatory care facilities. In Group I-2 and ambulatory care facilities, where doors protecting
+      openings in smoke barriers are installed across a corridor and have hold-open devices, the doors shall be automatic-closing
+      in accordance with Section 716.2.6.6. Such doors shall have a vision panel with fire-protection-rated glazing materials
+      in fire-protection-rated frames, the area of which shall not exceed that tested.
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'In Group I-2 and ambulatory care facilities, smoke barrier doors across a corridor with hold-open devices close
+      automatically per 716.2.6.6, and have a vision panel of fire-protection-rated glazing in fire-protection-rated frames
+      no larger than tested: the doors aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      ambulatory_care_facility: false
+    expect: not_applicable
+    note: 'Group R-2 with no ambulatory care facility stated: not this section''s.'
+  - given:
+      occupancy_group: B
+    expect: needs_review
+    note: 'Group B, an ambulatory care facility not ruled out: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'No group stated: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 716.2.6.6 isn't brought in. Narrowed to Group
+    I-2, a building of two or more groups, and one where an ambulatory care facility is stated or not ruled out.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_709_6_smoke_barrier_penetrations
+  kind: flag
+  topic: means_of_egress
+  title: Penetrations of smoke barriers (BCNYS 709.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 17
+    - 17
+    quote: 709.6 Penetrations. Penetrations of smoke barriers shall comply with Section 714.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Penetrations of a smoke barrier meet Section 714: not in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 714 isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_709_7_smoke_barrier_joints
+  kind: flag
+  topic: means_of_egress
+  title: Joints in smoke barriers (BCNYS 709.7)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 18
+    - 18
+    quote: 709.7 Joints. Joints made in or between smoke barriers shall comply with Section 715.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Joints in or between smoke barriers meet Section 715: not in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 715 isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_709_8_smoke_barrier_ducts
+  kind: flag
+  topic: means_of_egress
+  title: Ducts and air transfer openings through smoke barriers (BCNYS 709.8)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 19
+    - 19
+    quote: 709.8 Ducts and air transfer openings. Penetrations in a smoke barrier by ducts and air transfer openings shall
+      comply with Section 717.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Ducts and air transfer openings through a smoke barrier meet Section 717: not in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 717 isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_710_3_smoke_partition_rating
+  kind: flag
+  topic: means_of_egress
+  title: Smoke partitions need no rating unless required elsewhere (BCNYS 710.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 23
+    - 24
+    quote: 710.3 Fire-resistance rating. Unless required elsewhere in the code, smoke partitions are not required to have
+      a fire-resistance rating.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A smoke partition (a Group I-2 corridor''s walls, 407.3; an elevator lobby''s, 3006.3) needs no fire-resistance
+      rating unless another section requires one: which walls are smoke partitions, and whether another section rates them,
+      a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 407.3 and 3006.3 aren't brought in. Shown for
+    every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_710_4_smoke_partition_continuity
+  kind: flag
+  topic: means_of_egress
+  title: Smoke partitions continuous to the deck or a smoke-tight ceiling (BCNYS 710.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 25
+    - 30
+    quote: '710.4 Continuity. Smoke partitions shall extend from the top of the foundation or floor below to the underside
+      of the floor or roof sheathing, deck or slab above or to the underside of the ceiling above where the ceiling membrane
+      is constructed to limit the transfer of smoke. Exception: In Group I-2, a lay-in ceiling system shall be considered
+      capable of limiting the transfer of smoke where the ceiling tiles weigh not less than 1 pound per square foot (4.882
+      kg/m2) and where the HVAC system is fully ducted in accordance with Section 603 of the Mechanical Code of New York State.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A smoke partition runs from the foundation or floor below to the underside of the floor or roof sheathing, deck
+      or slab above, or to the underside of a ceiling whose membrane limits the passage of smoke; in Group I-2, a lay-in ceiling
+      counts where its tiles weigh at least 1 pound per square foot and the HVAC system is fully ducted per 603 of the Mechanical
+      Code of New York State: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 603 of the Mechanical Code isn't brought in.
+    Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_710_4_1_elevator_lobby_smoke_partitions
+  kind: flag
+  topic: means_of_egress
+  title: Smoke partitions enclosing elevator lobbies (BCNYS 710.4.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 31
+    - 33
+    quote: 710.4.1 Smoke partition walls enclosing elevator lobbies. Smoke partition walls used to enclose elevator lobbies
+      in accor- dance with Section 3006.3 shall form an enclosure that terminates at a fire barrier having a fire-resistance
+      rating of not less than 1 hour, another smoke partition or an outside wall.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Smoke partitions enclosing an elevator lobby per 3006.3 form an enclosure ending at a fire barrier rated at least
+      1 hour, another smoke partition or an outside wall: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 3006.3 isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_710_5_1_smoke_partition_windows
+  kind: flag
+  topic: means_of_egress
+  title: Windows in smoke partitions sealed or closing on smoke (BCNYS 710.5.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 35
+    - 36
+    quote: 710.5.1 Windows. Windows in smoke partitions shall be sealed to resist the free passage of smoke or be automatic-closing
+      upon detection of smoke.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Windows in a smoke partition are sealed against the free passage of smoke, or close automatically on detecting
+      smoke: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_710_5_2_1_smoke_partition_door_louvers
+  kind: flag
+  topic: means_of_egress
+  title: No louvers in smoke partition doors (BCNYS 710.5.2.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 38
+    - 39
+    quote: '710.5.2.1 Louvers. Doors in smoke partitions shall not include louvers. Exception: Where permitted in accordance
+      with Section 407.3.1.1.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Doors in a smoke partition have no louvers, except where 407.3.1.1 permits them (Group I-2): a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 407.3.1.1 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_710_5_2_2_smoke_partition_draft_control_doors
+  kind: flag
+  topic: means_of_egress
+  title: Smoke and draft control doors in smoke partitions (BCNYS 710.5.2.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 40
+    - 44
+    quote: 710.5.2.2 Smoke and draft control doors. Where required elsewhere in the code, doors in smoke partitions shall
+      meet the requirements for a smoke and draft control door assembly tested in accordance with UL 1784. The air leakage
+      rate of the door assembly shall not exceed 3.0 cubic feet per minute per square foot [0.015424 m[fn3]/(s × m[fn2])]
+      of door opening at 0.10 inch of water (25 Pa) for both the ambient temperature test and the elevated temperature exposure
+      test. Installation of smoke doors shall be in accordance with NFPA 105.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where another section requires it, a door in a smoke partition is a smoke and draft control door tested per UL
+      1784, leaking at most 3.0 cubic feet per minute per square foot of opening at 0.10 inch of water in both the ambient
+      and elevated temperature tests, installed per NFPA 105: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_710_5_2_3_smoke_partition_self_closing_doors
+  kind: flag
+  topic: means_of_egress
+  title: Self-closing smoke partition doors where required (BCNYS 710.5.2.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 47
+    - 48
+    quote: 710.5.2.3 Self- or automatic-closing doors. Where required elsewhere in the code, doors in smoke partitions shall
+      be self- or automatic-closing by smoke detection in accordance with Section 716.2.6.6.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where another section requires it, a door in a smoke partition is self-closing or closes automatically on smoke
+      detection per 716.2.6.6: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 716.2.6.6 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_710_5_3_i2_pass_through_openings
+  kind: flag
+  topic: means_of_egress
+  title: Pass-through openings in Group I-2 Condition 2 smoke partitions (BCNYS 710.5.3)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 49
+    - 55
+    quote: '710.5.3 Pass-through openings in Group I-2, Condition 2. Where pass-through openings are provided in smoke partitions
+      in Group I-2, Condition 2 occupancies, such openings shall comply with the following: 1. The smoke compartment in which
+      the pass-through openings occur does not contain a patient care suite or sleeping room. 2. Pass-through openings are
+      installed in a wall, door or vision panel that is not required to have a fire-resistance rating. 3. The top of the pass-through
+      opening is located a maximum of 48 inches (1219 mm) above the floor. 4. The aggregate area of all such pass-through
+      openings within a single room shall not exceed 80 square inches (0.05 m[fn2]).'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'In Group I-2 Condition 2, a pass-through opening in a smoke partition is allowed only where its smoke compartment
+      holds no patient care suite or sleeping room, it is in a wall, door or vision panel not required to be rated, its top
+      is at most 48 inches above the floor, and all such openings in one room total at most 80 square inches: whether a building
+      is Condition 2, and its pass-through openings, aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Group R-2: not this section''s.'
+  - given: {}
+    expect: needs_review
+    note: 'No group stated: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. Narrowed to Group I-2 and a building of two
+    or more groups (Condition 2 isn't a stated fact).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_710_6_smoke_partition_penetrations
+  kind: flag
+  topic: means_of_egress
+  title: Penetrations of smoke partitions filled against smoke (BCNYS 710.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 56
+    - 56
+    quote: 710.6 Penetrations. The space around penetrating items shall be filled with an approved material to limit the free
+      passage of smoke.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The space around anything passing through a smoke partition is filled with an approved material to limit the free
+      passage of smoke: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_710_7_smoke_partition_joints
+  kind: flag
+  topic: means_of_egress
+  title: Joints in smoke partitions filled against smoke (BCNYS 710.7)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 175
+    lines:
+    - 57
+    - 57
+    quote: 710.7 Joints. Joints shall be filled with an approved material to limit the free passage of smoke.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Joints in a smoke partition are filled with an approved material to limit the free passage of smoke: a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_710_8_smoke_partition_ducts
+  kind: flag
+  topic: means_of_egress
+  title: Ducts and air transfer openings through smoke partitions (BCNYS 710.8)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 176
+    lines:
+    - 3
+    - 7
+    quote: '710.8 Ducts and air transfer openings. The space around a duct penetrating a smoke partition shall be filled with
+      an approved material to limit the free passage of smoke. Air transfer openings in smoke partitions shall be provided
+      with a smoke damper comply- ing with Section 717.3.2.2. Exception: Where the installation of a smoke damper will interfere
+      with the operation of a required smoke control system in accordance with Section 909, approved alternative protection
+      shall be utilized.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The space around a duct through a smoke partition is filled with an approved material against smoke, and an air
+      transfer opening in it has a smoke damper per 717.3.2.2, or, where a damper would interfere with a required smoke control
+      system per 909, approved other protection: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 717.3.2.2 and 909 aren't brought in. Shown
+    for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_1004_7_outdoor_areas
   kind: flag
   topic: means_of_egress
@@ -13661,7 +14434,8 @@ rules:
     - part: p1
       outcome: needs_review
     expect: needs_review
-    note: 'Rated walls comply with Section 708 for fire partitions (not brought in): a person checks.'
+    note: 'Rated walls comply with Section 708 for fire partitions (its rating, continuity, openings and penetrations are
+      Chapter 7 part c''s flags): a person checks.'
   - given: {}
     parts:
       corridor:
@@ -13693,7 +14467,7 @@ rules:
     expect: not_applicable
     note: 'No corridor: with none, the flag doesn''t apply.'
   notes: '1020.2''s second sentence: corridor walls required to be rated comply with Section 708 (fire partitions: continuity,
-    openings, doors), not brought in; exception 5 permits unprotected openings on unrated exterior walls (Tables 705.5 and
+    openings, doors; Chapter 7 part c''s flags); exception 5 permits unprotected openings on unrated exterior walls (Tables 705.5 and
     705.9, not brought in). Hand-drafted in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
