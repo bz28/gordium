@@ -290,8 +290,10 @@ def test_the_contents_list_every_chapter_and_never_hide_a_rows_section(apartment
     chapters = [c for c in bc["chapters"] if c["kind"] == "chapter"]
     assert [c["number"] for c in chapters] == [str(n) for n in range(1, 36)]
     egress = next(c for c in chapters if c["number"] == "10")
-    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] >= 20
+    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 9   # section group 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009; 9d: 1019 (1018 left the count with 1018.4, round 1 of 2026-11-23); 9e: 1021, 1022 and 1023; 9f: 1024 and 1025
     sections = {s["number"]: s for s in egress["sections"]}
+    assert sections["1018"]["whole"] is True and sections["1019"]["whole"] is True   # group 9d review round 1
+    assert all(sections[s]["whole"] is True for s in ("1021", "1022", "1023", "1024", "1025"))   # groups 9e and 9f
     assert sections["1006"]["coverage"] == "rules" and sections["1006"]["whole"] is False
     assert sections["1017"]["whole"] is True and sections["1011"]["coverage"] == "not_brought_in"
     assert sections["1010"]["coverage"] == "rules" and sections["1010"]["whole"] is False   # group 6a: 1010.1, 1010.1.1
