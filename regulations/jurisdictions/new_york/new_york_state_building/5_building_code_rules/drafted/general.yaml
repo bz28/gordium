@@ -3370,7 +3370,7 @@ rules:
 - id: general.bc_408_6_1_smoke_compartments
   kind: flag
   topic: means_of_egress
-  title: At most 200 residents a compartment, 150 ft and 200 ft to its door (BCNYS 408.6.1)
+  title: At most 200 residents, 150 ft and 200 ft to its door (BCNYS 408.6.1)
   applies_when: occupancy_group in ["I-3", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
@@ -3676,7 +3676,7 @@ rules:
 - id: general.bc_420_3_horizontal_separation
   kind: flag
   topic: means_of_egress
-  title: Floors between dwelling and sleeping units as horizontal assemblies (BCNYS 420.3)
+  title: Floors between units as horizontal assemblies (BCNYS 420.3)
   applies_when: occupancy_group in ["I-1", "R-1", "R-2", "R-3", "R-4", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
@@ -3955,7 +3955,7 @@ rules:
 - id: general.bc_422_3_smoke_compartments
   kind: flag
   topic: means_of_egress
-  title: Smoke compartments for over 10,000 sq ft of ambulatory care on a story (BCNYS 422.3)
+  title: Smoke compartments over 10,000 sq ft of ambulatory care (BCNYS 422.3)
   applies_when: ambulatory_care_facility
   sources:
   - file: gov.ny.building.2025.pdf
@@ -4052,7 +4052,7 @@ rules:
 - id: general.bc_422_3_3_independent_egress
   kind: flag
   topic: means_of_egress
-  title: Egress from each ambulatory care smoke compartment without going back (BCNYS 422.3.3)
+  title: Egress from each ambulatory care compartment, not back (BCNYS 422.3.3)
   applies_when: ambulatory_care_facility
   sources:
   - file: gov.ny.building.2025.pdf

@@ -524,6 +524,121 @@ pieces:
     heading: Locks › Relock capability
     rules:
     - general.bc_408_4_4_relock_capability
+  '408.6':
+    label: flag
+    heading: Smoke barrier
+    rules:
+    - general.bc_408_6_smoke_barrier
+  408.6.1:
+    label: flag
+    heading: Smoke barrier › Smoke compartments
+    rules:
+    - general.bc_408_6_1_smoke_compartments
+  408.6.2:
+    label: flag
+    heading: Smoke barrier › Refuge area
+    rules:
+    - general.bc_408_6_2_refuge_area
+  408.6.3:
+    label: flag
+    heading: Smoke barrier › Independent egress
+    rules:
+    - general.bc_408_6_3_independent_egress
+  '408.8':
+    label: flag
+    heading: Subdivision of resident housing areas
+    rules:
+    - general.bc_408_8_subdivision_of_resident_housing_areas
+  408.8.1:
+    label: flag
+    heading: Subdivision of resident housing areas › Occupancy Conditions 3 and 4
+    rules:
+    - general.bc_408_8_1_occupancy_conditions_3_and_4
+  408.8.2:
+    label: flag
+    heading: Subdivision of resident housing areas › Occupancy Condition 5
+    rules:
+    - general.bc_408_8_2_occupancy_condition_5
+  408.8.3:
+    label: flag
+    heading: Subdivision of resident housing areas › Openings in room face
+    rules:
+    - general.bc_408_8_3_openings_in_room_face
+  408.8.4:
+    label: flag
+    heading: Subdivision of resident housing areas › Smoke-tight doors
+    rules:
+    - general.bc_408_8_4_smoke_tight_doors
+  '420.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_420_1_groups_i1_and_r
+  '420.2':
+    label: flag
+    heading: Separation walls
+    rules:
+    - general.bc_420_2_separation_walls
+  '420.3':
+    label: flag
+    heading: Horizontal separation
+    rules:
+    - general.bc_420_3_horizontal_separation
+  '420.6':
+    label: flag
+    heading: Smoke barriers in Group I-1, Condition 2
+    rules:
+    - general.bc_420_6_smoke_barriers_in_group_i1_condition_2
+  420.6.1:
+    label: flag
+    heading: Smoke barriers in Group I-1, Condition 2 › Refuge area
+    rules:
+    - general.bc_420_6_1_refuge_area
+  '420.7':
+    label: flag
+    heading: Group I-1 assisted living housing units
+    rules:
+    - general.bc_420_7_assisted_living_housing_units
+  '420.8':
+    label: flag
+    heading: Group I-1 cooking facilities
+    rules:
+    - general.bc_420_8_group_i1_cooking_facilities
+  '420.9':
+    label: flag
+    heading: Domestic cooking appliances
+    rules:
+    - general.bc_420_9_domestic_cooking_appliances
+  '422.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_422_1_ambulatory_care_facilities
+  '422.2':
+    label: flag
+    heading: Separation
+    rules:
+    - general.bc_422_2_separation
+  '422.3':
+    label: flag
+    heading: Smoke compartments
+    rules:
+    - general.bc_422_3_smoke_compartments
+  422.3.1:
+    label: flag
+    heading: Smoke compartments › Means of egress
+    rules:
+    - general.bc_422_3_1_means_of_egress
+  422.3.2:
+    label: flag
+    heading: Smoke compartments › Refuge area
+    rules:
+    - general.bc_422_3_2_refuge_area
+  422.3.3:
+    label: flag
+    heading: Smoke compartments › Independent egress
+    rules:
+    - general.bc_422_3_3_independent_egress
   508.2.1:
     label: flag
     heading: Accessory occupancies › Occupancy classification

@@ -23,16 +23,17 @@ second_reading:
     Chapter 4 part a (402.1, 402.1.1, 402.8 whole, 404.1, 404.9 to 404.11 and 7 definitions, 2026-11-26), an eighteenth
     for the 39 of Chapter 4 part b (403.1, 403.2.2, 403.5, 403.6, 405.1, 405.4, 405.7 and 15 definitions), a nineteenth for
     the 43 of Chapter 4 part c (407.1 to 407.4 and 15 definitions), a twentieth for the 28 of Chapter 4 part d (407.5, 407.6,
-    407.10, 408.1 to 408.4 and 3 definitions), and a helper for
+    407.10, 408.1 to 408.4 and 3 definitions), a twenty-first for the 24 of Chapter 4 part e (408.6, 408.8, 420.1 to
+    420.3, 420.6 to 420.9, 422.1 to 422.3 and 1 definition), and a helper for
     the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 12 pages, 30 boxes as step_ch04a (Chapter 4 part a), 16 pages, 39 boxes as step_ch04b (Chapter 4 part b), 13 pages, 44 boxes as step_ch04c (Chapter 4 part c), and 6 pages, 29 boxes as step_ch04d (Chapter 4 part d); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 12 pages, 30 boxes as step_ch04a (Chapter 4 part a), 16 pages, 39 boxes as step_ch04b (Chapter 4 part b), 13 pages, 44 boxes as step_ch04c (Chapter 4 part c), 6 pages, 29 boxes as step_ch04d (Chapter 4 part d), and 5 pages, 25 boxes as step_ch04e (Chapter 4 part e); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 402 pieces, 1046 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 426 pieces, 1161 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -846,6 +847,12 @@ pieces:
     - '716'
     second_reading_comparisons:
     - none
+  202:fire_resistance:
+    piece_sha256: 603e80d4f7ffd4c371cdc0c3e4118758d6ac51fdec274d05a3209ccd0862ceca
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:fire_wall:
     piece_sha256: 13baefb78e6958cd35ec518f1244fe88b8fbe0602fd3fbdd92e3a81e3875ceee
     numbers: []
@@ -3617,6 +3624,512 @@ pieces:
     second_reading_comparisons: []
   408.4.4:
     piece_sha256: b638cead137cb26dc1fcf74fede7265a8fb260741be9ffd0619d31aee4238b31
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  '408.6':
+    piece_sha256: 92dc444ff2782a2e4c80ab38b3cce1e0237c8c2f07f734c59efe71a61948d5e4
+    numbers:
+    - '408.6'
+    - '408.6'
+    - and 709
+    - 50 or more
+    - two
+    - one
+    - '2'
+    - 50 foot
+    - 15 mm
+    - 240 mm
+    - 50 foot
+    - 15 mm
+    - 240 mm
+    - 6 square foot or more
+    - 0.56 m or more
+    second_reading: agrees
+    second_reading_numbers:
+    - '408.6'
+    - '408.6'
+    - and 709
+    - 50 or more
+    - two
+    - one
+    - '2'
+    - 50 foot
+    - 15 mm
+    - 240 mm
+    - 50 foot
+    - 15 mm
+    - 240 mm
+    - 6 square foot or more
+    - 0.56 m or more
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - '>='
+    - '>='
+    - none
+    - '>='
+    - '>='
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    - '>='
+    - none
+    flags:
+    - '''two'' (>=): ''into not fewer than two smoke compartments''; ''2'' (>=): ''a 2-hour fire-resistance-rated assembly'',
+      at least that rating; ''50 foot'' (>=, twice): ''50 feet (15 240 mm) of open space'' and ''a holding space 50 feet (15
+      240 mm) from the housing area'', at least that far; the recorded words miss it (numbers.py reads comparison words only
+      directly before a number or after its unit). The second reading is right.'
+    - '''0.56 m or more'' (none): the square metres in brackets are 6 square feet''s conversion and set no limit; the ''or
+      more'' is the 6 square feet''s. The second reading (none) is right. Flag figures (Chapter 4 part e), read by no rule.'
+  408.6.1:
+    piece_sha256: 3577b7252c0fafffd7d772131bd73efee634f2455834e9e72e6d4caa02d3f118
+    numbers:
+    - not more than 200
+    - not greater than 150 foot
+    - 45 mm
+    - 720 mm
+    - not greater than 200 foot
+    - 60 mm
+    - 960 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not more than 200
+    - not greater than 150 foot
+    - 45 mm
+    - 720 mm
+    - not greater than 200 foot
+    - 60 mm
+    - 960 mm
+    second_reading_comparisons:
+    - <=
+    - <=
+    - none
+    - none
+    - <=
+    - none
+    - none
+  408.6.2:
+    piece_sha256: 846ca24b42a873d9f01cf5f738daf16e33a06ba19110f8c05d36f1972524e9e6
+    numbers:
+    - not less than 6
+    - 0.56 m
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 6
+    - 0.56 m
+    second_reading_comparisons:
+    - '>='
+    - none
+  408.6.3:
+    piece_sha256: abe179f4b7578dea835ec2b8fdb7cdbb212c7348c197c34d8fc5e37b2f6b88e5
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  '408.8':
+    piece_sha256: 4b92a1fa5ef588dea3e2106923ba4dec91b3fd441842ad6d8862819e2441ca33
+    numbers:
+    - '408.8'
+    second_reading: agrees
+    second_reading_numbers:
+    - '408.8'
+    second_reading_comparisons:
+    - none
+  408.8.1:
+    piece_sha256: 0bbbe692f4e39ddf22292d23437a0dc2420a77e200051f04c9eb1126d9502a2b
+    numbers:
+    - '3'
+    - and 4
+    - '3'
+    - and 4
+    - 50 foot
+    - 15 mm
+    - 240 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '3'
+    - and 4
+    - '3'
+    - and 4
+    - 50 foot
+    - 15 mm
+    - 240 mm
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - '>'
+    - none
+    - none
+    flags:
+    - '''50 foot'' (>): ''where the distance of travel ... exceeds 50 feet''; the recorded words miss it (numbers.py reads
+      comparison words only directly before a number or after its unit). The second reading is right. A flag''s figure (Chapter
+      4 part e), read by no rule.'
+  408.8.2:
+    piece_sha256: f9800fe921c56a639f2faba68ebbafd8ea9d5d4278086f5c78407217a5440061
+    numbers:
+    - '5'
+    - '5'
+    second_reading: agrees
+    second_reading_numbers:
+    - '5'
+    - '5'
+    second_reading_comparisons:
+    - none
+    - none
+  408.8.3:
+    piece_sha256: dee73137c157299e8ab2b2ce72e0f840e49c8b69dbeaf6571762e445a4ee77dc
+    numbers:
+    - '2'
+    - '3'
+    - '4'
+    - and 5
+    - not exceed 120 square inch
+    - 0.77 m
+    - not more than 36 inch
+    - 914 mm
+    - '5'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2'
+    - '3'
+    - '4'
+    - and 5
+    - not exceed 120 square inch
+    - 0.77 m
+    - not more than 36 inch
+    - 914 mm
+    - '5'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - none
+  408.8.4:
+    piece_sha256: 0aab87cc46ba72e08061e2876414e9a76b9b2fe2623fefaaf03bdd22513a4d6c
+    numbers:
+    - '408.8'
+    second_reading: agrees
+    second_reading_numbers:
+    - '408.8'
+    second_reading_comparisons:
+    - none
+  '420.1':
+    piece_sha256: 275d7ee94d610878b2da231134dead876322a6cfc6f8f33bbac4057e060e982a
+    numbers:
+    - '420.1'
+    - '420.1'
+    - '420.11'
+    second_reading: agrees
+    second_reading_numbers:
+    - '420.1'
+    - '420.1'
+    - '420.11'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  '420.2':
+    piece_sha256: 1991b156a55e534b0eeb39934c585570cc8496c91b3ecb9062e7fc7c81e370b4
+    numbers:
+    - '420.2'
+    - '708'
+    second_reading: agrees
+    second_reading_numbers:
+    - '420.2'
+    - '708'
+    second_reading_comparisons:
+    - none
+    - none
+  '420.3':
+    piece_sha256: 226ce69c920b185accea5d5aa720b8c92a3aa57519ea747ba6728f21a4dd837e
+    numbers:
+    - '420.3'
+    - '711'
+    second_reading: agrees
+    second_reading_numbers:
+    - '420.3'
+    - '711'
+    second_reading_comparisons:
+    - none
+    - none
+  '420.6':
+    piece_sha256: 8ea0db1cc61783df951b6d1369d4ac9a3d1eb31320e70288f9c800b585d349c7
+    numbers:
+    - '420.6'
+    - '2'
+    - '2'
+    - 50 or more
+    - two
+    - not more than 22,500 square foot
+    - 2092 m
+    - not exceed 200 foot
+    - 60 mm
+    - 960 mm
+    - '709'
+    second_reading: agrees
+    second_reading_numbers:
+    - '420.6'
+    - '2'
+    - '2'
+    - 50 or more
+    - two
+    - not more than 22,500 square foot
+    - 2092 m
+    - not exceed 200 foot
+    - 60 mm
+    - 960 mm
+    - '709'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - '>='
+    - '>='
+    - <=
+    - none
+    - <=
+    - none
+    - none
+    - none
+    flags:
+    - '''two'' (>=): ''into not fewer than two smoke compartments''; the recorded words miss it (numbers.py reads comparison
+      words only directly before a number or after its unit). The second reading is right. A flag''s figure (Chapter 4 part
+      e), read by no rule.'
+  420.6.1:
+    piece_sha256: f8f076b655ed6ac260c8232a52a7c47ca8635fe9d8bc7a85656055e59c5f63ef
+    numbers:
+    - two or more
+    - not less than 15
+    - 1.4 m
+    - not less than 6
+    - 0.56 m
+    second_reading: agrees
+    second_reading_numbers:
+    - two or more
+    - not less than 15
+    - 1.4 m
+    - not less than 6
+    - 0.56 m
+    second_reading_comparisons:
+    - '>='
+    - '>='
+    - none
+    - '>='
+    - none
+  '420.7':
+    piece_sha256: 947b6e803a339cc40cfaf13824518afc6c0ea2cbe7ee6de34034a51465c1006b
+    numbers:
+    - '420.7'
+    - '509'
+    - 907 inch
+    - '1'
+    - '907'
+    - '2'
+    - '907'
+    second_reading: agrees
+    second_reading_numbers:
+    - '420.7'
+    - '509'
+    - 907 inch
+    - '1'
+    - '907'
+    - '2'
+    - '907'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+  '420.8':
+    piece_sha256: c14a86c04015a4bc9eca5c97c545586293e03944f2780e6adb5a17851f023fb7
+    numbers:
+    - '420.8'
+    - '1'
+    - one
+    - not be greater than 30 inch
+    - '2'
+    - one
+    - not be greater than 30
+    - '420.9'
+    second_reading: agrees
+    second_reading_numbers:
+    - '420.8'
+    - '1'
+    - one
+    - not be greater than 30 inch
+    - '2'
+    - one
+    - not be greater than 30
+    - '420.9'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - none
+    - <=
+    - none
+  '420.9':
+    piece_sha256: f02c22513e63c23c9ba537a36c779e1bdb7e7cd412249ee0794c21dc7b7e6395
+    numbers:
+    - '420.9'
+    - '505'
+    - '904.15'
+    - not more than 120
+    - '906'
+    - 30 foot
+    - 9144 mm
+    - '3'
+    second_reading: agrees
+    second_reading_numbers:
+    - '420.9'
+    - '505'
+    - '904.15'
+    - not more than 120
+    - '906'
+    - 30 foot
+    - 9144 mm
+    - '3'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - none
+    flags:
+    - '''30 foot'' (<=): ''within a 30-foot (9144 mm) distance of travel''; the recorded words miss it (numbers.py reads comparison
+      words only directly before a number or after its unit). The second reading is right. A flag''s figure (Chapter 4 part
+      e), read by no rule.'
+  '422.1':
+    piece_sha256: 3074977b6f785ece94ffee756c109de85d6895d0b83d1258f115691219e5725e
+    numbers:
+    - '422.1'
+    - '422.1'
+    - '422.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '422.1'
+    - '422.1'
+    - '422.7'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  '422.2':
+    piece_sha256: 9be877d77d640572f7e60325480ac07ae55824e8bca714503fea021ca6695ebb
+    numbers:
+    - '422.2'
+    - four or more
+    - '708'
+    second_reading: agrees
+    second_reading_numbers:
+    - '422.2'
+    - four or more
+    - '708'
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+  '422.3':
+    piece_sha256: d387f0223c7dbdb65e822097f7ffc6d1a846b636617a312e773a41fdcc1c5d2c
+    numbers:
+    - '422.3'
+    - one or more
+    - greater than 10,000 square foot
+    - 929 m
+    - one
+    - two
+    - one
+    - not greater than 22,500 square foot
+    - 2092 m
+    - not greater than 200 foot
+    - 60 mm
+    - 960 mm
+    - '709'
+    second_reading: agrees
+    second_reading_numbers:
+    - '422.3'
+    - one or more
+    - greater than 10,000 square foot
+    - 929 m
+    - one
+    - two
+    - one
+    - not greater than 22,500 square foot
+    - 2092 m
+    - not greater than 200 foot
+    - 60 mm
+    - 960 mm
+    - '709'
+    second_reading_comparisons:
+    - none
+    - '>='
+    - '>'
+    - none
+    - none
+    - '>='
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - none
+    - none
+    flags:
+    - '''two'' (>=): ''into not fewer than two smoke compartments''; the recorded words miss it (numbers.py reads comparison
+      words only directly before a number or after its unit). The second reading is right. A flag''s figure (Chapter 4 part
+      e), read by no rule.'
+  422.3.1:
+    piece_sha256: 46f5babd8eaece8195d713d6a819ebd03cca6bb879cb04d0e45593f2f5cc9d88
+    numbers:
+    - '422.3'
+    - '1002.2'
+    - '403'
+    - and 404
+    second_reading: agrees
+    second_reading_numbers:
+    - '422.3'
+    - '1002.2'
+    - '403'
+    - and 404
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  422.3.2:
+    piece_sha256: 4c28bf4938fc7cba96a7b27b1859a127a2f91a865031fa4e066490ac01392465
+    numbers:
+    - not less than 30
+    - 2.8 m
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 30
+    - 2.8 m
+    second_reading_comparisons:
+    - '>='
+    - none
+  422.3.3:
+    piece_sha256: a1d6475c92880ca81d801ce230453d5cd935abde020795f865acb645dfc3dba4
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
