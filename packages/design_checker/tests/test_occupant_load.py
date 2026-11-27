@@ -662,7 +662,7 @@ def test_the_assembly_functions_are_exactly_table_1004_5s_rows_under_its_assembl
 _SEATING_PARTS = {}
 
 
-def _seating_story(fn=None, use="other", more=None):
+def _seating_story(fn=None, use="other", more=None, building=None):
     r = room("r", rect(0, 0, 20, 15), use=use, **({"function": fn} if fn is not None else {}))
     desc = description([r, room("c", rect(-20, 15.5, 40, 23.5))],
                        [door("d", (10, 15.25), (1, 0), ("r", "c")),
@@ -672,7 +672,7 @@ def _seating_story(fn=None, use="other", more=None):
     if not _SEATING_PARTS:                          # a function or use changes no geometry: measured once (the
         _SEATING_PARTS["r"] = measure(desc)["parts"]   # seating reads each room's function and use from the description)
     parts = copy.deepcopy(_SEATING_PARTS["r"])
-    occupant_load.assembly_seating(parts, desc, FACTORS)
+    occupant_load.assembly_seating(parts, desc, FACTORS, building)
     story = parts["story"][0]
     assert all(p["measures"][occupant_load.SEATING_SPACE] == story["measures"][occupant_load.SEATING_STORY]
                for p in parts["space"])
@@ -733,3 +733,24 @@ def test_the_apartments_stories_seat_no_one_served_by_aisles(apartment):
     next(r for r in desc["rooms"] if r["id"] == "L2N").pop("function")
     parts = _loads(desc)
     assert {s["id"]: s["measures"][occupant_load.SEATING_STORY] for s in parts["story"]} == {"L1": False, "L2": True}
+
+
+@pytest.mark.parametrize("groups", [["A-1"], ["A-2"], ["A-3"], ["A-4"], ["A-5"], ["B", "A-3"]])
+def test_a_building_stated_group_a_with_no_assembly_room_shown_may_seat_people_on_every_story(groups):
+    """Review round 1 (P2): Group A is an assembly use (303.1 to 303.6), so a building stated Group A has a room used
+    for assembly purposes (1030.1); where no room states an Assembly function or one that may be an assembly use (a
+    lecture hall stated a classroom, every room stated business), that room isn't shown and any room may be it. Stated
+    another group, a story of business rooms seats no one; Group A with a dining room stated, a business story beside
+    it doesn't either (the assembly room is shown)."""
+    building = {"occupancy_groups": groups}
+    for fn in ("business", "classroom", "residential"):
+        assert _seating_story(fn, building=building) is True, (groups, fn)
+    assert _seating_story("business", building={"occupancy_groups": ["B"]}) is False
+    assert _seating_story("business", building={"occupancy_groups": ["R-2", "M"]}) is False
+    assert _seating_story("business", building={}) is False
+    shown = copy.deepcopy(_SEATING_PARTS["r"])
+    desc = _seating_desc_with_extra({"id": "dining", "name": "dining", "function": "assembly_unconcentrated"})
+    shown["space"].append({"id": "dining", "within": "elsewhere", "measures": {}, "not_measured": {}})
+    occupant_load.assembly_seating(shown, desc, FACTORS, building)
+    assert shown["story"][0]["measures"][occupant_load.SEATING_STORY] is False      # the dining room is shown, elsewhere
+

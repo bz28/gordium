@@ -444,3 +444,10 @@ def test_a_story_whose_room_may_seat_people_served_by_aisles_never_passes_on_tra
     assert row(lambda d: next(r for r in d["rooms"] if r["id"] == "L1S").update(
         function="assembly_unconcentrated")) == "needs_review"
     assert row(lambda d: next(r for r in d["rooms"] if r["id"] == "L1S").update(function="courtroom")) == "needs_review"
+
+    def group_a(d):                                  # review round 1: a Group A building whose assembly room isn't shown
+        d["building"]["occupancy_groups"] = ["A-2"]
+        for r in d["rooms"]:
+            if r.get("function") is not None:
+                r["function"] = "business"
+    assert row(group_a) == "needs_review"

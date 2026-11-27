@@ -1051,3 +1051,22 @@ def test_a_restaurant_story_with_no_fixed_seats_never_passes_a_travel_or_common_
         twins = [w["when"] for w in r["review_when"] if re.search(rf"{m}", w["when"])]
         assert [re.sub(r"assembly_fixed_seating", m, f) for f in fixed] == twins, rid
         assert all(_cites(r, 354, 50) or "1030.7" in w["reason"] for w in r["review_when"] if m in w["when"]), rid
+
+
+def test_each_seating_review_names_every_way_the_story_may_seat_people_and_when_it_is_settled(rules):
+    """Review round 1 (P3): the seating reviews said "Setting each room's function settles it", which a real restaurant
+    or a courtroom never does, and named neither a function none of the table's nor a room unread. Each names every
+    trigger the measuring has (design_checker/occupant_load.py assembly_seating) and says when it is settled."""
+    n = 0
+    for rid, r in rules.items():
+        for w in r.get("review_when") or []:
+            if "assembly_seating_possible" not in w["when"]:
+                continue
+            why = " ".join(w["reason"].split())
+            assert "settles it" not in why, rid
+            for must in ("Assembly function", "may be an assembly use", "none of the table's", "or none",
+                         "can't be read or placed", "stated Group A", "It is settled only where every room on the story"):
+                assert must in why, (rid, must)
+            n += 1
+    assert n == 30
+

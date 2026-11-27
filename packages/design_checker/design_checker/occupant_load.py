@@ -153,20 +153,28 @@ def _may_seat(room: dict, functions: dict, is_exit=None) -> bool:
     return fn in ASSEMBLY_FUNCTIONS or fn in ASSEMBLY_LIKE_FUNCTIONS
 
 
-def assembly_seating(parts: dict, description: dict, factors: dict) -> dict:
+def assembly_seating(parts: dict, description: dict, factors: dict, building: dict | None = None) -> dict:
     """story_assembly_seating_possible on each story, and space_assembly_seating_possible (its story's) on each of the
     story's spaces: true where a room on the story may hold seating served by aisles (_may_seat), so the travel and
     common-path rows need review there (1030.7: measured along the aisles, never over the seats the routes measure
     across); false only where every room on the story states one of Table 1004.5's other functions (or is an exit, or a
     corridor, closet or toilet with none). True on every story where a room can't be read or placed on a story, or the
     description lists an enclosed space with no room drawn in it (its use isn't known): never false on a room unseen.
-    The story knows its rooms (it is in the model), so a floor the model leaves out doesn't matter here."""
+    True on every story, too, where the building is stated Group A (an assembly use, 303.1 to 303.6) and no room states
+    an Assembly function or one that may be an assembly use: its assembly room isn't shown, so any room may be it
+    (review round 1). The story knows its rooms (it is in the model), so a floor the model leaves out doesn't matter
+    here."""
     rooms, every = readable_rooms(description)
     unknown = description.get("unknown_spaces") if isinstance(description, dict) else None
     spaces = [p for p in parts.get("space") or [] if isinstance(p, dict)]
     corridors = [c for c in parts.get("corridor") or [] if isinstance(c, dict)]
     placed = {p.get("id") for p in spaces + corridors}
     unseen = not every or bool(unknown) or any(r not in placed for r in rooms)
+    groups = building.get("occupancy_groups") if isinstance(building, dict) else None
+    shown = any(r.get("function") in ASSEMBLY_FUNCTIONS + ASSEMBLY_LIKE_FUNCTIONS for r in rooms.values()
+                if isinstance(r.get("function"), str))
+    if isinstance(groups, list) and any(isinstance(g, str) and g.startswith("A-") for g in groups) and not shown:
+        unseen = True
     functions = factors["functions"]
     for story in parts.get("story") or []:
         mine = [p for p in spaces if p.get("within") == story["id"]]
@@ -191,7 +199,7 @@ def _set(part: dict, name: str, value: bool) -> None:
 
 
 def apply(parts: dict, description: dict, factors: dict, building: dict | None) -> dict:
-    assembly_seating(parts, description, factors)
+    assembly_seating(parts, description, factors, building)
     rooms, every = readable_rooms(description)
     increase_ruled_out = isinstance(building, dict) and building.get("occupant_load_increased") is False
     cap = factors["increase_cap"]
