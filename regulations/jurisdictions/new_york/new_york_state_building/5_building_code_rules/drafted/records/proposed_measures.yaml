@@ -31,6 +31,7 @@ sprinklered_903_3_1_1:
   - general.bc_1009_4_2_elevator_area_of_refuge
   - general.bc_1009_7_2_assisted_rescue_separation
   - general.bc_1009_7_4_assisted_rescue_stairways
+  - general.bc_1011_2_stair_width
   - general.bc_1013_2_low_level_exit_signs_group_r1
   - general.bc_1017_2_travel_distance
   - general.bc_1020_3_corridor_capacity
@@ -96,6 +97,7 @@ sprinklered_903_3_1_2:
   - general.bc_1009_4_2_elevator_area_of_refuge
   - general.bc_1009_7_2_assisted_rescue_separation
   - general.bc_1009_7_4_assisted_rescue_stairways
+  - general.bc_1011_2_stair_width
   - general.bc_1013_2_low_level_exit_signs_group_r1
   - general.bc_1020_3_corridor_capacity
   - general.bc_1031_2_escape_opening_where_required
@@ -216,6 +218,10 @@ occupancy_group:
   - general.bc_1010_2_13_controlled_egress
   - general.bc_1010_2_7_educational_locking
   - general.bc_1010_2_8_panic_hardware
+  - general.bc_1011_2_stair_width
+  - general.bc_1011_3_stair_headroom
+  - general.bc_1011_5_2_riser_height
+  - general.bc_1011_5_2_tread_depth
   - general.bc_1013_1_exit_signs_where_required
   - general.bc_1013_2_low_level_exit_signs_group_r1
   - general.bc_1016_2_intervening_spaces_other_groups

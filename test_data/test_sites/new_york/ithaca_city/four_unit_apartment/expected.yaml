@@ -528,6 +528,19 @@ results:
   general.bc_714_5_2_floor_membrane_penetrations: needs_review
   general.bc_714_5_3_floor_dissimilar_materials: needs_review
   general.bc_714_5_4_smoke_barrier_penetrations: needs_review
+  # section group 7c: Section 1011's stair rules and flags, one line each. The apartment's two stairs aren't described
+  # (its 9 by 6 ft enclosures can't hold a code-sized stair: the plan's open design item 2), so no flight is read
+  # and every one needs review, never a pass (the stair test building, test_data/test_sites/new_york/stair_enclosure,
+  # carries them end to end)
+  general.bc_1011_1_stairways_general: needs_review
+  general.bc_1011_2_stair_width: needs_review
+  general.bc_1011_3_stair_headroom: needs_review
+  general.bc_1011_5_2_riser_height: needs_review
+  general.bc_1011_5_2_tread_depth: needs_review
+  general.bc_1011_5_4_riser_uniformity: needs_review
+  general.bc_1011_5_4_tread_uniformity: needs_review
+  general.bc_1011_6_stair_landings: needs_review
+  general.bc_1011_11_stair_handrails: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

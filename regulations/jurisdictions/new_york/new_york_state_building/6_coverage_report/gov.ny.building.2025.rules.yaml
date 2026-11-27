@@ -1113,6 +1113,43 @@ pieces:
     heading: Door operations › Locking arrangements in buildings within correctional facilities
     rules:
     - general.bc_1010_2_15_correctional_facilities
+  '1011.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_1011_1_stairways_general
+  '1011.2':
+    label: rule
+    heading: Width and capacity
+    rules:
+    - general.bc_1011_2_stair_width
+  '1011.3':
+    label: rule
+    heading: Headroom
+    rules:
+    - general.bc_1011_3_stair_headroom
+  1011.5.2:
+    label: rule
+    heading: Stair treads and risers › Riser height and tread depth
+    rules:
+    - general.bc_1011_5_2_riser_height
+    - general.bc_1011_5_2_tread_depth
+  1011.5.4:
+    label: rule
+    heading: Stair treads and risers › Dimensional uniformity
+    rules:
+    - general.bc_1011_5_4_riser_uniformity
+    - general.bc_1011_5_4_tread_uniformity
+  '1011.6':
+    label: flag
+    heading: Stairway landings
+    rules:
+    - general.bc_1011_6_stair_landings
+  '1011.11':
+    label: rule
+    heading: Handrails
+    rules:
+    - general.bc_1011_11_stair_handrails
   '1012.2':
     label: flag
     heading: Ramps › Slope

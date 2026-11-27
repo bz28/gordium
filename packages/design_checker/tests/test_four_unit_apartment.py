@@ -616,6 +616,16 @@ def test_a_door_to_outside_asks_whether_the_occupants_use_outdoor_areas(got):
             assert "building.occupied_outdoor_areas" in {a.get("field") for a in asks}, i["name"]
 
 
+# ---- section group 7c (2026-11-26): Section 1011's stairs --------------------------------------------------------------
+
+def test_its_stairs_are_not_described_so_every_stair_line_needs_review(got):
+    """Before: no rule read a stair. After: Section 1011's seven rules and two flags each give one line, and the
+    apartment's two stairs aren't described (its 9 by 6 ft enclosures can't hold a code-sized stair), so no flight is
+    read and every line needs review, never a pass; nothing else changes (expected.yaml holds every other line as it
+    was)."""
+    stair = {k: v for k, v in got["results"].items() if k.startswith("general.bc_1011_")}
+    assert len(stair) == 9 and set(stair.values()) == {present.REVIEW}
+    assert got["interior"]["parts"]["stair"] is None
 # ---- section group 6e (2026-11-26): panic and fire exit hardware ------------------------------------------------------
 
 PANIC = "general.bc_1010_2_8_panic_hardware"

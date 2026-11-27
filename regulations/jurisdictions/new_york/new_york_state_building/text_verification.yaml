@@ -34,15 +34,15 @@ second_reading:
     twenty-ninth for the 29 of section group 9f (Sections 1024 and 1025 and 1 definition, 2026-11-26), a thirtieth for
     the 30 of section group 9g (Sections 1026 to 1029 and 5 definitions, 2026-11-26), the 31 of section group 9h (1030.1 to
     1030.9, Table 1030.6.2 and 4 definitions, 2026-11-26), the 48 of section group 9i (1030's heading, 1030.10 to
-    1030.17, Table 1030.13.2.1 and 5 definitions, 2026-11-26), one for the 52 of Chapter 7 part a (703.2.1.1, 703.5, 707, 713 and 20 definitions, 2026-11-26), one for the 42 of Chapter 7 part b (716.1, Tables 716.1(1) to 716.1(3), 716.2 to 716.2.4 and 14 definitions), one for the 39 of Chapter 7 part c (708, 709, 710 and 3 definitions), one for the 38 of Chapter 7 part d (711, 712, 714.1 to 714.4 and 15 definitions) and one for its 12 more (714.5 and 5 definitions), and a helper for the comparison words)
+    1030.17, Table 1030.13.2.1 and 5 definitions, 2026-11-26), one for the 52 of Chapter 7 part a (703.2.1.1, 703.5, 707, 713 and 20 definitions, 2026-11-26), one for the 42 of Chapter 7 part b (716.1, Tables 716.1(1) to 716.1(3), 716.2 to 716.2.4 and 14 definitions), one for the 39 of Chapter 7 part c (708, 709, 710 and 3 definitions), one for the 38 of Chapter 7 part d (711, 712, 714.1 to 714.4 and 15 definitions) and one for its 12 more (714.5 and 5 definitions), one for the 20 of section group 7c (1011.1 to 1011.11 and 11 definitions, 2026-11-26), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c), and 4 pages, 11 boxes as step_g9d (section group 9d), and 1 page, 1 box as step_g9d2 (1018''s heading), and 10 pages, 42 boxes as step_g9e (section group 9e), and 4 pages, 30 boxes as step_g9f (section group 9f), and 9 pages, 32 boxes as step_g9g (section group 9g), and 7 pages, 33 boxes as step_g9h (section group 9h, Table 1030.6.2 also cell by cell, its last row''s label wrapped around its values read by position on p.354), and 9 pages, 48 boxes as step_g9i (section group 9i, Table 1030.13.2.1 also cell by cell, its two-line heading placed by position on p.357), and 18 pages, 53 boxes as step_ch07a (Chapter 7 part a), 13 pages, 44 boxes as step_ch07b (Chapter 7 part b), 7 pages, 40 boxes as step_ch07c (Chapter 7 part c), 14 pages, 39 boxes as step_ch07d and 6 pages, 13 boxes as step_ch07d2 (Chapter 7 part d); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c), and 4 pages, 11 boxes as step_g9d (section group 9d), and 1 page, 1 box as step_g9d2 (1018''s heading), and 10 pages, 42 boxes as step_g9e (section group 9e), and 4 pages, 30 boxes as step_g9f (section group 9f), and 9 pages, 32 boxes as step_g9g (section group 9g), and 7 pages, 33 boxes as step_g9h (section group 9h, Table 1030.6.2 also cell by cell, its last row''s label wrapped around its values read by position on p.354), and 9 pages, 48 boxes as step_g9i (section group 9i, Table 1030.13.2.1 also cell by cell, its two-line heading placed by position on p.357), and 18 pages, 53 boxes as step_ch07a (Chapter 7 part a), 13 pages, 44 boxes as step_ch07b (Chapter 7 part b), 7 pages, 40 boxes as step_ch07c (Chapter 7 part c), 14 pages, 39 boxes as step_ch07d and 6 pages, 13 boxes as step_ch07d2 (Chapter 7 part d), and 12 pages, 20 boxes as step_g7c (section group 7c); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 793 pieces, 2602 numbers, every piece agrees but Table 716.1(2), whose extracted text loses its stacked fractions (its flag says the second reading is right). The tables were also read
+    through document_extraction/numbers.py: 807 pieces, 2692 numbers, every piece agrees but Table 716.1(2), whose extracted text loses its stacked fractions (its flag says the second reading is right). The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -374,6 +374,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:certificate_of_occupancy:
+    piece_sha256: 5f8ce0dbf0b87bdfa4f27f1439b66e3a6cf7ce4082cc7ea76600d60ec0341616
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:combination_fire_smoke_damper:
     piece_sha256: 348b556d2b8b77b913785e2e134788d23f122d5f67ee81bed4ca261c0b7a5ffe
     numbers: []
@@ -583,6 +589,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:construction_documents:
+    piece_sha256: 93910e4e57117f3b870091535e7bcab1b8ce034281d2b4936660f625847d940e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:corridor:
     piece_sha256: 915ca255184e969aa7953e98413317521565bba1e9ae6ae7e8c3e6ed867b78ab
     numbers: []
@@ -786,6 +798,24 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:existing_building:
+    piece_sha256: 3c30ce83d67f6cf1996b6b3a8be2daa3a71d2e8d3317e78987ac6ec5c34ae473
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:existing_building_code_of_new_york_state:
+    piece_sha256: 09e3e14cf0c7af1f6131523f028cff01bdd027c2c7449ffb9b8c77d6d791aff3
+    numbers:
+    - '2025'
+    - '2025'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2025'
+    - '2025'
+    second_reading_comparisons:
+    - none
+    - none
   202:exit:
     piece_sha256: 6f4c6a822f8c6d6adda671ed50e7453bb47a9e1f6137adb4070c0ab424429474
     numbers: []
@@ -2104,6 +2134,12 @@ pieces:
     second_reading_comparisons: []
   202:stairway_scissor:
     piece_sha256: bdf42d56d067276a4e60faa8e1fc7daf2224e07af80a4186b44211ffd293104e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:stairway_spiral:
+    piece_sha256: 0c2dd42136226a475b128690beea370279df1514172e7a133864efd6a0a72754
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -8137,6 +8173,342 @@ pieces:
     - not less than one
     second_reading_comparisons:
     - '>='
+  '1011.1':
+    piece_sha256: db3a44848a9872e52f8aeda92906582ce4642b45fcede662068461e3aecc98ea
+    numbers:
+    - '1011.1'
+    - '1011.2'
+    - '1011.14'
+    - '1011.15'
+    - '1011.16'
+    - '1030'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1011.1'
+    - '1011.2'
+    - '1011.14'
+    - '1011.15'
+    - '1011.16'
+    - '1030'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+  '1011.2':
+    piece_sha256: 62c9e97d40b6a5c6fa277f6caf45c6358d6a38dd6cf2363fcb42997664f89194
+    numbers:
+    - '1011.2'
+    - '1005.1'
+    - not less than 44 inch
+    - 1118 mm
+    - '1009.3'
+    - less than 50
+    - not less than 36 inch
+    - 914 mm
+    - '1011.10'
+    - not less than 20 inch
+    - 508 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1011.2'
+    - '1005.1'
+    - not less than 44 inch
+    - 1118 mm
+    - '1009.3'
+    - less than 50
+    - not less than 36 inch
+    - 914 mm
+    - '1011.10'
+    - not less than 20 inch
+    - 508 mm
+    second_reading_comparisons:
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    - <
+    - '>='
+    - none
+    - none
+    - '>='
+    - none
+  '1011.3':
+    piece_sha256: 1a9c2ddaf830deae56aa065d017cdeda9b106089b5f94f4b565a27fb35d29d81
+    numbers:
+    - '1011.3'
+    - not less than 80 inch
+    - 2032 mm
+    - one
+    - '1011.10'
+    - 78 inch
+    - 1981 mm
+    - not more than 4 3/4 inch
+    - 121 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1011.3'
+    - not less than 80 inch
+    - 2032 mm
+    - one
+    - '1011.10'
+    - 78 inch
+    - 1981 mm
+    - not more than 4 3/4 inch
+    - 121 mm
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - <=
+    - none
+    flags:
+    - '''78 inch'' (>=): ''Spiral stairways complying with Section 1011.10 are permitted a 78-inch (1981 mm) headroom clearance'',
+      in place of the 80 in minimum. The recorded words miss it (numbers.py reads comparison words only directly before a
+      number or after its unit). The second reading is right.'
+  '1011.5':
+    piece_sha256: df2e0aba4e13cb9d96a9d92efa58a4bf9c01ba9b5fe4c7a5ebaa082025f1c9cc
+    numbers:
+    - '1011.5'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1011.5'
+    second_reading_comparisons:
+    - none
+  1011.5.1:
+    piece_sha256: dbfedc11f29c4254da596ef39f2501701b4593d2604b04e900989664b3e313de
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1011.5.2:
+    piece_sha256: 26673be063ce8bd9a9027e47a85c4eef1174b94983c398aacb287fa79426253d
+    numbers:
+    - 7 inch
+    - 178 mm
+    - and 4 inch
+    - 102 mm
+    - 11 inch
+    - 279 mm
+    - 11 inch
+    - 279 mm
+    - 10 inch
+    - 254 mm
+    - '1011.10'
+    - '11'
+    - 7 3/4 inch
+    - 197 mm
+    - 10 inch
+    - 254 mm
+    - 10 inch
+    - 254 mm
+    - 6 inch
+    - 152 mm
+    - not less than 3/4 inch
+    - 19.1 mm
+    - not more than 1 1/4 inch
+    - 32 mm
+    - less than 11 inch
+    - 279 mm
+    - '503.1'
+    - not more than 250 square foot
+    - 23 m
+    - 8 inch
+    - 203 mm
+    - 9 inch
+    - 229 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - 7 inch
+    - 178 mm
+    - and 4 inch
+    - 102 mm
+    - 11 inch
+    - 279 mm
+    - 11 inch
+    - 279 mm
+    - 10 inch
+    - 254 mm
+    - '1011.10'
+    - '11'
+    - 7 3/4 inch
+    - 197 mm
+    - 10 inch
+    - 254 mm
+    - 10 inch
+    - 254 mm
+    - 6 inch
+    - 152 mm
+    - not less than 3/4 inch
+    - 19.1 mm
+    - not more than 1 1/4 inch
+    - 32 mm
+    - less than 11 inch
+    - 279 mm
+    - '503.1'
+    - not more than 250 square foot
+    - 23 m
+    - 8 inch
+    - 203 mm
+    - 9 inch
+    - 229 mm
+    second_reading_comparisons:
+    - <=
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - <=
+    - none
+    - <
+    - none
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - '>='
+    - none
+    flags:
+    - '''7 inch'' (<=) and ''and 4 inch'' (>=): ''Stair riser heights shall be 7 inches (178 mm) maximum and 4 inches (102
+      mm) minimum''; ''11 inch'' (>=) twice and the first ''10 inch'' (>=): ''tread depths shall be 11 inches (279 mm) minimum'',
+      ''a minimum tread depth of 11 inches'' at the walkline and ''a minimum tread depth of 10 inches'' within the clear width;
+      exception 3''s ''7 3/4 inch'' (<=), ''10 inch'' (>=) twice and ''6 inch'' (>=): ''the maximum riser height shall be
+      7 3/4 inches'', ''the minimum tread depth shall be 10 inches'', ''the minimum winder tread depth at the walkline shall
+      be 10 inches'', ''the minimum winder tread depth shall be 6 inches''; exception 5''s ''8 inch'' (<=) and ''9 inch''
+      (>=): ''a maximum riser height of 8 inches'' and ''a minimum tread depth of 9 inches''. The recorded words miss them
+      (numbers.py reads ''maximum'' and ''minimum'' only directly before a number or after its unit, not a phrase away). The
+      second reading is right.'
+  1011.5.4:
+    piece_sha256: 7627c0cbd6be89bfb92e01e991796f3db293844b731b237da89a72585b3d221b
+    numbers:
+    - not exceed 3/8 inch
+    - 9.5 mm
+    - not exceed the smallest by more than 3/8 inch
+    - 9.5 mm
+    - '1011.5'
+    second_reading: agrees
+    second_reading_numbers:
+    - not exceed 3/8 inch
+    - 9.5 mm
+    - not exceed the smallest by more than 3/8 inch
+    - 9.5 mm
+    - '1011.5'
+    second_reading_comparisons:
+    - <=
+    - none
+    - <=
+    - none
+    - none
+  '1011.6':
+    piece_sha256: c00d794b1afc3e6f67992f5c994e26b830828a22506c0a15ff0360366db92f57
+    numbers:
+    - '1011.6'
+    - 48 inch
+    - 1219 mm
+    - not reduce the landing to less than one-half
+    - not proj- ect more than 7 inch
+    - 178 mm
+    - '1030'
+    - 90 degree or more
+    - 1.57 rad or more
+    second_reading: agrees
+    second_reading_numbers:
+    - '1011.6'
+    - 48 inch
+    - 1219 mm
+    - not reduce the landing to less than one-half
+    - not proj- ect more than 7 inch
+    - 178 mm
+    - '1030'
+    - 90 degree or more
+    - 1.57 rad or more
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - '>='
+    - <=
+    - none
+    - none
+    - '>='
+    - '>='
+    flags:
+    - '''48 inch'' (>=): ''Every landing shall have a minimum depth ... equal to the width of the stairway or 48 inches (1219
+      mm), whichever is less''. The recorded words miss it (numbers.py reads ''minimum'' only directly before a number). The
+      second reading is right.'
+  '1011.11':
+    piece_sha256: 35c3684c160b9620da013cba3900cb889303357c85c279986c1a880bd1166941
+    numbers:
+    - '1011.11'
+    - '1014'
+    - '2407'
+    - one
+    - three or fewer
+    - not more than two riser
+    - one
+    - not less than 34 inch
+    - 864 mm
+    - not more than 42 inch
+    - 1067 mm
+    - '1014.4'
+    - not less than 4.5 inch
+    - 114 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1011.11'
+    - '1014'
+    - '2407'
+    - one
+    - three or fewer
+    - not more than two riser
+    - one
+    - not less than 34 inch
+    - 864 mm
+    - not more than 42 inch
+    - 1067 mm
+    - '1014.4'
+    - not less than 4.5 inch
+    - 114 mm
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - <=
+    - <=
+    - none
+    - '>='
+    - none
+    - <=
+    - none
+    - none
+    - '>='
+    - none
   '1012':
     piece_sha256: 7a6678801ea2beb1fa3d4b448beb124ff8ca63995b740278e4eda01fd399408e
     numbers:
