@@ -4132,7 +4132,7 @@ labels:
     topic: means_of_egress
     reason: 'A smoke barrier is an effective membrane from the foundation or floor below to the underside of the floor or
       roof sheathing, deck or slab above, through concealed and interstitial spaces, its supporting construction rated as
-      the wall or floor it supports (but in Types IIB, IIIB and VB); walls dividing smoke compartments meet 709.4.1, walls
+      the wall or floor it supports (except in buildings of Types IIB, IIIB and VB); walls dividing smoke compartments meet 709.4.1, walls
       enclosing areas of refuge (1009.6.4) or elevator lobbies (405.4.3, 3007.6.2, 3008.6.2) meet 709.4.2; except none is
       needed in an interstitial space whose ceilings or exterior walls resist fire and smoke as well: a person''s check (general.bc_709_4_smoke_barrier_continuity).'
     sources:

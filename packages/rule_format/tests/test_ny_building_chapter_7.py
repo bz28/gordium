@@ -230,7 +230,7 @@ def test_review_round_1s_notes_say_what_the_law_says(book, labels):
 
 
 def test_part_cs_group_i2_flags_never_set_aside_an_i2_or_unstated_building(book, ctx):
-    """709.5.1 (Group I-2 and ambulatory care smoke barrier doors) and 710.5.3 (Group I-2 Condition 2 pass-through
+    """709.5.1 (Groups I-1 and I-2 and ambulatory care smoke barrier doors) and 710.5.3 (Group I-2 Condition 2 pass-through
     openings) are set aside only where the stated group rules them out: Group I-2, a building of two or more groups,
     no group stated, or (709.5.1) an ambulatory care facility stated or not ruled out, all need review."""
     allowed = ctx.allowed()
@@ -437,3 +437,14 @@ def test_709_5_1_reaches_group_i1_through_709_5s_exception(book, ctx):
     Condition 2 isn't a stated fact, so a stated Group I-1 never sets 709.5.1 aside."""
     doors = [r for r in book if r["id"] == "general.bc_709_5_1_i2_smoke_barrier_doors"][0]
     assert outcome(doors, {"occupancy_group": "I-1", "ambulatory_care_facility": False}, ctx.allowed()) == "needs_review"
+
+
+def test_part_c_review_round_2s_wording(book):
+    """Part c review round 2: 709.5.1's title keeps ambulatory care facilities (an R-2 or B building sees it only for
+    them); 709.4's support exception reads 'except in' Types IIB, IIIB and VB (not 'only in'); 708.6's and 709.5's
+    openings name Table 716.1(3)'s windows as well as Table 716.1(2)'s doors."""
+    rules = {r["id"]: r for r in book}
+    assert "ambulatory care" in rules["general.bc_709_5_1_i2_smoke_barrier_doors"]["title"]
+    assert "except in buildings of Types IIB, IIIB and VB" in _shown_note(rules["general.bc_709_4_smoke_barrier_continuity"])
+    for rid in ("general.bc_708_6_fire_partition_openings", "general.bc_709_5_smoke_barrier_openings"):
+        assert "OH-45" in " ".join(_shown_note(rules[rid]).split()), rid
