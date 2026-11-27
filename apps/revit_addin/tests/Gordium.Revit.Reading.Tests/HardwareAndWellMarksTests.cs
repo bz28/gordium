@@ -9,8 +9,8 @@ namespace Gordium.Revit.Reading.Tests;
 /// <summary>The facts the checker already reads that architects had no way to enter (derive before asking: a mark only
 /// for what the model can't show for certain). A door's hardware (BCNYS 1010.2.8): no Revit door family or type
 /// parameter says it, so the door's own mark Gordium: Hardware, sent as <c>doors[].hardware</c>. An escape opening's
-/// place below grade and its area well (BCNYS 1031.5): a well isn't in Revit's vocabulary and the reader doesn't read
-/// the ground at a window yet, so the window's or door's own marks, sent as <c>openings[].stated_well</c>, each only
+/// place below grade and its area well (BCNYS 1031.5): a well isn't in Revit's vocabulary (below grade and the depth
+/// are also measured from a Toposolid stated to be the finished ground: GroundTests), so the window's or door's own marks, sent as <c>openings[].stated_well</c>, each only
 /// when set (blank is not stated, never 0 or No).</summary>
 public sealed class HardwareAndWellMarksTests
 {

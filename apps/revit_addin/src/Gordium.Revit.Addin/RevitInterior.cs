@@ -40,6 +40,7 @@ internal static class RevitInterior
         List<StairRecord>? stairs;
         List<StairCandidate> candidates;
         List<RailingRecord>? railings;
+        List<GroundRecord>? grounds;
         // each element's geometry worked out once for the rooms, openings, stairs and railings (the same element over
         // many rooms was read again for each): kept only until the enclosed areas below, the first step that changes
         // the model (a Room placed for the moment, rolled back); nothing before it changes anything, so what is kept
@@ -51,12 +52,16 @@ internal static class RevitInterior
         using (IndexKept.Open())
         {
             // each step timed and counted for the log's read_steps (never part of the records)
+            // the grounds first: what stands outside each window and door is looked for only where one is drawn
+            grounds = ReadSteps.Time("inside.grounds", () => GroundsOf(doc, diagnostics));
+            ReadSteps.Count("inside.grounds", grounds?.Count ?? 0);
+            var anyGround = grounds is not { Count: 0 };
             rooms = ReadSteps.Time("inside.rooms", () => new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms)
                 .WhereElementIsNotElementType().OfType<Room>().Select(r => RoomOf(doc, r)).ToList());
             ReadSteps.Count("inside.rooms", rooms.Count);
             openings = ReadSteps.Time("inside.openings", () => new[] { BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors }
                 .SelectMany(c => new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().OfType<FamilyInstance>())
-                .Select(fi => OpeningOf(doc, fi, phase)).ToList());
+                .Select(fi => OpeningOf(doc, fi, phase, anyGround)).ToList());
             ReadSteps.Count("inside.openings", openings.Count);
             // the design options (for the trial's log): what is read is the main model and, of each set, the option being
             // edited or else its primary; Revit's enclosed areas (plan circuits) are the main model's own
@@ -92,6 +97,7 @@ internal static class RevitInterior
                 .Select(l => new LevelRecord(l.UniqueId, l.Name, l.ProjectElevation)).ToList(),
             SeparationLines = ReadSteps.Time("inside.separation_lines", () => SeparationLinesOf(doc, diagnostics)),
             GrossAreas = phase is null ? null : ReadSteps.Time("inside.gross_areas", () => GrossAreasOf(doc, phase, diagnostics)),
+            Grounds = grounds,
             Diagnostics = diagnostics,
         };
     }
@@ -1421,7 +1427,7 @@ internal static class RevitInterior
 
     // ---- a window or door ---------------------------------------------------------------------------------------
 
-    private static OpeningRecord OpeningOf(Document doc, FamilyInstance fi, Phase? phase)
+    private static OpeningRecord OpeningOf(Document doc, FamilyInstance fi, Phase? phase, bool anyGround)
     {
         var type = doc.GetElement(fi.GetTypeId());
         var level = doc.GetElement(fi.LevelId) as Level;
@@ -1449,8 +1455,131 @@ internal static class RevitInterior
             WallOpening = cut.Points,
             WallOpeningBy = cut.By,
             WallOpeningUnread = cut.Unread,
+            // what stands outside it, only where a ground is drawn (GroundReader reads the ground there)
+            Around = anyGround ? ReadSteps.Time("inside.opening.around", () => AroundOf(doc, fi)) : null,
             Diagnostics = cut.Words,
         };
+    }
+
+    // ---- the ground (GroundReader) -------------------------------------------------------------------------------
+
+    /// <summary>Every <c>Toposolid</c> and every older <c>TopographySurface</c>, each as triangles; null when they
+    /// couldn't be listed (then no ground is read).</summary>
+    private static List<GroundRecord>? GroundsOf(Document doc, List<string> diagnostics)
+    {
+        try
+        {
+            var grounds = new List<GroundRecord>();
+            foreach (var s in new FilteredElementCollector(doc).OfClass(typeof(Toposolid)).WhereElementIsNotElementType().Cast<Toposolid>())
+                grounds.Add(GroundOf(doc, s, "Toposolid", s.HostTopoId));
+#pragma warning disable CS0618 // TopographySurface: older models still hold them, so they are read as ground too
+            foreach (var s in new FilteredElementCollector(doc).OfClass(typeof(TopographySurface)).WhereElementIsNotElementType().Cast<TopographySurface>())
+                grounds.Add(GroundOf(doc, s, "TopographySurface", s.IsSiteSubRegion ? s.AsSiteSubRegion()?.HostId : null));
+#pragma warning restore CS0618
+            diagnostics.Add("grounds: " + string.Join("; ", grounds.Select(g =>
+                $"{g.Kind} {g.UniqueId}: {(g.Triangles is { } x ? x.Count.ToString(CultureInfo.InvariantCulture) : "unread")} triangles")));
+            return grounds;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            diagnostics.Add($"the grounds couldn't be listed ({x.GetType().Name}: {x.Message})");
+            return null;
+        }
+    }
+
+    /// <summary>A ground's triangles: each solid face's (<c>Face.Triangulate()</c>), each mesh's; null when any face
+    /// gives none, <c>get_Geometry</c> refuses, or a piece of another kind is found (never the triangles read alone).</summary>
+    private static GroundRecord GroundOf(Document doc, Element e, string kind, ElementId? host)
+    {
+        var triangles = new List<GroundTriangle>();
+        var failed = false;
+        void Add(Mesh m)
+        {
+            for (var i = 0; i < m.NumTriangles; i++)
+            {
+                var tr = m.get_Triangle(i);
+                triangles.Add(new GroundTriangle(P(tr.get_Vertex(0)), P(tr.get_Vertex(1)), P(tr.get_Vertex(2))));
+            }
+        }
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+            {
+                switch (o)
+                {
+                    case Solid s:
+                        foreach (Face f in s.Faces)
+                        {
+                            if (f.Triangulate() is { NumTriangles: > 0 } m)
+                                Add(m);
+                            else
+                                failed = true;
+                        }
+                        break;
+                    case Mesh m:
+                        Add(m);
+                        break;
+                    case GeometryInstance gi:
+                        if (gi.GetInstanceGeometry() is { } inner)
+                            Walk(inner);
+                        else
+                            failed = true;
+                        break;
+                    case GeometryElement nested:
+                        Walk(nested);
+                        break;
+                    case Curve or PolyLine or Autodesk.Revit.DB.Point:
+                        break;
+                    default:
+                        failed = true;
+                        break;
+                }
+            }
+        }
+        try
+        {
+            if (e.get_Geometry(Fine) is { } g)
+                Walk(g);
+            else
+                failed = true;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            failed = true;
+        }
+        var name = doc.GetElement(e.GetTypeId())?.Name ?? e.Name;
+        return new GroundRecord(e.UniqueId, kind, name, failed || triangles.Count == 0 ? null : triangles,
+                                Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id),
+                                host is null || host == ElementId.InvalidElementId ? null : doc.GetElement(host)?.UniqueId);
+    }
+
+    /// <summary>Every model element (not view-specific) whose box meets the instance's own box widened
+    /// <see cref="GroundReader.Around"/> in plan and reaching <see cref="GroundReader.Below"/> under it, each with its
+    /// box, category, phase and option; null when it couldn't be looked for (no box, Revit refused).</summary>
+    private static List<NearbyElement>? AroundOf(Document doc, FamilyInstance fi)
+    {
+        try
+        {
+            if (fi.get_BoundingBox(null) is not { } b)
+                return null;
+            var box = Box3.Turned(P(b.Min), P(b.Max), b.Transform is { } bt ? T(bt) : Reading.Transform3.Identity);
+            var outline = new Outline(new XYZ(box.Min.X - GroundReader.Around, box.Min.Y - GroundReader.Around, box.Min.Z - GroundReader.Below),
+                                      new XYZ(box.Max.X + GroundReader.Around, box.Max.Y + GroundReader.Around, box.Max.Z));
+            var list = new List<NearbyElement>();
+            foreach (var e in Collect(doc, outline))
+            {
+                if (e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model } c)
+                    continue;
+                list.Add(new NearbyElement(e.UniqueId, c.BuiltInCategory.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
+                                           Box: BoxOf(e), PhaseDemolished: Id(e.DemolishedPhaseId), DesignOption: Id(e.DesignOption?.Id)));
+            }
+            return list;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            return null;
+        }
     }
 
     /// <summary>A window or door type's own Width and Height, or null where it has none.</summary>

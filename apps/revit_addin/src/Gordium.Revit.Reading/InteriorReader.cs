@@ -145,8 +145,10 @@ public static class InteriorReader
         if (openingsNotRead.Count == 0 && records is not null)
         {
             var marked = MarkReading.InDesign(model).ToDictionary(e => e.UniqueId, StringComparer.Ordinal);
+            // the ground outside each window and door, only where a ground is drawn in the design checked (GroundReader)
+            var ground = GroundReader.Of(model) is { } grounds ? (grounds, UnknownSpaceList(model)) : ((GroundReader.Grounds, List<(EnclosedArea, string, List<P2>?)>)?)null;
             foreach (var o in MarkReading.Openings(model))
-                openings.Add(ReadOpening(model, records, marked[o.Id], o, notes, evidence));
+                openings.Add(ReadOpening(model, records, marked[o.Id], o, notes, evidence, plans, ground));
         }
         if (openingsNotRead.Count == 0 && openings.Count == 0)
             openingsNotRead = ["No windows or doors are drawn: no escape opening is read (never read as a house with none)"];
@@ -775,7 +777,8 @@ public static class InteriorReader
     // ---- a window or door ----------------------------------------------------------------------------------------
 
     private static JsonObject ReadOpening(RevitModel model, InteriorRecords records, MarkedElement e, OpeningMarks o,
-                                          List<InteriorNote> notes, JsonObject evidence)
+                                          List<InteriorNote> notes, JsonObject evidence, Dictionary<string, RoomPlan> plans,
+                                          (GroundReader.Grounds Set, List<(EnclosedArea Area, string Id, List<P2>? Outline)> Unknown)? ground)
     {
         var id = o.Id;
         void Out(string field, string why) => notes.Add(new(id, field, why));
@@ -808,6 +811,19 @@ public static class InteriorReader
             Out("stated_clear", "a door's maker's clear opening is sent with the door (doors); as an escape opening its " +
                                 "bottom isn't stated by a door's marks yet");
         opening["stated_well"] = StatedWell(e, o, Out);
+        // the ground just outside it, from a Toposolid stated to show the finished ground (GroundReader): below grade
+        // and the well's least depth are then measured; only an escape opening's reason why not is said (its rules
+        // read it), and nothing at all where no ground is drawn. A window's only: a door's clear bottom isn't sent, so
+        // its ground could only unsettle its Below grade mark, never measure it (review round 1)
+        if (ground is { } g && rec is not null && o.Kind == MarkedKind.Window)
+        {
+            if (evidence[id] is not JsonObject seen)
+                evidence[id] = seen = new JsonObject();
+            if (GroundReader.Outside(model, g.Set, rec, opening["room"]?.GetValue<string>(), "window", plans, g.Unknown, seen, out var why) is { } at)
+                opening["ground_outside"] = at;
+            else if (o.Escape is true)
+                Out("ground_outside", why!);
+        }
         return opening;
     }
 

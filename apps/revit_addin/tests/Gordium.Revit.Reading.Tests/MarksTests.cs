@@ -129,6 +129,8 @@ public sealed class MarksTests
             ("Gordium: Leaves", "f23ad40b-e048-4b61-a92a-b7963e64d4cf", MarkValueKind.Integer, MarkBinding.Type, ["OST_Doors"]),
             // what latches or locks each door (BCNYS 1010.2.8): no door family or type parameter says it
             ("Gordium: Hardware", "9900f8fa-52dd-4654-bda2-1e1a4b9cb959", MarkValueKind.Text, MarkBinding.Instance, ["OST_Doors"]),
+            // the Toposolids show the finished ground (RCNYS R202 GRADE): only then is the ground at each opening read
+            ("Gordium: Toposolid is finished ground", "bbb69f1e-d644-4830-8ba0-cd958c04bbb8", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // an escape opening below grade and its area well (BCNYS 1031.5): a well isn't in Revit's vocabulary
             ("Gordium: Below grade", "250e27a5-d58b-4ddf-8ece-b35235ccc1f2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
             ("Gordium: Well area", "6e368439-8dd1-48c8-99bf-eff9afd45b39", MarkValueKind.Area, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),

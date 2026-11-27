@@ -59,10 +59,35 @@ public sealed record InteriorRecords
     /// outlines (section 10). Null when the Revit layer didn't read them: then no outline is sent.</summary>
     public IReadOnlyDictionary<string, GrossArea>? GrossAreas { get; init; }
 
+    /// <summary>Every ground the model draws (<see cref="GroundRecord"/>): each <c>Toposolid</c> and each older
+    /// <c>TopographySurface</c>, in any phase or design option (the reader keeps the design checked's). The ground at
+    /// each window and door is read from them (<see cref="GroundReader"/>). Null when the Revit layer didn't read them:
+    /// then no ground is read, as with none drawn.</summary>
+    public IReadOnlyList<GroundRecord>? Grounds { get; init; }
+
     /// <summary>What the Revit layer looked at and what Revit said (each level's enclosed areas, an error), for the
     /// trial's log only: never read by a decision.</summary>
     public IReadOnlyList<string> Diagnostics { get; init; } = [];
 }
+
+/// <summary>A ground drawn in the model: a <c>Toposolid</c> (Revit 2024 and later) or an older
+/// <c>TopographySurface</c>, as triangles (internal coordinates, feet): a Toposolid's every face (<c>get_Geometry</c>,
+/// Fine: its solids' faces, <c>Face.Triangulate()</c>), a topography surface's mesh (<c>Mesh.get_Triangle</c>). The
+/// ground at a plan point is the highest of its triangles over it.</summary>
+/// <param name="UniqueId"><c>Element.UniqueId</c>.</param>
+/// <param name="Kind">"Toposolid" or "TopographySurface", for the words.</param>
+/// <param name="Name">Its type's name, for the words.</param>
+/// <param name="Triangles">Its triangles, or null when its geometry couldn't be read (a face Revit gave no triangles
+/// for, <c>get_Geometry</c> refused, or a piece of another kind): then no ground is read from the model.</param>
+/// <param name="PhaseDemolished"><c>Element.DemolishedPhaseId</c>.</param>
+/// <param name="DesignOption"><c>Element.DesignOption</c>'s id.</param>
+/// <param name="Host">A Toposolid subdivision's host Toposolid (<c>Toposolid.HostTopoId</c>), by <c>UniqueId</c>, or
+/// null: a subdivision lies on its host (a path, a lawn), so over it the subdivision's top is the ground.</param>
+public sealed record GroundRecord(string UniqueId, string Kind, string? Name, IReadOnlyList<GroundTriangle>? Triangles,
+                                  string? PhaseDemolished = null, string? DesignOption = null, string? Host = null);
+
+/// <summary>A triangle of a ground's surface, its three corners (internal coordinates, feet).</summary>
+public sealed record GroundTriangle(Xyz A, Xyz B, Xyz C);
 
 /// <summary>A level's building outline, the exterior walls' outer faces as Revit's room logic gives them (section 10):
 /// room separation lines drawn as a rectangle 20 ft round the level's walls, a Room placed in the ring, its boundary at
@@ -436,6 +461,13 @@ public sealed record OpeningRecord
     /// Revit gives no edges for): the opening this window cuts is unread, never looked for on the faces that could be
     /// read alone (its bottom could be on the one that couldn't). <see cref="WallOpening"/> is then null.</summary>
     public bool WallOpeningUnread { get; init; }
+
+    /// <summary>Every model element (not view-specific) whose box (<c>get_BoundingBox(null)</c>) meets the instance's
+    /// own box widened <see cref="GroundReader.Around"/> in plan and reaching <see cref="GroundReader.Below"/> under it:
+    /// what could stand over the ground just outside it (an area well drawn as a family, a step, a slab, a deck), each
+    /// with its box, category, phase and option (no faces). Its own box, its host wall and the grounds are among them;
+    /// the reader sets those apart. Null when it couldn't be looked for: then no ground is read at the opening.</summary>
+    public IReadOnlyList<NearbyElement>? Around { get; init; }
 
     /// <summary>What the Revit layer looked at for this window (the wall's faces, the ids that generated them), for the
     /// trial's log only: never read by a decision.</summary>

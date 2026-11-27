@@ -40,6 +40,9 @@ internal sealed class FakeHouse
     public Dictionary<Guid, MarkValue> ProjectMarks { get; } = new() { [Marks.AllStairs.Guid] = new(true, 1) };   // ticked
     public int CoordinationModels { get; set; }
 
+    /// <summary>The grounds drawn (Toposolids), none by default (no ground: nothing read at the openings).</summary>
+    public List<GroundRecord>? Grounds { get; set; }
+
     public RevitModel Model() => new()
     {
         Document = Name,
@@ -52,8 +55,41 @@ internal sealed class FakeHouse
         {
             Rooms = Rooms, Openings = Openings, EnclosedAreas = Areas, Links = Links, Stairs = Stairs,
             StairCandidates = StairCandidates, CoordinationModels = CoordinationModels, Railings = Railings, Ramps = Ramps,
+            Grounds = Grounds,
         },
     };
+
+    /// <summary>A Toposolid over the whole drawing (shared plan coordinates, ft, <paramref name="reach"/> each way of the
+    /// origin) whose top is <paramref name="z"/> at the corners of a grid (its lines at <paramref name="xs"/> and
+    /// <paramref name="ys"/> besides its edges: planes between), two triangles a cell, turned into internal coordinates as
+    /// the Revit layer gives them.</summary>
+    public GroundRecord Toposolid(Func<double, double, double> z, string id = "topo-1", string? name = "Finished grade",
+                                  string? host = null, double reach = 100, double[]? xs = null, double[]? ys = null)
+    {
+        Xyz At(double x, double y) => Fake.Place(x, y, z(x, y));
+        var gx = (xs ?? []).Append(-reach).Append(reach).Distinct().Order().ToList();
+        var gy = (ys ?? []).Append(-reach).Append(reach).Distinct().Order().ToList();
+        var triangles = new List<GroundTriangle>();
+        for (var i = 0; i + 1 < gx.Count; i++)
+            for (var j = 0; j + 1 < gy.Count; j++)
+            {
+                Xyz a = At(gx[i], gy[j]), b = At(gx[i + 1], gy[j]), c = At(gx[i + 1], gy[j + 1]), d = At(gx[i], gy[j + 1]);
+                triangles.Add(new GroundTriangle(a, b, c));
+                triangles.Add(new GroundTriangle(a, c, d));
+            }
+        return new GroundRecord(id, "Toposolid", name, triangles, Host: host);
+    }
+
+    /// <summary>The architect's word that the Toposolids show the finished ground (Project Information).</summary>
+    public void FinishedGround(bool? yes) => SetProject(Marks.ToposolidFinished, yes is { } y ? new MarkValue(true, y ? 1 : 0) : null);
+
+    private void SetProject(MarkDefinition mark, MarkValue? value)
+    {
+        if (value is null)
+            ProjectMarks.Remove(mark.Guid);
+        else
+            ProjectMarks[mark.Guid] = value;
+    }
 
     /// <summary>The drawing's rail width and a handrail's top over the line of nosings (recordings.py's RAIL, HANDRAIL_TOP).</summary>
     public double Rail => D(Drawing["rail"]);
@@ -580,6 +616,7 @@ internal sealed class FakeHouse
                 Type = type,
             });
             var cut = OpeningPlan(cx, cy, ox, oy, width / 2, Thick(w, t));
+            var wall = Thick(w, t);
             Openings.Add(new OpeningRecord
             {
                 UniqueId = uid, ToRoom = Uid(w["room"]!.GetValue<string>()), Host = WallOf(w), HostIsWall = true,
@@ -587,6 +624,14 @@ internal sealed class FakeHouse
                 Along = Fake.Place(-oy, ox, 0) - Fake.Place(0, 0, 0), TypeWidth = width, TypeHeight = height,
                 Placed = WindowFaces(w, Thick(w, t)).SelectMany(f => f.Points).ToList(),
                 WallOpening = cut.SelectMany(p => new[] { Fake.Place(p.X, p.Y, z + sill), Fake.Place(p.X, p.Y, z + sill + height) }).ToList(),
+                // the wall's two side faces: the room's at the window's centre line, the outside one a wall's thickness out
+                // (its cut, OpeningPlan, runs from one to the other); nothing stands outside it
+                WallSides =
+                [
+                    new WallFace(Fake.Place(cx + wall * ox, cy + wall * oy, z), Fake.Place(ox, oy, 0) - Fake.Place(0, 0, 0)),
+                    new WallFace(Fake.Place(cx, cy, z), Fake.Place(-ox, -oy, 0) - Fake.Place(0, 0, 0)),
+                ],
+                Around = [],
             });
         }
         DrawStairs();
