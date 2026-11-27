@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Gordium.Worker;
 using Xunit;
 
@@ -14,12 +15,22 @@ public sealed class FollowUpQuestionsTests
 {
     private static readonly WorkerAbout About = new("1.3", "gordium.site/1", new string('f', 64), new Dictionary<string, string>());
 
+    private static readonly string File_ = Path.Combine(Env.Repo, "apps", "revit_addin", "tests", "Gordium.Revit.Reading.Tests",
+                                                         "answers", "four_unit_apartment_check_answer.json");
+
     private static ResultModel Apartment()
     {
-        var file = Path.Combine(Env.Repo, "apps", "revit_addin", "tests", "Gordium.Revit.Reading.Tests", "answers", "four_unit_apartment_check_answer.json");
-        var doc = JsonDocument.Parse(File.ReadAllText(file, Encoding.UTF8));
+        var doc = JsonDocument.Parse(File.ReadAllText(File_, Encoding.UTF8));
         return ResultRows.Build(CheckResult.Parse(new WorkerAnswer(doc.RootElement.GetProperty("result").Clone(), About)), "New Construction", [], null);
     }
+
+    /// <summary>How many of the answer's results need review, read from its JSON (never through the pane): the checker's
+    /// word, and "not applicable" with no reason, as ResultViewsTests counts them (the answer is made, so no number is
+    /// written here).</summary>
+    private static int InReview() =>
+        JsonNode.Parse(File.ReadAllText(File_, Encoding.UTF8))!["result"]!["view"]!["items"]!.AsArray()
+                .Count(i => (string?)i!["status"] is "needs_review"
+                            || ((string?)i!["status"] is "not_applicable" && string.IsNullOrWhiteSpace((string?)i!["reason"])));
 
     private static IReadOnlyList<SetupField> Fields() =>
         SetupScreen.Build(new RevitModel { Document = "apartment.rvt", Marked = [], ProjectMarks = new Dictionary<Guid, MarkValue>() }, [], null).Fields;
@@ -146,7 +157,7 @@ public sealed class FollowUpQuestionsTests
                 Assert.Equal(Verdict.NeedsReview, r.Verdict);
                 Assert.All(rows.Where(p => p.Row.Id == r.Id), p => Assert.NotEqual(PanelStatus.Complies, p.Status));
             }
-        Assert.StartsWith("276 need review", m.Views!.Summary, StringComparison.Ordinal);
+        Assert.StartsWith($"{InReview()} need review", m.Views!.Summary, StringComparison.Ordinal);   // every one still counted
     }
 
     /// <summary>Review round 1: a result's page offered the follow-ups the card held back ("Answer 5 questions" with one
