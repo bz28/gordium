@@ -6152,25 +6152,31 @@ rules:
   topic: means_of_egress
   title: Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)
   applies_when: occupancy_group_i4
-  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
-    and space_common_path <= 75)
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+    and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75)
   review_when:
-  - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 75 or not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2))
+  - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 75 or not (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
     reason: 'Two exits or more, and a common path over 75 ft (or a building not sprinklered throughout, where the table gives
       Group I-4 no common path): whether Table 1006.2.1 caps the common path or only decides when a second exit is needed
       is open (the open question); a person checks.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and ((space_occupant_load <= 10 and (sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2) and space_common_path <= 75))
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75))
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use, stated or not
       ruled out (as the architect states it): a person checks.'
   - when: not space_is_exit and assembly_fixed_seating and (space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2) and space_common_path <= 75))
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75))
     reason: 'The building may have a room used for assembly purposes with fixed seating, in any group (303.1.1 to 303.1.3),
       stated or not ruled out: its common path is a portion of its exit access travel (202 COMMON PATH OF EGRESS TRAVEL),
       which 1030.7 measures along the aisles and aisle accessways, never over the seats, and 1030.8 caps at 30 ft from any
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and not occupancy_group
+      in ["R-1", "R-2", "R-3", "R-4"] and space_occupant_load <= 10 and space_common_path <= 75
+    reason: 'An NFPA 13R system in a building not stated Group R: 903.3.1.2 permits one only in Group R occupancies (and in
+      Group I-1 Condition 1, 903.2.6 exception 1), so Table 1006.2.1''s sprinklered I-4 row (note a: a system per 903.3.1.1
+      or 903.3.1.2, Section 903 saying where 13R is permitted) may not apply: a person checks.'
   for_each: space
   when_none: needs_review
   sources:
@@ -6419,7 +6425,9 @@ rules:
     a Claude Code session (2026-11-21). Review round 2 (2026-11-23): a room with fixed seating, in any group, stated or not
     ruled out, needs review over 1030.8''s 30 ft (75 ft); a one-exit space where a 1006.2.2 room is stated or not ruled out
     needs review (as its siblings). Review round 3 (2026-11-23): with fixed seating stated or not ruled out, the row needs
-    review at any common path, as its travel does (202, 1030.7), where it would otherwise pass.'
+    review at any common path, as its travel does (202, 1030.7), where it would otherwise pass. A stated NFPA 13R system counts
+    only in a building stated Group R: 903.3.1.2 permits it only in Group R occupancies (and in Group I-1 Condition 1, 903.2.6
+    exception 1), so outside one it needs review between the limits, never a pass (Chapter 9 part a''s review round 1, 2026-11-27).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_other_occupancies
@@ -12474,35 +12482,42 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Two exits at least 1/2 the diagonal apart, 1/3 sprinklered (BCNYS 1007.1.1)
-  check: exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1 / 2)
+  check: exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1",
+    "R-2", "R-3", "R-4"]) else 1 / 2)
   review_when:
   - when: story_exit_count < 2
     reason: 'Fewer than two exits on the story: whether two are required is the rule “Exits per story by occupant load, one
       where 1006.3.4 allows (BCNYS 1006.3.3)”''s question; a person checks.'
-  - when: story_exit_count >= 2 and not (exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
-      else 1 / 2)) and (not (occupancy_group_i4 or other_occupancy_present) or other_occupancy_present and occupancy_group
-      == "mixed" or story_rooms_exit_directly_outside or (occupancy_group_i4 and story_first_above_or_below_grade and story_occupant_load
-      <= 10 and egress_travel_distance <= 75))
+  - when: story_exit_count >= 2 and not (exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2)) and (not (occupancy_group_i4 or other_occupancy_present)
+      or other_occupancy_present and occupancy_group == "mixed" or story_rooms_exit_directly_outside or (occupancy_group_i4
+      and story_first_above_or_below_grade and story_occupant_load <= 10 and egress_travel_distance <= 75))
     reason: 'The story''s exits are close together, but it may not need two: one exit may do here (1006.3.4: Table 1006.3.4(2)''s
       row, or rooms that exit directly outside), or the building is in another occupancy (or its occupancy isn''t stated).
       Whether 1007.1.1 applies to it is a person''s check.'
-  - when: story_exit_count >= 2 and not exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
-      else 1 / 2) and other_occupancy_present and (occupancy_group in ["R-3", "R-4", "S-2"] or occupancy_group == "R-2" and
-      not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance <= 125)
+  - when: story_exit_count >= 2 and not exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2) and other_occupancy_present and (occupancy_group in
+      ["R-3", "R-4", "S-2"] or occupancy_group == "R-2" and not story_fourth_or_higher_above_grade_plane and story_dwelling_units
+      <= 4 and egress_travel_distance <= 125)
     reason: 'A close pair in a building of one group other than I-4 whose own row could allow one exit (read loosely, sprinklered
       or not: Table 1006.3.4(1) or (2) for a story, Table 1006.2.1 for a space): two may not be required, a person checks
       (2026-11-23). Elsewhere two are required and a close pair fails.'
-  - when: story_exit_count >= 2 and not exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
-      else 1 / 2) and other_occupancy_present and (story_first_above_or_below_grade and (occupancy_group in ["A-1", "A-2",
-      "A-3", "A-4", "A-5", "E", "M", "U"] and story_occupant_load <= 49 and egress_travel_distance <= 75 or occupancy_group
-      in ["B", "F-1", "F-2"] and story_occupant_load <= 49 and egress_travel_distance <= 100 or occupancy_group == "S-1" and
-      story_occupant_load <= 29 and egress_travel_distance <= 100 or occupancy_group in ["H-2", "H-3"] and story_occupant_load
+  - when: story_exit_count >= 2 and not exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2) and other_occupancy_present and (story_first_above_or_below_grade
+      and (occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "E", "M", "U"] and story_occupant_load <= 49 and egress_travel_distance
+      <= 75 or occupancy_group in ["B", "F-1", "F-2"] and story_occupant_load <= 49 and egress_travel_distance <= 100 or occupancy_group
+      == "S-1" and story_occupant_load <= 29 and egress_travel_distance <= 100 or occupancy_group in ["H-2", "H-3"] and story_occupant_load
       <= 3 and egress_travel_distance <= 25 or occupancy_group in ["H-4", "H-5", "I-1", "I-2", "I-3", "R-1", "R-2"] and story_occupant_load
       <= 10 and egress_travel_distance <= 75) or story_second_above_grade_plane and occupancy_group in ["B", "F-1", "F-2",
       "M", "S-1"] and story_occupant_load <= 29 and egress_travel_distance <= 75)
     reason: 'A close pair in a building of one group other than I-4 whose own row could allow one exit (read loosely, sprinklered
       or not: Table 1006.3.4(1) or (2) for a story, Table 1006.2.1 for a space): two may not be required, a person checks
       (2026-11-23). Elsewhere two are required and a close pair fails.'
+  - when: story_exit_count >= 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and not occupancy_group in ["R-1",
+      "R-2", "R-3", "R-4"] and exit_remoteness_ratio >= 1 / 3 and not exit_remoteness_ratio >= 1 / 2
+    reason: 'An NFPA 13R system in a building not stated Group R: 903.3.1.2 permits one only in Group R occupancies (and in
+      Group I-1 Condition 1, 903.2.6 exception 1), so 1007.1.1''s one-third for a sprinklered building may not apply; at one-third
+      of the diagonal or more but under one-half, a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -12740,7 +12755,9 @@ rules:
     review (1006.3.4 item 3: a mechanically parked garage may have one exit at any load). Group 2 review round 2 (2026-11-24):
     the loose test reads each Table 1006.3.4(2) row at its own larger column (the first story A, E, M, U 75 ft; S-1 29 occupants;
     the second story 75 ft), so a close pair fails wherever the row itself fails one exit. The I-4 row''s own test (the first
-    story, 10 occupants, 75 ft) reads Group I-4 only.'
+    story, 10 occupants, 75 ft) reads Group I-4 only. A stated NFPA 13R system counts only in a building stated Group R: 903.3.1.2
+    permits it only in Group R occupancies (and in Group I-1 Condition 1, 903.2.6 exception 1), so outside one it needs review
+    between the limits, never a pass (Chapter 9 part a''s review round 1, 2026-11-27).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_2_three_or_more_exits
@@ -12771,13 +12788,14 @@ rules:
   kind: rule
   topic: means_of_egress
   title: A space's doorways 1/2 the diagonal apart, 1/3 sprinklered (BCNYS 1007.1.1)
-  check: space_is_exit or space_exit_count < 2 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
-    else 1 / 2)
+  check: space_is_exit or space_exit_count < 2 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+    and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2)
   review_when:
   - when: not space_is_exit and space_exit_count >= 2 and not (space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2 else 1 / 2)) and (not (occupancy_group_i4 or other_occupancy_present) or other_occupancy_present
-      and occupancy_group == "mixed" or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and
-      space_common_path <= 75))
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2)) and (not (occupancy_group_i4
+      or other_occupancy_present) or other_occupancy_present and occupancy_group == "mixed" or (space_occupant_load <= 10
+      and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path
+      <= 75))
     reason: 'The space''s doorways are close together, but it may not need two: Table 1006.2.1''s I-4 row (10 or fewer occupants,
       sprinklered, a common path of 75 ft or less) lets it have one, or the space is in another occupancy (or its occupancy
       isn''t stated), whose row is a flag (the rule “Table 1006.2.1 in a building of two or more groups (BCNYS)”). Whether
@@ -12794,6 +12812,12 @@ rules:
     reason: 'A close pair in a building of one group other than I-4 whose own row could allow one exit (read loosely, sprinklered
       or not: Table 1006.3.4(1) or (2) for a story, Table 1006.2.1 for a space): two may not be required, a person checks
       (2026-11-23). Elsewhere two are required and a close pair fails.'
+  - when: not space_is_exit and space_exit_count >= 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and not occupancy_group
+      in ["R-1", "R-2", "R-3", "R-4"] and space_exit_remoteness_ratio >= 1 / 3 and not space_exit_remoteness_ratio >= 1 /
+      2
+    reason: 'An NFPA 13R system in a building not stated Group R: 903.3.1.2 permits one only in Group R occupancies (and in
+      Group I-1 Condition 1, 903.2.6 exception 1), so 1007.1.1''s one-third for a sprinklered building may not apply; at one-third
+      of the diagonal or more but under one-half, a person checks.'
   for_each: space
   when_none: needs_review
   sources:
@@ -12998,7 +13022,10 @@ rules:
     the building is of one group other than I-4, a close pair fails unless that group''s row of Table 1006.3.4(1) or (2) (a
     story) or Table 1006.2.1 (a space) could allow one exit, read loosely (the larger value of its columns), so it never fails
     where one could do. Group 2 review round 1 (2026-11-24): in a one-group R-3 or R-4 building a space of 20 or fewer may
-    have one exit whatever its common path (Table 1006.2.1 note e), so its close pair needs review.'
+    have one exit whatever its common path (Table 1006.2.1 note e), so its close pair needs review. A stated NFPA 13R system
+    counts only in a building stated Group R: 903.3.1.2 permits it only in Group R occupancies (and in Group I-1 Condition
+    1, 903.2.6 exception 1), so outside one it needs review between the limits, never a pass (Chapter 9 part a''s review round
+    1, 2026-11-27).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_2_space_three_or_more
@@ -13006,13 +13033,20 @@ rules:
   topic: means_of_egress
   title: 'A space needing three exits: two arranged per 1007.1.1 (BCNYS 1007.1.2)'
   check: space_is_exit or space_exit_count < 3 or space_occupant_load <= 500 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
-    or sprinklered_903_3_1_2 else 1 / 2)
+    or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2)
   review_when:
   - when: not space_is_exit and space_exit_count >= 3 and (space_occupant_load <= 500 or space_exit_remoteness_ratio >= (1
-      / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1 / 2))
+      / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 /
+      2))
     reason: 'Three or more doorways: three aren''t required here (500 occupants or fewer: 1006.2.1.1 asks three from 501,
       Table 1006.3.3''s two-exit band is 1-500), so whether two must be apart is 1007.1.1''s question; or two are far enough
       apart and whether the others are a reasonable distance apart is a person''s judgment.'
+  - when: not space_is_exit and space_exit_count >= 3 and space_occupant_load > 500 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1
+      and not occupancy_group in ["R-1", "R-2", "R-3", "R-4"] and space_exit_remoteness_ratio >= 1 / 3 and not space_exit_remoteness_ratio
+      >= 1 / 2
+    reason: 'An NFPA 13R system in a building not stated Group R: 903.3.1.2 permits one only in Group R occupancies (and in
+      Group I-1 Condition 1, 903.2.6 exception 1), so the one-third for a sprinklered building may not apply; at one-third
+      of the diagonal or more but under one-half, a person checks.'
   for_each: space
   when_none: needs_review
   sources:
@@ -13147,7 +13181,9 @@ rules:
     are too close; where three or more are drawn but three aren''t required, or the occupant load isn''t given, it needs review,
     never fail. For every occupancy. The 500 is Table 1006.3.3''s printed two-exit band (''1-500'', a story''s), used for
     a space by analogy; a fractional load over 500 needs three (the finding on loads over 500). Hand-drafted in a Claude Code
-    session (2026-11-21).'
+    session (2026-11-21). A stated NFPA 13R system counts only in a building stated Group R: 903.3.1.2 permits it only in
+    Group R occupancies (and in Group I-1 Condition 1, 903.2.6 exception 1), so outside one it needs review between the limits,
+    never a pass (Chapter 9 part a''s review round 1, 2026-11-27).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
   findings:

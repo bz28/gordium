@@ -363,3 +363,35 @@ def test_the_room_walks_oracle_catches_a_limit_changed(book, ctx):
                                 {k: v for k, v in (("space_floor_area", a), ("space_occupant_load", ld)) if v is not None},
                                 allowed) not in _room_law("A-1", 12000, 300, ["A-1"], "none", a, ld)
                    for a, ld in cases), (old, new)
+
+def test_no_rule_passes_on_a_13r_system_outside_group_r(book, ctx):
+    """Review round 1 (2026-11-27), the class: 903.3.1.2 permits an NFPA 13R system only in Group R occupancies, so no
+    rule may pass a part with a 13R system stated in a building of another group (or two or more groups) that it
+    doesn't pass with no system at all. 1007.1.1's two remoteness rules and Group I-4's two-exit rule (1006.2.1) did
+    (a Group B story's exits 0.4 of the diagonal apart passed at one-third). Walked over every rule that reads the
+    13R fact, each worked example's parts, and every group but R."""
+    allowed, wrong, walked = ctx.allowed(), [], 0
+    others = [[g] for g in GROUPS if not g.startswith("R-")] + [["M", "R-2"], ["B", "I-1"]]
+    for r in book:
+        reads = {n for t in [r.get("check")] + [w["when"] for w in r.get("review_when") or []] if t
+                 for n in formula.names(t)}
+        if r["kind"] != "rule" or "sprinklered_903_3_1_2" not in reads or not parts.is_part_rule(r):
+            continue
+        for e in r.get("examples") or []:
+            kind = r["for_each"]
+            if not (e.get("parts") or {}).get(kind):
+                continue
+            # the example's other facts, its groups and system replaced by each case's
+            facts = {k: v for k, v in e["given"].items()
+                     if code_scope.DERIVED.get(k, (None,))[0] not in ("occupancy_groups", "sprinkler_system")}
+            for groups in others:
+                answers = {}
+                for system in ("nfpa_13r", "none"):
+                    values = {**facts, **code_scope.building_measures({"occupancy_groups": groups,
+                                                                       "sprinkler_system": system})}
+                    answers[system] = [row["outcome"] for row in parts.rows(r, e["parts"], values, allowed)]
+                walked += 1
+                for with_13r, without in zip(answers["nfpa_13r"], answers["none"]):
+                    if with_13r == "pass" and without != "pass":
+                        wrong.append((r["id"], groups, e.get("note", "")[:60]))
+    assert walked > 500 and not wrong, wrong[:5]
