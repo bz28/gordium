@@ -4033,11 +4033,12 @@ rules:
   - given:
       sprinklered_903_3_1_2: true
     expect: needs_review
-    note: 'An NFPA 13R system is permitted only in Group R occupancies four stories or fewer above grade plane (stories counted
-      from grade plane where built per 510.2 or 510.4), the roof assembly less than 45 feet (Group R-2) or the highest floor
-      30 feet or less (other Group R) above the lowest level of fire department vehicle access, and the lowest floor 30 feet
-      or less below it; elsewhere it isn''t a system 903.3.1 accepts, nor one Chapter 10''s sprinklered allowances count:
-      a person''s check.'
+    note: 'An NFPA 13R system is permitted only in Group R occupancies four stories or fewer above grade plane (stories
+      counted from grade plane where built per 510.2 or 510.4), the roof assembly less than 45 feet (Group R-2) or the highest
+      floor 30 feet or less (other Group R) above the lowest level of fire department vehicle access, and the lowest floor 30
+      feet or less below it. Chapter 10''s sprinklered allowances count a stated 13R system only in a building stated Group
+      R, taking its stories and heights on the architect''s statement (903.2.8''s rule fails one above four stated stories):
+      whether these limits are met is a person''s check.'
   - given: {}
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
@@ -4046,8 +4047,10 @@ rules:
     expect: not_applicable
     note: 'No NFPA 13R system: not applicable.'
   notes: '903.3.1.2: an NFPA 13R system only in Group R, four stories or fewer above grade plane, within its heights of the
-    lowest level of fire department vehicle access (not in the model). Chapter 10''s rules count a stated 13R system only
-    in Group R (Chapter 10 plan, group 5a''s round 1: a 13R system outside Group R had passed). Hand-drafted in a Claude Code
+    lowest level of fire department vehicle access (not in the model). Chapter 10''s rules count a stated 13R system only in
+    a building stated Group R (Chapter 10 plan, group 5a''s round 1; Chapter 9 part a''s review round 1 brought 1007.1.1,
+    1007.1.2 and Group I-4''s two exits in line), its stories and heights taken on the architect''s statement, as the Chapter
+    10 plan decided (group 4b); 903.2.8''s rule fails a 13R system above four stated stories. Hand-drafted in a Claude Code
     session (2026-11-27, Chapter 9 part a).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -10609,28 +10612,28 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Two exits at least 1/2 the diagonal apart, 1/3 sprinklered (BCNYS 1007.1.1)
-  check: exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1",
-    "R-2", "R-3", "R-4"]) else 1 / 2)
+  check: (exit_remoteness_ratio >= 1 / 2 or exit_remoteness_ratio >= 1 / 3 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+    and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
   review_when:
   - when: story_exit_count < 2
     reason: 'Fewer than two exits on the story: whether two are required is the rule “Exits per story by occupant load, one
       where 1006.3.4 allows (BCNYS 1006.3.3)”''s question; a person checks.'
-  - when: story_exit_count >= 2 and not (exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
-      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2)) and (not (occupancy_group_i4 or other_occupancy_present)
+  - when: story_exit_count >= 2 and not ((exit_remoteness_ratio >= 1 / 2 or exit_remoteness_ratio >= 1 / 3 and (sprinklered_903_3_1_1
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))) and (not (occupancy_group_i4 or other_occupancy_present)
       or other_occupancy_present and occupancy_group == "mixed" or story_rooms_exit_directly_outside or (occupancy_group_i4
       and story_first_above_or_below_grade and story_occupant_load <= 10 and egress_travel_distance <= 75))
     reason: 'The story''s exits are close together, but it may not need two: one exit may do here (1006.3.4: Table 1006.3.4(2)''s
       row, or rooms that exit directly outside), or the building is in another occupancy (or its occupancy isn''t stated).
       Whether 1007.1.1 applies to it is a person''s check.'
-  - when: story_exit_count >= 2 and not exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
-      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2) and other_occupancy_present and (occupancy_group in
-      ["R-3", "R-4", "S-2"] or occupancy_group == "R-2" and not story_fourth_or_higher_above_grade_plane and story_dwelling_units
+  - when: story_exit_count >= 2 and not (exit_remoteness_ratio >= 1 / 2 or exit_remoteness_ratio >= 1 / 3 and (sprinklered_903_3_1_1
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]))) and other_occupancy_present and (occupancy_group
+      in ["R-3", "R-4", "S-2"] or occupancy_group == "R-2" and not story_fourth_or_higher_above_grade_plane and story_dwelling_units
       <= 4 and egress_travel_distance <= 125)
     reason: 'A close pair in a building of one group other than I-4 whose own row could allow one exit (read loosely, sprinklered
       or not: Table 1006.3.4(1) or (2) for a story, Table 1006.2.1 for a space): two may not be required, a person checks
       (2026-11-23). Elsewhere two are required and a close pair fails.'
-  - when: story_exit_count >= 2 and not exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
-      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2) and other_occupancy_present and (story_first_above_or_below_grade
+  - when: story_exit_count >= 2 and not (exit_remoteness_ratio >= 1 / 2 or exit_remoteness_ratio >= 1 / 3 and (sprinklered_903_3_1_1
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]))) and other_occupancy_present and (story_first_above_or_below_grade
       and (occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "E", "M", "U"] and story_occupant_load <= 49 and egress_travel_distance
       <= 75 or occupancy_group in ["B", "F-1", "F-2"] and story_occupant_load <= 49 and egress_travel_distance <= 100 or occupancy_group
       == "S-1" and story_occupant_load <= 29 and egress_travel_distance <= 100 or occupancy_group in ["H-2", "H-3"] and story_occupant_load
@@ -10915,27 +10918,27 @@ rules:
   kind: rule
   topic: means_of_egress
   title: A space's doorways 1/2 the diagonal apart, 1/3 sprinklered (BCNYS 1007.1.1)
-  check: space_is_exit or space_exit_count < 2 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
-    and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2)
+  check: space_is_exit or space_exit_count < 2 or (space_exit_remoteness_ratio >= 1 / 2 or space_exit_remoteness_ratio >=
+    1 / 3 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
   review_when:
-  - when: not space_is_exit and space_exit_count >= 2 and not (space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
-      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2)) and (not (occupancy_group_i4
-      or other_occupancy_present) or other_occupancy_present and occupancy_group == "mixed" or (space_occupant_load <= 10
-      and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path
-      <= 75))
+  - when: not space_is_exit and space_exit_count >= 2 and not ((space_exit_remoteness_ratio >= 1 / 2 or space_exit_remoteness_ratio
+      >= 1 / 3 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]))))
+      and (not (occupancy_group_i4 or other_occupancy_present) or other_occupancy_present and occupancy_group == "mixed" or
+      (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2",
+      "R-3", "R-4"])) and space_common_path <= 75))
     reason: 'The space''s doorways are close together, but it may not need two: Table 1006.2.1''s I-4 row (10 or fewer occupants,
       sprinklered, a common path of 75 ft or less) lets it have one, or the space is in another occupancy (or its occupancy
       isn''t stated), whose row is a flag (the rule “Table 1006.2.1 in a building of two or more groups (BCNYS)”). Whether
       1007.1.1 applies to it is a person''s check.'
-  - when: not space_is_exit and space_exit_count >= 2 and not space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2 else 1 / 2) and other_occupancy_present and (occupancy_group in ["A-1", "A-2", "A-3", "A-4",
-      "A-5", "E", "M"] and space_occupant_load <= 49 and space_common_path <= 75 or occupancy_group in ["B", "F-1", "F-2",
-      "U"] and space_occupant_load <= 49 and space_common_path <= 100 or occupancy_group in ["H-1", "H-2", "H-3"] and space_occupant_load
-      <= 3 and space_common_path <= 25 or occupancy_group in ["H-4", "H-5", "I-1", "I-2", "R-1"] and space_occupant_load <=
-      10 and space_common_path <= 75 or occupancy_group == "I-3" and space_occupant_load <= 10 and space_common_path <= 100
-      or occupancy_group == "R-2" and space_occupant_load <= 20 and space_common_path <= 125 or occupancy_group in ["R-3",
-      "R-4"] and space_occupant_load <= 20 or occupancy_group in ["S-1", "S-2"] and space_occupant_load <= 29 and space_common_path
-      <= 100)
+  - when: not space_is_exit and space_exit_count >= 2 and not (space_exit_remoteness_ratio >= 1 / 2 or space_exit_remoteness_ratio
+      >= 1 / 3 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2)) and other_occupancy_present and (occupancy_group in ["A-1",
+      "A-2", "A-3", "A-4", "A-5", "E", "M"] and space_occupant_load <= 49 and space_common_path <= 75 or occupancy_group in
+      ["B", "F-1", "F-2", "U"] and space_occupant_load <= 49 and space_common_path <= 100 or occupancy_group in ["H-1", "H-2",
+      "H-3"] and space_occupant_load <= 3 and space_common_path <= 25 or occupancy_group in ["H-4", "H-5", "I-1", "I-2", "R-1"]
+      and space_occupant_load <= 10 and space_common_path <= 75 or occupancy_group == "I-3" and space_occupant_load <= 10
+      and space_common_path <= 100 or occupancy_group == "R-2" and space_occupant_load <= 20 and space_common_path <= 125
+      or occupancy_group in ["R-3", "R-4"] and space_occupant_load <= 20 or occupancy_group in ["S-1", "S-2"] and space_occupant_load
+      <= 29 and space_common_path <= 100)
     reason: 'A close pair in a building of one group other than I-4 whose own row could allow one exit (read loosely, sprinklered
       or not: Table 1006.3.4(1) or (2) for a story, Table 1006.2.1 for a space): two may not be required, a person checks
       (2026-11-23). Elsewhere two are required and a close pair fails.'
@@ -11159,12 +11162,12 @@ rules:
   kind: rule
   topic: means_of_egress
   title: 'A space needing three exits: two arranged per 1007.1.1 (BCNYS 1007.1.2)'
-  check: space_is_exit or space_exit_count < 3 or space_occupant_load <= 500 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
-    or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 / 2)
+  check: space_is_exit or space_exit_count < 3 or space_occupant_load <= 500 or (space_exit_remoteness_ratio >= 1 / 2 or space_exit_remoteness_ratio
+    >= 1 / 3 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
   review_when:
-  - when: not space_is_exit and space_exit_count >= 3 and (space_occupant_load <= 500 or space_exit_remoteness_ratio >= (1
-      / 3 if sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]) else 1 /
-      2))
+  - when: not space_is_exit and space_exit_count >= 3 and (space_occupant_load <= 500 or (space_exit_remoteness_ratio >= 1
+      / 2 or space_exit_remoteness_ratio >= 1 / 3 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group
+      in ["R-1", "R-2", "R-3", "R-4"]))))
     reason: 'Three or more doorways: three aren''t required here (500 occupants or fewer: 1006.2.1.1 asks three from 501,
       Table 1006.3.3''s two-exit band is 1-500), so whether two must be apart is 1007.1.1''s question; or two are far enough
       apart and whether the others are a reasonable distance apart is a person''s judgment.'
