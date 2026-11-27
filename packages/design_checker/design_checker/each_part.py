@@ -491,6 +491,8 @@ MEASURE_NAMES = {
     "mezzanines": "mezzanines (whether the building has any, per 505.2)",
     "loads_not_by_area": "loads not by area (whether any area is counted by its seats, lanes or actual load)",
     "space_is_exit": "exit status (whether the space is itself an exit)",
+    "story_assembly_seating_possible": "assembly seating on the story (whether a room on it may seat people served by aisles)",
+    "space_assembly_seating_possible": "assembly seating on the space's story (whether a room on it may seat people served by aisles)",
     "space_occupant_load": "occupant load",
     "story_first_above_or_below_grade": "whether the story is the first above or below grade",
     "story_second_above_grade_plane": "story's place (whether it is the second story above grade plane)",
