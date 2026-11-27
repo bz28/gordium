@@ -781,7 +781,8 @@ Needs the .NET 10 SDK, the .NET 8 runtime beside it (`dotnet --list-runtimes` sh
 10.x) and a Python with Gordium installed (`pip install -e ".[dev]"` at the repository root).
 
 ```bash
-python apps/revit_addin/tools/evals/make_apartment_answer.py   # first, from the repository folder (see below); ~30 s
+python apps/revit_addin/tools/evals/make_apartment_answer.py   # first, from the repository folder (see below); ~30 s;
+                                                               # this checkout's Gordium (PYTHONPATH or pip install -e)
 cd apps/revit_addin          # dotnet reads global.json (the pinned SDK) from the folder it runs in
 GORDIUM_PYTHON=/path/to/.venv/bin/python dotnet test                       # both, one after the other
 GORDIUM_PYTHON=/path/to/.venv/bin/python dotnet test --framework net8.0    # or one at a time

@@ -80,6 +80,24 @@ def test_by_default_it_publishes_with_the_same_ensure_the_tests_and_ci_use(monke
         tool.write(tmp_path / "a.json", answer=lambda request: {"ok": True, "result": {}})
 
 
+@pytest.mark.parametrize("module", ["rule_format", "design_checker"])
+def test_a_checker_of_another_checkout_is_refused_and_nothing_is_published_or_written(monkeypatch, tmp_path, module):
+    import design_checker
+    import rule_format.rulebook
+    from rule_format import published
+    if module == "rule_format":
+        monkeypatch.setattr(rule_format.rulebook, "REPO", tmp_path / "other")
+    else:
+        monkeypatch.setattr(design_checker, "__file__", str(tmp_path / "other/packages/design_checker/__init__.py"))
+    ran = []
+    monkeypatch.setattr(published, "ensure", lambda: ran.append("publish") or [])
+    with pytest.raises(tool.CheckerFailed, match="not from this checkout"):
+        tool.write(tmp_path / "a.json", answer=lambda request: ran.append("answer") or {"ok": True, "result": {}})
+    assert ran == [] and not (tmp_path / "a.json").exists()
+    monkeypatch.undo()
+    tool.own_checkout()                                     # the real imports (PYTHONPATH or pip install -e) are this one's
+
+
 def _steps_running(job: dict, words: str) -> list[int]:
     return [n for n, step in enumerate(job.get("steps") or []) if words in str(step.get("run") or "")]
 

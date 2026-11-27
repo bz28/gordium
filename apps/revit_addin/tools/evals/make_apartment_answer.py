@@ -32,9 +32,24 @@ class CheckerFailed(RuntimeError):
     """The checker answered the request with an error, not a result, or a state law couldn't be published."""
 
 
+def own_checkout() -> None:
+    """Refuses a checker of another checkout: Python imports Gordium from wherever it is installed (a worktree run with
+    the main clone's venv and no PYTHONPATH imports the main clone's), which would publish that checkout's laws and
+    write its answer here, the rules of another branch, with nothing saying so (merge review of PR #266)."""
+    import design_checker
+    import rule_format.rulebook
+    for name, where in (("rule_format", rule_format.rulebook.REPO), ("design_checker", design_checker.__file__)):
+        if not Path(where).resolve().is_relative_to(REPO):
+            raise CheckerFailed(f"{name} is imported from {Path(where).resolve()}, not from this checkout ({REPO}): "
+                                "set PYTHONPATH to this checkout's packages, or pip install -e it")
+
+
 def text(request: dict, answer=None, publish=None) -> str:
     """The answer file's text: the checker's answer as the worker writes it (indent 1, UTF-8 kept), after every state
-    law is published (`publish`: what couldn't be, as rule_format.published.ensure gives it)."""
+    law is published (`publish`: what couldn't be, as rule_format.published.ensure gives it). The checker and the
+    publisher, when not given, are this checkout's (own_checkout)."""
+    if publish is None or answer is None:
+        own_checkout()
     if publish is None:
         from rule_format.published import ensure as publish
     unpublished = publish()
