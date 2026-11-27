@@ -29,6 +29,111 @@ pieces:
     heading: Institutional Group I-4, day care facilities › Five or fewer persons receiving care in a dwelling unit
     rules:
     - general.bc_308_5_4_dwelling_unit
+  '402.1':
+    label: flag
+    heading: Applicability
+    rules:
+    - general.bc_402_1_mall_buildings
+  '402.8':
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_402_8_means_of_egress
+  402.8.1:
+    label: flag
+    heading: Means of egress › Mall width
+    rules:
+    - general.bc_402_8_1_mall_width
+  402.8.1.1:
+    label: flag
+    heading: Mall width › Minimum width
+    rules:
+    - general.bc_402_8_1_1_mall_minimum_width
+  402.8.2:
+    label: flag
+    heading: Means of egress › Determination of occupant load
+    rules:
+    - general.bc_402_8_2_tenant_occupant_load
+  402.8.2.1:
+    label: flag
+    heading: Determination of occupant load › Occupant formula
+    rules:
+    - general.bc_402_8_2_1_mall_occupant_formula
+  402.8.2.2:
+    label: flag
+    heading: Determination of occupant load › OLF range
+    rules:
+    - general.bc_402_8_2_2_olf_range
+  402.8.2.3:
+    label: flag
+    heading: Determination of occupant load › Anchor buildings
+    rules:
+    - general.bc_402_8_2_3_anchor_buildings
+  402.8.2.4:
+    label: flag
+    heading: Determination of occupant load › Food courts
+    rules:
+    - general.bc_402_8_2_4_food_courts
+  402.8.3:
+    label: flag
+    heading: Means of egress › Number of means of egress
+    rules:
+    - general.bc_402_8_3_tenant_two_means_of_egress
+  402.8.4:
+    label: flag
+    heading: Means of egress › Arrangements of means of egress
+    rules:
+    - general.bc_402_8_4_assembly_in_a_mall
+  402.8.4.1:
+    label: flag
+    heading: Arrangements of means of egress › Anchor building means of egress
+    rules:
+    - general.bc_402_8_4_1_anchor_building_egress
+  402.8.5:
+    label: flag
+    heading: Means of egress › Distance to exits
+    rules:
+    - general.bc_402_8_5_distance_to_exits
+  402.8.6:
+    label: flag
+    heading: Means of egress › Access to exits
+    rules:
+    - general.bc_402_8_6_access_to_exits
+  402.8.6.1:
+    label: flag
+    heading: Access to exits › Exit passageways
+    rules:
+    - general.bc_402_8_6_1_exit_passageways
+  402.8.7:
+    label: flag
+    heading: Means of egress › Service areas fronting on exit passageways
+    rules:
+    - general.bc_402_8_7_service_areas_on_exit_passageways
+  402.8.8:
+    label: flag
+    heading: Means of egress › Security grilles and doors
+    rules:
+    - general.bc_402_8_8_security_grilles_and_doors
+  '404.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_404_1_atriums
+  '404.9':
+    label: flag
+    heading: Exit access travel distance
+    rules:
+    - general.bc_404_9_atrium_travel_distance
+  '404.10':
+    label: flag
+    heading: Exit stairways in an atrium
+    rules:
+    - general.bc_404_10_exit_stairways_in_an_atrium
+  '404.11':
+    label: flag
+    heading: Interior exit stairway discharge
+    rules:
+    - general.bc_404_11_stairway_discharge_through_an_atrium
   407.4.2:
     label: rule
     heading: Distance of travel

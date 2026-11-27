@@ -157,7 +157,7 @@ rules:
 - id: general.bc_402_8_means_of_egress
   kind: flag
   topic: means_of_egress
-  title: A mall building's means of egress, and 402.8 over Chapter 10 where they conflict (BCNYS 402.8)
+  title: A mall building's means of egress, 402.8 governing (BCNYS 402.8)
   applies_when: special_egress_spaces
   sources:
   - file: gov.ny.building.2025.pdf
@@ -227,7 +227,7 @@ rules:
 - id: general.bc_402_8_1_1_mall_minimum_width
   kind: flag
   topic: means_of_egress
-  title: A mall's width, at least 20 ft, and 10 ft clear to any obstruction (BCNYS 402.8.1.1)
+  title: A mall at least 20 ft wide, 10 ft clear (BCNYS 402.8.1.1)
   applies_when: special_egress_spaces
   sources:
   - file: gov.ny.building.2025.pdf
@@ -297,7 +297,7 @@ rules:
 - id: general.bc_402_8_2_1_mall_occupant_formula
   kind: flag
   topic: means_of_egress
-  title: The mall's occupant load, from its gross leasable area (BCNYS 402.8.2.1, Equation 4-1)
+  title: The mall's occupant load by Equation 4-1 (BCNYS 402.8.2.1)
   applies_when: special_egress_spaces
   sources:
   - file: gov.ny.building.2025.pdf
@@ -337,7 +337,7 @@ rules:
 - id: general.bc_402_8_2_2_olf_range
   kind: flag
   topic: means_of_egress
-  title: The mall's occupant load factor between 30 and 50 sq ft a person (BCNYS 402.8.2.2)
+  title: The mall's load factor, 30 to 50 sq ft a person (BCNYS 402.8.2.2)
   applies_when: special_egress_spaces
   sources:
   - file: gov.ny.building.2025.pdf
@@ -431,7 +431,7 @@ rules:
 - id: general.bc_402_8_3_tenant_two_means_of_egress
   kind: flag
   topic: means_of_egress
-  title: A tenant space's second means of egress past 75 ft to the mall or at 50 occupants (BCNYS 402.8.3)
+  title: A tenant space's second means of egress (BCNYS 402.8.3)
   applies_when: special_egress_spaces
   sources:
   - file: gov.ny.building.2025.pdf
@@ -570,7 +570,7 @@ rules:
 - id: general.bc_402_8_6_access_to_exits
   kind: flag
   topic: means_of_egress
-  title: Two ways to separate exits from any point in a mall, and its passageways 66 in wide (BCNYS 402.8.6)
+  title: Access to exits from a mall, passageways 66 in wide (BCNYS 402.8.6)
   applies_when: special_egress_spaces
   sources:
   - file: gov.ny.building.2025.pdf
@@ -641,7 +641,7 @@ rules:
 - id: general.bc_402_8_7_service_areas_on_exit_passageways
   kind: flag
   topic: means_of_egress
-  title: Service areas opening into exit passageways behind 1-hour fire barriers (BCNYS 402.8.7)
+  title: Service areas opening into exit passageways (BCNYS 402.8.7)
   applies_when: special_egress_spaces
   sources:
   - file: gov.ny.building.2025.pdf
@@ -820,7 +820,7 @@ rules:
 - id: general.bc_404_11_stairway_discharge_through_an_atrium
   kind: flag
   topic: means_of_egress
-  title: Interior exit stairways discharging through an atrium, per Section 1028 (BCNYS 404.11)
+  title: Exit stairways discharging through an atrium (BCNYS 404.11)
   applies_when: building_has_atrium
   sources:
   - file: gov.ny.building.2025.pdf
