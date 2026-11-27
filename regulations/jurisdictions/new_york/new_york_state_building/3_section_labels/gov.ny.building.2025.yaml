@@ -282,6 +282,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:authority_having_jurisdiction:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTHORITY HAVING JURISDICTION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 10
+      - 11
+      quote: '[NY] AUTHORITY HAVING JURISDICTION. The governmental unit or agency responsible for administration and enforcement
+        of this code.'
+    piece_sha256: 266faf22994f54b27642ec4f44ec5f2c271ed7073b37a9b88dfe22abc942a5c5
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:automatic:
     label: reference
     topic: definitions
@@ -296,6 +312,22 @@ labels:
         the necessity for'
     piece_sha256: d4a09578ec9aa29d640e81df267daa1a209a9dee6ac4ac76fc7358f405c78e9e
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:automatic_smoke_detection_system:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTOMATIC SMOKE DETECTION SYSTEM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 20
+      - 21
+      quote: '[F] AUTOMATIC SMOKE DETECTION SYSTEM. A fire alarm system that has initiation devices that utilize smoke detectors
+        for protec- tion of an area such as a room or space with detectors to provide early warning of fire.'
+    piece_sha256: ef5952c3c71c6749ae5ff6d096078c1366f9b095a2e90ba81dad5f40faa7c6ec
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:automatic_sprinkler_system:
@@ -501,6 +533,53 @@ labels:
         support rooms or'
     piece_sha256: b4b6b0fbdbc1cdf335bad44bed232fb8db39f6db64f491fc2b9f9d409f4ca498
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:cell_group_i_3_occupancy:
+    label: reference
+    topic: definitions
+    reason: 'Defines CELL (Group I-3 occupancy), a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 36
+      lines:
+      - 29
+      - 30
+      quote: '[NY] CELL (Group I-3 occupancy). A room within a housing unit in a detention or correctional facility used to
+        confine incarcerated individuals.'
+    piece_sha256: 1176a376bca7f564a69cc39201e304aee68bcc6c7e01baf374c8c70b464df97a
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:cell_masonry:
+    label: reference
+    topic: definitions
+    reason: 'Defines CELL (masonry), a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 36
+      lines:
+      - 31
+      - 31
+      quote: '[BS] CELL (masonry). A void space having a gross cross-sectional area greater than 1 1/2 square inches (967
+        mm[fn2]).'
+    piece_sha256: 83ac2c2aeab8b04135a60272911c976e790c9cfbf6550d73c473d98f9a0c5445
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:circulation_path:
+    label: reference
+    topic: definitions
+    reason: 'Defines CIRCULATION PATH, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 37
+      lines:
+      - 14
+      - 14
+      quote: '[BE] CIRCULATION PATH. An exterior or interior way of passage from one place to another for pedestrians.'
+    piece_sha256: 412c5477b8361f02ae77378356de6be320326154a74ff4b8b39292651608c8d0
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:combustible_liquid:
@@ -1110,6 +1189,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:fire_alarm_system:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE ALARM SYSTEM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 58
+      - 59
+      quote: '[F] FIRE ALARM SYSTEM. A system or portion of a combination system consisting of components and circuits arranged
+        to monitor and annunciate the status of fire alarm or supervisory signal-initiating devices and to initiate the appropriate
+        response to those signals.'
+    piece_sha256: 33a8b800345bc2a4672d91c19cf4409e58c17002f0d1953342ee3bb1bce8a85d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:fire_barrier:
     label: reference
     topic: definitions
@@ -1124,6 +1220,22 @@ labels:
         in which continuity is maintained.'
     piece_sha256: 0fdf51e0e90fb73c5088b18d8fea6b28c41e3d12f5ce5da5db4fa9121343d10b
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE CODE OF NEW YORK STATE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 8
+      - 9
+      quote: '[NY] FIRE CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Fire Code of New York State,”
+        published by the International Code Council, Inc. (publication date July 2025).'
+    piece_sha256: 6ca85564ff64eba1774763ca817dcf5bfebbea184e7de2a6dd9deda0a6028cb2
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_command_center:
@@ -1610,6 +1722,21 @@ labels:
         intended to'
     piece_sha256: 8fc7ca31651bf9c8156e635c8956075f018c2be5c8cdc5868f41fe560f1f8bf1
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:housing_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines HOUSING UNIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 18
+      - 18
+      quote: '[BG] HOUSING UNIT. A dormitory or a group of cells with a common dayroom in Group I-3.'
+    piece_sha256: 4b17b1f002b97ae7209ac586ed02dc50d66894d7444b8ad145d168898b4af2c1
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:incapable_of_self_preservation:
@@ -2169,6 +2296,38 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:part_1203:
+    label: reference
+    topic: definitions
+    reason: 'Defines PART 1203, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 27
+      - 28
+      quote: '[NY] PART 1203. The regulations set forth in 19 NYCRR Part 1203 (“Uniform Code: Minimum Standards for Administration
+        and Enforce- ment”), as currently in effect and as hereafter amended from time to time.'
+    piece_sha256: f9624053f96eb38c56331ec59311ae1b985c9a157e4d53f92e96b097f91d816d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:part_1203_compliant_code_enforcement_program:
+    label: reference
+    topic: definitions
+    reason: 'Defines PART 1203-COMPLIANT CODE ENFORCEMENT PROGRAM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 29
+      - 30
+      quote: '[NY] PART 1203—COMPLIANT CODE ENFORCEMENT PROGRAM. A code enforcement program that includes the features required
+        by Part 1203 and satisfies the requirements of Part 1203.'
+    piece_sha256: 7f0151ea42cfca7168e2fa71f800fbc78d90a2cc0ad36d2ac0316c30713b2efe
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:penthouse:
     label: reference
     topic: definitions
@@ -2183,6 +2342,25 @@ labels:
         tanks,'
     piece_sha256: fc5256d01cd9ee53d90c31802d6855c67f03f6585f624353f2a6f1146beda4ed
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:permit:
+    label: reference
+    topic: definitions
+    reason: 'Defines PERMIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 50
+      - 54
+      quote: '[NY] PERMIT. An official document or certificate issued by the authority having jurisdiction that authorizes
+        performance of a specified activity. [NY] Building permit. A building permit, construction permit, demolition permit
+        or permit that authorizes the performance of work. [NY] Operating permit. A permit required under the stricter of
+        the authority having jurisdiction’s Code Enforcement Program or a Part 1203—Compliant Code Enforcement Program to
+        conduct a specified activity or to use a specified category of building.'
+    piece_sha256: ff84d2b1f3ce08aa62753821db364b0eac9543293da4052c88c4806a476013d6
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:person:
@@ -2318,6 +2496,21 @@ labels:
         been deeded, dedicated or'
     piece_sha256: 9c30bb288f4686d66c6762dfcbf3145b9a1416cc78180b76405f8335b44d63f6
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:public_use_areas:
+    label: reference
+    topic: definitions
+    reason: 'Defines PUBLIC-USE AREAS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 20
+      - 20
+      quote: '[BE] PUBLIC-USE AREAS. Interior or exterior rooms or spaces that are made available to the general public.'
+    piece_sha256: 19c36bdb0406b95db8f60f226c748c7ed4de6264e7ab8b8036c78f7241c42b34
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:ramp:
@@ -2594,6 +2787,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:smoke_compartment:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKE COMPARTMENT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 5
+      - 6
+      quote: '[BG] SMOKE COMPARTMENT. A space within a building separated from other interior areas of the building by smoke
+        barriers, includ- ing interior walls and horizontal assemblies.'
+    piece_sha256: 71488f773b63d6a1a6d3cdae1a2e9bec7ee5c95184c97ff80ff91ba534d91e75
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:smoke_detector:
     label: reference
     topic: definitions
@@ -2608,6 +2817,23 @@ labels:
     piece_sha256: 522da15a335b767701eedf42bdfb4c346aca491af705eb998bf698ea50e567df
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
       4c (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term 1020.6.1 uses, by the book''s italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:smoke_partition:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKE PARTITION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 11
+      - 13
+      quote: '[BF] SMOKE PARTITION. A wall assembly that extends from the top of the foundation or floor below to the underside
+        of the floor or roof sheathing, deck or slab above or to the underside of the ceiling above where the ceiling membrane
+        is constructed to limit the transfer of smoke.'
+    piece_sha256: 2c95fe8d28f512866a927ec836ef8d68a5b3f818828b53a23c607435d9cb0aea
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:smokeproof_enclosure:
@@ -2843,6 +3069,24 @@ labels:
       quote: '[A] STRUCTURE. That which is built or constructed.'
     piece_sha256: 0a2ea45a577f48e5194c0496c4f735fc362db3d2b90086fee6f0b93e26d412cf
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:supervisory_signal_initiating_device:
+    label: reference
+    topic: definitions
+    reason: 'Defines SUPERVISORY SIGNAL-INITIATING DEVICE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 64
+      lines:
+      - 13
+      - 16
+      quote: '[F] SUPERVISORY SIGNAL-INITIATING DEVICE. An initiation device, such as a valve supervisory switch, water-level
+        indicator or low- air pressure switch on a dry-pipe sprinkler system, whose change of state signals an off-normal
+        condition and its restoration to normal of a fire protection or life safety system, or a need for action in connection
+        with guard tours, fire suppression systems or equipment or maintenance features of related systems.'
+    piece_sha256: 6e0e706319eef21505ea4e93da0244898cabec2aaf1e70dc6f478d0b40e6833f
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:swimming_pool:
@@ -4020,6 +4264,316 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '407.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'Group I-2, Sections 407.1 to 407.11: not in the model, so a person''s check where the building may be Group I-2
+      (general.bc_407_1_group_i2).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 98
+      lines:
+      - 13
+      - 14
+      quote: 407.1 General. Occupancies in Group I-2 shall comply with the provisions of Sections 407.1 through 407.11 and
+        other applicable provisions of this code.
+    piece_sha256: c7241b2c7e5492b40dd6ba3c18afc25010726e283fdaa819fb7299007bf77c2d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '407.2':
+    label: flag
+    topic: means_of_egress
+    reason: 'Group I-2 corridors continuous to the exits and separated: not in the model, so a person''s check where the building
+      may be Group I-2 (general.bc_407_2_corridor_continuity_and_separation).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 98
+      lines:
+      - 15
+      - 16
+      quote: 407.2 Corridors continuity and separation. Corridors in occupancies in Group I-2 shall be continuous to the exits
+        and shall be sepa- rated from other areas in accordance with Section 407.3 except spaces conforming to Sections 407.2.1
+        through 407.2.6.
+    piece_sha256: e6369f51aa3188b5cbc34379adda7e5dd90a99460946db9c3dec079d129d1353
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Waiting and similar areas open to a Group I-2 corridor: not in the model, so a person''s check where the building
+      may be Group I-2 (general.bc_407_2_1_waiting_areas_open_to_a_corridor).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 98
+      lines:
+      - 17
+      - 25
+      quote: '407.2.1 Waiting and similar areas. Waiting areas, public-use areas or group meeting spaces constructed as required
+        for corridors shall be permitted to be open to a corridor, only where all of the following criteria are met: 1. The
+        spaces are not occupied as care recipient’s sleeping rooms, treatment rooms, incidental uses in accordance with Section
+        509, or hazardous uses. 2. The open space is protected by an automatic fire detection system installed in accordance
+        with Section 907. 3. The corridors onto which the spaces open, in the same smoke compartment, are protected by an
+        automatic fire detection system installed in accordance with Section 907, or the smoke compartment in which the spaces
+        are located is equipped throughout with quick-response sprinklers in accordance with Section 903.3.2. 4. The space
+        is arranged so as not to obstruct access to the required exits.'
+    piece_sha256: 7f98af7eab393b08d1ed8bafafaa6913e1edc5244e2f0061b2709c2c356f6220
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Care providers'' stations open to a Group I-2 corridor: not in the model, so a person''s check where the building
+      may be Group I-2 (general.bc_407_2_2_care_providers_stations).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 98
+      lines:
+      - 26
+      - 28
+      quote: 407.2.2 Care providers’ stations. Spaces for care providers’, supervisory staff, doctors’ and nurses’ charting,
+        communications and related clerical areas shall be permitted to be open to the corridor, where such spaces are constructed
+        as required for corridors.
+    piece_sha256: 0e038078b64cd017fe57fe54da639a51546b16c0204e2d6400c7d0e660629781
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.2.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Psychiatric treatment areas open to a Group I-2 corridor: not in the model, so a person''s check where the building
+      may be Group I-2 (general.bc_407_2_3_psychiatric_treatment_areas).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 98
+      lines:
+      - 29
+      - 37
+      quote: '407.2.3 Psychiatric treatment areas. Areas wherein psychiatric care recipients who are incapable of self-preservation
+        are housed, or group meeting or multipurpose therapeutic spaces other than incidental uses in accordance with Section
+        509, under continuous supervision by facility staff, shall be permitted to be open to the corridor, where the following
+        criteria are met: 1. Each area does not exceed 1,500 square feet (140 m[fn2]). 2. The area is located to permit supervision
+        by the facility staff. 3. The area is arranged so as not to obstruct any access to the required exits. 4. The area
+        is equipped with an automatic fire detection system installed in accordance with Section 907.2. 5. Not more than one
+        such space is permitted in any one smoke compartment. 6. The walls and ceilings of the space are constructed as required
+        for corridors.'
+    piece_sha256: 7d752aadfb7d5a9caf6d31a9ac2018b232a12f5aa5c81d02395f96364d39f42b
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.2.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Gift shops open to a Group I-2 corridor: not in the model, so a person''s check where the building may be Group
+      I-2 (general.bc_407_2_4_gift_shops).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 98
+      lines:
+      - 38
+      - 39
+      quote: 407.2.4 Gift shops. Gift shops and associated storage that are less than 500 square feet (455 m[fn2]) in area
+        shall be permitted to be open to the corridor where such spaces are constructed as required for corridors.
+    piece_sha256: 248d1755aa1ad9e4553886840d31d68bc25e36ce8127e181ebac9db39243773e
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.2.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'Nursing home shared spaces open to the corridor: not in the model, so a person''s check where the building may
+      be Group I-2 (general.bc_407_2_5_nursing_home_housing_units).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 98
+      lines:
+      - 40
+      - 50
+      quote: '407.2.5 Nursing home housing units. In Group I-2, Condition 1 occupancies, in areas where nursing home residents
+        are housed, shared living spaces, group meeting or multipurpose therapeutic spaces shall be permitted to be open to
+        the corridor, where all of the following criteria are met: 1. The walls and ceilings of the space are constructed
+        as required for corridors. 2. The spaces are not occupied as resident sleeping rooms, treatment rooms, incidental
+        uses in accordance with Section 509, or hazardous uses. 3. The open space is protected by an automatic fire detection
+        system installed in accordance with Section 907. 4. The corridors onto which the spaces open, in the same smoke compartment,
+        are protected by an automatic fire detection system installed in accordance with Section 907, or the smoke compartment
+        in which the spaces are located is equipped throughout with quick-response sprinklers in accordance with Section 903.3.2.
+        5. The space is arranged so as not to obstruct access to the required exits.'
+    piece_sha256: 0bced79d837cf973c74e8779bff5b3f37ec3934edc58b712de89d1fa14762b5c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.2.6:
+    label: flag
+    topic: means_of_egress
+    reason: 'Nursing home cooking facilities open to the corridor: not in the model, so a person''s check where the building
+      may be Group I-2 (general.bc_407_2_6_nursing_home_cooking_facilities).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 98
+      lines:
+      - 51
+      - 57
+      quote: '407.2.6 Nursing home cooking facilities. In Group I-2, Condition 1 occupancies, rooms or spaces that contain
+        a cooking facility with domestic cooking appliances shall be permitted to be open to the corridor where all of the
+        following criteria are met: 1. The number of care recipients housed in the smoke compartment shall not be greater
+        than 30. 2. The number of care recipients served by the cooking facility shall not be greater than 30. 3. Not more
+        than one cooking facility area shall be permitted in a smoke compartment. 4. The corridor shall be a clearly identified
+        space delineated by construction or floor pattern, material or color. 5. The space containing the domestic cooking
+        facility shall be arranged so as not to obstruct access to the required exit.'
+    - file: gov.ny.building.2025.pdf
+      page: 99
+      lines:
+      - 3
+      - 3
+      quote: 6. The cooking appliance shall comply with Section 407.2.7.
+    piece_sha256: 1a9e474298dbfcda04389d64bb43f38d5c9c129802ee8577fe5b3294d9de0fb5
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.2.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'Domestic cooking appliances in Group I-2: not in the model, so a person''s check where the building may be Group
+      I-2 (general.bc_407_2_7_domestic_cooking_appliances).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 99
+      lines:
+      - 4
+      - 20
+      quote: '407.2.7 Domestic cooking appliances. In Group I-2 occupancies, installation of cooking appliances used in domestic
+        cooking facilities shall comply with all of the following: 1. The types of cooking appliances permitted shall be limited
+        to ovens, cooktops, ranges, warmers and microwaves. 2. Domestic cooking hoods installed and constructed in accordance
+        with Section 505 of the Mechanical Code of New York State shall be provided over cooktops and ranges. 3. Cooktops
+        and ranges shall be protected in accordance with Section 904.15. 4. A shut-off for the fuel and electrical power supply
+        to the cooking equipment shall be provided in a location to which only staff has access. 5. A timer shall be provided
+        that automatically deactivates the cooking appliances within a period of not more than 120 minutes. 6. A portable
+        fire extinguisher shall be provided. Installation shall be in accordance with Section 906, and the extinguisher shall
+        be located a distance of travel of 30 feet (9144 mm) or less from each domestic cooking appliance. Exceptions: 1.
+        Cooktops and ranges located within smoke compartments with no patient sleeping or patient care areas are not required
+        to comply with this section. 2. Cooktops and ranges used for care recipient training or nutritional counseling are
+        not required to comply with Item 3 of this section.'
+    piece_sha256: d9ba189aef9432703886126107f3a133409f609c9ce1b46c6d6cf1ab858e50a5
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '407.3':
+    label: flag
+    topic: means_of_egress
+    reason: 'Group I-2 corridor walls as smoke partitions: not in the model, so a person''s check where the building may be
+      Group I-2 (general.bc_407_3_corridor_wall_construction).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 99
+      lines:
+      - 21
+      - 21
+      quote: 407.3 Corridor wall construction. Corridor walls shall be constructed as smoke partitions in accordance with
+        Section 710.
+    piece_sha256: f3249a3bc6b6ff9441a237e66182b79d15d3cd60fdaa9fbc4cf3705e603de94b
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.3.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Group I-2 corridor doors limiting smoke, positive latching: not in the model, so a person''s check where the
+      building may be Group I-2 (general.bc_407_3_1_corridor_doors).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 99
+      lines:
+      - 22
+      - 25
+      quote: 407.3.1 Corridor doors. Corridor doors, other than those in a wall required to be rated by Section 509.4 or for
+        the enclosure of a vertical opening or an exit, shall not have a required fire protection rating and shall not be
+        required to be equipped with self-clos- ing or automatic-closing devices, but shall provide an effective barrier to
+        limit the transfer of smoke and shall be equipped with positive latching. Roller latches are not permitted. Other
+        doors shall conform to Section 716.
+    piece_sha256: 108f64a06d1f34a2a47c4141cb57aaa464aa2208c90943da948e2df2c9a7b340
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.3.1.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Group I-2 corridor door construction: not in the model, so a person''s check where the building may be Group
+      I-2 (general.bc_407_3_1_1_corridor_door_construction).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 99
+      lines:
+      - 26
+      - 33
+      quote: '407.3.1.1 Door construction. Doors in corridors not required to have a fire protection rating shall comply with
+        the following: 1. Solid doors shall have close-fitting operational tolerances, head and jamb stops. 2. Dutch-style
+        doors shall have an astragal, rabbet or bevel at the meeting edges of the upper and lower door sections. Both the
+        upper and lower door sections shall have latching hardware. Dutch-style doors shall have hardware that connects the
+        upper and lower sections to function as a single leaf. 3. To provide makeup air for exhaust systems in accordance
+        with Section 1020.6, Exception 1, doors are permitted to have louvers or to have a clearance between the bottom of
+        the door and the floor surface that is 2/3 inch (19.1 mm) maximum.'
+    piece_sha256: 28c78adf2603265f6ade8b850218a3a43ba7551cf98631ae40bfa636e0d242cc
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '407.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'Group I-2 means of egress, and the defend-in-place plan: not in the model, so a person''s check where the building
+      may be Group I-2 (general.bc_407_4_means_of_egress).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 99
+      lines:
+      - 34
+      - 37
+      quote: '[BE] 407.4 Means of egress. Group I-2 occupancies shall be provided with means of egress complying with Chapter
+        10 and Sections 407.4.1 through 407.4.4. The fire safety and evacuation plans provided in accordance with Section
+        1002.2 shall identify the building components necessary to support a defend-in-place emergency response in accordance
+        with Sections 403 and 404 of the Fire Code of New York State.'
+    piece_sha256: 00550fe70b520c41f14ec3fdafb3ebf5483840cca7b6298aecb7399d1c16c9e3
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A Group I-2 habitable room''s door directly to a corridor: not in the model, so a person''s check where the building
+      may be Group I-2 (general.bc_407_4_1_direct_access_to_a_corridor).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 99
+      lines:
+      - 38
+      - 42
+      quote: '[BE] 407.4.1 Direct access to a corridor. Habitable rooms in Group I-2 occupancies shall have an exit access
+        door leading directly to a corridor. Exceptions: 1. Rooms with exit doors opening directly to the outside at ground
+        level. 2. Rooms arranged as care suites complying with Section 407.4.4.'
+    piece_sha256: 1558816ba13442b0c08918ee408b0792f7c94e5decf225c78108095e612c3268
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.1.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Locks on a care recipient''s room not restricting egress from it: not in the model, so a person''s check where
+      the building may be Group I-2 (general.bc_407_4_1_1_locking_devices).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 99
+      lines:
+      - 43
+      - 47
+      quote: '[BE] 407.4.1.1 Locking devices. Locking devices that restrict access to a care recipient’s room from the corridor
+        and that are operable only by staff from the corridor side shall not restrict the means of egress from the care recipient’s
+        room. Exceptions: 1. This section shall not apply to rooms in psychiatric treatment and similar care areas. 2. Locking
+        arrangements in accordance with Section 1010.2.13.'
+    piece_sha256: 32cb36e90b01f4255a075f6e7d570627f0a95360bfd42305bf12fc2efa96524c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   407.4.2:
     label: rule
     topic: means_of_egress
@@ -4038,6 +4592,246 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
       of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
       table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Furniture in nursing home corridors at least 96 in wide: not in the model, so a person''s check where the building
+      may be Group I-2 (general.bc_407_4_3_projections_in_nursing_home_corridors).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 99
+      lines:
+      - 50
+      - 58
+      quote: '[BE] 407.4.3 Projections in nursing home corridors. In Group I-2, Condition 1 occupancies, where the corridor
+        width is not less than 96 inches (2440 mm), projections shall be permitted for furniture where all of the following
+        criteria are met: 1. The furniture is attached to the floor or to the wall. 2. The furniture does not reduce the clear
+        width of the corridor to less than 72 inches (1830 mm) except where other encroachments are permitted in accordance
+        with Section 1005.7. 3. The furniture is positioned on only one side of the corridor. 4. Each arrangement of furniture
+        is 50 square feet (4.6 m[fn2]) maximum in area. 5. Furniture arrangements are separated by 10 feet (3048 mm) minimum.
+        6. Placement of furniture is considered as part of the fire and safety plans in accordance with Section 1002.2.'
+    piece_sha256: f2447e57e77973be0571fb39f2df5c8e418d899c7b096b4c54190cf98aa97ad1
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Group I-2 care suites: not in the model, so a person''s check where the building may be Group I-2 (general.bc_407_4_4_care_suites).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 3
+      - 4
+      quote: '[BE] 407.4.4 Group I-2 care suites. Care suites in Group I-2 shall comply with Sections 407.4.4.1 through 407.4.4.5
+        and either Section 407.4.4.6 or 407.4.4.7.'
+    piece_sha256: fdf35c4721a33bdf581d9df13e05b66aa557902df404b7b21f12e482725c8ab7
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'No exit access from elsewhere through a care suite: not in the model, so a person''s check where the building
+      may be Group I-2 (general.bc_407_4_4_1_exit_access_through_care_suites).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 5
+      - 6
+      quote: '[BE] 407.4.4.1 Exit access through care suites. Exit access from all other portions of a building not classified
+        as a care suite shall not pass through a care suite.'
+    piece_sha256: 6fe435e265c93449a3dc1a33b6d47037457557e32a342e7d9091d150cffbb506
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Care suites separated by smoke partitions: not in the model, so a person''s check where the building may be Group
+      I-2 (general.bc_407_4_4_2_care_suite_separation).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 7
+      - 8
+      quote: '[BE] 407.4.4.2 Separation. Care suites shall be separated from other portions of the building, including other
+        care suites, by a smoke partition complying with Section 710.'
+    piece_sha256: e7e36f5c4ab6c08afb65499765ba147477f6f6c13aa1ee2b5bdb9ec59b342270
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'A care suite''s door to a corridor, within 100 ft: not in the model, so a person''s check where the building
+      may be Group I-2 (general.bc_407_4_4_3_care_suite_access_to_corridor).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 9
+      - 13
+      quote: '[BE] 407.4.4.3 Access to corridor. Every care suite shall have a door leading directly to an exit access corridor
+        or horizontal exit. Movement from habitable rooms within a care suite shall not require more than 100 feet (30 480
+        mm) of travel within the care suite to a door leading to the exit access corridor or horizontal exit. Where a care
+        suite is required to have more than one exit access door by Section 407.4.4.6.2 or 407.4.4.7.2, the additional door
+        shall lead directly to an exit access corridor, exit or an adjacent suite.'
+    piece_sha256: e782334b73e3825de17d68adda4d7955f2488940ddc22e8c9796d25d4278b3f2
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Circulation paths within a care suite at least 36 in: not in the model, so a person''s check where the building
+      may be Group I-2 (general.bc_407_4_4_4_care_suite_circulation_paths).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 14
+      - 16
+      quote: '[BE] 407.4.4.4 Circulation paths within a care suite. The circulation paths within a care suite providing the
+        access to doors required in Section 407.4.4.3 shall have a minimum width of 36 inches (914 mm) and shall not be required
+        to meet the require- ments for a corridor or an aisle.'
+    piece_sha256: 87367afd95c9ccba6116046a3b758c4a154549dc34935d4da777cd9cfcfd8c60
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'Doors within care suites: not in the model, so a person''s check where the building may be Group I-2 (general.bc_407_4_4_5_doors_within_care_suites).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 17
+      - 21
+      quote: '[BE] 407.4.4.5 Doors within care suites. Doors in care suites serving habitable rooms shall be permitted to
+        comply with one of the following: 1. Manually operated horizontal sliding doors permitted in accordance with Exception
+        9 to Section 1010.1.2. 2. Power-operated doors permitted in accordance with Section 1010.1.2, Exception 7. 3. Means
+        of egress doors complying with Section 1010.'
+    piece_sha256: b62d68cde9ac6359010bfa668c96252a389b852636b92866a14cd4f8931ee0a1
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4.6:
+    label: flag
+    topic: means_of_egress
+    reason: 'Care suites containing sleeping rooms: not in the model, so a person''s check where the building may be Group
+      I-2 (general.bc_407_4_4_6_care_suites_with_sleeping_rooms).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 22
+      - 27
+      quote: '[BE] 407.4.4.6 Care suites containing sleeping room areas. Sleeping rooms shall be permitted to be grouped into
+        care suites where one of the following criteria is met: 1. The care suite is not used as an exit access for more than
+        eight care recipient beds. 2. The arrangement of the care suite allows for direct and constant visual supervision
+        into the sleeping rooms by care providers. 3. An automatic smoke detection system is provided in the sleeping rooms
+        and installed in accordance with NFPA 72.'
+    piece_sha256: c39f19d6847dadbd291d8aec554e3287f82bbe37b20d92c1dc8186b995b5a1e5
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4.6.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A sleeping care suite at most 7,500 sq ft: not in the model, so a person''s check where the building may be Group
+      I-2 (general.bc_407_4_4_6_1_sleeping_care_suite_area).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 28
+      - 31
+      quote: '[BE] 407.4.4.6.1 Area. Care suites containing sleeping rooms shall be not greater than 7,500 square feet (696
+        m[fn2]) in area. Exception: Care suites containing sleeping rooms shall be permitted to be not greater than 10,000
+        square feet (929 m[fn2]) in area where an automatic smoke detection system is provided throughout the care suite and
+        installed in accordance with NFPA 72.'
+    piece_sha256: e86fe9f9a2e08a1f8c929acea4da0eafc1c7d825bf23f16203a7b3ce17bdc9bf
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4.6.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Two exit access doors from a sleeping care suite over 1,000 sq ft: not in the model, so a person''s check where
+      the building may be Group I-2 (general.bc_407_4_4_6_2_sleeping_care_suite_exit_access).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 32
+      - 33
+      quote: '[BE] 407.4.4.6.2 Exit access. Any sleeping room, or any care suite that contains sleeping rooms, of more than
+        1,000 square feet (93 m[fn2]) shall have not fewer than two exit access doors from the care suite located in accordance
+        with Section 1007.'
+    piece_sha256: 691ebb3c2a9d7a0db4799ce7fe16fbbea5980d66be4ff7bd86fdc048df0ad161
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'Care suites without sleeping rooms: not in the model, so a person''s check where the building may be Group I-2
+      (general.bc_407_4_4_7_care_suites_without_sleeping_rooms).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 34
+      - 36
+      quote: '[BE] 407.4.4.7 Care suites not containing sleeping rooms. Areas not containing sleeping rooms, but only treatment
+        areas and the associated rooms, spaces or circulation space, shall be permitted to be grouped into care suites and
+        shall conform to the limitations in Sections 407.4.4.7.1 and 407.4.4.7.2.'
+    piece_sha256: c3852e2cae3bb93c9dd2a9cc6bf8bf13cdc15ce511fb6507e5be103545f383a7
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4.7.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A treatment care suite at most 12,500 sq ft: not in the model, so a person''s check where the building may be
+      Group I-2 (general.bc_407_4_4_7_1_treatment_care_suite_area).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 37
+      - 41
+      quote: '[BE] 407.4.4.7.1 Area. Care suites of rooms, other than sleeping rooms, shall have an area not greater than
+        12,500 square feet (1161 m[fn2]). Exception: Care suites not containing sleeping rooms shall be permitted to be not
+        greater than 15,000 square feet (1394 m[fn2]) in area where an automatic smoke detection system is provided throughout
+        the care suite in accordance with Section 907.'
+    piece_sha256: 2024cc3884cc88c9ecc481fda0d9655bcd9f605359709e9a6a7b81bbe8180ded
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  407.4.4.7.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Two exit access doors from a treatment care suite over 2,500 sq ft: not in the model, so a person''s check where
+      the building may be Group I-2 (general.bc_407_4_4_7_2_treatment_care_suite_exit_access).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 100
+      lines:
+      - 42
+      - 43
+      quote: '[BE] 407.4.4.7.2 Exit access. Care suites, other than sleeping rooms, with an area of more than 2,500 square
+        feet (232 m[fn2]) shall have not fewer than two exit access doors from the care suite located in accordance with Section
+        1007.'
+    piece_sha256: 7116d019b04c6deff7fc72c81da28509d5ad7f60cc878845c530fc3522bc98f9
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '508.2':

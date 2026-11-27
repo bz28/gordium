@@ -165,7 +165,35 @@ occupancy_group:
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_1020_5_other_occupancies
   - general.bc_404_1_atriums
+  - general.bc_407_1_group_i2
+  - general.bc_407_2_1_waiting_areas_open_to_a_corridor
+  - general.bc_407_2_2_care_providers_stations
+  - general.bc_407_2_3_psychiatric_treatment_areas
+  - general.bc_407_2_4_gift_shops
+  - general.bc_407_2_5_nursing_home_housing_units
+  - general.bc_407_2_6_nursing_home_cooking_facilities
+  - general.bc_407_2_7_domestic_cooking_appliances
+  - general.bc_407_2_corridor_continuity_and_separation
+  - general.bc_407_3_1_1_corridor_door_construction
+  - general.bc_407_3_1_corridor_doors
+  - general.bc_407_3_corridor_wall_construction
+  - general.bc_407_4_1_1_locking_devices
+  - general.bc_407_4_1_direct_access_to_a_corridor
   - general.bc_407_4_2_sleeping_room_travel
+  - general.bc_407_4_3_projections_in_nursing_home_corridors
+  - general.bc_407_4_4_1_exit_access_through_care_suites
+  - general.bc_407_4_4_2_care_suite_separation
+  - general.bc_407_4_4_3_care_suite_access_to_corridor
+  - general.bc_407_4_4_4_care_suite_circulation_paths
+  - general.bc_407_4_4_5_doors_within_care_suites
+  - general.bc_407_4_4_6_1_sleeping_care_suite_area
+  - general.bc_407_4_4_6_2_sleeping_care_suite_exit_access
+  - general.bc_407_4_4_6_care_suites_with_sleeping_rooms
+  - general.bc_407_4_4_7_1_treatment_care_suite_area
+  - general.bc_407_4_4_7_2_treatment_care_suite_exit_access
+  - general.bc_407_4_4_7_care_suites_without_sleeping_rooms
+  - general.bc_407_4_4_care_suites
+  - general.bc_407_4_means_of_egress
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f

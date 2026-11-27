@@ -1646,6 +1646,905 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_407_1_group_i2
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2, Sections 407.1 to 407.11 (BCNYS 407.1)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 98
+    lines:
+    - 13
+    - 14
+    quote: 407.1 General. Occupancies in Group I-2 shall comply with the provisions of Sections 407.1 through 407.11 and other
+      applicable provisions of this code.
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'The building may be Group I-2 (hospitals, nursing homes, detoxification facilities): Sections 407.1 to 407.11 apply
+      besides the rest of the code: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Shown where the building is stated Group I-2, of two or more groups, or its group isn't stated. Of Section 407, its
+    corridors (407.2, 407.3) and means of egress (407.4) are brought in here (407.4.2 was already), its smoke barriers, doors
+    and secured yards in Chapter 4 part d. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_2_corridor_continuity_and_separation
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2 corridors continuous to the exits and separated (BCNYS 407.2)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 98
+    lines:
+    - 15
+    - 16
+    quote: 407.2 Corridors continuity and separation. Corridors in occupancies in Group I-2 shall be continuous to the exits
+      and shall be sepa- rated from other areas in accordance with Section 407.3 except spaces conforming to Sections 407.2.1
+      through 407.2.6.
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Group I-2 corridors run continuous to the exits and are separated from other areas per 407.3, but the spaces 407.2.1
+      to 407.2.6 let open to them: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Which spaces open to a corridor and how its walls are built aren't in the model. Hand-drafted in a Claude Code session
+    (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_2_1_waiting_areas_open_to_a_corridor
+  kind: flag
+  topic: means_of_egress
+  title: Waiting and similar areas open to a Group I-2 corridor (BCNYS 407.2.1)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 98
+    lines:
+    - 17
+    - 25
+    quote: '407.2.1 Waiting and similar areas. Waiting areas, public-use areas or group meeting spaces constructed as required
+      for corridors shall be permitted to be open to a corridor, only where all of the following criteria are met: 1. The
+      spaces are not occupied as care recipient’s sleeping rooms, treatment rooms, incidental uses in accordance with Section
+      509, or hazardous uses. 2. The open space is protected by an automatic fire detection system installed in accordance
+      with Section 907. 3. The corridors onto which the spaces open, in the same smoke compartment, are protected by an automatic
+      fire detection system installed in accordance with Section 907, or the smoke compartment in which the spaces are located
+      is equipped throughout with quick-response sprinklers in accordance with Section 903.3.2. 4. The space is arranged so
+      as not to obstruct access to the required exits.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'A waiting, public-use or group meeting space built as a corridor may be open to it only if it isn''t a sleeping,
+      treatment, incidental or hazardous use, has fire detection (907), its corridors have detection or quick-response sprinklers,
+      and it doesn''t obstruct access to the exits: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_2_2_care_providers_stations
+  kind: flag
+  topic: means_of_egress
+  title: Care providers' stations open to a Group I-2 corridor (BCNYS 407.2.2)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 98
+    lines:
+    - 26
+    - 28
+    quote: 407.2.2 Care providers’ stations. Spaces for care providers’, supervisory staff, doctors’ and nurses’ charting,
+      communications and related clerical areas shall be permitted to be open to the corridor, where such spaces are constructed
+      as required for corridors.
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Care providers'', staff, charting and clerical spaces built as a corridor may be open to it: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_2_3_psychiatric_treatment_areas
+  kind: flag
+  topic: means_of_egress
+  title: Psychiatric treatment areas open to a Group I-2 corridor (BCNYS 407.2.3)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 98
+    lines:
+    - 29
+    - 37
+    quote: '407.2.3 Psychiatric treatment areas. Areas wherein psychiatric care recipients who are incapable of self-preservation
+      are housed, or group meeting or multipurpose therapeutic spaces other than incidental uses in accordance with Section
+      509, under continuous supervision by facility staff, shall be permitted to be open to the corridor, where the following
+      criteria are met: 1. Each area does not exceed 1,500 square feet (140 m[fn2]). 2. The area is located to permit supervision
+      by the facility staff. 3. The area is arranged so as not to obstruct any access to the required exits. 4. The area is
+      equipped with an automatic fire detection system installed in accordance with Section 907.2. 5. Not more than one such
+      space is permitted in any one smoke compartment. 6. The walls and ceilings of the space are constructed as required
+      for corridors.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'A supervised psychiatric treatment area may be open to the corridor only at 1,500 sq ft or less, supervised, not
+      obstructing access to the exits, with fire detection (907.2), one per smoke compartment, its walls and ceilings built
+      as a corridor''s: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_2_4_gift_shops
+  kind: flag
+  topic: means_of_egress
+  title: Gift shops open to a Group I-2 corridor (BCNYS 407.2.4)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 98
+    lines:
+    - 38
+    - 39
+    quote: 407.2.4 Gift shops. Gift shops and associated storage that are less than 500 square feet (455 m[fn2]) in area shall
+      be permitted to be open to the corridor where such spaces are constructed as required for corridors.
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'A gift shop and its storage under 500 sq ft, built as a corridor, may be open to it: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_2_5_nursing_home_housing_units
+  kind: flag
+  topic: means_of_egress
+  title: Nursing home shared spaces open to the corridor (BCNYS 407.2.5)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 98
+    lines:
+    - 40
+    - 50
+    quote: '407.2.5 Nursing home housing units. In Group I-2, Condition 1 occupancies, in areas where nursing home residents
+      are housed, shared living spaces, group meeting or multipurpose therapeutic spaces shall be permitted to be open to
+      the corridor, where all of the following criteria are met: 1. The walls and ceilings of the space are constructed as
+      required for corridors. 2. The spaces are not occupied as resident sleeping rooms, treatment rooms, incidental uses
+      in accordance with Section 509, or hazardous uses. 3. The open space is protected by an automatic fire detection system
+      installed in accordance with Section 907. 4. The corridors onto which the spaces open, in the same smoke compartment,
+      are protected by an automatic fire detection system installed in accordance with Section 907, or the smoke compartment
+      in which the spaces are located is equipped throughout with quick-response sprinklers in accordance with Section 903.3.2.
+      5. The space is arranged so as not to obstruct access to the required exits.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'In Group I-2, Condition 1, shared living, group meeting or therapy spaces may be open to the corridor only if built
+      as a corridor, not a sleeping, treatment, incidental or hazardous use, with fire detection, their corridors detected
+      or sprinklered with quick response, and not obstructing access to the exits: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: The Condition isn't stated. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_2_6_nursing_home_cooking_facilities
+  kind: flag
+  topic: means_of_egress
+  title: Nursing home cooking facilities open to the corridor (BCNYS 407.2.6)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 98
+    lines:
+    - 51
+    - 57
+    quote: '407.2.6 Nursing home cooking facilities. In Group I-2, Condition 1 occupancies, rooms or spaces that contain a
+      cooking facility with domestic cooking appliances shall be permitted to be open to the corridor where all of the following
+      criteria are met: 1. The number of care recipients housed in the smoke compartment shall not be greater than 30. 2.
+      The number of care recipients served by the cooking facility shall not be greater than 30. 3. Not more than one cooking
+      facility area shall be permitted in a smoke compartment. 4. The corridor shall be a clearly identified space delineated
+      by construction or floor pattern, material or color. 5. The space containing the domestic cooking facility shall be
+      arranged so as not to obstruct access to the required exit.'
+  - file: gov.ny.building.2025.pdf
+    page: 99
+    lines:
+    - 3
+    - 3
+    quote: 6. The cooking appliance shall comply with Section 407.2.7.
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'In Group I-2, Condition 1, a space with domestic cooking may be open to the corridor only for 30 care recipients
+      or fewer in the smoke compartment and served, one per smoke compartment, the corridor clearly marked, access to the
+      exit unobstructed, its appliances per 407.2.7: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_2_7_domestic_cooking_appliances
+  kind: flag
+  topic: means_of_egress
+  title: Domestic cooking appliances in Group I-2 (BCNYS 407.2.7)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 99
+    lines:
+    - 4
+    - 20
+    quote: '407.2.7 Domestic cooking appliances. In Group I-2 occupancies, installation of cooking appliances used in domestic
+      cooking facilities shall comply with all of the following: 1. The types of cooking appliances permitted shall be limited
+      to ovens, cooktops, ranges, warmers and microwaves. 2. Domestic cooking hoods installed and constructed in accordance
+      with Section 505 of the Mechanical Code of New York State shall be provided over cooktops and ranges. 3. Cooktops and
+      ranges shall be protected in accordance with Section 904.15. 4. A shut-off for the fuel and electrical power supply
+      to the cooking equipment shall be provided in a location to which only staff has access. 5. A timer shall be provided
+      that automatically deactivates the cooking appliances within a period of not more than 120 minutes. 6. A portable fire
+      extinguisher shall be provided. Installation shall be in accordance with Section 906, and the extinguisher shall be
+      located a distance of travel of 30 feet (9144 mm) or less from each domestic cooking appliance. Exceptions: 1. Cooktops
+      and ranges located within smoke compartments with no patient sleeping or patient care areas are not required to comply
+      with this section. 2. Cooktops and ranges used for care recipient training or nutritional counseling are not required
+      to comply with Item 3 of this section.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Domestic cooking appliances limited to ovens, cooktops, ranges, warmers and microwaves, with hoods, protection,
+      a staff-only shut-off, a timer of at most 120 minutes and a fire extinguisher within 30 ft (exceptions for compartments
+      without patient sleeping or care areas, and for training): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Brought in as part of 407.2 (407.2.6 sends to it); appliances aren't in the model. Hand-drafted in a Claude Code
+    session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_3_corridor_wall_construction
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2 corridor walls as smoke partitions (BCNYS 407.3)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 99
+    lines:
+    - 21
+    - 21
+    quote: 407.3 Corridor wall construction. Corridor walls shall be constructed as smoke partitions in accordance with Section
+      710.
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Corridor walls are smoke partitions per 710: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Walls' construction isn't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_3_1_corridor_doors
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2 corridor doors limiting smoke, positive latching (BCNYS 407.3.1)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 99
+    lines:
+    - 22
+    - 25
+    quote: 407.3.1 Corridor doors. Corridor doors, other than those in a wall required to be rated by Section 509.4 or for
+      the enclosure of a vertical opening or an exit, shall not have a required fire protection rating and shall not be required
+      to be equipped with self-clos- ing or automatic-closing devices, but shall provide an effective barrier to limit the
+      transfer of smoke and shall be equipped with positive latching. Roller latches are not permitted. Other doors shall
+      conform to Section 716.
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Corridor doors (other than in rated walls) limit the transfer of smoke and latch positively, no roller latches;
+      other doors per 716: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Door hardware isn't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_3_1_1_corridor_door_construction
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2 corridor door construction (BCNYS 407.3.1.1)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 99
+    lines:
+    - 26
+    - 33
+    quote: '407.3.1.1 Door construction. Doors in corridors not required to have a fire protection rating shall comply with
+      the following: 1. Solid doors shall have close-fitting operational tolerances, head and jamb stops. 2. Dutch-style doors
+      shall have an astragal, rabbet or bevel at the meeting edges of the upper and lower door sections. Both the upper and
+      lower door sections shall have latching hardware. Dutch-style doors shall have hardware that connects the upper and
+      lower sections to function as a single leaf. 3. To provide makeup air for exhaust systems in accordance with Section
+      1020.6, Exception 1, doors are permitted to have louvers or to have a clearance between the bottom of the door and the
+      floor surface that is 2/3 inch (19.1 mm) maximum.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Unrated corridor doors: solid with close-fitting stops; Dutch doors with an astragal and latching both halves as
+      one leaf; louvers or an undercut of at most 2/3 in only for makeup air (1020.6 exception 1): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_means_of_egress
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2 means of egress, and the defend-in-place plan (BCNYS 407.4)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 99
+    lines:
+    - 34
+    - 37
+    quote: '[BE] 407.4 Means of egress. Group I-2 occupancies shall be provided with means of egress complying with Chapter
+      10 and Sections 407.4.1 through 407.4.4. The fire safety and evacuation plans provided in accordance with Section 1002.2
+      shall identify the building components necessary to support a defend-in-place emergency response in accordance with
+      Sections 403 and 404 of the Fire Code of New York State.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Means of egress per Chapter 10 and 407.4.1 to 407.4.4, and the fire safety and evacuation plans (1002.2) name the
+      building components a defend-in-place response needs: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_1_direct_access_to_a_corridor
+  kind: flag
+  topic: means_of_egress
+  title: A Group I-2 habitable room's door directly to a corridor (BCNYS 407.4.1)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 99
+    lines:
+    - 38
+    - 42
+    quote: '[BE] 407.4.1 Direct access to a corridor. Habitable rooms in Group I-2 occupancies shall have an exit access door
+      leading directly to a corridor. Exceptions: 1. Rooms with exit doors opening directly to the outside at ground level.
+      2. Rooms arranged as care suites complying with Section 407.4.4.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Each habitable room has an exit access door leading directly to a corridor, but rooms with exit doors directly
+      outside at ground level and rooms in a care suite: a person''s check of which rooms are habitable.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: 'Which rooms are habitable and which are in a care suite aren''t stated: a person checks. Egress through another
+    room already needs review in Group I-2 (1016.2''s rule for every group: an adjoining or intervening room, and in Group
+    I-2 any care suite not ruled out). Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_1_1_locking_devices
+  kind: flag
+  topic: means_of_egress
+  title: Locks on a care recipient's room not restricting egress from it (BCNYS 407.4.1.1)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 99
+    lines:
+    - 43
+    - 47
+    quote: '[BE] 407.4.1.1 Locking devices. Locking devices that restrict access to a care recipient’s room from the corridor
+      and that are operable only by staff from the corridor side shall not restrict the means of egress from the care recipient’s
+      room. Exceptions: 1. This section shall not apply to rooms in psychiatric treatment and similar care areas. 2. Locking
+      arrangements in accordance with Section 1010.2.13.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'A lock restricting access to a care recipient''s room from the corridor, operable only by staff, never restricts
+      egress from the room (not in psychiatric treatment areas, or per 1010.2.13): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Locks aren't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_3_projections_in_nursing_home_corridors
+  kind: flag
+  topic: means_of_egress
+  title: Furniture in nursing home corridors at least 96 in wide (BCNYS 407.4.3)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 99
+    lines:
+    - 50
+    - 58
+    quote: '[BE] 407.4.3 Projections in nursing home corridors. In Group I-2, Condition 1 occupancies, where the corridor
+      width is not less than 96 inches (2440 mm), projections shall be permitted for furniture where all of the following
+      criteria are met: 1. The furniture is attached to the floor or to the wall. 2. The furniture does not reduce the clear
+      width of the corridor to less than 72 inches (1830 mm) except where other encroachments are permitted in accordance
+      with Section 1005.7. 3. The furniture is positioned on only one side of the corridor. 4. Each arrangement of furniture
+      is 50 square feet (4.6 m[fn2]) maximum in area. 5. Furniture arrangements are separated by 10 feet (3048 mm) minimum.
+      6. Placement of furniture is considered as part of the fire and safety plans in accordance with Section 1002.2.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'In Group I-2, Condition 1, a corridor at least 96 in wide may hold fixed furniture on one side only, leaving 72
+      in clear (or 1005.7''s encroachments), each group of at most 50 sq ft and 10 ft apart, in the fire and safety plans:
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Loosens 1005.7's encroachments (the flag "Trim at most 1 1/2 in each side into the width (BCNYS 1005.7.2)" already
+    names it); furniture isn't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_care_suites
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2 care suites (BCNYS 407.4.4)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 3
+    - 4
+    quote: '[BE] 407.4.4 Group I-2 care suites. Care suites in Group I-2 shall comply with Sections 407.4.4.1 through 407.4.4.5
+      and either Section 407.4.4.6 or 407.4.4.7.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Care suites meet 407.4.4.1 to 407.4.4.5 and either 407.4.4.6 or 407.4.4.7: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Care suites aren't a part the model gives; a building that may have them is one that holds a space the code gives
+    its own exits (the fact special egress spaces names a Group I-2 care suite, 407.4.4), which Chapter 10's travel and intervening-space
+    rules already read. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_1_exit_access_through_care_suites
+  kind: flag
+  topic: means_of_egress
+  title: No exit access from elsewhere through a care suite (BCNYS 407.4.4.1)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 5
+    - 6
+    quote: '[BE] 407.4.4.1 Exit access through care suites. Exit access from all other portions of a building not classified
+      as a care suite shall not pass through a care suite.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Exit access from any part of the building not a care suite never passes through one: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_2_care_suite_separation
+  kind: flag
+  topic: means_of_egress
+  title: Care suites separated by smoke partitions (BCNYS 407.4.4.2)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 7
+    - 8
+    quote: '[BE] 407.4.4.2 Separation. Care suites shall be separated from other portions of the building, including other
+      care suites, by a smoke partition complying with Section 710.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Each care suite is separated from the rest of the building, other suites included, by a smoke partition (710):
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_3_care_suite_access_to_corridor
+  kind: flag
+  topic: means_of_egress
+  title: A care suite's door to a corridor, within 100 ft (BCNYS 407.4.4.3)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 9
+    - 13
+    quote: '[BE] 407.4.4.3 Access to corridor. Every care suite shall have a door leading directly to an exit access corridor
+      or horizontal exit. Movement from habitable rooms within a care suite shall not require more than 100 feet (30 480 mm)
+      of travel within the care suite to a door leading to the exit access corridor or horizontal exit. Where a care suite
+      is required to have more than one exit access door by Section 407.4.4.6.2 or 407.4.4.7.2, the additional door shall
+      lead directly to an exit access corridor, exit or an adjacent suite.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Every care suite has a door directly to an exit access corridor or horizontal exit, at most 100 ft of travel from
+      any habitable room in it; a second door required by 407.4.4.6.2 or 407.4.4.7.2 leads to a corridor, an exit or an adjacent
+      suite: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_4_care_suite_circulation_paths
+  kind: flag
+  topic: means_of_egress
+  title: Circulation paths within a care suite at least 36 in (BCNYS 407.4.4.4)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 14
+    - 16
+    quote: '[BE] 407.4.4.4 Circulation paths within a care suite. The circulation paths within a care suite providing the
+      access to doors required in Section 407.4.4.3 shall have a minimum width of 36 inches (914 mm) and shall not be required
+      to meet the require- ments for a corridor or an aisle.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Paths to the suite''s doors are at least 36 in wide and need not meet a corridor''s or an aisle''s requirements:
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_5_doors_within_care_suites
+  kind: flag
+  topic: means_of_egress
+  title: Doors within care suites (BCNYS 407.4.4.5)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 17
+    - 21
+    quote: '[BE] 407.4.4.5 Doors within care suites. Doors in care suites serving habitable rooms shall be permitted to comply
+      with one of the following: 1. Manually operated horizontal sliding doors permitted in accordance with Exception 9 to
+      Section 1010.1.2. 2. Power-operated doors permitted in accordance with Section 1010.1.2, Exception 7. 3. Means of egress
+      doors complying with Section 1010.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Doors serving habitable rooms in a care suite may be manual horizontal sliding doors (1010.1.2 exception 9), power-operated
+      doors (exception 7) or doors per 1010: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_6_care_suites_with_sleeping_rooms
+  kind: flag
+  topic: means_of_egress
+  title: Care suites containing sleeping rooms (BCNYS 407.4.4.6)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 22
+    - 27
+    quote: '[BE] 407.4.4.6 Care suites containing sleeping room areas. Sleeping rooms shall be permitted to be grouped into
+      care suites where one of the following criteria is met: 1. The care suite is not used as an exit access for more than
+      eight care recipient beds. 2. The arrangement of the care suite allows for direct and constant visual supervision into
+      the sleeping rooms by care providers. 3. An automatic smoke detection system is provided in the sleeping rooms and installed
+      in accordance with NFPA 72.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Sleeping rooms may be grouped into a care suite only where it serves as exit access for at most eight beds, or
+      gives constant visual supervision, or has smoke detection in the sleeping rooms (NFPA 72): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_6_1_sleeping_care_suite_area
+  kind: flag
+  topic: means_of_egress
+  title: A sleeping care suite at most 7,500 sq ft (BCNYS 407.4.4.6.1)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 28
+    - 31
+    quote: '[BE] 407.4.4.6.1 Area. Care suites containing sleeping rooms shall be not greater than 7,500 square feet (696
+      m[fn2]) in area. Exception: Care suites containing sleeping rooms shall be permitted to be not greater than 10,000 square
+      feet (929 m[fn2]) in area where an automatic smoke detection system is provided throughout the care suite and installed
+      in accordance with NFPA 72.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'A care suite with sleeping rooms is at most 7,500 sq ft (10,000 sq ft with smoke detection throughout): a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_6_2_sleeping_care_suite_exit_access
+  kind: flag
+  topic: means_of_egress
+  title: Two exit access doors from a sleeping care suite over 1,000 sq ft (BCNYS 407.4.4.6.2)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 32
+    - 33
+    quote: '[BE] 407.4.4.6.2 Exit access. Any sleeping room, or any care suite that contains sleeping rooms, of more than
+      1,000 square feet (93 m[fn2]) shall have not fewer than two exit access doors from the care suite located in accordance
+      with Section 1007.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'A sleeping room, or a care suite with sleeping rooms, over 1,000 sq ft has at least two exit access doors from
+      the suite, placed per 1007: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_7_care_suites_without_sleeping_rooms
+  kind: flag
+  topic: means_of_egress
+  title: Care suites without sleeping rooms (BCNYS 407.4.4.7)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 34
+    - 36
+    quote: '[BE] 407.4.4.7 Care suites not containing sleeping rooms. Areas not containing sleeping rooms, but only treatment
+      areas and the associated rooms, spaces or circulation space, shall be permitted to be grouped into care suites and shall
+      conform to the limitations in Sections 407.4.4.7.1 and 407.4.4.7.2.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Treatment areas and their rooms and circulation may be grouped into a care suite within 407.4.4.7.1 and 407.4.4.7.2:
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_7_1_treatment_care_suite_area
+  kind: flag
+  topic: means_of_egress
+  title: A treatment care suite at most 12,500 sq ft (BCNYS 407.4.4.7.1)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 37
+    - 41
+    quote: '[BE] 407.4.4.7.1 Area. Care suites of rooms, other than sleeping rooms, shall have an area not greater than 12,500
+      square feet (1161 m[fn2]). Exception: Care suites not containing sleeping rooms shall be permitted to be not greater
+      than 15,000 square feet (1394 m[fn2]) in area where an automatic smoke detection system is provided throughout the care
+      suite in accordance with Section 907.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'A care suite without sleeping rooms is at most 12,500 sq ft (15,000 sq ft with smoke detection throughout, 907):
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_4_4_7_2_treatment_care_suite_exit_access
+  kind: flag
+  topic: means_of_egress
+  title: Two exit access doors from a treatment care suite over 2,500 sq ft (BCNYS 407.4.4.7.2)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 42
+    - 43
+    quote: '[BE] 407.4.4.7.2 Exit access. Care suites, other than sleeping rooms, with an area of more than 2,500 square feet
+      (232 m[fn2]) shall have not fewer than two exit access doors from the care suite located in accordance with Section
+      1007.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'A care suite without sleeping rooms over 2,500 sq ft has at least two exit access doors from the suite, placed
+      per 1007: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 # ---- end of Chapter 4 ----
 - id: general.bc_508_2_1_classification
   kind: flag

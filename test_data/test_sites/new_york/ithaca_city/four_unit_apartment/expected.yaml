@@ -96,6 +96,35 @@ results:
   general.bc_405_7_means_of_egress: needs_review
   general.bc_405_7_1_two_exits_on_each_floor_level: needs_review
   general.bc_405_7_2_smokeproof_enclosures: needs_review
+  # Chapter 4 part c: one flag per piece of 407.1 to 407.4 (Group I-2), not applicable to a building stated Group R-2
+  general.bc_407_1_group_i2: not_applicable
+  general.bc_407_2_corridor_continuity_and_separation: not_applicable
+  general.bc_407_2_1_waiting_areas_open_to_a_corridor: not_applicable
+  general.bc_407_2_2_care_providers_stations: not_applicable
+  general.bc_407_2_3_psychiatric_treatment_areas: not_applicable
+  general.bc_407_2_4_gift_shops: not_applicable
+  general.bc_407_2_5_nursing_home_housing_units: not_applicable
+  general.bc_407_2_6_nursing_home_cooking_facilities: not_applicable
+  general.bc_407_2_7_domestic_cooking_appliances: not_applicable
+  general.bc_407_3_corridor_wall_construction: not_applicable
+  general.bc_407_3_1_corridor_doors: not_applicable
+  general.bc_407_3_1_1_corridor_door_construction: not_applicable
+  general.bc_407_4_means_of_egress: not_applicable
+  general.bc_407_4_1_direct_access_to_a_corridor: not_applicable
+  general.bc_407_4_1_1_locking_devices: not_applicable
+  general.bc_407_4_3_projections_in_nursing_home_corridors: not_applicable
+  general.bc_407_4_4_care_suites: not_applicable
+  general.bc_407_4_4_1_exit_access_through_care_suites: not_applicable
+  general.bc_407_4_4_2_care_suite_separation: not_applicable
+  general.bc_407_4_4_3_care_suite_access_to_corridor: not_applicable
+  general.bc_407_4_4_4_care_suite_circulation_paths: not_applicable
+  general.bc_407_4_4_5_doors_within_care_suites: not_applicable
+  general.bc_407_4_4_6_care_suites_with_sleeping_rooms: not_applicable
+  general.bc_407_4_4_6_1_sleeping_care_suite_area: not_applicable
+  general.bc_407_4_4_6_2_sleeping_care_suite_exit_access: not_applicable
+  general.bc_407_4_4_7_care_suites_without_sleeping_rooms: not_applicable
+  general.bc_407_4_4_7_1_treatment_care_suite_area: not_applicable
+  general.bc_407_4_4_7_2_treatment_care_suite_exit_access: not_applicable
   general.bc_1007_1_1_remoteness: pass                 # 0.5992 >= 1/2 on both stories (above)
   general.bc_1007_1_1_space_remoteness: pass           # "space_exit_count < 2 or ...": every space has one doorway
   general.bc_1007_1_2_space_three_or_more: pass        # "space_exit_count < 3 or ...": none has three

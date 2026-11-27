@@ -89,6 +89,35 @@ def test_each_piece_has_its_flag_shown_only_where_the_building_may_be_that_use(c
             assert outcome(rule, given, ctx.allowed()) == want, (pid, value)
 
 
+# part c: a section for one occupancy group, its flags shown where the building is stated that group, two or more
+# groups, or none (a building stated one other group: not applicable)
+GROUP_GATED = {"407": ["I-2"]}
+# pieces a rule outside the Chapter 4 block already checks (Chapter 10's review round 1 brought them in alone)
+CHECKED_BEFORE = {"407.4.2": "general.bc_407_4_2_sleeping_room_travel"}
+
+
+@pytest.mark.parametrize("section", sorted(GROUP_GATED))
+def test_each_piece_of_a_groups_section_has_its_flag_shown_only_for_that_group(ctx, rules, section):
+    pieces, labels = _pieces(), load(LABELS)["labels"]
+    block = _block_ids()
+    groups = GROUP_GATED[section]
+    wanted = [pid for pid in _chapter_4(pieces, labels, section) if pid not in CHECKED_BEFORE]
+    assert wanted and all(rid in rules for rid in CHECKED_BEFORE.values())
+    for pid in wanted:
+        rid = [r for r in block if r.startswith("general.bc_" + pid.replace(".", "_") + "_") and
+               not any(r.startswith("general.bc_" + q.replace(".", "_") + "_") for q in wanted if q.startswith(pid + "."))]
+        assert len(rid) == 1, (pid, rid)
+        rule = rules[rid[0]]
+        gate = "occupancy_group in " + str(groups + ["mixed"]).replace("'", '"')
+        assert rule["kind"] == "flag" and rule["applies_when"] == gate, pid
+        quoted = {(s["page"], n) for s in rule["sources"] for n in range(s["lines"][0], s["lines"][1] + 1)}
+        assert quoted == {(page, n) for page, a, b in pieces[pid]["lines"] for n in range(a, b + 1)}, pid
+        for group in GROUPS + ["mixed", None]:
+            given = {} if group is None else {"occupancy_group": group}
+            want = "needs_review" if group in groups + ["mixed", None] else "not_applicable"
+            assert outcome(rule, given, ctx.allowed()) == want, (pid, group)
+
+
 def test_the_block_holds_chapter_4_only_in_book_order(rules):
     block = _block_ids()
     assert block and all(re.match(r"general\.bc_4\d\d_", r) for r in block)
