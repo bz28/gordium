@@ -520,3 +520,22 @@ def test_part_d_review_round_1s_notes(book, labels):
     assert "714.4.1.2" in one and "714.4.1.1" in two and not two.startswith("Or")
     for pid in ("714.5", "714.5.1", "714.5.1.1", "714.5.1.2", "714.5.2", "714.5.3", "714.5.4"):
         assert labels[pid]["label"] == "flag" and _flags(book, pid), pid
+
+
+def test_part_d_review_round_2s_notes(book):
+    """Part d review round 2: 714.5.1's exception 2 and 714.5.1.2's exception 4 name only steel, ferrous or copper
+    conduits, pipes, tubes or vents (never concrete or masonry items); switchgear penetrated directly; 714.5.2's and
+    714.4.2's listed boxes and luminaires installed per their listing; 714.4.1's positive pressure."""
+    rules = {r["id"]: r for r in book}
+    def shown(rid):
+        return " ".join(_shown_note(rules[rid]).split())
+    floor = shown("general.bc_714_5_1_floor_through_penetrations")
+    assert "such items at most" not in floor and "copper conduits, pipes, tubes or vents at most 6 inches through a single" in floor
+    firestop = shown("general.bc_714_5_1_2_floor_firestop_systems")
+    assert "penetrating directly into metal-enclosed electrical power switchgear" in firestop
+    assert "copper conduits, pipes, tubes or vents at most 6 inches through a single concrete floor" in firestop
+    membrane = shown("general.bc_714_5_2_floor_membrane_penetrations")
+    assert "protected with listed materials" in membrane and membrane.count("installed per their listing") >= 2
+    assert "wall opening protective material system for use in fire-resistance-rated assemblies, installed per their listing" \
+        in shown("general.bc_714_4_2_membrane_penetrations")
+    assert "positive pressure differential" in shown("general.bc_714_4_1_through_penetrations")

@@ -2880,7 +2880,7 @@ rules:
       or conduit, whose annular space may be filled with concrete, grout or mortar the full thickness of a concrete or masonry
       wall or the thickness that keeps its rating (an item at most 6 inches nominal diameter through an opening at most 144
       square inches), or with a material that stops flame and hot gases for the wall''s rating under ASTM E119 or UL 263 fire
-      conditions at a pressure differential of at least 0.01 inch of water: a person''s check.'
+      conditions at a positive pressure differential of at least 0.01 inch of water: a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -2979,12 +2979,12 @@ rules:
       in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches apart
       where the stud cavities don''t communicate (or the wall cavity''s depth where filled with cellulose, rockwool or slag
       wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes per their
-      listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); boxes listed with
-      a wall opening protective system; other boxes in a membrane penetration firestop system tested per ASTM E814 or UL 1479
-      at a positive pressure differential of at least 0.01 inch of water, with F and T ratings at least the wall''s, installed
-      per their listing; sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed
-      putty pads or listed means: a person''s check (1023.5 allows membrane penetrations on the outside of an exit stairway
-      enclosure only so protected).'
+      listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); electrical boxes
+      listed as part of a wall opening protective material system for use in fire-resistance-rated assemblies, installed per
+      their listing; other boxes in a membrane penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure
+      differential of at least 0.01 inch of water, with F and T ratings at least the wall''s, installed per their listing;
+      sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or listed
+      means: a person''s check (1023.5 allows membrane penetrations on the outside of an exit stairway enclosure only so protected).'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 718.2.1 and 1023.5 aren't brought in. Shown
     for every building.
   drafted_by: claude_code/claude-opus-5-5
@@ -3066,10 +3066,11 @@ rules:
       pipes, tubes or vents or concrete or masonry items through a single rated floor with the annular space stopping flame
       and hot gases for the floor''s rating under ASTM E119 or UL 263 fire conditions at a positive pressure differential
       of at least 0.01 inch of water (items at most 6 inches nominal diameter may pass more than one floor where the openings
-      total at most 144 square inches in any 100 square feet of floor); such items at most 6 inches through a single concrete
-      floor with concrete, grout or mortar the full thickness or the thickness that keeps its rating (more than one floor
-      where each opening is at most 144 square inches); listed electrical boxes tested for rated assemblies per their listing;
-      and concrete floors or ramps of parking garages per 406.5 and 406.6 with parking above and below: a person''s check.'
+      total at most 144 square inches in any 100 square feet of floor); steel, ferrous or copper conduits, pipes, tubes or
+      vents at most 6 inches through a single concrete floor with concrete, grout or mortar the full thickness or the thickness
+      that keeps its rating (more than one floor where each opening is at most 144 square inches); listed electrical boxes
+      tested for rated assemblies per their listing; and concrete floors or ramps of parking garages per 406.5 and 406.6 with
+      parking above and below: a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 406.5 and 406.6 aren't brought in. Shown for
     every building.
   drafted_by: claude_code/claude-opus-5-5
@@ -3122,9 +3123,10 @@ rules:
       by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential
       of at least 0.01 inch of water, with an F rating and a T rating of at least 1 hour and at least the floor''s required
       rating; no T rating is needed for floor penetrations within a wall cavity above or below, floor, tub or shower drains
-      within a horizontal assembly''s concealed space, metal conduit or tubing at most 4 inches nominal diameter into metal-enclosed
-      electrical switchgear, or steel, ferrous or copper items at most 6 inches through a single concrete floor (more than
-      one floor where each opening is at most 144 square inches): a person''s check.'
+      within a horizontal assembly''s concealed space, metal conduit or tubing at most 4 inches nominal diameter penetrating
+      directly into metal-enclosed electrical power switchgear, or steel, ferrous or copper conduits, pipes, tubes or vents
+      at most 6 inches through a single concrete floor (more than one floor where each opening is at most 144 square inches):
+      a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -3175,11 +3177,13 @@ rules:
       items with the annular space protected per 714.5.1 or against flame and the products of combustion, at most 100 square
       inches of openings in any 100 square feet of ceiling (in assemblies tested without penetrations); steel electrical boxes
       in ceilings of assemblies rated at most 2 hours, each at most 16 square inches, at most 100 square inches in any 100
-      square feet, an annular space at most 1/8 inch; boxes listed with an opening protective system; listed electrical boxes
-      tested for rated assemblies per their listing (1/8 inch unless listed otherwise); sprinkler escutcheons; noncombustible
-      items cast into concrete that don''t pass both faces; the double wood top plate of a wall sheathed with Type X gypsum
-      board interrupting the ceiling of an assembly rated at most 2 hours, its penetrations protected per 714.5.1.1 or 714.5.1.2
-      and the ceiling tight to the plates; and listed or protected luminaires tested for rated assemblies: a person''s check.'
+      square feet, an annular space at most 1/8 inch; electrical boxes listed as part of an opening protective material system
+      for use in horizontal assemblies, installed per their listing; listed electrical boxes tested for rated assemblies per
+      their listing (1/8 inch unless listed otherwise); sprinkler escutcheons; noncombustible items cast into concrete that
+      don''t pass both faces; the double wood top plate of a wall sheathed with Type X gypsum board interrupting the ceiling
+      of an assembly rated at most 2 hours, its penetrations protected per 714.5.1.1 or 714.5.1.2 and the ceiling tight to
+      the plates; and ceiling membrane penetrations by listed luminaires, or luminaires protected with listed materials, tested
+      for rated assemblies and installed per their listing: a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
