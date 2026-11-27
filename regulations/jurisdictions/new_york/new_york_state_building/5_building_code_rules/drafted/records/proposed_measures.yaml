@@ -31,9 +31,17 @@ sprinklered_903_3_1_1:
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
+  - general.bc_903_2_1_1_group_a1_sprinklers
+  - general.bc_903_2_1_2_group_a2_sprinklers
+  - general.bc_903_2_1_3_group_a3_sprinklers
+  - general.bc_903_2_1_4_group_a4_sprinklers
+  - general.bc_903_2_3_group_e_sprinklers
+  - general.bc_903_2_4_group_f1_sprinklers
   - general.bc_903_2_5_1_group_h_sprinklers
   - general.bc_903_2_6_group_i_sprinklers
+  - general.bc_903_2_7_group_m_sprinklers
   - general.bc_903_2_8_group_r_sprinklers
+  - general.bc_903_2_9_group_s1_sprinklers
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -183,10 +191,35 @@ occupancy_group:
   - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_710_5_3_i2_pass_through_openings
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
+  - general.bc_903_2_10_1_commercial_parking
+  - general.bc_903_2_10_2_mechanical_access_garages
+  - general.bc_903_2_10_parking_garages
+  - general.bc_903_2_1_1_group_a1_sprinklers
+  - general.bc_903_2_1_2_group_a2_sprinklers
+  - general.bc_903_2_1_3_group_a3_sprinklers
+  - general.bc_903_2_1_4_group_a4_sprinklers
+  - general.bc_903_2_1_5_1_under_grandstands
+  - general.bc_903_2_1_5_a5_accessory_areas
+  - general.bc_903_2_1_7_multiple_a_fire_areas
+  - general.bc_903_2_2_2_battery_laboratories
+  - general.bc_903_2_3_group_e_sprinklers
+  - general.bc_903_2_4_1_woodworking
+  - general.bc_903_2_4_2_distilled_spirits
+  - general.bc_903_2_4_3_upholstered_furniture
+  - general.bc_903_2_4_group_f1_sprinklers
   - general.bc_903_2_5_1_group_h_sprinklers
   - general.bc_903_2_5_2_h5_sprinkler_design
   - general.bc_903_2_6_group_i_sprinklers
+  - general.bc_903_2_7_1_high_piled_storage
+  - general.bc_903_2_7_2_upholstered_furniture
+  - general.bc_903_2_7_3_battery_storage
+  - general.bc_903_2_7_group_m_sprinklers
   - general.bc_903_2_8_group_r_sprinklers
+  - general.bc_903_2_9_1_repair_garages
+  - general.bc_903_2_9_3_distilled_spirits_wine
+  - general.bc_903_2_9_4_upholstered_furniture
+  - general.bc_903_2_9_group_s1_sprinklers
+  - general.bc_903_2_mixed_occupancies
   - general.bc_903_3_1_3_nfpa_13d_scope
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
@@ -368,12 +401,14 @@ occupied_outdoor_areas:
   needed_by:
   - general.bc_1004_7_outdoor_areas
   - general.bc_1010_1_2_1_direction_of_swing
+  - general.bc_903_2_1_6_assembly_on_roofs
 ambulatory_care_facility:
   meaning: 'The building is or holds an ambulatory care facility (2025 BCNYS 202, Section 422; Group B, 304.1), as the architect
     states it: Table 1020.3 asks 72 inches of its corridors serving stretcher traffic'
   unit: yes_no
   needed_by:
   - general.bc_709_5_1_i2_smoke_barrier_doors
+  - general.bc_903_2_2_1_ambulatory_care
   - general.bc_table_1020_3_corridor_width
 corridors_within_dwelling_units:
   meaning: 'The building has corridors within a dwelling unit or sleeping unit (2025 BCNYS 1020.2 exception 2: no rating

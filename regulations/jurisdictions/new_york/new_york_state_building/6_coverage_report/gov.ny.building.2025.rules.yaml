@@ -578,6 +578,81 @@ pieces:
     heading: General › Alternative protection
     rules:
     - general.bc_903_1_1_alternative_protection
+  903.2.1.1:
+    label: rule
+    heading: Group A › Group A-1
+    rules:
+    - general.bc_903_2_1_1_group_a1_sprinklers
+  903.2.1.2:
+    label: rule
+    heading: Group A › Group A-2
+    rules:
+    - general.bc_903_2_1_2_group_a2_sprinklers
+  903.2.1.3:
+    label: rule
+    heading: Group A › Group A-3
+    rules:
+    - general.bc_903_2_1_3_group_a3_sprinklers
+  903.2.1.4:
+    label: rule
+    heading: Group A › Group A-4
+    rules:
+    - general.bc_903_2_1_4_group_a4_sprinklers
+  903.2.1.5:
+    label: flag
+    heading: Group A › Group A-5
+    rules:
+    - general.bc_903_2_1_5_a5_accessory_areas
+  903.2.1.5.1:
+    label: flag
+    heading: Group A-5 › Spaces under grandstands or bleachers
+    rules:
+    - general.bc_903_2_1_5_1_under_grandstands
+  903.2.1.6:
+    label: flag
+    heading: Group A › Assembly occupancies on roofs
+    rules:
+    - general.bc_903_2_1_6_assembly_on_roofs
+  903.2.1.7:
+    label: flag
+    heading: Group A › Multiple fire areas
+    rules:
+    - general.bc_903_2_1_7_multiple_a_fire_areas
+  903.2.2.1:
+    label: flag
+    heading: Group B › Ambulatory care facilities
+    rules:
+    - general.bc_903_2_2_1_ambulatory_care
+  903.2.2.2:
+    label: flag
+    heading: Group B › Laboratories involving testing, research and development
+    rules:
+    - general.bc_903_2_2_2_battery_laboratories
+  903.2.3:
+    label: rule
+    heading: Where required › Group E
+    rules:
+    - general.bc_903_2_3_group_e_sprinklers
+  903.2.4:
+    label: rule
+    heading: Where required › Group F-1
+    rules:
+    - general.bc_903_2_4_group_f1_sprinklers
+  903.2.4.1:
+    label: flag
+    heading: Group F-1 › Woodworking operations
+    rules:
+    - general.bc_903_2_4_1_woodworking
+  903.2.4.2:
+    label: flag
+    heading: Group F-1 › Group F-1 distilled spirits
+    rules:
+    - general.bc_903_2_4_2_distilled_spirits
+  903.2.4.3:
+    label: flag
+    heading: Group F-1 › Group F-1 upholstered furniture or mattresses
+    rules:
+    - general.bc_903_2_4_3_upholstered_furniture
   903.2.5.1:
     label: rule
     heading: Group H › General
@@ -598,11 +673,71 @@ pieces:
     heading: Where required › Group I
     rules:
     - general.bc_903_2_6_group_i_sprinklers
+  903.2.7:
+    label: rule
+    heading: Where required › Group M
+    rules:
+    - general.bc_903_2_7_group_m_sprinklers
+  903.2.7.1:
+    label: flag
+    heading: Group M › High-piled storage
+    rules:
+    - general.bc_903_2_7_1_high_piled_storage
+  903.2.7.2:
+    label: flag
+    heading: Group M › Group M upholstered furniture or mattresses
+    rules:
+    - general.bc_903_2_7_2_upholstered_furniture
+  903.2.7.3:
+    label: flag
+    heading: Group M › Lithium-ion or lithium metal battery storage
+    rules:
+    - general.bc_903_2_7_3_battery_storage
   903.2.8:
     label: rule
     heading: Where required › Group R
     rules:
     - general.bc_903_2_8_group_r_sprinklers
+  903.2.9:
+    label: rule
+    heading: Where required › Group S-1
+    rules:
+    - general.bc_903_2_9_group_s1_sprinklers
+  903.2.9.1:
+    label: flag
+    heading: Group S-1 › Repair garages
+    rules:
+    - general.bc_903_2_9_1_repair_garages
+  903.2.9.2:
+    label: flag
+    heading: Group S-1 › Bulk storage of tires
+    rules:
+    - general.bc_903_2_9_2_bulk_tires
+  903.2.9.3:
+    label: flag
+    heading: Group S-1 › Group S-1 Distilled spirits or wine
+    rules:
+    - general.bc_903_2_9_3_distilled_spirits_wine
+  903.2.9.4:
+    label: flag
+    heading: Group S-1 › Group S-1 upholstered furniture and mattresses
+    rules:
+    - general.bc_903_2_9_4_upholstered_furniture
+  903.2.10:
+    label: flag
+    heading: Where required › Group S-2 parking garages
+    rules:
+    - general.bc_903_2_10_parking_garages
+  903.2.10.1:
+    label: flag
+    heading: Group S-2 parking garages › Commercial parking garages
+    rules:
+    - general.bc_903_2_10_1_commercial_parking
+  903.2.10.2:
+    label: flag
+    heading: Group S-2 parking garages › Mechanical-access enclosed parking garages
+    rules:
+    - general.bc_903_2_10_2_mechanical_access_garages
   903.3.1.2:
     label: flag
     heading: Standards › NFPA 13R sprinkler systems

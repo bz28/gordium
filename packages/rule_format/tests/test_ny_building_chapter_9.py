@@ -125,7 +125,8 @@ def test_every_chapter_9_flag_is_a_persons_check_never_a_pass(labels, book, ctx)
     narrowed only by a fact the architect states (the groups, the sprinkler system) and needs review while that fact
     isn't stated."""
     allowed = ctx.allowed()
-    by = {"occupancy_group", "group_h_present", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3"}
+    by = {"occupancy_group", "group_h_present", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3",
+          "occupied_outdoor_areas", "ambulatory_care_facility"}            # part b: 903.2.1.6, 903.2.2.1
     for pid, v in labels.items():
         if v["label"] != "flag":
             continue
@@ -287,3 +288,78 @@ def test_the_13r_flag_shows_wherever_a_13r_system_is_stated_or_the_system_isnt(b
             for other in ("none", "nfpa_13", "nfpa_13d"):
                 assert outcome(r, code_scope.building_measures(_building(groups, other, 3, None, None)),
                                allowed) == "not_applicable"
+
+
+# ---- part b (2026-11-27): the groups whose requirement turns on fire area, occupant load or story -----------------
+
+# each per-room rule, its group and the limits typed from the page (903.2.1.1 to 903.2.1.4: p.269 lines 33-34, 40-41,
+# 46-47, 52-53; 903.2.3: p.270 lines 27 and 31; 903.2.4: p.270 line 34; 903.2.7: p.271 line 24; 903.2.9: p.271 line 45):
+# a fire area over the area, or with an occupant load of the load or more (None: no occupant load condition)
+ROOM_RULES = {
+    "general.bc_903_2_1_1_group_a1_sprinklers": ("A-1", 12000, 300),
+    "general.bc_903_2_1_2_group_a2_sprinklers": ("A-2", 5000, 100),
+    "general.bc_903_2_1_3_group_a3_sprinklers": ("A-3", 12000, 300),
+    "general.bc_903_2_1_4_group_a4_sprinklers": ("A-4", 12000, 300),
+    "general.bc_903_2_3_group_e_sprinklers": ("E", 12000, 300),
+    "general.bc_903_2_4_group_f1_sprinklers": ("F-1", 12000, None),
+    "general.bc_903_2_7_group_m_sprinklers": ("M", 12000, None),
+    "general.bc_903_2_9_group_s1_sprinklers": ("S-1", 12000, None),
+}
+
+
+def _room_law(group_of_rule, limit, load_limit, groups, system, area, load):
+    """The law's answer for one room, written from 903.2.1.1 to 903.2.9 and 903.3.1 (never from the rules): a room
+    lies within one fire area, so a room over the area or at the load settles the requirement; anything else about
+    its fire area (its true size, its floor, other fire areas) isn't in the model."""
+    if groups is None:
+        return {"needs_review"}
+    if len(set(groups)) != 1 or groups[0] != group_of_rule:
+        return {"not_applicable"}                 # another group, or two or more: 903.2's flag
+    if system is None:
+        return {"needs_review"}
+    if system == "nfpa_13":
+        return {"pass"}
+    settled = (area is not None and area > limit) or (load_limit is not None and load is not None and
+                                                      load >= load_limit)
+    return {"fail"} if settled else {"needs_review"}
+
+
+def _room_answer(rule, building, measures, allowed):
+    values = code_scope.building_measures(building)
+    [row] = parts.rows(rule, {"space": [{"id": "p1", "name": "Room", "measures": measures}]}, values, allowed)
+    return row["outcome"]
+
+
+@pytest.mark.parametrize("rid", sorted(ROOM_RULES))
+def test_each_room_rule_gives_the_laws_answer_for_every_room(book, ctx, rid):
+    """The walk: every group alone, two buildings of two or more groups and none stated; each sprinkler system or none
+    stated; the room's floor area and occupant load around each printed limit, or not measured. The rule's row is
+    the law's, exactly."""
+    group, limit, load_limit = ROOM_RULES[rid]
+    rule, allowed, wrong = _rule(book, rid), ctx.allowed(), []
+    areas = [None, 0, limit - 1, limit, limit + 0.01, 10 * limit]
+    loads = [None] if load_limit is None else [None, 0, load_limit - 1, load_limit - 0.01, load_limit, load_limit + 5]
+    for groups in [None, [group], ["M", "R-2"], [group, "B"]] + [[g] for g in GROUPS if g != group]:
+        for system in SPRINKLERS:
+            for area, load in itertools.product(areas, loads):
+                m = {k: v for k, v in (("space_floor_area", area), ("space_occupant_load", load)) if v is not None}
+                got = _room_answer(rule, _building(groups, system, None, None, None), m, allowed)
+                if got not in _room_law(group, limit, load_limit, groups, system, area, load):
+                    wrong.append((groups, system, area, load, got))
+    assert not wrong, wrong[:5]
+
+
+def test_the_room_walks_oracle_catches_a_limit_changed(book, ctx):
+    """The pin: a limit moved the way a misread would move it (12,000 read 1,200; 300 read 30; 'or more' read 'more
+    than') disagrees with the oracle."""
+    allowed = ctx.allowed()
+    rid = "general.bc_903_2_1_1_group_a1_sprinklers"
+    r = _rule(book, rid)
+    for old, new in (("> 12000", "> 1200"), (">= 300", ">= 30"), (">= 300", "> 300")):
+        w = r["review_when"][0]
+        mutant = {**r, "review_when": [{**w, "when": w["when"].replace(old, new)}]}
+        cases = [(1500, None), (None, 30), (None, 300)]
+        assert any(_room_answer(mutant, _building(["A-1"], "none", None, None, None),
+                                {k: v for k, v in (("space_floor_area", a), ("space_occupant_load", ld)) if v is not None},
+                                allowed) not in _room_law("A-1", 12000, 300, ["A-1"], "none", a, ld)
+                   for a, ld in cases), (old, new)

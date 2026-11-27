@@ -3264,6 +3264,1305 @@ rules:
     Chapter 9 part a).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_903_2_mixed_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Sprinkler systems in a building of two or more groups (BCNYS 903.2)
+  applies_when: occupancy_group in ["mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 269
+    lines:
+    - 20
+    - 27
+    quote: '[F] 903.2 Where required. Approved automatic sprinkler systems in new buildings and structures shall be provided
+      in the locations described in Sections 903.2.1 through 903.2.12. Exception: Spaces or areas in telecommunications buildings
+      used exclusively for telecommunications equipment, associated electrical power distribution equipment, batteries not
+      required to have an automatic sprinkler system by Section 1207 of the Fire Code of New York State for energy storage
+      systems and standby engines, provided that those spaces or areas are equipped throughout with an automatic smoke detection
+      system in accordance with Section 907.2 and are separated from the remainder of the building by not less than 1-hour
+      fire barriers constructed in accordance with Section 707 or not less than 2-hour horizontal assemblies constructed in
+      accordance with Section 711, or both.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In a building of two or more groups, each group''s own section (903.2.1 to 903.2.12) says where its fire areas
+      need a sprinkler system, by their area, occupant load and story; Group R, H and I-1 to I-3 are their own rules. Spaces
+      used only for telecommunications equipment, its power distribution, batteries Section 1207 of the Fire Code of New York
+      State doesn''t require sprinklered and standby engines, in a telecommunications building, may be left out where they
+      have smoke detection per 907.2 and are separated by 1-hour fire barriers per 707 or 2-hour horizontal assemblies per
+      711: a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2: sprinkler systems in new buildings where 903.2.1 to 903.2.12 say. The groups'' own rules read a building
+    stated as one group; for two or more, each portion''s fire areas are a person''s check (Groups R, H and I-1 to I-3 have
+    rules for a building of two or more groups too). The exception (telecommunications spaces) loosens it. Hand-drafted in
+    a Claude Code session (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_1_1_group_a1_sprinklers
+  kind: rule
+  topic: means_of_egress
+  title: 'Sprinkler system required: Group A-1, by the room (BCNYS 903.2.1.1)'
+  applies_when: occupancy_group in ["A-1"]
+  check: sprinklered_903_3_1_1
+  review_when:
+  - when: not sprinklered_903_3_1_1 and not space_floor_area > 12000 and not space_occupant_load >= 300
+    reason: 'No NFPA 13 system stated, and this room settles none of 903.2.1.1''s conditions (its own floor area is 12,000
+      square feet or less, its occupant load under 300 or not worked out); its fire area, which the model doesn''t show, may
+      be larger than the room and hold more people, or may be on a floor other than a level of exit discharge serving it,
+      or hold a multitheater complex: a person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 269
+    lines:
+    - 30
+    - 36
+    quote: '[F] 903.2.1.1 Group A-1. An automatic sprinkler system shall be provided throughout stories containing Group A-1
+      occupancies and throughout all stories from the Group A-1 occupancy to and including the levels of exit discharge serving
+      that occupancy where one of the following conditions exists: 1. The fire area exceeds 12,000 square feet (1115 m[fn2]).
+      2. The fire area has an occupant load of 300 or more. 3. The fire area is located on a floor other than a level of exit
+      discharge serving such occupancies. 4. The fire area contains a multitheater complex.'
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 41
+    - 42
+    quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+      903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.'
+  examples:
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 13000
+          space_occupant_load: 350
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group A-1 with an NFPA 13 system throughout (903.3.1.1): the system 903.2.1.1 requires.'
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Large room
+        measures:
+          space_floor_area: 12001
+          space_occupant_load: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room of over 12,000 square feet lies within one fire area, so its fire area is over 12,000 square feet: 903.2.1.1
+      requires a system, and none is stated.'
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Crowded room
+        measures:
+          space_floor_area: 1000
+          space_occupant_load: 300
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room with an occupant load of 300 lies within one fire area, so its fire area holds 300 or more: 903.2.1.1 requires
+      a system, and none is stated.'
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Crowded room
+        measures:
+          space_floor_area: 1000
+          space_occupant_load: 301
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'An NFPA 13R system in Group A-1: 903.3.1 permits 13R only in Group R (903.3.1.2), so it isn''t the system 903.2.1.1
+      asks.'
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Small room
+        measures:
+          space_floor_area: 400
+          space_occupant_load: 299
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A room under both limits: its fire area may be larger, a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Office
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not Group A-1: not applicable.'
+  - given:
+      occupancy_group: A-1
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 400
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No room in the model: with none, the rule needs review.'
+  notes: '903.2.1.1: a sprinkler system where a Group A-1 fire area is over 12,000 square feet, or with an occupant load of
+    300 or more, or its other conditions hold; 903.3.1 has it follow 903.3.1.1 (NFPA 13), since 903.3.1.2 and 903.3.1.3 permit
+    13R and 13D only in Group R and dwellings. Fire areas aren''t in the model, but a room lies wholly within one (202 FIRE
+    AREA: bounded by fire walls, fire barriers, exterior walls or horizontal assemblies, none of which runs through a room),
+    so a room over 12,000 square feet, or with an occupant load of 300 or more settles it: with less than NFPA 13 stated,
+    that room''s row fails. NFPA 13 passes. Any other room needs review while less than NFPA 13 is stated. Read for a building
+    stated Group A-1 alone; a building of two or more groups is 903.2''s flag. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_1_2_group_a2_sprinklers
+  kind: rule
+  topic: means_of_egress
+  title: 'Sprinkler system required: Group A-2, by the room (BCNYS 903.2.1.2)'
+  applies_when: occupancy_group in ["A-2"]
+  check: sprinklered_903_3_1_1
+  review_when:
+  - when: not sprinklered_903_3_1_1 and not space_floor_area > 5000 and not space_occupant_load >= 100
+    reason: 'No NFPA 13 system stated, and this room settles none of 903.2.1.2''s conditions (its own floor area is 5,000
+      square feet or less, its occupant load under 100 or not worked out); its fire area, which the model doesn''t show, may
+      be larger than the room and hold more people, or may be on a floor other than a level of exit discharge serving it:
+      a person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 269
+    lines:
+    - 37
+    - 42
+    quote: '[F] 903.2.1.2 Group A-2. An automatic sprinkler system shall be provided throughout stories containing Group A-2
+      occupancies and throughout all stories from the Group A-2 occupancy to and including the levels of exit discharge serving
+      that occupancy where one of the following conditions exists: 1. The fire area exceeds 5,000 square feet (464 m[fn2]).
+      2. The fire area has an occupant load of 100 or more. 3. The fire area is located on a floor other than a level of exit
+      discharge serving such occupancies.'
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 41
+    - 42
+    quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+      903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.'
+  examples:
+  - given:
+      occupancy_group: A-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 6000
+          space_occupant_load: 150
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group A-2 with an NFPA 13 system throughout (903.3.1.1): the system 903.2.1.2 requires.'
+  - given:
+      occupancy_group: A-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Large room
+        measures:
+          space_floor_area: 5001
+          space_occupant_load: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room of over 5,000 square feet lies within one fire area, so its fire area is over 5,000 square feet: 903.2.1.2
+      requires a system, and none is stated.'
+  - given:
+      occupancy_group: A-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Crowded room
+        measures:
+          space_floor_area: 1000
+          space_occupant_load: 100
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room with an occupant load of 100 lies within one fire area, so its fire area holds 100 or more: 903.2.1.2 requires
+      a system, and none is stated.'
+  - given:
+      occupancy_group: A-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Crowded room
+        measures:
+          space_floor_area: 1000
+          space_occupant_load: 101
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'An NFPA 13R system in Group A-2: 903.3.1 permits 13R only in Group R (903.3.1.2), so it isn''t the system 903.2.1.2
+      asks.'
+  - given:
+      occupancy_group: A-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Small room
+        measures:
+          space_floor_area: 400
+          space_occupant_load: 99
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A room under both limits: its fire area may be larger, a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Office
+        measures:
+          space_floor_area: 5001
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not Group A-2: not applicable.'
+  - given:
+      occupancy_group: A-2
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 400
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: A-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No room in the model: with none, the rule needs review.'
+  notes: '903.2.1.2: a sprinkler system where a Group A-2 fire area is over 5,000 square feet, or with an occupant load of
+    100 or more, or its other conditions hold; 903.3.1 has it follow 903.3.1.1 (NFPA 13), since 903.3.1.2 and 903.3.1.3 permit
+    13R and 13D only in Group R and dwellings. Fire areas aren''t in the model, but a room lies wholly within one (202 FIRE
+    AREA: bounded by fire walls, fire barriers, exterior walls or horizontal assemblies, none of which runs through a room),
+    so a room over 5,000 square feet, or with an occupant load of 100 or more settles it: with less than NFPA 13 stated, that
+    room''s row fails. NFPA 13 passes. Any other room needs review while less than NFPA 13 is stated. Read for a building
+    stated Group A-2 alone; a building of two or more groups is 903.2''s flag. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_1_3_group_a3_sprinklers
+  kind: rule
+  topic: means_of_egress
+  title: 'Sprinkler system required: Group A-3, by the room (BCNYS 903.2.1.3)'
+  applies_when: occupancy_group in ["A-3"]
+  check: sprinklered_903_3_1_1
+  review_when:
+  - when: not sprinklered_903_3_1_1 and not space_floor_area > 12000 and not space_occupant_load >= 300
+    reason: 'No NFPA 13 system stated, and this room settles none of 903.2.1.3''s conditions (its own floor area is 12,000
+      square feet or less, its occupant load under 300 or not worked out); its fire area, which the model doesn''t show, may
+      be larger than the room and hold more people, or may be on a floor other than a level of exit discharge serving it:
+      a person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 269
+    lines:
+    - 43
+    - 48
+    quote: '[F] 903.2.1.3 Group A-3. An automatic sprinkler system shall be provided throughout stories containing Group A-3
+      occupancies and throughout all stories from the Group A-3 occupancy to and including the levels of exit discharge serving
+      that occupancy where one of the following conditions exists: 1. The fire area exceeds 12,000 square feet (1115 m[fn2]).
+      2. The fire area has an occupant load of 300 or more. 3. The fire area is located on a floor other than a level of exit
+      discharge serving such occupancies.'
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 41
+    - 42
+    quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+      903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.'
+  examples:
+  - given:
+      occupancy_group: A-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 13000
+          space_occupant_load: 350
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group A-3 with an NFPA 13 system throughout (903.3.1.1): the system 903.2.1.3 requires.'
+  - given:
+      occupancy_group: A-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Large room
+        measures:
+          space_floor_area: 12001
+          space_occupant_load: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room of over 12,000 square feet lies within one fire area, so its fire area is over 12,000 square feet: 903.2.1.3
+      requires a system, and none is stated.'
+  - given:
+      occupancy_group: A-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Crowded room
+        measures:
+          space_floor_area: 1000
+          space_occupant_load: 300
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room with an occupant load of 300 lies within one fire area, so its fire area holds 300 or more: 903.2.1.3 requires
+      a system, and none is stated.'
+  - given:
+      occupancy_group: A-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Crowded room
+        measures:
+          space_floor_area: 1000
+          space_occupant_load: 301
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'An NFPA 13R system in Group A-3: 903.3.1 permits 13R only in Group R (903.3.1.2), so it isn''t the system 903.2.1.3
+      asks.'
+  - given:
+      occupancy_group: A-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Small room
+        measures:
+          space_floor_area: 400
+          space_occupant_load: 299
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A room under both limits: its fire area may be larger, a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Office
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not Group A-3: not applicable.'
+  - given:
+      occupancy_group: A-3
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 400
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: A-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No room in the model: with none, the rule needs review.'
+  notes: '903.2.1.3: a sprinkler system where a Group A-3 fire area is over 12,000 square feet, or with an occupant load of
+    300 or more, or its other conditions hold; 903.3.1 has it follow 903.3.1.1 (NFPA 13), since 903.3.1.2 and 903.3.1.3 permit
+    13R and 13D only in Group R and dwellings. Fire areas aren''t in the model, but a room lies wholly within one (202 FIRE
+    AREA: bounded by fire walls, fire barriers, exterior walls or horizontal assemblies, none of which runs through a room),
+    so a room over 12,000 square feet, or with an occupant load of 300 or more settles it: with less than NFPA 13 stated,
+    that room''s row fails. NFPA 13 passes. Any other room needs review while less than NFPA 13 is stated. Read for a building
+    stated Group A-3 alone; a building of two or more groups is 903.2''s flag. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_1_4_group_a4_sprinklers
+  kind: rule
+  topic: means_of_egress
+  title: 'Sprinkler system required: Group A-4, by the room (BCNYS 903.2.1.4)'
+  applies_when: occupancy_group in ["A-4"]
+  check: sprinklered_903_3_1_1
+  review_when:
+  - when: not sprinklered_903_3_1_1 and not space_floor_area > 12000 and not space_occupant_load >= 300
+    reason: 'No NFPA 13 system stated, and this room settles none of 903.2.1.4''s conditions (its own floor area is 12,000
+      square feet or less, its occupant load under 300 or not worked out); its fire area, which the model doesn''t show, may
+      be larger than the room and hold more people, or may be on a floor other than a level of exit discharge serving it:
+      a person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 269
+    lines:
+    - 49
+    - 54
+    quote: '[F] 903.2.1.4 Group A-4. An automatic sprinkler system shall be provided throughout stories containing Group A-4
+      occupancies and throughout all stories from the Group A-4 occupancy to and including the levels of exit discharge serving
+      that occupancy where one of the following conditions exists: 1. The fire area exceeds 12,000 square feet (1115 m[fn2]).
+      2. The fire area has an occupant load of 300 or more. 3. The fire area is located on a floor other than a level of exit
+      discharge serving such occupancies.'
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 41
+    - 42
+    quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+      903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.'
+  examples:
+  - given:
+      occupancy_group: A-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 13000
+          space_occupant_load: 350
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group A-4 with an NFPA 13 system throughout (903.3.1.1): the system 903.2.1.4 requires.'
+  - given:
+      occupancy_group: A-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Large room
+        measures:
+          space_floor_area: 12001
+          space_occupant_load: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room of over 12,000 square feet lies within one fire area, so its fire area is over 12,000 square feet: 903.2.1.4
+      requires a system, and none is stated.'
+  - given:
+      occupancy_group: A-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Crowded room
+        measures:
+          space_floor_area: 1000
+          space_occupant_load: 300
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room with an occupant load of 300 lies within one fire area, so its fire area holds 300 or more: 903.2.1.4 requires
+      a system, and none is stated.'
+  - given:
+      occupancy_group: A-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Crowded room
+        measures:
+          space_floor_area: 1000
+          space_occupant_load: 301
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'An NFPA 13R system in Group A-4: 903.3.1 permits 13R only in Group R (903.3.1.2), so it isn''t the system 903.2.1.4
+      asks.'
+  - given:
+      occupancy_group: A-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Small room
+        measures:
+          space_floor_area: 400
+          space_occupant_load: 299
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A room under both limits: its fire area may be larger, a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Office
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not Group A-4: not applicable.'
+  - given:
+      occupancy_group: A-4
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 400
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: A-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No room in the model: with none, the rule needs review.'
+  notes: '903.2.1.4: a sprinkler system where a Group A-4 fire area is over 12,000 square feet, or with an occupant load of
+    300 or more, or its other conditions hold; 903.3.1 has it follow 903.3.1.1 (NFPA 13), since 903.3.1.2 and 903.3.1.3 permit
+    13R and 13D only in Group R and dwellings. Fire areas aren''t in the model, but a room lies wholly within one (202 FIRE
+    AREA: bounded by fire walls, fire barriers, exterior walls or horizontal assemblies, none of which runs through a room),
+    so a room over 12,000 square feet, or with an occupant load of 300 or more settles it: with less than NFPA 13 stated,
+    that room''s row fails. NFPA 13 passes. Any other room needs review while less than NFPA 13 is stated. Read for a building
+    stated Group A-4 alone; a building of two or more groups is 903.2''s flag. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_1_5_a5_accessory_areas
+  kind: flag
+  topic: means_of_egress
+  title: Group A-5's enclosed accessory use areas (BCNYS 903.2.1.5)
+  applies_when: occupancy_group in ["A-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 269
+    lines:
+    - 55
+    - 56
+    quote: '[F] 903.2.1.5 Group A-5. An automatic sprinkler system shall be provided for all enclosed Group A-5 accessory
+      use areas in excess of 1,000 square feet (93 m[fn2]).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Enclosed Group A-5 accessory use areas over 1,000 square feet are sprinklered: which enclosed areas are accessory
+      use areas is a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.1.5: an outdoor assembly building''s enclosed accessory use areas (concessions, offices, storage) over 1,000
+    square feet; which of the model''s rooms they are isn''t stated. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_1_5_1_under_grandstands
+  kind: flag
+  topic: means_of_egress
+  title: Enclosed spaces under grandstands or bleachers (BCNYS 903.2.1.5.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 269
+    lines:
+    - 57
+    - 58
+    quote: '[F] 903.2.1.5.1 Spaces under grandstands or bleachers. Enclosed spaces under grandstands or bleachers shall be
+      equipped with an automatic sprinkler system in accordance with Section 903.3.1.1 where either of the following exist:'
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 3
+    - 4
+    quote: 1. The enclosed area is 1,000 square feet (93 m[fn2]) or less and is not constructed in accordance with Section
+      1030.1.1.1. 2. The enclosed area exceeds 1,000 square feet (93 m[fn2]).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Enclosed spaces under grandstands or bleachers are sprinklered per 903.3.1.1 where they exceed 1,000 square feet,
+      or are 1,000 square feet or less and not built per 1030.1.1.1: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.1.5.1: grandstands and bleachers aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_1_6_assembly_on_roofs
+  kind: flag
+  topic: means_of_egress
+  title: An assembly occupancy on an occupiable roof (BCNYS 903.2.1.6)
+  applies_when: occupied_outdoor_areas
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 5
+    - 8
+    quote: '[F] 903.2.1.6 Assembly occupancies on roofs. Where an occupiable roof has an assembly occupancy with an occupant
+      load exceeding 100 for Group A-2 and 300 for other Group A occupancies, all floors between the occupiable roof and the
+      level of exit discharge shall be equipped with an automatic sprinkler system in accordance with Section 903.3.1.1 or
+      903.3.1.2. Exception: Open parking garages of Type I or Type II construction.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where an occupiable roof has an assembly occupancy of more than 100 (Group A-2) or 300 (other Group A), every floor
+      between the roof and the level of exit discharge has a system per 903.3.1.1 or 903.3.1.2, open parking garages of Type
+      I or II construction aside: a person''s check.'
+  - given:
+      occupied_outdoor_areas: false
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.1.6: in a building of any group with an occupiable roof; narrowed to a building stating outdoor areas its
+    occupants use (1004.7''s fact: occupiable roofs among them), or not stating it. Hand-drafted in a Claude Code session
+    (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_1_7_multiple_a_fire_areas
+  kind: flag
+  topic: means_of_egress
+  title: Group A fire areas sharing exits (BCNYS 903.2.1.7)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 9
+    - 11
+    quote: '[F] 903.2.1.7 Multiple fire areas. An automatic sprinkler system shall be provided where multiple fire areas of
+      Group A-1, A-2, A-3 or A-4 occupancies share exit or exit access components and the combined occupant load of theses
+      fire areas is 300 or more.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where Group A-1, A-2, A-3 or A-4 fire areas share exit or exit access components and their occupant loads together
+      are 300 or more, a sprinkler system is provided: the fire areas aren''t in the model, a person''s check.'
+  - given:
+      occupancy_group: A-5
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.1.7: fire areas, and which share exits, aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_2_1_ambulatory_care
+  kind: flag
+  topic: means_of_egress
+  title: An ambulatory care facility's floors sprinklered (BCNYS 903.2.2.1)
+  applies_when: ambulatory_care_facility
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 14
+    - 23
+    quote: '[F] 903.2.2.1 Ambulatory care facilities. An automatic sprinkler system shall be installed throughout the entire
+      floor contain- ing an ambulatory care facility where either of the following conditions exist at any time: 1. Four or
+      more care recipients are incapable of self-preservation. 2. One or more care recipients that are incapable of self-preservation
+      are located at other than the level of exit discharge serving such a facility. In buildings where ambulatory care is
+      provided on levels other than the level of exit discharge, an automatic sprinkler system shall be installed throughout
+      the entire floor as well as all floors below where such care is provided, and all floors between the level of ambulatory
+      care and the nearest level of exit discharge, the level of exit discharge, and all floors below the level of exit discharge.
+      Exception: Floors classified as an open parking garage are not required to be sprinklered.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The whole floor holding an ambulatory care facility is sprinklered where four or more care recipients are incapable
+      of self-preservation, or one or more are at other than the level of exit discharge; where care is on another level,
+      that floor, every floor between it and the nearest level of exit discharge, that level and every floor below it too
+      (open parking garage floors aside): a person''s check.'
+  - given:
+      ambulatory_care_facility: false
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.2.1: the care recipients and where they are aren''t in the model; narrowed by the building''s stated ambulatory
+    care facility (Table 1020.3''s fact). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_2_2_battery_laboratories
+  kind: flag
+  topic: means_of_egress
+  title: Laboratories testing lithium batteries (BCNYS 903.2.2.2)
+  applies_when: occupancy_group in ["B", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 24
+    - 25
+    quote: '[F] 903.2.2.2 Laboratories involving testing, research and development. An automatic sprinkler system shall be
+      installed throughout the fire areas utilized for the research and development or testing of lithium-ion or lithium metal
+      batteries.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire areas used for research and development or testing of lithium-ion or lithium metal batteries are sprinklered
+      throughout: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.2.2: what a laboratory tests isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_3_group_e_sprinklers
+  kind: rule
+  topic: means_of_egress
+  title: 'Sprinkler system required: Group E, by the room (BCNYS 903.2.3)'
+  applies_when: occupancy_group in ["E"]
+  check: sprinklered_903_3_1_1
+  review_when:
+  - when: not sprinklered_903_3_1_1 and not space_floor_area > 12000 and not space_occupant_load >= 300
+    reason: 'No NFPA 13 system stated, and this room settles none of 903.2.3''s conditions (its own floor area is 12,000 square
+      feet or less, its occupant load under 300 or not worked out); its fire area, which the model doesn''t show, may be larger
+      than the room and hold more people, or may be on a floor other than a level of exit discharge serving it (where not
+      every classroom has an exterior exit door at ground level, the exception): a person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 26
+    - 31
+    quote: '[F] 903.2.3 Group E. An automatic sprinkler system shall be provided for Group E occupancies as follows: 1. Throughout
+      all Group E fire areas greater than 12,000 square feet (1115 m[fn2]) in area. 2. The Group E fire area is located on
+      a floor other than a level of exit discharge serving such occupancies. Exception: In buildings where every classroom
+      has not fewer than one exterior exit door at ground level, an automatic sprinkler system is not required in any area
+      below the lowest level of exit discharge serving that area. 3. The Group E fire area has an occupant load of 300 or
+      more.'
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 41
+    - 42
+    quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+      903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.'
+  examples:
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 13000
+          space_occupant_load: 350
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group E with an NFPA 13 system throughout (903.3.1.1): the system 903.2.3 requires.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Large room
+        measures:
+          space_floor_area: 12001
+          space_occupant_load: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room of over 12,000 square feet lies within one fire area, so its fire area is over 12,000 square feet: 903.2.3
+      requires a system, and none is stated.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Crowded room
+        measures:
+          space_floor_area: 1000
+          space_occupant_load: 300
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room with an occupant load of 300 lies within one fire area, so its fire area holds 300 or more: 903.2.3 requires
+      a system, and none is stated.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Crowded room
+        measures:
+          space_floor_area: 1000
+          space_occupant_load: 301
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'An NFPA 13R system in Group E: 903.3.1 permits 13R only in Group R (903.3.1.2), so it isn''t the system 903.2.3
+      asks.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Small room
+        measures:
+          space_floor_area: 400
+          space_occupant_load: 299
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A room under both limits: its fire area may be larger, a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Office
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not Group E: not applicable.'
+  - given:
+      occupancy_group: E
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 400
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No room in the model: with none, the rule needs review.'
+  notes: '903.2.3: a sprinkler system where a Group E fire area is over 12,000 square feet, or with an occupant load of 300
+    or more, or its other conditions hold; 903.3.1 has it follow 903.3.1.1 (NFPA 13), since 903.3.1.2 and 903.3.1.3 permit
+    13R and 13D only in Group R and dwellings. Fire areas aren''t in the model, but a room lies wholly within one (202 FIRE
+    AREA: bounded by fire walls, fire barriers, exterior walls or horizontal assemblies, none of which runs through a room),
+    so a room over 12,000 square feet, or with an occupant load of 300 or more settles it: with less than NFPA 13 stated,
+    that room''s row fails. NFPA 13 passes. Any other room needs review while less than NFPA 13 is stated. Read for a building
+    stated Group E alone; a building of two or more groups is 903.2''s flag. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_4_group_f1_sprinklers
+  kind: rule
+  topic: means_of_egress
+  title: 'Sprinkler system required: Group F-1, by the room (BCNYS 903.2.4)'
+  applies_when: occupancy_group in ["F-1"]
+  check: sprinklered_903_3_1_1
+  review_when:
+  - when: not sprinklered_903_3_1_1 and not space_floor_area > 12000
+    reason: 'No NFPA 13 system stated, and this room settles none of 903.2.4''s conditions (its own floor area is 12,000 square
+      feet or less); its fire area, which the model doesn''t show, may be larger than the room, or may be more than three
+      stories above grade plane, the F-1 fire areas of every floor together may exceed 24,000 square feet, or it may make
+      lithium-ion or lithium metal batteries, or vehicles, energy storage systems or equipment holding them: a person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 32
+    - 40
+    quote: '[F] 903.2.4 Group F-1. An automatic sprinkler system shall be provided throughout all buildings containing a Group
+      F-1 occu- pancy where one of the following conditions exists: 1. A Group F-1 fire area exceeds 12,000 square feet (1115
+      m[fn2]). 2. A Group F-1 fire area is located more than three stories above grade plane. 3. The combined area of all
+      Group F-1 fire areas on all floors, including any mezzanines, exceeds 24,000 square feet (2230 m[fn2]). 4. A Group F-1
+      occupancy is used to manufacture lithium-ion or lithium metal batteries. 5. A Group F-1 occupancy is used to manufacture
+      vehicles, energy storage systems or equipment containing lithium-ion or lithium metal batteries where the batteries
+      are installed as part of the manufacturing process.'
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 41
+    - 42
+    quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+      903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.'
+  examples:
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 13000
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group F-1 with an NFPA 13 system throughout (903.3.1.1): the system 903.2.4 requires.'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Large room
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room of over 12,000 square feet lies within one fire area, so its fire area is over 12,000 square feet: 903.2.4
+      requires a system, and none is stated.'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Large room
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'An NFPA 13R system in Group F-1: 903.3.1 permits 13R only in Group R (903.3.1.2), so it isn''t the system 903.2.4
+      asks.'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Small room
+        measures:
+          space_floor_area: 12000
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A room of 12,000 square feet, not over: its fire area may be larger, a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Office
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not Group F-1: not applicable.'
+  - given:
+      occupancy_group: F-1
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 400
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No room in the model: with none, the rule needs review.'
+  notes: '903.2.4: a sprinkler system where a Group F-1 fire area is over 12,000 square feet, or its other conditions hold;
+    903.3.1 has it follow 903.3.1.1 (NFPA 13), since 903.3.1.2 and 903.3.1.3 permit 13R and 13D only in Group R and dwellings.
+    Fire areas aren''t in the model, but a room lies wholly within one (202 FIRE AREA: bounded by fire walls, fire barriers,
+    exterior walls or horizontal assemblies, none of which runs through a room), so a room over 12,000 square feet settles
+    it: with less than NFPA 13 stated, that room''s row fails. NFPA 13 passes. Any other room needs review while less than
+    NFPA 13 is stated. Read for a building stated Group F-1 alone; a building of two or more groups is 903.2''s flag. Hand-drafted
+    in a Claude Code session (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_4_1_woodworking
+  kind: flag
+  topic: means_of_egress
+  title: Group F-1 woodworking over 2,500 square feet (BCNYS 903.2.4.1)
+  applies_when: occupancy_group in ["F-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 41
+    - 43
+    quote: '[F] 903.2.4.1 Woodworking operations. An automatic sprinkler system shall be provided throughout all Group F-1
+      occupancy fire areas that contain woodworking operations in excess of 2,500 square feet (232 m[fn2]) in area that generate
+      finely divided combustible waste or use finely divided combustible materials.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group F-1 fire areas with woodworking over 2,500 square feet that makes or uses finely divided combustible material
+      are sprinklered throughout: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.4.1: the operations aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_4_2_distilled_spirits
+  kind: flag
+  topic: means_of_egress
+  title: Group F-1 making distilled spirits (BCNYS 903.2.4.2)
+  applies_when: occupancy_group in ["F-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 44
+    - 45
+    quote: '[F] 903.2.4.2 Group F-1 distilled spirits. An automatic sprinkler system shall be provided throughout a Group
+      F-1 fire area used for the manufacture of distilled spirits.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A Group F-1 fire area making distilled spirits is sprinklered throughout: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.4.2: the use isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_4_3_upholstered_furniture
+  kind: flag
+  topic: means_of_egress
+  title: Group F-1 making upholstered furniture or mattresses (BCNYS 903.2.4.3)
+  applies_when: occupancy_group in ["F-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 46
+    - 47
+    quote: '[F] 903.2.4.3 Group F-1 upholstered furniture or mattresses. An automatic sprinkler system shall be provided throughout
+      a Group F-1 fire area that exceeds 2,500 square feet (232 m[fn2]) used for the manufacture of upholstered furniture
+      or mattresses.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A Group F-1 fire area over 2,500 square feet making upholstered furniture or mattresses is sprinklered throughout:
+      a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.4.3: the use isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_903_2_5_1_group_h_sprinklers
   kind: rule
   topic: means_of_egress
@@ -3752,6 +5051,229 @@ rules:
     check reads its rules part by part), each story''s row the building''s answer. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part a).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_903_2_7_group_m_sprinklers
+  kind: rule
+  topic: means_of_egress
+  title: 'Sprinkler system required: Group M, by the room (BCNYS 903.2.7)'
+  applies_when: occupancy_group in ["M"]
+  check: sprinklered_903_3_1_1
+  review_when:
+  - when: not sprinklered_903_3_1_1 and not space_floor_area > 12000
+    reason: 'No NFPA 13 system stated, and this room settles none of 903.2.7''s conditions (its own floor area is 12,000 square
+      feet or less); its fire area, which the model doesn''t show, may be larger than the room, or may be more than three
+      stories above grade plane, or the M fire areas of every floor together may exceed 24,000 square feet: a person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 271
+    lines:
+    - 22
+    - 26
+    quote: '[F] 903.2.7 Group M. An automatic sprinkler system shall be provided throughout buildings containing a Group M
+      occupancy where one of the following conditions exists: 1. A Group M fire area exceeds 12,000 square feet (1115 m[fn2]).
+      2. A Group M fire area is located more than three stories above grade plane. 3. The combined area of all Group M fire
+      areas on all floors, including any mezzanines, exceeds 24,000 square feet (2230 m[fn2]).'
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 41
+    - 42
+    quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+      903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.'
+  examples:
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 13000
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group M with an NFPA 13 system throughout (903.3.1.1): the system 903.2.7 requires.'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Large room
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room of over 12,000 square feet lies within one fire area, so its fire area is over 12,000 square feet: 903.2.7
+      requires a system, and none is stated.'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Large room
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'An NFPA 13R system in Group M: 903.3.1 permits 13R only in Group R (903.3.1.2), so it isn''t the system 903.2.7
+      asks.'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Small room
+        measures:
+          space_floor_area: 12000
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A room of 12,000 square feet, not over: its fire area may be larger, a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Office
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not Group M: not applicable.'
+  - given:
+      occupancy_group: M
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 400
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No room in the model: with none, the rule needs review.'
+  notes: '903.2.7: a sprinkler system where a Group M fire area is over 12,000 square feet, or its other conditions hold;
+    903.3.1 has it follow 903.3.1.1 (NFPA 13), since 903.3.1.2 and 903.3.1.3 permit 13R and 13D only in Group R and dwellings.
+    Fire areas aren''t in the model, but a room lies wholly within one (202 FIRE AREA: bounded by fire walls, fire barriers,
+    exterior walls or horizontal assemblies, none of which runs through a room), so a room over 12,000 square feet settles
+    it: with less than NFPA 13 stated, that room''s row fails. NFPA 13 passes. Any other room needs review while less than
+    NFPA 13 is stated. Read for a building stated Group M alone; a building of two or more groups is 903.2''s flag. Hand-drafted
+    in a Claude Code session (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_7_1_high_piled_storage
+  kind: flag
+  topic: means_of_egress
+  title: Group M high-piled or rack storage (BCNYS 903.2.7.1)
+  applies_when: occupancy_group in ["M", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 271
+    lines:
+    - 27
+    - 28
+    quote: '[F] 903.2.7.1 High-piled storage. An automatic sprinkler system shall be provided in accordance with the Fire
+      Code of New York State in all buildings of Group M where storage of merchandise is in high-piled or rack storage arrays.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A Group M building storing merchandise in high-piled or rack storage arrays has a sprinkler system per the Fire
+      Code of New York State: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.7.1: the storage isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_7_2_upholstered_furniture
+  kind: flag
+  topic: means_of_egress
+  title: Group M selling upholstered furniture or mattresses (BCNYS 903.2.7.2)
+  applies_when: occupancy_group in ["M", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 271
+    lines:
+    - 29
+    - 31
+    quote: '[F] 903.2.7.2 Group M upholstered furniture or mattresses. An automatic sprinkler system shall be provided throughout
+      a Group M fire area where the area used for the display and sale of upholstered furniture or mattresses exceeds 5,000
+      square feet (464 m[fn2]).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A Group M fire area whose display and sale of upholstered furniture or mattresses exceeds 5,000 square feet is
+      sprinklered throughout: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.7.2: the use isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_7_3_battery_storage
+  kind: flag
+  topic: means_of_egress
+  title: Group M storing lithium batteries (BCNYS 903.2.7.3)
+  applies_when: occupancy_group in ["M", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 271
+    lines:
+    - 32
+    - 34
+    quote: '[F] 903.2.7.3 Lithium-ion or lithium metal battery storage. An automatic sprinkler system shall be provided in
+      a room or space within a Group M occupancy where required for the storage of lithium-ion or lithium metal batteries
+      by Section 320 of the Fire Code of New York State or Chapter 32 of the Fire Code of New York State.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A room or space in Group M storing lithium-ion or lithium metal batteries is sprinklered where Section 320 or Chapter
+      32 of the Fire Code of New York State requires it: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.7.3: the storage isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_903_2_8_group_r_sprinklers
   kind: rule
   topic: means_of_egress
@@ -4005,6 +5527,357 @@ rules:
     a single-family dwelling are Group R-3 (308.2.4, 310.4.1). Read on each story the model holds (the system is "throughout"; the Building Code
     check reads its rules part by part), each story''s row the building''s answer. Hand-drafted in a Claude Code session (2026-11-27, Chapter
     9 part a).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_9_group_s1_sprinklers
+  kind: rule
+  topic: means_of_egress
+  title: 'Sprinkler system required: Group S-1, by the room (BCNYS 903.2.9)'
+  applies_when: occupancy_group in ["S-1"]
+  check: sprinklered_903_3_1_1
+  review_when:
+  - when: not sprinklered_903_3_1_1 and not space_floor_area > 12000
+    reason: 'No NFPA 13 system stated, and this room settles none of 903.2.9''s conditions (its own floor area is 12,000 square
+      feet or less); its fire area, which the model doesn''t show, may be larger than the room, or may be more than three
+      stories above grade plane, the S-1 fire areas of every floor together may exceed 24,000 square feet, or it may store
+      commercial motor vehicles (over 5,000 square feet) or lithium-ion or lithium metal powered vehicles (over 500 square
+      feet): a person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 271
+    lines:
+    - 43
+    - 51
+    quote: '[F] 903.2.9 Group S-1. An automatic sprinkler system shall be provided throughout all buildings containing a Group
+      S-1 occu- pancy where one of the following conditions exists: 1. A Group S-1 fire area exceeds 12,000 square feet (1115
+      m[fn2]). 2. A Group S-1 fire area is located more than three stories above grade plane. 3. The combined area of all
+      Group S-1 fire areas on all floors, including any mezzanines, exceeds 24,000 square feet (2230 m[fn2]). 4. A Group S-1
+      fire area used for the storage of commercial motor vehicles where the fire area exceeds 5,000 square feet (464 m[fn2]).
+      5. A Group S-1 fire area used for the storage of lithium-ion or lithium metal powered vehicles where the fire area exceeds
+      500 square feet (46.4 m[fn2]).'
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 41
+    - 42
+    quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+      903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.'
+  examples:
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 13000
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group S-1 with an NFPA 13 system throughout (903.3.1.1): the system 903.2.9 requires.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Large room
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room of over 12,000 square feet lies within one fire area, so its fire area is over 12,000 square feet: 903.2.9
+      requires a system, and none is stated.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Large room
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'An NFPA 13R system in Group S-1: 903.3.1 permits 13R only in Group R (903.3.1.2), so it isn''t the system 903.2.9
+      asks.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Small room
+        measures:
+          space_floor_area: 12000
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A room of 12,000 square feet, not over: its fire area may be larger, a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space:
+      - id: p1
+        name: Office
+        measures:
+          space_floor_area: 12001
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not Group S-1: not applicable.'
+  - given:
+      occupancy_group: S-1
+    parts:
+      space:
+      - id: p1
+        name: Main room
+        measures:
+          space_floor_area: 400
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No room in the model: with none, the rule needs review.'
+  notes: '903.2.9: a sprinkler system where a Group S-1 fire area is over 12,000 square feet, or its other conditions hold;
+    903.3.1 has it follow 903.3.1.1 (NFPA 13), since 903.3.1.2 and 903.3.1.3 permit 13R and 13D only in Group R and dwellings.
+    Fire areas aren''t in the model, but a room lies wholly within one (202 FIRE AREA: bounded by fire walls, fire barriers,
+    exterior walls or horizontal assemblies, none of which runs through a room), so a room over 12,000 square feet settles
+    it: with less than NFPA 13 stated, that room''s row fails. NFPA 13 passes. Any other room needs review while less than
+    NFPA 13 is stated. Read for a building stated Group S-1 alone; a building of two or more groups is 903.2''s flag. Hand-drafted
+    in a Claude Code session (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_9_1_repair_garages
+  kind: flag
+  topic: means_of_egress
+  title: Repair garages (BCNYS 903.2.9.1)
+  applies_when: occupancy_group in ["S-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 271
+    lines:
+    - 52
+    - 55
+    quote: '[F] 903.2.9.1 Repair garages. An automatic sprinkler system shall be provided throughout all buildings used as
+      repair garages in accordance with Section 406, as shown: 1. Buildings having two or more stories above grade plane,
+      including basements, with a fire area containing a repair garage exceeding 10,000 square feet (929 m[fn2]).'
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 3
+    - 9
+    quote: 2. Buildings not more than one story above grade plane, with a fire area containing a repair garage exceeding 12,000
+      square feet (1115 m[fn2]). 3. Buildings with repair garages servicing vehicles parked in basements. 4. A Group S-1 fire
+      area used for the repair of commercial motor vehicles where the fire area exceeds 5,000 square feet (464 m[fn2]). 5.
+      A Group S-1 fire area used for the storage of lithium-ion or lithium metal powered vehicles where the fire area exceeds
+      500 square feet (46.4 m[fn2]).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A building used as a repair garage per Section 406 is sprinklered throughout where it has two or more stories above
+      grade plane (basements included) and a repair garage fire area over 10,000 square feet, one story with one over 12,000
+      square feet, vehicles serviced in a basement, commercial motor vehicles repaired in a fire area over 5,000 square feet,
+      or lithium-ion or lithium metal powered vehicles stored in one over 500 square feet: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.9.1: repair garages and their fire areas aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_9_2_bulk_tires
+  kind: flag
+  topic: means_of_egress
+  title: Bulk storage of tires (BCNYS 903.2.9.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 10
+    - 11
+    quote: '[F] 903.2.9.2 Bulk storage of tires. Buildings and structures where the area for the storage of tires exceeds
+      20,000 cubic feet (566 m[fn3]) shall be equipped throughout with an automatic sprinkler system in accordance with Section
+      903.3.1.1.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A building or structure storing more than 20,000 cubic feet of tires is sprinklered throughout per 903.3.1.1: a
+      person''s check.'
+  notes: '903.2.9.2: in a building of any group; what is stored isn''t in the model. Hand-drafted in a Claude Code session
+    (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_9_3_distilled_spirits_wine
+  kind: flag
+  topic: means_of_egress
+  title: Group S-1 bulk storage of distilled spirits or wine (BCNYS 903.2.9.3)
+  applies_when: occupancy_group in ["S-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 12
+    - 13
+    quote: '[F] 903.2.9.3 Group S-1 Distilled spirits or wine. An automatic sprinkler system shall be provided throughout
+      a Group S-1 fire area used for the bulk storage of distilled spirits or wine.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A Group S-1 fire area used for bulk storage of distilled spirits or wine is sprinklered throughout: a person''s
+      check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.9.3: what is stored isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_9_4_upholstered_furniture
+  kind: flag
+  topic: means_of_egress
+  title: Group S-1 storing upholstered furniture or mattresses (BCNYS 903.2.9.4)
+  applies_when: occupancy_group in ["S-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 14
+    - 18
+    quote: '[F] 903.2.9.4 Group S-1 upholstered furniture and mattresses. An automatic sprinkler system shall be provided
+      throughout a Group S-1 fire area where the area used for the storage of upholstered furniture or mattresses exceeds
+      2,500 square feet (232 m[fn2]). Exception: Self-service storage facilities not greater than one story above grade plane
+      where all storage spaces can be accessed directly from the exterior.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A Group S-1 fire area storing upholstered furniture or mattresses over 2,500 square feet is sprinklered throughout,
+      self-service storage of one story above grade plane with every space reached from outside aside: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.9.4: what is stored isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_10_parking_garages
+  kind: flag
+  topic: means_of_egress
+  title: Parking garages (BCNYS 903.2.10)
+  applies_when: occupancy_group in ["S-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 19
+    - 25
+    quote: '[F] 903.2.10 Group S-2 parking garages. An automatic sprinkler system shall be provided throughout buildings classified
+      as park- ing garages where any of the following conditions exists: 1. Where the fire area of the enclosed parking garage
+      in accordance with Section 406.6 exceeds 12,000 square feet (1115 m[fn2]). 2. Where the enclosed parking garage in accordance
+      with Section 406.6 is located beneath other groups. Exception: Enclosed parking garages located beneath Group R-3 occupancies.
+      3. Where the fire area of the open parking garage in accordance with Section 406.5 exceeds 48,000 square feet (4460
+      m[fn2]).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A building classified as a parking garage is sprinklered throughout where an enclosed parking garage per 406.6
+      has a fire area over 12,000 square feet or is beneath other groups (beneath Group R-3 aside), or an open parking garage
+      per 406.5 has one over 48,000 square feet: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.10: whether a garage is open or enclosed, its fire areas and what is above it aren''t in the model. Hand-drafted
+    in a Claude Code session (2026-11-27, Chapter 9 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_10_1_commercial_parking
+  kind: flag
+  topic: means_of_egress
+  title: Storage of commercial motor vehicles (BCNYS 903.2.10.1)
+  applies_when: occupancy_group in ["S-1", "S-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 26
+    - 27
+    quote: '[F] 903.2.10.1 Commercial parking garages. An automatic sprinkler system shall be provided throughout buildings
+      used for storage of commercial motor vehicles where the fire area exceeds 5,000 square feet (464 m[fn2]).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A building storing commercial motor vehicles is sprinklered throughout where the fire area exceeds 5,000 square
+      feet: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.10.1: the vehicles aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_10_2_mechanical_access_garages
+  kind: flag
+  topic: means_of_egress
+  title: Mechanical-access enclosed parking garages (BCNYS 903.2.10.2)
+  applies_when: occupancy_group in ["S-1", "S-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 28
+    - 31
+    quote: '[F] 903.2.10.2 Mechanical-access enclosed parking garages. An approved automatic sprinkler system shall be provided
+      throughout buildings used for the storage of motor vehicles in a mechanical-access enclosed parking garage. The portion
+      of the building that contains the mechanical-access enclosed parking garage shall be protected with a specially engineered
+      automatic sprinkler system.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A building storing motor vehicles in a mechanical-access enclosed parking garage has an approved sprinkler system
+      throughout, the garage''s portion a specially engineered one: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Not this building''s group or fact, as stated: not applicable.'
+  notes: '903.2.10.2: the garage''s kind isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9
+    part b).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_903_3_1_2_nfpa_13r_limits

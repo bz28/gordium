@@ -203,9 +203,11 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     opening-protective flags (88; Table 716.1(2)'s corridor doors are each corridor's row); part c 30 of its 31 fire
     partition, smoke barrier and smoke partition flags (118; 710.5.3 is Group I-2's, not the stated R-2's); part d its 23 floor, vertical opening
     and penetration flags (141). Chapter 9 part a (2026-11-27) adds 903.1.1's alternative systems and 903.2.5.3's
-    pyroxylin plastics (143); its other flags are Group H-5's or a 13R or 13D system's, not this building's."""
+    pyroxylin plastics (143); its other flags are Group H-5's or a 13R or 13D system's, not this building's. Part b
+    adds 903.2.1.6's occupiable roofs, 903.2.2.1's ambulatory care floors (neither fact stated) and 903.2.9.2's bulk tire
+    storage (146); its other flags are other groups'."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 143 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 146 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):

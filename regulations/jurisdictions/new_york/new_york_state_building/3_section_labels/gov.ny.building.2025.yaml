@@ -329,6 +329,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:authority_having_jurisdiction:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTHORITY HAVING JURISDICTION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 10
+      - 11
+      quote: '[NY] AUTHORITY HAVING JURISDICTION. The governmental unit or agency responsible for administration and enforcement
+        of this code.'
+    piece_sha256: 266faf22994f54b27642ec4f44ec5f2c271ed7073b37a9b88dfe22abc942a5c5
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:automatic:
     label: reference
     topic: definitions
@@ -439,6 +455,22 @@ labels:
         all sides. This definition'
     piece_sha256: c6371e0d6a5f2ad6aa55bc3d8c5b06c0d0b9d39b38c1ea81ce0d423046a50617
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:bleachers:
+    label: reference
+    topic: definitions
+    reason: 'Defines BLEACHERS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 35
+      lines:
+      - 9
+      - 10
+      quote: '[BE] BLEACHERS. Tiered seating supported on a dedicated structural system and two or more rows high and is not
+        a building element (see “Grandstand”).'
+    piece_sha256: 08b8040959649ad045232a4699f24ddbf1671a31734fa2a6c89ce30d536dba20
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:boiling_point:
@@ -586,6 +618,24 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:certificate_of_occupancy:
+    label: reference
+    topic: definitions
+    reason: 'Defines CERTIFICATE OF OCCUPANCY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 36
+      lines:
+      - 39
+      - 41
+      quote: '[NY] CERTIFICATE OF OCCUPANCY. A document issued by the authority having jurisdiction certifying that the building
+        or structure, or portion thereof, complies with the approved construction documents that have been submitted to and
+        approved by the authority having jurisdiction, indicating that the building or structure, or portion thereof, to be
+        in a condition suitable for occupancy.'
+    piece_sha256: 5f8ce0dbf0b87bdfa4f27f1439b66e3a6cf7ce4082cc7ea76600d60ec0341616
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:combination_fire_smoke_damper:
     label: reference
     topic: definitions
@@ -618,6 +668,28 @@ labels:
         shall be subdivided'
     piece_sha256: bfd1dc89f9575a4a5091b93817bb7c10957bbf107e48cdf4602a18c1c632d252
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:commercial_motor_vehicle:
+    label: reference
+    topic: definitions
+    reason: 'Defines COMMERCIAL MOTOR VEHICLE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 37
+      lines:
+      - 56
+      - 58
+      quote: '[F] COMMERCIAL MOTOR VEHICLE. A motor vehicle used to transport passengers or property where the motor vehicle
+        meets one of the following: 1. Has a gross vehicle weight rating of 10,000 pounds (4540 kg) or more.'
+    - file: gov.ny.building.2025.pdf
+      page: 38
+      lines:
+      - 3
+      - 3
+      quote: 2. Is designed to transport 16 or more passengers, including the driver.
+    piece_sha256: 8f491954d3f0c2cdc316b84a4042fa00c060bc3441e35b60e2480a2b9f6423fb
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:common_path_of_egress_travel:
@@ -678,6 +750,22 @@ labels:
         When added to a Portland cement slurry the resulting concrete has a dry unit weight of approximately 30 pcf (480 kg/m[fn3]).'
     piece_sha256: 3b9379468e6cb3600d52f2ff4c1e611576d75d54eb33d0076c3de068bcf79cef
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:construction_documents:
+    label: reference
+    topic: definitions
+    reason: 'Defines CONSTRUCTION DOCUMENTS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 38
+      lines:
+      - 50
+      - 51
+      quote: '[A] CONSTRUCTION DOCUMENTS. Written, graphic and pictorial documents prepared or assembled for describing the
+        design, loca- tion and physical characteristics of the elements of a project necessary for obtaining a building permit.'
+    piece_sha256: 93910e4e57117f3b870091535e7bcab1b8ce034281d2b4936660f625847d940e
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:continuity_head_of_wall_system:
@@ -1044,6 +1132,23 @@ labels:
         for a'
     piece_sha256: 2e3b4be459c83e184ca9490e00d148447e710ffd44d5ad74cb43c97c1522cf0e
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:existing_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXISTING BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 46
+      - 47
+      quote: '[NY] EXISTING BUILDING. A building that is legally occupied and/or for which a certificate of occupancy authorizing
+        its use(s) has been issued, without regard to the date on which such legal occupancy began or the date on which such
+        certificate of occupancy was issued.'
+    piece_sha256: 3c30ce83d67f6cf1996b6b3a8be2daa3a71d2e8d3317e78987ac6ec5c34ae473
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:exit:
@@ -1787,6 +1892,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:grandstand:
+    label: reference
+    topic: definitions
+    reason: 'Defines GRANDSTAND, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 48
+      lines:
+      - 40
+      - 41
+      quote: '[BE] GRANDSTAND. Tiered seating supported on a dedicated structural system and two or more rows high and is
+        not a building element (see “Bleachers”).'
+    piece_sha256: fec287c678a0fab47e2ca75d547adc21eadcfcd8ecdc630f1d884d5bdb893c27
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:gypsum_board:
     label: reference
     topic: definitions
@@ -2388,6 +2509,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:mechanical_access_enclosed_parking_garage:
+    label: reference
+    topic: definitions
+    reason: 'Defines MECHANICAL-ACCESS ENCLOSED PARKING GARAGE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 53
+      lines:
+      - 45
+      - 47
+      quote: '[BG] MECHANICAL-ACCESS ENCLOSED PARKING GARAGE. An enclosed parking garage that employs parking machines, lifts,
+        eleva- tors or other mechanical devices for vehicle moving from and to street level and in which public occupancy
+        in the garage is prohibited in all areas except the vehicle access bay.'
+    piece_sha256: 3a113e6387576d34748b6d6c1044f698f1125b7747be563c617b5ec651c600ee
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:mechanical_code_of_new_york_state:
     label: reference
     topic: definitions
@@ -2722,6 +2860,38 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:part_1203:
+    label: reference
+    topic: definitions
+    reason: 'Defines PART 1203, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 27
+      - 28
+      quote: '[NY] PART 1203. The regulations set forth in 19 NYCRR Part 1203 (“Uniform Code: Minimum Standards for Administration
+        and Enforce- ment”), as currently in effect and as hereafter amended from time to time.'
+    piece_sha256: f9624053f96eb38c56331ec59311ae1b985c9a157e4d53f92e96b097f91d816d
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:part_1203_compliant_code_enforcement_program:
+    label: reference
+    topic: definitions
+    reason: 'Defines PART 1203—COMPLIANT CODE ENFORCEMENT PROGRAM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 29
+      - 30
+      quote: '[NY] PART 1203—COMPLIANT CODE ENFORCEMENT PROGRAM. A code enforcement program that includes the features required
+        by Part 1203 and satisfies the requirements of Part 1203.'
+    piece_sha256: 7f0151ea42cfca7168e2fa71f800fbc78d90a2cc0ad36d2ac0316c30713b2efe
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:penetration_firestop:
     label: reference
     topic: definitions
@@ -2751,6 +2921,25 @@ labels:
         tanks,'
     piece_sha256: fc5256d01cd9ee53d90c31802d6855c67f03f6585f624353f2a6f1146beda4ed
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:permit:
+    label: reference
+    topic: definitions
+    reason: 'Defines PERMIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 50
+      - 54
+      quote: '[NY] PERMIT. An official document or certificate issued by the authority having jurisdiction that authorizes
+        performance of a specified activity. [NY] Building permit. A building permit, construction permit, demolition permit
+        or permit that authorizes the performance of work. [NY] Operating permit. A permit required under the stricter of
+        the authority having jurisdiction’s Code Enforcement Program or a Part 1203—Compliant Code Enforcement Program to
+        conduct a specified activity or to use a specified category of building.'
+    piece_sha256: ff84d2b1f3ce08aa62753821db364b0eac9543293da4052c88c4806a476013d6
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:person:
@@ -2949,6 +3138,37 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:repair:
+    label: reference
+    topic: definitions
+    reason: 'Defines REPAIR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 51
+      - 52
+      quote: '[A] REPAIR. The reconstruction, replacement or renewal of any part of an existing building for the purpose of
+        its maintenance or to correct damage.'
+    piece_sha256: 432404a49982c9b3e71227432f6b51fcdee0bfb93af92d60c15ab15bf19446b4
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:repair_garage:
+    label: reference
+    topic: definitions
+    reason: 'Defines REPAIR GARAGE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 53
+      - 53
+      quote: '[BG] REPAIR GARAGE. A building, structure or portion thereof used for servicing or repairing motor vehicles.'
+    piece_sha256: e35665379fd473a65110bcdffb179c02fe42a2a5a0399efb77444a8a55e16c8f
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:residential_code_of_new_york_state:
     label: reference
     topic: definitions
@@ -3077,6 +3297,22 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
       4 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor sections use, by the book''s
       italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:self_service_storage_facility:
+    label: reference
+    topic: definitions
+    reason: 'Defines SELF-SERVICE STORAGE FACILITY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 60
+      lines:
+      - 6
+      - 7
+      quote: '[BG] SELF-SERVICE STORAGE FACILITY. Real property designed and used for the purpose of renting or leasing individual
+        storage spaces to customers for the purpose of storing and removing personal property on a self-service basis.'
+    piece_sha256: 7cc11ef7390d5ef23870cefed4dec18524d3ff3d22a3a7a0726e5b41b9896159
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:service_corridor:
@@ -3596,6 +3832,22 @@ labels:
         of time.'
     piece_sha256: 6ed649c5a645afdd376890a5541d2a74d71f1863fe7aec0a7d8dec78002c2a56
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:tires_bulk_storage_of:
+    label: reference
+    topic: definitions
+    reason: 'Defines TIRES, BULK STORAGE OF, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 65
+      lines:
+      - 3
+      - 3
+      quote: '[F] TIRES, BULK STORAGE OF. Storage of tires where the area available for storage exceeds 20,000 cubic feet
+        (566 m[fn3]).'
+    piece_sha256: 84f62eaf7c54256292d52e392e2f5d255476e3f10c2abd9551176786c7d2b494
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:townhouse:
@@ -6664,6 +6916,339 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  903.2.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says Group A buildings and portions are sprinklered as 903.2.1.1 to 903.2.1.7 provide: a pointer, no requirement
+      of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 269
+      lines:
+      - 28
+      - 29
+      quote: '[F] 903.2.1 Group A. An automatic sprinkler system shall be provided throughout buildings and portions thereof
+        used as Group A occupancies as provided in this section.'
+    piece_sha256: 762ad74bfad6736c8bb4b8d85209a2880dec4f7d51c41501d4caf18669dbc3b7
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.1.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
+      on the stated group and sprinkler system (general.bc_903_2_1_1_group_a1_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 269
+      lines:
+      - 30
+      - 36
+      quote: '[F] 903.2.1.1 Group A-1. An automatic sprinkler system shall be provided throughout stories containing Group
+        A-1 occupancies and throughout all stories from the Group A-1 occupancy to and including the levels of exit discharge
+        serving that occupancy where one of the following conditions exists: 1. The fire area exceeds 12,000 square feet (1115
+        m[fn2]). 2. The fire area has an occupant load of 300 or more. 3. The fire area is located on a floor other than a
+        level of exit discharge serving such occupancies. 4. The fire area contains a multitheater complex.'
+    piece_sha256: 8345d0191f2631e8cf2feaace3883443a8235baed82126547cfa34047b955a3c
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.1.2:
+    label: rule
+    topic: means_of_egress
+    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
+      on the stated group and sprinkler system (general.bc_903_2_1_2_group_a2_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 269
+      lines:
+      - 37
+      - 42
+      quote: '[F] 903.2.1.2 Group A-2. An automatic sprinkler system shall be provided throughout stories containing Group
+        A-2 occupancies and throughout all stories from the Group A-2 occupancy to and including the levels of exit discharge
+        serving that occupancy where one of the following conditions exists: 1. The fire area exceeds 5,000 square feet (464
+        m[fn2]). 2. The fire area has an occupant load of 100 or more. 3. The fire area is located on a floor other than a
+        level of exit discharge serving such occupancies.'
+    piece_sha256: 1c7baca42c3271ee2fc82cb4567cca6a6ff6a78d30630c650c75018283db7471
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.1.3:
+    label: rule
+    topic: means_of_egress
+    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
+      on the stated group and sprinkler system (general.bc_903_2_1_3_group_a3_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 269
+      lines:
+      - 43
+      - 48
+      quote: '[F] 903.2.1.3 Group A-3. An automatic sprinkler system shall be provided throughout stories containing Group
+        A-3 occupancies and throughout all stories from the Group A-3 occupancy to and including the levels of exit discharge
+        serving that occupancy where one of the following conditions exists: 1. The fire area exceeds 12,000 square feet (1115
+        m[fn2]). 2. The fire area has an occupant load of 300 or more. 3. The fire area is located on a floor other than a
+        level of exit discharge serving such occupancies.'
+    piece_sha256: 7d888659e3427c06d13d2ffeee1dd32dd94cad0aa278398f9fb3bd5b29afa33a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.1.4:
+    label: rule
+    topic: means_of_egress
+    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
+      on the stated group and sprinkler system (general.bc_903_2_1_4_group_a4_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 269
+      lines:
+      - 49
+      - 54
+      quote: '[F] 903.2.1.4 Group A-4. An automatic sprinkler system shall be provided throughout stories containing Group
+        A-4 occupancies and throughout all stories from the Group A-4 occupancy to and including the levels of exit discharge
+        serving that occupancy where one of the following conditions exists: 1. The fire area exceeds 12,000 square feet (1115
+        m[fn2]). 2. The fire area has an occupant load of 300 or more. 3. The fire area is located on a floor other than a
+        level of exit discharge serving such occupancies.'
+    piece_sha256: 1413c760b7c4059550237a7c8ab66ce4c6bc9442c0844e1362f32d21b51caa71
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.1.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'Enclosed Group A-5 accessory use areas over 1,000 square feet are sprinklered: which enclosed areas are accessory
+      use areas is a person''s check.: not in the model, a person''s check (general.bc_903_2_1_5_a5_accessory_areas).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 269
+      lines:
+      - 55
+      - 56
+      quote: '[F] 903.2.1.5 Group A-5. An automatic sprinkler system shall be provided for all enclosed Group A-5 accessory
+        use areas in excess of 1,000 square feet (93 m[fn2]).'
+    piece_sha256: cdeda52bea184e1ce6797fd2403ccd522cd019b591bfc31c8609164fc4b18180
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.1.5.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Enclosed spaces under grandstands or bleachers are sprinklered per 903.3.1.1 where they exceed 1,000 square feet,
+      or are 1,000 square feet or less and not built per 1030.1.1.1: not in the model, a person''s check (general.bc_903_2_1_5_1_under_grandstands).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 269
+      lines:
+      - 57
+      - 58
+      quote: '[F] 903.2.1.5.1 Spaces under grandstands or bleachers. Enclosed spaces under grandstands or bleachers shall
+        be equipped with an automatic sprinkler system in accordance with Section 903.3.1.1 where either of the following
+        exist:'
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 3
+      - 4
+      quote: 1. The enclosed area is 1,000 square feet (93 m[fn2]) or less and is not constructed in accordance with Section
+        1030.1.1.1. 2. The enclosed area exceeds 1,000 square feet (93 m[fn2]).
+    piece_sha256: 33bf00130e58a3d439f0b80fcef57e8b10d8790c0a135a124194c8236f395747
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.1.6:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where an occupiable roof has an assembly occupancy of more than 100 (Group A-2) or 300 (other Group A), every
+      floor between the roof and the level of exit discharge has a system per 903.3.1.1 or 903.3.1.2, open parking garages
+      of Type I or II construction aside: not in the model, a person''s check (general.bc_903_2_1_6_assembly_on_roofs).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 5
+      - 8
+      quote: '[F] 903.2.1.6 Assembly occupancies on roofs. Where an occupiable roof has an assembly occupancy with an occupant
+        load exceeding 100 for Group A-2 and 300 for other Group A occupancies, all floors between the occupiable roof and
+        the level of exit discharge shall be equipped with an automatic sprinkler system in accordance with Section 903.3.1.1
+        or 903.3.1.2. Exception: Open parking garages of Type I or Type II construction.'
+    piece_sha256: 6bc4d73a4762f055c7f44c8acb8c10c2d55c6fcff304030fbbc0b8d455fcc531
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.1.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where Group A-1, A-2, A-3 or A-4 fire areas share exit or exit access components and their occupant loads together
+      are 300 or more, a sprinkler system is provided: the fire areas aren''t in the model, a person''s check.: not in the
+      model, a person''s check (general.bc_903_2_1_7_multiple_a_fire_areas).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 9
+      - 11
+      quote: '[F] 903.2.1.7 Multiple fire areas. An automatic sprinkler system shall be provided where multiple fire areas
+        of Group A-1, A-2, A-3 or A-4 occupancies share exit or exit access components and the combined occupant load of theses
+        fire areas is 300 or more.'
+    piece_sha256: dcf7f31a8e2b9ddfc2cf92560974c83597714a4441aab511e2bd454605ae1691
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.2:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says Group B is sprinklered as 903.2.2.1 and 903.2.2.2 require: a pointer, no requirement of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 12
+      - 13
+      quote: '[F] 903.2.2 Group B. An automatic sprinkler system shall be provided for Group B occupancies as required in
+        Sections 903.2.2.1 and 903.2.2.2.'
+    piece_sha256: b3d8546e5615a9163e6a6ca44ce446fef64d41dfb48ae0a24c0055981c4e6d14
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'The whole floor holding an ambulatory care facility is sprinklered where four or more care recipients are incapable
+      of self-preservation, or one or more are at other than the level of exit discharge; where care is on another level,
+      that floor, every floor between it and the nearest level of exit discharge, that level and every floor below it too
+      (open parking garage floors aside): not in the model, a person''s check (general.bc_903_2_2_1_ambulatory_care).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 14
+      - 23
+      quote: '[F] 903.2.2.1 Ambulatory care facilities. An automatic sprinkler system shall be installed throughout the entire
+        floor contain- ing an ambulatory care facility where either of the following conditions exist at any time: 1. Four
+        or more care recipients are incapable of self-preservation. 2. One or more care recipients that are incapable of self-preservation
+        are located at other than the level of exit discharge serving such a facility. In buildings where ambulatory care
+        is provided on levels other than the level of exit discharge, an automatic sprinkler system shall be installed throughout
+        the entire floor as well as all floors below where such care is provided, and all floors between the level of ambulatory
+        care and the nearest level of exit discharge, the level of exit discharge, and all floors below the level of exit
+        discharge. Exception: Floors classified as an open parking garage are not required to be sprinklered.'
+    piece_sha256: 6163bb274d1597d7705fb87b321c444b1e368b8ae57f3cb1704aed99d54ac43d
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Fire areas used for research and development or testing of lithium-ion or lithium metal batteries are sprinklered
+      throughout: not in the model, a person''s check (general.bc_903_2_2_2_battery_laboratories).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 24
+      - 25
+      quote: '[F] 903.2.2.2 Laboratories involving testing, research and development. An automatic sprinkler system shall
+        be installed throughout the fire areas utilized for the research and development or testing of lithium-ion or lithium
+        metal batteries.'
+    piece_sha256: 26140ce502c48da51bdf06df5a4c74eb4d892d7bc7bd8f07f0f70d75f2af3e19
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.3:
+    label: rule
+    topic: means_of_egress
+    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
+      on the stated group and sprinkler system (general.bc_903_2_3_group_e_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 26
+      - 31
+      quote: '[F] 903.2.3 Group E. An automatic sprinkler system shall be provided for Group E occupancies as follows: 1.
+        Throughout all Group E fire areas greater than 12,000 square feet (1115 m[fn2]) in area. 2. The Group E fire area
+        is located on a floor other than a level of exit discharge serving such occupancies. Exception: In buildings where
+        every classroom has not fewer than one exterior exit door at ground level, an automatic sprinkler system is not required
+        in any area below the lowest level of exit discharge serving that area. 3. The Group E fire area has an occupant load
+        of 300 or more.'
+    piece_sha256: 940cb13e56a44777d053aae74f0ecdb089d1a67608c3436f547c96de686c28da
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.4:
+    label: rule
+    topic: means_of_egress
+    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
+      on the stated group and sprinkler system (general.bc_903_2_4_group_f1_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 32
+      - 40
+      quote: '[F] 903.2.4 Group F-1. An automatic sprinkler system shall be provided throughout all buildings containing a
+        Group F-1 occu- pancy where one of the following conditions exists: 1. A Group F-1 fire area exceeds 12,000 square
+        feet (1115 m[fn2]). 2. A Group F-1 fire area is located more than three stories above grade plane. 3. The combined
+        area of all Group F-1 fire areas on all floors, including any mezzanines, exceeds 24,000 square feet (2230 m[fn2]).
+        4. A Group F-1 occupancy is used to manufacture lithium-ion or lithium metal batteries. 5. A Group F-1 occupancy is
+        used to manufacture vehicles, energy storage systems or equipment containing lithium-ion or lithium metal batteries
+        where the batteries are installed as part of the manufacturing process.'
+    piece_sha256: a01bf959a6410c5a70178d584782384dea597eafdd513e120a42f94f1bd458a0
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Group F-1 fire areas with woodworking over 2,500 square feet that makes or uses finely divided combustible material
+      are sprinklered throughout: not in the model, a person''s check (general.bc_903_2_4_1_woodworking).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 41
+      - 43
+      quote: '[F] 903.2.4.1 Woodworking operations. An automatic sprinkler system shall be provided throughout all Group F-1
+        occupancy fire areas that contain woodworking operations in excess of 2,500 square feet (232 m[fn2]) in area that
+        generate finely divided combustible waste or use finely divided combustible materials.'
+    piece_sha256: f1b8e95074ff9eb6240fe347e2a9fab457e36d3add9b9d5ae36fff20ea4831ac
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.4.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A Group F-1 fire area making distilled spirits is sprinklered throughout: not in the model, a person''s check
+      (general.bc_903_2_4_2_distilled_spirits).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 44
+      - 45
+      quote: '[F] 903.2.4.2 Group F-1 distilled spirits. An automatic sprinkler system shall be provided throughout a Group
+        F-1 fire area used for the manufacture of distilled spirits.'
+    piece_sha256: 357a803f0863c0014b74ae36421911cc079a4484732d9533e2b468a664c17de2
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.4.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'A Group F-1 fire area over 2,500 square feet making upholstered furniture or mattresses is sprinklered throughout:
+      not in the model, a person''s check (general.bc_903_2_4_3_upholstered_furniture).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 46
+      - 47
+      quote: '[F] 903.2.4.3 Group F-1 upholstered furniture or mattresses. An automatic sprinkler system shall be provided
+        throughout a Group F-1 fire area that exceeds 2,500 square feet (232 m[fn2]) used for the manufacture of upholstered
+        furniture or mattresses.'
+    piece_sha256: cb2a2609c0905b87adf7d04023d09d49a7a5a6a83e15d7697b1a929b9b8a1d94
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   903.2.5:
     label: reference
     topic: means_of_egress
@@ -6773,6 +7358,78 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  903.2.7:
+    label: rule
+    topic: means_of_egress
+    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
+      on the stated group and sprinkler system (general.bc_903_2_7_group_m_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 22
+      - 26
+      quote: '[F] 903.2.7 Group M. An automatic sprinkler system shall be provided throughout buildings containing a Group
+        M occupancy where one of the following conditions exists: 1. A Group M fire area exceeds 12,000 square feet (1115
+        m[fn2]). 2. A Group M fire area is located more than three stories above grade plane. 3. The combined area of all
+        Group M fire areas on all floors, including any mezzanines, exceeds 24,000 square feet (2230 m[fn2]).'
+    piece_sha256: db86f588b0437ac1bd0216dfcd66fd59fe2fda67c6554743a2d94308501209a8
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.7.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A Group M building storing merchandise in high-piled or rack storage arrays has a sprinkler system per the Fire
+      Code of New York State: not in the model, a person''s check (general.bc_903_2_7_1_high_piled_storage).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 27
+      - 28
+      quote: '[F] 903.2.7.1 High-piled storage. An automatic sprinkler system shall be provided in accordance with the Fire
+        Code of New York State in all buildings of Group M where storage of merchandise is in high-piled or rack storage arrays.'
+    piece_sha256: 8a5fba1f099df02bc9c1e56af82b32c4cf71a11730c4c97fc5ca6f12586797ec
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.7.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A Group M fire area whose display and sale of upholstered furniture or mattresses exceeds 5,000 square feet is
+      sprinklered throughout: not in the model, a person''s check (general.bc_903_2_7_2_upholstered_furniture).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 29
+      - 31
+      quote: '[F] 903.2.7.2 Group M upholstered furniture or mattresses. An automatic sprinkler system shall be provided throughout
+        a Group M fire area where the area used for the display and sale of upholstered furniture or mattresses exceeds 5,000
+        square feet (464 m[fn2]).'
+    piece_sha256: 6b21189dec33b4add564036cc69b2be10b310ba8c976004177b1a47beca297ff
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.7.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'A room or space in Group M storing lithium-ion or lithium metal batteries is sprinklered where Section 320 or
+      Chapter 32 of the Fire Code of New York State requires it: not in the model, a person''s check (general.bc_903_2_7_3_battery_storage).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 32
+      - 34
+      quote: '[F] 903.2.7.3 Lithium-ion or lithium metal battery storage. An automatic sprinkler system shall be provided
+        in a room or space within a Group M occupancy where required for the storage of lithium-ion or lithium metal batteries
+        by Section 320 of the Fire Code of New York State or Chapter 32 of the Fire Code of New York State.'
+    piece_sha256: 30d85d4a444a60ca8b9307647c4d44ebffc637cd81fdacedcf4e1dd0d8bef7ff
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   903.2.8:
     label: rule
     topic: means_of_egress
@@ -6838,6 +7495,172 @@ labels:
         shall be permitted in care facilities with five or fewer individuals in a single-family dwelling.'
     piece_sha256: 632a47d5f9500e39a1aa0c8479a8e36d048b964b229c0bd20def060918aba983
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.9:
+    label: rule
+    topic: means_of_egress
+    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
+      on the stated group and sprinkler system (general.bc_903_2_9_group_s1_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 43
+      - 51
+      quote: '[F] 903.2.9 Group S-1. An automatic sprinkler system shall be provided throughout all buildings containing a
+        Group S-1 occu- pancy where one of the following conditions exists: 1. A Group S-1 fire area exceeds 12,000 square
+        feet (1115 m[fn2]). 2. A Group S-1 fire area is located more than three stories above grade plane. 3. The combined
+        area of all Group S-1 fire areas on all floors, including any mezzanines, exceeds 24,000 square feet (2230 m[fn2]).
+        4. A Group S-1 fire area used for the storage of commercial motor vehicles where the fire area exceeds 5,000 square
+        feet (464 m[fn2]). 5. A Group S-1 fire area used for the storage of lithium-ion or lithium metal powered vehicles
+        where the fire area exceeds 500 square feet (46.4 m[fn2]).'
+    piece_sha256: 55a52814d0322af67cebe0b1a616f6ccc22a2057394195946db3b988ca43d59f
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.9.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A building used as a repair garage per Section 406 is sprinklered throughout where it has two or more stories
+      above grade plane (basements included) and a repair garage fire area over 10,000 square feet, one story with one over
+      12,000 square feet, vehicles serviced in a basement, commercial motor vehicles repaired in a fire area over 5,000 square
+      feet, or lithium-ion or lithium metal powered vehicles stored in one over 500 square feet: not in the model, a person''s
+      check (general.bc_903_2_9_1_repair_garages).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 52
+      - 55
+      quote: '[F] 903.2.9.1 Repair garages. An automatic sprinkler system shall be provided throughout all buildings used
+        as repair garages in accordance with Section 406, as shown: 1. Buildings having two or more stories above grade plane,
+        including basements, with a fire area containing a repair garage exceeding 10,000 square feet (929 m[fn2]).'
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 3
+      - 9
+      quote: 2. Buildings not more than one story above grade plane, with a fire area containing a repair garage exceeding
+        12,000 square feet (1115 m[fn2]). 3. Buildings with repair garages servicing vehicles parked in basements. 4. A Group
+        S-1 fire area used for the repair of commercial motor vehicles where the fire area exceeds 5,000 square feet (464
+        m[fn2]). 5. A Group S-1 fire area used for the storage of lithium-ion or lithium metal powered vehicles where the
+        fire area exceeds 500 square feet (46.4 m[fn2]).
+    piece_sha256: 2ae093af43b820812f5c922585a45205d346b3104e2bd59d43ccbe3cf95c39e5
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.9.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A building or structure storing more than 20,000 cubic feet of tires is sprinklered throughout per 903.3.1.1:
+      not in the model, a person''s check (general.bc_903_2_9_2_bulk_tires).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 10
+      - 11
+      quote: '[F] 903.2.9.2 Bulk storage of tires. Buildings and structures where the area for the storage of tires exceeds
+        20,000 cubic feet (566 m[fn3]) shall be equipped throughout with an automatic sprinkler system in accordance with
+        Section 903.3.1.1.'
+    piece_sha256: 4177dea06058874328f96ef83267f0b511cd0b36bb50524dd3e11258e72efdf3
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.9.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'A Group S-1 fire area used for bulk storage of distilled spirits or wine is sprinklered throughout: not in the
+      model, a person''s check (general.bc_903_2_9_3_distilled_spirits_wine).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 12
+      - 13
+      quote: '[F] 903.2.9.3 Group S-1 Distilled spirits or wine. An automatic sprinkler system shall be provided throughout
+        a Group S-1 fire area used for the bulk storage of distilled spirits or wine.'
+    piece_sha256: 79fac605b06558cdc762f49b370183562731e9158d95b272e8ff64f10c9c9bdf
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.9.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'A Group S-1 fire area storing upholstered furniture or mattresses over 2,500 square feet is sprinklered throughout,
+      self-service storage of one story above grade plane with every space reached from outside aside: not in the model, a
+      person''s check (general.bc_903_2_9_4_upholstered_furniture).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 14
+      - 18
+      quote: '[F] 903.2.9.4 Group S-1 upholstered furniture and mattresses. An automatic sprinkler system shall be provided
+        throughout a Group S-1 fire area where the area used for the storage of upholstered furniture or mattresses exceeds
+        2,500 square feet (232 m[fn2]). Exception: Self-service storage facilities not greater than one story above grade
+        plane where all storage spaces can be accessed directly from the exterior.'
+    piece_sha256: c6eeb4d526fe38b3200e8e67c2eda3012f4ea088237b7945a230e9e4d41d8c19
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.10:
+    label: flag
+    topic: means_of_egress
+    reason: 'A building classified as a parking garage is sprinklered throughout where an enclosed parking garage per 406.6
+      has a fire area over 12,000 square feet or is beneath other groups (beneath Group R-3 aside), or an open parking garage
+      per 406.5 has one over 48,000 square feet: not in the model, a person''s check (general.bc_903_2_10_parking_garages).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 19
+      - 25
+      quote: '[F] 903.2.10 Group S-2 parking garages. An automatic sprinkler system shall be provided throughout buildings
+        classified as park- ing garages where any of the following conditions exists: 1. Where the fire area of the enclosed
+        parking garage in accordance with Section 406.6 exceeds 12,000 square feet (1115 m[fn2]). 2. Where the enclosed parking
+        garage in accordance with Section 406.6 is located beneath other groups. Exception: Enclosed parking garages located
+        beneath Group R-3 occupancies. 3. Where the fire area of the open parking garage in accordance with Section 406.5
+        exceeds 48,000 square feet (4460 m[fn2]).'
+    piece_sha256: 436f01cc3f27a9befc6ac4f9e92fc16bc31ce678aa2403a71c4ac34f1ec819ec
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.10.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A building storing commercial motor vehicles is sprinklered throughout where the fire area exceeds 5,000 square
+      feet: not in the model, a person''s check (general.bc_903_2_10_1_commercial_parking).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 26
+      - 27
+      quote: '[F] 903.2.10.1 Commercial parking garages. An automatic sprinkler system shall be provided throughout buildings
+        used for storage of commercial motor vehicles where the fire area exceeds 5,000 square feet (464 m[fn2]).'
+    piece_sha256: 33d712fe5dda967cd7760a840f03ca1b5c880ad82e42586d95c34287bb6cc443
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.10.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A building storing motor vehicles in a mechanical-access enclosed parking garage has an approved sprinkler system
+      throughout, the garage''s portion a specially engineered one: not in the model, a person''s check (general.bc_903_2_10_2_mechanical_access_garages).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 28
+      - 31
+      quote: '[F] 903.2.10.2 Mechanical-access enclosed parking garages. An approved automatic sprinkler system shall be provided
+        throughout buildings used for the storage of motor vehicles in a mechanical-access enclosed parking garage. The portion
+        of the building that contains the mechanical-access enclosed parking garage shall be protected with a specially engineered
+        automatic sprinkler system.'
+    piece_sha256: 040c69418488acdec9939805fb3e38a6ef18bb4a0a50216b73fd0398d305fbf8
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '903.3':

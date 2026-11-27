@@ -268,6 +268,38 @@ results:
   general.bc_903_3_1_2_nfpa_13r_limits: not_applicable
   general.bc_903_3_1_2_2_corridors_balconies_13r: not_applicable
   general.bc_903_3_1_3_nfpa_13d_scope: not_applicable
+  # Chapter 9 part b (2026-11-27): the groups whose requirement turns on a fire area's size, occupant load or story,
+  # none of them this building's (Group R-2 alone); the flags for a building of any group show: an occupiable
+  # roof's assembly use (903.2.1.6, while the building doesn't state its outdoor areas), an ambulatory care
+  # facility's floors (903.2.2.1, while it doesn't state none) and bulk tire storage (903.2.9.2)
+  general.bc_903_2_mixed_occupancies: not_applicable
+  general.bc_903_2_1_1_group_a1_sprinklers: not_applicable
+  general.bc_903_2_1_2_group_a2_sprinklers: not_applicable
+  general.bc_903_2_1_3_group_a3_sprinklers: not_applicable
+  general.bc_903_2_1_4_group_a4_sprinklers: not_applicable
+  general.bc_903_2_1_5_a5_accessory_areas: not_applicable
+  general.bc_903_2_1_5_1_under_grandstands: not_applicable
+  general.bc_903_2_1_6_assembly_on_roofs: needs_review
+  general.bc_903_2_1_7_multiple_a_fire_areas: not_applicable
+  general.bc_903_2_2_1_ambulatory_care: needs_review
+  general.bc_903_2_2_2_battery_laboratories: not_applicable
+  general.bc_903_2_3_group_e_sprinklers: not_applicable
+  general.bc_903_2_4_group_f1_sprinklers: not_applicable
+  general.bc_903_2_4_1_woodworking: not_applicable
+  general.bc_903_2_4_2_distilled_spirits: not_applicable
+  general.bc_903_2_4_3_upholstered_furniture: not_applicable
+  general.bc_903_2_7_group_m_sprinklers: not_applicable
+  general.bc_903_2_7_1_high_piled_storage: not_applicable
+  general.bc_903_2_7_2_upholstered_furniture: not_applicable
+  general.bc_903_2_7_3_battery_storage: not_applicable
+  general.bc_903_2_9_group_s1_sprinklers: not_applicable
+  general.bc_903_2_9_1_repair_garages: not_applicable
+  general.bc_903_2_9_2_bulk_tires: needs_review
+  general.bc_903_2_9_3_distilled_spirits_wine: not_applicable
+  general.bc_903_2_9_4_upholstered_furniture: not_applicable
+  general.bc_903_2_10_parking_garages: not_applicable
+  general.bc_903_2_10_1_commercial_parking: not_applicable
+  general.bc_903_2_10_2_mechanical_access_garages: not_applicable
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

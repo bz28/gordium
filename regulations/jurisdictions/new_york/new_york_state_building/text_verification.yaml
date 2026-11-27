@@ -19,15 +19,15 @@ second_reading:
     the 4 pieces of section group 5a (1005.1, 1005.2, 1005.3, 1005.3.1, 2026-11-25), a thirteenth for the 3 of section
     group 5b (1005.4, 1005.5, 1005.6), a fourteenth for the 6 of section group 5c (1005.7 to 1005.7.3 and 2
     definitions), a fifteenth for the 9 of section group 6a (1010.1, 1010.1.1, 1010.1.1.1 and 6 definitions,
-    2026-11-25), a sixteenth for the 11 of section group 6b (1010.1.2, 1010.1.2.1 and 9 definitions), one for the 52 of Chapter 7 part a (703.2.1.1, 703.5, 707, 713 and 20 definitions, 2026-11-26), one for the 42 of Chapter 7 part b (716.1, Tables 716.1(1) to 716.1(3), 716.2 to 716.2.4 and 14 definitions), one for the 39 of Chapter 7 part c (708, 709, 710 and 3 definitions), one for the 38 of Chapter 7 part d (711, 712, 714.1 to 714.4 and 15 definitions) and one for its 12 more (714.5 and 5 definitions), one for the 29 of Chapter 9 part a (903.1, 903.2, 903.2.5, 903.2.6, 903.2.8, 903.3, 903.3.1, 903.3.1.2.2, 903.3.1.3 and 12 definitions, 2026-11-27), and a helper for the comparison words)
+    2026-11-25), a sixteenth for the 11 of section group 6b (1010.1.2, 1010.1.2.1 and 9 definitions), one for the 52 of Chapter 7 part a (703.2.1.1, 703.5, 707, 713 and 20 definitions, 2026-11-26), one for the 42 of Chapter 7 part b (716.1, Tables 716.1(1) to 716.1(3), 716.2 to 716.2.4 and 14 definitions), one for the 39 of Chapter 7 part c (708, 709, 710 and 3 definitions), one for the 38 of Chapter 7 part d (711, 712, 714.1 to 714.4 and 15 definitions) and one for its 12 more (714.5 and 5 definitions), one for the 29 of Chapter 9 part a (903.1, 903.2, 903.2.5, 903.2.6, 903.2.8, 903.3, 903.3.1, 903.3.1.2.2, 903.3.1.3 and 12 definitions, 2026-11-27), one for the 44 of Chapter 9 part b (903.2.1 to 903.2.4, 903.2.7, 903.2.9, 903.2.10 and 15 definitions), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 18 pages, 53 boxes as step_ch07a (Chapter 7 part a), 13 pages, 44 boxes as step_ch07b (Chapter 7 part b), 7 pages, 40 boxes as step_ch07c (Chapter 7 part c), 14 pages, 39 boxes as step_ch07d and 6 pages, 13 boxes as step_ch07d2 (Chapter 7 part d), 16 pages, 29 boxes as step_ch09a (Chapter 9 part a); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 18 pages, 53 boxes as step_ch07a (Chapter 7 part a), 13 pages, 44 boxes as step_ch07b (Chapter 7 part b), 7 pages, 40 boxes as step_ch07c (Chapter 7 part c), 14 pages, 39 boxes as step_ch07d and 6 pages, 13 boxes as step_ch07d2 (Chapter 7 part d), 16 pages, 29 boxes as step_ch09a (Chapter 9 part a), 16 pages, 47 boxes as step_ch09b (Chapter 9 part b); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 475 pieces, 1258 numbers, every piece agrees but Table 716.1(2), whose extracted text loses its stacked fractions (its flag says the second reading is right). The tables were also read
+    through document_extraction/numbers.py: 519 pieces, 1359 numbers, every piece agrees but Table 716.1(2), whose extracted text loses its stacked fractions (its flag says the second reading is right). The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -193,6 +193,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:authority_having_jurisdiction:
+    piece_sha256: 266faf22994f54b27642ec4f44ec5f2c271ed7073b37a9b88dfe22abc942a5c5
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:automatic:
     piece_sha256: d4a09578ec9aa29d640e81df267daa1a209a9dee6ac4ac76fc7358f405c78e9e
     numbers: []
@@ -241,6 +247,18 @@ pieces:
     - '1612'
     second_reading_comparisons:
     - none
+  202:bleachers:
+    piece_sha256: 08b8040959649ad045232a4699f24ddbf1671a31734fa2a6c89ce30d536dba20
+    numbers:
+    - and two or more
+    second_reading: agrees
+    second_reading_numbers:
+    - and two or more
+    second_reading_comparisons:
+    - '>='
+    flags:
+    - '''and two or more'' (>=): ''two or more rows of seats''; the recorded words miss it (numbers.py reads comparison words
+      only directly before a number or after its unit). The second reading is right. A definition, used by no rule.'
   202:boiling_point:
     piece_sha256: 112ea86f91c3dfec7a5c3c7d54724214ed4181cc24594183535e45161d04ae22
     numbers:
@@ -310,6 +328,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:certificate_of_occupancy:
+    piece_sha256: 5f8ce0dbf0b87bdfa4f27f1439b66e3a6cf7ce4082cc7ea76600d60ec0341616
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:combination_fire_smoke_damper:
     piece_sha256: 348b556d2b8b77b913785e2e134788d23f122d5f67ee81bed4ca261c0b7a5ffe
     numbers: []
@@ -363,6 +387,27 @@ pieces:
       above 140°F'', ''below 200°F'', ''at or above 200°F''; the recorded words miss it (numbers.py reads comparison
       words only directly before a number or after its unit). The second reading is right. A Fire Code class, used
       by no rule.'
+  202:commercial_motor_vehicle:
+    piece_sha256: 8f491954d3f0c2cdc316b84a4042fa00c060bc3441e35b60e2480a2b9f6423fb
+    numbers:
+    - one
+    - 10,000 pound or more
+    - 4540 kg or more
+    - 16 or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - 10,000 pound or more
+    - 4540 kg or more
+    - 16 or more
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - '>='
+    flags:
+    - '''4540 kg or more'': the ''or more'' is the US number''s before the brackets (recorded ''>='' with it); the metric
+      number is a conversion and sets no limit, so the second reading (none) is right.'
   202:common_path_of_egress_travel:
     piece_sha256: 6f30a9e55e3491cabc607b0e4f176710d41936eba3429f2387a03e7b7738200a
     numbers:
@@ -492,6 +537,12 @@ pieces:
       none) and ''between 105'' and ''and 120'' (between, as recorded; the comparisons reader read ''generally between 105
       and 120 pcf'' as describing, none): each names what a kind of concrete is, no limit on a building. Both readings say
       the same of the book; the recorded comparisons stand. A definition, used by no rule.'
+  202:construction_documents:
+    piece_sha256: 93910e4e57117f3b870091535e7bcab1b8ce034281d2b4936660f625847d940e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:continuity_head_of_wall_system:
     piece_sha256: c638ef67392feb01545bd6ff5df3e60144add116f647013394a18c9f0eb3fb87
     numbers: []
@@ -657,6 +708,12 @@ pieces:
     - '>='
   202:emergency_escape_and_rescue_opening:
     piece_sha256: 2e3b4be459c83e184ca9490e00d148447e710ffd44d5ad74cb43c97c1522cf0e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:existing_building:
+    piece_sha256: 3c30ce83d67f6cf1996b6b3a8be2daa3a71d2e8d3317e78987ac6ec5c34ae473
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -979,6 +1036,18 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:grandstand:
+    piece_sha256: fec287c678a0fab47e2ca75d547adc21eadcfcd8ecdc630f1d884d5bdb893c27
+    numbers:
+    - and two or more
+    second_reading: agrees
+    second_reading_numbers:
+    - and two or more
+    second_reading_comparisons:
+    - '>='
+    flags:
+    - '''and two or more'' (>=): ''two or more rows of seats''; the recorded words miss it (numbers.py reads comparison words
+      only directly before a number or after its unit). The second reading is right. A definition, used by no rule.'
   202:gypsum_board:
     piece_sha256: 34568285c21762eaa66c262af6342055d7d59a05da709542afbf26f09297d6b2
     numbers: []
@@ -1289,6 +1358,12 @@ pieces:
     - three
     second_reading_comparisons:
     - none
+  202:mechanical_access_enclosed_parking_garage:
+    piece_sha256: 3a113e6387576d34748b6d6c1044f698f1125b7747be563c617b5ec651c600ee
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:mechanical_code_of_new_york_state:
     piece_sha256: 4d535ce1a22f6ecb1e3680d8af451d7b961dd621b5d57f6aa94d2129726d34bc
     numbers:
@@ -1436,6 +1511,36 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:part_1203:
+    piece_sha256: f9624053f96eb38c56331ec59311ae1b985c9a157e4d53f92e96b097f91d816d
+    numbers:
+    - '1203'
+    - '19'
+    - '1203'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1203'
+    - '19'
+    - '1203'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  202:part_1203_compliant_code_enforcement_program:
+    piece_sha256: 7f0151ea42cfca7168e2fa71f800fbc78d90a2cc0ad36d2ac0316c30713b2efe
+    numbers:
+    - '1203'
+    - '1203'
+    - '1203'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1203'
+    - '1203'
+    - '1203'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
   202:penetration_firestop:
     piece_sha256: c28c16ff9e034a58a0aa5280f861d0037d22103065a755181fd79e133e704fde
     numbers: []
@@ -1448,6 +1553,15 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:permit:
+    piece_sha256: ff84d2b1f3ce08aa62753821db364b0eac9543293da4052c88c4806a476013d6
+    numbers:
+    - '1203'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1203'
+    second_reading_comparisons:
+    - none
   202:person:
     piece_sha256: bbcff593e1603747f83a21aef9d7fc87f08ff971fe211899a8a1731254a57ef5
     numbers: []
@@ -1557,6 +1671,18 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:repair:
+    piece_sha256: 432404a49982c9b3e71227432f6b51fcdee0bfb93af92d60c15ab15bf19446b4
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:repair_garage:
+    piece_sha256: e35665379fd473a65110bcdffb179c02fe42a2a5a0399efb77444a8a55e16c8f
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:residential_code_of_new_york_state:
     piece_sha256: 9426f839175b3e6054bad415690f7ba6b208ccb1b42f150ed46782990a12044a
     numbers:
@@ -1622,6 +1748,12 @@ pieces:
     second_reading_comparisons: []
   202:self_closing:
     piece_sha256: 6bfda0739cb8a8540ce92bf66e9a0c9669ed2b7b94bc03d2cc03098da01eb33f
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:self_service_storage_facility:
+    piece_sha256: 7cc11ef7390d5ef23870cefed4dec18524d3ff3d22a3a7a0726e5b41b9896159
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -1913,6 +2045,21 @@ pieces:
     - one or more
     second_reading_comparisons:
     - '>='
+  202:tires_bulk_storage_of:
+    piece_sha256: 84f62eaf7c54256292d52e392e2f5d255476e3f10c2abd9551176786c7d2b494
+    numbers:
+    - 20,000 cubic foot
+    - 566 m
+    second_reading: agrees
+    second_reading_numbers:
+    - 20,000 cubic foot
+    - 566 m
+    second_reading_comparisons:
+    - '>'
+    - none
+    flags:
+    - '''20,000 cubic foot'' (>): the storage area ''exceeds 20,000 cubic feet''; the recorded words miss it (numbers.py doesn''t
+      read ''exceeds'' or ''in excess of'' before a number). The second reading is right. A definition, used by no rule.'
   202:townhouse:
     piece_sha256: 1fe5e377ed53a182269e162cf0545ebd76f3b97f5d1eaeea0dc419093b1ae8fa
     numbers:
@@ -4590,6 +4737,274 @@ pieces:
     - none
     - '>='
     - none
+  903.2.1:
+    piece_sha256: 762ad74bfad6736c8bb4b8d85209a2880dec4f7d51c41501d4caf18669dbc3b7
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  903.2.1.1:
+    piece_sha256: 8345d0191f2631e8cf2feaace3883443a8235baed82126547cfa34047b955a3c
+    numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - 300 or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - 300 or more
+    second_reading_comparisons:
+    - none
+    - '>'
+    - none
+    - '>='
+    flags:
+    - '''12,000 square foot'' (>): ''The fire area exceeds 12,000 square feet''; the recorded words miss it (numbers.py doesn''t
+      read ''exceeds'' or ''in excess of'' before a number). The second reading is right. Read by the Group A-1 rule''s review
+      band (a room over it fails).'
+  903.2.1.2:
+    piece_sha256: 1c7baca42c3271ee2fc82cb4567cca6a6ff6a78d30630c650c75018283db7471
+    numbers:
+    - one
+    - 5,000 square foot
+    - 464 m
+    - 100 or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - 5,000 square foot
+    - 464 m
+    - 100 or more
+    second_reading_comparisons:
+    - none
+    - '>'
+    - none
+    - '>='
+    flags:
+    - '''5,000 square foot'' (>): ''The fire area exceeds 5,000 square feet''; the recorded words miss it (numbers.py doesn''t
+      read ''exceeds'' or ''in excess of'' before a number). The second reading is right. Read by the Group A-2 rule''s review
+      band (a room over it fails).'
+  903.2.1.3:
+    piece_sha256: 7d888659e3427c06d13d2ffeee1dd32dd94cad0aa278398f9fb3bd5b29afa33a
+    numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - 300 or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - 300 or more
+    second_reading_comparisons:
+    - none
+    - '>'
+    - none
+    - '>='
+    flags:
+    - '''12,000 square foot'' (>): ''The fire area exceeds 12,000 square feet''; the recorded words miss it (numbers.py doesn''t
+      read ''exceeds'' or ''in excess of'' before a number). The second reading is right. Read by the Group A-3 rule''s review
+      band.'
+  903.2.1.4:
+    piece_sha256: 1413c760b7c4059550237a7c8ab66ce4c6bc9442c0844e1362f32d21b51caa71
+    numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - 300 or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - 300 or more
+    second_reading_comparisons:
+    - none
+    - '>'
+    - none
+    - '>='
+    flags:
+    - '''12,000 square foot'' (>): ''The fire area exceeds 12,000 square feet''; the recorded words miss it (numbers.py doesn''t
+      read ''exceeds'' or ''in excess of'' before a number). The second reading is right. Read by the Group A-4 rule''s review
+      band.'
+  903.2.1.5:
+    piece_sha256: cdeda52bea184e1ce6797fd2403ccd522cd019b591bfc31c8609164fc4b18180
+    numbers:
+    - 1,000 square foot
+    - 93 m
+    second_reading: agrees
+    second_reading_numbers:
+    - 1,000 square foot
+    - 93 m
+    second_reading_comparisons:
+    - '>'
+    - none
+    flags:
+    - '''1,000 square foot'' (>): ''accessory use areas in excess of 1,000 square feet''; the recorded words miss it (numbers.py
+      doesn''t read ''exceeds'' or ''in excess of'' before a number). The second reading is right. A flag.'
+  903.2.1.5.1:
+    piece_sha256: 33bf00130e58a3d439f0b80fcef57e8b10d8790c0a135a124194c8236f395747
+    numbers:
+    - 1,000 square foot or less
+    - 93 m or less
+    - 1,000 square foot
+    - 93 m
+    second_reading: agrees
+    second_reading_numbers:
+    - 1,000 square foot or less
+    - 93 m or less
+    - 1,000 square foot
+    - 93 m
+    second_reading_comparisons:
+    - <=
+    - none
+    - '>'
+    - none
+    flags:
+    - '''93 m or less'': the ''or less'' is the 1,000 square feet''s before the brackets (recorded ''<='' with it); the metric
+      number is a conversion and sets no limit, so the second reading (none) is right.'
+    - '''1,000 square foot'' (>), the second one: item 2''s ''The enclosed area exceeds 1,000 square feet''; the recorded
+      words miss it (numbers.py doesn''t read ''exceeds'' or ''in excess of'' before a number). The second reading is right.
+      A flag.'
+  903.2.1.6:
+    piece_sha256: 6bc4d73a4762f055c7f44c8acb8c10c2d55c6fcff304030fbbc0b8d455fcc531
+    numbers:
+    - exceeding 100
+    - and 300
+    second_reading: agrees
+    second_reading_numbers:
+    - exceeding 100
+    - and 300
+    second_reading_comparisons:
+    - '>'
+    - '>'
+    flags:
+    - '''and 300'' (>): ''an occupant load exceeding 100 for Group A-2 and 300 for other Group A occupancies'', the ''exceeding''
+      of both; the recorded words miss it (numbers.py reads comparison words only directly before a number or after its unit).
+      The second reading is right. A flag.'
+  903.2.1.7:
+    piece_sha256: dcf7f31a8e2b9ddfc2cf92560974c83597714a4441aab511e2bd454605ae1691
+    numbers:
+    - 300 or more
+    second_reading: agrees
+    second_reading_numbers:
+    - 300 or more
+    second_reading_comparisons:
+    - '>='
+  903.2.2:
+    piece_sha256: b3d8546e5615a9163e6a6ca44ce446fef64d41dfb48ae0a24c0055981c4e6d14
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  903.2.2.1:
+    piece_sha256: 6163bb274d1597d7705fb87b321c444b1e368b8ae57f3cb1704aed99d54ac43d
+    numbers:
+    - four or more
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - four or more
+    - one or more
+    second_reading_comparisons:
+    - '>='
+    - '>='
+  903.2.2.2:
+    piece_sha256: 26140ce502c48da51bdf06df5a4c74eb4d892d7bc7bd8f07f0f70d75f2af3e19
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  903.2.3:
+    piece_sha256: 940cb13e56a44777d053aae74f0ecdb089d1a67608c3436f547c96de686c28da
+    numbers:
+    - greater than 12,000 square foot
+    - 1115 m
+    - one
+    - 300 or more
+    second_reading: agrees
+    second_reading_numbers:
+    - greater than 12,000 square foot
+    - 1115 m
+    - one
+    - 300 or more
+    second_reading_comparisons:
+    - '>'
+    - none
+    - '>='
+    - '>='
+    flags:
+    - '''one'' (>=): the exception''s ''not fewer than one exterior exit door''; the recorded words miss it (numbers.py reads
+      comparison words only directly before a number or after its unit). The second reading is right. Item 1''s ''12,000 square
+      feet'' is printed ''greater than'', recorded ''>'' with it.'
+  903.2.4:
+    piece_sha256: a01bf959a6410c5a70178d584782384dea597eafdd513e120a42f94f1bd458a0
+    numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - more than three
+    - 24,000 square foot
+    - 2230 m
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - more than three
+    - 24,000 square foot
+    - 2230 m
+    second_reading_comparisons:
+    - none
+    - '>'
+    - none
+    - '>'
+    - '>'
+    - none
+    flags:
+    - '''12,000 square foot'' and ''24,000 square foot'' (>): ''A Group F-1 fire area exceeds 12,000 square feet'', ''The
+      combined area ... exceeds 24,000 square feet''; the recorded words miss it (numbers.py doesn''t read ''exceeds'' or
+      ''in excess of'' before a number). The second reading is right. The 12,000 is read by the Group F-1 rule''s review band.'
+  903.2.4.1:
+    piece_sha256: f1b8e95074ff9eb6240fe347e2a9fab457e36d3add9b9d5ae36fff20ea4831ac
+    numbers:
+    - 2,500 square foot
+    - 232 m
+    second_reading: agrees
+    second_reading_numbers:
+    - 2,500 square foot
+    - 232 m
+    second_reading_comparisons:
+    - '>'
+    - none
+    flags:
+    - '''2,500 square foot'' (>): ''woodworking operations in excess of 2,500 square feet''; the recorded words miss it (numbers.py
+      doesn''t read ''exceeds'' or ''in excess of'' before a number). The second reading is right. A flag.'
+  903.2.4.2:
+    piece_sha256: 357a803f0863c0014b74ae36421911cc079a4484732d9533e2b468a664c17de2
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  903.2.4.3:
+    piece_sha256: cb2a2609c0905b87adf7d04023d09d49a7a5a6a83e15d7697b1a929b9b8a1d94
+    numbers:
+    - 2,500 square foot
+    - 232 m
+    second_reading: agrees
+    second_reading_numbers:
+    - 2,500 square foot
+    - 232 m
+    second_reading_comparisons:
+    - '>'
+    - none
+    flags:
+    - '''2,500 square foot'' (>): ''a Group F-1 fire area that exceeds 2,500 square feet''; the recorded words miss it (numbers.py
+      doesn''t read ''exceeds'' or ''in excess of'' before a number). The second reading is right. A flag.'
   903.2.5:
     piece_sha256: ba1b15c67ce584a29951a77f1de6ef7a48836dcd30bdbd6d84d426d5ae3e6409
     numbers: []
@@ -4667,6 +5082,67 @@ pieces:
     - '''one'' (>=): exception 2''s ''not fewer than one exterior exit door''; the recorded words miss it (numbers.py reads
       comparison words only directly before a number or after its unit). The second reading is right. Group I-4''s exception,
       a review on the rule (no number of it in a formula).'
+  903.2.7:
+    piece_sha256: db86f588b0437ac1bd0216dfcd66fd59fe2fda67c6554743a2d94308501209a8
+    numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - more than three
+    - 24,000 square foot
+    - 2230 m
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - more than three
+    - 24,000 square foot
+    - 2230 m
+    second_reading_comparisons:
+    - none
+    - '>'
+    - none
+    - '>'
+    - '>'
+    - none
+    flags:
+    - '''12,000 square foot'' and ''24,000 square foot'' (>): ''A Group M fire area exceeds 12,000 square feet'', ''The combined
+      area ... exceeds 24,000 square feet''; the recorded words miss it (numbers.py doesn''t read ''exceeds'' or ''in excess
+      of'' before a number). The second reading is right. The 12,000 is read by the Group M rule''s review band.'
+  903.2.7.1:
+    piece_sha256: 8a5fba1f099df02bc9c1e56af82b32c4cf71a11730c4c97fc5ca6f12586797ec
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  903.2.7.2:
+    piece_sha256: 6b21189dec33b4add564036cc69b2be10b310ba8c976004177b1a47beca297ff
+    numbers:
+    - 5,000 square foot
+    - 464 m
+    second_reading: agrees
+    second_reading_numbers:
+    - 5,000 square foot
+    - 464 m
+    second_reading_comparisons:
+    - '>'
+    - none
+    flags:
+    - '''5,000 square foot'' (>): ''the area used for the display and sale ... exceeds 5,000 square feet''; the recorded words
+      miss it (numbers.py doesn''t read ''exceeds'' or ''in excess of'' before a number). The second reading is right. A flag.'
+  903.2.7.3:
+    piece_sha256: 30d85d4a444a60ca8b9307647c4d44ebffc637cd81fdacedcf4e1dd0d8bef7ff
+    numbers:
+    - '320'
+    - '32'
+    second_reading: agrees
+    second_reading_numbers:
+    - '320'
+    - '32'
+    second_reading_comparisons:
+    - none
+    - none
   903.2.8:
     piece_sha256: 8fb3d163cf98cb0936a6b1205f720189a9e99a6fcf5614eefc09f805c9f5e94f
     numbers:
@@ -4703,6 +5179,178 @@ pieces:
     - five or fewer
     second_reading_comparisons:
     - <=
+  903.2.9:
+    piece_sha256: 55a52814d0322af67cebe0b1a616f6ccc22a2057394195946db3b988ca43d59f
+    numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - more than three
+    - 24,000 square foot
+    - 2230 m
+    - 5,000 square foot
+    - 464 m
+    - 500 square foot
+    - 46.4 m
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - 12,000 square foot
+    - 1115 m
+    - more than three
+    - 24,000 square foot
+    - 2230 m
+    - 5,000 square foot
+    - 464 m
+    - 500 square foot
+    - 46.4 m
+    second_reading_comparisons:
+    - none
+    - '>'
+    - none
+    - '>'
+    - '>'
+    - none
+    - '>'
+    - none
+    - '>'
+    - none
+    flags:
+    - '''12,000 square foot'', ''24,000 square foot'', ''5,000 square foot'' and ''500 square foot'' (>): each ''exceeds'';
+      the recorded words miss it (numbers.py doesn''t read ''exceeds'' or ''in excess of'' before a number). The second reading
+      is right. The 12,000 is read by the Group S-1 rule''s review band.'
+  903.2.9.1:
+    piece_sha256: 2ae093af43b820812f5c922585a45205d346b3104e2bd59d43ccbe3cf95c39e5
+    numbers:
+    - '406'
+    - two or more
+    - exceeding 10,000 square foot
+    - 929 m
+    - not more than one
+    - exceeding 12,000 square foot
+    - 1115 m
+    - 5,000 square foot
+    - 464 m
+    - 500 square foot
+    - 46.4 m
+    second_reading: agrees
+    second_reading_numbers:
+    - '406'
+    - two or more
+    - exceeding 10,000 square foot
+    - 929 m
+    - not more than one
+    - exceeding 12,000 square foot
+    - 1115 m
+    - 5,000 square foot
+    - 464 m
+    - 500 square foot
+    - 46.4 m
+    second_reading_comparisons:
+    - none
+    - '>='
+    - '>'
+    - none
+    - <=
+    - '>'
+    - none
+    - '>'
+    - none
+    - '>'
+    - none
+    flags:
+    - '''5,000 square foot'' and ''500 square foot'' (>): items 4 and 5''s ''where the fire area exceeds''; the recorded words
+      miss it (numbers.py doesn''t read ''exceeds'' or ''in excess of'' before a number). The second reading is right. A flag.'
+  903.2.9.2:
+    piece_sha256: 4177dea06058874328f96ef83267f0b511cd0b36bb50524dd3e11258e72efdf3
+    numbers:
+    - 20,000 cubic foot
+    - 566 m
+    second_reading: agrees
+    second_reading_numbers:
+    - 20,000 cubic foot
+    - 566 m
+    second_reading_comparisons:
+    - '>'
+    - none
+    flags:
+    - '''20,000 cubic foot'' (>): ''the area for the storage of tires exceeds 20,000 cubic feet''; the recorded words miss
+      it (numbers.py doesn''t read ''exceeds'' or ''in excess of'' before a number). The second reading is right. A flag.'
+  903.2.9.3:
+    piece_sha256: 79fac605b06558cdc762f49b370183562731e9158d95b272e8ff64f10c9c9bdf
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  903.2.9.4:
+    piece_sha256: c6eeb4d526fe38b3200e8e67c2eda3012f4ea088237b7945a230e9e4d41d8c19
+    numbers:
+    - 2,500 square foot
+    - 232 m
+    - not greater than one
+    second_reading: agrees
+    second_reading_numbers:
+    - 2,500 square foot
+    - 232 m
+    - not greater than one
+    second_reading_comparisons:
+    - '>'
+    - none
+    - <=
+    flags:
+    - '''2,500 square foot'' (>): ''the area used for the storage ... exceeds 2,500 square feet''; the recorded words miss
+      it (numbers.py doesn''t read ''exceeds'' or ''in excess of'' before a number). The second reading is right. A flag.'
+  903.2.10:
+    piece_sha256: 436f01cc3f27a9befc6ac4f9e92fc16bc31ce678aa2403a71c4ac34f1ec819ec
+    numbers:
+    - '406.6'
+    - 12,000 square foot
+    - 1115 m
+    - '406.6'
+    - '406.5'
+    - 48,000 square foot
+    - 4460 m
+    second_reading: agrees
+    second_reading_numbers:
+    - '406.6'
+    - 12,000 square foot
+    - 1115 m
+    - '406.6'
+    - '406.5'
+    - 48,000 square foot
+    - 4460 m
+    second_reading_comparisons:
+    - none
+    - '>'
+    - none
+    - none
+    - none
+    - '>'
+    - none
+    flags:
+    - '''12,000 square foot'' and ''48,000 square foot'' (>): items 1 and 3''s ''exceeds''; the recorded words miss it (numbers.py
+      doesn''t read ''exceeds'' or ''in excess of'' before a number). The second reading is right. A flag.'
+  903.2.10.1:
+    piece_sha256: 33d712fe5dda967cd7760a840f03ca1b5c880ad82e42586d95c34287bb6cc443
+    numbers:
+    - 5,000 square foot
+    - 464 m
+    second_reading: agrees
+    second_reading_numbers:
+    - 5,000 square foot
+    - 464 m
+    second_reading_comparisons:
+    - '>'
+    - none
+    flags:
+    - '''5,000 square foot'' (>): ''where the fire area exceeds 5,000 square feet''; the recorded words miss it (numbers.py
+      doesn''t read ''exceeds'' or ''in excess of'' before a number). The second reading is right. A flag.'
+  903.2.10.2:
+    piece_sha256: 040c69418488acdec9939805fb3e38a6ef18bb4a0a50216b73fd0398d305fbf8
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   '903.3':
     piece_sha256: 7745d9e0ce17281be697998d25fe644fb890be157ee0a90e574d2d8109d362af
     numbers:
