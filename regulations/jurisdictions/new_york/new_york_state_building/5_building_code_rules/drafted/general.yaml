@@ -6929,6 +6929,1103 @@ rules:
     (2026-11-27, Chapter 9 part c).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_907_2_6_group_i_fire_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Group I's manual fire alarm and smoke detection (BCNYS 907.2.6)
+  applies_when: occupancy_group in ["I-1", "I-2", "I-3", "I-4", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 286
+    lines:
+    - 17
+    - 27
+    quote: '[F] 907.2.6 Group I. A manual fire alarm system that activates the occupant notification system in accordance
+      with Section 907.5 shall be installed in Group I occupancies. An automatic smoke detection system that activates the
+      occupant notification system in accordance with Section 907.5 shall be provided in accordance with Sections 907.2.6.1,
+      907.2.6.2 and 907.2.6.3.3. Exceptions: 1. Manual fire alarm boxes in sleeping units of Group I-1 and I-2 occupancies
+      shall not be required at exits if located at all care providers’ control stations or other constantly attended staff
+      locations, provided that such manual fire alarm boxes are visible and provided with ready access, and the distances
+      of travel required in Section 907.4.2.1 are not exceeded. 2. Occupant notification systems are not required to be activated
+      where private mode signaling installed in accordance with NFPA 72 is approved by the fire code official and staff evacuation
+      responsibilities are included in the fire safety and evacuation plan required by Section 404 of the Fire Code of New
+      York State.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group I has a manual fire alarm system activating occupant notification per 907.5, and automatic smoke detection
+      per 907.2.6.1, 907.2.6.2 and 907.2.6.3.3 (exception 1: Group I-1 and I-2 sleeping units'' boxes at constantly attended
+      staff locations, visible, with ready access, within 907.4.2.1''s travel distances; exception 2: private mode signaling
+      the fire code official approves, staff evacuation in the plan per Section 404 of the Fire Code of New York State): a
+      person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.6: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s check.
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_6_1_group_i1_smoke_detection
+  kind: flag
+  topic: means_of_egress
+  title: Group I-1's smoke detection (BCNYS 907.2.6.1)
+  applies_when: occupancy_group in ["I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 286
+    lines:
+    - 28
+    - 34
+    quote: '[F] 907.2.6.1 Group I-1. In Group I-1 occupancies, an automatic smoke detection system shall be installed in corridors,
+      waiting areas open to corridors and habitable spaces other than sleeping units and kitchens. The system shall be activated
+      in accor- dance with Section 907.5. Exceptions: 1. For Group I-1, Condition 1 occupancies, smoke detection in habitable
+      spaces is not required where the facility is equipped throughout with an automatic sprinkler system installed in accordance
+      with Section 903.3.1.1. 2. Smoke detection is not required for exterior balconies.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group I-1 has automatic smoke detection activated per 907.5 in corridors, waiting areas open to corridors and habitable
+      spaces other than sleeping units and kitchens (not in habitable spaces of a Condition 1 facility with a 903.3.1.1 system;
+      not on exterior balconies): a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.6.1: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_6_1_1_group_i1_smoke_alarms
+  kind: flag
+  topic: means_of_egress
+  title: Group I-1's smoke alarms (BCNYS 907.2.6.1.1)
+  applies_when: occupancy_group in ["I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 286
+    lines:
+    - 35
+    - 36
+    quote: '[F] 907.2.6.1.1 Smoke alarms. Single- and multiple-station smoke alarms shall be installed in accordance with
+      Section 907.2.11.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group I-1 has single- and multiple-station smoke alarms per 907.2.11: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.6.1.1: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_6_2_group_i2_smoke_detection
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2's corridor smoke detection (BCNYS 907.2.6.2)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 286
+    lines:
+    - 37
+    - 48
+    quote: '[F] 907.2.6.2 Group I-2. An automatic smoke detection system shall be installed in corridors in Group I-2, Condition
+      1 facilities and spaces permitted to be open to the corridors by Section 407.2. The system shall be activated in accordance
+      with Section 907.4. Group I-2, Condition 2 occupancies shall be equipped with an automatic smoke detection system as
+      required in Section 407. Exceptions: 1. Corridor smoke detection is not required in smoke compartments that contain
+      sleeping units where such units are provided with smoke detectors that comply with UL 268. Such detectors shall provide
+      a visual display on the corri- dor side of each sleeping unit and shall provide an audible and visual alarm at the care
+      providers’ station attending each unit. 2. Corridor smoke detection is not required in smoke compartments that contain
+      sleeping units where sleeping unit doors are equipped with automatic door-closing devices with integral smoke detectors
+      on the unit sides installed in accordance with their listing, provided that the integral detectors perform the required
+      alerting function.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group I-2 Condition 1 has automatic smoke detection in corridors and the spaces 407.2 lets open to them, activated
+      per 907.4; Condition 2 as Section 407 requires (corridor detection not needed in smoke compartments whose sleeping units
+      have UL 268 detectors displaying in the corridor and alarming at the care providers'' station, or door-closers with
+      integral smoke detectors): a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.6.2: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_6_3_group_i3_fire_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Group I-3's manual fire alarm and smoke detection (BCNYS 907.2.6.3)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 286
+    lines:
+    - 49
+    - 50
+    quote: '[F] 907.2.6.3 Group I-3 occupancies. Group I-3 occupancies shall be equipped with a manual fire alarm system and
+      automatic smoke detection system installed for alerting staff.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group I-3 has a manual fire alarm system and automatic smoke detection installed for alerting staff: a person''s
+      check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.6.3: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_6_3_1_group_i3_initiation
+  kind: flag
+  topic: means_of_egress
+  title: Group I-3's alarm initiation (BCNYS 907.2.6.3.1)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 286
+    lines:
+    - 51
+    - 52
+    quote: '[F] 907.2.6.3.1 System initiation. Actuation of an automatic fire-extinguishing system, automatic sprinkler system,
+      a manual fire alarm box or a fire detector shall initiate an approved fire alarm signal that automatically notifies
+      staff.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In Group I-3, an extinguishing system, sprinkler system, manual fire alarm box or fire detector initiates an approved
+      signal that automatically notifies staff: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.6.3.1: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_6_3_2_group_i3_alarm_boxes
+  kind: flag
+  topic: means_of_egress
+  title: Group I-3's manual fire alarm boxes (BCNYS 907.2.6.3.2)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 286
+    lines:
+    - 53
+    - 55
+    quote: '[F] 907.2.6.3.2 Manual fire alarm boxes. Manual fire alarm boxes are not required to be located in accordance
+      with Section 907.4.2 where the fire alarm boxes are provided at staff-attended locations having direct supervision over
+      areas where manual fire alarm boxes have been omitted.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In Group I-3, manual boxes needn''t be located per 907.4.2 where they are at staff-attended locations directly
+      supervising the areas left without them: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.6.3.2: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_6_3_2_1_group_i3_locked_boxes
+  kind: flag
+  topic: means_of_egress
+  title: Group I-3's locked alarm boxes, New York's (BCNYS 907.2.6.3.2.1)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 286
+    lines:
+    - 56
+    - 58
+    quote: '[NY] 907.2.6.3.2.1 Manual fire alarm boxes in areas occupied by detained individuals. Manual fire alarm boxes
+      are allowed to be locked in areas occupied by detained individuals, provided that staff members are present within the
+      subject area and have keys readily available to operate the manual fire alarm boxes.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'New York allows manual boxes locked in areas occupied by detained individuals, with staff present and keys readily
+      available: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.6.3.2.1: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_6_3_3_group_i3_smoke_detection
+  kind: flag
+  topic: means_of_egress
+  title: Group I-3's smoke detection in resident housing (BCNYS 907.2.6.3.3)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 287
+    lines:
+    - 3
+    - 12
+    quote: '[F] 907.2.6.3.3 Automatic smoke detection system. An automatic smoke detection system shall be installed throughout
+      resident housing areas, including sleeping units and contiguous day rooms, group activity spaces and other common spaces
+      normally open to residents. Exceptions: 1. Other approved smoke detection arrangements providing equivalent protection,
+      including, but not limited to, placing detectors in exhaust ducts from cells or behind protective guards listed for
+      the purpose, are allowed where necessary to prevent damage or tampering. 2. Sleeping units in Use Conditions 2 and 3
+      as described in Section 308. 3. Smoke detectors are not required in sleeping units with four or fewer occupants in smoke
+      compartments that are equipped throughout with an automatic sprinkler system installed in accordance with Section 903.3.1.1.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group I-3 has automatic smoke detection throughout resident housing areas, sleeping units, day rooms, group activity
+      and common spaces open to residents (other approved arrangements against damage or tampering; not in Use Conditions
+      2 and 3 sleeping units per Section 308; not in sleeping units of four or fewer in smoke compartments with a 903.3.1.1
+      system): a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.6.3.3: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_7_1_group_m_fire_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Group M's manual fire alarm system (BCNYS 907.2.7.1)
+  applies_when: occupancy_group in ["M", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 287
+    lines:
+    - 15
+    - 23
+    quote: '[F] 907.2.7.1 Occupant load. A manual fire alarm system that activates the occupant notification system in accordance
+      with Section 907.5 shall be installed in Group M occupancies where one of the following conditions exists: 1. The combined
+      Group M occupant load of all floors is 500 or more persons. 2. The Group M occupant load is more than 100 persons above
+      or below the lowest level of exit discharge. Exceptions: 1. A manual fire alarm system is not required in covered or
+      open mall buildings complying with Section 402. 2. Manual fire alarm boxes are not required where the building is equipped
+      throughout with an automatic sprinkler system installed in accordance with Section 903.3.1.1 and the occupant notification
+      appliances will automatically activate throughout the notification zones upon sprinkler water flow.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group M has a manual fire alarm system activating occupant notification per 907.5 where the Group M occupant load
+      of all floors together is 500 or more, or more than 100 are above or below the lowest level of exit discharge (not in
+      covered or open mall buildings complying with Section 402; boxes left out with a 903.3.1.1 system that activates notification
+      on water flow): a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.7.1: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_7_1_1_group_m_notification
+  kind: flag
+  topic: means_of_egress
+  title: Group M's occupant notification (BCNYS 907.2.7.1.1)
+  applies_when: occupancy_group in ["M", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 287
+    lines:
+    - 24
+    - 27
+    quote: '[F] 907.2.7.1.1 Occupant notification. During times that the building is occupied, the initiation of a signal
+      from a manual fire alarm box or from a waterflow switch shall not be required to activate the alarm notification appliances
+      when an alarm signal is activated at a constantly attended location from which evacuation instructions shall be initiated
+      over an emergency voice/alarm communication system installed in accordance with Section 907.5.2.2.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In Group M, a box or waterflow signal needn''t sound the notification appliances while the building is occupied
+      where it alarms at a constantly attended location that starts evacuation over an emergency voice/alarm communication
+      system per 907.5.2.2: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.7.1.1: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_7_2_group_m_battery_storage
+  kind: flag
+  topic: means_of_egress
+  title: Group M storing lithium batteries (BCNYS 907.2.7.2)
+  applies_when: occupancy_group in ["M", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 287
+    lines:
+    - 28
+    - 31
+    quote: '[F] 907.2.7.2 Storage of lithium-ion or lithium metal batteries. A fire alarm system activated by an air-sampling-type
+      smoke detection system or a radiant-energy-sensing detection system shall be installed in a room or space within a Group
+      M occu- pancy where required for the storage of lithium-ion or lithium metal batteries in accordance with Section 320
+      of the Fire Code of New York State.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A room or space in Group M storing lithium-ion or lithium metal batteries where Section 320 of the Fire Code of
+      New York State requires it has a fire alarm system activated by air-sampling or radiant-energy detection: a person''s
+      check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.7.2: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_8_1_group_r1_fire_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Group R-1's manual fire alarm system (BCNYS 907.2.8.1)
+  applies_when: occupancy_group in ["R-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 287
+    lines:
+    - 34
+    - 45
+    quote: '[F] 907.2.8.1 Manual fire alarm system. A manual fire alarm system that activates the occupant notification system
+      in accor- dance with Section 907.5 shall be installed in Group R- 1 occupancies. Exceptions: 1. A manual fire alarm
+      system is not required in buildings not more than two stories in height where all individual dwelling units, sleeping
+      units, and contiguous attic and crawl spaces to those units are separated from each other and public or common areas
+      by not less than 1-hour fire partitions and each individual dwelling unit and sleeping unit has an exit directly to
+      a public way, egress court or yard. 2. Manual fire alarm boxes are not required throughout the building where all of
+      the following conditions are met: 2.1. The building is equipped throughout with an automatic sprinkler system installed
+      in accordance with Section 903.3.1.1 or 903.3.1.2. 2.2. The notification appliances will activate upon sprinkler water
+      flow. 2.3. Not fewer than one manual fire alarm box is installed at an approved location.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group R-1 has a manual fire alarm system activating occupant notification per 907.5 (exception 1: not in a building
+      of two stories or less whose units are separated by 1-hour fire partitions and each have an exit directly to a public
+      way, egress court or yard; exception 2: boxes left out with a 903.3.1.1 or 903.3.1.2 system, notification on water flow
+      and at least one box at an approved location): a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.8.1: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_8_2_group_r1_corridor_detection
+  kind: flag
+  topic: means_of_egress
+  title: Group R-1's corridor smoke detection (BCNYS 907.2.8.2)
+  applies_when: occupancy_group in ["R-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 287
+    lines:
+    - 46
+    - 51
+    quote: '[F] 907.2.8.2 Automatic smoke detection system. An automatic smoke detection system that activates the occupant
+      notifica- tion system in accordance with Section 907.5 shall be installed throughout all interior corridors serving
+      dwelling units or sleeping units. Exception: An automatic smoke detection system is not required in buildings that do
+      not have interior corridors serving dwell- ing units or sleeping units and where each dwelling unit or sleeping unit
+      has a means of egress door opening directly to an exit or to an exterior exit access that leads directly to an exit.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group R-1 has automatic smoke detection activating notification per 907.5 throughout interior corridors serving
+      dwelling or sleeping units (not where there are no such corridors and each unit''s egress door opens directly to an
+      exit or an exterior exit access leading directly to one): a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.8.2: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_8_3_group_r1_smoke_alarms
+  kind: flag
+  topic: means_of_egress
+  title: Group R-1's smoke alarms (BCNYS 907.2.8.3)
+  applies_when: occupancy_group in ["R-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 287
+    lines:
+    - 52
+    - 52
+    quote: '[F] 907.2.8.3 Smoke alarms. Single- and multiple-station smoke alarms shall be installed in accordance with Section
+      907.2.11.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group R-1 has single- and multiple-station smoke alarms per 907.2.11: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.8.3: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_9_1_group_r2_fire_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Group R-2's manual fire alarm system (BCNYS 907.2.9.1)
+  applies_when: occupancy_group in ["R-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 287
+    lines:
+    - 55
+    - 59
+    quote: '[F] 907.2.9.1 Manual fire alarm system. A manual fire alarm system that activates the occupant notification system
+      in accor- dance with Section 907.5 shall be installed in Group R-2 occupancies where any of the following conditions
+      apply: 1. Any dwelling unit or sleeping unit is located three or more stories above the lowest level of exit discharge.
+      2. Any dwelling unit or sleeping unit is located more than one story below the highest level of exit discharge of exits
+      serv- ing the dwelling unit or sleeping unit.'
+  - file: gov.ny.building.2025.pdf
+    page: 288
+    lines:
+    - 3
+    - 16
+    quote: '3. The building contains more than 16 dwelling units or sleeping units. Exceptions: 1. A fire alarm system is
+      not required in buildings not more than two stories in height where all dwelling units or sleeping units and contiguous
+      attic and crawl spaces are separated from each other and public or common areas by not less than 1-hour fire partitions
+      and each dwelling unit or sleeping unit has an exit directly to a public way, egress court or yard. 2. Manual fire alarm
+      boxes are not required where the building is equipped throughout with an automatic sprinkler system installed in accordance
+      with Section 903.3.1.1 or 903.3.1.2 and the occupant notification appliances will automatically activate throughout
+      the notification zones upon a sprinkler water flow. 3. A fire alarm system is not required in buildings that do not
+      have interior corridors serving dwelling units and are protected by an approved automatic sprinkler system installed
+      in accordance with Section 903.3.1.1 or 903.3.1.2, provided that dwelling units either have a means of egress door opening
+      directly to an exterior exit access that leads directly to the exits or are served by open-ended corridors designed
+      in accordance with Section 1027.6, Exception 3.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group R-2 has a manual fire alarm system activating occupant notification per 907.5 where any unit is three or
+      more stories above the lowest level of exit discharge, more than one story below the highest level of exit discharge
+      of the exits serving it, or the building has more than 16 dwelling or sleeping units (exception 1: not in a building
+      of two stories or less whose units are separated by 1-hour fire partitions and each have an exit directly to a public
+      way, egress court or yard; exception 2: boxes left out with a 903.3.1.1 or 903.3.1.2 system and notification on water
+      flow; exception 3: none with a 903.3.1.1 or 903.3.1.2 system where there are no interior corridors serving units and
+      each unit''s egress door opens to an exterior exit access, or open-ended corridors per 1027.6 exception 3 serve them):
+      a person''s check.'
+  - given:
+      occupancy_group: R-3
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.9.1: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_9_2_group_r2_smoke_alarms
+  kind: flag
+  topic: means_of_egress
+  title: Group R-2's smoke alarms (BCNYS 907.2.9.2)
+  applies_when: occupancy_group in ["R-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 288
+    lines:
+    - 17
+    - 17
+    quote: '[F] 907.2.9.2 Smoke alarms. Single- and multiple-station smoke alarms shall be installed in accordance with Section
+      907.2.11.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group R-2 has single- and multiple-station smoke alarms per 907.2.11: a person''s check.'
+  - given:
+      occupancy_group: R-3
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.9.2: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_9_3_group_r2_college_detection
+  kind: flag
+  topic: means_of_egress
+  title: Group R-2 college and university buildings (BCNYS 907.2.9.3)
+  applies_when: occupancy_group in ["R-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 288
+    lines:
+    - 18
+    - 28
+    quote: '[F] 907.2.9.3 Group R-2 college and university buildings. An automatic smoke detection system that activates the
+      occupant notification system in accordance with Section 907.5 shall be installed in Group R-2 occupancies operated by
+      a college or university for student or staff housing in all of the following locations: 1. Common spaces outside of
+      dwelling units and sleeping units. 2. Laundry rooms, mechanical equipment rooms and storage rooms. 3. All interior corridors
+      serving sleeping units or dwelling units. Exception: An automatic smoke detection system is not required in buildings
+      that do not have interior corridors serving sleep- ing units or dwelling units and where each sleeping unit or dwelling
+      unit either has a means of egress door opening directly to an exterior exit access that leads directly to an exit or
+      a means of egress door opening directly to an exit. Required smoke alarms in dwelling units and sleeping units in Group
+      R-2 occupancies operated by a college or university for student or staff housing shall be interconnected with the fire
+      alarm system in accordance with NFPA 72.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group R-2 a college or university runs for student or staff housing has automatic smoke detection activating notification
+      per 907.5 in common spaces outside units, laundry, mechanical equipment and storage rooms, and interior corridors serving
+      units (not where there are no interior corridors and each unit''s egress door opens to an exterior exit access or an
+      exit), its units'' smoke alarms interconnected with the fire alarm system per NFPA 72: a person''s check.'
+  - given:
+      occupancy_group: R-3
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.9.3: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_10_1_storage_fire_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Public and self-storage of three stories or more (BCNYS 907.2.10.1)
+  applies_when: occupancy_group in ["S-1", "S-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 288
+    lines:
+    - 30
+    - 36
+    quote: '[F] 907.2.10.1 Public- and self-storage occupancies. A manual fire alarm system that activates the occupant notification
+      system in accordance with Section 907.5 shall be installed in Group S public-and self-storage occupancies three stories
+      or greater in height for interior corridors and interior common areas. Visible notification appliances are not required
+      within stor- age units. Exception: Manual fire alarm boxes are not required where the building is equipped throughout
+      with an automatic sprinkler system installed in accordance with Section 903.3.1.1, and the occupant notification appliances
+      will activate throughout the notification zones upon sprinkler water flow.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group S public and self-storage three stories or more in height has a manual fire alarm system activating notification
+      per 907.5 for interior corridors and common areas (no visible appliances needed in storage units; boxes left out with
+      a 903.3.1.1 system that activates notification on water flow): a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.10.1: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_10_2_battery_storage_detection
+  kind: flag
+  topic: means_of_egress
+  title: Storage of lithium batteries (BCNYS 907.2.10.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 288
+    lines:
+    - 37
+    - 40
+    quote: '[F] 907.2.10.2 Storage of lithium-ion or lithium metal batteries. A fire alarm system activated by an air-sampling-type
+      smoke detection system or a radiant-energy-sensing detection system shall be installed throughout the entire fire area
+      where required for the storage of lithium-ion batteries or lithium metal batteries in accordance with Section 320 of
+      the Fire Code of New York State.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where Section 320 of the Fire Code of New York State requires it for stored lithium-ion or lithium metal batteries,
+      the fire area has a fire alarm system activated by air-sampling or radiant-energy detection throughout, in a building
+      of any group (storage accessory to another occupancy is part of it, 311.1.1): a person''s check.'
+  notes: '907.2.10.2: no fire alarm fact is stated yet (the Revit-fields queue); what the model can''t show is a person''s
+    check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_11_smoke_alarms
+  kind: flag
+  topic: means_of_egress
+  title: Single- and multiple-station smoke alarms (BCNYS 907.2.11)
+  applies_when: occupancy_group in ["R-1", "R-2", "R-3", "R-4", "I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 288
+    lines:
+    - 41
+    - 42
+    quote: '[F] 907.2.11 Single- and multiple-station smoke alarms. Listed single- and multiple-station smoke alarms complying
+      with UL 217 shall be installed in accordance with Sections 907.2.11.1 through 907.2.11.7, NFPA 72 and the manufacturer’s
+      instructions.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Listed single- and multiple-station smoke alarms complying with UL 217 are installed per 907.2.11.1 to 907.2.11.7,
+      NFPA 72 and the maker''s instructions: a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.11: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_11_1_group_r1_smoke_alarm_locations
+  kind: flag
+  topic: means_of_egress
+  title: Group R-1's smoke alarm locations, New York's (BCNYS 907.2.11.1)
+  applies_when: occupancy_group in ["R-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 288
+    lines:
+    - 43
+    - 59
+    quote: '[NY] 907.2.11.1 Group R-1. Single- or multiple-station smoke alarms shall be installed in all of the following
+      locations in Group R- 1: 1. In sleeping areas. 2. In every room in the path of the means of egress from the sleeping
+      area to the door leading from the dwelling unit or sleeping unit. 3. In each story within the dwelling unit or sleeping
+      unit, including basements. For dwelling units or sleeping units with split levels and without an intervening door between
+      the adjacent levels, a smoke alarm installed on the upper level shall suffice for the adjacent lower level provided
+      that the lower level is less than one full story below the upper level. 4. Not less than 3 feet (914 mm) horizontally
+      from the door or opening of a bathroom that contains a bathtub or shower unless this would prevent placement of a smoke
+      alarm required by this section. 5. In the hallway and in the room open to the hallway in dwelling units where the ceiling
+      height of a room open to a hall- way serving bedrooms exceeds that of the hallway by 24 inches (610 mm) or more. 6.
+      Within the room to which a sleeping loft is open, in the immediate vicinity of the sleeping loft. 7. In each common
+      space shared by three or more dwelling units such that an alarm notification is clearly audible in each common space.
+      8. Where the interior floor area for a given level of a dwelling unit, excluding garage areas, is greater than 1000
+      ft2 (93 m2), smoke alarms shall be installed per both of the following:'
+  - file: gov.ny.building.2025.pdf
+    page: 289
+    lines:
+    - 3
+    - 8
+    quote: 8.1 All points on the ceiling shall have a smoke alarm within a distance of 30 ft (9.1 m) travel distance or shall
+      have an equivalent of one smoke alarm per 500 ft2 (46 m2) of floor area. 8.2 Where dwelling units include great rooms
+      or vaulted/cathedral ceilings extending over multiple floors, smoke alarms located on the upper floor that are intended
+      to protect the aforementioned area shall be permitted to be considered as part of the lower floor’s protection scheme.
+      [NY] 907.2.11.2 Groups R-2, R-3, R-4 and I-1. Single- or multiple-station smoke alarms shall be installed and maintained
+      in
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'New York places Group R-1''s smoke alarms in sleeping areas, in every room on the path of egress from them to the
+      unit''s door, on each story within a unit (a split level''s upper alarm serving a lower level less than a full story
+      below with no door between), at least 3 feet from a bath or shower room''s door, in a hallway and the room open to it
+      where that room''s ceiling is 24 inches or more above the hallway''s, by a sleeping loft, in each common space shared
+      by three or more units, and, on a level over 1000 square feet, within 30 feet of travel of every ceiling point or one
+      per 500 square feet (upper-floor alarms may serve great rooms and vaulted ceilings): a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.11.1: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_11_2_group_r_smoke_alarm_locations
+  kind: flag
+  topic: means_of_egress
+  title: Smoke alarm locations, Groups R-2 to R-4 and I-1 (BCNYS 907.2.11.2)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 289
+    lines:
+    - 8
+    - 29
+    quote: '[NY] 907.2.11.2 Groups R-2, R-3, R-4 and I-1. Single- or multiple-station smoke alarms shall be installed and
+      maintained in Groups R-2, R-3, R-4 and I-1 regardless of occupant load at all of the following locations: 1. On the
+      ceiling or wall outside of each separate sleeping area in the immediate vicinity of bedrooms. 2. In each room used for
+      sleeping purposes. 3. In each story within a dwelling unit, including basements but not including crawl spaces and uninhabitable
+      attics. In dwellings or dwelling units with split levels and without an intervening door between the adjacent levels,
+      a smoke alarm installed on the upper level shall suffice for the adjacent lower level provided that the lower level
+      is less than one full story below the upper level. 4. Not less than 3 feet (914 mm) horizontally from the door or opening
+      of a bathroom that contains a bathtub or shower unless this would prevent placement of a smoke alarm required by this
+      section. 5. In the hallway and in the room open to the hallway in dwelling units where the ceiling height of a room
+      open to a hall- way serving bedrooms exceeds that of the hallway by 24 inches (610 mm) or more. 6. Within the room to
+      which a sleeping loft is open, in the immediate vicinity of the sleeping loft. 7. In each common space shared by three
+      or more dwelling units such that an alarm notification is clearly audible in each common space. 8. Where the interior
+      floor area for a given level of a dwelling unit, excluding garage areas, is greater than 1000 ft2 (93 m2), smoke alarms
+      shall be installed per both of the following: 8.1 All points on the ceiling shall have a smoke alarm within a distance
+      of 30 ft (9.1 m) travel distance or shall have an equivalent of one smoke alarm per 500 ft2 (46 m2) of floor area. 8.2
+      Where dwelling units include great rooms or vaulted/cathedral ceilings extending over multiple floors, smoke alarms
+      located on the upper floor that are intended to protect the aforementioned area shall be permitted to be considered
+      as part of the lower floor’s protection scheme.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'New York places smoke alarms in Groups R-2, R-3, R-4 and I-1 outside each separate sleeping area near the bedrooms,
+      in each room used for sleeping, on each story within a unit including basements (a split level''s upper alarm serving
+      a lower level less than a full story below with no door between), at least 3 feet from a bath or shower room''s door,
+      in a hallway and the room open to it where that room''s ceiling is 24 inches or more above the hallway''s, by a sleeping
+      loft, in each common space shared by three or more units, and, on a level over 1000 square feet, within 30 feet of travel
+      of every ceiling point or one per 500 square feet: a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.11.2: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_11_3_smoke_alarms_near_cooking
+  kind: flag
+  topic: means_of_egress
+  title: Smoke alarms near cooking appliances (BCNYS 907.2.11.3)
+  applies_when: occupancy_group in ["R-1", "R-2", "R-3", "R-4", "I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 289
+    lines:
+    - 30
+    - 33
+    quote: '[F] 907.2.11.3 Installation near cooking appliances. Smoke alarms shall be installed not less than 10 feet (3048
+      mm) hori- zontally from a permanently installed cooking appliance. Exception: Smoke alarms shall be permitted to be
+      installed not less than 6 feet (1829 mm) horizontally from a permanently installed cooking appliance where necessary
+      to comply with Section 907.2.11.1 or 907.2.11.2.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Smoke alarms are at least 10 feet horizontally from a permanently installed cooking appliance, 6 feet where needed
+      to comply with 907.2.11.1 or 907.2.11.2: a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.11.3: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_11_4_smoke_alarms_near_bathrooms
+  kind: flag
+  topic: means_of_egress
+  title: Smoke alarms near bathrooms (BCNYS 907.2.11.4)
+  applies_when: occupancy_group in ["R-1", "R-2", "R-3", "R-4", "I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 289
+    lines:
+    - 34
+    - 36
+    quote: '[F] 907.2.11.4 Installation near bathrooms. Smoke alarms shall be installed not less than 3 feet (914 mm) horizontally
+      from the door or opening of a bathroom that contains a bathtub or shower unless this would prevent placement of a smoke
+      alarm required by Section 907.2.11.1 or 907.2.11.2.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Smoke alarms are at least 3 feet horizontally from the door or opening of a bathroom with a tub or shower, unless
+      that would prevent an alarm 907.2.11.1 or 907.2.11.2 requires: a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.11.4: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_11_5_smoke_alarm_interconnection
+  kind: flag
+  topic: means_of_egress
+  title: Smoke alarms interconnected (BCNYS 907.2.11.5)
+  applies_when: occupancy_group in ["R-1", "R-2", "R-3", "R-4", "I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 289
+    lines:
+    - 37
+    - 41
+    quote: '[F] 907.2.11.5 Interconnection. Where more than one smoke alarm is required to be installed within an individual
+      dwelling unit or sleeping unit in Group R or I-1 occupancies, the smoke alarms shall be interconnected in such a manner
+      that the activa- tion of one alarm will activate all of the alarms in the individual unit. Physical interconnection
+      of smoke alarms shall not be required where listed wireless alarms are installed and all alarms sound upon activation
+      of one alarm. The alarm shall be clearly audible in all bedrooms over background noise levels with all intervening doors
+      closed.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where a unit in Group R or I-1 needs more than one smoke alarm, they are interconnected so one sets off all (listed
+      wireless alarms may do it), clearly audible in all bedrooms over background noise with the doors closed: a person''s
+      check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.11.5: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_11_6_smoke_alarm_power
+  kind: flag
+  topic: means_of_egress
+  title: Smoke alarms' power source (BCNYS 907.2.11.6)
+  applies_when: occupancy_group in ["R-1", "R-2", "R-3", "R-4", "I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 289
+    lines:
+    - 42
+    - 48
+    quote: '[F] 907.2.11.6 Power source. In new construction, required smoke alarms shall receive their primary power from
+      the building wiring where such wiring is served from a commercial source and shall be equipped with a battery backup.
+      Smoke alarms with integral strobes that are not equipped with battery backup shall be connected to an emergency electrical
+      system in accor- dance with Section 2702. Smoke alarms shall emit a signal when the batteries are low. Wiring shall
+      be permanent and without a disconnecting switch other than as required for overcurrent protection. Exception: Smoke
+      alarms are not required to be equipped with battery backup where they are connected to an emergency electrical system
+      that complies with Section 2702.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In new construction, smoke alarms take their primary power from building wiring with battery backup, those with
+      strobes and no battery on an emergency electrical system per 2702 (no battery where on one), signal low batteries, and
+      are wired permanently without a disconnecting switch other than for overcurrent protection: a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.11.6: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_11_7_smoke_detection_instead
+  kind: flag
+  topic: means_of_egress
+  title: A smoke detection system instead of smoke alarms (BCNYS 907.2.11.7)
+  applies_when: occupancy_group in ["R-1", "R-2", "R-3", "R-4", "I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 289
+    lines:
+    - 49
+    - 57
+    quote: '[F] 907.2.11.7 Smoke detection system. Smoke detectors listed in accordance with UL 268 and provided as part of
+      the build- ing fire alarm system shall be an acceptable alternative to single- and multiple-station smoke alarms and
+      shall comply with the following: 1. The fire alarm system shall comply with all applicable requirements in Section 907.
+      2. Activation of a smoke detector in a dwelling unit or sleeping unit shall initiate alarm notification in the dwelling
+      unit or sleeping unit in accordance with Section 907.5.2. 3. Activation of a smoke detector in a dwelling unit or sleeping
+      unit shall not activate alarm notification appliances outside of the dwelling unit or sleeping unit, provided that a
+      supervisory signal is generated and monitored in accor- dance with Section 907.6.6.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Smoke detectors listed per UL 268 in the building fire alarm system may stand in for smoke alarms where the system
+      meets Section 907, a detector in a unit sounds notification in the unit per 907.5.2, and not outside it where a supervisory
+      signal is monitored per 907.6.6: a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.11.7: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_11_8_portable_smoke_alarms
+  kind: flag
+  topic: means_of_egress
+  title: Portable smoke alarms in hotels and lodging houses (BCNYS 907.2.11.8)
+  applies_when: occupancy_group in ["R-1", "R-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 289
+    lines:
+    - 58
+    - 60
+    quote: '[NY] 907.2.11.8 Portable smoke alarms in hotels, motels, and lodging houses. In addition to any other requirement
+      of this code, portable smoke alarms of both audible and visual design shall be provided in all hotels, motels, and lodging
+      houses. The number of smoke alarms available shall be 3 percent of the number of sleeping units with a minimum of one
+      operational smoke'
+  - file: gov.ny.building.2025.pdf
+    page: 290
+    lines:
+    - 3
+    - 8
+    quote: 'alarm per building. Proprietors shall post conspicuously a sign, with letters at least 3 inches (76 mm) in height,
+      at the main desk or other similar station advising of the availability of such smoke alarms. Such smoke alarms shall
+      comply with NFPA 72. Exception: Portable smoke alarms shall not be required where any of the following applies: 1. Where
+      audible/visual smoke alarms are hard wired. 2. Where audible/visual smoke alarms are incorporated into a fire alarm
+      system such that visual notification is activated by the system.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'New York asks hotels, motels and lodging houses for portable audible and visual smoke alarms, 3 percent of the
+      sleeping units (at least one per building) per NFPA 72, with a sign at least 3 inches high at the main desk saying they
+      are available (not where audible/visual alarms are hard wired, or part of a fire alarm system that activates visual
+      notification): a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.11.8: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_5_2_2_voice_alarm_design
+  kind: flag
+  topic: means_of_egress
+  title: The emergency voice/alarm communication system's design (BCNYS 907.5.2.2)
+  applies_when: emergency_voice_alarm_system
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 293
+    lines:
+    - 34
+    - 46
+    quote: '[F] 907.5.2.2 Emergency voice/alarm communication systems. Emergency voice/alarm communication systems required
+      by this code shall be designed and installed in accordance with NFPA 72. The operation of any automatic fire detector,
+      sprinkler waterflow device or manual fire alarm box shall automatically sound an alert tone followed by voice instructions
+      giving approved information and directions for a general or staged evacuation in accordance with the building’s fire
+      safety and evacu- ation plans required by Section 404 of the Fire Code of New York State. In high-rise buildings, the
+      system shall operate on at least the alarming floor, the floor above and the floor below. Speakers shall be provided
+      throughout the building by paging zones. At a minimum, paging zones shall be provided as follows: 1. Elevator groups.
+      2. Interior exit stairways. 3. Each floor. 4. Areas of refuge as defined in Chapter 2. Exception: In Group I-1 and I-2
+      occupancies, the alarm shall sound in a constantly attended area and a general occupant notification shall be broadcast
+      over the overhead page.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An emergency voice/alarm communication system is designed and installed per NFPA 72: a detector, waterflow device
+      or manual box sounds an alert tone and voice instructions for general or staged evacuation per the plans Section 404
+      of the Fire Code of New York State requires; in high-rise buildings on at least the alarming floor and those above and
+      below; speakers throughout by paging zones, at least for elevator groups, interior exit stairways, each floor and areas
+      of refuge as Chapter 2 defines them (in Groups I-1 and I-2 the alarm in a constantly attended area and a general notification
+      over the overhead page): a person''s check.'
+  - given:
+      emergency_voice_alarm_system: false
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.5.2.2: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_5_2_2_1_voice_alarm_override
+  kind: flag
+  topic: means_of_egress
+  title: The voice/alarm system's manual override (BCNYS 907.5.2.2.1)
+  applies_when: emergency_voice_alarm_system
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 293
+    lines:
+    - 47
+    - 48
+    quote: '[F] 907.5.2.2.1 Manual override. A manual override for emergency voice communication shall be provided on a selective
+      and all-call basis for all paging zones.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A manual override for voice communication on a selective and all-call basis for all paging zones: a person''s check.'
+  - given:
+      emergency_voice_alarm_system: false
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.5.2.2.1: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_5_2_2_2_voice_alarm_live_messages
+  kind: flag
+  topic: means_of_egress
+  title: The voice/alarm system's live voice messages (BCNYS 907.5.2.2.2)
+  applies_when: emergency_voice_alarm_system
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 293
+    lines:
+    - 49
+    - 50
+    quote: '[F] 907.5.2.2.2 Live voice messages. The emergency voice/alarm communication system shall have the capability
+      to broadcast live voice messages by paging zones on a selective and all-call basis.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The system can broadcast live voice messages by paging zones, selective and all-call: a person''s check.'
+  - given:
+      emergency_voice_alarm_system: false
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.5.2.2.2: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_5_2_2_3_voice_alarm_other_uses
+  kind: flag
+  topic: means_of_egress
+  title: The voice/alarm system's other uses (BCNYS 907.5.2.2.3)
+  applies_when: emergency_voice_alarm_system
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 293
+    lines:
+    - 51
+    - 52
+    quote: '[F] 907.5.2.2.3 Alternative uses. The emergency voice/alarm communication system shall be allowed to be used for
+      other announcements, provided that the manual fire alarm use takes precedence over any other use.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The system may carry other announcements where the manual fire alarm use takes precedence: a person''s check.'
+  - given:
+      emergency_voice_alarm_system: false
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.5.2.2.3: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_5_2_2_4_voice_alarm_captions
+  kind: flag
+  topic: means_of_egress
+  title: Captions in stadiums, arenas and grandstands (BCNYS 907.5.2.2.4)
+  applies_when: emergency_voice_alarm_system and occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 293
+    lines:
+    - 53
+    - 56
+    quote: '[F] 907.5.2.2.4 Emergency voice/alarm communication captions. Where stadiums, arenas and grandstands have 15,000
+      fixed seats or more and provide audible public announcements, the emergency/voice alarm communication system shall provide
+      prerecorded or real-time captions. Prerecorded or live emergency captions shall be from an approved location constantly
+      attended by personnel trained to respond to an emergency.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where stadiums, arenas and grandstands have 15,000 fixed seats or more and audible public announcements, the system
+      gives prerecorded or real-time captions from an approved location constantly attended by trained personnel: a person''s
+      check.'
+  - given:
+      emergency_voice_alarm_system: false
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.5.2.2.4: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_5_2_2_5_voice_alarm_standby_power
+  kind: flag
+  topic: means_of_egress
+  title: The voice/alarm system's standby power (BCNYS 907.5.2.2.5)
+  applies_when: emergency_voice_alarm_system
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 293
+    lines:
+    - 57
+    - 58
+    quote: '[F] 907.5.2.2.5 Standby power. Emergency voice/alarm communications systems shall be provided with standby power
+      in accordance with Section 2702.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The system has standby power per Section 2702: a person''s check.'
+  - given:
+      emergency_voice_alarm_system: false
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.5.2.2.5: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part d).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_1004_7_outdoor_areas
   kind: flag
   topic: means_of_egress

@@ -115,6 +115,12 @@ pieces:
     - less than 24
     second_reading_comparisons:
     - <
+  202:alarm_notification_appliance:
+    piece_sha256: eae67b903521fd17222b99db1d8c1d3c5bdd3b34d40544ad9b40d67ae03c7c3a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:alarm_signal:
     piece_sha256: 95591167dcd24bc03267be2968375c3b1e8931db1834fea47e2ac1e0a463048c
     numbers: []
@@ -340,6 +346,24 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:cell_group_i_3_occupancy:
+    piece_sha256: 1176a376bca7f564a69cc39201e304aee68bcc6c7e01baf374c8c70b464df97a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:cell_masonry:
+    piece_sha256: 83ac2c2aeab8b04135a60272911c976e790c9cfbf6550d73c473d98f9a0c5445
+    numbers:
+    - greater than 1 1/2 square inch
+    - 967 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - greater than 1 1/2 square inch
+    - 967 mm
+    second_reading_comparisons:
+    - '>'
+    - none
   202:certificate_of_occupancy:
     piece_sha256: 5f8ce0dbf0b87bdfa4f27f1439b66e3a6cf7ce4082cc7ea76600d60ec0341616
     numbers: []
@@ -760,6 +784,24 @@ pieces:
     - one or more
     second_reading_comparisons:
     - '>='
+  202:egress_court:
+    piece_sha256: d85feeeb4ad45650b08673f5d6868ceac974b6b026613ae44999bf3e5eb2201c
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  202:elevator_group:
+    piece_sha256: 29fafeb543a24cc95902c77a5b0c9fe5ada7c8cad6f9bea995857b269c5e1b1e
+    numbers:
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    second_reading_comparisons:
+    - none
   202:emergency_escape_and_rescue_opening:
     piece_sha256: 2e3b4be459c83e184ca9490e00d148447e710ffd44d5ad74cb43c97c1522cf0e
     numbers: []
@@ -1231,6 +1273,12 @@ pieces:
     flags:
     - '''and two or more'' (>=): ''two or more rows of seats''; the recorded words miss it (numbers.py reads comparison words
       only directly before a number or after its unit). The second reading is right. A definition, used by no rule.'
+  202:guard:
+    piece_sha256: 17648a9702f155e72d2fc9951e2a7a1eb0e4ed60fc664b0878b3f22d476a2f0b
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:gypsum_board:
     piece_sha256: 34568285c21762eaa66c262af6342055d7d59a05da709542afbf26f09297d6b2
     numbers: []
@@ -1254,6 +1302,12 @@ pieces:
     - none
   202:gypsum_wallboard:
     piece_sha256: da312c049ff9ef383c20daa48ba6a3aead7a5c5e4a8fe6827e90bafc823d7229
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:habitable_space:
+    piece_sha256: 488ee09b45c53d9dbcc6de65b285dde7dcea762a77dfab4b171dbdeb5ada15a7
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -1431,6 +1485,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:housing_unit:
+    piece_sha256: 4b17b1f002b97ae7209ac586ed02dc50d66894d7444b8ad145d168898b4af2c1
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:hpm:
     piece_sha256: 4bc37934cc73650fd87facd433226c86cc83295480f8030c7f4ae3554d6de60a
     numbers: []
@@ -1576,6 +1636,18 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:lodging_house:
+    piece_sha256: 09860839b959e07e675aa3cbb9cabe31b921e7d2fbc4b1d70ee58799d61b47a2
+    numbers:
+    - one
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - one or more
+    second_reading_comparisons:
+    - none
+    - '>='
   202:lot:
     piece_sha256: 3878c11e1290ff14909d679911e8daa283b5fb0fe2afd103b44c5e3eb669fcfd
     numbers: []
@@ -1726,6 +1798,18 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:multiple_station_smoke_alarm:
+    piece_sha256: c5958f9960caf83ded00d6509c1d5903f6f5681c8a778a379d67185e49ffcd54
+    numbers:
+    - two or more
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - two or more
+    - one
+    second_reading_comparisons:
+    - '>='
+    - none
   202:nominal_loads:
     piece_sha256: 733f4e17e658a76826670f3aef98e59263808433eb9d791339b42163cdc7ea8c
     numbers:
@@ -2162,6 +2246,15 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:single_station_smoke_alarm:
+    piece_sha256: 06b199b39fdc933307622e990d76df05ef1f26042eb8058f83ff9514b510cc77
+    numbers:
+    - one unit
+    second_reading: agrees
+    second_reading_numbers:
+    - one unit
+    second_reading_comparisons:
+    - none
   202:site:
     piece_sha256: 920170e75cc3b8b0be60c3232b2cd76c652dafb3d8013af8d97cb6b4e88359fe
     numbers: []
@@ -2177,6 +2270,12 @@ pieces:
     - one or more
     second_reading_comparisons:
     - '>='
+  202:smoke_alarm:
+    piece_sha256: 72f5a1c106f95c8e49e3deebdbce1334840fea887b8c2aa7339118604bedbc70
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:smoke_barrier:
     piece_sha256: 2362bf8f9765ea07a0781a2aa97a6e85dcd42105b1868731ffc1abb41c737ea4
     numbers: []
@@ -2348,6 +2447,12 @@ pieces:
     second_reading_comparisons: []
   202:supervisory_service:
     piece_sha256: 5ca7d5ab06a4289b3ef0294534e8fc891e2b93bf1e6fb86307cb5370327832be
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:supervisory_signal:
+    piece_sha256: 2d2b04839a332f4ed4e413a6d42c12f875ed4b7699697872e48b341d953f574c
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -6437,6 +6542,552 @@ pieces:
     - none
     - none
     - none
+    - none
+  907.2.6:
+    piece_sha256: 695b9540db8e088d531a7ce56acd63821dca9d2d5ccb90ef7f2c99148181d9fc
+    numbers:
+    - '907.5'
+    - '907.5'
+    - '72'
+    - '404'
+    second_reading: agrees
+    second_reading_numbers:
+    - '907.5'
+    - '907.5'
+    - '72'
+    - '404'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  907.2.6.1:
+    piece_sha256: 0ed620bc076be97f867d51207217a7bde401fc3802d2bf01d000904099f7aa29
+    numbers:
+    - '907.5'
+    - '1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '907.5'
+    - '1'
+    second_reading_comparisons:
+    - none
+    - none
+  907.2.6.1.1:
+    piece_sha256: a98004ffa9bf167f703f5ec38490843dde1de9d59b8f227f12e17b61f0f36d7d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.6.2:
+    piece_sha256: 92838acb5543fcdb0aa368d878d22aafcdde79438433d9add73cf74ef0aef116
+    numbers:
+    - '1'
+    - '407.2'
+    - '2'
+    - '407'
+    - '268'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1'
+    - '407.2'
+    - '2'
+    - '407'
+    - '268'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+  907.2.6.3:
+    piece_sha256: 36b821c82fc50fc181d944e4781e21c226d834de92c618e84d0c1d15d592409f
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.6.3.1:
+    piece_sha256: 1de37a2184c6c67676e92f3ac86d79d58a8943e81645a2e6d1f382f87fd41918
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.6.3.2:
+    piece_sha256: ad6916fd11d9cc270e2590b68ec0a1649bdd62610239fb8f9010cc5d002bff9d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.6.3.2.1:
+    piece_sha256: 24a4b2d3656e7ba5721f4d889c3051d4ea46d108bdfbfcb13b37dc2623d30348
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.6.3.3:
+    piece_sha256: 7b94417d9d8396e858bced5ab800779259c2416782a46c24a22f7fef6555c1be
+    numbers:
+    - '2'
+    - and 3
+    - '308'
+    - four or fewer
+    second_reading: agrees
+    second_reading_numbers:
+    - '2'
+    - and 3
+    - '308'
+    - four or fewer
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - <=
+  907.2.7:
+    piece_sha256: 0da8b280bfaedc9ba8f6662acbd066963e1a527ff0db722b9bb196da3ed222e1
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.7.1:
+    piece_sha256: 20b201238d61a5ce9eb77abf112f8cdc8c91af0f6b202e168acb1fd900a507a9
+    numbers:
+    - '907.5'
+    - one
+    - 500 or more
+    - more than 100
+    - '402'
+    second_reading: agrees
+    second_reading_numbers:
+    - '907.5'
+    - one
+    - 500 or more
+    - more than 100
+    - '402'
+    second_reading_comparisons:
+    - none
+    - none
+    - '>='
+    - '>'
+    - none
+  907.2.7.1.1:
+    piece_sha256: ab49c432b7581c801c3c487530d7cf3fe1540630a51a69ff8a51bfa43efa14be
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.7.2:
+    piece_sha256: 308fbbf84cd5933649008818b84971f45d7c5e3652abafed0978bc8c364b1da7
+    numbers:
+    - '320'
+    second_reading: agrees
+    second_reading_numbers:
+    - '320'
+    second_reading_comparisons:
+    - none
+  907.2.8:
+    piece_sha256: 75cbae1957446878947784f71a2d66fcfd668e5b92fb2b7ad5442452c4aef899
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.8.1:
+    piece_sha256: adfa945372f40168ea7efc95ebea402ff2e28bc87976586be2457f39d38b0790
+    numbers:
+    - '907.5'
+    - '1'
+    - not more than two
+    - not less than 1
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - '907.5'
+    - '1'
+    - not more than two
+    - not less than 1
+    - one
+    second_reading_comparisons:
+    - none
+    - none
+    - <=
+    - '>='
+    - '>='
+    flags:
+    - '''one'' (>=): exception 2.3''s ''Not fewer than one manual fire alarm box''; the recorded words miss it (numbers.py
+      reads comparison words only directly before a number or after its unit). The second reading is right. A flag.'
+  907.2.8.2:
+    piece_sha256: c05322dd1bc71f4ef6a4e93b4d27a9258deb13c858be5c6e1963b1916fd6eab5
+    numbers:
+    - '907.5'
+    second_reading: agrees
+    second_reading_numbers:
+    - '907.5'
+    second_reading_comparisons:
+    - none
+  907.2.8.3:
+    piece_sha256: f68d7f50a7d2826d48126583b320a28536551ba67a8d19b36af022494f4db9e7
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.9:
+    piece_sha256: f84a535a4f9f7e9f8c0110c5b38bbea0d30c7513a5bf81a2d7e8d44e2cdff846
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.9.1:
+    piece_sha256: a6e8b001b75bf90bba040186f4dd7d986b76ed93c9138858ec53931d1cc7ec2b
+    numbers:
+    - '907.5'
+    - three or more
+    - more than one
+    - more than 16
+    - not more than two
+    - not less than 1
+    - '1027.6'
+    - '3'
+    second_reading: agrees
+    second_reading_numbers:
+    - '907.5'
+    - three or more
+    - more than one
+    - more than 16
+    - not more than two
+    - not less than 1
+    - '1027.6'
+    - '3'
+    second_reading_comparisons:
+    - none
+    - '>='
+    - '>'
+    - '>'
+    - <=
+    - '>='
+    - none
+    - none
+  907.2.9.2:
+    piece_sha256: 798c3b4d42f5ad63176274a2a007d04fda70ff97cd963978911408105c582f28
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.9.3:
+    piece_sha256: d8a539dd02af3e7d1d47a5ad3813f90f9f9c4e81e6afb28e49af793db715c2b8
+    numbers:
+    - '907.5'
+    - '72'
+    second_reading: agrees
+    second_reading_numbers:
+    - '907.5'
+    - '72'
+    second_reading_comparisons:
+    - none
+    - none
+  907.2.10:
+    piece_sha256: 5da5ec8031cfec8a3c5a222939c7e81574cc064328381fa79274f97c0f0dcb07
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.2.10.1:
+    piece_sha256: 5ba77d1d43fbbeba6c3d11026bcea9f2cd99b11c05b1235c5f1894e9efa5cfcb
+    numbers:
+    - '907.5'
+    - three
+    second_reading: agrees
+    second_reading_numbers:
+    - '907.5'
+    - three
+    second_reading_comparisons:
+    - none
+    - '>='
+    flags:
+    - '''three'' (>=): ''three stories or greater in height''; the recorded words miss it (numbers.py reads comparison words
+      only directly before a number or after its unit). The second reading is right. A flag.'
+  907.2.10.2:
+    piece_sha256: 2e939d946b669e086b87dbeefe3800611cc979300b2cba8fe53e8f758fd6d864
+    numbers:
+    - '320'
+    second_reading: agrees
+    second_reading_numbers:
+    - '320'
+    second_reading_comparisons:
+    - none
+  907.2.11:
+    piece_sha256: b3b05e03a276027838183d962a4eeccddda682ae2d825c35fb3d5a9ddef2f156
+    numbers:
+    - '217'
+    - '72'
+    second_reading: agrees
+    second_reading_numbers:
+    - '217'
+    - '72'
+    second_reading_comparisons:
+    - none
+    - none
+  907.2.11.1:
+    piece_sha256: 02254045cb28c0c3fcc66b62aeffdcac0d0ea47b3b89bed2287cf27a51392cca
+    numbers:
+    - '1'
+    - less than one
+    - not less than 3 foot
+    - 914 mm
+    - 24 inch or more
+    - 610 mm or more
+    - three or more
+    - greater than 1000
+    - 93 m
+    - '8.1'
+    - '30'
+    - 9.1 m
+    - one
+    - '500'
+    - 46 m
+    - '8.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1'
+    - less than one
+    - not less than 3 foot
+    - 914 mm
+    - 24 inch or more
+    - 610 mm or more
+    - three or more
+    - greater than 1000
+    - 93 m
+    - '8.1'
+    - '30'
+    - 9.1 m
+    - one
+    - '500'
+    - 46 m
+    - '8.2'
+    second_reading_comparisons:
+    - none
+    - <
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - '>'
+    - none
+    - none
+    - <=
+    - none
+    - none
+    - <=
+    - none
+    - none
+    flags:
+    - '''610 mm or more'': the ''or more'' is the 24 inches'' before the brackets (recorded ''>='' with it); the millimetres
+      are a conversion and set no limit, so the second reading (none) is right.'
+    - '''30'' (<=) and ''500'' (<=): ''within a distance of 30 ft (9.1 m) travel distance'', ''one smoke alarm per 500 ft2
+      (46 m2)'', at most that far and that much floor area per alarm; numbers.py reads ''ft'' and ''ft2'' as no unit it knows.
+      The second reading is right. A flag.'
+  907.2.11.2:
+    piece_sha256: 70d4b851ba85c5e2074b3a4409f2fde2425273742bfa71c31b5f5ce4c2041a30
+    numbers:
+    - less than one
+    - not less than 3 foot
+    - 914 mm
+    - 24 inch or more
+    - 610 mm or more
+    - three or more
+    - greater than 1000
+    - 93 m
+    - '8.1'
+    - '30'
+    - 9.1 m
+    - one
+    - '500'
+    - 46 m
+    - '8.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - less than one
+    - not less than 3 foot
+    - 914 mm
+    - 24 inch or more
+    - 610 mm or more
+    - three or more
+    - greater than 1000
+    - 93 m
+    - '8.1'
+    - '30'
+    - 9.1 m
+    - one
+    - '500'
+    - 46 m
+    - '8.2'
+    second_reading_comparisons:
+    - <
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - '>'
+    - none
+    - none
+    - <=
+    - none
+    - none
+    - <=
+    - none
+    - none
+    flags:
+    - '''610 mm or more'': the ''or more'' is the 24 inches'' before the brackets (recorded ''>='' with it); the millimetres
+      are a conversion and set no limit, so the second reading (none) is right.'
+    - '''30'' (<=) and ''500'' (<=): ''within a distance of 30 ft (9.1 m) travel distance'', ''one smoke alarm per 500 ft2
+      (46 m2)'', at most that far and that much floor area per alarm; numbers.py reads ''ft'' and ''ft2'' as no unit it knows.
+      The second reading is right. A flag.'
+  907.2.11.3:
+    piece_sha256: e13adf0c183e2baa461e5829da5946825aa2547255ca0544a56c6bdcb5a7cd02
+    numbers:
+    - not less than 10 foot
+    - 3048 mm
+    - not less than 6 foot
+    - 1829 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 10 foot
+    - 3048 mm
+    - not less than 6 foot
+    - 1829 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    - '>='
+    - none
+  907.2.11.4:
+    piece_sha256: c6e16a69821eb9cff22e30bbfd44a9b5337614290a946765ff7c7407d56b154d
+    numbers:
+    - not less than 3 foot
+    - 914 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 3 foot
+    - 914 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+  907.2.11.5:
+    piece_sha256: 25c26d48c0903fcdd63f7b2ae81b199e9affa7e71a8c7b1901e9fd098f9ad15c
+    numbers:
+    - more than one
+    - one
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - more than one
+    - one
+    - one
+    second_reading_comparisons:
+    - '>'
+    - none
+    - none
+  907.2.11.6:
+    piece_sha256: 4492246b1758cc67af66d40073dcdc4c3b13642a815e5af0ad124b6502b17746
+    numbers:
+    - '2702'
+    - '2702'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2702'
+    - '2702'
+    second_reading_comparisons:
+    - none
+    - none
+  907.2.11.7:
+    piece_sha256: 9fd460bbde0f022446788b7dc3130cd0043169eb363ef3fe18e02b1668c01096
+    numbers:
+    - '268'
+    - '907'
+    second_reading: agrees
+    second_reading_numbers:
+    - '268'
+    - '907'
+    second_reading_comparisons:
+    - none
+    - none
+  907.2.11.8:
+    piece_sha256: c64a132faaf38e584b7c0cc2642563ac0c3a97b86492a57371a4877b046cf401
+    numbers:
+    - 3 percent
+    - one
+    - at least 3 inch
+    - 76 mm
+    - '72'
+    second_reading: agrees
+    second_reading_numbers:
+    - 3 percent
+    - one
+    - at least 3 inch
+    - 76 mm
+    - '72'
+    second_reading_comparisons:
+    - none
+    - '>='
+    - '>='
+    - none
+    - none
+    flags:
+    - '''one'' (>=): ''with a minimum of one operational smoke alarm per building''; the recorded words miss it (numbers.py
+      reads comparison words only directly before a number or after its unit). The second reading is right. A flag.'
+  907.5.2.2:
+    piece_sha256: 0a73eb9445ed729b48dd5bf282d4200d7a3311bf5238bc6bc9ac7bdc1c90e0b9
+    numbers:
+    - '72'
+    - '404'
+    - '2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '72'
+    - '404'
+    - '2'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  907.5.2.2.1:
+    piece_sha256: b8b441ff75afb74c0a6c71c0ace2445987f4c485d385166f523a17a13da92cef
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.5.2.2.2:
+    piece_sha256: 18b2c06498de5430a6e8968fbf540e2a6c0f1ac791674d369589341f66451cc8
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.5.2.2.3:
+    piece_sha256: 5bade3acb35afed2f4fcf8cde78149df019ce7bb7713a62a1b29e99aad8ed033
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  907.5.2.2.4:
+    piece_sha256: 5f1af4a68491a4d9805064aaade888dbb3930599fdd3a39495906b164097e391
+    numbers:
+    - 15,000
+    second_reading: agrees
+    second_reading_numbers:
+    - 15,000
+    second_reading_comparisons:
+    - '>='
+    flags:
+    - '''15,000'' (>=): ''have 15,000 fixed seats or more''; the recorded words miss it (numbers.py reads comparison words
+      only directly before a number or after its unit). The second reading is right. A flag.'
+  907.5.2.2.5:
+    piece_sha256: d3ba72500b12c340e96acd279229d33bca1ad3c4b5779a6a0addbcbf88e2e20a
+    numbers:
+    - '2702'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2702'
+    second_reading_comparisons:
     - none
   '1004':
     piece_sha256: ca107e7301f29c5c026cdf74f3b4fd5a787aefc056d7a10c0ac5d3367f01dfa1

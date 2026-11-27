@@ -237,6 +237,16 @@ occupancy_group:
   - general.bc_903_2_9_group_s1_sprinklers
   - general.bc_903_2_mixed_occupancies
   - general.bc_903_3_1_3_nfpa_13d_scope
+  - general.bc_907_2_10_1_storage_fire_alarm
+  - general.bc_907_2_11_1_group_r1_smoke_alarm_locations
+  - general.bc_907_2_11_2_group_r_smoke_alarm_locations
+  - general.bc_907_2_11_3_smoke_alarms_near_cooking
+  - general.bc_907_2_11_4_smoke_alarms_near_bathrooms
+  - general.bc_907_2_11_5_smoke_alarm_interconnection
+  - general.bc_907_2_11_6_smoke_alarm_power
+  - general.bc_907_2_11_7_smoke_detection_instead
+  - general.bc_907_2_11_8_portable_smoke_alarms
+  - general.bc_907_2_11_smoke_alarms
   - general.bc_907_2_1_1_group_a_voice_alarm
   - general.bc_907_2_1_2_captions
   - general.bc_907_2_1_3_group_a_smoke_detection
@@ -248,6 +258,25 @@ occupancy_group:
   - general.bc_907_2_4_1_battery_manufacturing
   - general.bc_907_2_4_group_f_fire_alarm
   - general.bc_907_2_5_group_h_fire_alarm
+  - general.bc_907_2_6_1_1_group_i1_smoke_alarms
+  - general.bc_907_2_6_1_group_i1_smoke_detection
+  - general.bc_907_2_6_2_group_i2_smoke_detection
+  - general.bc_907_2_6_3_1_group_i3_initiation
+  - general.bc_907_2_6_3_2_1_group_i3_locked_boxes
+  - general.bc_907_2_6_3_2_group_i3_alarm_boxes
+  - general.bc_907_2_6_3_3_group_i3_smoke_detection
+  - general.bc_907_2_6_3_group_i3_fire_alarm
+  - general.bc_907_2_6_group_i_fire_alarm
+  - general.bc_907_2_7_1_1_group_m_notification
+  - general.bc_907_2_7_1_group_m_fire_alarm
+  - general.bc_907_2_7_2_group_m_battery_storage
+  - general.bc_907_2_8_1_group_r1_fire_alarm
+  - general.bc_907_2_8_2_group_r1_corridor_detection
+  - general.bc_907_2_8_3_group_r1_smoke_alarms
+  - general.bc_907_2_9_1_group_r2_fire_alarm
+  - general.bc_907_2_9_2_group_r2_smoke_alarms
+  - general.bc_907_2_9_3_group_r2_college_detection
+  - general.bc_907_5_2_2_4_voice_alarm_captions
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -457,6 +486,12 @@ emergency_voice_alarm_system:
   - general.bc_1020_3_corridor_capacity
   - general.bc_907_2_1_1_group_a_voice_alarm
   - general.bc_907_2_3_group_e_voice_alarm
+  - general.bc_907_5_2_2_1_voice_alarm_override
+  - general.bc_907_5_2_2_2_voice_alarm_live_messages
+  - general.bc_907_5_2_2_3_voice_alarm_other_uses
+  - general.bc_907_5_2_2_4_voice_alarm_captions
+  - general.bc_907_5_2_2_5_voice_alarm_standby_power
+  - general.bc_907_5_2_2_voice_alarm_design
 group_r_present:
   meaning: 'The building has a Group R occupancy (R-1 to R-4) among the groups the architect states, alone or with others
     (2025 BCNYS 903.2.8: a sprinkler system "throughout all buildings with a Group R fire area")'
