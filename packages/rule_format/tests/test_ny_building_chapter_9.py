@@ -442,3 +442,38 @@ def test_the_grandstands_flag_shows_for_a_school(book, ctx):
     assembly space associated with Group E is part of it (303.1.3, p.68), so a building stated Group E sees it."""
     r = _rule(book, "general.bc_903_2_1_5_1_under_grandstands")
     assert outcome(r, code_scope.building_measures({"occupancy_groups": ["E"]}), ctx.allowed()) == "needs_review"
+def test_the_separation_thresholds_are_decided_with_the_groups_not_stated(book, ctx):
+    """Review round 2 (2026-11-27): with a 13R system stated and the groups not, 1007.1.1's and 1007.1.2's thresholds
+    were an if-else on an unknown test, so a pair a full diagonal apart needed review (and a pair at 0.2 no longer
+    failed): stating a 13R system gave a worse answer than stating none. Written as "at least one-half, or at least
+    one-third where the system counts", each gives the same answer as with no system or NFPA 13."""
+    allowed = ctx.allowed()
+    cases = [("general.bc_1007_1_1_remoteness", "story", {"story_exit_count": 2, "exit_remoteness_ratio": 0.87}, "pass"),
+             ("general.bc_1007_1_1_space_remoteness", "space",
+              {"space_is_exit": False, "space_exit_count": 2, "space_exit_remoteness_ratio": 0.6}, "pass"),
+             ("general.bc_1007_1_2_space_three_or_more", "space",
+              {"space_is_exit": False, "space_exit_count": 3, "space_occupant_load": 600,
+               "space_exit_remoteness_ratio": 0.2}, "fail")]
+    for rid, kind, m, want in cases:
+        for system in ("none", "nfpa_13", "nfpa_13r"):
+            values = code_scope.building_measures({"sprinkler_system": system})
+            [row] = parts.rows(_rule(book, rid), {kind: [{"id": "p1", "name": "Part", "measures": m}]}, values, allowed)
+            assert row["outcome"] == want, (rid, system, row["outcome"])
+
+
+def test_the_13r_flag_says_what_chapter_10_counts(book, ctx):
+    """Review round 2: the 903.3.1.2 flag said Chapter 10 never counts a 13R system beyond 903.3.1.2's limits, but
+    within a stated Group R Chapter 10 takes the stories and heights on the architect's statement (1007.1.1 passes a
+    Group R-2 story at one-third whatever the stated stories); 903.2.8's rule is what fails 13R above four stories. The
+    shown words say exactly that."""
+    note = _shown_note(_rule(book, "general.bc_903_3_1_2_nfpa_13r_limits"))
+    assert "only in a building stated Group R" in note and "on the architect's statement" in note
+    assert "903.2.8" in note and "nor one Chapter 10" not in note
+    allowed = ctx.allowed()
+    b = {"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r", "stories_above_grade_plane": 6}
+    [row] = parts.rows(_rule(book, "general.bc_1007_1_1_remoteness"),
+                       {"story": [{"id": "p1", "name": "L1", "measures": {"story_exit_count": 2,
+                                                                         "exit_remoteness_ratio": 0.4}}]},
+                       code_scope.building_measures(b), allowed)
+    assert row["outcome"] == "pass"                     # what the note says Chapter 10 does
+    assert _answer(_rule(book, "general.bc_903_2_8_group_r_sprinklers"), b, allowed) == "fail"
