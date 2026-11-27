@@ -32340,8 +32340,8 @@ rules:
     note: 'The occupancy isn''t stated: a person checks.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9d. 1019.1 (scope) and 1019.2 (floor levels within
     one story), labeled reference, are quoted here. 713 isn't brought in whole (only Chapter 7's flags) and 712.1.9 is brought
-    in (Chapter 7 part d's flag); 404 isn't brought in whole (404.1 and 404.9 to 404.11 are Chapter 4 part a's flags);
-    NFPA 13 and 1030 aren't brought in (1030.7 is, alone). Not shown for a building stated
+    in (Chapter 7 part d's flag); NFPA 13, 1030 and the rest of 404 aren't brought in (1030.7 is, alone); 404.1 and
+    404.9 to 404.11 are Chapter 4 part a's flags. Not shown for a building stated
     Group I-2 or I-3 alone (1019.4 covers them).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -32395,8 +32395,8 @@ rules:
     expect: needs_review
     note: 'The occupancy isn''t stated: a person checks.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9d. 713 isn't brought in whole (only Chapter 7's
-    flags) and 408 isn't brought in whole (408.1 to 408.4 are Chapter 4 part d's flags, 408.6 and
-    408.8 part e's).
+    flags) and the rest of 408 isn't brought in; 408.1 to 408.4 are Chapter 4 part d's flags, 408.6
+    and 408.8 part e's.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1021_1_egress_balconies_as_corridors
@@ -32623,7 +32623,7 @@ rules:
       and exit stairways (not ramps) per 510.2 (a horizontal building separation): the enclosure''s rating isn''t in the model,
       so a person''s check.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 707 and 711 aren''t brought in whole (only
-    parts: Chapter 7''s flags); 404.6 and 510.2 aren''t brought in (408.3.8 is a flag of Chapter 4 part d). Each exception only loosens; none spares a whole
+    parts: Chapter 7''s flags); 404.6 and 510.2 aren''t brought in; 408.3.8 is a flag of Chapter 4 part d. Each exception only loosens; none spares a whole
     building, so this shows for every building.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -32999,8 +32999,8 @@ rules:
     note: 'Where 403.5.4 (high-rise buildings), 405.7.2 (underground buildings) or 412.2.2.1 (airport traffic control towers)
       requires it, an interior exit stairway or ramp is a smokeproof enclosure per 909.20: whether the building is one of
       these isn''t a fact Gordium is given, so a person''s check.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 909.20 isn''t brought in (403.5.4 and
-    405.7.2 are flags of Chapter 4 part b, 412.2.2.1 of part f). Shown for every building: nothing Gordium is given rules out a high-rise, underground building or control
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 909.20 isn''t brought in; 403.5.4 and
+    405.7.2 are flags of Chapter 4 part b, 412.2.2.1 of part f. Shown for every building: nothing Gordium is given rules out a high-rise, underground building or control
     tower.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

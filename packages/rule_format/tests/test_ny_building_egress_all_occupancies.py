@@ -1065,6 +1065,11 @@ def test_table_1020_3_within_a_dwelling_unit_needs_review_only_while_not_ruled_o
         assert _one(r, "corridor", _corridor(43.5, 50), base | units, ctx) == want, units
 
 
+# merging main into Chapter 4 part f: 407.4.4.6's care suite (Chapter 4 part c) is exit access "for more than eight"
+# beds at most; the comparisons reader marked the 'more than' alone (>), and its flag says the recorded words (<=) are right
+MARKED_ALONE = {("407.4.4.6", "not used as an exit access for more than eight"): ">"}
+
+
 def test_more_than_one_reads_the_same_comparison_in_every_piece():
     """Review round 1 of group 5b (P3): 1005.5's 'Where more than one exit ... is required' was read 'none' while
     1020.5's same words read '>': the second reading says what the printed sentence says of each number, so 'more
@@ -1085,6 +1090,10 @@ def test_more_than_one_reads_the_same_comparison_in_every_piece():
     for pid, e in pieces.items():
         for n, comp in zip(e["second_reading_numbers"], e["second_reading_comparisons"]):
             if re.search(r"\bnot\b.*\bmore than\b", str(n)):
+                if (pid, n) in MARKED_ALONE:     # the reader marked the 'more than' alone; its flag puts it right (<=)
+                    assert comp == MARKED_ALONE[(pid, n)], (pid, n, comp)
+                    assert any(f"'{n}' (<=)" in x for x in e.get("flags") or []), (pid, n)
+                    continue
                 assert comp == capped.get((pid, n), "<="), (pid, n, comp)
                 if (pid, n) in capped:
                     assert any(f"'{n}' ({comp})" in f for f in e.get("flags") or []), (pid, n)

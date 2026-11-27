@@ -196,8 +196,8 @@ labels:
       quote: '[F] ALARM SIGNAL. A signal indicating an emergency requiring immediate action, such as a signal indicative of
         fire.'
     piece_sha256: 95591167dcd24bc03267be2968375c3b1e8931db1834fea47e2ac1e0a463048c
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d. Also Chapter
-      4 part b.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part b. Section
+      group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:alternating_tread_device:
@@ -406,8 +406,8 @@ labels:
       quote: '[NY] AUTHORITY HAVING JURISDICTION. The governmental unit or agency responsible for administration and enforcement
         of this code.'
     piece_sha256: 266faf22994f54b27642ec4f44ec5f2c271ed7073b37a9b88dfe22abc942a5c5
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c. Also Chapter
-      4 part c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part c. Section
+      group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:automatic:
@@ -458,8 +458,8 @@ labels:
       quote: '[F] AUTOMATIC SMOKE DETECTION SYSTEM. A fire alarm system that has initiation devices that utilize smoke detectors
         for protec- tion of an area such as a room or space with detectors to provide early warning of fire.'
     piece_sha256: ef5952c3c71c6749ae5ff6d096078c1366f9b095a2e90ba81dad5f40faa7c6ec
-    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 6e. Also Chapter
-      4 part c.
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Also Chapter 4 part c. Section
+      group 6e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:automatic_sprinkler_system:
@@ -767,8 +767,8 @@ labels:
       - 14
       quote: '[BE] CIRCULATION PATH. An exterior or interior way of passage from one place to another for pedestrians.'
     piece_sha256: 412c5477b8361f02ae77378356de6be320326154a74ff4b8b39292651608c8d0
-    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9a. Also Chapter
-      4 part c.
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Also Chapter 4 part c. Section
+      group 9a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:combustible_liquid:
@@ -1625,8 +1625,8 @@ labels:
       - 52
       quote: FIRE ALARM BOX, MANUAL. See “Manual fire alarm box.”
     piece_sha256: 86eb8c6a06170095bbe1aaa68657cf2101f6212837fa0e4432c80254f11c970d
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d. Also Chapter
-      4 part b.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part b. Section
+      group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_alarm_signal:
@@ -1643,8 +1643,8 @@ labels:
         automatic fire detector, waterflow switch or other device whose activation is indicative of the presence of a fire
         or fire signature.'
     piece_sha256: 4e0e1ac4569062cadaabf7445efe4a87311446bd0603337ec3e33c46dd44e5f4
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d. Also Chapter
-      4 part b.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part b. Section
+      group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_alarm_system:
@@ -1661,8 +1661,8 @@ labels:
         to monitor and annunciate the status of fire alarm or supervisory signal-initiating devices and to initiate the appropriate
         response to those signals.'
     piece_sha256: 33a8b800345bc2a4672d91c19cf4409e58c17002f0d1953342ee3bb1bce8a85d
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d. Also Chapter
-      4 part c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part c. Section
+      group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_barrier:
@@ -1678,8 +1678,8 @@ labels:
       quote: '[BF] FIRE BARRIER. A fire-resistance-rated wall assembly of materials designed to restrict the spread of fire
         in which continuity is maintained.'
     piece_sha256: 0fdf51e0e90fb73c5088b18d8fea6b28c41e3d12f5ce5da5db4fa9121343d10b
-    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9e. Also Chapter
-      4 part a.
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Also Chapter 4 part a. Section
+      group 9e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_code_of_new_york_state:
@@ -1695,8 +1695,8 @@ labels:
       quote: '[NY] FIRE CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Fire Code of New York State,”
         published by the International Code Council, Inc. (publication date July 2025).'
     piece_sha256: 6ca85564ff64eba1774763ca817dcf5bfebbea184e7de2a6dd9deda0a6028cb2
-    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 6e. Also Chapter
-      4 part c.
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Also Chapter 4 part c. Section
+      group 6e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_command_center:
@@ -1712,8 +1712,8 @@ labels:
       quote: '[F] FIRE COMMAND CENTER. The principal attended or unattended location where the status of detection, alarm
         communications and control systems is displayed, and from which the systems can be manually controlled.'
     piece_sha256: 5c6af425e103a36ddcd19bcc03ac123db6dc7b9109b5ee76c18f67d31231ff1d
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d. Also Chapter
-      4 part b.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part b. Section
+      group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_damper:
@@ -1746,8 +1746,8 @@ labels:
       - 16
       quote: '[F] FIRE DETECTOR, AUTOMATIC. A device designed to detect the presence of a fire signature and to initiate action.'
     piece_sha256: 56399eeb88bc608dba2e29d9dc18fb3d35c48dd4a9b2215857bb69e2c3e0ddf5
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d. Also Chapter
-      4 part b.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part b. Section
+      group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_door:
@@ -1896,8 +1896,8 @@ labels:
         excessive flames to confine a fire as determined by tests specified in Section 716. Ratings are stated in hours or
         minutes.'
     piece_sha256: 391aeee61c9f4c5d3f39243d93a9752da2fc697865cf0d666a18d3910c38d441
-    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9e. Also Chapter
-      4 part a.
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Also Chapter 4 part a. Section
+      group 9e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_resistance:
@@ -2331,8 +2331,8 @@ labels:
       quote: '[BE] GUARD. A building component or a system of building components located at or near the open sides of elevated
         walking surfaces that minimizes the possibility of a fall from the walking surface to a lower level.'
     piece_sha256: 17648a9702f155e72d2fc9951e2a7a1eb0e4ed60fc664b0878b3f22d476a2f0b
-    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9a. Also Chapter
-      4 part d.
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Also Chapter 4 part d. Section
+      group 9a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:guestroom:
@@ -2509,8 +2509,8 @@ labels:
       quote: '[BG] HIGH-RISE BUILDING. A building with an occupied floor or occupiable roof located more than 75 feet (22
         860 mm) above the lowest level of fire department vehicle access.'
     piece_sha256: 2c9ef8382ec9fe199f1c24477190a8ec25ff7ff8eb1a001e4082a7060454b079
-    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f. Also Chapter
-      4 part b.
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Also Chapter 4 part b. Section
+      group 9f.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:horizontal_assembly:
@@ -2526,8 +2526,8 @@ labels:
       quote: '[BF] HORIZONTAL ASSEMBLY. A fire-resistance-rated floor or roof assembly of materials designed to restrict the
         spread of fire in which continuity is maintained.'
     piece_sha256: cceab85c133ff9e85ddb883279e03c330ced56f29f2a99c1b30d1c055244ad50
-    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9e. Also Chapter
-      4 part a.
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Also Chapter 4 part a. Section
+      group 9e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:horizontal_exit:
@@ -2887,8 +2887,8 @@ labels:
       quote: '[F] LIFE SAFETY SYSTEMS. Systems, devices and equipment that enhance or facilitate evacuation, smoke control,
         compartmentation and isolation.'
     piece_sha256: 3a0a9f98d28757e913e2785beee8f90da8fd0dd025e71af1e90ff2d6db96e096
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d. Also Chapter
-      4 part c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part c. Section
+      group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:limited_verbal_or_physical_assistance:
@@ -3098,8 +3098,8 @@ labels:
       - 13
       quote: '[F] MANUAL FIRE ALARM BOX. A manually operated device used to initiate an alarm signal.'
     piece_sha256: 80f811ad2e2cfb6de1214be42ac372f93ab2d10db0e9044cbba3e0b82ca9fbdc
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d. Also Chapter
-      4 part b.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part b. Section
+      group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:manufacturer_s_designation:
@@ -3561,8 +3561,8 @@ labels:
       quote: '[NY] PART 1203. The regulations set forth in 19 NYCRR Part 1203 (“Uniform Code: Minimum Standards for Administration
         and Enforce- ment”), as currently in effect and as hereafter amended from time to time.'
     piece_sha256: f9624053f96eb38c56331ec59311ae1b985c9a157e4d53f92e96b097f91d816d
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c. Also Chapter
-      4 part c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part c. Section
+      group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:part_1203_compliant_code_enforcement_program:
@@ -3578,8 +3578,8 @@ labels:
       quote: '[NY] PART 1203—COMPLIANT CODE ENFORCEMENT PROGRAM. A code enforcement program that includes the features required
         by Part 1203 and satisfies the requirements of Part 1203.'
     piece_sha256: 7f0151ea42cfca7168e2fa71f800fbc78d90a2cc0ad36d2ac0316c30713b2efe
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c. Also Chapter
-      4 part c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part c. Section
+      group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:penthouse:
@@ -3614,8 +3614,8 @@ labels:
         the authority having jurisdiction’s Code Enforcement Program or a Part 1203—Compliant Code Enforcement Program to
         conduct a specified activity or to use a specified category of building.'
     piece_sha256: ff84d2b1f3ce08aa62753821db364b0eac9543293da4052c88c4806a476013d6
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c. Also Chapter
-      4 part c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part c. Section
+      group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:person:
@@ -3647,8 +3647,8 @@ labels:
       quote: '[BE] PHOTOLUMINESCENT. Having the property of emitting light that continues for a length of time after excitation
         by visible or invis- ible light has been removed.'
     piece_sha256: 31999a6fbe9ee162da05191a992082d5219cf8594b7cabf2cbfb54e4d31048df
-    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9b. Also Chapter
-      4 part f.
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Also Chapter 4 part f. Section
+      group 9b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:place_of_religious_worship:
@@ -4151,8 +4151,8 @@ labels:
       quote: '[BF] SMOKE BARRIER. A continuous membrane, either vertical or horizontal, such as a wall, floor or ceiling assembly,
         that is designed and constructed to restrict the movement of smoke.'
     piece_sha256: 2362bf8f9765ea07a0781a2aa97a6e85dcd42105b1868731ffc1abb41c737ea4
-    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9c. Also Chapter
-      4 part b.
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Also Chapter 4 part b. Section
+      group 9c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:smoke_compartment:
@@ -4234,8 +4234,8 @@ labels:
       quote: '[BF] SMOKEPROOF ENCLOSURE. An exit stairway or ramp designed and constructed so that the movement of the products
         of combustion produced by a fire occurring in any part of the building into the enclosure is limited.'
     piece_sha256: 60842050c2e0685bc0f261f4c58e1d9111e3b9edb353871267404accd305cb06
-    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9e. Also Chapter
-      4 part b.
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Also Chapter 4 part b. Section
+      group 9e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:smoke_protected_assembly_seating:
@@ -4522,8 +4522,8 @@ labels:
         condition and its restoration to normal of a fire protection or life safety system, or a need for action in connection
         with guard tours, fire suppression systems or equipment or maintenance features of related systems.'
     piece_sha256: 6e0e706319eef21505ea4e93da0244898cabec2aaf1e70dc6f478d0b40e6833f
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d. Also Chapter
-      4 part c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Also Chapter 4 part c. Section
+      group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:swimming_pool:
