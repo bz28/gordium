@@ -19,6 +19,9 @@ NFPA13 = {S1: True, S2: False, "sprinklered_903_3_1_3": False}
 NONE = {S1: False, S2: False, "sprinklered_903_3_1_3": False}
 STATED = {"egress_balcony_increase_taken": False, "assembly_fixed_seating": False, "special_egress_spaces": False,
           "building_has_atrium": False, "merchandise_pads": False}
+# Chapter 4 part a: the building holds no covered or open mall (no space with its own exits or travel limit), so
+# 402.8, which governs over Chapter 10 there, can't change these rows (test_ny_building_chapter_4.py walks it)
+NO_MALL = {"special_egress_spaces": False}
 
 # Table 1017.2, p.341: line -> (groups, without a sprinkler system (None: Not Permitted), with one, the rule)
 TABLE_1017_2 = {
@@ -181,7 +184,7 @@ def test_dead_ends_for_every_group_but_i4(ctx, rules):
     for g in groups:
         if g in ("I-4", "mixed"):
             continue
-        given = {"occupancy_group": g}
+        given = {"occupancy_group": g} | NO_MALL
         limit = 50 if g in EXCEPTION_2 else 20
         assert _one(rule, "corridor", {"corridor_dead_end_length": limit, "corridor_dead_end_least_width": 5},
                     given | NFPA13, ctx) == "pass", g
@@ -494,7 +497,7 @@ def test_group_i3_allowed_one_exit_by_its_travel_needs_review_and_a_measured_fai
 
 def test_two_exits_by_table_1006_3_3_and_r3_r4_with_one(ctx, rules):
     r = _story_rule(rules, "B")
-    b = {"occupancy_group": "B"} | NFPA13
+    b = {"occupancy_group": "B"} | NFPA13 | NO_MALL
     assert _one(r, "story", _story(FIRST, 500, 300, exits=2), b, ctx) == "pass"
     assert _one(r, "story", _story(FIRST, 500.5, 300, exits=2), b, ctx) == "fail"           # 501-1,000: three
     assert _one(r, "story", _story(FIRST, 1000, 300, exits=3), b, ctx) == "pass"
@@ -705,7 +708,7 @@ def test_table_1020_3_every_row_passes_at_its_width_and_not_just_short_of_it(ctx
     lines 23-24; stretcher traffic in an ambulatory care facility, stated)."""
     r = rules["general.bc_table_1020_3_corridor_width"]
     assert all(_cites(r, 344, line) for line in TABLE_1020_3)
-    no_amb = {"ambulatory_care_facility": False}
+    no_amb = {"ambulatory_care_facility": False} | NO_MALL
     for g in ONE_GROUP:
         given = {"occupancy_group": g} | no_amb
         if g == "I-2":
@@ -729,7 +732,7 @@ def test_table_1020_3_every_row_passes_at_its_width_and_not_just_short_of_it(ctx
                 _one(r, "corridor", _corridor(TABLE_1020_3[31] - 0.5, 100), given, ctx)) == want, g
     # line 32: stretcher traffic in an ambulatory care facility (Group B, 304.1), stated or not ruled out
     for amb in ({"ambulatory_care_facility": True}, {}):
-        b = {"occupancy_group": "B"} | amb
+        b = {"occupancy_group": "B"} | amb | NO_MALL
         assert _one(r, "corridor", _corridor(TABLE_1020_3[32], 60), b, ctx) == "pass"
         assert _one(r, "corridor", _corridor(TABLE_1020_3[32] - 0.5, 60), b, ctx) == "needs_review"
     # a building of two or more groups, or one whose group isn't stated, never passes
@@ -745,12 +748,12 @@ def test_a_corridors_capacity_is_1005_3_2s_factor_at_its_limit_and_just_past_it(
     own factors) needs review short of it. Was 4a's flag."""
     r = rules["general.bc_1020_3_corridor_capacity"]
     assert r["kind"] == "rule" and _cites(r, 314, 15) and _cites(r, 314, 20) and _cites(r, 344, 21)
-    plain = {S1: False, S2: False, "emergency_voice_alarm_system": False, "assembly_fixed_seating": False}
+    plain = {S1: False, S2: False, "emergency_voice_alarm_system": False, "assembly_fixed_seating": False} | NO_MALL
     for g in ("B", "I-2", "H-3", "mixed"):
         given = {"occupancy_group": g} | plain
         assert _one(r, "corridor", _corridor(44, 220), given, ctx) == "pass", g      # 0.2 x 220 = 44
         assert _one(r, "corridor", _corridor(44, 220.5), given, ctx) == "fail", g
-    voice = {S1: True, S2: False, "emergency_voice_alarm_system": True, "assembly_fixed_seating": False}
+    voice = {S1: True, S2: False, "emergency_voice_alarm_system": True, "assembly_fixed_seating": False} | NO_MALL
     # review round 1 of group 5a: a building of two or more groups is each portion's (1004.4): between the two
     # factors, a person's check, never a fail on 0.2 alone
     for g, want in (("B", "pass"), ("R-2", "pass"), ("I-2", "fail"), ("H-3", "fail"), ("mixed", "needs_review")):
@@ -804,7 +807,7 @@ def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ct
         many = (over or 0) + 0.5                                   # just past the row's load (any load for "All")
         for g in groups:
             for system, need in ((NFPA13, with_), (NONE, without)):
-                given = {"occupancy_group": g} | system | NO_UNITS
+                given = {"occupancy_group": g} | system | NO_UNITS | NO_MALL
                 if need is None:                                  # Not Permitted
                     assert _one(r, "corridor", _rating(many, 5), given, ctx) == "fail", (g, line)
                     continue
@@ -816,10 +819,10 @@ def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ct
                 else:
                     assert _one(r, "corridor", _rating(many), given, ctx) == "pass", (g, line)    # 0: none asked
             if over is not None:                                  # at the row's load: no rating asked
-                assert _one(r, "corridor", _rating(over), {"occupancy_group": g} | NONE | NO_UNITS, ctx) == "pass", g
+                assert _one(r, "corridor", _rating(over), {"occupancy_group": g} | NONE | NO_UNITS | NO_MALL, ctx) == "pass", g
     # note d (p.344 lines 17-18): Group R-3 and R-4 with 903.3.1.3 (NFPA 13D), 1 hour; R-1 and R-2 have no such cell
     r = rules["general.bc_table_1020_2_r"]
-    d13 = {S1: False, S2: False, "sprinklered_903_3_1_3": True} | NO_UNITS
+    d13 = {S1: False, S2: False, "sprinklered_903_3_1_3": True} | NO_UNITS | NO_MALL
     assert _cites(r, 344, 17)
     assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": "R-3"} | d13, ctx) == "pass"
     assert _one(r, "corridor", _rating(11, 0.75), {"occupancy_group": "R-3"} | d13, ctx) == "fail"
@@ -830,7 +833,7 @@ def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ct
     assert _one(r, "corridor", _rating(11, 0.75), {"occupancy_group": "R-4"} | d13, ctx) == "fail"
     assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": "R-2"} | d13, ctx) == "fail"
     # note c's 903.3.1.2 (NFPA 13R): Group R's 0.5 hour; elsewhere "where allowed", a person's check
-    s13r = {S1: False, S2: True, "sprinklered_903_3_1_3": False} | NO_UNITS
+    s13r = {S1: False, S2: True, "sprinklered_903_3_1_3": False} | NO_UNITS | NO_MALL
     assert _one(r, "corridor", _rating(11, 0.5), {"occupancy_group": "R-2"} | s13r, ctx) == "pass"
     for rid, g in (("h1_h2_h3", "H-1"), ("i1_i3", "I-1"), ("i2", "I-2"), ("i4", "I-4"), ("a_b_e_f_m_s_u", "M")):
         assert _one(rules[f"general.bc_table_1020_2_{rid}"], "corridor", _rating(31, 0.5),
