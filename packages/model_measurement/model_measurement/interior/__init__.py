@@ -1,7 +1,7 @@
 """Measuring the inside of a house for egress (escape openings, stairs, guards, the exit door), from a host-neutral
 interior description. Plain code written by engineers, no AI (principle 6): same description, same numbers.
 
-    measure(description) -> {"parts": {kind: [part, …] | None}, "problems": [...], "not_checked": [...], …}
+    measure(description, whole=None, stated_stories=None) -> {"parts": {kind: [part, …] | None}, "problems": [...], "not_checked": [...], …}
 
 `parts` is exactly what rule_format.parts.rows reads: each part {"id", "name", "within"?, "measures"}, measures
 named as rule_format/parts.yaml names them, in inches and square feet. A kind not given in the description is None
@@ -89,6 +89,13 @@ def _given(description: dict, kind: str, problems: list):
 
 
 SAME_FLOOR = 0.5      # in: rooms' floors this close are one floor (a threshold's change in level, never a step)
+LANDING_STEP = 8.25   # in: RCNYS R318.3.2, the most a door's outside landing may be below it; a floor higher above
+#                       every ground given is reached by a stair or a ramp (or its own way out at grade, not shown)
+
+
+def _level_id(value):
+    """A level's id as the description gives it: text with something in it, or a whole number (never a yes/no)."""
+    return value if isinstance(value, str) and value.strip() or type(value) is int else None
 
 
 def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
@@ -99,19 +106,27 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
       Code's description and the Revit add-in place them), named from `levels` where it names them;
     - its rooms' floors are more than 1/2 in apart (`floor_elevation`, as a house's gives them; a change of floor
       that size is a step, or a ramp), or a room's floor is given but can't be read (it may be on another floor);
-    - the check states two or more stories (`stated_stories`: the architect's count above grade plane, or the place's).
+    - every room's floor is more than 8 1/4 in above the highest ground given outside the openings (`ground_outside`:
+      only an upper floor drawn, or a floor a landing's step can't reach the ground from, R318.3.2);
+    - the check gives two or more stories (`stated_stories`: a count, or (count, whose words with {n}),
+      design_checker.egress._stated_stories).
     Rooms with neither level nor floor given show nothing against it (not given is never a second floor)."""
-    if type(stated_stories) in (int, float) and stated_stories >= 2:
-        return Stop("stairs_none_several_floors", what=f"the building is stated to have {stated_stories:g} "
-                                                       "stories").reason
+    count, said = stated_stories if isinstance(stated_stories, tuple) else \
+        (stated_stories, "the check gives the building {n} stories")
+    if type(count) in (int, float) and math.isfinite(count) and count >= 2:
+        return Stop("stairs_none_several_floors", what=said.format(n=f"{count:g}")).reason
     if not isinstance(whole, dict):
         return None
     rooms = [r for r in whole.get("rooms") if isinstance(r, dict)] if isinstance(whole.get("rooms"), list) else []
-    spaces = [u for u in whole.get("unknown_spaces") if isinstance(u, dict)]         if isinstance(whole.get("unknown_spaces"), list) else []
-    levels = {r["level"] for r in rooms + spaces if isinstance(r.get("level"), str) and r["level"].strip()
-              or type(r.get("level")) is int}               # an id as text or a whole number (never a yes/no)
+    spaces = [u for u in whole.get("unknown_spaces") if isinstance(u, dict)] \
+        if isinstance(whole.get("unknown_spaces"), list) else []
+    on_rooms = {_level_id(r.get("level")) for r in rooms} - {None}
+    levels = on_rooms | ({_level_id(u.get("level")) for u in spaces} - {None})
     if len(levels) > 1:
-        listed = {lv.get("id"): lv for lv in whole.get("levels") or [] if isinstance(lv, dict)}             if isinstance(whole.get("levels"), list) else {}
+        listed = {}
+        for lv in whole.get("levels") if isinstance(whole.get("levels"), list) else []:
+            if isinstance(lv, dict) and _level_id(lv.get("id")) is not None:
+                listed[lv["id"]] = lv
 
         def named(level_id):
             lv = listed.get(level_id) or {}
@@ -120,7 +135,8 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
             return (0, z, name) if type(z) in (int, float) and math.isfinite(z) else (1, 0, name)
         order = [n for _, _, n in sorted(named(lv) for lv in levels)]
         shown = " and ".join(order) if len(order) <= 3 else ", ".join(order[:3]) + f" and {len(order) - 3} more"
-        return Stop("stairs_none_several_floors", what=f"its rooms are on {len(order)} levels ({shown})").reason
+        who = "its rooms are" if levels == on_rooms else "its rooms, and enclosed spaces with no room drawn, are"
+        return Stop("stairs_none_several_floors", what=f"{who} on {len(order)} levels ({shown})").reason
     floors = []
     for r in rooms:
         if r.get("floor_elevation") is None:
@@ -136,7 +152,27 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
             return Stop("stairs_none_several_floors", what=f"its rooms' floors are at different heights ({low_name}'s "
                                                            f"at {tidy(low):g} in, {high_name}'s at {tidy(high):g} "
                                                            "in)").reason
+        ground = _highest_ground(whole, reader)
+        if ground is not None and low - ground > LANDING_STEP:
+            return Stop("stairs_none_several_floors", what=f"its lowest floor ({low_name}'s, at {tidy(low):g} in) is "
+                                                           f"more than 8 1/4 in above the ground outside its openings "
+                                                           f"(at most {tidy(ground):g} in)").reason
     return None
+
+
+def _highest_ground(whole: dict, reader):
+    """The highest ground given outside any opening (`ground_outside`, one value or a list), in inches; None where
+    none is given or any given can't be read (then nothing is compared: the openings' own rules say so)."""
+    got = []
+    for o in whole.get("openings") if isinstance(whole.get("openings"), list) else []:
+        if not isinstance(o, dict) or o.get("ground_outside") is None:
+            continue
+        for g in o["ground_outside"] if isinstance(o["ground_outside"], list) else [o["ground_outside"]]:
+            try:
+                got.append(reader.length(g, "the ground outside an opening"))
+            except Stop:
+                return None
+    return max(got) if got else None
 
 
 def _unknown_spaces(description: dict, problems: list):
@@ -190,7 +226,8 @@ def measure(description, whole=None, stated_stories=None) -> dict:
     """The description measured (the module's account). An empty list of stairs is read against the floors
     (_stairs_against_floors): those of `whole`, where the description given isn't the whole one (the Building
     Code's stairs and guards are measured on a description with its rooms left out; None: the description itself),
-    and `stated_stories`, the stories the check states (None: none stated)."""
+    and `stated_stories`, the stories the check gives (a count, or (count, whose words with {n}); None: none).
+    """
     out = {"format": MEASURED_FORMAT, "units": {"length": "in", "area": "sf"},
            "parts": {k: None for k in KINDS}, "problems": [], "not_checked": [], "has_none": {}}
     problems = out["problems"]
@@ -255,6 +292,7 @@ def measure(description, whole=None, stated_stories=None) -> dict:
         against = _stairs_against_floors(description if whole is None else whole, reader, stated_stories)
         if against:
             problems.append(against)
+            out.setdefault("refused", {})["stair"] = against     # the rows say "no stairs" wasn't taken, and why
             stairs = None
     flights = {}
     if stairs is not None:

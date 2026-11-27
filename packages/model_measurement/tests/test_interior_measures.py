@@ -2323,6 +2323,26 @@ def test_no_stairs_is_taken_on_one_floor_and_never_beside_rooms_on_two():
     assert measure(d)["parts"]["stair"] == []
 
 
+def test_no_stairs_beside_floors_a_landings_step_cant_reach_the_ground_from():
+    """Round 2 (skeptic B): a house drawn with only its upper floor (every room 10 ft above every ground given
+    outside its openings) keeps no stairs no longer. A floor more than 8 1/4 in above the highest ground given (RCNYS
+    R318.3.2: the most a door's outside landing may be below it) is reached by a stair or a ramp, or its own way out
+    at grade, none of which the model shows; within 8 1/4 in (a slab a step up), or with no ground given, it stands."""
+    def at(floor, ground):
+        d = _no_stairs()
+        d["rooms"][0]["floor_elevation"] = floor
+        for o in d["openings"]:
+            o["ground_outside"] = ground
+        return d
+    assert measure(at(8.25, 0))["parts"]["stair"] == []
+    assert measure(at(120, 112))["parts"]["stair"] == []                     # the ground near the floor: a step
+    assert "its lowest floor (Bedroom's, at 120 in) is more than 8 1/4 in above the ground outside its openings " \
+           "(at most 0 in)" in _refused(measure(at(120, 0)))
+    assert "(at most 3 in)" in _refused(measure(at(12, [0, 3])))
+    assert measure(at(120, None))["parts"]["stair"] == []                    # no ground given: nothing compared
+    assert measure(at(120, "x"))["parts"]["stair"] == []                     # unreadable: the opening's rules say so
+
+
 def test_no_stairs_beside_rooms_on_two_levels_as_the_building_code_places_them():
     """A description that places its rooms (or enclosed spaces with no room drawn) on levels: two levels refuse
     "no stairs", named from `levels` in height order where it names them (skeptic A: never Revit's ids); rooms all
@@ -2339,7 +2359,11 @@ def test_no_stairs_beside_rooms_on_two_levels_as_the_building_code_places_them()
     assert "(Level 1 and Level 2)" in _refused(measure(d, whole=whole("u2", "u1", levels=named)))
     assert "L1, L2, L3 and 2 more" in _refused(measure(d, whole=whole("L1", "L2", "L3", "L4", "L5")))
     upstairs = whole("L1", unknown_spaces=[{"id": "a2", "level": "L2"}])          # skeptic A: an upper floor undrawn
-    assert "(L1 and L2)" in _refused(measure(d, whole=upstairs))
+    assert "its rooms, and enclosed spaces with no room drawn, are on 2 levels (L1 and L2)" in \
+        _refused(measure(d, whole=upstairs))
+    odd = [{"id": ["L1"], "name": "x"}, {"id": {"a": 1}}, {"id": "L2", "name": "Level 2"}, "x"]   # round 2: never a crash
+    assert "(L1 and Level 2)" in _refused(measure(d, whole=whole("L1", "L2", levels=odd)))
+    assert measure(d, whole=whole("L1", "L2", levels="x"))["parts"]["stair"] is None
     assert measure(d, whole="x")["parts"]["stair"] == []                         # rooms that can't be read
     d2 = base()                                         # stairs given (not none) are measured as before
     d2["rooms"].append({"id": "k", "name": "Kitchen", "sleeping": False, "floor_elevation": 108})
@@ -2351,7 +2375,12 @@ def test_no_stairs_beside_two_stories_stated_and_a_guard_on_a_stair_says_why():
     house stated as 3 stories, drawn with its ground floor alone); one stated keeps it. A guard naming a stair
     where "none" was refused says the refusal, never that the model didn't say these are all the stairs."""
     assert measure(_no_stairs(), stated_stories=1)["parts"]["stair"] == []
-    assert "the building is stated to have 3 stories" in _refused(measure(_no_stairs(), stated_stories=3))
+    for odd in (float("nan"), float("inf"), True, "3", None, (1.99, "{n}")):
+        assert measure(_no_stairs(), stated_stories=odd)["parts"]["stair"] in ([], None), odd
+    assert measure(_no_stairs(), stated_stories=float("nan"))["parts"]["stair"] == []
+    assert "the check gives the building 3 stories" in _refused(measure(_no_stairs(), stated_stories=3))
+    said = (2, "the architect states {n} stories above grade plane")
+    assert "yet the architect states 2 stories above grade plane:" in _refused(measure(_no_stairs(), stated_stories=said))
     d = _no_stairs(kitchen=108)
     d["guards"] = [{"id": "g", "name": "Stair guard", "stair": "s", "top_line": [[0, 36, 41], [30, 36, 64]]}]
     why = _refused(measure(d))

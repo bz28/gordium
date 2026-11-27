@@ -13,7 +13,7 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
 endobj
 5 0 obj
-<< /Length 29058 >>
+<< /Length 29088 >>
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (CODE ANALYSIS: EGRESS) Tj ET
 BT /F2 7.5 Tf 0.54 0.33 0 rg 68 728.4 Td (Egress result: NEEDS REVIEW) Tj ET
@@ -93,7 +93,7 @@ BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 545.9 Td (R318.7.5.2,) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 536.9 Td (R318.7.6,) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 527.9 Td (R318.7.8,) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 518.9 Td (R318.7.11.1) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 599.9 Td (to give: the stairs weren't sent from the model) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 599.9 Td (to give: the model's "no stairs" isn't taken: the interior drawing says why) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 68 514.9 m 994 514.9 l S
 0.3 w [] 0 d
@@ -124,10 +124,10 @@ BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 505.9 Td () Tj ET
 1 0.95 0.84 rg 602.49 514.9 m 684.2 514.9 l 684.2 474.9 l 602.49 474.9 l h f
 BT /F2 7 Tf 0.54 0.33 0 rg 605.49 505.9 Td (NEEDS REVIEW) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 505.9 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 505.9 Td (The interior drawing: the model says there are no stairs, yet the building is) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 496.9 Td (stated to have 2 stories: a stair or a ramp joins its floors, or each floor has its) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 487.9 Td (own way out at grade, which the model doesn't show, so 'no stairs' isn't taken) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 478.9 Td (and the stair rules need review) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 505.9 Td (The interior drawing: the model says there are no stairs, yet the architect gives) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 496.9 Td (the building 2 stories: a stair or a ramp joins its floors, or each floor has its own) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 487.9 Td (way out at grade, which the model doesn't show, so 'no stairs' isn't taken and) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 478.9 Td (the stair rules need review) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 68 474.9 m 994 474.9 l S
 0.3 w [] 0 d
@@ -1180,16 +1180,16 @@ xref
 0000000141 00000 n 
 0000000238 00000 n 
 0000000340 00000 n 
-0000029450 00000 n 
-0000029587 00000 n 
-0000040853 00000 n 
-0000040990 00000 n 
-0000048691 00000 n 
-0000048829 00000 n 
-0000058728 00000 n 
-0000058867 00000 n 
+0000029480 00000 n 
+0000029617 00000 n 
+0000040883 00000 n 
+0000041020 00000 n 
+0000048721 00000 n 
+0000048859 00000 n 
+0000058758 00000 n 
+0000058897 00000 n 
 trailer
 << /Size 14 /Root 1 0 R /Info 13 0 R >>
 startxref
-58977
+59007
 %%EOF

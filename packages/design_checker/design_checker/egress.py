@@ -321,14 +321,20 @@ def _reads_interior(law: dict) -> bool:
 
 
 def _stated_stories(interior, values: dict | None):
-    """The most stories the check states for the building (the architect's count above grade plane, in the check's
-    values or the description's `building` block, or the place's own count, Ithaca's `stories`), or None: "no stairs"
-    beside two or more is a contradiction (model_measurement.interior._stairs_against_floors)."""
+    """(the most stories the check gives the building, in whose words) or None: "no stairs" beside two or more is a
+    contradiction (model_measurement.interior._stairs_against_floors). Each count where it is a number: the
+    architect's count above grade plane (the check's values, or the description's `building` block), the count the
+    architect typed for the place (code_scope.STORIES_TYPED, check.py: kept even where the place's count is an open
+    question) and the place's own count (Ithaca's `stories`, as drawn or typed)."""
     block = interior.get("building") if isinstance(interior, dict) else None
-    given = [(values or {}).get("stories_above_grade_plane"), (values or {}).get("stories"),
-             block.get("stories_above_grade_plane") if isinstance(block, dict) else None]
-    counts = [v for v in given if type(v) in (int, float) and math.isfinite(v)]
-    return max(counts) if counts else None
+    values = values if isinstance(values, dict) else {}
+    above = "the architect states {n} stories above grade plane"
+    given = [(values.get("stories_above_grade_plane"), above),
+             (block.get("stories_above_grade_plane") if isinstance(block, dict) else None, above),
+             (values.get(code_scope.STORIES_TYPED), "the architect gives the building {n} stories"),
+             (values.get("stories"), "the building's stories, as the place counts them (drawn or typed), are {n}")]
+    counts = [(v, words) for v, words in given if type(v) in (int, float) and math.isfinite(v)]
+    return max(counts, key=lambda c: c[0]) if counts else None
 
 
 def _stairs_and_guards(interior, stated_stories=None) -> dict:
@@ -342,7 +348,8 @@ def _stairs_and_guards(interior, stated_stories=None) -> dict:
         keep = {k: interior[k] for k in ("format", "units", "stairs", "guards") if k in interior}
         interior = {**keep, "rooms": [], "openings": [], "doors": []}
     got = measure_interior(interior, whole=whole, stated_stories=stated_stories)
-    return {"parts": {k: got["parts"].get(k) for k in BUILDING_INTERIOR_KINDS}, "problems": got["problems"]}
+    return {"parts": {k: got["parts"].get(k) for k in BUILDING_INTERIOR_KINDS}, "problems": got["problems"],
+            "refused": got.get("refused") or {}}
 
 
 def _measured(law: dict, interior, readings: dict, ground: dict | None = None, values: dict | None = None) -> dict:
@@ -364,11 +371,12 @@ def _measured(law: dict, interior, readings: dict, ground: dict | None = None, v
                 stated = {**{k: v for k, v in (values or {}).items() if k in code_scope.FACTS},
                           **(block if isinstance(block, dict) else {})}       # as _law_values merges them
                 occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors), block, stated)
-            inside = _stairs_and_guards(interior, _stated_stories(interior, values)) if kind == ROUTES_AND_INTERIOR                 else {"parts": {}, "problems": []}
+            inside = _stairs_and_guards(interior, _stated_stories(interior, values)) if kind == ROUTES_AND_INTERIOR \
+                else {"parts": {}, "problems": []}
             problems = [str(p) for p in got["problems"]]
             problems += [str(p) for p in inside["problems"] if str(p) not in problems]
             readings[kind] = {"parts": {**got["parts"], **inside["parts"]}, "problems": problems,
-                              "not_checked": [], "has_none": {}}
+                              "not_checked": [], "has_none": {}, "refused": inside.get("refused") or {}}
         else:
             readings[kind] = measure_interior(interior, stated_stories=_stated_stories(interior, values))
     return readings[kind]
@@ -445,7 +453,7 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
         return [_own_item(law, f"{law['short'].lower()}.rules", f"{law['short']} rules", present.REVIEW,
                           words.format(title=law["title"], why=why))]
     claims = measured.get("has_none") or {}
-    got = each_part.check_parts(law["rules"], measured["parts"], values, allowed, claims)
+    got = each_part.check_parts(law["rules"], measured["parts"], values, allowed, claims, measured.get("refused"))
     rows += got["rows"]
     for key, answer in got["results"].items():   # one rule id in two laws: the more cautious answer, never kinder
         results[key] = part_rules.rule_result([{"outcome": answer}] + ([{"outcome": results[key]}]

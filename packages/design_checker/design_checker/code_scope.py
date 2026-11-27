@@ -170,6 +170,9 @@ ASSUMED = (("care_facility", "no one outside the household receives care here"),
 COUNTS = ("dwelling_units", "attached_units_in_building", "adus_on_parcel", "rooms_let_for_profit", "stories")
 YES_NO = ("accessory_dwelling_unit", "adu_detached", "home_occupation")
 # where check.py found Ithaca's stories count read from the drawing with nothing drawn below the ground
+# the check's value: the place's story count as the architect typed it, kept even where the place's count is an
+# open question (check.py _with_stories_bound): "no stairs" beside two or more is refused (egress._stated_stories)
+STORIES_TYPED = "stories_typed"
 STORIES_DRAWN = "stories_from_drawing"
 # how that count came: "read" (counted from Gordium's floor blocks or a drawing that allows one count) or "typed"
 # (the architect's Gordium: Stories, kept because it lies within what the drawing allows), for the words only

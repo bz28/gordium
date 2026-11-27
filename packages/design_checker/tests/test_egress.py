@@ -27,7 +27,7 @@ import egress_house  # noqa: E402
 from design_checker.check import check_site, summary
 from rule_format import published
 from rule_format.place import place
-from rule_format.rulebook import REPO, building_code_rulebook, load
+from rule_format.rulebook import REPO, Context, building_code_rulebook, load
 
 sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
 from test_measure import FACTS, box, lot  # noqa: E402
@@ -499,10 +499,17 @@ def test_no_stairs_beside_rooms_on_two_floors_leaves_every_stair_row_to_review()
     assert any(p.startswith("the model says there are no stairs, yet its rooms' floors are at different heights")
                for p in got["interior"]["problems"]), got["interior"]["problems"]
     assert any("no stairs, yet" in (i.get("reason") or "") for i in got["items"])       # said to the architect
+    # round 2 (skeptic B): each stair row says the model's "no stairs" wasn't taken, never that it wasn't sent
+    stair_items = [i for i in got["items"] if i.get("rule") in stair_rules]
+    assert stair_items and all(each_part.NOT_TAKEN in " ".join((i.get("open") or {}).get("inputs") or [])
+                               for i in stair_items), stair_items[0].get("open")
+    assert not any(each_part.NOT_SENT in " ".join((i.get("open") or {}).get("inputs") or []) for i in stair_items)
+    asks = {c["words"] for i in stair_items for c in i.get("causes") or []}
+    assert 'the model\'s "no stairs" isn\'t taken: the interior drawing says why' in asks, asks
     # skeptic A, round 1: a house stated as 3 stories, drawn with its ground floor alone, never sets them aside
     got, stated = results(flat, stories=3)
     assert set(stated.values()) == {"needs_review"}, stated
-    assert any("the building is stated to have 3 stories" in p for p in got["interior"]["problems"])
+    assert any("the architect states 3 stories above grade plane" in p for p in got["interior"]["problems"])
 
 
 def test_the_building_codes_stairs_none_is_read_against_its_rooms_levels():
@@ -521,5 +528,41 @@ def test_the_building_codes_stairs_none_is_read_against_its_rooms_levels():
     undrawn = dict(one, unknown_spaces=[{"id": "u", "level": "L2"}])     # skeptic A/B: an upper floor, no room drawn
     assert egress._stairs_and_guards(undrawn)["parts"]["stair"] is None
     assert egress._stairs_and_guards(one, stated_stories=2)["parts"]["stair"] is None
-    assert egress._stated_stories({"building": {"stories_above_grade_plane": 2}}, {"stories": 1}) == 2
+    above = "the architect states {n} stories above grade plane"
+    assert egress._stated_stories({"building": {"stories_above_grade_plane": 2}}, {"stories": 1}) == (2, above)
     assert egress._stated_stories({}, {"stories": True}) is None                     # a yes/no is no count
+    assert egress._stated_stories(None, None) is None
+    # round 2: the count the architect typed for the place, kept where the place's own count is an open question
+    from design_checker import code_scope
+    typed = egress._stated_stories({}, {code_scope.STORIES_TYPED: 3, "stories": None})
+    assert typed == (3, "the architect gives the building {n} stories")
+    assert egress._stated_stories({}, {"stories": 2})[1].startswith("the building's stories, as the place counts")
+
+
+def test_the_architects_typed_story_count_reaches_egress_whether_or_not_the_place_settles_it():
+    """Review round 2 (skeptic A): Ithaca's count is None wherever its readings disagree or it is refused (a floor
+    block over the ground's, no grade given), so "no stairs" was taken under a typed 3; the typed count now reaches
+    egress on its own (code_scope.STORIES_TYPED), never a guess from the height."""
+    from design_checker import code_scope
+    from design_checker.check import _with_stories_bound
+    got = _with_stories_bound({"stories": None}, {"stories": {"objects": []}}, {"stories": 3})
+    assert got[code_scope.STORIES_TYPED] == 3
+    for odd in ({}, {"stories": "3"}, {"stories": float("nan")}, {"stories": True}):
+        assert code_scope.STORIES_TYPED not in _with_stories_bound({}, {}, odd), odd
+
+
+def test_the_building_codes_stated_stories_reach_its_stairs_through_the_check():
+    """Review round 2 (skeptic A's test gap): the Building Code path passes the check's stated stories to its stairs'
+    measuring (egress._measured), shown among the interior's problems; pinned through egress.check, not the helper."""
+    sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
+    import make_ny_build_data as build
+    desc = build.interior_of()
+    desc["stairs"] = []
+    for r in desc["rooms"] + (desc.get("unknown_spaces") or []):
+        r["level"] = desc["rooms"][0]["level"]                     # every room on one level: only the count tells
+    allowed = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/ithaca_city").allowed()
+    laws = egress.laws("regulations/jurisdictions/new_york/ithaca_city")
+    values = {"use": "multi_family", "stories_above_grade_plane": 2}
+    got = egress.check(laws, desc, values, allowed)
+    assert any("the architect states 2 stories above grade plane" in p for p in got["interior"]["problems"]), \
+        got["interior"]["problems"]
