@@ -355,7 +355,20 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          "1030.6.2.3": (354, 31, 36), "1030.6.3": (354, 37, 41), "1030.6.3.1": (354, 42, 49), "1030.8": (355, 13, 18),
          "1030.8.1": (355, 19, 24), "1030.9": (355, 25, 27), "1030.9.1": (355, 28, 43), "1030.9.2": (355, 44, 47),
          "1030.9.3": (355, 48, 49), "1030.9.4": (355, 50, 51), "1030.9.5": (355, 52, 57), "1030.9.5 (part 2)": (356, 3, 10),
-         "1030.9.6": (356, 11, 14), "1030.9.6.1": (356, 15, 17), "1030.9.7": (356, 18, 20), "1030.9.8": (356, 21, 23)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
+         "1030.9.6": (356, 11, 14), "1030.9.6.1": (356, 15, 17), "1030.9.7": (356, 18, 20), "1030.9.8": (356, 21, 23),
+         # section group 9i: 1030.10 to 1030.17 with Table 1030.13.2.1
+         "1030.10": (356, 24, 24), "1030.10.1": (356, 25, 27), "1030.10.2": (356, 28, 30), "1030.10.2.1": (356, 31, 36),
+         "1030.10.2.2": (356, 37, 39), "1030.10.3": (356, 40, 42), "1030.11": (356, 43, 44), "1030.11.1": (356, 45, 47),
+         "1030.11.2": (356, 48, 50), "1030.12": (356, 51, 53), "1030.12.1": (356, 54, 55), "1030.12.2": (356, 56, 57),
+         "1030.13": (356, 58, 59), "1030.13.1": (357, 3, 9), "1030.13.1.1": (357, 10, 15), "1030.13.1.2": (357, 16, 17),
+         "1030.13.2": (357, 18, 26), "1030.13.2.1": (357, 27, 32), "Table 1030.13.2.1": (357, 33, 49),
+         "1030.13.2.2": (357, 50, 55), "1030.14": (357, 56, 57), "1030.14.1": (358, 3, 6), "1030.14.1.1": (358, 7, 8),
+         "1030.14.1.2": (358, 9, 10), "1030.14.1.3": (358, 11, 13), "1030.14.2": (358, 14, 16),
+         "1030.14.2.1": (358, 17, 18), "1030.14.2.2": (358, 19, 29), "1030.14.2.2.1": (358, 30, 35),
+         "1030.14.2.3": (358, 36, 40), "1030.14.2.4": (358, 41, 41), "1030.15": (358, 42, 58), "1030.16": (359, 3, 13),
+         "1030.16.1": (359, 14, 18), "1030.16.2": (359, 19, 20), "1030.16.3": (359, 21, 24), "1030.16.4": (359, 25, 27),
+         "1030.17": (359, 28, 31), "1030.17.1": (359, 32, 40), "1030.17.2": (359, 41, 46), "1030.17.3": (359, 47, 50),
+         "1030.17.4": (359, 51, 54)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -483,6 +496,14 @@ HANDLERS = {
                  "general.bc_1030_9_8_stairways_connecting_to_vomitories"], "1030.14"),
     "1030.10": (["general.bc_1030_9_7_stairways_connecting_to_stepped_aisles",
                  "general.bc_1030_9_8_stairways_connecting_to_vomitories"], "1030.10"),
+    # section group 9i (1005.1, 1009, 1012.6 to 1012.10.1, 1014, 1015 and 1030.x handled above or brought in)
+    "1011.7.1": ("general.bc_1030_12_1_walking_surface", "1011.7.1"),
+    "1109.2": ("general.bc_1030_14_1_ramped_aisles", "1109.2"),
+    "1011.5.5": ("general.bc_1030_14_2_4_nosing_and_profile", "1011.5.5"),
+    "1011.5.5.3": ("general.bc_1030_14_2_4_nosing_and_profile", "1011.5.5.3"),
+    "1014.4": ("general.bc_1030_16_handrails", "1014.4"),
+    "1607.9.1.2": ("general.bc_1030_16_4_rails", "1607.9.1.2"),
+    "1015.3": ("general.bc_1030_17_1_perimeter_guards", "1015.3"),
 }
 NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
             "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1", "1010.1.2",
@@ -501,7 +522,13 @@ NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.
             "1026.1", "1026.2", "1026.3", "1026.4", "1026.4.1", "1026.4.2", "1026.5", "1027.1", "1027.2", "1027.3", "1027.4", "1027.5", "1027.6", "1028.1", "1028.2", "1028.3", "1028.4", "1028.5", "1029.1", "1029.2", "1029.3",
             "1030.1", "1030.1.1", "1030.1.1.1", "1030.2", "1030.3", "1030.4", "1030.5", "1030.6", "1030.6.1", "1030.6.2",
             "1030.6.2.1", "1030.6.2.2", "1030.6.2.3", "1030.6.3", "1030.6.3.1", "1030.8.1", "1030.9", "1030.9.1",
-            "1030.9.2", "1030.9.3", "1030.9.4", "1030.9.5", "1030.9.6", "1030.9.6.1", "1030.9.7", "1030.9.8"}          # the piece naming itself
+            "1030.9.2", "1030.9.3", "1030.9.4", "1030.9.5", "1030.9.6", "1030.9.6.1", "1030.9.7", "1030.9.8",
+            "1030.10", "1030.10.1", "1030.10.2", "1030.10.2.1", "1030.10.2.2", "1030.10.3", "1030.11", "1030.11.1",
+            "1030.11.2", "1030.12", "1030.12.1", "1030.12.2", "1030.13", "1030.13.1", "1030.13.1.1", "1030.13.1.2",
+            "1030.13.2", "1030.13.2.1", "1030.13.2.2", "1030.14", "1030.14.1", "1030.14.1.1", "1030.14.1.2",
+            "1030.14.1.3", "1030.14.2", "1030.14.2.1", "1030.14.2.2", "1030.14.2.2.1", "1030.14.2.3", "1030.14.2.4",
+            "1030.15", "1030.16", "1030.16.1", "1030.16.2", "1030.16.3", "1030.16.4", "1030.17", "1030.17.1",
+            "1030.17.2", "1030.17.3", "1030.17.4"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
@@ -1624,7 +1651,7 @@ def test_a_flags_label_reason_is_its_shown_reason(rules):
         assert labels[piece]["label"] == "flag", (rid, piece)
         assert " ".join(labels[piece]["reason"].split()) == " ".join(r["examples"][0]["note"].split()), rid
         n += 1
-    assert n == 26 + 24 + 18 + 26          # section groups 9e, 9f, 9g and 9h (with 1030.8's, 2026-11-23)
+    assert n == 26 + 24 + 18 + 26 + 37     # section groups 9e, 9f, 9g, 9h (with 1030.8's, 2026-11-23) and 9i
 
 
 def test_every_up_to_limit_in_a_section_group_9e_reason_is_a_maximum_in_the_book(rules):
@@ -1833,6 +1860,44 @@ HIDDEN_1030 = {
     "general.bc_1030_9_6_1_assembly_aisle_obstructions": NO_ASSEMBLY,
     "general.bc_1030_9_7_stairways_connecting_to_stepped_aisles": NO_ASSEMBLY,
     "general.bc_1030_9_8_stairways_connecting_to_vomitories": NO_ASSEMBLY,
+    # section group 9i: 1030.10 to 1030.17 and Table 1030.13.2.1, each for a room or space used for assembly purposes
+    "general.bc_1030_10_1_transitions_keeping_stepped_aisle_dimensions": NO_ASSEMBLY,
+    "general.bc_1030_10_2_1_straight_run_transitions": NO_ASSEMBLY,
+    "general.bc_1030_10_2_2_transitions_changing_direction": NO_ASSEMBLY,
+    "general.bc_1030_10_3_transition_marking": NO_ASSEMBLY,
+    "general.bc_1030_11_1_stepped_aisles_changing_direction_at_vomitories": NO_ASSEMBLY,
+    "general.bc_1030_11_2_transitions_at_top_of_vomitories": NO_ASSEMBLY,
+    "general.bc_1030_12_construction": NO_ASSEMBLY,
+    "general.bc_1030_12_1_walking_surface": NO_ASSEMBLY,
+    "general.bc_1030_12_2_outdoor_conditions": NO_ASSEMBLY,
+    "general.bc_1030_13_1_seating_at_tables": NO_ASSEMBLY,
+    "general.bc_1030_13_1_1_table_aisle_accessway_width": NO_ASSEMBLY,
+    "general.bc_1030_13_1_2_table_aisle_accessway_length": NO_ASSEMBLY,
+    "general.bc_1030_13_2_rows_of_seats": NO_ASSEMBLY,
+    "general.bc_1030_13_2_1_dual_access": NO_ASSEMBLY,
+    "general.bc_table_1030_13_2_1_smoke_protected_row_lengths": NO_ASSEMBLY,
+    "general.bc_1030_13_2_2_single_access": NO_ASSEMBLY,
+    "general.bc_1030_14_1_ramped_aisles": NO_ASSEMBLY,
+    "general.bc_1030_14_1_1_cross_slope": NO_ASSEMBLY,
+    "general.bc_1030_14_1_2_ramped_aisle_landings": NO_ASSEMBLY,
+    "general.bc_1030_14_1_3_ramped_aisle_edge_protection": NO_ASSEMBLY,
+    "general.bc_1030_14_2_stepped_aisles": NO_ASSEMBLY,
+    "general.bc_1030_14_2_1_stepped_aisle_treads": NO_ASSEMBLY,
+    "general.bc_1030_14_2_2_stepped_aisle_risers": NO_ASSEMBLY,
+    "general.bc_1030_14_2_2_1_construction_tolerances": NO_ASSEMBLY,
+    "general.bc_1030_14_2_3_tread_contrasting_marking_stripe": NO_ASSEMBLY,
+    "general.bc_1030_14_2_4_nosing_and_profile": NO_ASSEMBLY,
+    "general.bc_1030_15_seat_stability": NO_ASSEMBLY,
+    "general.bc_1030_16_handrails": NO_ASSEMBLY,
+    "general.bc_1030_16_1_discontinuous_mid_aisle_handrails": NO_ASSEMBLY,
+    "general.bc_1030_16_2_handrail_termination": NO_ASSEMBLY,
+    "general.bc_1030_16_3_mid_aisle_termination": NO_ASSEMBLY,
+    "general.bc_1030_16_4_rails": NO_ASSEMBLY,
+    "general.bc_1030_17_assembly_guards": NO_ASSEMBLY,
+    "general.bc_1030_17_1_perimeter_guards": NO_ASSEMBLY,
+    "general.bc_1030_17_2_cross_aisle_guards": NO_ASSEMBLY,
+    "general.bc_1030_17_3_sightline_constrained_guard_heights": NO_ASSEMBLY,
+    "general.bc_1030_17_4_guards_at_end_of_aisles": NO_ASSEMBLY,
 }
 YES_NO_UNSTATED = (True, False, None)
 

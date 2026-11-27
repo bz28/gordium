@@ -33,15 +33,16 @@ second_reading:
     review round 1), a twenty-eighth for the 39 of section group 9e (Sections 1021, 1022 and 1023 and 9 definitions, 2026-11-26), a
     twenty-ninth for the 29 of section group 9f (Sections 1024 and 1025 and 1 definition, 2026-11-26), a thirtieth for
     the 30 of section group 9g (Sections 1026 to 1029 and 5 definitions, 2026-11-26), the 31 of section group 9h (1030.1 to
-    1030.9, Table 1030.6.2 and 4 definitions, 2026-11-26), and a helper for the comparison words)
+    1030.9, Table 1030.6.2 and 4 definitions, 2026-11-26), the 48 of section group 9i (1030's heading, 1030.10 to
+    1030.17, Table 1030.13.2.1 and 5 definitions, 2026-11-26), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c), and 4 pages, 11 boxes as step_g9d (section group 9d), and 1 page, 1 box as step_g9d2 (1018''s heading), and 10 pages, 42 boxes as step_g9e (section group 9e), and 4 pages, 30 boxes as step_g9f (section group 9f), and 9 pages, 32 boxes as step_g9g (section group 9g), and 7 pages, 33 boxes as step_g9h (section group 9h, Table 1030.6.2 also cell by cell, its last row''s label wrapped around its values read by position on p.354); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c), and 4 pages, 11 boxes as step_g9d (section group 9d), and 1 page, 1 box as step_g9d2 (1018''s heading), and 10 pages, 42 boxes as step_g9e (section group 9e), and 4 pages, 30 boxes as step_g9f (section group 9f), and 9 pages, 32 boxes as step_g9g (section group 9g), and 7 pages, 33 boxes as step_g9h (section group 9h, Table 1030.6.2 also cell by cell, its last row''s label wrapped around its values read by position on p.354), and 9 pages, 48 boxes as step_g9i (section group 9i, Table 1030.13.2.1 also cell by cell, its two-line heading placed by position on p.357); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 580 pieces, 1822 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 628 pieces, 2061 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -771,6 +772,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:factored_load:
+    piece_sha256: 027e7cb3f3c4e5cd86844253413911be7dc171e37419248e370a4a97e928a32f
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:fire_alarm_box_manual:
     piece_sha256: 86eb8c6a06170095bbe1aaa68657cf2101f6212837fa0e4432c80254f11c970d
     numbers: []
@@ -1168,6 +1175,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:limit_state:
+    piece_sha256: fba81c80bc26aa8d0ed6064bf929bec443ecd98720269089ab4ef5589b998e69
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:limited_verbal_or_physical_assistance:
     piece_sha256: 108af115596fbcbe73690ffe8c412e6fca40e3f66bc053e08e77cb7aa56b1f1d
     numbers: []
@@ -1209,6 +1222,12 @@ pieces:
     second_reading_comparisons: []
   202:live_work_unit:
     piece_sha256: 088271b43c22b4cbad6ffceb275a7873d0eeb9591a75997b76125391ba44c113
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:load_and_resistance_factor_design_lrfd:
+    piece_sha256: 8fa1dd0469a59f7b9282c5c1f28f81d8216520837ad943329d6d1970e242264c
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -1598,6 +1617,12 @@ pieces:
     second_reading_comparisons:
     - none
     - none
+  202:resistance_factor:
+    piece_sha256: d96b1a9d5861453ce8b4916492c29cd87e754c9ce78d5fba44db38c5ebf87c8b
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:roof_assembly_for_application_to_chapter_15_only:
     piece_sha256: 173789464433579bfcaf554221be2d326740cf2f462d22762df34ab6940a7599
     numbers:
@@ -1866,6 +1891,27 @@ pieces:
     - '>'
     - none
     - '>'
+  202:strength:
+    piece_sha256: 44ededc6649e1a9a8e08cc5fcf9b86b724fc46a76d2a693a323df0ca512c3eed
+    numbers:
+    - two
+    - '16'
+    - '21'
+    - '16'
+    - '21'
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    - '16'
+    - '21'
+    - '16'
+    - '21'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
   202:structure:
     piece_sha256: 0a2ea45a577f48e5194c0496c4f735fc362db3d2b90086fee6f0b93e26d412cf
     numbers: []
@@ -8401,6 +8447,15 @@ pieces:
     flags:
     - '''10 foot'' (>=), the second: the walls are rated ''for a distance of 10 feet (3048 mm) above the floor of the egress
       court'', at least that high; the recorded words give no comparison. The second reading is right.'
+  '1030':
+    piece_sha256: 112761cf4ca72bcedae9480e30110f74560e1d4532db91a8fcf15b0c81f7583a
+    numbers:
+    - '1030'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1030'
+    second_reading_comparisons:
+    - none
   '1030.1':
     piece_sha256: e1086eb9ff06d2b15b34c4c1e9651ed9cb1d8217778d7cf001c5e9feaedcdb20
     numbers:
@@ -9269,6 +9324,1020 @@ pieces:
     - '1030.10'
     second_reading_comparisons:
     - none
+    - none
+  '1030.10':
+    piece_sha256: 9d03ca2c6c0ef4c3d452578bfc90231ea11ea3de43868c5f9e251d373e376580
+    numbers:
+    - '1030.10'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1030.10'
+    second_reading_comparisons:
+    - none
+  1030.10.1:
+    piece_sha256: 9cc07f0804ae003f3089ddd4ab55fedecac58104bb8848ff5fd35d6e809769dc
+    numbers:
+    - '1030.14'
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - '1030.14'
+    - one
+    second_reading_comparisons:
+    - none
+    - none
+  1030.10.2:
+    piece_sha256: b21bbdf29c053fa087f251d2df8144de5c514f20017e594662aeca2f4c212c17
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1030.10.2.1:
+    piece_sha256: 058b392c59c0d0a2e2dcf0b49e42b29fe5c29ded40c9bddeaf3ba5ea27dec609
+    numbers:
+    - one
+    - not less than 22 inch
+    - 559 mm
+    - not less than 30 inch
+    - 762 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - not less than 22 inch
+    - 559 mm
+    - not less than 30 inch
+    - 762 mm
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+  1030.10.2.2:
+    piece_sha256: 31753cbaff428a1e844bd3e35d84322c00826c82af169d99076adcb7144dcefb
+    numbers:
+    - 11 inch
+    - 280 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - 11 inch
+    - 280 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    flags:
+    - '''11 inch'' (>=): ''shall have a minimum depth of 11 inches (280 mm) or the stepped aisle tread depth, whichever is
+      greater''; the recorded words miss it (numbers.py reads comparison words only directly before a number or after its
+      unit). The second reading is right.'
+  1030.10.3:
+    piece_sha256: fa666605a15fb486db0682da59911ace980323efa96170a4b0bbbe5cc5d7fb35
+    numbers:
+    - not less than 1 inch
+    - 25 mm
+    - not more than 2 inch
+    - 51 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 1 inch
+    - 25 mm
+    - not more than 2 inch
+    - 51 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    - <=
+    - none
+  '1030.11':
+    piece_sha256: 43f4ced0f3d38f6e13285651809a6f65b20d5bd551cfceb165c989d6fe770e56
+    numbers:
+    - '1030.11'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1030.11'
+    second_reading_comparisons:
+    - none
+  1030.11.1:
+    piece_sha256: 1ef777b2b401476a140c6a6b20734dcf41df807d402f6f4a9efb1fc31d8efb0c
+    numbers:
+    - not less than 11 inch
+    - 280 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 11 inch
+    - 280 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+  1030.11.2:
+    piece_sha256: 3c9b7bd7f339b3c548887ff339dc2b6c7c4ee7fb5bdbe89c4c64ede96e32af53
+    numbers:
+    - not less than 11 inch
+    - 280 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 11 inch
+    - 280 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+  '1030.12':
+    piece_sha256: 173eb1f9452eb149c02bb990551faf328953e8f9780b002fb5224a51bf7efaa7
+    numbers:
+    - '1030.12'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1030.12'
+    second_reading_comparisons:
+    - none
+  1030.12.1:
+    piece_sha256: 4f79528daea43237f093e841a112c57b96dfbd659ac84696ed22e41001608a35
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1030.12.2:
+    piece_sha256: 9050b6c55c5090ae310a797533c933ffa4398ed2fca60d91b609ac7a0d6ea0f0
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  '1030.13':
+    piece_sha256: 39d693d07f02a05c4d6faa05f9e0a8accc6f0f03ad6875b042e68d5a40c57fb6
+    numbers:
+    - '1030.13'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1030.13'
+    second_reading_comparisons:
+    - none
+  1030.13.1:
+    piece_sha256: 4f93df7ce5e19c7009ddbabed59d627420a4aecebbff20a1fc94077cba762cb0
+    numbers:
+    - 19 inch
+    - 483 mm
+    - 19 inch
+    - 483 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - 19 inch
+    - 483 mm
+    - 19 inch
+    - 483 mm
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  1030.13.1.1:
+    piece_sha256: dd209f3661674cd6cddf0aa618924d55362bc3daa5f25f915e55b84903e3cf48
+    numbers:
+    - '1005.1'
+    - not have less than 12 inch
+    - 305 mm
+    - 1/2 inch
+    - 12.7 mm
+    - 1 foot
+    - 305 mm
+    - 12 foot
+    - 3658 mm
+    - not exceeding 6 foot
+    - 1829 mm
+    - not more than four
+    second_reading: agrees
+    second_reading_numbers:
+    - '1005.1'
+    - not have less than 12 inch
+    - 305 mm
+    - 1/2 inch
+    - 12.7 mm
+    - 1 foot
+    - 305 mm
+    - 12 foot
+    - 3658 mm
+    - not exceeding 6 foot
+    - 1829 mm
+    - not more than four
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - '>'
+    - none
+    - <=
+    - none
+    - <=
+    flags:
+    - '''1/2 inch'' (>=) and ''12 foot'' (>): ''not ... less than 12 inches (305 mm) of width plus 1/2 inch (12.7 mm) of width
+      for each additional 1 foot (305 mm), or fraction thereof, beyond 12 feet'', the 1/2 inch part of the least width, added
+      past 12 feet of length; the recorded words miss it (numbers.py reads comparison words only directly before a number
+      or after its unit). The second reading is right.'
+  1030.13.1.2:
+    piece_sha256: fe8db99c210a7a354d41befecf64717400d465183c481e20502c4f31678c2612
+    numbers:
+    - not exceed 30 foot
+    - 9144 mm
+    - two or more
+    second_reading: agrees
+    second_reading_numbers:
+    - not exceed 30 foot
+    - 9144 mm
+    - two or more
+    second_reading_comparisons:
+    - <=
+    - none
+    - '>='
+  1030.13.2:
+    piece_sha256: dccfb75fc2e7d44d556e5ed65458aa6b9aaa02f522f92585203c4157b15e4dc2
+    numbers:
+    - 14 or fewer
+    - not less than 12 inch
+    - 305 mm
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - 14 or fewer
+    - not less than 12 inch
+    - 305 mm
+    - one
+    second_reading_comparisons:
+    - <=
+    - '>='
+    - none
+    - none
+  1030.13.2.1:
+    piece_sha256: f32939a1c7e1b07928901015cefb3dc0ec15c79a0c787eac2a260f10304a261d
+    numbers:
+    - not more than 100
+    - 12 inch
+    - 305 mm
+    - 0.3 inch
+    - 7.6 mm
+    - '14'
+    - '21'
+    - not required to exceed 22 inch
+    - 559 mm
+    - 12 inch
+    - 305 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not more than 100
+    - 12 inch
+    - 305 mm
+    - 0.3 inch
+    - 7.6 mm
+    - '14'
+    - '21'
+    - not required to exceed 22 inch
+    - 559 mm
+    - 12 inch
+    - 305 mm
+    second_reading_comparisons:
+    - <=
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>'
+    - '>'
+    - <=
+    - none
+    - none
+    - none
+    flags:
+    - '''12 inch'' and ''0.3 inch'' (>=): ''The minimum clear width of 12 inches (305 mm) between rows shall be increased
+      by 0.3 inch'' a seat, a least width; ''14'' and ''21'' (>): ''beyond 14 seats where seats have backrests or beyond 21'';
+      ''not required to exceed 22 inch'' (<=): the most the minimum grows to; the recorded words miss it (numbers.py reads
+      comparison words only directly before a number or after its unit). The second reading is right.'
+  Table 1030.13.2.1:
+    piece_sha256: 6df4ba2a39a723d9fbe27060a54cc9834b32f977ded4ab75e643bd61a4b21517
+    numbers:
+    - minimum 12 inch
+    - one
+    - less than 4,000
+    - '14'
+    - '21'
+    - '7'
+    - '10'
+    - 4,000
+    - 6,999
+    - '15'
+    - '22'
+    - '7'
+    - '10'
+    - 7,000
+    - 9,999
+    - '16'
+    - '23'
+    - '8'
+    - '11'
+    - 10,000
+    - 12,999
+    - '17'
+    - '24'
+    - '8'
+    - '11'
+    - 13,000
+    - 15,999
+    - '18'
+    - '25'
+    - '9'
+    - '12'
+    - 16,000
+    - 18,999
+    - '19'
+    - '26'
+    - '9'
+    - '12'
+    - 19,000
+    - 21,999
+    - '20'
+    - '27'
+    - '10'
+    - '13'
+    - 22,000
+    - '21'
+    - '28'
+    - '11'
+    - '14'
+    - 1 inch
+    - 25.4 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - minimum 12 inch
+    - one
+    - less than 4,000
+    - '14'
+    - '21'
+    - '7'
+    - '10'
+    - 4,000
+    - 6,999
+    - '15'
+    - '22'
+    - '7'
+    - '10'
+    - 7,000
+    - 9,999
+    - '16'
+    - '23'
+    - '8'
+    - '11'
+    - 10,000
+    - 12,999
+    - '17'
+    - '24'
+    - '8'
+    - '11'
+    - 13,000
+    - 15,999
+    - '18'
+    - '25'
+    - '9'
+    - '12'
+    - 16,000
+    - 18,999
+    - '19'
+    - '26'
+    - '9'
+    - '12'
+    - 19,000
+    - 21,999
+    - '20'
+    - '27'
+    - '10'
+    - '13'
+    - 22,000
+    - '21'
+    - '28'
+    - '11'
+    - '14'
+    - 1 inch
+    - 25.4 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    - <
+    - <=
+    - <=
+    - <=
+    - <=
+    - between
+    - between
+    - <=
+    - <=
+    - <=
+    - <=
+    - between
+    - between
+    - <=
+    - <=
+    - <=
+    - <=
+    - between
+    - between
+    - <=
+    - <=
+    - <=
+    - <=
+    - between
+    - between
+    - <=
+    - <=
+    - <=
+    - <=
+    - between
+    - between
+    - <=
+    - <=
+    - <=
+    - <=
+    - between
+    - between
+    - <=
+    - <=
+    - <=
+    - <=
+    - '>='
+    - <=
+    - <=
+    - <=
+    - <=
+    - none
+    - none
+    flags:
+    - 'Seats-per-row cells ''14'', ''21'', ''7'', ''10'', ''15'', ''22'', ''16'', ''23'', ''8'', ''11'', ''17'', ''24'', ''18'',
+      ''25'', ''9'', ''12'', ''19'', ''26'', ''20'', ''27'', ''13'', ''28'' (<=): the column heading ''MAXIMUM NUMBER OF SEATS
+      PER ROW PERMITTED TO HAVE A MINIMUM 12-INCH CLEAR WIDTH AISLE ACCESSWAY'', so each is the most seats per row; the table
+      prints no comparison words beside its cells. Seat-count rows ''4,000'' and ''6,999'', ''7,000'' and ''9,999'', ''10,000''
+      and ''12,999'', ''13,000'' and ''15,999'', ''16,000'' and ''18,999'', ''19,000'' and ''21,999'' (between): printed ranges
+      ''N to M''; ''22,000'' (>=): ''22,000 and greater''. Read cell by cell by position (p.357) and on the page image. The
+      second reading is right. The table is a person''s check (its flag), so no rule reads these.'
+  1030.13.2.2:
+    piece_sha256: 557bf88388b0ba0b73850bd0a32dd9627b412ab9d319f1abfd08adc296eabdcc
+    numbers:
+    - one
+    - 12 inch
+    - 305 mm
+    - 0.6 inch
+    - 15.2 mm
+    - seven
+    - '10'
+    - not required to exceed 22 inch
+    - 559 mm
+    - 12 inch
+    - 305 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - 12 inch
+    - 305 mm
+    - 0.6 inch
+    - 15.2 mm
+    - seven
+    - '10'
+    - not required to exceed 22 inch
+    - 559 mm
+    - 12 inch
+    - 305 mm
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>'
+    - '>'
+    - <=
+    - none
+    - none
+    - none
+    flags:
+    - '''12 inch'' and ''0.6 inch'' (>=): ''the minimum clear width of 12 inches (305 mm) between rows shall be increased
+      by 0.6 inch'' a seat, a least width; ''seven'' and ''10'' (>): ''beyond seven seats where seats have backrests or beyond
+      10''; ''not required to exceed 22 inch'' (<=): the most the minimum grows to; the recorded words miss it (numbers.py
+      reads comparison words only directly before a number or after its unit). The second reading is right.'
+  '1030.14':
+    piece_sha256: b6081d194ae2829ea8cc23c171dfe11d237f399c79eb3ed76cfefe5940e0f0d8
+    numbers:
+    - '1030.14'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1030.14'
+    second_reading_comparisons:
+    - none
+  1030.14.1:
+    piece_sha256: 9a64ce817c2f36e619b2ccf571d3cbc791844fb7f2b89d308808b623114ddae6
+    numbers:
+    - more than 1 unit vertical
+    - 20 unit horizontal
+    - 5 percent
+    - '1009'
+    - and 1109.2
+    - 1 unit vertical
+    - 12 unit horizontal
+    - 8 percent
+    - not exceed 1 unit vertical
+    - 8 unit horizontal
+    - 12.5 percent
+    second_reading: agrees
+    second_reading_numbers:
+    - more than 1 unit vertical
+    - 20 unit horizontal
+    - 5 percent
+    - '1009'
+    - and 1109.2
+    - 1 unit vertical
+    - 12 unit horizontal
+    - 8 percent
+    - not exceed 1 unit vertical
+    - 8 unit horizontal
+    - 12.5 percent
+    second_reading_comparisons:
+    - '>'
+    - none
+    - '>'
+    - none
+    - none
+    - <=
+    - none
+    - <=
+    - <=
+    - none
+    - <=
+    flags:
+    - '''5 percent'' (>): ''(5-percent slope)'' restates ''sloped more than 1 unit vertical in 20 units horizontal''; ''1
+      unit vertical'' (<=), the second: ''shall have a maximum slope of 1 unit vertical in 12'', and its ''8 percent'' and
+      the other ramped aisles'' ''12.5 percent'' (<=): ''shall not exceed 1 unit vertical in 8''; the recorded words miss
+      it (numbers.py reads comparison words only directly before a number or after its unit). The second reading is right.'
+  1030.14.1.1:
+    piece_sha256: fd652ca0e9ec991b3dd2123ce8a223abe25ac0af8d0f9b77a9d94bf48647251c
+    numbers:
+    - not be steeper than 1 unit vertical
+    - 48 unit horizontal
+    - 2 percent
+    second_reading: agrees
+    second_reading_numbers:
+    - not be steeper than 1 unit vertical
+    - 48 unit horizontal
+    - 2 percent
+    second_reading_comparisons:
+    - <=
+    - none
+    - <=
+    flags:
+    - '''2 percent'' (<=): ''(2-percent slope)'' restates ''shall not be steeper than 1 unit vertical in 48''; the recorded
+      words miss it (numbers.py reads comparison words only directly before a number or after its unit). The second reading
+      is right.'
+  1030.14.1.2:
+    piece_sha256: 005eff0d7cd250349785cabba9c7901db9a5a45c8c69093825731af94f2160b3
+    numbers:
+    - '1012.6'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1012.6'
+    second_reading_comparisons:
+    - none
+  1030.14.1.3:
+    piece_sha256: 169eb3e3fce9f8b8399417fffd16fefe6fb21eea7a168f76e47df65b97974dc6
+    numbers:
+    - '1012.10'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1012.10'
+    second_reading_comparisons:
+    - none
+  1030.14.2:
+    piece_sha256: 7bd5561dfc10854b50d60faa3f9fe85e65afc9a243d3790e44648c331ec1cf0f
+    numbers:
+    - exceeding one unit vertical
+    - eight unit horizontal
+    - 12.5 percent
+    second_reading: agrees
+    second_reading_numbers:
+    - exceeding one unit vertical
+    - eight unit horizontal
+    - 12.5 percent
+    second_reading_comparisons:
+    - '>'
+    - none
+    - '>'
+    flags:
+    - '''12.5 percent'' (>): ''(12.5-percent slope)'' restates ''a slope exceeding one unit vertical in eight''; the recorded
+      words miss it (numbers.py reads comparison words only directly before a number or after its unit). The second reading
+      is right.'
+  1030.14.2.1:
+    piece_sha256: 28841efc66fd7356070cd2eb883207b9751430926b248642ae5466dc01cbe3bd
+    numbers:
+    - not less than 11 inch
+    - 279 mm
+    - not exceed 3/16 inch
+    - 4.8 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 11 inch
+    - 279 mm
+    - not exceed 3/16 inch
+    - 4.8 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    - <=
+    - none
+  1030.14.2.2:
+    piece_sha256: 0c1e9b4012059f58cb5e1428ce3dd13d29d7fe8f4a4a2fd2e889f6a31ae76c41
+    numbers:
+    - not less than 4 inch
+    - 102 mm
+    - nor more than 8 inch
+    - 203 mm
+    - exceed 3/16 inch
+    - 4.8 mm
+    - not less than 1 inch
+    - 25 mm
+    - not more than 2 inch
+    - 51 mm
+    - not exceeding 9 inch
+    - 229 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 4 inch
+    - 102 mm
+    - nor more than 8 inch
+    - 203 mm
+    - exceed 3/16 inch
+    - 4.8 mm
+    - not less than 1 inch
+    - 25 mm
+    - not more than 2 inch
+    - 51 mm
+    - not exceeding 9 inch
+    - 229 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    - <=
+    - none
+    - '>'
+    - none
+    - '>='
+    - none
+    - <=
+    - none
+    - <=
+    - none
+  1030.14.2.2.1:
+    piece_sha256: 3e3655df17030fa044490bdfcac4aa02f62ef531b8133ea6ca41adcf9158f213
+    numbers:
+    - not exceed 3/16 inch
+    - 4.8 mm
+    - '1'
+    - not more than 3/8 inch
+    - 9.5 mm
+    - less than 22 inch
+    - 560 mm
+    - and 3/4 inch
+    - 19.1 mm
+    - 22 inch or greater
+    - 560 mm or greater
+    second_reading: agrees
+    second_reading_numbers:
+    - not exceed 3/16 inch
+    - 4.8 mm
+    - '1'
+    - not more than 3/8 inch
+    - 9.5 mm
+    - less than 22 inch
+    - 560 mm
+    - and 3/4 inch
+    - 19.1 mm
+    - 22 inch or greater
+    - 560 mm or greater
+    second_reading_comparisons:
+    - <=
+    - none
+    - none
+    - <=
+    - none
+    - <
+    - none
+    - <=
+    - none
+    - '>='
+    - none
+    flags:
+    - '''and 3/4 inch'' (<=): ''not more than 3/8 inch (9.5 mm) ... and 3/4 inch (19.1 mm) in height different'', the ''not
+      more than'' carried to the second figure; the recorded words miss it (numbers.py reads comparison words only directly
+      before a number or after its unit). The second reading is right.'
+    - '''560 mm or greater'': the ''or greater'' is the 22 inches'' (recorded ''>='' with it); the millimetres in brackets
+      are a conversion and set no limit, so the second reading (none) is right.'
+  1030.14.2.3:
+    piece_sha256: 85fd00adc799f2f6e111a3f6b6eef5ccc1dae9537f1d05fefaa6559cd657c5f4
+    numbers:
+    - not less than 1 inch
+    - 25 mm
+    - not more than 2 inch
+    - 51 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 1 inch
+    - 25 mm
+    - not more than 2 inch
+    - 51 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    - <=
+    - none
+  1030.14.2.4:
+    piece_sha256: 2b8195a2569d1a456413669c85bb6ad54d2c12a80174d07f96ada84913f9f56a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  '1030.15':
+    piece_sha256: 279f26ccba13ec59aa9cfe2ab589ebe50438fe6abacf0461bb44ea285f483d43
+    numbers:
+    - '1030.15'
+    - 200 or fewer
+    - greater than 200
+    - not less than three
+    - not more than 200
+    - not more than 14
+    second_reading: agrees
+    second_reading_numbers:
+    - '1030.15'
+    - 200 or fewer
+    - greater than 200
+    - not less than three
+    - not more than 200
+    - not more than 14
+    second_reading_comparisons:
+    - none
+    - <=
+    - '>'
+    - '>='
+    - <=
+    - <=
+  '1030.16':
+    piece_sha256: 3084698c4c3276837f4824459333345ea61b2228f4cdac94165a8b33578b2e60
+    numbers:
+    - '1030.16'
+    - exceeding one unit vertical
+    - 15 unit horizontal
+    - 6.7 percent
+    - '1014'
+    - one
+    - one
+    - 74 inch or greater
+    - 1880 mm or greater
+    - two
+    - two
+    - one
+    - within 30 inch
+    - 762 mm
+    - '1014.4'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1030.16'
+    - exceeding one unit vertical
+    - 15 unit horizontal
+    - 6.7 percent
+    - '1014'
+    - one
+    - one
+    - 74 inch or greater
+    - 1880 mm or greater
+    - two
+    - two
+    - one
+    - within 30 inch
+    - 762 mm
+    - '1014.4'
+    second_reading_comparisons:
+    - none
+    - '>'
+    - none
+    - '>'
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - none
+    flags:
+    - '''6.7 percent'' (>): ''(6.7-percent slope)'' restates ''a slope exceeding one unit vertical in 15''; the recorded words
+      miss it (numbers.py reads comparison words only directly before a number or after its unit). The second reading is right.'
+    - '''1880 mm or greater'': the ''or greater'' is the 74 inches'' (recorded ''>='' with it); the millimetres in brackets
+      are a conversion and set no limit, so the second reading (none) is right.'
+  1030.16.1:
+    piece_sha256: 03655789b5c6d26b7d625daadf5fe2911bb3e29653a2a0d367ef16dd5eae96b1
+    numbers:
+    - two
+    - not exceeding five
+    - one
+    - not less than 22 inch
+    - 559 mm
+    - not greater than 36 inch
+    - 914 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    - not exceeding five
+    - one
+    - not less than 22 inch
+    - 559 mm
+    - not greater than 36 inch
+    - 914 mm
+    second_reading_comparisons:
+    - none
+    - <=
+    - none
+    - '>='
+    - none
+    - <=
+    - none
+  1030.16.2:
+    piece_sha256: eec10fd738269ab9b765c03dc52f788c09034871efff09ba9e07daea3dcd429c
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1030.16.3:
+    piece_sha256: 18da2852513ac37653117e8aa09f6262dbcee8f4b0a8db86f89917d9dfea5a3d
+    numbers:
+    - within 18 inch
+    - 381 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - within 18 inch
+    - 381 mm
+    second_reading_comparisons:
+    - <=
+    - none
+  1030.16.4:
+    piece_sha256: 56706746ae4c1ebf8f720fcf849bc56b29c1bc5954451366e6b7565399f4d8ca
+    numbers:
+    - 12 inch
+    - 305 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - 12 inch
+    - 305 mm
+    second_reading_comparisons:
+    - none
+    - none
+  '1030.17':
+    piece_sha256: 74a823e8452d5029f9871db7775054ce81b6835aeedf380b0830b50144fe3198
+    numbers:
+    - '1030.17'
+    - '1015'
+    - '1015'
+    - '300'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1030.17'
+    - '1015'
+    - '1015'
+    - '300'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  1030.17.1:
+    piece_sha256: af31082c327bc48801d6c814f4821037d5130eea02ce6a9180140f7781f4e0f8
+    numbers:
+    - more than 30 inch
+    - 762 mm
+    - 42 inch
+    - 1067 mm
+    - 42 inch
+    - 1067 mm
+    - '1015.3'
+    - less than 4 inch
+    - 102 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - more than 30 inch
+    - 762 mm
+    - 42 inch
+    - 1067 mm
+    - 42 inch
+    - 1067 mm
+    - '1015.3'
+    - less than 4 inch
+    - 102 mm
+    second_reading_comparisons:
+    - '>'
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - none
+    - <
+    - none
+    flags:
+    - '''42 inch'' (>=), both: ''guard height shall be 42 inches (1067 mm) high minimum'', the ''minimum'' after the unit;
+      the recorded words miss it (numbers.py reads comparison words only directly before a number or after its unit). The
+      second reading is right.'
+  1030.17.2:
+    piece_sha256: f87b3188cb1e1edc6f15b895ef95a1a1cdd37e3005d8332526aa888891030db2
+    numbers:
+    - more than 30 inch
+    - 762 mm
+    - '1015'
+    - 30 inch or less
+    - 762 mm or less
+    - not less than 26 inch
+    - 660 mm
+    - 24 inch or more
+    - 610 mm or more
+    second_reading: agrees
+    second_reading_numbers:
+    - more than 30 inch
+    - 762 mm
+    - '1015'
+    - 30 inch or less
+    - 762 mm or less
+    - not less than 26 inch
+    - 660 mm
+    - 24 inch or more
+    - 610 mm or more
+    second_reading_comparisons:
+    - '>'
+    - none
+    - none
+    - <=
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    flags:
+    - '''762 mm or less'' and ''610 mm or more'': the ''or less'' and ''or more'' are the 30 inches'' and the 24 inches''
+      (recorded with them); the millimetres in brackets are a conversion and set no limit, so the second reading (none) is
+      right.'
+  1030.17.3:
+    piece_sha256: b328e7cf27fb8945bc324d90101c5fd694a0e09234bc541b0aed2b916930774b
+    numbers:
+    - '1015'
+    - 26 inch
+    - 660 mm
+    - more than 30 inch
+    - 762 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1015'
+    - 26 inch
+    - 660 mm
+    - more than 30 inch
+    - 762 mm
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - '>'
+    - none
+    flags:
+    - '''26 inch'' (>=): ''having a minimum height of 26 inches (660 mm)'', the ''minimum ... of'' before the number; the
+      recorded words miss it (numbers.py reads comparison words only directly before a number or after its unit). The second
+      reading is right.'
+  1030.17.4:
+    piece_sha256: 580bc1750943d049349f9ba37902323ba67fce9612ca806b87afa3bf563be0df
+    numbers:
+    - '1015'
+    - more than 30 inch
+    - 762 mm
+    - not less than 36 inch
+    - 914 mm
+    - not less than 42 inch
+    - 1067 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1015'
+    - more than 30 inch
+    - 762 mm
+    - not less than 36 inch
+    - 914 mm
+    - not less than 42 inch
+    - 1067 mm
+    second_reading_comparisons:
+    - none
+    - '>'
+    - none
+    - '>='
+    - none
+    - '>='
     - none
   '1031.1':
     piece_sha256: b7ab9d597bd16f9fe680d4369c73a505933438fa68644d87c0440a74c741b151

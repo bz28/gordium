@@ -20180,8 +20180,9 @@ rules:
       require access (risers and treads per 1030.14, a handrail per 1030.16); throughout a story in Group I-2, any change
       in elevation in the means of egress serving nonambulatory persons is a ramp or sloped walkway: the routes read each
       story as one level, so changes in floor level within it aren''t in the model, a person''s check.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Chapter 11, 1011.5, 1014, 1030.14 and 1030.16
-    aren''t brought in here (1011 and 1014 are section group 7''s): the exceptions only loosen, and the flag never passes.
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Chapter 11, 1011.5 and 1014
+    aren''t brought in here (1011 and 1014 are section group 7''s; 1030.14 and 1030.16 are 1030.14''s and 1030.16''s flags,
+    section group 9i): the exceptions only loosen, and the flag never passes.
     Its Group I-2 sentence is part of the same check.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -22116,8 +22117,8 @@ rules:
       complying with 1005.7; in a room or space used for assembly, aisles and aisle accessways comply with 1030 (1018.2):
       furniture and fixtures aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9d. 1018.2 (a pointer to 1030, labeled reference)
-    is quoted here. 1030 isn't brought in whole; 1030.1 to 1030.9 are (section group 9h, assembly aisles in 1030.9 and its
-    parts, a person's check each), 1030.10 to 1030.17 not yet; 1005.7 is section group 5c's.
+    is quoted here. Section 1030 is brought in whole (section groups 9h and 9i, assembly aisles in 1030.9 to 1030.16, a
+    person's check each); 1005.7 is section group 5c's.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1018_3_aisles_groups_b_m
@@ -22256,8 +22257,8 @@ rules:
     expect: needs_review
     note: 'The occupancy isn''t stated: a person checks.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9d. 1019.1 (scope) and 1019.2 (floor levels within
-    one story), labeled reference, are quoted here. 713, 712.1.9, 404 and NFPA 13 aren't brought in, nor 1030 whole (1030.1
-    to 1030.9 are, section group 9h).
+    one story), labeled reference, are quoted here. 713, 712.1.9, 404 and NFPA 13 aren't brought in (1030 is, whole, by
+    section groups 9h and 9i).
     Not shown for a building stated Group I-2 or I-3 alone (1019.4 covers them).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -25647,8 +25648,7 @@ rules:
       assembly_spaces: false
     expect: needs_review
     note: 'Two or more groups: one may be Group A, a person checks.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9h. 1030.13.1 isn't brought in yet (section group
-    9i).
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9h. 1030.13.1 is its own flag (section group 9i).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1030_9_6_1_assembly_aisle_obstructions
@@ -25755,8 +25755,7 @@ rules:
       assembly_spaces: false
     expect: needs_review
     note: 'Two or more groups: one may be Group A, a person checks.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9h. 1030.10 and 1030.14 aren't brought in yet (section
-    group 9i).
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9h. 1030.10 and 1030.14 have their own flags (section group 9i).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1030_9_8_stairways_connecting_to_vomitories
@@ -25810,7 +25809,2108 @@ rules:
       assembly_spaces: false
     expect: needs_review
     note: 'Two or more groups: one may be Group A, a person checks.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9h. 1030.10 and 1030.14 aren't brought in yet (section
-    group 9i).
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9h. 1030.10 and 1030.14 have their own flags (section group 9i).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_10_1_transitions_keeping_stepped_aisle_dimensions
+  kind: flag
+  topic: means_of_egress
+  title: Stairs that keep a stepped aisle's risers and treads (BCNYS 1030.10.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 24
+    - 24
+    quote: 1030.10 Transitions. Transitions between stairways and stepped aisles shall comply with either Section 1030.10.1
+      or 1030.10.2.
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 25
+    - 27
+    quote: 1030.10.1 Transitions to stairways that maintain stepped aisle riser and tread dimensions. Stepped aisles, transitions
+      and stairways that maintain the stepped aisle riser and tread dimensions shall comply with Section 1030.14 as one exit
+      access component.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A transition between a stairway and a stepped aisle meets 1030.10.1 or 1030.10.2: where the stepped aisles, transitions
+      and stairways keep the stepped aisle''s riser and tread dimensions, they comply with 1030.14 as one exit access component:
+      stepped aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_10_2_1_straight_run_transitions
+  kind: flag
+  topic: means_of_egress
+  title: Straight-run transitions at least 22 or 30 in deep (BCNYS 1030.10.2.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 28
+    - 30
+    quote: 1030.10.2 Transitions to stairways that do not maintain stepped aisle riser and tread dimensions. Transitions between
+      stairways and stepped aisles having different riser and tread dimensions shall comply with Sections 1030.10.2.1 through
+      1030.10.3.
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 31
+    - 36
+    quote: '1030.10.2.1 Stairways and stepped aisles in a straight run. Where stairways and stepped aisles are in a straight
+      run, transi- tions shall have one of the following: 1. A depth of not less than 22 inches (559 mm) where the treads
+      on the descending side of the transition have greater depth. 2. A depth of not less than 30 inches (762 mm) where the
+      treads on the descending side of the transition have lesser depth.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where a stairway and a stepped aisle with different riser and tread dimensions meet (1030.10.2 to 1030.10.3) in
+      a straight run, the transition is at least 22 inches deep where the treads on its descending side are deeper, or at
+      least 30 inches where they are shallower: stepped aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_10_2_2_transitions_changing_direction
+  kind: flag
+  topic: means_of_egress
+  title: Transitions where a stairway turns from a stepped aisle (BCNYS 1030.10.2.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 37
+    - 39
+    quote: 1030.10.2.2 Stairways that change direction from stepped aisles. Transitions where the stairway changes direction
+      from the stepped aisle shall have a minimum depth of 11 inches (280 mm) or the stepped aisle tread depth, whichever
+      is greater, between the stepped aisle and stairway.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where the stairway changes direction from the stepped aisle, the transition between them is at least 11 inches
+      deep, or the stepped aisle''s tread depth if that is more: stepped aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_10_3_transition_marking
+  kind: flag
+  topic: means_of_egress
+  title: A 1 to 2 in marking stripe at each transition (BCNYS 1030.10.3)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 40
+    - 42
+    quote: 1030.10.3 Transition marking. A distinctive marking stripe shall be provided at each nosing or leading edge adjacent
+      to the tran- sition. Such stripe shall be not less than 1 inch (25 mm), and not more than 2 inches (51 mm), wide. The
+      edge marking stripe shall be distinctively different from the stepped aisle contrasting marking stripe.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A distinctive marking stripe at least 1 inch and at most 2 inches wide is at each nosing or leading edge next to
+      the transition, distinctly different from the stepped aisle''s contrasting marking stripe: stepped aisles aren''t in
+      the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_11_1_stepped_aisles_changing_direction_at_vomitories
+  kind: flag
+  topic: means_of_egress
+  title: Stepped aisle treads turning at a vomitory, at least 11 in (BCNYS 1030.11.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 43
+    - 44
+    quote: 1030.11 Stepped aisles at vomitories. Stepped aisles that change direction at vomitories shall comply with Section
+      1030.11.1 Tran- sitions between a stepped aisle above a vomitory and a stepped aisle to the side of a vomitory shall
+      comply with Section 1030.11.2.
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 45
+    - 47
+    quote: 1030.11.1 Stepped aisles that change direction at vomitories. Stepped aisle treads where the stepped aisle changes
+      direction at a vomitory shall have a depth of not less than 11 inches (280 mm) or the stepped aisle tread depth, whichever
+      is greater. The height of a stepped aisle tread above a transition at a vomitory shall comply with Section 1030.14.2.2.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where a stepped aisle changes direction at a vomitory (1030.11), its treads there are at least 11 inches deep,
+      or the stepped aisle''s tread depth if that is more, and a tread''s height above a transition at a vomitory complies
+      with 1030.14.2.2: stepped aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_11_2_transitions_at_top_of_vomitories
+  kind: flag
+  topic: means_of_egress
+  title: Transitions at the top of a vomitory, at least 11 in deep (BCNYS 1030.11.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 48
+    - 50
+    quote: 1030.11.2 Stepped aisle transitions at the top of vomitories. Transitions between the stepped aisle above a vomitory
+      and stepped aisles to the side of a vomitory shall have a depth of not less than 11 inches (280 mm) or the stepped aisle
+      tread depth, whichever is greater.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A transition between the stepped aisle above a vomitory and the stepped aisles beside it is at least 11 inches
+      deep, or the stepped aisle''s tread depth if that is more: stepped aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_12_construction
+  kind: flag
+  topic: means_of_egress
+  title: Aisles built of materials the construction type allows (BCNYS 1030.12)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 51
+    - 53
+    quote: '1030.12 Construction. Aisles, stepped aisles and ramped aisles shall be built of materials consistent with the
+      types permitted for the type of construction of the building. Exception: Wood handrails shall be permitted for all types
+      of construction.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Aisles, stepped aisles and ramped aisles are built of materials consistent with the types permitted for the building''s
+      type of construction; wood handrails are permitted in every type: aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_12_1_walking_surface
+  kind: flag
+  topic: means_of_egress
+  title: Slip-resistant aisle surfaces (BCNYS 1030.12.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 54
+    - 55
+    quote: 1030.12.1 Walking surface. The surface of aisles, stepped aisles and ramped aisles shall be of slip-resistant materials
+      that are securely attached. The surface for stepped aisles shall comply with Section 1011.7.1.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The surface of aisles, stepped aisles and ramped aisles is of slip-resistant materials, securely attached, and
+      a stepped aisle''s surface complies with 1011.7.1: aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i. 1011.7.1 isn't brought in.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_12_2_outdoor_conditions
+  kind: flag
+  topic: means_of_egress
+  title: Outdoor aisles shed water (BCNYS 1030.12.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 56
+    - 57
+    quote: 1030.12.2 Outdoor conditions. Outdoor aisles, stepped aisles and ramped aisles and outdoor approaches to aisles,
+      stepped aisles and ramped aisles shall be designed so that water will not accumulate on the walking surface.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Outdoor aisles, stepped aisles and ramped aisles, and the outdoor approaches to them, are designed so that water
+      doesn''t accumulate on the walking surface: aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_13_1_seating_at_tables
+  kind: flag
+  topic: means_of_egress
+  title: Aisle width at tables measured 19 in from the table edge (BCNYS 1030.13.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 356
+    lines:
+    - 58
+    - 59
+    quote: 1030.13 Aisle accessways. Aisle accessways for seating at tables shall comply with Section 1030.13.1. Aisle accessways
+      for seating in rows shall comply with Section 1030.13.2.
+  - file: gov.ny.building.2025.pdf
+    page: 357
+    lines:
+    - 3
+    - 9
+    quote: '1030.13.1 Seating at tables. Where seating is located at a table or counter and is adjacent to an aisle or aisle
+      accessway, the measurement of required clear width of the aisle or aisle accessway shall be made to a line 19 inches
+      (483 mm) away from and parallel to the edge of the table or counter. The 19-inch (483 mm) distance shall be measured
+      perpendicular to the side of the table or counter. In the case of other side boundaries for aisles or aisle accessways,
+      the clear width shall be measured to walls, edges of seating and tread edges. Exception: Where tables or counters are
+      served by fixed seats, the width of the aisle or aisle accessway shall be measured from the back of the seat.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Aisle accessways serve seating at tables per 1030.13.1 and seating in rows per 1030.13.2: where seating at a table
+      or counter is next to an aisle or aisle accessway, its required clear width is measured to a line 19 inches from and
+      parallel to the table''s or counter''s edge, measured perpendicular to that side; other side boundaries are measured
+      to walls, edges of seating and tread edges; where fixed seats serve the tables or counters, the width is measured from
+      the back of the seat: tables and seats aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_13_1_1_table_aisle_accessway_width
+  kind: flag
+  topic: means_of_egress
+  title: 'Table aisle accessways: 12 in plus 1/2 in a foot past 12 ft (BCNYS 1030.13.1.1)'
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 357
+    lines:
+    - 10
+    - 15
+    quote: '1030.13.1.1 Aisle accessway capacity and width for seating at tables. Aisle accessways serving arrangements of
+      seating at tables or counters shall comply with the capacity requirements of Section 1005.1 but shall not have less
+      than 12 inches (305 mm) of width plus 1/2 inch (12.7 mm) of width for each additional 1 foot (305 mm), or fraction thereof,
+      beyond 12 feet (3658 mm) of aisle accessway length measured from the center of the seat farthest from an aisle. Exception:
+      Portions of an aisle accessway having a length not exceeding 6 feet (1829 mm) and used by a total of not more than four
+      persons.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An aisle accessway serving seating at tables or counters meets 1005.1''s capacity and is at least 12 inches wide
+      plus 1/2 inch for each additional foot, or part of one, beyond 12 feet of its length measured from the center of the
+      seat farthest from an aisle; but a portion at most 6 feet long and used by at most four people in all is exempt: tables
+      and seats aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_13_1_2_table_aisle_accessway_length
+  kind: flag
+  topic: means_of_egress
+  title: Table aisle accessways at most 30 ft to two paths (BCNYS 1030.13.1.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 357
+    lines:
+    - 16
+    - 17
+    quote: 1030.13.1.2 Seating at table aisle accessway length. The length of travel along the aisle accessway shall not exceed
+      30 feet (9144 mm) from any seat to the point where a person has a choice of two or more paths of egress travel to separate
+      exits.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Travel along an aisle accessway at tables is at most 30 feet from any seat to the point where a person has a choice
+      of two or more paths of egress travel to separate exits: tables and seats aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_13_2_rows_of_seats
+  kind: flag
+  topic: means_of_egress
+  title: Rows of 14 or fewer seats at least 12 in apart (BCNYS 1030.13.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 357
+    lines:
+    - 18
+    - 26
+    quote: '1030.13.2 Clear width of aisle accessways serving seating in rows. Where seating rows have 14 or fewer seats,
+      the minimum clear aisle accessway width shall be not less than 12 inches (305 mm) measured as the clear horizontal distance
+      from the back of the row ahead and the nearest projection of the row behind. Where chairs have automatic or self-rising
+      seats, the measurement shall be made with seats in the raised position. Where any chair in the row does not have an
+      automatic or self-rising seat, the measurements shall be made with the seat in the down position. For seats with folding
+      tablet arms, row spacing shall be deter- mined with the tablet arm in the used position. Exception: For seats with folding
+      tablet arms, row spacing is permitted to be determined with the tablet arm in the stored position where the tablet arm
+      when raised manually to vertical position in one motion automatically returns to the stored position by force of gravity.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where rows have 14 or fewer seats, the aisle accessway between them is at least 12 inches clear, measured horizontally
+      from the back of the row ahead to the nearest projection of the row behind: with automatic or self-rising seats raised,
+      any other seat down, and folding tablet arms in use (or stored, where a tablet arm raised to vertical in one motion
+      falls back to stored by gravity): seats and rows aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_13_2_1_dual_access
+  kind: flag
+  topic: means_of_egress
+  title: 'Rows reached at both ends: at most 100 seats (BCNYS 1030.13.2.1)'
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 357
+    lines:
+    - 27
+    - 32
+    quote: '1030.13.2.1 Dual access. For rows of seating served by aisles or doorways at both ends, there shall be not more
+      than 100 seats per row. The minimum clear width of 12 inches (305 mm) between rows shall be increased by 0.3 inch (7.6
+      mm) for every addi- tional seat beyond 14 seats where seats have backrests or beyond 21 where seats are without backrests.
+      The minimum clear width is not required to exceed 22 inches (559 mm). Exception: For smoke-protected or open-air assembly
+      seating, the row length limits for a 12-inch-wide (305 mm) aisle access- way, beyond which the aisle accessway minimum
+      clear width shall be increased, are in Table 1030.13.2.1.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A row of seating served by aisles or doorways at both ends has at most 100 seats, and the 12 inches between rows
+      grows by 0.3 inch for every seat beyond 14 where the seats have backrests, or beyond 21 where they don''t, to at most
+      22 inches needed; for smoke-protected or open-air seating, Table 1030.13.2.1 gives the row lengths a 12-inch aisle accessway
+      may serve before it widens: seats and rows aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1030_13_2_1_smoke_protected_row_lengths
+  kind: flag
+  topic: means_of_egress
+  title: Smoke-protected rows' seats with 12 in between (BCNYS Table 1030.13.2.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 357
+    lines:
+    - 33
+    - 49
+    quote: 'TABLE 1030.13.2.1—SMOKE-PROTECTED OR OPEN-AIR ASSEMBLY AISLE ACCESSWAYS MAXIMUM NUMBER OF SEATS PER ROW PERMITTED
+      TO HAVE A MINIMUM 12-INCH CLEAR WIDTH AISLE ACCESSWAY NUMBER OF SEATS IN THE SMOKE- Aisle or doorway at both ends of
+      row Aisle or doorway at one end of row only PROTECTED OR OPEN-AIR ASSEMBLY SEATING Seats with Seats without Seats with
+      Seats without backrests backrests backrests backrests Less than 4,000 14 21 7 10 4,000 to 6,999 15 22 7 10 7,000 to
+      9,999 16 23 8 11 10,000 to 12,999 17 24 8 11 13,000 to 15,999 18 25 9 12 16,000 to 18,999 19 26 9 12 19,000 to 21,999
+      20 27 10 13 22,000 and greater 21 28 11 14 For SI: 1 inch = 25.4 mm.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The most seats a row of smoke-protected or open-air assembly seating may have with a 12-inch clear aisle accessway,
+      by the total number of seats (with backrests and without, an aisle or doorway at both ends, then at one end only): fewer
+      than 4,000, 14, 21, 7 and 10; 4,000 to 6,999, 15, 22, 7 and 10; 7,000 to 9,999, 16, 23, 8 and 11; 10,000 to 12,999,
+      17, 24, 8 and 11; 13,000 to 15,999, 18, 25, 9 and 12; 16,000 to 18,999, 19, 26, 9 and 12; 19,000 to 21,999, 20, 27,
+      10 and 13; 22,000 and more, 21, 28, 11 and 14: seats and rows aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_13_2_2_single_access
+  kind: flag
+  topic: means_of_egress
+  title: 'Rows reached at one end: 12 in plus 0.6 in a seat (BCNYS 1030.13.2.2)'
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 357
+    lines:
+    - 50
+    - 55
+    quote: '1030.13.2.2 Single access. For rows of seating served by an aisle or doorway at only one end of the row, the minimum
+      clear width of 12 inches (305 mm) between rows shall be increased by 0.6 inch (15.2 mm) for every additional seat beyond
+      seven seats where seats have backrests or beyond 10 where seats are without backrests. The minimum clear width is not
+      required to exceed 22 inches (559 mm). Exception: For smoke-protected or open-air assembly seating, the row length limits
+      for a 12-inch-wide (305 mm) aisle access- way, beyond which the aisle accessway minimum clear width shall be increased,
+      are in Table 1030.13.2.1.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'For a row served by an aisle or doorway at one end only, the 12 inches between rows grows by 0.6 inch for every
+      seat beyond seven where the seats have backrests, or beyond 10 where they don''t, to at most 22 inches needed; for smoke-protected
+      or open-air seating, Table 1030.13.2.1 gives the row lengths a 12-inch aisle accessway may serve before it widens: seats
+      and rows aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_14_1_ramped_aisles
+  kind: flag
+  topic: means_of_egress
+  title: Ramped aisles at most 1 in 8, 1 in 12 on an accessible route (BCNYS 1030.14.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 357
+    lines:
+    - 56
+    - 57
+    quote: 1030.14 Assembly aisle walking surfaces. Ramped aisles shall comply with Sections 1030.14.1 through 1030.14.1.3.
+      Stepped aisles shall comply with Sections 1030.14.2 through 1030.14.2.4.
+  - file: gov.ny.building.2025.pdf
+    page: 358
+    lines:
+    - 3
+    - 6
+    quote: 1030.14.1 Ramped aisles. Aisles that are sloped more than 1 unit vertical in 20 units horizontal (5-percent slope)
+      shall be consid- ered to be a ramped aisle. Ramped aisles that serve as part of an accessible route in accordance with
+      Sections 1009 and 1109.2 shall have a maximum slope of 1 unit vertical in 12 units horizontal (8-percent slope). The
+      slope of other ramped aisles shall not exceed 1 unit vertical in 8 units horizontal (12.5-percent slope).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Ramped aisles comply with 1030.14.1 to 1030.14.1.3 and stepped aisles with 1030.14.2 to 1030.14.2.4: an aisle sloped
+      more than 1 in 20 (5 percent) is a ramped aisle; one that is part of an accessible route per 1009 and 1109.2 is at most
+      1 in 12 (8 percent), and any other at most 1 in 8 (12.5 percent): aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i. 1109.2 isn't brought in.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_14_1_1_cross_slope
+  kind: flag
+  topic: means_of_egress
+  title: A ramped aisle's cross slope at most 1 in 48 (BCNYS 1030.14.1.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 358
+    lines:
+    - 7
+    - 8
+    quote: 1030.14.1.1 Cross slope. The slope measured perpendicular to the direction of travel of a ramped aisle shall not
+      be steeper than 1 unit vertical in 48 units horizontal (2-percent slope).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A ramped aisle''s slope measured perpendicular to the direction of travel is not steeper than 1 in 48 (2 percent):
+      aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_14_1_2_ramped_aisle_landings
+  kind: flag
+  topic: means_of_egress
+  title: Landings for ramped aisles per 1012.6 (BCNYS 1030.14.1.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 358
+    lines:
+    - 9
+    - 10
+    quote: 1030.14.1.2 Landings. Ramped aisles shall have landings in accordance with Sections 1012.6 through 1012.6.5. Landings
+      for ramped aisles shall be permitted to overlap required aisles or cross aisles.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Ramped aisles have landings per 1012.6 to 1012.6.5, which may overlap required aisles or cross aisles: aisles aren''t
+      in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_14_1_3_ramped_aisle_edge_protection
+  kind: flag
+  topic: means_of_egress
+  title: Edge protection for ramped aisles per 1012.10 (BCNYS 1030.14.1.3)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 358
+    lines:
+    - 11
+    - 13
+    quote: '1030.14.1.3 Edge protection. Ramped aisles shall have edge protection in accordance with Sections 1012.10 and
+      1012.10.1. Exception: In assembly spaces with fixed seating, edge protection is not required on the sides of ramped
+      aisles where the ramped aisles provide access to the adjacent seating and aisle accessways.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Ramped aisles have edge protection per 1012.10 and 1012.10.1; but in assembly spaces with fixed seating, not on
+      the sides where the ramped aisle gives access to the adjacent seating and aisle accessways: aisles aren''t in the model,
+      so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_14_2_stepped_aisles
+  kind: flag
+  topic: means_of_egress
+  title: Aisles steeper than 1 in 8 are stepped aisles (BCNYS 1030.14.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 358
+    lines:
+    - 14
+    - 16
+    quote: 1030.14.2 Stepped aisles. Aisles with a slope exceeding one unit vertical in eight units horizontal (12.5-percent
+      slope) shall consist of a series of risers and treads that extends across the full width of aisles and complies with
+      Sections 1030.14.2.1 through 1030.14.2.4.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An aisle sloped more than 1 in 8 (12.5 percent) is a series of risers and treads across its full width, complying
+      with 1030.14.2.1 to 1030.14.2.4: stepped aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_14_2_1_stepped_aisle_treads
+  kind: flag
+  topic: means_of_egress
+  title: Stepped aisle treads at least 11 in, uniform (BCNYS 1030.14.2.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 358
+    lines:
+    - 17
+    - 18
+    quote: '1030.14.2.1 Treads. Tread depths shall be not less than 11 inches (279 mm) and shall have dimensional uniformity.
+      Exception: The tolerance between adjacent treads shall not exceed 3/16 inch (4.8 mm).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Stepped aisle treads are at least 11 inches deep and uniform, adjacent treads differing by at most 3/16 inch: stepped
+      aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_14_2_2_stepped_aisle_risers
+  kind: flag
+  topic: means_of_egress
+  title: Stepped aisle risers 4 to 8 in, uniform (BCNYS 1030.14.2.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 358
+    lines:
+    - 19
+    - 29
+    quote: '1030.14.2.2 Risers. Where the gradient of stepped aisles is to be the same as the gradient of adjoining seating
+      areas, the riser height shall be not less than 4 inches (102 mm) nor more than 8 inches (203 mm) and shall be uniform
+      within each flight. Exceptions: 1. Riser height nonuniformity shall be limited to the extent necessitated by changes
+      in the gradient of the adjoining seating area to maintain adequate sightlines. Where nonuniformities exceed 3/16 inch
+      (4.8 mm) between adjacent risers, the exact location of such nonuniformities shall be indicated with a distinctive marking
+      stripe on each tread at the nosing or leading edge adjacent to the nonuniform risers. Such stripe shall be not less
+      than 1 inch (25 mm), and not more than 2 inches (51 mm), wide. The edge marking stripe shall be distinctively different
+      from the contrasting marking stripe. 2. Riser heights not exceeding 9 inches (229 mm) shall be permitted where they
+      are necessitated by the slope of the adjacent seating areas to maintain sightlines.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where a stepped aisle''s gradient matches the adjoining seating''s, its risers are at least 4 and at most 8 inches
+      high and uniform within each flight; but they may vary only as far as the seating''s changing gradient needs for sightlines,
+      each variation over 3/16 inch between adjacent risers marked by a distinctive stripe 1 to 2 inches wide on each tread
+      at the nosing next to it, distinct from the contrasting marking stripe; and risers up to 9 inches are permitted where
+      the adjacent seating''s slope needs them for sightlines: stepped aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_14_2_2_1_construction_tolerances
+  kind: flag
+  topic: means_of_egress
+  title: Stepped aisle riser tolerances (BCNYS 1030.14.2.2.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 358
+    lines:
+    - 30
+    - 35
+    quote: 1030.14.2.2.1 Construction tolerances. The tolerance between adjacent risers on a stepped aisle that were designed
+      to be equal height shall not exceed 3/16 inch (4.8 mm). Where the stepped aisle is designed in accordance with Exception
+      1 of Section 1030.14.2.2, the stepped aisle shall be constructed so that each riser of unequal height, determined in
+      the direction of descent, is not more than 3/8 inch (9.5 mm) in height different from adjacent risers where stepped
+      aisle treads are less than 22 inches (560 mm) in depth and 3/4 inch (19.1 mm) in height different from adjacent risers
+      where stepped aisle treads are 22 inches (560 mm) or greater in depth.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Adjacent risers designed equal differ by at most 3/16 inch; where the stepped aisle takes 1030.14.2.2''s exception
+      1, each riser of unequal height differs from the adjacent ones, in the direction of descent, by at most 3/8 inch where
+      its treads are less than 22 inches deep, and by at most 3/4 inch where they are 22 inches or more: stepped aisles aren''t
+      in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_14_2_3_tread_contrasting_marking_stripe
+  kind: flag
+  topic: means_of_egress
+  title: A 1 to 2 in contrasting stripe on each tread (BCNYS 1030.14.2.3)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 358
+    lines:
+    - 36
+    - 40
+    quote: '1030.14.2.3 Tread contrasting marking stripe. A contrasting marking stripe shall be provided on each tread at
+      the nosing or leading edge such that the location of each tread is readily apparent when viewed in descent. Such stripe
+      shall be not less than 1 inch (25 mm) and not more than 2 inches (51 mm) wide. Exception: The contrasting marking stripe
+      is permitted to be omitted where tread surfaces are such that the location of each tread is readily apparent when viewed
+      in descent.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Each tread has a contrasting marking stripe at least 1 inch and at most 2 inches wide at its nosing or leading
+      edge, so each tread is readily seen in descent; but it may be left out where the tread surfaces already make each tread
+      readily apparent in descent: stepped aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_14_2_4_nosing_and_profile
+  kind: flag
+  topic: means_of_egress
+  title: Stepped aisle nosings per 1011.5.5 (BCNYS 1030.14.2.4)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 358
+    lines:
+    - 41
+    - 41
+    quote: 1030.14.2.4 Nosing and profile. Nosing and riser profile shall comply with Sections 1011.5.5 through 1011.5.5.3.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A stepped aisle''s nosing and riser profile comply with 1011.5.5 to 1011.5.5.3: stepped aisles aren''t in the model,
+      so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i. 1011.5.5 to 1011.5.5.3 aren't brought in.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_15_seat_stability
+  kind: flag
+  topic: means_of_egress
+  title: Assembly seats fastened to the floor (BCNYS 1030.15)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 358
+    lines:
+    - 42
+    - 58
+    quote: '1030.15 Seat stability. In a building, room or space used for assembly purposes, the seats shall be securely fastened
+      to the floor. Exceptions: 1. In a building, room or space used for assembly purposes or portions thereof without ramped
+      or tiered floors for seating and with 200 or fewer seats, the seats shall not be required to be fastened to the floor.
+      2. In a building, room or space used for assembly purposes or portions thereof with seating at tables and without ramped
+      or tiered floors for seating, the seats shall not be required to be fastened to the floor. 3. In a building, room or
+      space used for assembly purposes or portions thereof without ramped or tiered floors for seating and with greater than
+      200 seats, the seats shall be fastened together in groups of not less than three or the seats shall be securely fastened
+      to the floor. 4. In a building, room or space used for assembly purposes where flexibility of the seating arrangement
+      is an integral part of the design and function of the space and seating is on tiered levels, not more than 200 seats
+      shall not be required to be fastened to the floor. Plans showing seating, tiers and aisles shall be submitted for approval.
+      5. Groups of seats within a building, room or space used for assembly purposes separated from other seating by railings,
+      guards, partial height walls or similar barriers with level floors and having not more than 14 seats per group shall
+      not be required to be fastened to the floor. 6. Seats intended for musicians or other performers and separated by railings,
+      guards, partial height walls or similar barri- ers shall not be required to be fastened to the floor.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In a building, room or space used for assembly purposes, seats are securely fastened to the floor; but not where
+      there are no ramped or tiered floors for seating and 200 or fewer seats, nor at tables without ramped or tiered floors;
+      over 200 seats without ramped or tiered floors, they are fastened together in groups of at least three or fastened to
+      the floor; where flexible seating is integral to a space on tiered levels, up to 200 seats need not be fastened (plans
+      showing seating, tiers and aisles submitted for approval); nor groups of at most 14 seats on level floors set apart
+      by railings, guards, partial height walls or similar barriers; nor seats for musicians or other performers set apart
+      so: seats aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_16_handrails
+  kind: flag
+  topic: means_of_egress
+  title: Handrails on stepped aisles and steep ramped aisles (BCNYS 1030.16)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 359
+    lines:
+    - 3
+    - 13
+    quote: '1030.16 Handrails. Ramped aisles having a slope exceeding one unit vertical in 15 units horizontal (6.7-percent
+      slope) and stepped aisles shall be provided with handrails in compliance with Section 1014 located either at one or
+      both sides of the aisle or within the aisle width. Where stepped aisles have seating on one side and the aisle width
+      is 74 inches (1880 mm) or greater, two handrails are required. Where two handrails are required, one of the handrails
+      shall be within 30 inches (762 mm) horizontally of the side of the tiered floor adjacent to the stepped aisle. Exceptions:
+      1. Handrails are not required for ramped aisles with seating on both sides. 2. Handrails are not required where, at
+      the side of the aisle, there is a guard with a top surface that complies with the grasp- ability requirements of handrails
+      in accordance with Section 1014.4. 3. Handrail extensions are not required at the top and bottom of stepped aisles and
+      ramped aisles to permit crossovers within the aisles.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Ramped aisles sloped more than 1 in 15 (6.7 percent) and stepped aisles have handrails per 1014, at one or both
+      sides or within the aisle width; a stepped aisle with seating on one side and 74 inches wide or more has two, one within
+      30 inches horizontally of the side of the tiered floor next to it; but no handrails are needed on ramped aisles with
+      seating on both sides, nor where a guard at the aisle''s side has a top as graspable as a handrail per 1014.4, and no
+      extensions at the top and bottom where they would block crossovers: aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i. 1014 and 1014.4 aren't brought in.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_16_1_discontinuous_mid_aisle_handrails
+  kind: flag
+  topic: means_of_egress
+  title: Mid-aisle handrails broken every five rows or fewer (BCNYS 1030.16.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 359
+    lines:
+    - 14
+    - 18
+    quote: 1030.16.1 Discontinuous mid-aisle handrails. Where there is seating on both sides of the aisle, the mid-aisle handrails
+      shall be discontinuous. Where a stepped aisle is required to have two handrails, the mid-aisle handrails shall be discontinuous.
+      Gaps or breaks shall be provided at intervals not exceeding five rows to facilitate access to seating and to permit
+      crossing from one side of the aisle to the other. These gaps or breaks shall have a clear width of not less than 22
+      inches (559 mm) and not greater than 36 inches (914 mm), measured horizontally, and the mid-aisle handrail shall have
+      rounded terminations or bends.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where there is seating on both sides of the aisle, or a stepped aisle needs two handrails, mid-aisle handrails
+      are discontinuous, with gaps or breaks at most every five rows, each at least 22 and at most 36 inches clear, measured
+      horizontally, and the handrail ends rounded or bent: aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_16_2_handrail_termination
+  kind: flag
+  topic: means_of_egress
+  title: Side handrails return or continue (BCNYS 1030.16.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 359
+    lines:
+    - 19
+    - 20
+    quote: 1030.16.2 Handrail termination. Handrails located on the side of stepped aisles shall return to a wall, guard or
+      the walking surface or shall be continuous to the handrail of an adjacent stepped aisle flight.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Handrails at the side of stepped aisles return to a wall, guard or the walking surface, or continue to the handrail
+      of the next stepped aisle flight: stepped aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_16_3_mid_aisle_termination
+  kind: flag
+  topic: means_of_egress
+  title: Mid-aisle handrails end within 18 in of the lowest riser (BCNYS 1030.16.3)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 359
+    lines:
+    - 21
+    - 24
+    quote: '1030.16.3 Mid-aisle termination. Mid-aisle handrails shall not extend beyond the lowest riser and shall terminate
+      within 18 inches (381 mm), measured horizontally, from the lowest riser. Handrail extensions are not required. Exception:
+      Mid-aisle handrails shall be permitted to extend beyond the lowest riser where the handrail extensions do not obstruct
+      the width of the cross aisle.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Mid-aisle handrails don''t extend beyond the lowest riser and end within 18 inches of it, measured horizontally,
+      with no extensions needed; but they may extend beyond it where their extensions don''t obstruct the cross aisle''s width:
+      stepped aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_16_4_rails
+  kind: flag
+  topic: means_of_egress
+  title: A rail about 12 in below mid-aisle handrails (BCNYS 1030.16.4)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 359
+    lines:
+    - 25
+    - 27
+    quote: 1030.16.4 Rails. Where mid-aisle handrails are provided in stepped aisles, there shall be an additional rail located
+      approximately 12 inches (305 mm) below the handrail. The rail shall be adequate in strength and attachment in accordance
+      with Section 1607.9.1.2.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where stepped aisles have mid-aisle handrails, an additional rail is about 12 inches below the handrail, its strength
+      and attachment per 1607.9.1.2: stepped aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i. 1607.9.1.2 isn't brought in.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_17_assembly_guards
+  kind: flag
+  topic: means_of_egress
+  title: Guards beside assembly seating per 1015 (BCNYS 1030.17)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 359
+    lines:
+    - 28
+    - 31
+    quote: 1030.17 Assembly guards. Guards adjacent to seating in a building, room or space used for assembly purposes shall
+      be provided where required by Section 1015 and shall be constructed in accordance with Section 1015 except where provided
+      in accordance with Sections 1030.17.1 through 1030.17.4. At bleachers, grandstands and folding and telescopic seating,
+      guards must be provided where required by ICC 300 and Section 1030.17.1.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Guards next to seating in a building, room or space used for assembly purposes are provided where 1015 requires
+      them and built per 1015, except as 1030.17.1 to 1030.17.4 provide; at bleachers, grandstands and folding and telescopic
+      seating, guards are provided where ICC 300 and 1030.17.1 require them: guards and seating aren''t in the model, so a
+      person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i. 1015 and ICC 300 aren't brought in.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_17_1_perimeter_guards
+  kind: flag
+  topic: means_of_egress
+  title: Perimeter guards where seating is over 30 in up, 42 in high (BCNYS 1030.17.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 359
+    lines:
+    - 32
+    - 40
+    quote: '1030.17.1 Perimeter guards. Perimeter guards shall be provided where the footboards or walking surface of seating
+      facilities are more than 30 inches (762 mm) above the floor or grade below. Where the seatboards are adjacent to the
+      perimeter, guard height shall be 42 inches (1067 mm) high minimum, measured from the seatboard. Where the seats are
+      self-rising, guard height shall be 42 inches (1067 mm) high minimum, measured from the floor surface. Where there is
+      an aisle between the seating and the perim- eter, the guard height shall be measured in accordance with Section 1015.3.
+      Exceptions: 1. Guards that impact sightlines shall be permitted to comply with Section 1030.17.3. 2. Bleachers, grandstands
+      and folding and telescopic seating shall not be required to have perimeter guards where the seating is located adjacent
+      to a wall and the space between the wall and the seating is less than 4 inches (102 mm).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Perimeter guards are provided where the footboards or walking surface of seating are more than 30 inches above
+      the floor or grade below: at least 42 inches high measured from the seatboard where seatboards adjoin the perimeter,
+      or from the floor where seats are self-rising, and measured per 1015.3 where an aisle lies between the seating and the
+      perimeter; but guards that impact sightlines may meet 1030.17.3, and bleachers, grandstands and folding and telescopic
+      seating need none where the seating is next to a wall less than 4 inches away: guards and seating aren''t in the model,
+      so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i. 1015.3 isn't brought in.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_17_2_cross_aisle_guards
+  kind: flag
+  topic: means_of_egress
+  title: Cross aisle guards, at least 26 in where 30 in or less above (BCNYS 1030.17.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 359
+    lines:
+    - 41
+    - 46
+    quote: '1030.17.2 Cross aisles. Cross aisles located more than 30 inches (762 mm) above the floor or grade below shall
+      have guards in accordance with Section 1015. Where an elevation change of 30 inches (762 mm) or less occurs between
+      a cross aisle and the adjacent floor or grade below, guards not less than 26 inches (660 mm) above the aisle floor shall
+      be provided. Exception: Where the backs of seats on the front of the cross aisle project 24 inches (610 mm) or more
+      above the adjacent floor of the aisle, a guard need not be provided.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Cross aisles more than 30 inches above the floor or grade below have guards per 1015; where the drop between a
+      cross aisle and the floor or grade below is 30 inches or less, guards at least 26 inches above the aisle floor; but
+      none where the backs of the seats at the front of the cross aisle rise 24 inches or more above the aisle''s floor: guards
+      and cross aisles aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i. 1015 isn't brought in.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_17_3_sightline_constrained_guard_heights
+  kind: flag
+  topic: means_of_egress
+  title: Guards that would block sightlines at least 26 in (BCNYS 1030.17.3)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 359
+    lines:
+    - 47
+    - 50
+    quote: 1030.17.3 Sightline-constrained guard heights. Unless subject to the requirements of Section 1030.17.4, a fascia
+      or railing system in accordance with the guard requirements of Section 1015 and having a minimum height of 26 inches
+      (660 mm) shall be provided where the floor or footboard elevation is more than 30 inches (762 mm) above the floor or
+      grade below and the fascia or railing would otherwise interfere with the sightlines of immediately adjacent seating.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Unless 1030.17.4 applies, a fascia or railing system meeting 1015''s guard requirements and at least 26 inches
+      high is provided where the floor or footboard is more than 30 inches above the floor or grade below and the fascia or
+      railing would otherwise interfere with the sightlines of the seating right beside it: guards and seating aren''t in
+      the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i. 1015 isn't brought in.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1030_17_4_guards_at_end_of_aisles
+  kind: flag
+  topic: means_of_egress
+  title: Guards at the foot of aisles at least 36 in high (BCNYS 1030.17.4)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] or assembly_fixed_seating or assembly_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 359
+    lines:
+    - 51
+    - 54
+    quote: 1030.17.4 Guards at the end of aisles. A fascia or railing system complying with the guard requirements of Section
+      1015 shall be provided for the full width of the aisle where the foot of the aisle is more than 30 inches (762 mm) above
+      the floor or grade below. The fascia or railing shall be not less than 36 inches (914 mm) high and shall provide not
+      less than 42 inches (1067 mm) measured diagonally between the top of the rail and the nosing of the nearest tread.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where the foot of an aisle is more than 30 inches above the floor or grade below, a fascia or railing system meeting
+      1015''s guard requirements runs the aisle''s full width, at least 36 inches high and giving at least 42 inches measured
+      diagonally between the top of the rail and the nosing of the nearest tread: guards and aisles aren''t in the model,
+      so a person''s check.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: not_applicable
+    note: 'Group R-2 alone, no fixed assembly seating and no room or space used for assembly purposes (stated): Section 1030
+      doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      assembly_fixed_seating: false
+    expect: needs_review
+    note: 'Group R-2 alone, but whether a room or space is used for assembly purposes isn''t stated (a description may hold
+      only some floors): a person checks.'
+  - given:
+      occupancy_group: B
+      assembly_fixed_seating: false
+      assembly_spaces: true
+    expect: needs_review
+    note: 'Group B with a room used for assembly purposes (303.1.2: a small one is part of Group B): a person checks.'
+  - given:
+      occupancy_group: A-3
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Group A-3: an assembly occupancy, a person checks.'
+  - given:
+      occupancy_group: mixed
+      assembly_fixed_seating: false
+      assembly_spaces: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group A, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9i. 1015 isn't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft

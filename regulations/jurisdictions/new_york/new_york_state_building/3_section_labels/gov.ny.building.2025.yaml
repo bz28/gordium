@@ -1302,6 +1302,21 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:factored_load:
+    label: reference
+    topic: definitions
+    reason: 'Defines FACTORED LOAD, a term STRENGTH prints in italics: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 34
+      - 34
+      quote: '[BS] FACTORED LOAD. The product of a nominal load and a load factor.'
+    piece_sha256: 027e7cb3f3c4e5cd86844253413911be7dc171e37419248e370a4a97e928a32f
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:fire_alarm_box_manual:
     label: reference
     topic: definitions
@@ -2170,6 +2185,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:limit_state:
+    label: reference
+    topic: definitions
+    reason: 'Defines LIMIT STATE, a term STRENGTH prints in italics: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 11
+      - 12
+      quote: '[BS] LIMIT STATE. A condition beyond which a structure or member becomes unfit for service and is judged to
+        be no longer useful for its intended function (serviceability limit state) or to be unsafe (strength limit state).'
+    piece_sha256: fba81c80bc26aa8d0ed6064bf929bec443ecd98720269089ab4ef5589b998e69
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:limited_verbal_or_physical_assistance:
     label: reference
     topic: definitions
@@ -2232,6 +2263,23 @@ labels:
         nonresidential use that is operated by the tenant.'
     piece_sha256: 088271b43c22b4cbad6ffceb275a7873d0eeb9591a75997b76125391ba44c113
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:load_and_resistance_factor_design_lrfd:
+    label: reference
+    topic: definitions
+    reason: 'Defines LOAD AND RESISTANCE FACTOR DESIGN (LRFD), a term STRENGTH prints in italics: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 40
+      - 42
+      quote: '[BS] LOAD AND RESISTANCE FACTOR DESIGN (LRFD). A method of proportioning structural members and their connections
+        using load and resistance factors such that no applicable limit state is reached when the structure is subjected to
+        appropriate load combina- tions. The term “LRFD” is used in the design of steel and wood structures.'
+    piece_sha256: 8fa1dd0469a59f7b9282c5c1f28f81d8216520837ad943329d6d1970e242264c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:load_factor:
@@ -3006,6 +3054,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:resistance_factor:
+    label: reference
+    topic: definitions
+    reason: 'Defines RESISTANCE FACTOR, a term STRENGTH prints in italics: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 59
+      lines:
+      - 8
+      - 9
+      quote: '[BS] RESISTANCE FACTOR. A factor that accounts for deviations of the actual strength from the nominal strength
+        and the manner and consequences of failure (also called “strength reduction factor”).'
+    piece_sha256: d96b1a9d5861453ce8b4916492c29cd87e754c9ce78d5fba44db38c5ebf87c8b
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:roof_assembly_for_application_to_chapter_15_only:
     label: reference
     topic: definitions
@@ -3501,6 +3565,32 @@ labels:
         which the finished'
     piece_sha256: f853582ba810f91b14ff8efce7077975c513251df3c871f6d9f8a24157a967ea
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:strength:
+    label: reference
+    topic: definitions
+    reason: 'Defines STRENGTH, a term 1030.16.4 prints in italics: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 63
+      lines:
+      - 17
+      - 31
+      quote: '[BS] STRENGTH. This term is defined two ways, the first for use in Chapter 16 and the second for use in Chapter
+        21. For Chapter 16: Nominal strength. The capacity of a structure or member to resist the effects of loads, as determined
+        by computations using specified material strengths and dimensions and equations derived from accepted principles of
+        structural mechanics or by field tests or laboratory tests of scaled models, allowing for modeling effects and differences
+        between laboratory and field conditions. Required strength. Strength of a member, cross section or connection required
+        to resist factored loads or related internal moments and forces in such combinations as stipulated by these provisions.
+        Strength design. A method of proportioning structural members such that the computed forces produced in the members
+        by factored loads do not exceed the member design strength [also called “load and resistance factor design” (LRFD)].
+        The term “strength design” is used in the design of concrete and masonry structural elements. For Chapter 21: Design
+        strength. Nominal strength multiplied by a strength reduction factor. Nominal strength. Strength of a member or cross
+        section calculated in accordance with these provisions before application of any strength-reduction factors. Required
+        strength. Strength of a member or cross section required to resist factored loads.'
+    piece_sha256: 44ededc6649e1a9a8e08cc5fcf9b86b724fc46a76d2a693a323df0ca512c3eed
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:structure:
@@ -7899,8 +7989,8 @@ labels:
   '1018.2':
     label: reference
     topic: means_of_egress
-    reason: 'A pointer: aisles and aisle accessways serving assembly spaces comply with 1030 (1030.1 to 1030.9 brought in by
-      section group 9h, the rest to follow); quoted by 1018.1''s flag.'
+    reason: 'A pointer: aisles and aisle accessways serving assembly spaces comply with 1030 (brought in whole by section groups
+      9h and 9i); quoted by 1018.1''s flag.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 342
@@ -10108,6 +10198,21 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '1030':
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 353
+      lines:
+      - 11
+      - 11
+      quote: SECTION 1030—ASSEMBLY
+    piece_sha256: 112761cf4ca72bcedae9480e30110f74560e1d4532db91a8fcf15b0c81f7583a
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   '1030.1':
     label: reference
     topic: means_of_egress
@@ -10750,6 +10855,867 @@ labels:
         between stairways and stepped aisles shall comply with Section 1030.10.
     piece_sha256: a99a534c1083690bccccc6fb2523beeaeb693693edbaa540173430bb3777d66e
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9h.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1030.10':
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: transitions between stairways and stepped aisles comply with 1030.10.1 or 1030.10.2; quoted by 1030.10.1''s
+      flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 24
+      - 24
+      quote: 1030.10 Transitions. Transitions between stairways and stepped aisles shall comply with either Section 1030.10.1
+        or 1030.10.2.
+    piece_sha256: 9d03ca2c6c0ef4c3d452578bfc90231ea11ea3de43868c5f9e251d373e376580
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.10.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A transition between a stairway and a stepped aisle meets 1030.10.1 or 1030.10.2: where the stepped aisles, transitions
+      and stairways keep the stepped aisle''s riser and tread dimensions, they comply with 1030.14 as one exit access component:
+      stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 25
+      - 27
+      quote: 1030.10.1 Transitions to stairways that maintain stepped aisle riser and tread dimensions. Stepped aisles, transitions
+        and stairways that maintain the stepped aisle riser and tread dimensions shall comply with Section 1030.14 as one
+        exit access component.
+    piece_sha256: 9cc07f0804ae003f3089ddd4ab55fedecac58104bb8848ff5fd35d6e809769dc
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.10.2:
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: transitions to stairways with other riser and tread dimensions comply with 1030.10.2.1 to 1030.10.3;
+      quoted by 1030.10.2.1''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 28
+      - 30
+      quote: 1030.10.2 Transitions to stairways that do not maintain stepped aisle riser and tread dimensions. Transitions
+        between stairways and stepped aisles having different riser and tread dimensions shall comply with Sections 1030.10.2.1
+        through 1030.10.3.
+    piece_sha256: b21bbdf29c053fa087f251d2df8144de5c514f20017e594662aeca2f4c212c17
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.10.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where a stairway and a stepped aisle with different riser and tread dimensions meet (1030.10.2 to 1030.10.3)
+      in a straight run, the transition is at least 22 inches deep where the treads on its descending side are deeper, or
+      at least 30 inches where they are shallower: stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 31
+      - 36
+      quote: '1030.10.2.1 Stairways and stepped aisles in a straight run. Where stairways and stepped aisles are in a straight
+        run, transi- tions shall have one of the following: 1. A depth of not less than 22 inches (559 mm) where the treads
+        on the descending side of the transition have greater depth. 2. A depth of not less than 30 inches (762 mm) where
+        the treads on the descending side of the transition have lesser depth.'
+    piece_sha256: 058b392c59c0d0a2e2dcf0b49e42b29fe5c29ded40c9bddeaf3ba5ea27dec609
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.10.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where the stairway changes direction from the stepped aisle, the transition between them is at least 11 inches
+      deep, or the stepped aisle''s tread depth if that is more: stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 37
+      - 39
+      quote: 1030.10.2.2 Stairways that change direction from stepped aisles. Transitions where the stairway changes direction
+        from the stepped aisle shall have a minimum depth of 11 inches (280 mm) or the stepped aisle tread depth, whichever
+        is greater, between the stepped aisle and stairway.
+    piece_sha256: 31753cbaff428a1e844bd3e35d84322c00826c82af169d99076adcb7144dcefb
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.10.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'A distinctive marking stripe at least 1 inch and at most 2 inches wide is at each nosing or leading edge next
+      to the transition, distinctly different from the stepped aisle''s contrasting marking stripe: stepped aisles aren''t
+      in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 40
+      - 42
+      quote: 1030.10.3 Transition marking. A distinctive marking stripe shall be provided at each nosing or leading edge adjacent
+        to the tran- sition. Such stripe shall be not less than 1 inch (25 mm), and not more than 2 inches (51 mm), wide.
+        The edge marking stripe shall be distinctively different from the stepped aisle contrasting marking stripe.
+    piece_sha256: fa666605a15fb486db0682da59911ace980323efa96170a4b0bbbe5cc5d7fb35
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1030.11':
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: stepped aisles changing direction at vomitories comply with 1030.11.1, and transitions above a vomitory
+      with 1030.11.2; quoted by 1030.11.1''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 43
+      - 44
+      quote: 1030.11 Stepped aisles at vomitories. Stepped aisles that change direction at vomitories shall comply with Section
+        1030.11.1 Tran- sitions between a stepped aisle above a vomitory and a stepped aisle to the side of a vomitory shall
+        comply with Section 1030.11.2.
+    piece_sha256: 43f4ced0f3d38f6e13285651809a6f65b20d5bd551cfceb165c989d6fe770e56
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.11.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where a stepped aisle changes direction at a vomitory (1030.11), its treads there are at least 11 inches deep,
+      or the stepped aisle''s tread depth if that is more, and a tread''s height above a transition at a vomitory complies
+      with 1030.14.2.2: stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 45
+      - 47
+      quote: 1030.11.1 Stepped aisles that change direction at vomitories. Stepped aisle treads where the stepped aisle changes
+        direction at a vomitory shall have a depth of not less than 11 inches (280 mm) or the stepped aisle tread depth, whichever
+        is greater. The height of a stepped aisle tread above a transition at a vomitory shall comply with Section 1030.14.2.2.
+    piece_sha256: 1ef777b2b401476a140c6a6b20734dcf41df807d402f6f4a9efb1fc31d8efb0c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.11.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A transition between the stepped aisle above a vomitory and the stepped aisles beside it is at least 11 inches
+      deep, or the stepped aisle''s tread depth if that is more: stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 48
+      - 50
+      quote: 1030.11.2 Stepped aisle transitions at the top of vomitories. Transitions between the stepped aisle above a vomitory
+        and stepped aisles to the side of a vomitory shall have a depth of not less than 11 inches (280 mm) or the stepped
+        aisle tread depth, whichever is greater.
+    piece_sha256: 3c9b7bd7f339b3c548887ff339dc2b6c7c4ee7fb5bdbe89c4c64ede96e32af53
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1030.12':
+    label: flag
+    topic: means_of_egress
+    reason: 'Aisles, stepped aisles and ramped aisles are built of materials consistent with the types permitted for the building''s
+      type of construction; wood handrails are permitted in every type: aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 51
+      - 53
+      quote: '1030.12 Construction. Aisles, stepped aisles and ramped aisles shall be built of materials consistent with the
+        types permitted for the type of construction of the building. Exception: Wood handrails shall be permitted for all
+        types of construction.'
+    piece_sha256: 173eb1f9452eb149c02bb990551faf328953e8f9780b002fb5224a51bf7efaa7
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.12.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'The surface of aisles, stepped aisles and ramped aisles is of slip-resistant materials, securely attached, and
+      a stepped aisle''s surface complies with 1011.7.1: aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 54
+      - 55
+      quote: 1030.12.1 Walking surface. The surface of aisles, stepped aisles and ramped aisles shall be of slip-resistant
+        materials that are securely attached. The surface for stepped aisles shall comply with Section 1011.7.1.
+    piece_sha256: 4f79528daea43237f093e841a112c57b96dfbd659ac84696ed22e41001608a35
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.12.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Outdoor aisles, stepped aisles and ramped aisles, and the outdoor approaches to them, are designed so that water
+      doesn''t accumulate on the walking surface: aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 56
+      - 57
+      quote: 1030.12.2 Outdoor conditions. Outdoor aisles, stepped aisles and ramped aisles and outdoor approaches to aisles,
+        stepped aisles and ramped aisles shall be designed so that water will not accumulate on the walking surface.
+    piece_sha256: 9050b6c55c5090ae310a797533c933ffa4398ed2fca60d91b609ac7a0d6ea0f0
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1030.13':
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: aisle accessways for seating at tables comply with 1030.13.1, for seating in rows with 1030.13.2;
+      quoted by 1030.13.1''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 356
+      lines:
+      - 58
+      - 59
+      quote: 1030.13 Aisle accessways. Aisle accessways for seating at tables shall comply with Section 1030.13.1. Aisle accessways
+        for seating in rows shall comply with Section 1030.13.2.
+    piece_sha256: 39d693d07f02a05c4d6faa05f9e0a8accc6f0f03ad6875b042e68d5a40c57fb6
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.13.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Aisle accessways serve seating at tables per 1030.13.1 and seating in rows per 1030.13.2: where seating at a
+      table or counter is next to an aisle or aisle accessway, its required clear width is measured to a line 19 inches from
+      and parallel to the table''s or counter''s edge, measured perpendicular to that side; other side boundaries are measured
+      to walls, edges of seating and tread edges; where fixed seats serve the tables or counters, the width is measured from
+      the back of the seat: tables and seats aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 357
+      lines:
+      - 3
+      - 9
+      quote: '1030.13.1 Seating at tables. Where seating is located at a table or counter and is adjacent to an aisle or aisle
+        accessway, the measurement of required clear width of the aisle or aisle accessway shall be made to a line 19 inches
+        (483 mm) away from and parallel to the edge of the table or counter. The 19-inch (483 mm) distance shall be measured
+        perpendicular to the side of the table or counter. In the case of other side boundaries for aisles or aisle accessways,
+        the clear width shall be measured to walls, edges of seating and tread edges. Exception: Where tables or counters
+        are served by fixed seats, the width of the aisle or aisle accessway shall be measured from the back of the seat.'
+    piece_sha256: 4f93df7ce5e19c7009ddbabed59d627420a4aecebbff20a1fc94077cba762cb0
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.13.1.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'An aisle accessway serving seating at tables or counters meets 1005.1''s capacity and is at least 12 inches wide
+      plus 1/2 inch for each additional foot, or part of one, beyond 12 feet of its length measured from the center of the
+      seat farthest from an aisle; but a portion at most 6 feet long and used by at most four people in all is exempt: tables
+      and seats aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 357
+      lines:
+      - 10
+      - 15
+      quote: '1030.13.1.1 Aisle accessway capacity and width for seating at tables. Aisle accessways serving arrangements
+        of seating at tables or counters shall comply with the capacity requirements of Section 1005.1 but shall not have
+        less than 12 inches (305 mm) of width plus 1/2 inch (12.7 mm) of width for each additional 1 foot (305 mm), or fraction
+        thereof, beyond 12 feet (3658 mm) of aisle accessway length measured from the center of the seat farthest from an
+        aisle. Exception: Portions of an aisle accessway having a length not exceeding 6 feet (1829 mm) and used by a total
+        of not more than four persons.'
+    piece_sha256: dd209f3661674cd6cddf0aa618924d55362bc3daa5f25f915e55b84903e3cf48
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.13.1.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Travel along an aisle accessway at tables is at most 30 feet from any seat to the point where a person has a
+      choice of two or more paths of egress travel to separate exits: tables and seats aren''t in the model, so a person''s
+      check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 357
+      lines:
+      - 16
+      - 17
+      quote: 1030.13.1.2 Seating at table aisle accessway length. The length of travel along the aisle accessway shall not
+        exceed 30 feet (9144 mm) from any seat to the point where a person has a choice of two or more paths of egress travel
+        to separate exits.
+    piece_sha256: fe8db99c210a7a354d41befecf64717400d465183c481e20502c4f31678c2612
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.13.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where rows have 14 or fewer seats, the aisle accessway between them is at least 12 inches clear, measured horizontally
+      from the back of the row ahead to the nearest projection of the row behind: with automatic or self-rising seats raised,
+      any other seat down, and folding tablet arms in use (or stored, where a tablet arm raised to vertical in one motion
+      falls back to stored by gravity): seats and rows aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 357
+      lines:
+      - 18
+      - 26
+      quote: '1030.13.2 Clear width of aisle accessways serving seating in rows. Where seating rows have 14 or fewer seats,
+        the minimum clear aisle accessway width shall be not less than 12 inches (305 mm) measured as the clear horizontal
+        distance from the back of the row ahead and the nearest projection of the row behind. Where chairs have automatic
+        or self-rising seats, the measurement shall be made with seats in the raised position. Where any chair in the row
+        does not have an automatic or self-rising seat, the measurements shall be made with the seat in the down position.
+        For seats with folding tablet arms, row spacing shall be deter- mined with the tablet arm in the used position. Exception:
+        For seats with folding tablet arms, row spacing is permitted to be determined with the tablet arm in the stored position
+        where the tablet arm when raised manually to vertical position in one motion automatically returns to the stored position
+        by force of gravity.'
+    piece_sha256: dccfb75fc2e7d44d556e5ed65458aa6b9aaa02f522f92585203c4157b15e4dc2
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.13.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A row of seating served by aisles or doorways at both ends has at most 100 seats, and the 12 inches between rows
+      grows by 0.3 inch for every seat beyond 14 where the seats have backrests, or beyond 21 where they don''t, to at most
+      22 inches needed; for smoke-protected or open-air seating, Table 1030.13.2.1 gives the row lengths a 12-inch aisle accessway
+      may serve before it widens: seats and rows aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 357
+      lines:
+      - 27
+      - 32
+      quote: '1030.13.2.1 Dual access. For rows of seating served by aisles or doorways at both ends, there shall be not more
+        than 100 seats per row. The minimum clear width of 12 inches (305 mm) between rows shall be increased by 0.3 inch
+        (7.6 mm) for every addi- tional seat beyond 14 seats where seats have backrests or beyond 21 where seats are without
+        backrests. The minimum clear width is not required to exceed 22 inches (559 mm). Exception: For smoke-protected or
+        open-air assembly seating, the row length limits for a 12-inch-wide (305 mm) aisle access- way, beyond which the aisle
+        accessway minimum clear width shall be increased, are in Table 1030.13.2.1.'
+    piece_sha256: f32939a1c7e1b07928901015cefb3dc0ec15c79a0c787eac2a260f10304a261d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1030.13.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'The most seats a row of smoke-protected or open-air assembly seating may have with a 12-inch clear aisle accessway,
+      by the total number of seats (with backrests and without, an aisle or doorway at both ends, then at one end only): fewer
+      than 4,000, 14, 21, 7 and 10; 4,000 to 6,999, 15, 22, 7 and 10; 7,000 to 9,999, 16, 23, 8 and 11; 10,000 to 12,999,
+      17, 24, 8 and 11; 13,000 to 15,999, 18, 25, 9 and 12; 16,000 to 18,999, 19, 26, 9 and 12; 19,000 to 21,999, 20, 27,
+      10 and 13; 22,000 and more, 21, 28, 11 and 14: seats and rows aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 357
+      lines:
+      - 33
+      - 49
+      quote: 'TABLE 1030.13.2.1—SMOKE-PROTECTED OR OPEN-AIR ASSEMBLY AISLE ACCESSWAYS MAXIMUM NUMBER OF SEATS PER ROW PERMITTED
+        TO HAVE A MINIMUM 12-INCH CLEAR WIDTH AISLE ACCESSWAY NUMBER OF SEATS IN THE SMOKE- Aisle or doorway at both ends
+        of row Aisle or doorway at one end of row only PROTECTED OR OPEN-AIR ASSEMBLY SEATING Seats with Seats without Seats
+        with Seats without backrests backrests backrests backrests Less than 4,000 14 21 7 10 4,000 to 6,999 15 22 7 10 7,000
+        to 9,999 16 23 8 11 10,000 to 12,999 17 24 8 11 13,000 to 15,999 18 25 9 12 16,000 to 18,999 19 26 9 12 19,000 to
+        21,999 20 27 10 13 22,000 and greater 21 28 11 14 For SI: 1 inch = 25.4 mm.'
+    piece_sha256: 6df4ba2a39a723d9fbe27060a54cc9834b32f977ded4ab75e643bd61a4b21517
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.13.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'For a row served by an aisle or doorway at one end only, the 12 inches between rows grows by 0.6 inch for every
+      seat beyond seven where the seats have backrests, or beyond 10 where they don''t, to at most 22 inches needed; for smoke-protected
+      or open-air seating, Table 1030.13.2.1 gives the row lengths a 12-inch aisle accessway may serve before it widens: seats
+      and rows aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 357
+      lines:
+      - 50
+      - 55
+      quote: '1030.13.2.2 Single access. For rows of seating served by an aisle or doorway at only one end of the row, the
+        minimum clear width of 12 inches (305 mm) between rows shall be increased by 0.6 inch (15.2 mm) for every additional
+        seat beyond seven seats where seats have backrests or beyond 10 where seats are without backrests. The minimum clear
+        width is not required to exceed 22 inches (559 mm). Exception: For smoke-protected or open-air assembly seating, the
+        row length limits for a 12-inch-wide (305 mm) aisle access- way, beyond which the aisle accessway minimum clear width
+        shall be increased, are in Table 1030.13.2.1.'
+    piece_sha256: 557bf88388b0ba0b73850bd0a32dd9627b412ab9d319f1abfd08adc296eabdcc
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1030.14':
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: ramped aisles comply with 1030.14.1 to 1030.14.1.3, stepped aisles with 1030.14.2 to 1030.14.2.4;
+      quoted by 1030.14.1''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 357
+      lines:
+      - 56
+      - 57
+      quote: 1030.14 Assembly aisle walking surfaces. Ramped aisles shall comply with Sections 1030.14.1 through 1030.14.1.3.
+        Stepped aisles shall comply with Sections 1030.14.2 through 1030.14.2.4.
+    piece_sha256: b6081d194ae2829ea8cc23c171dfe11d237f399c79eb3ed76cfefe5940e0f0d8
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.14.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Ramped aisles comply with 1030.14.1 to 1030.14.1.3 and stepped aisles with 1030.14.2 to 1030.14.2.4: an aisle
+      sloped more than 1 in 20 (5 percent) is a ramped aisle; one that is part of an accessible route per 1009 and 1109.2
+      is at most 1 in 12 (8 percent), and any other at most 1 in 8 (12.5 percent): aisles aren''t in the model, so a person''s
+      check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 358
+      lines:
+      - 3
+      - 6
+      quote: 1030.14.1 Ramped aisles. Aisles that are sloped more than 1 unit vertical in 20 units horizontal (5-percent slope)
+        shall be consid- ered to be a ramped aisle. Ramped aisles that serve as part of an accessible route in accordance
+        with Sections 1009 and 1109.2 shall have a maximum slope of 1 unit vertical in 12 units horizontal (8-percent slope).
+        The slope of other ramped aisles shall not exceed 1 unit vertical in 8 units horizontal (12.5-percent slope).
+    piece_sha256: 9a64ce817c2f36e619b2ccf571d3cbc791844fb7f2b89d308808b623114ddae6
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.14.1.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A ramped aisle''s slope measured perpendicular to the direction of travel is not steeper than 1 in 48 (2 percent):
+      aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 358
+      lines:
+      - 7
+      - 8
+      quote: 1030.14.1.1 Cross slope. The slope measured perpendicular to the direction of travel of a ramped aisle shall
+        not be steeper than 1 unit vertical in 48 units horizontal (2-percent slope).
+    piece_sha256: fd652ca0e9ec991b3dd2123ce8a223abe25ac0af8d0f9b77a9d94bf48647251c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.14.1.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Ramped aisles have landings per 1012.6 to 1012.6.5, which may overlap required aisles or cross aisles: aisles
+      aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 358
+      lines:
+      - 9
+      - 10
+      quote: 1030.14.1.2 Landings. Ramped aisles shall have landings in accordance with Sections 1012.6 through 1012.6.5.
+        Landings for ramped aisles shall be permitted to overlap required aisles or cross aisles.
+    piece_sha256: 005eff0d7cd250349785cabba9c7901db9a5a45c8c69093825731af94f2160b3
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.14.1.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Ramped aisles have edge protection per 1012.10 and 1012.10.1; but in assembly spaces with fixed seating, not
+      on the sides where the ramped aisle gives access to the adjacent seating and aisle accessways: aisles aren''t in the
+      model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 358
+      lines:
+      - 11
+      - 13
+      quote: '1030.14.1.3 Edge protection. Ramped aisles shall have edge protection in accordance with Sections 1012.10 and
+        1012.10.1. Exception: In assembly spaces with fixed seating, edge protection is not required on the sides of ramped
+        aisles where the ramped aisles provide access to the adjacent seating and aisle accessways.'
+    piece_sha256: 169eb3e3fce9f8b8399417fffd16fefe6fb21eea7a168f76e47df65b97974dc6
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.14.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'An aisle sloped more than 1 in 8 (12.5 percent) is a series of risers and treads across its full width, complying
+      with 1030.14.2.1 to 1030.14.2.4: stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 358
+      lines:
+      - 14
+      - 16
+      quote: 1030.14.2 Stepped aisles. Aisles with a slope exceeding one unit vertical in eight units horizontal (12.5-percent
+        slope) shall consist of a series of risers and treads that extends across the full width of aisles and complies with
+        Sections 1030.14.2.1 through 1030.14.2.4.
+    piece_sha256: 7bd5561dfc10854b50d60faa3f9fe85e65afc9a243d3790e44648c331ec1cf0f
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.14.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Stepped aisle treads are at least 11 inches deep and uniform, adjacent treads differing by at most 3/16 inch:
+      stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 358
+      lines:
+      - 17
+      - 18
+      quote: '1030.14.2.1 Treads. Tread depths shall be not less than 11 inches (279 mm) and shall have dimensional uniformity.
+        Exception: The tolerance between adjacent treads shall not exceed 3/16 inch (4.8 mm).'
+    piece_sha256: 28841efc66fd7356070cd2eb883207b9751430926b248642ae5466dc01cbe3bd
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.14.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where a stepped aisle''s gradient matches the adjoining seating''s, its risers are at least 4 and at most 8 inches
+      high and uniform within each flight; but they may vary only as far as the seating''s changing gradient needs for sightlines,
+      each variation over 3/16 inch between adjacent risers marked by a distinctive stripe 1 to 2 inches wide on each tread
+      at the nosing next to it, distinct from the contrasting marking stripe; and risers up to 9 inches are permitted where
+      the adjacent seating''s slope needs them for sightlines: stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 358
+      lines:
+      - 19
+      - 29
+      quote: '1030.14.2.2 Risers. Where the gradient of stepped aisles is to be the same as the gradient of adjoining seating
+        areas, the riser height shall be not less than 4 inches (102 mm) nor more than 8 inches (203 mm) and shall be uniform
+        within each flight. Exceptions: 1. Riser height nonuniformity shall be limited to the extent necessitated by changes
+        in the gradient of the adjoining seating area to maintain adequate sightlines. Where nonuniformities exceed 3/16 inch
+        (4.8 mm) between adjacent risers, the exact location of such nonuniformities shall be indicated with a distinctive
+        marking stripe on each tread at the nosing or leading edge adjacent to the nonuniform risers. Such stripe shall be
+        not less than 1 inch (25 mm), and not more than 2 inches (51 mm), wide. The edge marking stripe shall be distinctively
+        different from the contrasting marking stripe. 2. Riser heights not exceeding 9 inches (229 mm) shall be permitted
+        where they are necessitated by the slope of the adjacent seating areas to maintain sightlines.'
+    piece_sha256: 0c1e9b4012059f58cb5e1428ce3dd13d29d7fe8f4a4a2fd2e889f6a31ae76c41
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.14.2.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Adjacent risers designed equal differ by at most 3/16 inch; where the stepped aisle takes 1030.14.2.2''s exception
+      1, each riser of unequal height differs from the adjacent ones, in the direction of descent, by at most 3/8 inch where
+      its treads are less than 22 inches deep, and by at most 3/4 inch where they are 22 inches or more: stepped aisles aren''t
+      in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 358
+      lines:
+      - 30
+      - 35
+      quote: 1030.14.2.2.1 Construction tolerances. The tolerance between adjacent risers on a stepped aisle that were designed
+        to be equal height shall not exceed 3/16 inch (4.8 mm). Where the stepped aisle is designed in accordance with Exception
+        1 of Section 1030.14.2.2, the stepped aisle shall be constructed so that each riser of unequal height, determined
+        in the direction of descent, is not more than 3/8 inch (9.5 mm) in height different from adjacent risers where stepped
+        aisle treads are less than 22 inches (560 mm) in depth and 3/4 inch (19.1 mm) in height different from adjacent risers
+        where stepped aisle treads are 22 inches (560 mm) or greater in depth.
+    piece_sha256: 3e3655df17030fa044490bdfcac4aa02f62ef531b8133ea6ca41adcf9158f213
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.14.2.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Each tread has a contrasting marking stripe at least 1 inch and at most 2 inches wide at its nosing or leading
+      edge, so each tread is readily seen in descent; but it may be left out where the tread surfaces already make each tread
+      readily apparent in descent: stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 358
+      lines:
+      - 36
+      - 40
+      quote: '1030.14.2.3 Tread contrasting marking stripe. A contrasting marking stripe shall be provided on each tread at
+        the nosing or leading edge such that the location of each tread is readily apparent when viewed in descent. Such stripe
+        shall be not less than 1 inch (25 mm) and not more than 2 inches (51 mm) wide. Exception: The contrasting marking
+        stripe is permitted to be omitted where tread surfaces are such that the location of each tread is readily apparent
+        when viewed in descent.'
+    piece_sha256: 85fd00adc799f2f6e111a3f6b6eef5ccc1dae9537f1d05fefaa6559cd657c5f4
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.14.2.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'A stepped aisle''s nosing and riser profile comply with 1011.5.5 to 1011.5.5.3: stepped aisles aren''t in the
+      model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 358
+      lines:
+      - 41
+      - 41
+      quote: 1030.14.2.4 Nosing and profile. Nosing and riser profile shall comply with Sections 1011.5.5 through 1011.5.5.3.
+    piece_sha256: 2b8195a2569d1a456413669c85bb6ad54d2c12a80174d07f96ada84913f9f56a
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1030.15':
+    label: flag
+    topic: means_of_egress
+    reason: 'In a building, room or space used for assembly purposes, seats are securely fastened to the floor; but not where
+      there are no ramped or tiered floors for seating and 200 or fewer seats, nor at tables without ramped or tiered floors;
+      over 200 seats without ramped or tiered floors, they are fastened together in groups of at least three or fastened to
+      the floor; where flexible seating is integral to a space on tiered levels, up to 200 seats need not be fastened (plans
+      showing seating, tiers and aisles submitted for approval); nor groups of at most 14 seats on level floors set apart
+      by railings, guards, partial height walls or similar barriers; nor seats for musicians or other performers set apart
+      so: seats aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 358
+      lines:
+      - 42
+      - 58
+      quote: '1030.15 Seat stability. In a building, room or space used for assembly purposes, the seats shall be securely
+        fastened to the floor. Exceptions: 1. In a building, room or space used for assembly purposes or portions thereof
+        without ramped or tiered floors for seating and with 200 or fewer seats, the seats shall not be required to be fastened
+        to the floor. 2. In a building, room or space used for assembly purposes or portions thereof with seating at tables
+        and without ramped or tiered floors for seating, the seats shall not be required to be fastened to the floor. 3. In
+        a building, room or space used for assembly purposes or portions thereof without ramped or tiered floors for seating
+        and with greater than 200 seats, the seats shall be fastened together in groups of not less than three or the seats
+        shall be securely fastened to the floor. 4. In a building, room or space used for assembly purposes where flexibility
+        of the seating arrangement is an integral part of the design and function of the space and seating is on tiered levels,
+        not more than 200 seats shall not be required to be fastened to the floor. Plans showing seating, tiers and aisles
+        shall be submitted for approval. 5. Groups of seats within a building, room or space used for assembly purposes separated
+        from other seating by railings, guards, partial height walls or similar barriers with level floors and having not
+        more than 14 seats per group shall not be required to be fastened to the floor. 6. Seats intended for musicians or
+        other performers and separated by railings, guards, partial height walls or similar barri- ers shall not be required
+        to be fastened to the floor.'
+    piece_sha256: 279f26ccba13ec59aa9cfe2ab589ebe50438fe6abacf0461bb44ea285f483d43
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1030.16':
+    label: flag
+    topic: means_of_egress
+    reason: 'Ramped aisles sloped more than 1 in 15 (6.7 percent) and stepped aisles have handrails per 1014, at one or both
+      sides or within the aisle width; a stepped aisle with seating on one side and 74 inches wide or more has two, one within
+      30 inches horizontally of the side of the tiered floor next to it; but no handrails are needed on ramped aisles with
+      seating on both sides, nor where a guard at the aisle''s side has a top as graspable as a handrail per 1014.4, and no
+      extensions at the top and bottom where they would block crossovers: aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 3
+      - 13
+      quote: '1030.16 Handrails. Ramped aisles having a slope exceeding one unit vertical in 15 units horizontal (6.7-percent
+        slope) and stepped aisles shall be provided with handrails in compliance with Section 1014 located either at one or
+        both sides of the aisle or within the aisle width. Where stepped aisles have seating on one side and the aisle width
+        is 74 inches (1880 mm) or greater, two handrails are required. Where two handrails are required, one of the handrails
+        shall be within 30 inches (762 mm) horizontally of the side of the tiered floor adjacent to the stepped aisle. Exceptions:
+        1. Handrails are not required for ramped aisles with seating on both sides. 2. Handrails are not required where, at
+        the side of the aisle, there is a guard with a top surface that complies with the grasp- ability requirements of handrails
+        in accordance with Section 1014.4. 3. Handrail extensions are not required at the top and bottom of stepped aisles
+        and ramped aisles to permit crossovers within the aisles.'
+    piece_sha256: 3084698c4c3276837f4824459333345ea61b2228f4cdac94165a8b33578b2e60
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.16.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where there is seating on both sides of the aisle, or a stepped aisle needs two handrails, mid-aisle handrails
+      are discontinuous, with gaps or breaks at most every five rows, each at least 22 and at most 36 inches clear, measured
+      horizontally, and the handrail ends rounded or bent: aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 14
+      - 18
+      quote: 1030.16.1 Discontinuous mid-aisle handrails. Where there is seating on both sides of the aisle, the mid-aisle
+        handrails shall be discontinuous. Where a stepped aisle is required to have two handrails, the mid-aisle handrails
+        shall be discontinuous. Gaps or breaks shall be provided at intervals not exceeding five rows to facilitate access
+        to seating and to permit crossing from one side of the aisle to the other. These gaps or breaks shall have a clear
+        width of not less than 22 inches (559 mm) and not greater than 36 inches (914 mm), measured horizontally, and the
+        mid-aisle handrail shall have rounded terminations or bends.
+    piece_sha256: 03655789b5c6d26b7d625daadf5fe2911bb3e29653a2a0d367ef16dd5eae96b1
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.16.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Handrails at the side of stepped aisles return to a wall, guard or the walking surface, or continue to the handrail
+      of the next stepped aisle flight: stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 19
+      - 20
+      quote: 1030.16.2 Handrail termination. Handrails located on the side of stepped aisles shall return to a wall, guard
+        or the walking surface or shall be continuous to the handrail of an adjacent stepped aisle flight.
+    piece_sha256: eec10fd738269ab9b765c03dc52f788c09034871efff09ba9e07daea3dcd429c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.16.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Mid-aisle handrails don''t extend beyond the lowest riser and end within 18 inches of it, measured horizontally,
+      with no extensions needed; but they may extend beyond it where their extensions don''t obstruct the cross aisle''s width:
+      stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 21
+      - 24
+      quote: '1030.16.3 Mid-aisle termination. Mid-aisle handrails shall not extend beyond the lowest riser and shall terminate
+        within 18 inches (381 mm), measured horizontally, from the lowest riser. Handrail extensions are not required. Exception:
+        Mid-aisle handrails shall be permitted to extend beyond the lowest riser where the handrail extensions do not obstruct
+        the width of the cross aisle.'
+    piece_sha256: 18da2852513ac37653117e8aa09f6262dbcee8f4b0a8db86f89917d9dfea5a3d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.16.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where stepped aisles have mid-aisle handrails, an additional rail is about 12 inches below the handrail, its
+      strength and attachment per 1607.9.1.2: stepped aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 25
+      - 27
+      quote: 1030.16.4 Rails. Where mid-aisle handrails are provided in stepped aisles, there shall be an additional rail
+        located approximately 12 inches (305 mm) below the handrail. The rail shall be adequate in strength and attachment
+        in accordance with Section 1607.9.1.2.
+    piece_sha256: 56706746ae4c1ebf8f720fcf849bc56b29c1bc5954451366e6b7565399f4d8ca
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1030.17':
+    label: flag
+    topic: means_of_egress
+    reason: 'Guards next to seating in a building, room or space used for assembly purposes are provided where 1015 requires
+      them and built per 1015, except as 1030.17.1 to 1030.17.4 provide; at bleachers, grandstands and folding and telescopic
+      seating, guards are provided where ICC 300 and 1030.17.1 require them: guards and seating aren''t in the model, so a
+      person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 28
+      - 31
+      quote: 1030.17 Assembly guards. Guards adjacent to seating in a building, room or space used for assembly purposes shall
+        be provided where required by Section 1015 and shall be constructed in accordance with Section 1015 except where provided
+        in accordance with Sections 1030.17.1 through 1030.17.4. At bleachers, grandstands and folding and telescopic seating,
+        guards must be provided where required by ICC 300 and Section 1030.17.1.
+    piece_sha256: 74a823e8452d5029f9871db7775054ce81b6835aeedf380b0830b50144fe3198
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.17.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Perimeter guards are provided where the footboards or walking surface of seating are more than 30 inches above
+      the floor or grade below: at least 42 inches high measured from the seatboard where seatboards adjoin the perimeter,
+      or from the floor where seats are self-rising, and measured per 1015.3 where an aisle lies between the seating and the
+      perimeter; but guards that impact sightlines may meet 1030.17.3, and bleachers, grandstands and folding and telescopic
+      seating need none where the seating is next to a wall less than 4 inches away: guards and seating aren''t in the model,
+      so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 32
+      - 40
+      quote: '1030.17.1 Perimeter guards. Perimeter guards shall be provided where the footboards or walking surface of seating
+        facilities are more than 30 inches (762 mm) above the floor or grade below. Where the seatboards are adjacent to the
+        perimeter, guard height shall be 42 inches (1067 mm) high minimum, measured from the seatboard. Where the seats are
+        self-rising, guard height shall be 42 inches (1067 mm) high minimum, measured from the floor surface. Where there
+        is an aisle between the seating and the perim- eter, the guard height shall be measured in accordance with Section
+        1015.3. Exceptions: 1. Guards that impact sightlines shall be permitted to comply with Section 1030.17.3. 2. Bleachers,
+        grandstands and folding and telescopic seating shall not be required to have perimeter guards where the seating is
+        located adjacent to a wall and the space between the wall and the seating is less than 4 inches (102 mm).'
+    piece_sha256: af31082c327bc48801d6c814f4821037d5130eea02ce6a9180140f7781f4e0f8
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.17.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Cross aisles more than 30 inches above the floor or grade below have guards per 1015; where the drop between
+      a cross aisle and the floor or grade below is 30 inches or less, guards at least 26 inches above the aisle floor; but
+      none where the backs of the seats at the front of the cross aisle rise 24 inches or more above the aisle''s floor: guards
+      and cross aisles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 41
+      - 46
+      quote: '1030.17.2 Cross aisles. Cross aisles located more than 30 inches (762 mm) above the floor or grade below shall
+        have guards in accordance with Section 1015. Where an elevation change of 30 inches (762 mm) or less occurs between
+        a cross aisle and the adjacent floor or grade below, guards not less than 26 inches (660 mm) above the aisle floor
+        shall be provided. Exception: Where the backs of seats on the front of the cross aisle project 24 inches (610 mm)
+        or more above the adjacent floor of the aisle, a guard need not be provided.'
+    piece_sha256: f87b3188cb1e1edc6f15b895ef95a1a1cdd37e3005d8332526aa888891030db2
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.17.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Unless 1030.17.4 applies, a fascia or railing system meeting 1015''s guard requirements and at least 26 inches
+      high is provided where the floor or footboard is more than 30 inches above the floor or grade below and the fascia or
+      railing would otherwise interfere with the sightlines of the seating right beside it: guards and seating aren''t in
+      the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 47
+      - 50
+      quote: 1030.17.3 Sightline-constrained guard heights. Unless subject to the requirements of Section 1030.17.4, a fascia
+        or railing system in accordance with the guard requirements of Section 1015 and having a minimum height of 26 inches
+        (660 mm) shall be provided where the floor or footboard elevation is more than 30 inches (762 mm) above the floor
+        or grade below and the fascia or railing would otherwise interfere with the sightlines of immediately adjacent seating.
+    piece_sha256: b328e7cf27fb8945bc324d90101c5fd694a0e09234bc541b0aed2b916930774b
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1030.17.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where the foot of an aisle is more than 30 inches above the floor or grade below, a fascia or railing system
+      meeting 1015''s guard requirements runs the aisle''s full width, at least 36 inches high and giving at least 42 inches
+      measured diagonally between the top of the rail and the nosing of the nearest tread: guards and aisles aren''t in the
+      model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 51
+      - 54
+      quote: 1030.17.4 Guards at the end of aisles. A fascia or railing system complying with the guard requirements of Section
+        1015 shall be provided for the full width of the aisle where the foot of the aisle is more than 30 inches (762 mm)
+        above the floor or grade below. The fascia or railing shall be not less than 36 inches (914 mm) high and shall provide
+        not less than 42 inches (1067 mm) measured diagonally between the top of the rail and the nosing of the nearest tread.
+    piece_sha256: 580bc1750943d049349f9ba37902323ba67fce9612ca806b87afa3bf563be0df
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9i.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1031.1':
