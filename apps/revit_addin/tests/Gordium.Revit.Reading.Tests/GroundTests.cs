@@ -3,7 +3,8 @@ using Xunit;
 
 namespace Gordium.Revit.Reading.Tests;
 
-/// <summary>The ground just outside each window and door (<c>openings[].ground_outside</c>, GroundReader), read from a
+/// <summary>The ground just outside each window (<c>openings[].ground_outside</c>, GroundReader; a door's isn't read: its
+/// clear bottom isn't sent), read from a
 /// Toposolid the architect states shows the finished ground (Gordium: Toposolid is finished ground): RCNYS R202 "GRADE.
 /// The finished ground level adjoining the building at all exterior walls", read 1 in beyond the wall's outer face at
 /// each end of the opening and its middle. From it the measuring works out whether an escape opening is below grade and
@@ -346,10 +347,13 @@ public sealed class GroundTests
 
     // ---- review round 2 ---------------------------------------------------------------------------------------------
 
-    /// <summary>A hole or a cliff cut into the Toposolid between the places read (a 4 in strip of cells across the line
-    /// 1 in out from house 1's window, x 5 to 5.33, between its end and its middle): its rim is the highest at every edge
-    /// the line crosses, so each stretch between is read too. A hole: no ground there, nothing sent; a cliff 4 ft deep:
-    /// its floor is sent, and the window, more than 44 in over it, is no grade-floor opening.</summary>
+    /// <summary>A hole or a cliff cut into the Toposolid between the places read (a cell of the grid across the line
+    /// 1 in out from house 1's window, x 5 to 5.33, between its end and its middle), so each stretch between the edges
+    /// the line crosses is read too, its plane taken at both ends. A hole: its rim is the ground at both its sides, no
+    /// ground between, nothing sent. A cliff whose floor slopes from 4 ft down at x 5 to 1 ft at x 5.33 (review round 3:
+    /// a flat floor was read at its own diagonal, so it pinned nothing): its lowest, 4 ft down at the rim's foot, is
+    /// sent (read along the cell's diagonal alone it would be some 3.5 ft), and the window, more than 44 in over it, is
+    /// no grade-floor opening.</summary>
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -363,8 +367,9 @@ public sealed class GroundTests
             return x > 5.0 && x < 5.33 && y > -0.6 && y < -0.5;
         }
         var kept = whole.Triangles!.Where(t => !InCell(t)).ToList();
-        if (cliff)                                                       // the cell's floor 4 ft down, its sides sheer
-            kept.AddRange(whole.Triangles!.Where(InCell).Select(t => new GroundTriangle(t.A with { Z = -4 }, t.B with { Z = -4 }, t.C with { Z = -4 })));
+        Xyz Floor(Xyz v) => v with { Z = v.X < 5.0 + 1e-9 ? -4 : -1 };      // the cell's floor, its sides sheer
+        if (cliff)
+            kept.AddRange(whole.Triangles!.Where(InCell).Select(t => new GroundTriangle(Floor(t.A), Floor(t.B), Floor(t.C))));
         house.Grounds = [whole with { Triangles = kept }];
         house.FinishedGround(true);
         var read = InteriorReader.Read(house.Model());
@@ -416,6 +421,7 @@ public sealed class GroundTests
     public void The_marks_say_the_ground_is_read_at_windows_only()
     {
         Assert.DoesNotContain("window and door", Marks.ToposolidFinished.Description, StringComparison.Ordinal);
+        Assert.DoesNotContain("each window and door", File.ReadAllText(Path.Combine(Env.Repo, "docs", "revit", "revit_reading_design.md")), StringComparison.Ordinal);
         Assert.Contains("a door's isn't read yet", Marks.ToposolidFinished.Description, StringComparison.Ordinal);
         Assert.Contains("Blank: for a window, read from the Toposolid", Marks.BelowGrade.Description, StringComparison.Ordinal);
         Assert.Contains("Blank: for a window, where Gordium: Toposolid is finished ground is Yes", Marks.WellDepth.Description, StringComparison.Ordinal);
