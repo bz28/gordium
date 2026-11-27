@@ -3803,7 +3803,8 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Buildings with an atrium, and none in Group H (but the exception''s vertical openings, not shown): a person''s
-      check where an atrium is stated or not ruled out (general.bc_404_1_atriums).'
+      check where an atrium is stated or not ruled out, and in any building that may be Group H (H-1 to H-5, two or more
+      groups, or not stated) whatever the atrium fact says (general.bc_404_1_atriums).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 91

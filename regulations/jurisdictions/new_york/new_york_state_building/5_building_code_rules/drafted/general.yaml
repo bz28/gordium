@@ -1258,15 +1258,16 @@ rules:
       are not permit- ted in buildings or structures classified as Group H. Exception: Vertical openings that comply with
       Sections 712.1.1 through 712.1.3, and Sections 712.1.9 through 712.1.14.'
   examples:
+  - given: {}
+    expect: needs_review
+    note: 'An atrium is stated or not ruled out, or the building may be Group H: Sections 404.1 to 404.11 apply to a building
+      with an atrium, and an atrium isn''t permitted in a Group H building (a vertical opening complying with 712.1.1 to
+      712.1.3 or 712.1.9 to 712.1.14 excepted): a person checks.'
   - given:
       building_has_atrium: true
       occupancy_group: B
     expect: needs_review
-    note: 'The building states it has an atrium: Sections 404.1 to 404.11 apply, and an atrium isn''t permitted in a Group
-      H building; a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 is excepted. A person checks.'
-  - given: {}
-    expect: needs_review
-    note: 'Not stated: a person checks.'
+    note: 'An atrium is stated: Sections 404.1 to 404.11 apply; a person checks.'
   - given:
       building_has_atrium: false
       occupancy_group: H-2

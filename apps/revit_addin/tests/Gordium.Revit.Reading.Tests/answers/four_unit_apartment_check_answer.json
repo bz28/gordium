@@ -1393,7 +1393,7 @@
     "Egress · Elevators in a high-rise: A person checks this (Gordium doesn't decide it): Elevators in a high-rise meet Chapter 30, 403.6.1 and 403.6.2: a person's check.",
     "Egress · Fire service access elevators above 120 ft: A person checks this (Gordium doesn't decide it): With an occupied floor more than 120 ft above the lowest level of fire department vehicle access, at least two fire service access elevators (or all elevators, if fewer) per 3007, each of at least 3,500 pounds: a person's check.",
     "Egress · Occupant evacuation elevators: A person checks this (Gordium doesn't decide it): Passenger elevators installed per 3008 may serve occupant self-evacuation (they also waive 403.5.2's additional stairway): a person's check.",
-    "Egress · Buildings with an atrium: A person checks this (Gordium doesn't decide it): The building states it has an atrium: Sections 404.1 to 404.11 apply, and an atrium isn't permitted in a Group H building; a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 is excepted. A person checks.",
+    "Egress · Buildings with an atrium: A person checks this (Gordium doesn't decide it): An atrium is stated or not ruled out, or the building may be Group H: Sections 404.1 to 404.11 apply to a building with an atrium, and an atrium isn't permitted in a Group H building (a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 excepted): a person checks.",
     "Egress · Travel from areas open to an atrium: A person checks this (Gordium doesn't decide it): Travel from areas open to the atrium follows Section 1017, the 200 ft within the atrium off the level of exit discharge (1017.3.2.3) among it: a person checks the part within the atrium.",
     "Egress · An exit stairway in an atrium: A person checks this (Gordium doesn't decide it): An interior exit stairway in the atrium: its entry is the edge of its closest riser, reached from two directions, separated from an enclosed exit stairway's entrance as 1007.1.1 asks, travel measured to that riser, at most half the exit stairways in one atrium, and its discharge per 1028.1: a person's check.",
     "Egress · Exit stairways discharging through an atrium: A person checks this (Gordium doesn't decide it): An interior exit stairway that discharges through the atrium does so per Section 1028: a person's check.",
@@ -65708,11 +65708,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): The building states it has an atrium: Sections 404.1 to 404.11 apply, and an atrium isn't permitted in a Group H building; a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 is excepted. A person checks.",
+     "reason": "A person checks this (Gordium doesn't decide it): An atrium is stated or not ruled out, or the building may be Group H: Sections 404.1 to 404.11 apply to a building with an atrium, and an atrium isn't permitted in a Group H building (a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 excepted): a person checks.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): The building states it has an atrium: Sections 404.1 to 404.11 apply, and an atrium isn't permitted in a Group H building; a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 is excepted. A person checks.",
+      "line": "A person checks this (Gordium doesn't decide it): An atrium is stated or not ruled out, or the building may be Group H: Sections 404.1 to 404.11 apply to a building with an atrium, and an atrium isn't permitted in a Group H building (a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 excepted): a person checks.",
       "quotes": [
        {
         "text": "404.1 General. The provisions of Sections 404.1 through 404.11 shall apply to buildings containing atriums. Atriums are not permit- ted in buildings or structures classified as Group H. Exception: Vertical openings that comply with Sections 712.1.1 through 712.1.3, and Sections 712.1.9 through 712.1.14.",
@@ -65737,14 +65737,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_404_1_atriums",
-       "words": "A person checks this (Gordium doesn't decide it): The building states it has an atrium: Sections 404.1 to 404.11 apply, and an atrium isn't permitted in a Group H building; a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 is excepted. A person checks.",
+       "words": "A person checks this (Gordium doesn't decide it): An atrium is stated or not ruled out, or the building may be Group H: Sections 404.1 to 404.11 apply to a building with an atrium, and an atrium isn't permitted in a Group H building (a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 excepted): a person checks.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_404_1_atriums",
-       "why": "A person checks this (Gordium doesn't decide it): The building states it has an atrium: Sections 404.1 to 404.11 apply, and an atrium isn't permitted in a Group H building; a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 is excepted. A person checks.",
+       "why": "A person checks this (Gordium doesn't decide it): An atrium is stated or not ruled out, or the building may be Group H: Sections 404.1 to 404.11 apply to a building with an atrium, and an atrium isn't permitted in a Group H building (a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 excepted): a person checks.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -75786,7 +75786,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Buildings with an atrium, Section 404, and none in Group H (BCNYS 404.1): A person checks this (Gordium doesn't decide it): The building states it has an atrium: Sections 404.1 to 404.11 apply, and an atrium isn't permitted in a Group H building; a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 is excepted. A person checks.",
+       "title": "Egress · Buildings with an atrium, Section 404, and none in Group H (BCNYS 404.1): A person checks this (Gordium doesn't decide it): An atrium is stated or not ruled out, or the building may be Group H: Sections 404.1 to 404.11 apply to a building with an atrium, and an atrium isn't permitted in a Group H building (a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 excepted): a person checks.",
        "mark": "?",
        "name": "Egress · Buildings with an atrium, Section 404, and none in Group H (BCNYS 404.1)"
       },
@@ -77239,7 +77239,7 @@
       {
        "key": "reason:egress.general.bc_404_1_atriums",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): The building states it has an atrium: Sections 404.1 to 404.11 apply, and an atrium isn't permitted in a Group H building; a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 is excepted. A person checks.",
+       "words": "A person checks this (Gordium doesn't decide it): An atrium is stated or not ruled out, or the building may be Group H: Sections 404.1 to 404.11 apply to a building with an atrium, and an atrium isn't permitted in a Group H building (a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 excepted): a person checks.",
        "elements": [],
        "items": [
         "egress.general.bc_404_1_atriums"
@@ -106747,7 +106747,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "90350a4e202a40d0fe5f980decdd414912c496d9a7255f46405d0ff9a7138428",
   "rulebook": {
-   "new_york/ithaca_city": "e785cdb166655479c3dcd362d9b73be26af90476044e4b216fa82c7d28acbda9"
+   "new_york/ithaca_city": "2c1ea6006d702d2c40c1c349e88b242143825db81e2744e0b4ef6dbc3d111a4a"
   }
  }
 }
