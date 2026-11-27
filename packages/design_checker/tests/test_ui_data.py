@@ -400,10 +400,10 @@ _FIELDS = []
 
 def _known_fields() -> set:
     """Every field a host's description has, read from where it is defined, never copied: the Revit add-in's own
-    fields (every "building.…", "facts.…" and "kind[].flag" its C# names, and every whole list a mark of its feeds,
-    "stairs: []": stairs, guards, doors), the stated facts the start box and the rows' Enter… ask for
-    (host_core.facts.STATED_FACTS), the building block's facts (code_scope.FACTS) and the site's own questions
-    (ui_data.SITE_STOPS)."""
+    fields (every "building.…", "facts.…" and "kind[].flag" its C# names, and every whole list a mark's Feeds names
+    as the pane matches it: stairs, guards, buildings, unknown_spaces), the stated facts the start box and the rows'
+    Enter… ask for (host_core.facts.STATED_FACTS), the building block's facts (code_scope.FACTS) and the site's own
+    questions (ui_data.SITE_STOPS)."""
     if not _FIELDS:
         import re
         from design_checker.host_core.facts import STATED_FACTS
@@ -412,7 +412,10 @@ def _known_fields() -> set:
             if "obj" not in cs.parts:
                 found |= set(re.findall(r'"((?:building|facts)\.[a-z0-9_]+|[a-z]+\[\]\.[a-z0-9_]+)"',
                                         cs.read_text(encoding="utf-8")))
-                found |= set(re.findall(r'"([a-z]+): \[\]"', cs.read_text(encoding="utf-8")))   # a list's mark: "stairs: []"
+                # a whole list a mark feeds, the first word of a part of its Feeds as CauseCards.Fields reads it
+                # ("stairs (sent only when Yes)": stairs, Gordium: These are all the stairs)
+                for feeds in re.findall(r'MarkBinding\.\w+,\s*\[[^\]]*\],\s*"([^"]+)"', cs.read_text(encoding="utf-8")):
+                    found |= {w for w in (p.split(" ")[0] for p in feeds.split(", ")) if re.fullmatch(r"[a-z_]+", w)}
         found |= {f"facts.{k}" for k in STATED_FACTS} | {f"building.{k}" for k in code_scope.FACTS}
         found |= {f"facts.{f}" for facts in ui_data.SITE_STOPS.values() for f in facts}
         _FIELDS.append(found)
