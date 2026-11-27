@@ -295,7 +295,7 @@ def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(go
 
 
 def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got, laws):
-    """The two Revit marks for group 3's building facts on the apartment: Gordium: Occupied outdoor areas No makes 1004.7's
+    """The two Revit marks for group 3's building facts on the apartment: Gordium: Occupied outdoor areas No makes 1004.7's (and 903.2.1.6's)
     flag not applicable and moves nothing else (Yes leaves it a person's check); Gordium: Occupant load increased, either
     way, moves nothing here (an increase not ruled out keeps each room's larger reading at its area / 7 or more:
     occupant_load.py)."""
@@ -306,7 +306,10 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
         interior["building"] = {**interior["building"], fact: value}
         now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
         moved[(fact, value)] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
-    assert moved[("occupied_outdoor_areas", False)] == {"general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable")}
+    assert moved[("occupied_outdoor_areas", False)] == {"general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable"),
+                                                        # Chapter 9 part b: an occupiable roof's assembly use
+                                                        "general.bc_903_2_1_6_assembly_on_roofs": ("needs_review",
+                                                                                                   "not_applicable")}
     assert moved[("occupied_outdoor_areas", True)] == moved[("occupant_load_increased", False)] == \
         moved[("occupant_load_increased", True)] == {}
 
@@ -331,7 +334,8 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
         "general.bc_1020_3_corridor_capacity": ("needs_review", "pass"),
         "general.bc_table_1020_3_corridor_width": ("needs_review", "pass")}
     assert moved.pop(("ambulatory_care_facility", False)) == {
-        "general.bc_709_5_1_i2_smoke_barrier_doors": ("needs_review", "not_applicable")}
+        "general.bc_709_5_1_i2_smoke_barrier_doors": ("needs_review", "not_applicable"),
+        "general.bc_903_2_2_1_ambulatory_care": ("needs_review", "not_applicable")}      # Chapter 9 part b
     assert all(m == {} for m in moved.values()), moved
 
 
@@ -396,7 +400,7 @@ def test_door_swing_as_sent_and_with_each_doors_swing_stated(got):
     assert {k for k, v in rows.items() if v != "pass"} == {"L1WO", "L1EO", "L1W", "L1E"}
     assert {rows[k] for k in ("L1WO", "L1EO")} == {present.REVIEW} and stated["results"][SWING] == present.REVIEW
     assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {
-        "general.bc_1004_7_outdoor_areas"}
+        "general.bc_1004_7_outdoor_areas", "general.bc_903_2_1_6_assembly_on_roofs"}     # Chapter 9 part b's too
     for d in desc["doors"]:
         d["swings_into"] = d["sides"][0]
     wrong = _check(desc, egress.measure_routes(desc))
