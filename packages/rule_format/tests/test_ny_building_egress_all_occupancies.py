@@ -1608,6 +1608,7 @@ def test_the_readme_names_each_flag_reading_a_reference_outside_chapter_10_not_b
     group 9e on, each reference outside Chapter 10 a flag's notes say isn't brought in is in the README's list, with
     that flag ('1024.3's flag') or its section ('1024's flags') in the bracket after it."""
     readme = (NY / "README.md").read_text(encoding="utf-8")
+    labels = load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"]
     part = readme.split("## References in the brought-in sections that are not brought in", 1)[1].split("\n## ", 1)[0]
     ref = r"(?:UL|NFPA|ASTM) [A-Z]?\d+|ICC A117\.1|(?<![\d.])\d{3,4}(?:\.\d+)*(?![\d])"
     missing = []
@@ -1620,8 +1621,13 @@ def test_the_readme_names_each_flag_reading_a_reference_outside_chapter_10_not_b
             m = re.search(r"\b(?:is|are)n't(?: yet)? brought in", sentence)
             if not m:
                 continue
-            for x in re.findall(ref, re.sub(r"\([^()]*\)", "", sentence[:m.start()])):
-                if re.fullmatch(r"10\d\d(?:\.\d+)*", x) or x == "ICC A117.1":   # Chapter 10's own; A117.1 tested above
+            head = sentence[:m.start()]
+            if head.count("(") > head.count(")"):          # said inside a bracket: the bracket's own list
+                head = head[head.rindex("(") + 1:]
+            for x in re.findall(ref, re.sub(r"\([^()]*\)", "", head)):
+                # A117.1 is tested above; a Chapter 10 section is skipped only where it is brought in (review round 2 of
+                # section group 9f: 1028.2, not yet brought in, was never checked)
+                if x == "ICC A117.1" or (re.fullmatch(r"10\d\d(?:\.\d+)*", x) and x in labels):
                     continue
                 spots = [part[k.end():part.find(")", k.end())] for k in
                          re.finditer(rf"(?<![\w.]){re.escape(x)}(?![\d]|\.\d)", part)]
