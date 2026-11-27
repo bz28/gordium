@@ -362,10 +362,10 @@ def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rule
                 bad += [(r["id"], n) for n in named if any(n == s or n.startswith(s + ".") for s in ours)]
             # review round 2 of part c: the uses a whole sentence names stand for their sections too ("a mall, a
             # Group I-2 occupancy ...: each has its own distance, not brought in")
-            for sentence in re.split(r"(?<=\.)\s", text):
+            for sentence in re.split(r"(?<=[.;])\s", text):     # a list after a colon stays whole
                 if re.search(r"(?:not|n't) brought in", sentence):
-                    bad += [(r["id"], s) for use, s in USES.items() if re.search(use, sentence)
-                            and any(s == o or s.startswith(o + ".") for o in ours)]
+                    bad += [(r["id"], s) for s in _named_uses(sentence)
+                            if any(s == o or s.startswith(o + ".") for o in ours)]
     assert not bad, bad
 
 
@@ -384,18 +384,38 @@ def test_a_plural_term_is_the_definition_of_its_singular():
     assert not said, said
 
 
+VALUE = r"(\d+[ -]\d+/\d+|\d+/\d+|[\d,]+(?:\.\d+)?)"
+# every unit the number reader (document_extraction/numbers.py) records that is imperial, and the metric ones
+IMPERIAL = ("gross square foot", "square foot", "square inch", "cubic foot", "foot", "inch", "pound", "psf", "footcandle")
+METRIC = ("mm", "m", "kg", "N", "lux")
+
+
 def _figure(recorded):
-    """(value, unit) of a recorded number ("less than 500 square foot", "19.1 mm", "2/3 inch", "1588 kg"), or None."""
-    m = re.search(r"(\d+/\d+|[\d,]+(?:\.\d+)?)\s+(square foot|foot|inch|pound|mm|m|kg)\b", recorded)
+    """(value, unit) of a recorded number ("less than 500 square foot", "19.1 mm", "1 1/2 inch", "1588 kg"), or None."""
+    m = re.search(VALUE + r"\s+(" + "|".join(IMPERIAL + METRIC) + r")\b", recorded)
     if not m:
         return None
-    a, _, b = m.group(1).replace(",", "").partition("/")
-    return (float(a) / float(b) if b else float(a)), m.group(2)
+    whole, _, frac = m.group(1).replace(",", "").replace("-", " ").rpartition(" ") if "/" in m.group(1) \
+        else ("", "", m.group(1).replace(",", ""))
+    a, _, b = frac.partition("/")
+    return (float(whole or 0) + (float(a) / float(b) if b else float(a))), m.group(2)
 
 
-# each imperial unit and the conversions it is printed with (square metres are recorded as "m")
+def _imperial(recorded):
+    """Whether a recorded number carries an imperial unit word (whether or not _figure reads it)."""
+    return re.search(r"\d\s+(?:gross\s+)?(?:square\s+|cubic\s+)?(?:inch|foot|pound|psf|footcandle)\b", recorded)
+
+
+# each imperial unit and the conversions it is printed with (square metres are recorded as "m", square mm as "mm")
 CONVERSION = {"inch": {"mm": 25.4}, "foot": {"mm": 304.8, "m": 0.3048}, "square foot": {"m": 0.092903},
-              "pound": {"kg": 0.45359}}
+              "square inch": {"mm": 645.16}, "pound": {"kg": 0.45359, "N": 4.448}}
+# pieces whose metric figure the number reader records without its unit, and that unit
+UNIT_NOT_RECORDED = {}
+
+
+def _numbers(pid, entry):
+    unit = UNIT_NOT_RECORDED.get(str(pid))
+    return [n + " " + unit if unit and re.fullmatch(r"[\d,.]+", n) else n for n in entry["numbers"]]
 
 
 def _compared(numbers):
@@ -419,16 +439,22 @@ def _misprinted(numbers):
 
 
 def test_the_conversion_walk_compares_every_imperial_figure():
-    """Review round 3 of part c: the walk skipped feet printed with metres and pounds with kilograms. Every imperial
-    figure a Chapter 4 piece records is compared with the metric figure printed after it (none is printed alone)."""
+    """Review rounds 3 and 4 of part c: the walk skipped feet printed with metres and pounds with kilograms, and read
+    "1 1/2 inch" as 1/2. Every imperial figure a Chapter 4 piece records (by its unit word, read or not) is read, has a
+    conversion, and is compared with the metric figure printed after it (none is printed alone)."""
     assert _misprinted(["more than 420 foot", "12 m"]) and _misprinted(["not less than 3,500 pound", "158 kg"])
     assert not _misprinted(["more than 420 foot", "128 m"]) and not _misprinted(["75 foot", "22 mm", "860 mm"])
+    assert _figure("not more than 1 1/2 inch") == (1.5, "inch") and _figure("2/3 inch") == (2 / 3, "inch")
+    assert not _misprinted(["greater than 1 1/2 square inch", "967 mm"])
     pieces = load(NY / "text_verification.yaml")["pieces"]
     imperial = compared = 0
     for pid, entry in pieces.items():
         if re.fullmatch(r"4\d\d(\.\d+)*", str(pid)):
-            imperial += sum(1 for n in entry["numbers"] if (_figure(n) or (0, ""))[1] in CONVERSION)
-            compared += len(_compared(entry["numbers"]))
+            for n in entry["numbers"]:
+                if _imperial(n):
+                    assert _figure(n) and _figure(n)[1] in CONVERSION, (pid, n)   # read, with a conversion
+                    imperial += 1
+            compared += len(_compared(_numbers(pid, entry)))
     assert imperial and compared == imperial, (compared, imperial)
 
 
@@ -442,7 +468,7 @@ def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
     found = {}
     for pid, entry in pieces.items():
         if re.fullmatch(r"4\d\d(\.\d+)+", str(pid)):
-            for here, after in _misprinted(entry["numbers"]):
+            for here, after in _misprinted(_numbers(pid, entry)):
                 found.setdefault(str(pid), []).append((here, after))
     assert set(found) >= {"407.2.4", "407.3.1.1"}, found          # the walk finds the two it was written for
     block = _block_ids()
@@ -456,15 +482,22 @@ def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
             assert after.split()[0] in notes, (pid, after)
         assert "model code" not in flags + notes, pid
         assert "person's check" in notes, pid
+        assert "misprint" not in flags or "person's check" in flags, pid   # the second reading's words too (round 4)
         assert "misprint" not in notes or re.search(r"elsewhere \(p\.\d+, line \d+", notes), pid
 
 
 # the uses Chapter 10's words name for Chapter 4's sections (Table 1017.2 note a's list, 1006.2.2's spaces), as word
-# patterns so a plural or a missing article is caught too (review round 3 of part c)
-USES = {r"\bmalls?\b": "402.8", r"\batriums?\b": "404.9", r"\ba Group I-2\b": "407.4",
-        r"\bGroup I-2 care suites?\b": "407.4.4", r"\bhigh-rise": "403.5", r"\bunderground\b": "405.7"}
+# patterns matched in any case, so a plural, a missing article or a capital is caught too (review rounds 3 and 4 of part c)
+USES = {r"\bmalls?\b": "402.8", r"\batriums?\b": "404.9", r"\bGroup I-2\b": "407.4",
+        r"\bGroup I-2 care suites?\b": "407.4.4", r"\bhigh[- ]rise": "403.5", r"\bunderground\b": "405.7"}
 
 
-def test_the_uses_are_matched_in_any_number_and_without_an_article():
-    sentence = "Covered mall buildings and atriums are not brought in."
-    assert {s for use, s in USES.items() if re.search(use, sentence)} == {"402.8", "404.9"}
+def _named_uses(sentence):
+    """The Chapter 4 sections a sentence names by their uses."""
+    return {s for use, s in USES.items() if re.search(use, sentence, re.IGNORECASE)}
+
+
+def test_the_uses_are_matched_in_any_number_case_and_without_an_article():
+    assert _named_uses("Covered mall buildings and atriums are not brought in.") == {"402.8", "404.9"}
+    assert _named_uses("Atriums and Group I-2 occupancies aren't brought in.") == {"404.9", "407.4"}
+    assert _named_uses("High rise buildings are not brought in.") == {"403.5"}
