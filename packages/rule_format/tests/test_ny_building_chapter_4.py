@@ -555,14 +555,45 @@ def test_the_uses_are_matched_in_any_number_case_and_without_an_article():
     assert _named_uses("High rise buildings are not brought in.") == {"403.5"}
 
 
+def _sections(text):
+    """The section numbers a plan line names, ranges expanded by their last part ("407.1 to 407.4" is 407.1 to
+    407.4; "420.6 whole" is 420.6)."""
+    out = set()
+    for a, b in re.findall(r"(?<![\d.])(4\d\d(?:\.\d+)*)(?: to (4\d\d(?:\.\d+)*))?(?![\d])", text):
+        out.add(a)
+        if b and a.rsplit(".", 1)[0] == b.rsplit(".", 1)[0] and "." in a:
+            head, lo = a.rsplit(".", 1)
+            out |= {f"{head}.{n}" for n in range(int(lo), int(b.rsplit(".", 1)[1]) + 1)}
+        elif b:
+            out.add(b)
+    return out
+
+
+def _under(section, listed):
+    return any(section == s or section.startswith(s + ".") for s in listed)
+
+
 def test_the_plans_parts_list_names_each_parts_sections():
-    """Review round 3 of part d: the plan's "Parts, in order" list still gave part d its first scope. Each part's
-    status line names sections its list line names too."""
+    """Review rounds 3 and 4 of part d: the plan's "Parts, in order" list still gave part d its first scope, and
+    part d's status line reasoned about part e's 408.6.1. Each part's status line, up to what it brings in, names
+    only sections under its own list line, never one under another part's."""
     plan = (REPO / "docs/decisions/2026-11-26_ny_building_chapter_4_egress.md").read_text(encoding="utf-8")
     parts = plan.split("## Parts, in order", 1)[1].split("## Status", 1)[0]
     status = plan.split("## Status", 1)[1]
+    listed = {p: _sections(re.search(r"- \*\*" + p + r"\.[^\n]*", parts).group().split(":", 1)[1])
+              for p in "abcde"}
     for part in "abcd":
-        listed = re.search(r"- \*\*" + part + r"\.[^\n]*", parts).group()
-        stated = re.search(r"- \*\*" + part + r"\.\*\* Drafted[^\n]*", status).group()
-        first = re.search(r"\b4\d\d\.\d+", stated.split("Drafted", 1)[1]).group()
-        assert first.split(".")[0] in listed and (first in listed or first.rsplit(".", 1)[0] in listed), (part, first)
+        line = re.search(r"- \*\*" + part + r"\.\*\* Drafted[^\n]*", status).group()
+        stated = _sections(re.sub(r"\([^)]*\)", "", line.split("Drafted", 1)[1]))
+        assert stated, part
+        for s in stated:
+            mine = _under(s, listed[part])
+            theirs = [p for p in listed if p != part and _under(s, listed[p]) and not mine]
+            assert mine and not theirs, (part, s, theirs)
+    for part in listed:                                   # no part lists a section another part lists
+        for other in listed:
+            clash = [s for s in listed[part] if other != part and (_under(s, listed[other])
+                                                                    or any(_under(o, {s}) for o in listed[other]))]
+            assert not clash, (part, other, clash)
+    assert _sections("407.1 to 407.4; 408.1") == {"407.1", "407.2", "407.3", "407.4", "408.1"}
+    assert not _under("407.10", {"407.1"})
