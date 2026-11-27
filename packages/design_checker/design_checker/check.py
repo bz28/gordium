@@ -1068,7 +1068,8 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     found = egress.laws(facts["jurisdiction"])        # by place: the state law it inherits, its rules checked
     law = egress.check(found, interior, _with_stories_bound(values, measured, facts,
                                                             getattr(measuring(facts["jurisdiction"]), "fact_conflicts",
-                                                                    None)), allowed)
+                                                                    None)), allowed,
+                       ground=_story_ground(facts))
     egress.add_to_view(v, law, found["place"])
     # what the rebuilt results pane reads beyond today's fields (C1-C9): new fields only, never a status
     place_folder = egress._folder(facts["jurisdiction"])
@@ -1107,6 +1108,15 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
             "sections": v["sections"],          # zoning's, then each inherited law's, each with its own state
             "egress": {k: law[k] for k in ("rows", "results", "interior", "interior_sha256")},
             "which_code": egress.which_code(law)}      # which New York code governs the building (code_scope.py)
+
+
+def _story_ground(facts: dict) -> dict:
+    """The ground the Building Code's story places are worked out from (model_measurement.routes.story_place): the
+    lot facts' stated ground; flat ground the host only assumed is refused, with the lot's own place's reason where
+    its measuring gives one."""
+    from model_measurement.routes.story_place import ground_of
+    unsafe = getattr(measuring(facts["jurisdiction"]), "flat_assumption_unsafe", None)
+    return ground_of(facts, unsafe(facts) if unsafe else None)
 
 
 def _with_stories_bound(values: dict, measured: dict, facts: dict | None = None, conflicts=None) -> dict:

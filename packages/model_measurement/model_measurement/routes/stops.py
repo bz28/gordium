@@ -121,6 +121,50 @@ STOPS = {
     "area_unknown_space": "the story has an enclosed space with no room drawn in it ({name}): which area it counts in "
                           "isn't known",
     "area_rooms_overlap": "the rooms {a} and {b} overlap: an area counted twice",
+    # where each story sits against the grade plane (story_place.py)
+    "no_ground": "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so "
+                 "which story is above or below it, isn't known",
+    "ground_existing": "the ground given is the existing ground, not the finished ground the grade plane is "
+                       "measured from (the Building Code's grade plane, 202)",
+    "ground_assumed": "the ground is assumed flat, not stated ({why}): where the grade plane is isn't known",
+    "ground_spots_not_finished": "the spot grades aren't stated as finished ground (Revit's Ground from mark set to "
+                                 "Finished spot grades, or no regrading near the house): the grade plane is measured "
+                                 "from the finished ground",
+    "ground_disagrees": "the ground is stated flat at {flat} but finished ground at an opening is stated higher "
+                        "({high}): which is right isn't known",
+    "ground_disagrees_spots": "the highest finished spot grade is {high} but finished ground at an opening is "
+                              "stated higher ({stated}): the spots don't bound the grade plane",
+    "ground_openings_not_read": "the finished ground stated at an opening or an area well's floor can't be read",
+    "ground_spots_not_read": "the spot grades can't be read (each is a point with an elevation)",
+    "ground_no_outline": "the stories' outlines aren't all given, so which spot grades are at the building's walls "
+                         "isn't known",
+    "ground_wall_bare": "{count} wall(s) of the building have no spot grade within 2 ft: the ground there, and so the "
+                        "grade plane, isn't known",
+    "place_no_rooms": "no story has rooms with a floor elevation",
+    "place_description": "the model isn't read whole ({reasons}): a story may be missing",
+    "place_levels_not_all": "the model doesn't list every one of its levels (one with nothing drawn on it, an open "
+                            "parking story, may be a story): which story is the first above grade plane isn't known",
+    "place_story_no_rooms": "the level {name} has no rooms: it isn't placed as a story",
+    "place_floor_not_read": "the floor elevation of the room {name} isn't read: {reason}",
+    "place_level_not_read": "the elevation of the level {name} isn't read",
+    "place_levels_disagree": "the model gives the level {name} two heights (its levels and its list of every level "
+                             "disagree): which is right isn't known",
+    "place_under_lowest": "the lowest level is {gap} above the lowest ground stated: a story with no level of its own "
+                          "(an undercroft drawn from the level above) may stand under it",
+    "place_story_spread": "the rooms of {name} have floors {spread} apart: they may be two stories (a room drawn on a "
+                          "lower level with an offset)",
+    "place_level_inside_story": "the level {name} lies within a story's floors: a story may be drawn on another level",
+    "place_split_level": "the floors of {a} and {b} overlap in height (a split level): which story is above which "
+                         "isn't clear",
+    "place_either": "{name} could be {could}, depending on where the grade plane lies within what the ground stated "
+                    "allows",
+    "place_either_levels": "{name} could be {could}, depending on where the grade plane lies within what the ground "
+                           "stated allows and on whether the levels {levels} are stories (a level with no rooms drawn, "
+                           "or a small one that may be a mezzanine)",
+    "place_too_many_levels": "{count} levels have no rooms: whether each is a story nobody drew rooms on is tried both "
+                             "ways only up to 8",
+    "ground_buildings_apart": "the stories' outlines come apart in {count} pieces (separate buildings?): which spot "
+                              "grades are each building's ground isn't known",
     # each door's own part (doors.py, section group 6a): its sizes only from the maker's stated clear opening
     "door_no_stated_clear": "the door {name} has no maker's stated clear opening (its type's clear width and height, "
                             "confirmed): its size is never taken from the door's own size or its leaf",
@@ -135,6 +179,17 @@ STOPS = {
     "door_sides_not_read": "the door {name}'s sides (the two rooms, or a room and outside, it joins) aren't read",
     "door_side_no_use": "a side of the door {name} is the room {room}, which has no use given: whether it is a "
                         "corridor isn't known",
+    "egress_side_unclear": "which way egress travel goes through the door {name} isn't worked out: travel may cross it "
+                           "both ways (two rooms that both lead out through it, a room others' routes cross, an exit "
+                           "stair that may discharge through it, an outdoor area whose way out is back inside)",
+    "door_swing_not_given": "the door {name} doesn't say which side it swings into, and Gordium has no mark for it in "
+                            "the model yet",
+    "door_swing_not_read": "the door {name} says it swings into {got}, not one of the two sides it joins",
+    "door_not_on_routes": "the door {name} isn't one the routes read (its story's routes need review, or it isn't "
+                          "placed): which way egress travel goes through it isn't known",
+    "door_operation_not_given": "the door {name} doesn't say how it operates (side-hinged, sliding, folding, pocket)",
+    "door_operation_other": "the door {name}'s operation is given as other: whether it is a pivoted or balanced door "
+                            "(swinging) or another kind isn't known",
     "door_side_room_not_read": "a side of the door {name} is the room {room}, which isn't read: its floor area isn't "
                                "known",
 }

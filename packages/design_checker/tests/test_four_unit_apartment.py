@@ -37,7 +37,7 @@ def routes():
 
 def _check(desc, routes):
     with pytest.MonkeyPatch.context() as m:
-        m.setattr(egress, "measure_routes", lambda interior: copy.deepcopy(routes))
+        m.setattr(egress, "measure_routes", lambda interior, **_: copy.deepcopy(routes))
         return egress.check(egress.laws("regulations/jurisdictions/new_york/ithaca_city"), desc, VALUES, ALLOWED)
 
 
@@ -198,9 +198,13 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     hoistway doors (24); its per-corridor flag (a rated corridor's walls) is a corridor's row, not a building line.
     Section group 4c adds 1020.4's and 1020.6's (26); 1020.7's is a corridor's row. Section group 5a adds 1005.3.1's
     stairways and 1005.3.2's doors, ramps and passageways (28); section group 5b 1005.4, 1005.5 and 1005.6 (31); section group 5c 1005.7.1 to 1005.7.3 (34);
-    section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37)."""
+    section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37). Chapter 7 part a (2026-11-26) adds its 28
+    fire-barrier and shaft-enclosure flags, each shown for every building (65); part b its 23 building-wide
+    opening-protective flags (88; Table 716.1(2)'s corridor doors are each corridor's row); part c 30 of its 31 fire
+    partition, smoke barrier and smoke partition flags (118; 710.5.3 is Group I-2's, not the stated R-2's); part d its 23 floor, vertical opening
+    and penetration flags (141)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 37 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 141 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -309,7 +313,8 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
     No (its stairs are enclosed exits discharging outside) bounds each corridor's load by its story's, so the corridor
     width and capacity rows pass at the whole story's load (two readings, none and the story's: a pass only if the
     story's passes); Yes leaves them by hand; the other three, either way, move nothing here (Group R-2, no sprinkler
-    system, no ambulatory care, the corridors already within Table 1020.3's widths)."""
+    system, no ambulatory care, the corridors already within Table 1020.3's widths), but Gordium: Ambulatory care
+    facility No, which sets aside 709.5.1's smoke barrier doors (Chapter 7 part c: Group R-2 with none stated)."""
     moved = {}
     for fact, value in (("other_level_egress_into_corridors", False), ("other_level_egress_into_corridors", True),
                         ("ambulatory_care_facility", False), ("corridors_within_dwelling_units", False),
@@ -322,6 +327,8 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
     assert moved.pop(("other_level_egress_into_corridors", False)) == {
         "general.bc_1020_3_corridor_capacity": ("needs_review", "pass"),
         "general.bc_table_1020_3_corridor_width": ("needs_review", "pass")}
+    assert moved.pop(("ambulatory_care_facility", False)) == {
+        "general.bc_709_5_1_i2_smoke_barrier_doors": ("needs_review", "not_applicable")}
     assert all(m == {} for m in moved.values()), moved
 
 
@@ -357,6 +364,74 @@ def test_a_door_with_no_stated_clear_opening_is_never_sized_from_its_leaf(got):
     mine = [r for r in stated["rows"] if r["rule"] in (WIDTH, HEIGHT) and r["id"] == desc["doors"][0]["id"]]
     assert len(mine) == 2 and {r["outcome"] for r in mine} == {"needs_review"}
     assert stated["results"][WIDTH] == present.REVIEW and stated["results"][HEIGHT] == present.REVIEW
+
+
+# ---- section group 6b (2026-11-25): door kind and swing --------------------------------------------------------------
+
+KIND, SWING = "general.bc_1010_1_2_door_types", "general.bc_1010_1_2_1_direction_of_swing"
+
+
+def test_door_swing_as_sent_and_with_each_doors_swing_stated(got):
+    """Before: every door is side-hinged, so 1010.1.2's flag sets it aside, and the swing rule needs review (the side
+    each swings into isn't stated). After, each stated to swing into the side egress travel goes into (the corridor
+    from an apartment, the stair from the corridor, outside from the stair) with no occupied outdoor areas stated:
+    every door complies but Level 1's stair doors (their stairs' outside doors unmarked: either may be a way in, so the
+    corridor door may be the discharge, review round 7) and those outside doors (not known which way: rounds 5 and 6),
+    and nothing else changes; the other way round, it needs review (how many each door serves isn't worked out, so
+    under 50 can't be ruled out), never a pass and never a fail."""
+    assert got["results"][KIND] == "not_applicable" and got["results"][SWING] == present.REVIEW
+    desc = build.interior_of()
+    for d in desc["doors"]:
+        d["swings_into"] = d["sides"][1]
+    stated = _check(desc, egress.measure_routes(desc))
+    assert stated["results"][SWING] == present.REVIEW     # round 1: the stairs' outside doors may lead in from a patio
+    desc["building"] = {**desc["building"], "occupied_outdoor_areas": False}
+    stated = _check(desc, egress.measure_routes(desc))
+    # review rounds 5 and 6: the stairs' outside doors aren't marked exits (the eval marks the exit at the stair door), so
+    # which way egress goes through them isn't known: they need review; every other door complies
+    rows = {r["id"]: r["outcome"] for r in stated["rows"] if r["rule"] == SWING}
+    assert {k for k, v in rows.items() if v != "pass"} == {"L1WO", "L1EO", "L1W", "L1E"}
+    assert {rows[k] for k in ("L1WO", "L1EO")} == {present.REVIEW} and stated["results"][SWING] == present.REVIEW
+    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {
+        "general.bc_1004_7_outdoor_areas"}
+    for d in desc["doors"]:
+        d["swings_into"] = d["sides"][0]
+    wrong = _check(desc, egress.measure_routes(desc))
+    assert wrong["results"][SWING] == present.REVIEW
+    assert {r["outcome"] for r in wrong["rows"] if r["rule"] == SWING} == {present.REVIEW}
+
+
+def test_a_stair_that_may_discharge_through_the_corridor_never_passes_on_its_door_swinging_in(got):
+    """Review round 1 of group 6b (F2): with the west stair's outside door gone, Level 1's corridor door into it may be
+    its discharge (1028.1: through a lobby or corridor), so egress may run out of the stair through it: a door
+    swinging into the stair needs review there, never a pass; Level 2's, with no door to outside on its story, still
+    leads into the stair."""
+    desc = build.interior_of()
+    desc["doors"] = [d for d in desc["doors"] if d["id"] != "L1WO"]
+    desc["building"] = {**desc["building"], "occupied_outdoor_areas": False}
+    for d in desc["doors"]:
+        d["swings_into"] = d["sides"][1]
+    stated = _check(desc, egress.measure_routes(desc))
+    rows = {r["id"]: r["outcome"] for r in stated["rows"] if r["rule"] == SWING}
+    assert rows["L1W"] == present.REVIEW and stated["results"][SWING] == present.REVIEW
+    assert rows["L2W"] == "pass"
+
+
+def test_a_door_to_outside_asks_whether_the_occupants_use_outdoor_areas(got):
+    """Review round 2 of group 6b (P3): a door to outside that isn't an exit may be an occupied patio's or roof's way in
+    (1004.7): its swing row asks the building's fact, which has a Revit mark (Gordium: Occupied outdoor areas), beside
+    marking the door an exit where it is one (round 7: an unmarked door to outside is never taken as leading out)."""
+    from design_checker import ui_data
+    desc = build.interior_of()
+    for d in desc["doors"]:
+        d["swings_into"] = d["sides"][1]
+    for case in (_check(desc, egress.measure_routes(desc)), got):          # swings stated; nothing stated
+        items = [i for i in case["items"] if i.get("rule") == SWING and i["status"] == present.REVIEW
+                 and "outside door" in i["name"]]
+        assert len(items) == 2
+        for i in items:
+            asks = [ui_data._from_cause(c, "means_of_egress_door") for c in i.get("causes") or []]
+            assert "building.occupied_outdoor_areas" in {a.get("field") for a in asks}, i["name"]
 
 
 # ---- section group 7c (2026-11-26): Section 1011's stairs --------------------------------------------------------------

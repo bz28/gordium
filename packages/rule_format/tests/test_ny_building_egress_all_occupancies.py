@@ -283,6 +283,7 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          "1005.7.3": (314, 54, 54),
          "1010.1": (322, 28, 36), "1010.1.1": (322, 37, 58), "1010.1.1 (part 2)": (323, 3, 5),
          "1010.1.1.1": (323, 6, 10),
+         "1010.1.2": (323, 11, 23), "1010.1.2.1": (323, 24, 25),                       # section group 6b
          # section group 7c: Section 1011, stairways
          "1011.1": (331, 45, 48), "1011.2": (331, 49, 57), "1011.3": (332, 3, 12), "1011.5.2": (332, 19, 39),
          "1011.5.4": (332, 44, 53), "1011.6": (333, 17, 32), "1011.11": (334, 12, 29)}                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
@@ -330,6 +331,9 @@ HANDLERS = {
     "1010.4": ("general.bc_1010_1_doors_general", "1010.4"), "1010.4.1": ("general.bc_1010_1_doors_general", "1010.4.1"),
     "1010.5": ("general.bc_1010_1_doors_general", "1010.5"), "1010.5.4": ("general.bc_1010_1_doors_general", "1010.5.4"),
     "421.4.2": ("general.bc_1010_1_1_door_width", "421.4.2"), "421": ("general.bc_1010_1_1_door_width", "421.4.2"),
+    # section group 6b: 1010.1.2's exceptions 5 to 7 (revolving, power-operated, special-purpose sliding doors)
+    "1010.3.1": ("general.bc_1010_1_2_door_types", "1010.3.1"), "1010.3.2": ("general.bc_1010_1_2_door_types", "1010.3.2"),
+    "1010.3.3": ("general.bc_1010_1_2_door_types", "1010.3.3"),
     # section group 7c: Section 1011's (the rest of 1011 and the devices: the 1011.1 flag; spiral stairways: a review
     # in each rule; stepped aisles' 1030.14.2 and sloping public ways' 1011.5.4.1: a review where not in an enclosure)
     "1011.13": ("general.bc_1011_1_stairways_general", "1011.13"),
@@ -353,8 +357,8 @@ HANDLERS = {
     "1030": ("general.bc_1011_1_stairways_general", "Section 1030"),
 }
 NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
-            "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1", "1011.1", "1011.2", "1011.3",
-            "1011.5.2", "1011.5.4", "1011.6", "1011.11"}          # the piece naming itself
+            "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1", "1010.1.2",
+            "1010.1.2.1", "1011.1", "1011.2", "1011.3", "1011.5.2", "1011.5.4", "1011.6", "1011.11"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
@@ -593,11 +597,17 @@ def test_a_close_pair_on_a_story_follows_each_table_row_exactly_where_one_exit_c
 
 def test_the_readme_counts_the_pieces_and_numbers_the_second_reading_holds():
     """Review round 2 (P3): the folder's README states how many pieces are brought in and how many numbers were
-    read twice; both must be the second reading's own counts, so a piece brought in can't leave them stale."""
+    read twice; both must be the second reading's own counts, so a piece brought in can't leave them stale. Where a
+    piece's two readings differ (its flag says which is right: Chapter 7 part b's Table 716.1(2), whose extracted text
+    loses its stacked fractions), the README says how many, never "all agree"."""
     pieces = load(NY / "text_verification.yaml")["pieces"]
     numbers = sum(len(e["numbers"]) for e in pieces.values())
+    differ = [p for p, e in pieces.items() if e["second_reading"] == "differs"]
     readme = (NY / "README.md").read_text(encoding="utf-8")
-    assert f"{len(pieces)} pieces." in readme and f"(all {len(pieces)} pieces, {numbers} numbers, agree)" in readme
+    said = (f"(all {len(pieces)} pieces, {numbers} numbers, agree)" if not differ else
+            f"({len(pieces)} pieces, {numbers} numbers; all agree but {len(differ)}, whose flag says which reading is "
+            f"right: {', '.join(differ)})")
+    assert f"{len(pieces)} pieces." in readme and said in readme
 
 
 def test_needed_by_is_checked_against_the_rules_that_read_each_fact(tmp_path):
@@ -995,6 +1005,48 @@ def test_1010_1_1_takes_no_size_from_anything_but_the_stated_clear_opening(ctx, 
         for g in ("B", "R-2", "I-2"):
             assert _one(rules[rid], "means_of_egress_door", _door(), {"occupancy_group": g} | NO_UNITS, ctx) ==                 "needs_review", (rid, g)
 
+
+# ---- section group 6b (2026-11-25): door kind and swing, 1010.1.2 and 1010.1.2.1 (p.323) -----------------------------
+
+H = ["H-1", "H-2", "H-3", "H-4", "H-5"]
+
+
+def test_1010_1_2_1_swing_at_its_limit_and_just_past(ctx, rules):
+    """1010.1.2.1 (p.323 lines 24-25): a swinging door swings with egress travel where it serves 50 or more, or a
+    Group H occupancy, typed from the page; a door that isn't swinging is asked nothing."""
+    r = rules["general.bc_1010_1_2_1_direction_of_swing"]
+    assert _cites(r, 323, 24) and _cites(r, 323, 25)
+    one = lambda m, g: _one(r, "means_of_egress_door", m, {"occupancy_group": g}, ctx)
+    against = {"moe_door_swinging": True, "moe_door_swings_with_egress": False, "moe_door_exterior": False, "moe_door_exit": False}
+    for g in ("B", "A-2", "R-2"):
+        assert one(against | {"moe_door_occupant_load": 49.99}, g) == "pass", g
+        assert one(against | {"moe_door_occupant_load": 50}, g) == "fail", g
+    for g in H:
+        assert one(against | {"moe_door_occupant_load": 1}, g) == "fail", g
+    # two or more groups: under 50, whether a Group H occupancy is among them isn't shown (found by the walk)
+    assert one(against | {"moe_door_occupant_load": 1}, "mixed") == "needs_review"
+    assert one(against | {"moe_door_occupant_load": 50}, "mixed") == "fail"
+    assert one({"moe_door_swinging": True, "moe_door_occupant_load": 1}, "H-3") == "needs_review"  # swing not stated
+    assert one({"moe_door_swinging": False, "moe_door_occupant_load": 500}, "H-1") == "pass"       # not swinging
+    inside = {"moe_door_exterior": False, "moe_door_exit": False}
+    assert one({"moe_door_swinging": True, "moe_door_swings_with_egress": True, "moe_door_occupant_load": 900} | inside,
+               "B") == "pass"
+    # review round 2: a door to outside that isn't an exit, outdoor areas not ruled out: either way, never decided
+    patio = {"moe_door_swinging": True, "moe_door_exterior": True, "moe_door_exit": False, "moe_door_occupant_load": 900}
+    for swings in (True, False):
+        assert one(patio | {"moe_door_swings_with_egress": swings}, "B") == "needs_review", swings
+        assert _one(r, "means_of_egress_door", patio | {"moe_door_swings_with_egress": swings},
+                    {"occupancy_group": "B", "occupied_outdoor_areas": False}, ctx) == ("pass" if swings else "fail")
+
+
+def test_1010_1_2_door_kind_is_never_a_fail(ctx, rules):
+    """1010.1.2 (p.323 lines 11-23): exception 7's power-operated doors are allowed in every group, and the model
+    doesn't say whether a door is power-operated, so a door of another kind is a person's check, never a fail."""
+    r = rules["general.bc_1010_1_2_door_types"]
+    assert _cites(r, 323, 11) and _cites(r, 323, 20)
+    for g in ("B", "H-1", "R-2", "I-3"):
+        assert _one(r, "means_of_egress_door", {"moe_door_swinging": False}, {"occupancy_group": g}, ctx) ==             "needs_review", g
+        assert _one(r, "means_of_egress_door", {"moe_door_swinging": True}, {"occupancy_group": g}, ctx) ==             "not_applicable", g
 
 
 # ---- section group 7c (2026-11-26): Section 1011, stairways (pp.331-334) ----------------------------------------------

@@ -275,3 +275,67 @@ def test_a_pair_never_passes_on_its_openings_width(rules, ctx):
     assert _row(r, _part(door, U, 72, U), _given("B", False), ctx) == "needs_review"
     assert _row(r, _part(door, 1, 72, U), _given("B", False), ctx) == "pass"
     assert _row(r, _part(door, 2, 19, U), _given("B", False), ctx) == "fail"   # a leaf is never wider than the opening
+
+
+# ---- section group 6b (2026-11-25): the direction of swing, 1010.1.2.1 (p.323) --------------------------------------
+# Strict (a pass allowed only here): the door isn't swinging (1010.1.2.1 asks only swinging doors), or it swings with
+# egress travel, or it serves under 50 at the most it can serve and the building is one stated group other than H.
+# Loosest (a fail allowed only here): it is swinging, swings against egress travel, and serves 50 or more at the
+# least it can serve, or the building is stated Group H.
+SWING_RULE = "general.bc_1010_1_2_1_direction_of_swing"
+H_GROUPS = ("H-1", "H-2", "H-3", "H-4", "H-5")
+LOADS = (U, 0, 49.99, 50, 120, (0, 49.99), (0, 50), (0, 500), (50, 500))
+
+
+def _swing_part(swinging, swings, load, exterior=False, exit_=False):
+    m = {k: v for k, v in (("moe_door_swinging", swinging), ("moe_door_swings_with_egress", swings),
+                           ("moe_door_exterior", exterior), ("moe_door_exit", exit_)) if v is not U}
+    part = {"id": "p", "measures": m}
+    if isinstance(load, tuple):
+        part["readings"] = {"moe_door_occupant_load": [{"value": v, "named": {"door_occupants_served": n}}
+                                                        for v, n in zip(load, ("none", "whole_building"))]}
+    elif load is not U:
+        m["moe_door_occupant_load"] = load
+    return part
+
+
+def _swing_wrong(out, group, swinging, swings, load, exterior=False, exit_=False, outdoor=False):
+    low = high = None
+    if isinstance(load, tuple):
+        low, high = load
+    elif load is not U:
+        low = high = load
+    patio = exterior is not False and exit_ is not True and outdoor is not False
+    if out == "pass":
+        # round 2: a door to outside that isn't an exit may be an occupied outdoor area's way in (1004.7)
+        patio = exterior is not False and exit_ is not True and outdoor is not False
+        ok = swinging is False or (swings is True and not patio) or (
+            high is not None and high < 50 and group is not U and group != "mixed" and group not in H_GROUPS)
+        return None if ok else "passes short of the strict reading"
+    if out == "fail":
+        ok = swinging is True and swings is False and not patio and (
+            (low is not None and low >= 50) or group in H_GROUPS)
+        return None if ok else "fails within the loosest reading"
+    if out == "not_applicable":
+        return "set aside: it applies to every door"
+    return None
+
+
+def test_no_door_swing_passes_short_of_the_law_or_fails_within_it(rules, ctx):
+    rule = {r["id"]: r for r in rules}[SWING_RULE]
+    classes = group_classes(rule)
+    assert len(classes) >= 3                                 # H, mixed or unstated, the rest kept apart
+    bad, seen = [], set()
+    for rep, members in classes.items():
+        for outdoor in TRI:
+            given = _given(rep, U) | ({} if outdoor is U else {"occupied_outdoor_areas": outdoor})
+            for swinging, swings, exterior, exit_ in itertools.product(TRI, TRI, TRI, TRI):
+                for load in LOADS:
+                    part = _swing_part(swinging, swings, load, exterior, exit_)
+                    out = parts.rows(rule, {"means_of_egress_door": [part]}, given, ctx.allowed())[0]["outcome"]
+                    seen.add(out)
+                    for g in members:
+                        if why := _swing_wrong(out, g, swinging, swings, load, exterior, exit_, outdoor):
+                            bad.append((g, outdoor, swinging, swings, exterior, exit_, load, out, why))
+    assert not bad, (len(bad), bad[:5])
+    assert {"pass", "fail", "needs_review"} <= seen

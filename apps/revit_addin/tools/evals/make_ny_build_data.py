@@ -419,6 +419,9 @@ def interior_of() -> dict:
                           **({"function": r["function"]} if "function" in r else {})})
         for d in a["doors"] + (a["discharge_doors"] if lv is a["levels"][0] else []):
             door = {"id": f"{L}{d['id']}", "name": f"{d['name']} {L}", "exit": False, "level": L,
+                    # the type's Gordium: Operation as eval_marks.yaml door_types sets it (Side-hinged door), sent
+                    # as the Revit reader sends it (section group 6b: 1010.1.2's door kind)
+                    "operation": "side_hinged",
                     # the type's clear opening as eval_marks.yaml door_types stamps it: the reader sends a door's
                     # plan (its clear opening) only from that confirmed width, never the leaf's
                     "stated_clear": {"width": a["door"]["clear_width_in"] / 12, "height": a["door"]["clear_height_in"] / 12,
@@ -432,6 +435,8 @@ def interior_of() -> dict:
             doors.append(door)
     return {"format": "gordium.interior/1", "units": "ft",
             "levels": [{"id": lv["id"], "name": lv["name"], "elevation": lv["elevation"]} for lv in a["levels"]],
+            # every level of the model (RouteReader.cs all_levels): the building has only its two
+            "all_levels": [{"id": lv["id"], "name": lv["name"], "elevation": lv["elevation"]} for lv in a["levels"]],
             "rooms": rooms, "doors": doors, "passages": [],
             "story_outlines": [{"level": lv["id"], "outer": [list(p) for p in _rect([x0 - t, y0 - t, x1 + t, y1 + t])],
                                 "inner": [list(p) for p in _rect(a["inside"])]} for lv in a["levels"]],

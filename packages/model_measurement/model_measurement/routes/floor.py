@@ -51,6 +51,8 @@ class Room:
     use: str | None = None           # the room's `use`, as given (None: not given)
     lockable: bool | None = None     # as given (None: not given)
     not_occupied: bool = False       # decision 1b: the architect states nobody occupies it (left out or false: occupied)
+    end_only_stated: bool = False    # end-only by what is stated (sleeping, an end-only use, lockable, or pass_through
+                                     # false), never by a fact left out: no route of anyone's may cross it (section group 6b)
 
 
 @dataclass
@@ -355,8 +357,9 @@ def _room(item, reader, level) -> Room:
                         "it isn't a corridor, nor marked as a room an exit route may pass through"
                         if not (use == "corridor" or through)
                         else ""))
+    stated = bool(end_only) or (use is not None and use != "corridor" and lockable is not None and through is False)
     return Room(item["id"], name, level, outline, holes, obstructions, crossable=not why, end_only_why=why, use=use,
-                lockable=lockable, not_occupied=not_occupied)
+                lockable=lockable, not_occupied=not_occupied, end_only_stated=stated)
 
 
 def _outlines_of(item, key, reader, what) -> list:
@@ -484,7 +487,7 @@ def _outlines(outlines, reader, stories) -> None:
     given = {}
     for n, item in enumerate(outlines if isinstance(outlines, list) else [None], 1):
         level = item.get("level") if isinstance(item, dict) else None
-        if level not in stories:
+        if not isinstance(level, str) or level not in stories:
             for story in stories.values():
                 story.outline_stop = Stop("outline_not_read", reason=f"story outline #{n} isn't on one of the "
                                           "model's levels").reason
