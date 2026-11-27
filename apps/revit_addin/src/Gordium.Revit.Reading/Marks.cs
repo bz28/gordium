@@ -91,6 +91,20 @@ public static class Marks
         "BCNYS 1010.1.1: \"Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm).\" " +
         "1: the door's clear width is checked against 32 in. 2: one leaf of the pair must give the 32 in, which the maker's clear opening of the whole pair doesn't show, so a person checks. Blank or any other number: the door width needs review.");
 
+    /// <summary>A corridor's walls' fire-resistance rating, in minutes (<c>rooms[].fire_rating_hours</c>, sent in hours):
+    /// the architect's statement of the assemblies (BCNYS Table 1020.2), never read from the walls' geometry.</summary>
+    public static readonly MarkDefinition CorridorFireRating = new(
+        "Gordium: Corridor rating minutes", new("3e9778e1-4f8d-40cc-a224-58933cb06a45"), MarkValueKind.Integer,
+        MarkBinding.Instance, [Rooms], "rooms[].fire_rating_hours",
+        "A count: on a room whose Gordium: Use is Corridor, the minutes of fire-resistance rating of its walls (0 where they aren't rated; 30 for 1/2 hour, 60 for 1 hour; the least, where its walls differ), as the wall assemblies are rated. " +
+        "BCNYS 1020.2: \"Corridors shall be fire-resistance rated in accordance with Table 1020.2.\" Blank: the corridor rating rules need review.");
+
+    /// <summary>Whether a corridor's walls are smoke partitions (<c>rooms[].walls_smoke_partitions</c>, NFPA 101 2012 8.4).</summary>
+    public static readonly MarkDefinition SmokePartitionWalls = new(
+        "Gordium: Smoke partition walls", new("6a953c28-38f7-49d7-8e3c-5f38cc3aa78c"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [Rooms], "rooms[].walls_smoke_partitions",
+        "On a room whose Gordium: Use is Corridor: Yes when its walls form smoke partitions (NFPA 101 2012 8.4, a continuous membrane that restricts smoke). No: they don't. Blank: the rules that turn on it need review.");
+
     public static readonly MarkDefinition ClearConfirmed = new(
         "Gordium: Clear confirmed", new("66ced3f6-2dd7-4aa7-a0ce-89d086652103"), MarkValueKind.Text, MarkBinding.Type,
         [Windows, Doors], "openings[].stated_clear, doors[].stated_clear (the confirmation stamp)",
@@ -701,7 +715,7 @@ public static class Marks
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
         AbutsR1, Conversion, PrimaryBuildings, PrimaryBuildingsSameUse, HomeOccupationArea, HomeOccupationUnitArea,
         AduExistingBuilding, AduBedrooms, AduFloorArea, MainBuildingFloorArea,
-        DoorLeaves,
+        DoorLeaves, CorridorFireRating, SmokePartitionWalls,
     ];
 
     /// <summary>What a number typed in a mark means, said before it is typed, true wherever it is read: "count" for a
