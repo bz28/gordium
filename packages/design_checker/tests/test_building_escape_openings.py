@@ -194,7 +194,8 @@ def test_which_openings_comply_counts_only_known_ones():
     """Section group 8d: an opening complies only where every limit is known true; any known false, it doesn't; else not
     known. The room counts the known compliant ones (not measured where none is known to and one is unknown), and each
     opening says whether another in its room is known to comply."""
-    good, small, unknown = {"opening_net_clear_area": 6, "opening_net_clear_height": 30},         {"opening_net_clear_area": 4, "opening_net_clear_height": 30}, {"opening_net_clear_height": 30}
+    good, small, unknown = {"opening_net_clear_area": 6, "opening_net_clear_height": 30}, \
+        {"opening_net_clear_area": 4, "opening_net_clear_height": 30}, {"opening_net_clear_height": 30}
     room, (w, v) = _two(small, good)                            # the coordinator's case 1
     assert room["measures"]["sleeping_room_compliant_openings"] == 1
     assert w["measures"]["opening_room_other_compliant"] is True and v["measures"]["opening_room_other_compliant"] is False
@@ -492,3 +493,14 @@ def test_a_room_that_cant_be_read_or_a_count_that_isnt_one_gives_its_openings_no
         openings = [{"id": "w", "within": "b", "measures": {}, "not_measured": {}}]
         escape_openings._to_openings([{"id": "b", "measures": dict(full), "not_measured": why}], openings)
         assert not set(escape_openings.FROM_ROOM) & set(openings[0]["measures"]), why
+
+
+def test_a_sleeping_room_whose_id_isnt_text_is_never_a_crash():
+    """8d merge review: a room whose id is a list or a mapping counts no compliant openings (not known), never a
+    crash."""
+    for rid in (["b"], {"id": "b"}):
+        parts, desc = _parts(openings=[])
+        parts["sleeping_room"][0]["id"] = rid
+        escape_openings.link(parts, desc, _ny_rules())
+        assert "sleeping_room_compliant_openings" not in parts["sleeping_room"][0]["measures"]
+

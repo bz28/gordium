@@ -266,7 +266,8 @@ def _compliance(parts, rooms: list, openings, rules) -> None:
         by_room.setdefault(o.get("within"), []).append(o)
     good_ids = {id(o) for o in good or []}
     for r in rooms:
-        if not isinstance(r, dict) or r.get("maybe") or not isinstance(r.get("measures"), dict)                 or not isinstance(r.get("not_measured"), dict):
+        if not isinstance(r, dict) or r.get("maybe") or not isinstance(r.get("measures"), dict) \
+                or not isinstance(r.get("not_measured"), dict):
             continue                             # a room link left alone (it can't be read): its rows say so
         m, why = r["measures"], r["not_measured"]
         why.pop(COUNT, None)
@@ -280,7 +281,10 @@ def _compliance(parts, rooms: list, openings, rules) -> None:
         if "sleeping_room_escape_openings" not in m:            # its openings can't be told apart (a shared id)
             why[COUNT] = why.get("sleeping_room_escape_openings", "its openings aren't known")
             continue
-        pairs = [(o, complies(o, held)) for o in by_room.get(r.get("id"), [])]
+        if not isinstance(r.get("id"), str):
+            why[COUNT] = "the sleeping room's id isn't text, so which openings are its isn't known"
+            continue
+        pairs = [(o, complies(o, held)) for o in by_room.get(r["id"], [])]
         answers = [a for _, a in pairs]
         if anywhere or r.get("id") in unread:     # an opening that may be in it can't be read: never counted as none
             answers.append(None)
@@ -289,7 +293,8 @@ def _compliance(parts, rooms: list, openings, rules) -> None:
         else:
             why[COUNT] = _unknown_why(pairs, held)
     for o in openings if isinstance(openings, list) else []:
-        if not isinstance(o, dict) or not isinstance(o.get("measures", {}), dict)                 or not isinstance(o.get("not_measured", {}), dict):
+        if not isinstance(o, dict) or not isinstance(o.get("measures", {}), dict) \
+                or not isinstance(o.get("not_measured", {}), dict):
             continue
         m, why = o.setdefault("measures", {}), o.setdefault("not_measured", {})
         why.pop(COMPLIES, None)
