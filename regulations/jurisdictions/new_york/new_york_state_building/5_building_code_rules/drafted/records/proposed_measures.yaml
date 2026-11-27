@@ -525,7 +525,7 @@ stories_above_grade_plane:
   - general.bc_903_2_8_group_r_sprinklers
 townhouse_units:
   meaning: 'Every dwelling unit of the building is a townhouse unit (2025 BCNYS 202 TOWNHOUSE UNIT: a single-family dwelling
-    unit in a townhouse that extends from the foundation to the roof, with a yard or public way on not less than two sides),
+    unit in a townhouse that extends from the foundation to the roof, that has a yard or public way on not fewer than two sides and a separate means of egress),
     as the architect states it: 903.3.1.3 permits an NFPA 13D system in townhouses'
   unit: yes_no
   needed_by:

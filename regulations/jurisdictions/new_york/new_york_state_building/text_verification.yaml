@@ -2567,7 +2567,7 @@ pieces:
     second_reading_comparisons:
     - '>='
     flags:
-    - '''two'' (>=): ''a yard or public way on not less than two sides''; the recorded words miss it (numbers.py reads comparison
+    - '''two'' (>=): ''a yard or public way on not fewer than two sides''; the recorded words miss it (numbers.py reads comparison
       words only directly before a number or after its unit). The second reading is right. A definition the townhouse units
       fact names; used by no rule''s formula.'
   202:toxic:
