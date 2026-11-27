@@ -141,11 +141,12 @@ SEATING_STORY, SEATING_SPACE = "story_assembly_seating_possible", "space_assembl
 def _may_seat(room: dict, functions: dict, is_exit=None) -> bool:
     """Whether a room may hold seating served by aisles: a function under Table 1004.5's Assembly heading or one that may
     be an assembly use, no function stated (but a corridor, closet or toilet with none, or a room that is itself an
-    exit), or a function that is none of the table's. Only a room stating another of the table's functions is ruled
-    out (a residential, business or mercantile room)."""
-    if is_exit is True:
-        return False
+    exit with none), or a function that is none of the table's. Only a room stating another of the table's functions
+    is ruled out (a residential, business or mercantile room). A room that is itself an exit yet states a function is
+    one whose use isn't known (EXIT_FUNCTION), so it may seat people (review round 3)."""
     fn = room.get("function")
+    if is_exit is True:
+        return fn is not None
     if fn is None:
         return room.get("use") not in SUPPORT_USES
     if not isinstance(fn, str) or fn not in functions:

@@ -452,6 +452,13 @@ def test_a_story_whose_room_may_seat_people_served_by_aisles_never_passes_on_tra
                 r["function"] = "business"
     assert row(group_a) == "needs_review"
 
+    # review round 3: the exit stairs stating a function (an assembly one here) are rooms whose use isn't known
+    def stairs(d):
+        for r in d["rooms"]:
+            if r["id"] in ("L1SW", "L1SE", "L2SW", "L2SE"):
+                r["function"] = "assembly_unconcentrated"
+    assert row(stairs) == "needs_review"
+
     # review round 2: the groups sent in the check's values (which the rules read beside the building block) count too
     interior = build.interior_of()
     interior["building"] = {k: v for k, v in interior["building"].items() if k != "occupancy_groups"}

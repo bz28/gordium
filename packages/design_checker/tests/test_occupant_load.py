@@ -754,3 +754,22 @@ def test_a_building_stated_group_a_with_no_assembly_room_shown_may_seat_people_o
     occupant_load.assembly_seating(shown, desc, FACTORS, building)
     assert shown["story"][0]["measures"][occupant_load.SEATING_STORY] is False      # the dining room is shown, elsewhere
 
+
+@pytest.mark.parametrize("fn", ["assembly_unconcentrated", "business", "residential"])
+def test_an_exit_stating_a_function_may_seat_people(fn):
+    """Review round 3 (P2): a room the routes take for an exit (an exit enclosure's or passageway's door enters it) yet
+    stating a function is a room whose use isn't known (EXIT_FUNCTION); it was ruled out as seating, so a dining room
+    mis-marked an exit passed its story's travel. Now it may seat people, whatever the function; an exit stating none
+    still doesn't."""
+    parts = copy.deepcopy(_SEATING_PARTS.get("r") or measure(_seating_desc_with_extra(None))["parts"])
+    space = next(p for p in parts["space"] if p["id"] == "r")
+    space["measures"]["space_is_exit"] = True
+    desc = _seating_desc_with_extra(None)
+    desc["rooms"][0]["function"] = fn
+    occupant_load.assembly_seating(parts, desc, FACTORS)
+    assert parts["story"][0]["measures"][occupant_load.SEATING_STORY] is True
+    desc["rooms"][0].pop("function")
+    parts2 = copy.deepcopy(parts)
+    occupant_load.assembly_seating(parts2, desc, FACTORS)
+    assert parts2["story"][0]["measures"][occupant_load.SEATING_STORY] is False
+
