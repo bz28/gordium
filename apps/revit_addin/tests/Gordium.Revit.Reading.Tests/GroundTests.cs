@@ -425,6 +425,9 @@ public sealed class GroundTests
         Assert.Contains("a door's isn't read yet", Marks.ToposolidFinished.Description, StringComparison.Ordinal);
         Assert.Contains("Blank: for a window, read from the Toposolid", Marks.BelowGrade.Description, StringComparison.Ordinal);
         Assert.Contains("Blank: for a window, where Gordium: Toposolid is finished ground is Yes", Marks.WellDepth.Description, StringComparison.Ordinal);
+        // and blank where the phases show it (review round 1 of the phases)
+        Assert.Contains("or blank and the phases show the finished ground", Marks.WellDepth.Description, StringComparison.Ordinal);
+        Assert.Contains("or blank and the phases show the finished ground", Marks.BelowGrade.Description, StringComparison.Ordinal);
     }
 
     // ---- review round 4 ---------------------------------------------------------------------------------------------
@@ -519,6 +522,34 @@ public sealed class GroundTests
         // and where they don't, the mark No and Yes stand as before
         Assert.NotNull(Why(InteriorReader.Read(Phased(false, madeIn: "phase-1").Model()), "we1"));
         Assert.Equal([0.0, 0.0, 0.0], Ground(InteriorReader.Read(Phased(true, madeIn: "phase-1").Model()), "we1"));
+    }
+
+    /// <summary>The phases speak of the ground at a window only where the existing ground it replaced is drawn there,
+    /// in the design option checked (review round 1: an existing patio demolished elsewhere, or a ground in another
+    /// option, says nothing of a survey's ground made in the last phase); the mark Yes reads it whatever.</summary>
+    [Fact]
+    public void The_phases_speak_only_where_the_existing_ground_is_drawn_under_the_finished_one()
+    {
+        var far = Phased(null);
+        far.Grounds![0] = far.Toposolid((_, _) => 0.3, "topo-old", "Existing patio", reach: 2) with
+        {
+            PhaseCreated = "phase-1", PhaseDemolished = FakeHouse.LastPhase,
+            Triangles = far.Toposolid((_, _) => 0.3, reach: 2).Triangles!.Select(t => new GroundTriangle(
+                t.A with { X = t.A.X + 50 }, t.B with { X = t.B.X + 50 }, t.C with { X = t.C.X + 50 })).ToList(),
+        };
+        var read = InteriorReader.Read(far.Model());
+        Assert.Null(Ground(read, "we1"));
+        Assert.StartsWith("the phases show a finished ground only where it replaces the existing ground, and no existing ground is drawn just outside it", Why(read, "we1"));
+        far.FinishedGround(true);
+        Assert.Equal([0.0, 0.0, 0.0], Ground(InteriorReader.Read(far.Model()), "we1"));
+        // an existing ground in a design option not checked says nothing either
+        var other = Phased(null);
+        other.Grounds![0] = other.Grounds[0] with { DesignOption = "option-b" };
+        var model = other.Model() with
+        {
+            OptionSets = [new OptionSet("set-1", "Grading", [new DesignOptionRecord("option-a", "A", true), new DesignOptionRecord("option-b", "B", false)])],
+        };
+        Assert.StartsWith("Gordium: Toposolid is finished ground isn't Yes on Project Information", Why(InteriorReader.Read(model), "we1"));
     }
 
     /// <summary>The existing ground, demolished, is never read, even with the mark Yes: with no other ground drawn,

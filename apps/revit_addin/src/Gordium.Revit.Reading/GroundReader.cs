@@ -17,7 +17,8 @@ namespace Gordium.Revit.Reading;
 /// Never a guess: nothing is sent unless every one of these holds, and why not is said for an escape opening.
 /// <list type="bullet">
 /// <item>The architect states the ground drawn is the finished one, or the phases show it (<see cref="PhasesShow"/>: the
-/// existing ground drawn in an earlier phase and demolished, every ground of the design checked made in the last); a
+/// existing ground drawn in an earlier phase and demolished, in the design option checked and under every place read,
+/// every ground of the design checked made in the last); a
 /// statement wins, and one the phases contradict leaves it unread (a survey's existing ground is never read as it).</item>
 /// <item>Which side of its wall is outside is known: its one room on one side only, no room or enclosed space drawn on
 /// the other (as the escape routes tell a door to outside, <see cref="RouteReader.Sides"/>).</item>
@@ -63,6 +64,10 @@ public static class GroundReader
 
         /// <summary>What says the grounds are the finished ones: the architect's mark ("stated") or the phases ("phases").</summary>
         public string? By { get; internal set; }
+
+        /// <summary>With the phases: the existing grounds they read (made in an earlier phase, demolished since, in the
+        /// design option checked), shared: the finished ground is read only where one of them is drawn under it too.</summary>
+        internal List<(Xyz A, Xyz B, Xyz C)> Existing { get; } = [];
     }
 
     public static Grounds? Of(RevitModel model)
@@ -92,6 +97,9 @@ public static class GroundReader
             return set;
         }
         set.By = stated is true ? "stated" : "phases";
+        if (stated is not true)
+            set.Existing.AddRange(ExistingGrounds(model).SelectMany(g => g.Triangles!).Select(x =>
+                (model.InternalToShared.Apply(x.A), model.InternalToShared.Apply(x.B), model.InternalToShared.Apply(x.C))));
         var t = model.InternalToShared;
         foreach (var g in drawn)
         {
@@ -118,11 +126,25 @@ public static class GroundReader
         if (model.Phases.Count < 2)
             return false;
         var last = model.Phases[^1];
-        var earlier = model.Phases.Take(model.Phases.Count - 1).ToHashSet(StringComparer.Ordinal);
-        var existing = (model.Interior?.Grounds ?? []).Any(g => g.PhaseCreated is { } made && earlier.Contains(made)
-                                                                && g.PhaseDemolished is { } gone && model.Phases.Contains(gone));
-        return existing && drawn.All(g => g.PhaseCreated == last);
+        return ExistingGrounds(model).Any() && drawn.All(g => g.PhaseCreated == last);
     }
+
+    /// <summary>The existing grounds: made in a phase before the last, demolished in a listed phase, in the main model or
+    /// the design option checked (review round 1: never a ground in another option), with triangles read.</summary>
+    private static IEnumerable<GroundRecord> ExistingGrounds(RevitModel model)
+    {
+        var earlier = model.Phases.Take(Math.Max(0, model.Phases.Count - 1)).ToHashSet(StringComparer.Ordinal);
+        return (model.Interior?.Grounds ?? []).Where(g => g.PhaseCreated is { } made && earlier.Contains(made)
+                                                         && g.PhaseDemolished is { } gone && model.Phases.Contains(gone)
+                                                         && SiteReader.InDesignChecked(model, null, g.DesignOption)
+                                                         && g.Triangles is { Count: > 0 });
+    }
+
+    /// <summary>With the phases deciding: whether an existing ground is drawn under the plan point too, so the finished
+    /// ground there is the one that replaced it (review round 1: an existing patio demolished elsewhere says nothing of
+    /// the ground at this window).</summary>
+    private static bool Replaces(Grounds set, P2 at) =>
+        set.By != "phases" || set.Existing.Any(t => Height(t.A, t.B, t.C, at) is not null);
 
     /// <summary>The ground outside the opening (shared, ft): at one end, the middle and the other end, and the highest
     /// and lowest along its width where they are neither; or null with why. <paramref name="evidence"/> takes every
@@ -216,6 +238,11 @@ public static class GroundReader
                 }
                 if (Ground(set, at, where, out var by, out why) is not { } z)
                     return null;
+                if (!Replaces(set, at))
+                {
+                    why = $"the phases show a finished ground only where it replaces the existing ground, and no existing ground is drawn {where}, so it isn't read there";
+                    return null;
+                }
                 samples.Add(new JsonObject { ["along"] = a - uc, ["out"] = d, ["z"] = z, ["ground"] = by });
                 if (z < bottom)
                 {
