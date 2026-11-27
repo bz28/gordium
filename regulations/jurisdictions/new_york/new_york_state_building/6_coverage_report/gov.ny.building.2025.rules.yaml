@@ -254,11 +254,151 @@ pieces:
     heading: Means of egress › Smokeproof enclosure
     rules:
     - general.bc_405_7_2_smokeproof_enclosures
+  '407.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_407_1_group_i2
+  '407.2':
+    label: flag
+    heading: Corridors continuity and separation
+    rules:
+    - general.bc_407_2_corridor_continuity_and_separation
+  407.2.1:
+    label: flag
+    heading: Corridors continuity and separation › Waiting and similar areas
+    rules:
+    - general.bc_407_2_1_waiting_areas_open_to_a_corridor
+  407.2.2:
+    label: flag
+    heading: Corridors continuity and separation › Care providers’ stations
+    rules:
+    - general.bc_407_2_2_care_providers_stations
+  407.2.3:
+    label: flag
+    heading: Corridors continuity and separation › Psychiatric treatment areas
+    rules:
+    - general.bc_407_2_3_psychiatric_treatment_areas
+  407.2.4:
+    label: flag
+    heading: Corridors continuity and separation › Gift shops
+    rules:
+    - general.bc_407_2_4_gift_shops
+  407.2.5:
+    label: flag
+    heading: Corridors continuity and separation › Nursing home housing units
+    rules:
+    - general.bc_407_2_5_nursing_home_housing_units
+  407.2.6:
+    label: flag
+    heading: Corridors continuity and separation › Nursing home cooking facilities
+    rules:
+    - general.bc_407_2_6_nursing_home_cooking_facilities
+  407.2.7:
+    label: flag
+    heading: Corridors continuity and separation › Domestic cooking appliances
+    rules:
+    - general.bc_407_2_7_domestic_cooking_appliances
+  '407.3':
+    label: flag
+    heading: Corridor wall construction
+    rules:
+    - general.bc_407_3_corridor_wall_construction
+  407.3.1:
+    label: flag
+    heading: Corridor wall construction › Corridor doors
+    rules:
+    - general.bc_407_3_1_corridor_doors
+  407.3.1.1:
+    label: flag
+    heading: Corridor doors › Door construction
+    rules:
+    - general.bc_407_3_1_1_corridor_door_construction
+  '407.4':
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_407_4_means_of_egress
+  407.4.1:
+    label: flag
+    heading: Means of egress › Direct access to a corridor
+    rules:
+    - general.bc_407_4_1_direct_access_to_a_corridor
+  407.4.1.1:
+    label: flag
+    heading: Direct access to a corridor › Locking devices
+    rules:
+    - general.bc_407_4_1_1_locking_devices
   407.4.2:
     label: rule
-    heading: Distance of travel
+    heading: Means of egress › Distance of travel
     rules:
     - general.bc_407_4_2_sleeping_room_travel
+  407.4.3:
+    label: flag
+    heading: Means of egress › Projections in nursing home corridors
+    rules:
+    - general.bc_407_4_3_projections_in_nursing_home_corridors
+  407.4.4:
+    label: flag
+    heading: Means of egress › Group I-2 care suites
+    rules:
+    - general.bc_407_4_4_care_suites
+  407.4.4.1:
+    label: flag
+    heading: Group I-2 care suites › Exit access through care suites
+    rules:
+    - general.bc_407_4_4_1_exit_access_through_care_suites
+  407.4.4.2:
+    label: flag
+    heading: Group I-2 care suites › Separation
+    rules:
+    - general.bc_407_4_4_2_care_suite_separation
+  407.4.4.3:
+    label: flag
+    heading: Group I-2 care suites › Access to corridor
+    rules:
+    - general.bc_407_4_4_3_care_suite_access_to_corridor
+  407.4.4.4:
+    label: flag
+    heading: Group I-2 care suites › Circulation paths within a care suite
+    rules:
+    - general.bc_407_4_4_4_care_suite_circulation_paths
+  407.4.4.5:
+    label: flag
+    heading: Group I-2 care suites › Doors within care suites
+    rules:
+    - general.bc_407_4_4_5_doors_within_care_suites
+  407.4.4.6:
+    label: flag
+    heading: Group I-2 care suites › Care suites containing sleeping room areas
+    rules:
+    - general.bc_407_4_4_6_care_suites_with_sleeping_rooms
+  407.4.4.6.1:
+    label: flag
+    heading: Care suites containing sleeping room areas › Area
+    rules:
+    - general.bc_407_4_4_6_1_sleeping_care_suite_area
+  407.4.4.6.2:
+    label: flag
+    heading: Care suites containing sleeping room areas › Exit access
+    rules:
+    - general.bc_407_4_4_6_2_sleeping_care_suite_exit_access
+  407.4.4.7:
+    label: flag
+    heading: Group I-2 care suites › Care suites not containing sleeping rooms
+    rules:
+    - general.bc_407_4_4_7_care_suites_without_sleeping_rooms
+  407.4.4.7.1:
+    label: flag
+    heading: Care suites not containing sleeping rooms › Area
+    rules:
+    - general.bc_407_4_4_7_1_treatment_care_suite_area
+  407.4.4.7.2:
+    label: flag
+    heading: Care suites not containing sleeping rooms › Exit access
+    rules:
+    - general.bc_407_4_4_7_2_treatment_care_suite_exit_access
   508.2.1:
     label: flag
     heading: Accessory occupancies › Occupancy classification
