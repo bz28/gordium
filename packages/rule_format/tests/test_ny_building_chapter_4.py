@@ -344,6 +344,11 @@ def test_a_story_with_more_exits_than_any_reading_asks_passes_with_the_facts_not
         assert row["outcome"] == "pass", (rid, row)
 
 
+# the uses Chapter 10's words name for Chapter 4's sections (Table 1017.2 note a's list, 1006.2.2's spaces)
+USES = {"a mall": "402.8", "an atrium": "404.9", "a Group I-2": "407.4", "Group I-2 care suite": "407.4.4",
+        "a high-rise": "403.5", "underground": "405.7"}
+
+
 def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rules):
     """Review round 1 of part c: Chapter 10's words still said 407.4 "aren't brought in" (the shared stale-words test
     reads only "not brought in" in a narrow pattern). No sentence of any rule's title, notes, review reasons or
@@ -360,6 +365,12 @@ def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rule
                     continue
                 named = re.findall(r"\b(4\d\d(?:\.\d+)+)\b", sentence)
                 bad += [(r["id"], n) for n in named if any(n == s or n.startswith(s + ".") for s in ours)]
+            # review round 2 of part c: the uses a whole sentence names stand for their sections too ("a mall, a
+            # Group I-2 occupancy ...: each has its own distance, not brought in")
+            for sentence in re.split(r"(?<=\.)\s", text):
+                if re.search(r"(?:not|n't) brought in", sentence):
+                    bad += [(r["id"], s) for use, s in USES.items() if use in sentence
+                            and any(s == o or s.startswith(o + ".") for o in ours)]
     assert not bad, bad
 
 
@@ -378,10 +389,55 @@ def test_a_plural_term_is_the_definition_of_its_singular():
     assert not said, said
 
 
+def _figure(recorded):
+    """(value, unit) of a recorded number ("less than 500 square foot", "19.1 mm", "2/3 inch"), or None."""
+    m = re.search(r"(\d+/\d+|[\d,]+(?:\.\d+)?)\s+(square foot|foot|inch|pound|mm|m|N)\b", recorded)
+    if not m:
+        return None
+    a, _, b = m.group(1).replace(",", "").partition("/")
+    return (float(a) / float(b) if b else float(a)), m.group(2)
+
+
+# an imperial figure and the conversion its unit is printed with (mm, or m2 read as "m" for square feet)
+CONVERSION = {"inch": (25.4, "mm"), "foot": (304.8, "mm"), "square foot": (0.092903, "m"), "pound": (4.448, "N")}
+
+
+def _misprinted(numbers):
+    """[(the imperial figure, the metric one printed after it)] where the two disagree by more than 2%."""
+    out = []
+    for n, (here, after) in enumerate(zip(numbers, numbers[1:])):
+        a, b = _figure(here), _figure(after)
+        if not a or not b or a[1] not in CONVERSION or b[1] != CONVERSION[a[1]][1]:
+            continue
+        metric = b[0]
+        later = _figure(numbers[n + 2]) if n + 2 < len(numbers) else None
+        if b[1] == "mm" and later and later[1] == "mm" and metric < 1000 and 100 <= later[0] < 1000:
+            metric = metric * 1000 + later[0]            # "22 860 mm", read as "22 mm" and "860 mm"
+        want = a[0] * CONVERSION[a[1]][0]
+        if want and abs(metric - want) / want > 0.02:
+            out.append((here, after))
+    return out
+
+
 def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
-    """Review round 1 of part c: 407.3.1.1 prints "2/3 inch (19.1 mm)", and 19.1 mm is 3/4 inch. The flag says both,
-    and the second reading's record names the difference, so a person checks which the State means."""
-    note = rules["general.bc_407_3_1_1_corridor_door_construction"]["notes"]
-    assert "2/3 inch" in note and "3/4 inch" in note
-    entry = load(NY / "text_verification.yaml")["pieces"]["407.3.1.1"]
-    assert any("19.1 mm" in f and "3/4 inch" in f for f in entry["flags"])
+    """Review rounds 1 and 2 of part c: 407.3.1.1 prints "2/3 inch (19.1 mm)" (19.1 mm is 3/4 inch) and 407.2.4
+    "500 square feet (455 m2)" (500 sq ft is 46.45 m2). For every Chapter 4 piece, each imperial figure whose printed
+    metric conversion disagrees by more than 2% is named in the second reading's flags and said in its flag's notes,
+    so a person checks which the State means; never a claim about what another code prints without its source."""
+    pieces = load(NY / "text_verification.yaml")["pieces"]
+    found = {}
+    for pid, entry in pieces.items():
+        if re.fullmatch(r"4\d\d(\.\d+)+", str(pid)):
+            for here, after in _misprinted(entry["numbers"]):
+                found.setdefault(str(pid), []).append((here, after))
+    assert set(found) >= {"407.2.4", "407.3.1.1"}, found          # the walk finds the two it was written for
+    block = _block_ids()
+    for pid, pairs in found.items():
+        flags = " ".join(pieces[pid].get("flags") or [])
+        [rid] = [r for r in block if r.startswith("general.bc_" + pid.replace(".", "_") + "_")
+                 and not any(r.startswith("general.bc_" + q.replace(".", "_") + "_") for q in found if q.startswith(pid + "."))]
+        notes = rules[rid]["notes"]
+        for here, after in pairs:
+            assert here.split()[-3 if "square" in here else -2] in flags and after.split()[0] in flags, (pid, here, after)
+            assert after.split()[0] in notes, (pid, after)
+        assert "model code" not in flags + notes, pid

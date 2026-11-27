@@ -103,7 +103,9 @@ documents:
                  '1007.1', '1010.1.1', '1010.1.2', '1016.2', '1017', Table 1017.2, '1018.4', '1020.1', '1020.2', Table 1020.2, '1020.3', Table 1020.3,
                  '1020.4', '1020.5', '1020.6', '1020.7']
       alone: ['903.3.1.1', '903.3.1.2', '1010.1', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
-      definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
+      definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics,
+                     # or one printed in italics in a number the italics reader doesn't match (201.2: the singular
+                     # includes the plural)
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
           the rule measures the story's floor area by both of the book's own measures of floor area (README).
         202:floor_area_net: As 202:floor_area_gross.
