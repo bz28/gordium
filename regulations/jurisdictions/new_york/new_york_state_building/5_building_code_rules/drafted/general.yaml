@@ -716,6 +716,533 @@ rules:
   notes: Grilles and their use aren't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part a).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_403_1_high_rise_buildings
+  kind: flag
+  topic: means_of_egress
+  title: High-rise buildings, where Section 403 applies (BCNYS 403.1)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 88
+    lines:
+    - 6
+    - 15
+    quote: '403.1 Applicability. High-rise buildings shall comply with Sections 403.2 through 403.6. Exceptions: The provisions
+      of Sections 403.2 through 403.6 shall not apply to the following buildings and structures: 1. Airport traffic control
+      towers in accordance with Section 412.2. 2. Open parking garages in accordance with Section 406.5. 3. The portion of
+      a building containing a Group A-5 occupancy in accordance with Section 303.6. 4. Special industrial occupancies in accordance
+      with Section 503.1.1. 5. Buildings containing any one of the following: 5.1. A Group H-1 occupancy. 5.2. A Group H-2
+      occupancy in accordance with Section 415.8, 415.9.2, 415.9.3 or 426.1. 5.3. A Group H-3 occupancy in accordance with
+      Section 415.8.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'The building may be a high-rise: Sections 403.2 to 403.6 apply unless it is one of the exceptions (an airport traffic
+      control tower, an open parking garage, a Group A-5 portion, a special industrial occupancy, or a building holding Group
+      H-1, or Group H-2 or H-3 per the sections named): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: A high-rise building (202) has an occupied floor or occupiable roof more than 75 ft above the lowest level of fire
+    department vehicle access; where that level is isn't in the model, so it is the architect's statement (the stated fact
+    also covers a building more than 420 ft in building height, which 403.2.2 holds too). Of Section 403, its scope (403.1)
+    and the parts about exit stairways and egress (403.2.2, 403.5, 403.6) are brought in. Hand-drafted in a Claude Code session
+    (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_2_2_exit_stairway_enclosure_strength
+  kind: flag
+  topic: means_of_egress
+  title: Exit stairway and hoistway enclosures' structural integrity (BCNYS 403.2.2)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 88
+    lines:
+    - 33
+    - 35
+    quote: '[BS] 403.2.2 Structural integrity of interior exit stairways and elevator hoistway enclosures. For high-rise buildings
+      of Risk Category III or IV in accordance with Section 1604.5, and for all buildings that are more than 420 feet (128
+      m) in building height, enclosures for interior exit stairways and elevator hoistway enclosures shall comply with Sections
+      403.2.2.1 through 403.2.2.4.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'In a high-rise of Risk Category III or IV, and in any building more than 420 ft in building height, interior exit
+      stairway and elevator hoistway enclosures meet 403.2.2.1 to 403.2.2.4: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: The building's Risk Category (1604.5) and its walls' make-up aren't in the model. Hand-drafted in a Claude Code session
+    (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_2_2_1_enclosure_wall_panels
+  kind: flag
+  topic: means_of_egress
+  title: Impact-resistant panels on an interior enclosure wall (BCNYS 403.2.2.1)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 88
+    lines:
+    - 36
+    - 47
+    quote: '[BS] 403.2.2.1 Wall assembly materials Where an interior exit stairway enclosure or an elevator hoistway enclosure
+      is constructed as an interior wall of the building, the panels applied to the exterior of the enclosure shall be in
+      accordance with one of the following: 1. The wall assembly shall incorporate not fewer than two layers of impact-resistant
+      panels, each of which meets or exceeds Soft Body Impact Classification Level 2 and Hard Body Impact Classification Level
+      2 as measured by the test method described in ASTM C1629/C1629M. 2. The wall assembly shall incorporate not fewer than
+      one layer of impact-resistant panels that meet or exceed Soft Body Impact Classification Level 2 and Hard Body Impact
+      Classification Level 3 as measured by the test method described in ASTM C1629/C1629M. 3. The wall assembly incorporates
+      multiple layers of any material, tested in tandem, that meets or exceeds Soft Body Impact Classification Level 2 and
+      Hard Body Impact Classification Level 3 as measured by the test method described in ASTM C1629/C1629M.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'An enclosure built as an interior wall has impact-resistant panels outside it (two layers at Level 2 soft and hard
+      body, or one at Level 2 soft and Level 3 hard, or tested layers that meet it, per ASTM C1629/C1629M): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: The wall's panels aren't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_2_2_2_concrete_and_masonry_walls
+  kind: flag
+  topic: means_of_egress
+  title: Concrete or masonry enclosure walls deemed to comply (BCNYS 403.2.2.2)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 88
+    lines:
+    - 48
+    - 49
+    quote: '[BS] 403.2.2.2 Concrete and masonry walls. Concrete or masonry walls shall be deemed to satisfy the requirements
+      of Section 403.2.2.1.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'Concrete or masonry enclosure walls are deemed to meet 403.2.2.1: part of the person''s check of the enclosure
+      walls.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: A wall's material isn't read for this. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_2_2_3_other_wall_assemblies
+  kind: flag
+  topic: means_of_egress
+  title: Other enclosure wall assemblies of equal impact resistance (BCNYS 403.2.2.3)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 88
+    lines:
+    - 50
+    - 52
+    quote: '[BS] 403.2.2.3 Other wall assemblies. Any other wall assembly that provides impact resistance equivalent to that
+      required by Section 403.2.2.1 for Soft Body Impact Classification Level 2 and for Hard Body Impact Classification Level
+      3, as measured by the test method described in ASTM C1629/C1629M, shall be permitted.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'Any other wall assembly as impact resistant as 403.2.2.1 asks (Level 2 soft body, Level 3 hard body) is permitted:
+      part of the person''s check of the enclosure walls.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_2_2_4_glass_walls
+  kind: flag
+  topic: means_of_egress
+  title: Glass enclosure walls deemed to comply (BCNYS 403.2.2.4)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 88
+    lines:
+    - 53
+    - 54
+    quote: '[BS] 403.2.2.4 Glass walls. Glass walls complying with the safety glazing impact requirements of CPSC 16 CFR 1201,
+      Cat. II or ANSI Z97.1, Class A shall be deemed to satisfy the requirements of Section 403.2.2.1.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'Glass walls meeting CPSC 16 CFR 1201 Cat. II or ANSI Z97.1 Class A are deemed to meet 403.2.2.1: part of the person''s
+      check of the enclosure walls.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_5_means_of_egress_and_evacuation
+  kind: flag
+  topic: means_of_egress
+  title: A high-rise's means of egress and evacuation (BCNYS 403.5)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 90
+    lines:
+    - 41
+    - 42
+    quote: '[BE] 403.5 Means of egress and evacuation. The means of egress in high-rise buildings shall comply with Sections
+      403.5.1 through 403.5.5.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'A high-rise''s means of egress meets 403.5.1 to 403.5.5 besides Chapter 10: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: Its parts are each a flag; 403.5.2's additional stairway also holds the story exit rules for a person (see that flag).
+    Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_5_1_remoteness_of_exit_stairways
+  kind: flag
+  topic: means_of_egress
+  title: Interior exit stairways at least 30 ft or a quarter diagonal apart (BCNYS 403.5.1)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 90
+    lines:
+    - 43
+    - 47
+    quote: '[BE] 403.5.1 Remoteness of interior exit stairways. Required interior exit stairways shall be separated by a distance
+      not less than 30 feet (9144 mm) or not less than one-fourth of the length of the maximum overall diagonal dimension
+      of the building or area to be served, whichever is less. The distance shall be measured in a straight line between the
+      nearest points of the enclosure surrounding the interior exit stairways. In buildings with three or more interior exit
+      stairways, not fewer than two of the interior exit stairways shall comply with this section. Interlocking or scissor
+      stairways shall be counted as one interior exit stairway.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'Required interior exit stairways are at least 30 ft or a quarter of the building''s (or area''s) longest diagonal
+      apart, whichever is less, measured between the nearest points of their enclosures (at least two of three or more; scissor
+      stairways count as one): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: 'The route measuring measures 1007.1.1''s separation between exit doors, never between the stairways'' enclosures,
+    so a pass of 1007.1.1 says nothing of this: a person checks. Hand-drafted in a Claude Code session (2026-11-26, Chapter
+    4 part b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_5_2_additional_exit_stairway
+  kind: flag
+  topic: means_of_egress
+  title: An additional interior exit stairway above 420 ft (BCNYS 403.5.2)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 90
+    lines:
+    - 48
+    - 57
+    quote: '[BE] 403.5.2 Additional interior exit stairway. For buildings other than Group R-2 and their ancillary spaces
+      that are more than 420 feet (128 m) in building height, one additional interior exit stairway meeting the requirements
+      of Sections 1011 and 1023 shall be provided in addition to the minimum number of exits required by Section 1006.3. The
+      total capacity of any combination of remaining interior exit stairways with one interior exit stairway removed shall
+      be not less than the total capacity required by Section 1005.1. Scissor stairways shall not be considered the additional
+      interior exit stairway required by this section. Exceptions: 1. An additional interior exit stairway shall not be required
+      to be installed in buildings having elevators used for occupant self-evacuation in accordance with Section 3008. 2.
+      An additional interior exit stairway shall not be required for other portions of the building where the highest occupia-
+      ble floor level in those areas is less than 420 feet (128 m) in building height.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'A building other than Group R-2 more than 420 ft in building height has one interior exit stairway more than 1006.3
+      asks, and the stairways left with one removed still hold 1005.1''s capacity (not where elevators serve occupant self-evacuation,
+      exception 1, or for portions whose highest occupiable floor is under 420 ft, exception 2): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: The building's height isn't in the model, so the story exit rules (Table 1006.3.3's count, 1006.3.4's single exit)
+    need review, where they would pass with no more exits than 1006.3 asks, in a building other than Group R-2 that may be
+    a high-rise (stated, or not ruled out). Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_5_3_stairway_door_operation
+  kind: flag
+  topic: means_of_egress
+  title: Stairway doors locked from the stairway side (BCNYS 403.5.3)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 91
+    lines:
+    - 3
+    - 8
+    quote: '[BE] 403.5.3 Stairway door operation. Stairway doors other than the exit discharge doors shall be permitted to
+      be locked from the stairway side. Stairway doors that are locked from the stairway side shall be capable of being unlocked
+      without unlatching where all of the following conditions occur: 1. Individually or simultaneously upon a signal from
+      the fire command center. 2. Simultaneously upon activation of a fire alarm signal in an area served by the stairway.
+      3. Upon failure of the power supply to the lock or the locking system.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'Stairway doors other than exit discharge doors may be locked from the stairway side only where they unlock without
+      unlatching on a signal from the fire command center, on a fire alarm in an area the stairway serves, and on power failure:
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: Door hardware and its controls aren't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4
+    part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_5_3_1_stairway_communication_system
+  kind: flag
+  topic: means_of_egress
+  title: A stairway communication system where stairway doors lock (BCNYS 403.5.3.1)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 91
+    lines:
+    - 9
+    - 11
+    quote: '[BE] 403.5.3.1 Stairway communication system. A telephone or other two-way communications system connected to
+      an approved constantly attended station shall be provided at not less than every fifth floor in each stairway where
+      the doors to the stairway are locked. Systems shall be listed in accordance with UL 2525 and installed in accordance
+      with NFPA 72.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'Where stairway doors are locked, a two-way communication system to a constantly attended station at least every
+      fifth floor in each stairway (UL 2525, NFPA 72): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_5_4_smokeproof_enclosures
+  kind: flag
+  topic: means_of_egress
+  title: Smokeproof enclosures for stairways serving floors over 75 ft (BCNYS 403.5.4)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 91
+    lines:
+    - 12
+    - 13
+    quote: '[BE] 403.5.4 Smokeproof enclosures. Every required interior exit stairway serving floors more than 75 feet (22
+      860 mm) above the lowest level of fire department vehicle access shall be a smokeproof enclosure in accordance with
+      Sections 909.20 and 1023.12.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'Every required interior exit stairway serving floors more than 75 ft above the lowest level of fire department
+      vehicle access is a smokeproof enclosure (909.20, 1023.12): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: Where fire department vehicle access is and how a stairway is enclosed and ventilated aren't in the model. Hand-drafted
+    in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_5_5_luminous_egress_path_markings
+  kind: flag
+  topic: means_of_egress
+  title: Luminous egress path markings (BCNYS 403.5.5)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 91
+    lines:
+    - 14
+    - 15
+    quote: '[BE] 403.5.5 Luminous egress path markings. Luminous egress path markings shall be provided in accordance with
+      Section 1025.'
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'Luminous egress path markings per Section 1025: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: Markings aren't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_6_elevators
+  kind: flag
+  topic: means_of_egress
+  title: Elevators in a high-rise (BCNYS 403.6)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 91
+    lines:
+    - 16
+    - 17
+    quote: 403.6 Elevators. Elevator installation and operation in high-rise buildings shall comply with Chapter 30 and Sections
+      403.6.1 and 403.6.2.
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'Elevators in a high-rise meet Chapter 30, 403.6.1 and 403.6.2: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_6_1_fire_service_access_elevators
+  kind: flag
+  topic: means_of_egress
+  title: Fire service access elevators above 120 ft (BCNYS 403.6.1)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 91
+    lines:
+    - 18
+    - 21
+    quote: 403.6.1 Fire service access elevator. In buildings with an occupied floor more than 120 feet (36 576 mm) above
+      the lowest level of fire department vehicle access, not fewer than two fire service access elevators, or all elevators,
+      whichever is less, shall be provided in accordance with Section 3007. Each fire service access elevator shall have a
+      capacity of not less than 3,500 pounds (1588 kg) and shall comply with Section 3002.4.
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'With an occupied floor more than 120 ft above the lowest level of fire department vehicle access, at least two
+      fire service access elevators (or all elevators, if fewer) per 3007, each of at least 3,500 pounds: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: Elevators aren't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_403_6_2_occupant_evacuation_elevators
+  kind: flag
+  topic: means_of_egress
+  title: Occupant evacuation elevators (BCNYS 403.6.2)
+  applies_when: high_rise_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 91
+    lines:
+    - 22
+    - 23
+    quote: 403.6.2 Occupant evacuation elevators. Where installed in accordance with Section 3008, passenger elevators for
+      general public use shall be permitted to be used for occupant self-evacuation.
+  examples:
+  - given:
+      high_rise_building: true
+    expect: needs_review
+    note: 'Passenger elevators installed per 3008 may serve occupant self-evacuation (they also waive 403.5.2''s additional
+      stairway): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      high_rise_building: false
+    expect: not_applicable
+    note: 'The architect states the building is neither a high-rise (no occupied floor or occupiable roof more than 75 ft
+      above the lowest level of fire department vehicle access) nor more than 420 ft in building height: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_404_1_atriums
   kind: flag
   topic: means_of_egress
@@ -844,6 +1371,269 @@ rules:
     note: 'The architect states the building has no atrium: not applicable.'
   notes: Where each stairway discharges isn't measured (Section 1028, exit discharge). Hand-drafted in a Claude Code session
     (2026-11-26, Chapter 4 part a).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_405_1_underground_buildings
+  kind: flag
+  topic: means_of_egress
+  title: Underground buildings, where Section 405 applies (BCNYS 405.1)
+  applies_when: underground_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 92
+    lines:
+    - 36
+    - 46
+    quote: '405.1 General. The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level used
+      for human occu- pancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge. Exceptions:
+      The provisions of Section 405 are not applicable to the following buildings or portions of buildings: 1. One- and two-family
+      dwellings, sprinklered in accordance with Section 903.3.1.3. 2. Parking garages provided with automatic sprinkler systems
+      in compliance with Section 405.3. 3. Fixed guideway transit systems. 4. Grandstands, bleachers, stadiums, arenas and
+      similar facilities. 5. Where the lowest story is the only story that would qualify the building as an underground building
+      and has an area not greater than 1,500 square feet (139 m[fn2]) and has an occupant load less than 10. 6. Pumping stations
+      and other similar mechanical spaces intended only for limited periodic use by service or maintenance personnel.'
+  examples:
+  - given:
+      underground_building: true
+    expect: needs_review
+    note: 'The building may have a floor level used for human occupancy more than 30 ft below the finished floor of the lowest
+      level of exit discharge: Sections 405.2 to 405.9 apply unless it is an exception (a sprinklered one- or two-family dwelling,
+      a sprinklered parking garage, a fixed guideway transit system, grandstands and the like, a lowest story alone of up
+      to 1,500 sq ft and fewer than 10 occupants, pumping stations): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      underground_building: false
+    expect: not_applicable
+    note: 'The architect states no floor level used for human occupancy is more than 30 ft below the finished floor of the
+      lowest level of exit discharge: not applicable.'
+  notes: Levels' depths against the level of exit discharge aren't worked out (a model may hold only some of the floors),
+    so it is the architect's statement. Of Section 405, its scope (405.1), its compartments (405.4) and its means of egress
+    (405.7) are brought in. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_405_4_compartmentation
+  kind: flag
+  topic: means_of_egress
+  title: An underground building's compartments (BCNYS 405.4)
+  applies_when: underground_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 92
+    lines:
+    - 51
+    - 51
+    quote: 405.4 Compartmentation. Compartmentation shall be in accordance with Sections 405.4.1 through 405.4.3.
+  examples:
+  - given:
+      underground_building: true
+    expect: needs_review
+    note: 'Compartments per 405.4.1 to 405.4.3: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      underground_building: false
+    expect: not_applicable
+    note: 'The architect states no floor level used for human occupancy is more than 30 ft below the finished floor of the
+      lowest level of exit discharge: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_405_4_1_number_of_compartments
+  kind: flag
+  topic: means_of_egress
+  title: Two compartments below 60 ft (BCNYS 405.4.1)
+  applies_when: underground_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 92
+    lines:
+    - 52
+    - 57
+    quote: '405.4.1 Number of compartments. A building having a floor level more than 60 feet (18 288 mm) below the finished
+      floor of the lowest level of exit discharge shall be divided into not fewer than two compartments of approximately equal
+      size. Such compart- mentation shall extend through the highest level of exit discharge serving the underground portions
+      of the building and all levels below. Exception: The lowest story need not be compartmented where the area is not greater
+      than 1,500 square feet (139 m[fn2]) and has an occupant load of less than 10.'
+  examples:
+  - given:
+      underground_building: true
+    expect: needs_review
+    note: 'With a floor level more than 60 ft below the lowest level of exit discharge, at least two compartments of about
+      equal size through the highest level of exit discharge serving the underground portion and every level below (the lowest
+      story aside where up to 1,500 sq ft with fewer than 10 occupants): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      underground_building: false
+    expect: not_applicable
+    note: 'The architect states no floor level used for human occupancy is more than 30 ft below the finished floor of the
+      lowest level of exit discharge: not applicable.'
+  notes: Compartments aren't a part the model gives. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_405_4_2_smoke_barrier_between_compartments
+  kind: flag
+  topic: means_of_egress
+  title: Smoke barriers and their doors between compartments (BCNYS 405.4.2)
+  applies_when: underground_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 93
+    lines:
+    - 3
+    - 8
+    quote: 405.4.2 Smoke barrier penetration. The compartments shall be separated from each other by a smoke barrier in accordance
+      with Section 709. Penetrations between the two compartments shall be limited to plumbing and electrical piping and conduit
+      that are firestopped in accordance with Section 714. Doorways shall be protected by fire door assemblies that comply
+      with Section 716, automatic-closing by smoke detection in accordance with Section 716.2.6.6 and installed in accordance
+      with NFPA 105 and Section 716.2.2.1. Where provided, each compartment shall have an air supply and an exhaust system
+      independent of the other compartments.
+  examples:
+  - given:
+      underground_building: true
+    expect: needs_review
+    note: 'Compartments separated by a smoke barrier (709), its penetrations limited and firestopped, its doorways fire door
+      assemblies closing on smoke detection (716), and each compartment''s own air supply and exhaust where provided: a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      underground_building: false
+    expect: not_applicable
+    note: 'The architect states no floor level used for human occupancy is more than 30 ft below the finished floor of the
+      lowest level of exit discharge: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_405_4_3_compartment_elevators
+  kind: flag
+  topic: means_of_egress
+  title: Elevator access from each compartment (BCNYS 405.4.3)
+  applies_when: underground_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 93
+    lines:
+    - 9
+    - 14
+    quote: 405.4.3 Elevators. Where elevators are provided, each compartment shall have direct access to an elevator. Where
+      an elevator serves more than one compartment, an enclosed elevator lobby shall be provided and shall be separated from
+      each compartment by a smoke barrier in accordance with Section 709. Doorways in the smoke barrier shall be protected
+      by fire door assemblies that comply with Section 716, shall comply with the smoke and draft control assembly requirements
+      of Section 716.2.2.1 with the UL 1784 test conducted without an artificial bottom seal, and shall be automatic-closing
+      by smoke detection in accordance with Section 716.2.6.6.
+  examples:
+  - given:
+      underground_building: true
+    expect: needs_review
+    note: 'Where elevators are provided, each compartment reaches one directly, and an elevator serving more than one has
+      an enclosed lobby separated by smoke barriers with their doors per 716: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      underground_building: false
+    expect: not_applicable
+    note: 'The architect states no floor level used for human occupancy is more than 30 ft below the finished floor of the
+      lowest level of exit discharge: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_405_7_means_of_egress
+  kind: flag
+  topic: means_of_egress
+  title: An underground building's means of egress (BCNYS 405.7)
+  applies_when: underground_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 93
+    lines:
+    - 23
+    - 23
+    quote: '[BE] 405.7 Means of egress. Means of egress shall be in accordance with Sections 405.7.1 and 405.7.2.'
+  examples:
+  - given:
+      underground_building: true
+    expect: needs_review
+    note: 'Means of egress per 405.7.1 and 405.7.2: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      underground_building: false
+    expect: not_applicable
+    note: 'The architect states no floor level used for human occupancy is more than 30 ft below the finished floor of the
+      lowest level of exit discharge: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_405_7_1_two_exits_on_each_floor_level
+  kind: flag
+  topic: means_of_egress
+  title: Two exits on each floor level, one per compartment (BCNYS 405.7.1)
+  applies_when: underground_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 93
+    lines:
+    - 24
+    - 26
+    quote: '[BE] 405.7.1 Number of exits. Each floor level shall be provided with not fewer than two exits. Where compartmentation
+      is required by Section 405.4, each compartment shall have not fewer than one exit and not fewer than one exit access
+      doorway into the adjoining compartment.'
+  examples:
+  - given:
+      underground_building: true
+    expect: needs_review
+    note: 'Each floor level has at least two exits; where 405.4 asks compartments, each has an exit and an exit access doorway
+      into the adjoining compartment: a person''s check of the compartments.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      underground_building: false
+    expect: not_applicable
+    note: 'The architect states no floor level used for human occupancy is more than 30 ft below the finished floor of the
+      lowest level of exit discharge: not applicable.'
+  notes: Which floor levels the section holds, and the compartments, aren't in the model, so the story exit rules need review
+    where they would pass a story with one exit in a building that may be underground (stated, or not ruled out). Hand-drafted
+    in a Claude Code session (2026-11-26, Chapter 4 part b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_405_7_2_smokeproof_enclosures
+  kind: flag
+  topic: means_of_egress
+  title: Smokeproof enclosures for stairways below 30 ft (BCNYS 405.7.2)
+  applies_when: underground_building
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 93
+    lines:
+    - 27
+    - 28
+    quote: '[BE] 405.7.2 Smokeproof enclosure. Every required stairway serving floor levels more than 30 feet (9144 mm) below
+      the finished floor of its level of exit discharge shall comply with the requirements for a smokeproof enclosure as provided
+      in Section 1023.12.'
+  examples:
+  - given:
+      underground_building: true
+    expect: needs_review
+    note: 'Every required stairway serving floor levels more than 30 ft below its level of exit discharge is a smokeproof
+      enclosure (1023.12): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      underground_building: false
+    expect: not_applicable
+    note: 'The architect states no floor level used for human occupancy is more than 30 ft below the finished floor of the
+      lowest level of exit discharge: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 # ---- end of Chapter 4 ----
@@ -6182,6 +6972,20 @@ rules:
       may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
       mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
       ask more exits (402.8 governs over Chapter 10): a person checks.'
+  - when: story_exit_count < 1 + (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) and (story_exit_count
+      >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or (story_exit_count > 0 and occupancy_group_i4
+      and not other_occupancy_present and story_first_above_or_below_grade and story_occupant_load <= 10 and egress_travel_distance
+      <= 75)) and occupancy_group != "R-2" and high_rise_building
+    reason: 'No more exits than 1006.3 asks, in a building other than Group R-2 that may be a high-rise more than 420 ft in
+      building height (stated, or not ruled out): 403.5.2 asks one interior exit stairway more (not where elevators serve
+      occupant self-evacuation, or for portions whose highest occupiable floor is under 420 ft), and the building''s height
+      isn''t in the model: a person checks.'
+  - when: story_exit_count < 2 and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) or (story_exit_count > 0 and occupancy_group_i4 and not other_occupancy_present and story_first_above_or_below_grade
+      and story_occupant_load <= 10 and egress_travel_distance <= 75)) and underground_building
+    reason: 'One exit, allowed by 1006.3.4, in a building that may be an underground building (stated, or not ruled out: a
+      floor level used for human occupancy more than 30 ft below the lowest level of exit discharge): 405.7.1 asks two exits
+      on each floor level, and which floor levels it holds isn''t in the model: a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -6236,6 +7040,35 @@ rules:
       Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
       of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
       for determining the required means of egress for the mall building.'
+  - file: gov.ny.building.2025.pdf
+    page: 90
+    lines:
+    - 48
+    - 57
+    quote: '[BE] 403.5.2 Additional interior exit stairway. For buildings other than Group R-2 and their ancillary spaces
+      that are more than 420 feet (128 m) in building height, one additional interior exit stairway meeting the requirements
+      of Sections 1011 and 1023 shall be provided in addition to the minimum number of exits required by Section 1006.3. The
+      total capacity of any combination of remaining interior exit stairways with one interior exit stairway removed shall
+      be not less than the total capacity required by Section 1005.1. Scissor stairways shall not be considered the additional
+      interior exit stairway required by this section. Exceptions: 1. An additional interior exit stairway shall not be required
+      to be installed in buildings having elevators used for occupant self-evacuation in accordance with Section 3008. 2.
+      An additional interior exit stairway shall not be required for other portions of the building where the highest occupia-
+      ble floor level in those areas is less than 420 feet (128 m) in building height.'
+  - file: gov.ny.building.2025.pdf
+    page: 92
+    lines:
+    - 36
+    - 37
+    quote: 405.1 General. The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level used
+      for human occu- pancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge.
+  - file: gov.ny.building.2025.pdf
+    page: 93
+    lines:
+    - 24
+    - 26
+    quote: '[BE] 405.7.1 Number of exits. Each floor level shall be provided with not fewer than two exits. Where compartmentation
+      is required by Section 405.4, each compartment shall have not fewer than one exit and not fewer than one exit access
+      doorway into the adjoining compartment.'
   examples:
   - given:
       occupancy_group_i4: true
@@ -6245,6 +7078,8 @@ rules:
       occupancy_group: I-4
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6267,6 +7102,8 @@ rules:
       occupancy_group: I-4
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p2
@@ -6290,6 +7127,8 @@ rules:
       occupancy_group: I-4
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p3
@@ -6313,6 +7152,8 @@ rules:
       occupancy_group: I-4
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p7
@@ -6336,6 +7177,8 @@ rules:
       occupancy_group: I-4
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p4
@@ -6358,6 +7201,8 @@ rules:
       other_occupancy_present: false
       occupancy_group: I-4
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p6
@@ -6381,6 +7226,8 @@ rules:
       sprinklered_903_3_1_2: false
       occupancy_group: mixed
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p5
@@ -6400,6 +7247,8 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story: []
     rows:
@@ -6414,6 +7263,8 @@ rules:
       occupancy_group: I-4
       assembly_fixed_seating: false
       special_egress_spaces: true
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6429,6 +7280,56 @@ rules:
     expect: needs_review
     note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
       ask more here, so a person checks.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      other_occupancy_present: false
+      occupancy_group: I-4
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      high_rise_building: true
+      underground_building: false
+    parts:
+      story:
+      - id: p1
+        name: First floor, 120
+        measures:
+          story_exit_count: 2
+          story_occupant_load: 120
+          story_first_above_or_below_grade: true
+          egress_travel_distance: 130.667
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it is a high-rise or more than 420 ft in building height: 403.5.2 may ask
+      one more interior exit stairway, so a person checks.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      other_occupancy_present: false
+      occupancy_group: I-4
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      high_rise_building: false
+      underground_building: true
+    parts:
+      story:
+      - id: p3
+        name: Small first floor, one exit
+        measures:
+          story_exit_count: 1
+          story_occupant_load: 8
+          story_first_above_or_below_grade: true
+          egress_travel_distance: 60
+    rows:
+    - part: p3
+      outcome: needs_review
+    expect: needs_review
+    note: 'A story with one exit, a pass where the building states it isn''t underground, where it states it is: 405.7.1 asks
+      two exits on each floor level, so a person checks.'
   notes: 'Table 1006.3.3: two exits up to 500 occupants, three from 501 to 1,000, four above, for every occupancy. One
     exit is enough only where 1006.3.4 allows it: this rule reads item 1 for Group I-4 (Table 1006.3.4(2)''s I row: the
     first story above or below grade plane, at most 10 occupants and 75 ft of exit access travel; Group I is not in the
@@ -6555,6 +7456,23 @@ rules:
       may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
       mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
       ask more exits (402.8 governs over Chapter 10): a person checks.'
+  - when: story_exit_count < 1 + (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) and (story_exit_count
+      >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count > 0 and (story_first_above_or_below_grade
+      and story_occupant_load <= 49 and egress_travel_distance <= (100 if occupancy_group in ["B", "F-1", "F-2"] and sprinklered_903_3_1_1
+      else 75) or story_second_above_grade_plane and occupancy_group in ["B", "F-1", "F-2", "M"] and story_occupant_load <=
+      29 and egress_travel_distance <= 75)) and occupancy_group != "R-2" and high_rise_building
+    reason: 'No more exits than 1006.3 asks, in a building other than Group R-2 that may be a high-rise more than 420 ft in
+      building height (stated, or not ruled out): 403.5.2 asks one interior exit stairway more (not where elevators serve
+      occupant self-evacuation, or for portions whose highest occupiable floor is under 420 ft), and the building''s height
+      isn''t in the model: a person checks.'
+  - when: story_exit_count < 2 and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) or story_exit_count > 0 and (story_first_above_or_below_grade and story_occupant_load <= 49 and egress_travel_distance
+      <= (100 if occupancy_group in ["B", "F-1", "F-2"] and sprinklered_903_3_1_1 else 75) or story_second_above_grade_plane
+      and occupancy_group in ["B", "F-1", "F-2", "M"] and story_occupant_load <= 29 and egress_travel_distance <= 75)) and
+      underground_building
+    reason: 'One exit, allowed by 1006.3.4, in a building that may be an underground building (stated, or not ruled out: a
+      floor level used for human occupancy more than 30 ft below the lowest level of exit discharge): 405.7.1 asks two exits
+      on each floor level, and which floor levels it holds isn''t in the model: a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -6630,6 +7548,35 @@ rules:
       Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
       of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
       for determining the required means of egress for the mall building.'
+  - file: gov.ny.building.2025.pdf
+    page: 90
+    lines:
+    - 48
+    - 57
+    quote: '[BE] 403.5.2 Additional interior exit stairway. For buildings other than Group R-2 and their ancillary spaces
+      that are more than 420 feet (128 m) in building height, one additional interior exit stairway meeting the requirements
+      of Sections 1011 and 1023 shall be provided in addition to the minimum number of exits required by Section 1006.3. The
+      total capacity of any combination of remaining interior exit stairways with one interior exit stairway removed shall
+      be not less than the total capacity required by Section 1005.1. Scissor stairways shall not be considered the additional
+      interior exit stairway required by this section. Exceptions: 1. An additional interior exit stairway shall not be required
+      to be installed in buildings having elevators used for occupant self-evacuation in accordance with Section 3008. 2.
+      An additional interior exit stairway shall not be required for other portions of the building where the highest occupia-
+      ble floor level in those areas is less than 420 feet (128 m) in building height.'
+  - file: gov.ny.building.2025.pdf
+    page: 92
+    lines:
+    - 36
+    - 37
+    quote: 405.1 General. The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level used
+      for human occu- pancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge.
+  - file: gov.ny.building.2025.pdf
+    page: 93
+    lines:
+    - 24
+    - 26
+    quote: '[BE] 405.7.1 Number of exits. Each floor level shall be provided with not fewer than two exits. Where compartmentation
+      is required by Section 405.4, each compartment shall have not fewer than one exit and not fewer than one exit access
+      doorway into the adjoining compartment.'
   examples:
   - given:
       occupancy_group: B
@@ -6638,6 +7585,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6658,6 +7607,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6679,6 +7630,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6703,6 +7656,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6727,6 +7682,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6751,6 +7708,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6775,6 +7734,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6799,6 +7760,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6822,6 +7785,8 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story: []
     rows:
@@ -6834,6 +7799,8 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6857,6 +7824,8 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story: []
     rows:
@@ -6870,6 +7839,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: true
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -6884,6 +7855,56 @@ rules:
     expect: needs_review
     note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
       ask more here, so a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      high_rise_building: true
+      underground_building: false
+    parts:
+      story:
+      - id: p1
+        name: Office floor, two exits
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 2
+          story_occupant_load: 120
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it is a high-rise or more than 420 ft in building height: 403.5.2 may ask
+      one more interior exit stairway, so a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      high_rise_building: false
+      underground_building: true
+    parts:
+      story:
+      - id: p1
+        name: Small office, one exit, NFPA 13
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 49
+          egress_travel_distance: 100
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A story with one exit, a pass where the building states it isn''t underground, where it states it is: 405.7.1 asks
+      two exits on each floor level, so a person checks.'
   notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4
     (the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling
     units (Table 1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with
@@ -6961,6 +7982,25 @@ rules:
       may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
       mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
       ask more exits (402.8 governs over Chapter 10): a person checks.'
+  - when: story_exit_count < 1 + (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) and (story_exit_count
+      >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count > 0 and (occupancy_group
+      in ["R-3", "R-4"] or story_first_above_or_below_grade and (occupancy_group in ["H-2", "H-3"] and story_occupant_load
+      <= 3 and egress_travel_distance <= 25 or occupancy_group in ["H-4", "H-5", "I-1", "I-2", "I-3", "R-1", "R-2"] and story_occupant_load
+      <= 10 and egress_travel_distance <= 75) and (occupancy_group != "R-2" or (sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
+      and emergency_escape_openings_1031))) and occupancy_group != "R-2" and high_rise_building
+    reason: 'No more exits than 1006.3 asks, in a building other than Group R-2 that may be a high-rise more than 420 ft in
+      building height (stated, or not ruled out): 403.5.2 asks one interior exit stairway more (not where elevators serve
+      occupant self-evacuation, or for portions whose highest occupiable floor is under 420 ft), and the building''s height
+      isn''t in the model: a person checks.'
+  - when: story_exit_count < 2 and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) or story_exit_count > 0 and (occupancy_group in ["R-3", "R-4"] or story_first_above_or_below_grade and
+      (occupancy_group in ["H-2", "H-3"] and story_occupant_load <= 3 and egress_travel_distance <= 25 or occupancy_group
+      in ["H-4", "H-5", "I-1", "I-2", "I-3", "R-1", "R-2"] and story_occupant_load <= 10 and egress_travel_distance <= 75)
+      and (occupancy_group != "R-2" or (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031)))
+      and underground_building
+    reason: 'One exit, allowed by 1006.3.4, in a building that may be an underground building (stated, or not ruled out: a
+      floor level used for human occupancy more than 30 ft below the lowest level of exit discharge): 405.7.1 asks two exits
+      on each floor level, and which floor levels it holds isn''t in the model: a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -7036,6 +8076,35 @@ rules:
       Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
       of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
       for determining the required means of egress for the mall building.'
+  - file: gov.ny.building.2025.pdf
+    page: 90
+    lines:
+    - 48
+    - 57
+    quote: '[BE] 403.5.2 Additional interior exit stairway. For buildings other than Group R-2 and their ancillary spaces
+      that are more than 420 feet (128 m) in building height, one additional interior exit stairway meeting the requirements
+      of Sections 1011 and 1023 shall be provided in addition to the minimum number of exits required by Section 1006.3. The
+      total capacity of any combination of remaining interior exit stairways with one interior exit stairway removed shall
+      be not less than the total capacity required by Section 1005.1. Scissor stairways shall not be considered the additional
+      interior exit stairway required by this section. Exceptions: 1. An additional interior exit stairway shall not be required
+      to be installed in buildings having elevators used for occupant self-evacuation in accordance with Section 3008. 2.
+      An additional interior exit stairway shall not be required for other portions of the building where the highest occupia-
+      ble floor level in those areas is less than 420 feet (128 m) in building height.'
+  - file: gov.ny.building.2025.pdf
+    page: 92
+    lines:
+    - 36
+    - 37
+    quote: 405.1 General. The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level used
+      for human occu- pancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge.
+  - file: gov.ny.building.2025.pdf
+    page: 93
+    lines:
+    - 24
+    - 26
+    quote: '[BE] 405.7.1 Number of exits. Each floor level shall be provided with not fewer than two exits. Where compartmentation
+      is required by Section 405.4, each compartment shall have not fewer than one exit and not fewer than one exit access
+      doorway into the adjoining compartment.'
   examples:
   - given:
       occupancy_group: R-3
@@ -7044,6 +8113,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7065,6 +8136,8 @@ rules:
       r2_sleeping_units: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7090,6 +8163,8 @@ rules:
       r2_sleeping_units: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7113,6 +8188,8 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7136,6 +8213,8 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story: []
     rows:
@@ -7149,6 +8228,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: true
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7163,6 +8244,52 @@ rules:
     expect: needs_review
     note: 'Two exits for the story''s load, a pass where the building states it may hold a covered or open mall (special egress
       spaces yes): 402.8 may ask more here, so a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      high_rise_building: true
+      underground_building: false
+    parts:
+      story:
+      - id: p1
+        name: Group R-3 floor, one exit
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 40
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it is a high-rise or more than 420 ft in building height: 403.5.2 may ask
+      one more interior exit stairway, so a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      high_rise_building: false
+      underground_building: true
+    parts:
+      story:
+      - id: p1
+        name: Group R-3 floor, one exit
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 40
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A story with one exit, a pass where the building states it isn''t underground, where it states it is: 405.7.1 asks
+      two exits on each floor level, so a person checks.'
   notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4
     (the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling
     units (Table 1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with
@@ -7227,6 +8354,20 @@ rules:
       may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
       mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
       ask more exits (402.8 governs over Chapter 10): a person checks.'
+  - when: story_exit_count < 1 + (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) and (story_exit_count
+      >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count > 0 and ((story_first_above_or_below_grade
+      and egress_travel_distance <= (100 if sprinklered_903_3_1_1 else 75) or story_second_above_grade_plane and egress_travel_distance
+      <= 75) and story_occupant_load <= 29)) and occupancy_group != "R-2" and high_rise_building
+    reason: 'No more exits than 1006.3 asks, in a building other than Group R-2 that may be a high-rise more than 420 ft in
+      building height (stated, or not ruled out): 403.5.2 asks one interior exit stairway more (not where elevators serve
+      occupant self-evacuation, or for portions whose highest occupiable floor is under 420 ft), and the building''s height
+      isn''t in the model: a person checks.'
+  - when: story_exit_count < 2 and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) or story_exit_count > 0 and ((story_first_above_or_below_grade and egress_travel_distance <= (100 if sprinklered_903_3_1_1
+      else 75) or story_second_above_grade_plane and egress_travel_distance <= 75) and story_occupant_load <= 29)) and underground_building
+    reason: 'One exit, allowed by 1006.3.4, in a building that may be an underground building (stated, or not ruled out: a
+      floor level used for human occupancy more than 30 ft below the lowest level of exit discharge): 405.7.1 asks two exits
+      on each floor level, and which floor levels it holds isn''t in the model: a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -7302,6 +8443,35 @@ rules:
       Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
       of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
       for determining the required means of egress for the mall building.'
+  - file: gov.ny.building.2025.pdf
+    page: 90
+    lines:
+    - 48
+    - 57
+    quote: '[BE] 403.5.2 Additional interior exit stairway. For buildings other than Group R-2 and their ancillary spaces
+      that are more than 420 feet (128 m) in building height, one additional interior exit stairway meeting the requirements
+      of Sections 1011 and 1023 shall be provided in addition to the minimum number of exits required by Section 1006.3. The
+      total capacity of any combination of remaining interior exit stairways with one interior exit stairway removed shall
+      be not less than the total capacity required by Section 1005.1. Scissor stairways shall not be considered the additional
+      interior exit stairway required by this section. Exceptions: 1. An additional interior exit stairway shall not be required
+      to be installed in buildings having elevators used for occupant self-evacuation in accordance with Section 3008. 2.
+      An additional interior exit stairway shall not be required for other portions of the building where the highest occupia-
+      ble floor level in those areas is less than 420 feet (128 m) in building height.'
+  - file: gov.ny.building.2025.pdf
+    page: 92
+    lines:
+    - 36
+    - 37
+    quote: 405.1 General. The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level used
+      for human occu- pancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge.
+  - file: gov.ny.building.2025.pdf
+    page: 93
+    lines:
+    - 24
+    - 26
+    quote: '[BE] 405.7.1 Number of exits. Each floor level shall be provided with not fewer than two exits. Where compartmentation
+      is required by Section 405.4, each compartment shall have not fewer than one exit and not fewer than one exit access
+      doorway into the adjoining compartment.'
   examples:
   - given:
       occupancy_group: S-2
@@ -7309,6 +8479,8 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7333,6 +8505,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7357,6 +8531,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7381,6 +8557,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7404,6 +8582,8 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7427,6 +8607,8 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
       special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
     parts:
       story: []
     rows:
@@ -7440,6 +8622,8 @@ rules:
       emergency_escape_openings_1031: true
       assembly_fixed_seating: false
       special_egress_spaces: true
+      high_rise_building: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7458,6 +8642,60 @@ rules:
     expect: needs_review
     note: 'Two exits for the story''s load, a pass where the building states it may hold a covered or open mall (special egress
       spaces yes): 402.8 may ask more here, so a person checks.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      high_rise_building: true
+      underground_building: false
+    parts:
+      story:
+      - id: p1
+        name: Warehouse floor, one exit, NFPA 13
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 29
+          egress_travel_distance: 100
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it is a high-rise or more than 420 ft in building height: 403.5.2 may ask
+      one more interior exit stairway, so a person checks.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      high_rise_building: false
+      underground_building: true
+    parts:
+      story:
+      - id: p1
+        name: Warehouse floor, one exit, NFPA 13
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 29
+          egress_travel_distance: 100
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A story with one exit, a pass where the building states it isn''t underground, where it states it is: 405.7.1 asks
+      two exits on each floor level, so a person checks.'
   notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4
     (the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling
     units (Table 1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with
@@ -7518,6 +8756,13 @@ rules:
       may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
       mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
       ask more exits (402.8 governs over Chapter 10): a person checks.'
+  - when: story_exit_count < 2 and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) or story_exit_count > 0 and not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4
+      and egress_travel_distance <= 125 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031)
+      and underground_building
+    reason: 'One exit, allowed by 1006.3.4, in a building that may be an underground building (stated, or not ruled out: a
+      floor level used for human occupancy more than 30 ft below the lowest level of exit discharge): 405.7.1 asks two exits
+      on each floor level, and which floor levels it holds isn''t in the model: a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -7589,6 +8834,21 @@ rules:
       Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
       of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
       for determining the required means of egress for the mall building.'
+  - file: gov.ny.building.2025.pdf
+    page: 92
+    lines:
+    - 36
+    - 37
+    quote: 405.1 General. The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level used
+      for human occu- pancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge.
+  - file: gov.ny.building.2025.pdf
+    page: 93
+    lines:
+    - 24
+    - 26
+    quote: '[BE] 405.7.1 Number of exits. Each floor level shall be provided with not fewer than two exits. Where compartmentation
+      is required by Section 405.4, each compartment shall have not fewer than one exit and not fewer than one exit access
+      doorway into the adjoining compartment.'
   examples:
   - given:
       occupancy_group: R-2
@@ -7598,6 +8858,7 @@ rules:
       r2_sleeping_units: false
       assembly_fixed_seating: false
       special_egress_spaces: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7619,6 +8880,7 @@ rules:
       r2_sleeping_units: false
       assembly_fixed_seating: false
       special_egress_spaces: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7643,6 +8905,7 @@ rules:
       r2_sleeping_units: false
       assembly_fixed_seating: false
       special_egress_spaces: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7667,6 +8930,7 @@ rules:
       r2_sleeping_units: false
       assembly_fixed_seating: false
       special_egress_spaces: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7691,6 +8955,7 @@ rules:
       r2_sleeping_units: false
       assembly_fixed_seating: false
       special_egress_spaces: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7715,6 +8980,7 @@ rules:
       r2_sleeping_units: false
       assembly_fixed_seating: false
       special_egress_spaces: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7738,6 +9004,7 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
       special_egress_spaces: false
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7761,6 +9028,7 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
       special_egress_spaces: false
+      underground_building: false
     parts:
       story: []
     rows:
@@ -7775,6 +9043,7 @@ rules:
       r2_sleeping_units: false
       assembly_fixed_seating: false
       special_egress_spaces: true
+      underground_building: false
     parts:
       story:
       - id: p1
@@ -7789,6 +9058,32 @@ rules:
     expect: needs_review
     note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
       ask more here, so a person checks.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      underground_building: true
+    parts:
+      story:
+      - id: p1
+        name: Four apartments, one exit, at the limits
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 18
+          egress_travel_distance: 125
+          story_fourth_or_higher_above_grade_plane: false
+          story_dwelling_units: 4
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A story with one exit, a pass where the building states it isn''t underground, where it states it is: 405.7.1 asks
+      two exits on each floor level, so a person checks.'
   notes: 'Table 1006.3.4(1) for Group R-2 of dwelling units (note b; one of sleeping units is Table 1006.3.4(2)''s): a
     basement or the first, second or third story above grade plane may have one exit with at most 4 dwelling units and
     125 ft of exit access travel, only in a building sprinklered per 903.3.1.1 or 903.3.1.2 with emergency escape and
