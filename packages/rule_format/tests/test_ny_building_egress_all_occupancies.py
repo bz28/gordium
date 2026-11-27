@@ -362,7 +362,8 @@ HANDLERS = {
     "903.3.1.2": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "903.3.1.2"),
     "903.2.5.1": ("general.bc_table_1017_2_note_d_group_h", "903.2.5.1"),
     "903.3.1.3": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "sprinklered_903_3_1_3"),
-    "903.2.8": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "1006.2.2.6"),
+    # 903.2.8 twice, Table 1017.2's and Table 1020.2's (below): each under a key of its own, so both words are checked
+    "903.2.8 (Table 1017.2)": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "1006.2.2.6"),
     # Table 1006.2.1's notes, and 1006.2.1's own
     "903.2.5": ("general.bc_table_1017_2_note_d_group_h", "903.2.5"),
     "1030.8": ("general.bc_table_1006_2_1_a_e_m", "1030.8"), "1006.2.2.1": ("general.bc_table_1006_2_1_b", "1006.2.2"), "1006.2.2.6": ("general.bc_table_1006_2_1_r3_r4", "1006.2.2.6"),
