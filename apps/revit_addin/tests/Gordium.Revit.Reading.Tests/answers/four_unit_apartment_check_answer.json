@@ -1453,7 +1453,7 @@
     "Egress · Intervening spaces in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups: item 3 (Group H's hazard) and which room is which occupancy aren't marked; a person checks.",
     "Egress · Multiple tenants: no egress through another tenant: A person checks this (Gordium doesn't decide it): Which spaces are separate tenants is the architect's statement; a person checks the paths and the exception.",
     "Egress · Table 1017.2 in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy isn't marked yet, so a person checks.",
-    "Egress · Table 1017.2 note a: sections that change the distance: A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), not brought in.",
+    "Egress · Table 1017.2 note a: sections that change the distance: A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), a person's check.",
     "Egress · Group H's sprinkler system: A person checks this (Gordium doesn't decide it): Group H: the sprinklered columns ask for a system per 903.2.5 and 903.2.5.1 (Group H's own requirement, not brought in); the rows read the stated NFPA 13 system as one, a person confirms it.",
     "Egress · Exterior egress balcony increase: A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, not brought in) and its length are a person's check.",
     "Egress · Groups F-1 and S-1 increase to 400 ft: A person checks this (Gordium doesn't decide it): The increase's group: its conditions (not measured) are a person's check.",
@@ -69956,11 +69956,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), not brought in.",
+     "reason": "A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), not brought in.",
+      "line": "A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), a person's check.",
       "quotes": [
        {
         "text": "a. See the following sections for modifications to exit access travel distance requirements: Section 402.8: For the distance limitation in malls. Section 407.4: For the distance limitation in Group I-2. Sections 408.6.1 and 408.8.1: For the distance limitations in Group I-3. Section 411.2: For the distance limitation in special amusement areas. Section 412.6: For the distance limitations in aircraft manufacturing facilities. Section 1006.2.2.2: For the distance limitation in refrigeration machinery rooms. Section 1006.2.2.3: For the distance limitation in refrigerated rooms and spaces. Section 1006.3.4: For buildings with one exit. Section 1017.2.2: For increased distance limitation in Groups F-1 and S-1. Section 1017.2.3: For increased distance limitation in Group H-5. Section 1030.7: For increased limitation in assembly seating. Section 3103.4: For temporary structures. Section 3104.9: For pedestrian walkways.",
@@ -69985,14 +69985,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_table_1017_2_note_a",
-       "words": "A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), not brought in.",
+       "words": "A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_table_1017_2_note_a",
-       "why": "A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), not brought in.",
+       "why": "A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -78586,7 +78586,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Table 1017.2 note a: sections that change the distance (BCNYS): A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), not brought in.",
+       "title": "Egress · Table 1017.2 note a: sections that change the distance (BCNYS): A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), a person's check.",
        "mark": "?",
        "name": "Egress · Table 1017.2 note a: sections that change the distance (BCNYS)"
       },
@@ -80223,7 +80223,7 @@
       {
        "key": "reason:egress.general.bc_table_1017_2_note_a",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), not brought in.",
+       "words": "A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_table_1017_2_note_a"
@@ -93099,7 +93099,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 204
+          "not_for_checking": 206
          },
          "pieces": [
           {
@@ -93781,6 +93781,12 @@
            "rules": []
           },
           {
+           "id": "202:life_safety_systems",
+           "title": "LIFE SAFETY SYSTEMS",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:limited_verbal_or_physical_assistance",
            "title": "LIMITED VERBAL OR PHYSICAL ASSISTANCE",
            "coverage": "not_for_checking",
@@ -93885,6 +93891,12 @@
           {
            "id": "202:nosing",
            "title": "NOSING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:nursing_homes",
+           "title": "NURSING HOMES",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -109782,7 +109794,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "2e4cdd3997c3d85cf5798f6948856f9f1669cc48da03e9f56bb5efcb71cebd2d",
   "rulebook": {
-   "new_york/ithaca_city": "5f7fead6181d9ba45e4b25e18df40f0351e865dc92092fc1b665033b72e474a7"
+   "new_york/ithaca_city": "e5cdebee9472250f7ebda1a8cb76bda75889100e22d17b21701a1b4bf804a56b"
   }
  }
 }
