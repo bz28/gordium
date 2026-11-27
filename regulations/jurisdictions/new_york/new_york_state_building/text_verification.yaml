@@ -22,17 +22,17 @@ second_reading:
     2026-11-25), a sixteenth for the 11 of section group 6b (1010.1.2, 1010.1.2.1 and 9 definitions), a seventeenth for the 29 of
     Chapter 4 part a (402.1, 402.1.1, 402.8 whole, 404.1, 404.9 to 404.11 and 7 definitions, 2026-11-26), an eighteenth
     for the 39 of Chapter 4 part b (403.1, 403.2.2, 403.5, 403.6, 405.1, 405.4, 405.7 and 15 definitions), a nineteenth for
-    the 43 of Chapter 4 part c (407.1 to 407.4 and 15 definitions), a twentieth for the 28 of Chapter 4 part d (407.5, 407.6,
+    the 45 of Chapter 4 part c (407.1 to 407.4 and 17 definitions; the last two in its review round 1), a twentieth for the 28 of Chapter 4 part d (407.5, 407.6,
     407.10, 408.1 to 408.4 and 3 definitions), and a helper for
     the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 12 pages, 30 boxes as step_ch04a (Chapter 4 part a), 16 pages, 39 boxes as step_ch04b (Chapter 4 part b), 13 pages, 44 boxes as step_ch04c (Chapter 4 part c), and 6 pages, 29 boxes as step_ch04d (Chapter 4 part d); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 12 pages, 30 boxes as step_ch04a (Chapter 4 part a), 16 pages, 39 boxes as step_ch04b (Chapter 4 part b), 13 pages, 44 boxes as step_ch04c and 2 pages, 2 boxes as step_ch04c2 (Chapter 4 part c), and 6 pages, 29 boxes as step_ch04d (Chapter 4 part d); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 402 pieces, 1046 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 404 pieces, 1046 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -1063,6 +1063,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:life_safety_systems:
+    piece_sha256: 3a0a9f98d28757e913e2785beee8f90da8fd0dd025e71af1e90ff2d6db96e096
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:limited_verbal_or_physical_assistance:
     piece_sha256: 108af115596fbcbe73690ffe8c412e6fca40e3f66bc053e08e77cb7aa56b1f1d
     numbers: []
@@ -1218,6 +1224,12 @@ pieces:
     - none
   202:nosing:
     piece_sha256: 1f05d4bcf46c58cdc238a7105cb64f06b0f9dceef3865d9f3f2a2332175052cf
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:nursing_homes:
+    piece_sha256: 35f92d5cb37c8d93d5872aa36fca24929302734420403e96302667e12d28073a
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -2941,6 +2953,9 @@ pieces:
     - <=
     - none
     flags:
+    - '''2/3 inch'' beside ''19.1 mm'': the book prints a stacked 2/3 (the page image; pdfplumber reads the 2 and the 3 at
+      5.6 points over and under the bar), but 19.1 mm is 3/4 inch, the model code''s figure. Both readings agree on what
+      is printed; the flag of 407.3.1.1 says the difference (Chapter 4 part c, review round 1).'
     - '''2/3 inch'' (<=): ''2/3 inch (19.1 mm) maximum''; the recorded words miss it (numbers.py reads comparison words only
       directly before a number or after its unit). The second reading is right. A flag''s figure (Chapter 4 part c), read
       by no rule.'

@@ -110,6 +110,13 @@ documents:
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
           the rule measures the story's floor area by both of the book's own measures of floor area (README).
         202:floor_area_net: As 202:floor_area_gross.
+        202:nursing_homes: 407.2.5 prints "nursing home" in italics (p.98, line 40), singular; 201.2 makes the singular
+          include the plural, so NURSING HOMES (p.55, line 20) is its definition, brought in by name (brought_in.
+          italic_not_defined says why the italics reader doesn't match it). It says which buildings 407.2.5, 407.2.6 and
+          407.4.3 are about (Chapter 4 part c, review round 1).
+        202:life_safety_systems: SUPERVISORY SIGNAL-INITIATING DEVICE prints "life safety system" in italics (p.64,
+          line 15), singular; 201.2 makes the singular include the plural, so LIFE SAFETY SYSTEMS (p.51, line 53) is
+          its definition, brought in by name. Read by no rule (Chapter 4 part c, review round 1).
       tables:      # each table's lines, checked on the page image (the text doesn't say where a table ends); every
                    # table on the pages read is named, brought in or not
         Table 903.2.11.6: p.273 lines 14-36
@@ -222,15 +229,18 @@ documents:
             doesn''t name whole. Read by no rule (Chapter 4 part c).'
         202:supervisory_signal_initiating_device:
           life safety system: 'The book prints "life safety system" in italics (p.64, line 15); Section 202 defines
-            LIFE SAFETY SYSTEMS (p.51, line 53), plural, which the singular doesn''t name whole. Read by no rule
-            (Chapter 4 part c).'
+            LIFE SAFETY SYSTEMS (p.51, line 53), and 201.2 makes the singular include the plural, so it is brought in by
+            name (brought_in.definitions), the italics reader matching words only as printed. Read by no rule (Chapter 4
+            part c, review round 1).'
         '407.2.1':
           public-use: 'The book prints "public-use areas" in italics (p.98, line 17); PUBLIC-USE AREAS is brought in
             (202:public_use_areas), and the hyphenated word is left over by the italics reader. A flag''s words
             (Chapter 4 part c).'
         '407.2.5':
           nursing home: 'The book prints "nursing home" in italics (p.98, line 40); Section 202 defines NURSING HOMES
-            (p.55, line 20), plural, which the singular doesn''t name whole. A flag''s words (Chapter 4 part c).'
+            (p.55, line 20), and 201.2 makes the singular include the plural, so it is brought in by name
+            (brought_in.definitions), the italics reader matching words only as printed. A flag''s words (Chapter 4 part
+            c, review round 1).'
         202:concrete:
           perlite: 'One of CONCRETE''s own sub-entries (p.38, lines 24-41: carbonate aggregate, cellular, lightweight
             aggregate, perlite, sand-lightweight, siliceous aggregate, vermiculite), printed in italics; no term of
