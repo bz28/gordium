@@ -1854,6 +1854,12 @@ def _awning(d):
     d["openings"][0]["operation"] = "awning"
 
 
+def _upstairs(d):
+    """A second room, a kitchen whose floor is 9 ft above the bedroom's."""
+    d["rooms"].append({"id": "k", "name": "Kitchen", "sleeping": False, "floor_elevation": 108,
+                       "floor": [[200, 0], [320, 0], [320, 120], [200, 120]]})
+
+
 # one description per reason: measuring it must make that reason happen
 STOP_CASES = {
     "not_a_description": lambda: [],
@@ -1887,6 +1893,7 @@ STOP_CASES = {
     "has_none_reading": _set(("has_none",), [{"kind": "ramp", "source": "A-2", "reading": "yes"}]),
     "has_none_keys": _set(("has_none",), [{"kind": "ramp", "source": "A-2", "reding": True}]),
     "has_none_twice": _set(("has_none",), [{"kind": "ramp", "source": "A-2"}, {"kind": "ramp", "source": "A-4"}]),
+    "stairs_none_several_floors": _with(base, lambda d: d.update(stairs=[], guards=[]), _upstairs),
     "has_none_contradicted": _with(base, lambda d: d.update(has_none=[{"kind": "ramp", "source": "A-2"}],
                                                             ramps=[{"id": "r1"}])),
     "in_more_not_rules": _with(base, lambda d: d["openings"][0].update(
@@ -2275,3 +2282,53 @@ def test_a_no_sleeping_lofts_claim_cant_stand_beside_a_room_drawn_within_another
         assert "sleeping_loft" not in got["has_none"]
         assert all("stair_serves_sleeping_loft" not in (s.get("stated") or {}) for s in got["parts"]["stair"] or [])
         assert any(refused in p for p in got["problems"]), got["problems"]
+
+
+# ---- "no stairs" beside rooms on more than one floor (_stairs_against_floors) ---------------------------------------
+
+def _no_stairs(**floors):
+    d = base()
+    d.update(stairs=[], guards=[])
+    for room_id, z in floors.items():
+        d["rooms"].append({"id": room_id, "name": room_id.title(), "sleeping": False, "floor_elevation": z,
+                           "floor": [[200, 0], [320, 0], [320, 120], [200, 120]]})
+    return d
+
+
+def test_no_stairs_is_taken_on_one_floor_and_never_beside_rooms_on_two():
+    """An empty list of stairs says the house has none: taken where every room's floor is within 1/2 in of the
+    others (a threshold's change in level), so the stair rules are set aside; refused where a room's floor is higher
+    than that (a step, a stair or a ramp joins them, or each floor has its own way out at grade, none of which the
+    model shows): the stairs aren't read, so every stair rule needs review, never not applicable."""
+    for flat in ({}, {"kitchen": 0.5}, {"kitchen": -0.5}):
+        got = measure(_no_stairs(**flat))
+        assert got["parts"]["stair"] == [], flat
+        assert not any("no stairs" in p for p in got["problems"]), flat
+    for apart in ({"kitchen": 0.51}, {"kitchen": 108}, {"den": -96}, {"kitchen": 108, "loft": 216}):
+        got = measure(_no_stairs(**apart))
+        assert got["parts"]["stair"] is None, apart
+        why = [p for p in got["problems"] if p.startswith("the model says there are no stairs, yet")]
+        assert len(why) == 1 and "isn't taken" in why[0], (apart, got["problems"])
+    got = measure(_no_stairs(kitchen=108))
+    assert "Bedroom's floor at 0 in, Kitchen's at 108 in" in got["problems"][-1]
+
+
+def test_no_stairs_beside_rooms_on_two_levels_as_the_building_code_places_them():
+    """A description that places its rooms on levels (the Building Code's): rooms on two levels refuse "no stairs";
+    rooms all on one level, or with no level or a level that isn't text, show nothing against it. The stories can be
+    given apart from the description (the Building Code's stairs are measured with its rooms left out)."""
+    d = base()
+    d.update(stairs=[], guards=[], rooms=[])
+    on = lambda *levels: [{"id": f"r{n}", "level": lv} for n, lv in enumerate(levels)]
+    assert measure(d, stories=on("L1", "L1"))["parts"]["stair"] == []
+    assert measure(d, stories=on("L1", None, 5, ["L2"]))["parts"]["stair"] == []
+    for stories in (on("L1", "L2"), on("L2", "L1", "L3", "L4", "L5")):
+        got = measure(d, stories=stories)
+        assert got["parts"]["stair"] is None
+        assert "rooms on levels L1, L2" in got["problems"][-1]
+    assert "L1, L2, L3 and 2 more" in measure(d, stories=on("L1", "L2", "L3", "L4", "L5"))["problems"][-1]
+    assert measure(d, stories="x")["parts"]["stair"] == []          # rooms that can't be read show nothing
+    # stairs given (not none) are measured as before, whatever the floors
+    d2 = base()
+    d2["rooms"].append({"id": "k", "name": "Kitchen", "sleeping": False, "floor_elevation": 108})
+    assert len(measure(d2)["parts"]["stair"]) == 1

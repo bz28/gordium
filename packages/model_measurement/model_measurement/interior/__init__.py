@@ -26,7 +26,7 @@ from model_measurement.interior.doors import measure_door
 from model_measurement.interior import has_none as none_of
 from model_measurement.interior.guards import measure_guard
 from model_measurement.interior.openings import measure_opening
-from model_measurement.interior.read import FORMAT, INCHES, Reader, name_of, yes_no
+from model_measurement.interior.read import FORMAT, INCHES, Reader, name_of, tidy, yes_no
 from model_measurement.interior.rooms import floor_elevation, measure_room
 from model_measurement.interior.stairs import measure_stair
 from model_measurement.interior.stops import STOPS, Stop, given_text
@@ -88,6 +88,39 @@ def _given(description: dict, kind: str, problems: list):
     return got
 
 
+SAME_FLOOR = 0.5      # in: rooms' floors this close are one floor (a threshold's change in level, never a step)
+
+
+def _stairs_against_floors(rooms, reader) -> str | None:
+    """Why "no stairs" (an empty list of stairs) can't be taken beside these rooms, or None: rooms on two or more
+    stories (`level`, as the Building Code's description places them), or rooms' floors more than 1/2 in apart
+    (`floor_elevation`, as a house's gives them; a change of floor that size is a step, or a ramp). Rooms on more
+    than one floor are joined by a stair or a ramp, or each floor has its own way out at grade, and the model shows
+    none of that, so the claim needs review, never a stair rule set aside. Rooms that can't be read, or whose floor
+    can't be read, show nothing against it (the rooms' own problems say so)."""
+    if not isinstance(rooms, list):
+        return None
+    rooms = [r for r in rooms if isinstance(r, dict)]
+    levels = sorted({r["level"] for r in rooms if isinstance(r.get("level"), str) and r["level"].strip()})
+    if len(levels) > 1:
+        shown = ", ".join(levels[:3]) + (f" and {len(levels) - 3} more" if len(levels) > 3 else "")
+        return Stop("stairs_none_several_floors", what=f"rooms on levels {shown}").reason
+    floors = []
+    for r in rooms:
+        if r.get("floor_elevation") is None:
+            continue
+        try:
+            floors.append((floor_elevation(r, reader), name_of(r)))
+        except Stop:
+            continue
+    if floors:
+        (low, low_name), (high, high_name) = min(floors), max(floors)
+        if high - low > SAME_FLOOR:
+            return Stop("stairs_none_several_floors", what=f"{low_name}'s floor at {tidy(low):g} in, {high_name}'s "
+                                                           f"at {tidy(high):g} in").reason
+    return None
+
+
 def _unknown_spaces(description: dict, problems: list):
     """The enclosed spaces with no room drawn in them (`unknown_spaces`, [] when not given: the rooms are every
     room); None (with a problem: then no room is read) when the list or an entry can't be read."""
@@ -135,7 +168,10 @@ def _door(item: dict, measured) -> dict:
     return part
 
 
-def measure(description) -> dict:
+def measure(description, stories=None) -> dict:
+    """The description measured (the module's account). `stories`: the rooms an empty list of stairs is read against
+    (_stairs_against_floors), where the description given isn't the whole one (the Building Code's stairs and guards
+    are measured on a description with its rooms left out); None: the description's own rooms."""
     out = {"format": MEASURED_FORMAT, "units": {"length": "in", "area": "sf"},
            "parts": {k: None for k in KINDS}, "problems": [], "not_checked": [], "has_none": {}}
     problems = out["problems"]
@@ -195,6 +231,11 @@ def measure(description) -> dict:
             parts["emergency_escape_opening"].append(_part(o, measure_opening(o, reader, floor_of), o.get("room")))
 
     stairs = _given(description, "stair", problems)
+    if stairs == []:                                  # "no stairs": never beside rooms on more than one floor
+        against = _stairs_against_floors(description.get("rooms") if stories is None else stories, reader)
+        if against:
+            problems.append(against)
+            stairs = None
     flights = {}
     if stairs is not None:
         parts["stair"] = []

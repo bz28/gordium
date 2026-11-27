@@ -325,10 +325,12 @@ def _stairs_and_guards(interior) -> dict:
     its only parts and problems are the stairs' and guards' own. A kind the description doesn't give is not read
     (None, with the measuring's problem saying so): its rules need review, never pass. A description that isn't a
     mapping is measured as it is (its problem said)."""
+    stories = None
     if isinstance(interior, dict):
         keep = {k: interior[k] for k in ("format", "units", "stairs", "guards") if k in interior}
+        stories = interior.get("rooms")       # "no stairs" is read against the rooms' stories, never against none
         interior = {**keep, "rooms": [], "openings": [], "doors": []}
-    got = measure_interior(interior)
+    got = measure_interior(interior, stories=stories)
     return {"parts": {k: got["parts"].get(k) for k in BUILDING_INTERIOR_KINDS}, "problems": got["problems"]}
 
 

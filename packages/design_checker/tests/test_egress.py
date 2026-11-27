@@ -472,3 +472,42 @@ def test_a_saved_report_names_the_interior_it_was_checked_against(tmp_path):
     check_site(SITE, dict(FACTS), interior=empty, report_path=out)
     cells = [c.value for c in load_workbook(out)["Check"]["A"] if c.value]
     assert f"Interior: sha256 {egress.fingerprint(empty)} (no rooms drawn yet, egress not checked)" in cells
+
+
+def test_no_stairs_beside_rooms_on_two_floors_leaves_every_stair_row_to_review():
+    """"No stairs" (an empty list) on a house whose rooms are on two floors is a contradiction (a stair or a ramp
+    joins them, or each floor has its own way out at grade, none of which the model shows): the stairs aren't read,
+    so every stair row needs review naming nothing as complying, never not applicable as for a one-floor house; the
+    reason is said among the interior's problems."""
+    found = egress.laws(ITHACA)
+    stair_rules = {r["id"] for r in found["laws"][0]["rules"] if r.get("for_each") == "stair"}
+    assert stair_rules
+
+    def results(house):
+        got = egress.check(found, house, dict(egress_house.HOUSE), egress_house.ALLOWED)
+        return got, {k: v for k, v in got["results"].items() if k in stair_rules}
+
+    flat = dict(ranch(), stairs=[], guards=[])
+    _, one_floor = results(flat)
+    assert set(one_floor) == stair_rules and set(one_floor.values()) == {"not_applicable"}, one_floor
+    two = copy.deepcopy(flat)
+    two["rooms"][-1]["floor_elevation"] = 108                     # one room 9 ft up: a second floor
+    got, two_floors = results(two)
+    assert set(two_floors) == stair_rules and set(two_floors.values()) == {"needs_review"}, two_floors
+    assert any(p.startswith("the model says there are no stairs, yet its rooms are on more than one floor")
+               for p in got["interior"]["problems"]), got["interior"]["problems"]
+    assert any("no stairs, yet" in (i.get("reason") or "") for i in got["items"])       # said to the architect
+
+
+def test_the_building_codes_stairs_none_is_read_against_its_rooms_levels():
+    """The Building Code's stairs and guards are measured with the description's rooms left out
+    (egress._stairs_and_guards): "no stairs" is still read against those rooms' levels, so a building of two stories
+    stated with no stairs has its stairs not read (their rules need review), while one of a single story keeps it."""
+    one = {"format": "gordium.interior/1", "units": "in", "stairs": [], "guards": [],
+           "rooms": [{"id": "a", "level": "L1"}, {"id": "b", "level": "L1"}]}
+    assert egress._stairs_and_guards(one)["parts"]["stair"] == []
+    two = copy.deepcopy(one)
+    two["rooms"][1]["level"] = "L2"
+    got = egress._stairs_and_guards(two)
+    assert got["parts"]["stair"] is None
+    assert any("rooms on levels L1, L2" in p for p in got["problems"]), got["problems"]
