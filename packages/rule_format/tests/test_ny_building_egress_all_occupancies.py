@@ -1699,13 +1699,27 @@ def test_each_italic_word_entry_from_section_group_9e_on_cites_its_own_line():
     import json as _json
     from pathlib import Path
     brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]["italic_not_defined"]
-    cache = next(Path("C:/Users/benja/Documents/gordium_archive/code_cache").glob("729d2db7*/gov.ny.building.2025.text_*.jsonl"), None)         if Path("C:/Users/benja/Documents/gordium_archive/code_cache").exists() else None
-    if cache is None:
+    from rule_format.rulebook import cached_text
+    cache = cached_text(load(NY / "1_source_documents/sources.yaml")["documents"][0])   # the cache code_cache() names
+    if not cache.exists():
         pytest.skip("the book's cached text isn't on this machine")
-    text = {}
+    text, boxes = {}, {}
     for line in cache.read_text(encoding="utf-8").splitlines()[1:]:
         row = _json.loads(line)
         text[(row["page"], row["line"])] = row["text"]
+        boxes[(row["page"], row["line"])] = (row["top"], row["bottom"])
+    from rule_format.rulebook import cached
+    book = cached(load(NY / "1_source_documents/sources.yaml")["documents"][0])
+    pdf = None
+    if book.exists():
+        import pdfplumber
+        pdf = pdfplumber.open(book)
+    seen = {}
+
+    def words_of(page):              # the printed page is the PDF's page index page - 1 (no front matter offset)
+        if page not in seen:
+            seen[page] = pdf.pages[page - 1].extract_words(extra_attrs=["fontname"])
+        return seen[page]
     squash = lambda s: re.sub(r"[\s\-]", "", s).lower()
     checked = 0
     for pid, words in brought.items():
@@ -1720,6 +1734,28 @@ def test_each_italic_word_entry_from_section_group_9e_on_cites_its_own_line():
             assert squash(word) in lines, (pid, word)
             quoted = re.search(r'"([^"]+)"', why)
             assert quoted is None or squash(quoted[1]) in lines, (pid, word, quoted[1])
+            # review round 2 of section group 9g: the word is in the italic font on those lines (by position: each
+            # cached line's box on the page), so a line where it is roman doesn't do
+            if pdf is not None:
+                page_words = words_of(page)
+                rows = [boxes[(page, n)] for n in range(a, b + 1)]
+                italic = " ".join(w["text"] for w in page_words if w["fontname"].endswith("-It")
+                                  and any(top - 1 <= w["top"] <= bottom + 1 for top, bottom in rows))
+                assert squash(word) in squash(italic), (pid, word, "not in the italic font on the cited lines")
             checked += 1
     assert checked >= 6
+    # and without the cache: 1028.2's entry is the line 30 one (round 1 had line 18, where the word is roman)
+    assert "p.352, line 30" in brought["1028.2"]["enclosure"]
 
+
+
+def test_no_notes_say_a_sections_flags_show_for_every_building_where_one_has_a_condition(rules):
+    """Review round 2 of section group 9g (P3): 1029.2's notes said 'the 1029 flags show for every building' after
+    round 1 hid 1029.3's for a building stated Group R-3 alone. A note saying a section's flags show for every
+    building is true: none of that section's flags has a condition."""
+    bad = []
+    for rid, r in rules.items():
+        for sec in re.findall(r"the (\d{4}) flags show for every building", r.get("notes") or ""):
+            bad += [(rid, other) for other, o in rules.items() if o.get("kind") == "flag" and o.get("applies_when")
+                    and other.removeprefix("general.bc_").split("_")[0] == sec]
+    assert not bad, bad

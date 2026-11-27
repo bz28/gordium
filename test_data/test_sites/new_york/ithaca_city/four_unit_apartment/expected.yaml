@@ -328,7 +328,7 @@ results:
   general.bc_1025_3_uniformity: not_applicable   # Group R-2
   general.bc_1025_4_self_luminous_photoluminescent: not_applicable   # Group R-2
   general.bc_1025_5_illumination: not_applicable   # Group R-2
-  # section group 9g: 1026's horizontal exits, 1027's exterior exit stairways and ramps, 1028's exit discharge and 1029's egress courts, each a person's check for every building
+  # section group 9g: 1026's horizontal exits, 1027's exterior exit stairways and ramps, 1028's exit discharge and 1029's egress courts, each a person's check (1029.3's not for a building stated Group R-3 alone)
   general.bc_1026_1_horizontal_exits_general: needs_review
   general.bc_1026_2_horizontal_exit_separation: needs_review
   general.bc_1026_3_horizontal_exit_opening_protectives: needs_review

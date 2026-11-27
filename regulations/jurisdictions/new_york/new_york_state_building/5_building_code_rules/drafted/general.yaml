@@ -24337,7 +24337,8 @@ rules:
       the width and capacity unobstructed to a height of 7 feet but for encroachments complying with 1005.7: egress courts
       aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 1029.1 (its scope, labeled reference) is quoted
-    here. Whether the building has an egress court isn't a fact Gordium is given, so the 1029 flags show for every building.
+    here. Whether the building has an egress court isn't a fact Gordium is given, so 1029.2's flag shows for every building,
+    and 1029.3's for every building but one stated Group R-3 alone (its exception 2).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1029_3_egress_court_construction
