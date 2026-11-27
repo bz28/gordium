@@ -3,13 +3,13 @@ four_unit_apartment_check_answer.json, read by ResultViewsTests, ResultViewListT
 renders) is made by tools/evals/make_apartment_answer.py from the checker, never committed. Until 2026-11-27 it was committed
 and test_pane_answer_fresh.py failed whenever a rule change moved it (PR #181 review rounds 13 to 16), so almost every
 rule PR changed it and conflicted with every other waiting PR. These tests hold what replaced that: the tool writes the
-checker's answer exactly as the worker writes it and never writes an error; git never tracks the file; every CI job
-that runs the C# tests makes it first; and a C# build without it stops and says how to make it."""
+checker's answer exactly as the worker writes it and never writes an error; every CI job that runs the C# tests
+makes it first; and a C# build without it stops and says how to make it. That git never tracks it is
+tests/test_generated_not_committed.py's (nothing under apps/ starts a process: test_check.py's console-window check)."""
 
 from __future__ import annotations
 
 import json
-import subprocess
 import sys
 from pathlib import Path
 
@@ -46,7 +46,8 @@ def test_it_writes_the_checkers_answer_as_the_worker_writes_it(tmp_path):
     assert [p.name for p in out.parent.iterdir()] == ["a.json"]                                  # no temporary file left
 
 
-@pytest.mark.parametrize("bad", [{"id": 1, "ok": False, "error": {"message": "boom"}}, {"id": 1, "ok": True}, None])
+@pytest.mark.parametrize("bad", [{"id": 1, "ok": False, "error": {"message": "boom"}}, {"id": 1, "ok": True}, None,
+                                 {"id": 1, "ok": False, "result": {"view": {"items": []}}}])
 def test_a_checker_error_is_never_written_and_the_earlier_file_stays(tmp_path, bad):
     out = tmp_path / "a.json"
     out.write_text("earlier", encoding="utf-8")
@@ -54,17 +55,6 @@ def test_a_checker_error_is_never_written_and_the_earlier_file_stays(tmp_path, b
         tool.write(out, answer=lambda request: bad)
     assert out.read_text(encoding="utf-8") == "earlier"
     assert [p.name for p in tmp_path.iterdir()] == ["a.json"]
-
-
-def _git(*args: str) -> subprocess.CompletedProcess:
-    return subprocess.run(["git", *args], cwd=REPO, capture_output=True)
-
-
-def test_git_never_tracks_the_answer():
-    if _git("rev-parse", "--is-inside-work-tree").returncode != 0:
-        pytest.skip("not a git checkout")
-    assert _git("check-ignore", "-q", "--no-index", ANSWER).returncode == 0
-    assert _git("ls-files", "--error-unmatch", ANSWER).returncode != 0
 
 
 def _steps_running(job: dict, words: str) -> list[int]:

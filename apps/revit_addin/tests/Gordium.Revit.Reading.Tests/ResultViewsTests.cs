@@ -78,6 +78,23 @@ public sealed class ResultViewsTests
     private static HashSet<string> AskingFor(JsonNode result, string field) =>
         Asking(result, a => (string?)a["field"] == field && (string?)a["kind"] == "mark");
 
+    /// <summary>The group an ask's card belongs in, by the design's table (strings.md, "What to fix"), written here
+    /// apart from the pane's <see cref="ResultViews.KindOf"/> so a slip in it can't move the test's expectation too: a
+    /// mark of a fact on Project Information (<c>facts.</c>, <c>building.</c>) is a question to answer, any other mark
+    /// an element to mark; an unknown or missing kind is a person's to decide.</summary>
+    private static FixKind GroupOf(JsonNode ask) => ((string?)ask["kind"], (string?)ask["field"]) switch
+    {
+        ("mark", { } f) when f.StartsWith("facts.", StringComparison.Ordinal) || f.StartsWith("building.", StringComparison.Ordinal) => FixKind.Answer,
+        ("mark", _) => FixKind.Mark,
+        ("fix_model", _) => FixKind.FixModel,
+        ("survey", _) => FixKind.Survey,
+        ("measure", _) => FixKind.Measure,
+        ("open_question", _) => FixKind.OpenQuestion,
+        _ => FixKind.Decide,
+    };
+
+    private static JsonObject Work(string kind, string key) => new() { ["kind"] = kind, ["key"] = key, ["headline"] = "Do " + key };
+
     private static JsonObject Ask(string field, string? headline = null) => new()
     {
         ["kind"] = "mark", ["key"] = "field:" + field, ["headline"] = headline ?? "Say " + field, ["why"] = "w",
@@ -91,16 +108,19 @@ public sealed class ResultViewsTests
         return item;
     }
 
-    /// <summary>A small answer made here, its counts known by hand: one fails; six in review (three ask the occupancy
-    /// group, one of those first the sprinkler system, one asks for a room's function, one asks nothing, one has a
-    /// status word the add-in doesn't know and one doesn't apply but says no reason, each of those last three review);
-    /// two not checked yet; two comply; one doesn't apply.</summary>
+    /// <summary>A small answer made here, its counts known by hand: one fails; thirteen in review (three ask the
+    /// occupancy group, one of those first the sprinkler system; one asks for a room's function; one each asks to fix the
+    /// model, for a survey, to measure by hand, an open question, to decide, and work of a kind the add-in doesn't know;
+    /// one asks nothing, one has a status word the add-in doesn't know and one doesn't apply but says no reason, each of
+    /// those last three review); two not checked yet; two comply; one doesn't apply.</summary>
     private static CheckResult Small() => UxAnswers.Answer("does_not_comply",
         UxAnswers.Item("f1", "does_not_comply"),
         Asked("r1", Ask("building.sprinkler_system"), Ask("building.occupancy_groups")),
         Asked("r2", Ask("building.occupancy_groups")),
         Asked("r3", Ask("building.occupancy_groups"), Ask("building.occupancy_groups")),
         Asked("r4", new JsonObject { ["kind"] = "mark", ["key"] = "mark:rooms", ["headline"] = "Set the room's function", ["field"] = "rooms[].function" }),
+        Asked("r6", Work("fix_model", "fix:walls")), Asked("r7", Work("survey", "survey")), Asked("r8", Work("measure", "measure:sill")),
+        Asked("r9", Work("open_question", "open:yard")), Asked("r10", Work("decide", "decide:use")), Asked("r11", Work("brand_new", "new:x")),
         UxAnswers.Item("r5", "needs_review"),
         UxAnswers.Item("u1", "something_new"),
         UxAnswers.Item("a2", "not_applicable", reason: null),
@@ -115,21 +135,22 @@ public sealed class ResultViewsTests
     public void The_counts_and_their_words_on_a_small_answer_counted_by_hand()
     {
         var m = ResultViews.Build(Small());
-        Assert.Equal("1 fails · 7 need review · 2 not checked yet · 2 comply · 1 doesn't apply", m.Summary);
-        Assert.Equal([FixKind.Fails, FixKind.Answer, FixKind.Mark, FixKind.Decide, FixKind.NotChecked, FixKind.Done],
-                     m.Fix.Select(g => g.Kind));
+        Assert.Equal("1 fails · 13 need review · 2 not checked yet · 2 comply · 1 doesn't apply", m.Summary);
+        // every group, in the design's order, each with its rows and its words
+        Assert.Equal([FixKind.Fails, FixKind.Answer, FixKind.Mark, FixKind.FixModel, FixKind.Survey, FixKind.Measure, FixKind.Decide,
+                      FixKind.OpenQuestion, FixKind.NotChecked, FixKind.Done], m.Fix.Select(g => g.Kind));
+        Assert.Equal(["f1", "r1 r2 r3", "r4", "r6", "r7", "r8", "r10 r11 r5 u1 a2", "r9", "n1 n2", "c1 c2 a1"],
+                     m.Fix.Select(g => string.Join(" ", g.Rows.Select(r => r.Id))));
+        Assert.Equal(["Fails · 1", "Answer 2 questions about the project", "Mark 1 kind of element", "Fix 1 thing in the model",
+                      "Get a survey", "Measure 1 thing by hand", "5 code questions for you to decide", "1 open question about the law",
+                      "Not checked yet by Gordium", "Complies or doesn't apply · 3"], m.Fix.Select(g => g.Title));
         var answer = m.Fix.Single(g => g.Kind == FixKind.Answer);
         // the card most rows wait on first, though the sprinkler system was asked first; a row asking twice is listed once
         Assert.Equal(["building.occupancy_groups", "building.sprinkler_system"], answer.Cards.Select(c => c.Field));
         Assert.Equal(["r1 r2 r3", "r1"], answer.Cards.Select(c => string.Join(" ", c.Rows.Select(r => r.Id))));
         Assert.Equal("Answer 2 questions about the project", answer.Title);
         Assert.Equal(["r1", "r2", "r3"], answer.Rows.Select(r => r.Id));
-        Assert.Equal(["r4"], m.Fix.Single(g => g.Kind == FixKind.Mark).Rows.Select(r => r.Id));
-        Assert.Equal(["r5", "u1", "a2"], m.Fix.Single(g => g.Kind == FixKind.Decide).Rows.Select(r => r.Id));
-        Assert.Equal(["n1", "n2"], m.Fix.Single(g => g.Kind == FixKind.NotChecked).Rows.Select(r => r.Id));
-        Assert.Equal("Not checked yet by Gordium", m.Fix.Single(g => g.Kind == FixKind.NotChecked).Title);
-        Assert.Equal(["c1", "c2", "a1"], m.Fix.Single(g => g.Kind == FixKind.Done).Rows.Select(r => r.Id));
-        Assert.Equal(["f1"], m.Fix.Single(g => g.Kind == FixKind.Fails).Rows.Select(r => r.Id));
+        Assert.Equal(["decide:use", "new:x", "row:r5", "row:u1", "row:a2"], m.Fix.Single(g => g.Kind == FixKind.Decide).Cards.Select(c => c.Key));
         Assert.Equal("No results", ResultViews.Summary([]));
         Assert.Equal("1 needs review · 1 complies", ResultViews.Summary([Verdict.Complies, Verdict.NeedsReview]));
     }
@@ -188,7 +209,8 @@ public sealed class ResultViewsTests
         foreach (var item in result.Items.Where(i => i.Status == Verdict.NeedsReview))
             foreach (var ask in ResultViews.Asks(item.Raw))
             {
-                var card = m.Fix.SelectMany(g => g.Cards).Single(c => c.Key == ask.Key && c.Kind == ResultViews.KindOf(ask.Kind, ask.Field));
+                var kind = GroupOf(new JsonObject { ["kind"] = ask.Kind, ["field"] = ask.Field });
+                var card = m.Fix.SelectMany(g => g.Cards).Single(c => c.Key == ask.Key && c.Kind == kind);
                 Assert.Contains(card.Rows, r => r.Id == item.Id);
                 Assert.All(ask.Elements, e => Assert.Contains(e, card.Elements));
             }
@@ -200,7 +222,7 @@ public sealed class ResultViewsTests
         {
             foreach (var card in g.Cards)
             {
-                var asking = Asking(raw, a => (string?)a["key"] == card.Key && ResultViews.KindOf((string?)a["kind"] ?? "decide", (string?)a["field"]) == card.Kind);
+                var asking = Asking(raw, a => (string?)a["key"] == card.Key && GroupOf(a) == card.Kind);
                 if (asking.Count == 0)                                       // a row in review with no ask it can show
                 {
                     Assert.StartsWith("row:", card.Key, StringComparison.Ordinal);
