@@ -40,8 +40,9 @@ site_lookup = ["*.yaml", "adapters/*/*.yaml"]   # each place's lookup data
 design_checker = ["place.json"]   # the plugin's copy of its place's settings (rule_format/place.py)
 
 [tool.pytest.ini_options]
-# apps/revit_addin/tools: the add-in's Python helpers (extract_build_data.py), tested with the packages
-testpaths = ["packages", "apps/revit_addin/tools"]
+# apps/revit_addin/tools: the add-in's Python helpers (extract_build_data.py), tested with the packages; tests: the
+# repo's own checks (the test split, tests/test_shard_docs.py), never collected before 2026-11-27 (PR #266's review)
+testpaths = ["packages", "apps/revit_addin/tools", "tests"]
 addopts = "--import-mode=importlib"
 # a test still running after 15 minutes prints every thread's stack (the run then shows where it hangs). Not lower:
 # the dump reads a running test's state without stopping it, and on the Windows trial laptop it crashed Python (an
