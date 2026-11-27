@@ -581,10 +581,12 @@ def test_the_plans_parts_list_names_each_parts_sections():
     parts = plan.split("## Parts, in order", 1)[1].split("## Status", 1)[0]
     status = plan.split("## Status", 1)[1]
     listed = {p: _sections(re.search(r"- \*\*" + p + r"\.[^\n]*", parts).group().split(":", 1)[1])
-              for p in "abcde"}
+              for p in "abcdef"}
     for part in "abcd":
         line = re.search(r"- \*\*" + part + r"\.\*\* Drafted[^\n]*", status).group()
-        stated = _sections(re.sub(r"\([^)]*\)", "", line.split("Drafted", 1)[1]))
+        # every section the line names, brackets included (its reasoning sits there too); a dotted number only, never
+        # "420 ft" or a rule id's "bc_407" (review round 4's fix check)
+        stated = set(re.findall(r"(?<![\w.])(4\d\d\.\d+(?:\.\d+)*)(?!\d)", line.split("Drafted", 1)[1]))
         assert stated, part
         for s in stated:
             mine = _under(s, listed[part])
