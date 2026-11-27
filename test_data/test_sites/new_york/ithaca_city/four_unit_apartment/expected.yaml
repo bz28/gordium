@@ -41,6 +41,32 @@ egress_travel_distance_at_most: 60
 # Every rule's one answer (the check's `results`), with why. Pass only where the measured figures settle it; a figure
 # Gordium can't settle yet (a fact not stated, an open question) needs review, saying so.
 results:
+  # Chapter 4 part a (2026-11-26: docs/decisions/2026-11-26_ny_building_chapter_4_egress.md): one flag per piece of
+  # 402.1 and 402.8 (covered and open mall buildings), shown while the building doesn't rule out a space the code gives
+  # its own exits or travel limit (special egress spaces: not stated), and of 404.1 and 404.9 to 404.11 (atriums),
+  # shown while an atrium isn't ruled out (not stated): each a person's check. 402.8's review bands change nothing
+  # here: the story and corridor rows already wait on other facts, and the corridor has no dead end
+  general.bc_402_1_mall_buildings: needs_review
+  general.bc_402_8_means_of_egress: needs_review
+  general.bc_402_8_1_mall_width: needs_review
+  general.bc_402_8_1_1_mall_minimum_width: needs_review
+  general.bc_402_8_2_tenant_occupant_load: needs_review
+  general.bc_402_8_2_1_mall_occupant_formula: needs_review
+  general.bc_402_8_2_2_olf_range: needs_review
+  general.bc_402_8_2_3_anchor_buildings: needs_review
+  general.bc_402_8_2_4_food_courts: needs_review
+  general.bc_402_8_3_tenant_two_means_of_egress: needs_review
+  general.bc_402_8_4_assembly_in_a_mall: needs_review
+  general.bc_402_8_4_1_anchor_building_egress: needs_review
+  general.bc_402_8_5_distance_to_exits: needs_review
+  general.bc_402_8_6_access_to_exits: needs_review
+  general.bc_402_8_6_1_exit_passageways: needs_review
+  general.bc_402_8_7_service_areas_on_exit_passageways: needs_review
+  general.bc_402_8_8_security_grilles_and_doors: needs_review
+  general.bc_404_1_atriums: needs_review
+  general.bc_404_9_atrium_travel_distance: needs_review
+  general.bc_404_10_exit_stairways_in_an_atrium: needs_review
+  general.bc_404_11_stairway_discharge_through_an_atrium: needs_review
   general.bc_1007_1_1_remoteness: pass                 # 0.5992 >= 1/2 on both stories (above)
   general.bc_1007_1_1_space_remoteness: pass           # "space_exit_count < 2 or ...": every space has one doorway
   general.bc_1007_1_2_space_three_or_more: pass        # "space_exit_count < 3 or ...": none has three

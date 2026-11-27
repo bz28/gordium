@@ -46,6 +46,20 @@ def got(routes):
     return _check(build.interior_of(), routes)
 
 
+# Chapter 4 part a (2026-11-26): where the building may hold a covered or open mall (no space with its own exits or
+# travel limit ruled out), 402.8 governs over Chapter 10, so no story's exits, corridor's width, capacity or rating
+# passes on the load its rooms give: the stated-facts tests below state no mall too, and compare with the apartment
+# as sent but for that (`no_mall`)
+NO_MALL = {"special_egress_spaces": False}
+
+
+@pytest.fixture(scope="module")
+def no_mall(routes):
+    desc = build.interior_of()
+    desc["building"] = {**(desc.get("building") or {}), **NO_MALL}
+    return _check(desc, routes)
+
+
 @pytest.fixture(scope="module")
 def before(routes):
     """The same building with no room function stated: as it was before section group 3."""
@@ -97,13 +111,13 @@ def test_the_r2_story_rows_wait_only_on_whether_its_units_are_dwelling_units(rou
     assert rows and all(r["values"]["story_gross_floor_area"] == pytest.approx(1800)
                         and r["values"].get("story_net_floor_area") is None for r in rows)
     desc = build.interior_of()
-    desc["building"] = {**(desc.get("building") or {}), "r2_sleeping_units": False}
+    desc["building"] = {**(desc.get("building") or {}), "r2_sleeping_units": False, **NO_MALL}
     stated = _check(desc, routes)
     assert stated["results"]["general.bc_table_1006_3_4_1__r2_dwelling_units"] == "pass"
     assert stated["results"]["general.bc_table_1006_3_4_2__h_i_r"] == "not_applicable"
 
 
-def test_the_corridor_width_waits_only_on_whether_other_levels_reach_the_corridor(routes, got):
+def test_the_corridor_width_waits_only_on_whether_other_levels_reach_the_corridor(routes, got, no_mall):
     """Section group 4 (2026-11-25), before and after: as sent, the corridor's occupant load isn't worked out
     (another level's occupants reaching it isn't ruled out: 1004.2.2, 1004.2.3, 1005.6), so Table 1020.3 needs review
     though the corridor is 72 in; with the building stating none do, its load is two readings, none and the story's
@@ -118,17 +132,17 @@ def test_the_corridor_width_waits_only_on_whether_other_levels_reach_the_corrido
     assert got["results"][rule] == present.REVIEW and got["results"][capacity] == present.REVIEW
     for others, want, cap in ((False, "pass", "pass"), (True, present.REVIEW, present.REVIEW)):
         desc = build.interior_of()
-        desc["building"] = {**(desc.get("building") or {}), "other_level_egress_into_corridors": others}
+        desc["building"] = {**(desc.get("building") or {}), "other_level_egress_into_corridors": others, **NO_MALL}
         stated = _check(desc, routes)
         assert stated["results"][rule] == want and stated["results"][capacity] == cap, others
-        assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} <= {rule, capacity}, others
+        assert {k for k in got["results"] if stated["results"][k] != no_mall["results"][k]} <= {rule, capacity}, others
         if not others:
             for c in stated["interior"]["parts"]["corridor"]:
                 values = [r["value"] for r in c["readings"]["corridor_occupant_load"]]
                 assert values == pytest.approx([0, 1800 / 7])
 
 
-def test_the_corridor_rating_needs_review_however_the_corridor_facts_are_stated(routes, got):
+def test_the_corridor_rating_needs_review_however_the_corridor_facts_are_stated(routes, got, no_mall):
     """Section group 4b (2026-11-25), before and after: Table 1020.2's R row needs review as sent (the corridor's load
     isn't worked out). Stating that no other level reaches the corridors and that none is within a dwelling unit
     settles neither way: its load is two readings, none (no rating asked) and the story's 257.1 (more than 10
@@ -138,10 +152,10 @@ def test_the_corridor_rating_needs_review_however_the_corridor_facts_are_stated(
     assert got["results"][rule] == present.REVIEW
     desc = build.interior_of()
     desc["building"] = {**(desc.get("building") or {}), "other_level_egress_into_corridors": False,
-                        "corridors_within_dwelling_units": False}
+                        "corridors_within_dwelling_units": False, **NO_MALL}
     stated = _check(desc, routes)
     assert stated["results"][rule] == present.REVIEW
-    changed = {k for k in got["results"] if stated["results"][k] != got["results"][k]}
+    changed = {k for k in got["results"] if stated["results"][k] != no_mall["results"][k]}
     assert changed <= {"general.bc_table_1020_3_corridor_width", "general.bc_1020_3_corridor_capacity"}, changed
     assert stated["results"]["general.bc_table_1020_3_corridor_width"] == "pass"     # 72 in, as group 4a found
 
@@ -198,9 +212,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     hoistway doors (24); its per-corridor flag (a rated corridor's walls) is a corridor's row, not a building line.
     Section group 4c adds 1020.4's and 1020.6's (26); 1020.7's is a corridor's row. Section group 5a adds 1005.3.1's
     stairways and 1005.3.2's doors, ramps and passageways (28); section group 5b 1005.4, 1005.5 and 1005.6 (31); section group 5c 1005.7.1 to 1005.7.3 (34);
-    section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37)."""
+    section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37); Chapter 4 part a, 402.1 and 402.8's seventeen
+    (a mall isn't ruled out) and 404.1, 404.9 to 404.11's four (nor an atrium) (58)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 37 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 58 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -266,10 +281,13 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
                          "bc_1006_2_2_1_boiler_rooms", "bc_1006_2_2_2_refrigeration_machinery_rooms",
                          "bc_1006_2_2_3_refrigerated_rooms", "bc_1006_2_2_4_electrical_rooms",
                          "bc_1006_2_2_5_vehicular_ramps", "bc_table_1017_2_note_a", "bc_1017_2_1_balcony_increase",
-                         "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")}}
+                         "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")},
+                     # Chapter 4 part a: every flag of 402 (a mall: a space with its own exits) and 404 (an atrium)
+                     **{k: ("needs_review", "not_applicable") for k in got["results"]
+                        if re.match(r"general\.bc_40[24]_", k)}}
 
 
-def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(got, laws):
+def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(no_mall, laws):
     """The two Revit marks for Table 1006.3.4's notes (Gordium: R-2 sleeping units, Gordium: 1031 escape openings) on
     the apartment (Group R-2, no sprinkler system): stated dwelling units, the sleeping-units table (1006.3.4(2)) is
     not applicable and the dwelling-units row passes on the story's two exits (its occupant loads, read since group 3,
@@ -278,9 +296,11 @@ def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(go
     moved = {}
     for sleeping in (False, True):
         interior = build.interior_of()
-        interior["building"] = {**interior["building"], "r2_sleeping_units": sleeping, "emergency_escape_openings_1031": True}
+        interior["building"] = {**interior["building"], "r2_sleeping_units": sleeping, "emergency_escape_openings_1031": True,
+                                **NO_MALL}
         now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
-        moved[sleeping] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
+        moved[sleeping] = {k: (no_mall["results"][k], now[k]) for k in no_mall["results"]
+                           if no_mall["results"][k] != now[k]}
     assert moved[False] == {"general.bc_table_1006_3_4_2__h_i_r": ("needs_review", "not_applicable"),
                             "general.bc_table_1006_3_4_1__r2_dwelling_units": ("needs_review", "pass")}
     assert moved[True] == {"general.bc_table_1006_3_4_1__r2_dwelling_units": ("needs_review", "not_applicable"),
@@ -304,7 +324,7 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
         moved[("occupant_load_increased", True)] == {}
 
 
-def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
+def test_groups_4_and_5s_marks_stated_on_the_apartment(no_mall, laws):
     """The four Revit marks for groups 4 and 5's building facts on the apartment: Gordium: Other levels reach corridors
     No (its stairs are enclosed exits discharging outside) bounds each corridor's load by its story's, so the corridor
     width and capacity rows pass at the whole story's load (two readings, none and the story's: a pass only if the
@@ -316,9 +336,10 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
                         ("corridors_within_dwelling_units", True), ("emergency_voice_alarm_system", False),
                         ("emergency_voice_alarm_system", True)):
         interior = build.interior_of()
-        interior["building"] = {**interior["building"], fact: value}
+        interior["building"] = {**interior["building"], fact: value, **NO_MALL}
         now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
-        moved[(fact, value)] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
+        moved[(fact, value)] = {k: (no_mall["results"][k], now[k]) for k in no_mall["results"]
+                                if no_mall["results"][k] != now[k]}
     assert moved.pop(("other_level_egress_into_corridors", False)) == {
         "general.bc_1020_3_corridor_capacity": ("needs_review", "pass"),
         "general.bc_table_1020_3_corridor_width": ("needs_review", "pass")}
