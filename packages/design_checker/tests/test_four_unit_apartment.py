@@ -239,13 +239,16 @@ def test_section_1030s_flags_show_on_residential_rooms_alone_and_hide_only_on_a_
     moved = {k for k in got["results"] if got["results"][k] != now[k]}
     assert moved == set(shown) and {now[k] for k in moved} == {"not_applicable"}
     for fn, want in (("assembly_unconcentrated", "needs_review"), ("courtroom", "needs_review"),
-                     ("business", "not_applicable")):
+                     ("business", "not_applicable"), ("assembly_fixed_seats", "needs_review")):
         again = copy.deepcopy(interior)
         again["rooms"][0]["function"] = fn
         now = _flags_1030(egress.check(laws, again, VALUES, ALLOWED)["results"])
         now.pop("general.bc_1030_4_foyers_and_lobbies")
-        # 1030.8 and 1030.8.1 read the fixed seating alone (stated no here)
+        # 1030.8 and 1030.8.1 read the fixed seating alone: stated no here, but a room stating fixed seats has it
+        # (review round 1: the room's yes wins over the stated no)
+        fixed = "needs_review" if fn == "assembly_fixed_seats" else "not_applicable"
         assert {k: v for k, v in now.items() if "1030_8" not in k} == {k: want for k in shown if "1030_8" not in k}, fn
+        assert {v for k, v in now.items() if "1030_8" in k} == {fixed}, fn
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):

@@ -367,7 +367,8 @@ occupancy_group:
   - general.bc_table_1030_6_2_smoke_protected_aisle_factors
 assembly_fixed_seating:
   meaning: The building has rooms or spaces used for assembly purposes with fixed seating (2025 BCNYS Table 1006.2.1 note
-    c, 1030.8; Table 1017.2 note a, 1030.7), as the architect states it
+    c, 1030.8; Table 1017.2 note a, 1030.7), as the architect states it, and true whatever is stated where a room states
+    Table 1004.5's Assembly with fixed seats (design_checker/code_scope.py building_measures)
   unit: yes_no
   needed_by:
   - general.bc_1006_2_1_two_exits
