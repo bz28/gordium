@@ -71,6 +71,7 @@ FIELD_HEADLINES = {
     "building.stages_or_platforms": "Say whether the building has a stage, a platform or a technical production area (202, 410)",
     "building.aircraft_related_occupancy": "Say whether the building is or holds an airport traffic control tower, an aircraft hangar, an aircraft paint hangar, an aircraft manufacturing facility, a heliport or a helistop (412)",
     "building.service_corridors": "Say whether the building has a service corridor, a fully enclosed passage used for transporting HPM (202, 415.11.3)",
+    "building.assembly_spaces": "Say whether any room or space is used for assembly purposes, whatever the building's group (1030.1)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
     "building.mezzanines": "Say whether the building has a mezzanine (505.2)",
     "building.loads_not_by_area": "Say whether any area is counted by seats, lanes or actual load (fixed seats, bowling, call centers)",

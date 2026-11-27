@@ -203,7 +203,8 @@ building:
   sprinkler_system: none               # none, nfpa_13 (903.3.1.1), nfpa_13r (903.3.1.2), nfpa_13d (903.3.1.3)
   egress_balcony_increase_taken: false # BCNYS 1017.2.1 (a fact the Building Code's flags read)
   building_has_atrium: false
-  assembly_fixed_seating: false        # rooms used for assembly with fixed seating (BCNYS Table 1006.2.1 note c)
+  assembly_fixed_seating: false        # rooms used for assembly with fixed seating (BCNYS Table 1006.2.1 note c);
+                                       # true whatever is stated where a room states assembly_fixed_seats
   r2_sleeping_units: false             # every Group R-2 unit a sleeping unit (true) or a dwelling unit (false); left out
                                        # for a building of both (Table 1006.3.4(1) note b: neither table fits every story)
   emergency_escape_openings_1031: true # emergency escape and rescue openings per BCNYS 1031 (Table 1006.3.4 note a)
@@ -255,6 +256,16 @@ building:
                                        # held to 415.11.3.4; in Group H-5, Table 1017.2's H-5 row, Table
                                        # 1006.3.4(2)'s one-exit stories, 1020.5's dead ends and Table 1020.3's width
                                        # held to 415.11.3.3 and 415.11.3.4
+  assembly_spaces: false               # a room or space used for assembly purposes, whatever the building's group
+                                       # (BCNYS 1030.1; 303.1.1 and 303.1.2 put small ones in Group B or the main
+                                       # occupancy): Section 1030's checks show where true or not stated. Also true
+                                       # where any room states a Table 1004.5 Assembly function (gaming_floor,
+                                       # exhibit_gallery_museum, assembly_fixed_seats, assembly_concentrated,
+                                       # assembly_standing, assembly_unconcentrated, bowling_center), whatever is
+                                       # stated; a stated false is not read where a room states courtroom,
+                                       # library_reading_room, exercise_room, rink_pool, pool_deck, stage_platform or
+                                       # airport_waiting (each may be an assembly use). Never false from the rooms: a
+                                       # description may hold only some floors
   facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
 ```
 

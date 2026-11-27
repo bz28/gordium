@@ -65,6 +65,7 @@ BUILDING = {
     "ambulatory_care_facility": (None, True, False, "no"),
     "corridors_within_dwelling_units": (None, True, False, "no"),     # section group 4b
     "emergency_voice_alarm_system": (None, True, False, "no"),        # section group 5a
+    "assembly_spaces": (None, True, False, "no"),                     # section group 9h
     "mezzanines": (None, True, False, "no"),                          # the occupant-load ceiling (2026-11-26)
     "loads_not_by_area": (None, True, False, "no"),
     "high_rise_building": (None, True, False, "no"),                  # Chapter 4 part b
@@ -89,8 +90,8 @@ BASE = {"use": "one_family_detached", "dwelling_units": 1, "attached_units_in_bu
         "special_egress_spaces": None, "merchandise_pads": None,
         "emergency_escape_openings_1031": None, "r2_sleeping_units": None, "occupied_outdoor_areas": None,
         "occupant_load_increased": None, "other_level_egress_into_corridors": None, "ambulatory_care_facility": None,
-        "corridors_within_dwelling_units": None, "emergency_voice_alarm_system": None, "mezzanines": None,
-        "loads_not_by_area": None,
+        "corridors_within_dwelling_units": None, "emergency_voice_alarm_system": None, "assembly_spaces": None,
+        "mezzanines": None, "loads_not_by_area": None,
         "high_rise_building": None, "underground_building": None, "stages_or_platforms": None,
         "aircraft_related_occupancy": None, "service_corridors": None, "facts_not_sent": None}
 
@@ -113,9 +114,10 @@ def law(f):
                                     "special_egress_spaces", "merchandise_pads", "emergency_escape_openings_1031",
                                     "r2_sleeping_units", "occupied_outdoor_areas", "occupant_load_increased",
                                     "other_level_egress_into_corridors", "ambulatory_care_facility",
-                                    "corridors_within_dwelling_units", "emergency_voice_alarm_system", "mezzanines",
-                                    "loads_not_by_area", "high_rise_building", "underground_building",
-                                    "stages_or_platforms", "aircraft_related_occupancy", "service_corridors")]
+                                    "corridors_within_dwelling_units", "emergency_voice_alarm_system",
+                                    "assembly_spaces", "mezzanines", "loads_not_by_area", "high_rise_building",
+                                    "underground_building", "stages_or_platforms", "aircraft_related_occupancy",
+                                    "service_corridors")]
     kinds += [f[k] is None or count(f[k]) for k in ("dwelling_units", "attached_units_in_building", "adus_on_parcel",
                                                     "rooms_let_for_profit", "stories")]
     kinds += [f["stories_above_grade_plane"] is None or count(f["stories_above_grade_plane"], 1),

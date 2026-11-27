@@ -488,6 +488,7 @@ MEASURE_NAMES = {
     "ambulatory_care_facility": "ambulatory care facility (whether the building is or holds one, per Section 422 and Tables 1020.2 and 1020.3)",
     "corridors_within_dwelling_units": "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit)",
     "emergency_voice_alarm_system": "emergency voice/alarm system (whether the whole building has one per 907.5.2.2)",
+    "assembly_spaces": "assembly spaces (whether any room or space is used for assembly purposes, whatever its group)",
     "mezzanines": "mezzanines (whether the building has any, per 505.2)",
     "loads_not_by_area": "loads not by area (whether any area is counted by its seats, lanes or actual load)",
     "high_rise_building": "high-rise (whether the building is one, or more than 420 ft high, per 403)",

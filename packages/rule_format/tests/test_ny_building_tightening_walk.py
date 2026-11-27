@@ -38,8 +38,10 @@ FACTS = ("assembly_fixed_seating", "special_egress_spaces", "merchandise_pads", 
          "egress_balcony_increase_taken", "r2_sleeping_units", "emergency_escape_openings_1031",
          "occupied_outdoor_areas", "ambulatory_care_facility", "corridors_within_dwelling_units",
          "emergency_voice_alarm_system", "high_rise_building", "underground_building", "stages_or_platforms",
-         "aircraft_related_occupancy", "service_corridors")   # the last: Table 1020.3's (the corridor walk's,
-# test_ny_building_corridor_walk.py, which varies it with every width and load; here for completeness)
+         "aircraft_related_occupancy", "service_corridors",   # the emergency voice/alarm system: Table 1020.3's (the
+         # corridor walk's, test_ny_building_corridor_walk.py, which varies it with every width and load; here for
+         # completeness)
+         "assembly_spaces")                # section group 9h: only Section 1030's flags read it
 DERIVED = ("occupancy_group", "occupancy_group_i4", "other_occupancy_present", "sprinklered_903_3_1_1",
            "sprinklered_903_3_1_2", "sprinklered_903_3_1_3")
 
