@@ -196,8 +196,8 @@ results:
   general.bc_716_2_3_fire_doors: needs_review
   general.bc_716_2_4_fire_door_frames: needs_review
   # Chapter 7 part c (2026-11-26, 31 flags): fire partitions, smoke barriers and smoke partitions (708 to 710): no wall's
-  # rating or construction is in the model; Group I-2's two flags (709.5.1, 710.5.3) need review too, the request
-  # stating no group
+  # rating or construction is in the model; 709.5.1 (Group I-2 and ambulatory care smoke barrier doors) needs review too
+  # (no ambulatory care facility ruled out); 710.5.3 (Group I-2 Condition 2) doesn't apply to the stated Group R-2
   general.bc_708_1_which_walls_are_fire_partitions: needs_review
   general.bc_708_3_fire_partition_rating: needs_review
   general.bc_708_4_fire_partition_continuity: needs_review
@@ -225,7 +225,7 @@ results:
   general.bc_710_5_2_1_smoke_partition_door_louvers: needs_review
   general.bc_710_5_2_2_smoke_partition_draft_control_doors: needs_review
   general.bc_710_5_2_3_smoke_partition_self_closing_doors: needs_review
-  general.bc_710_5_3_i2_pass_through_openings: needs_review
+  general.bc_710_5_3_i2_pass_through_openings: not_applicable   # Group R-2 stated: not Group I-2
   general.bc_710_6_smoke_partition_penetrations: needs_review
   general.bc_710_7_smoke_partition_joints: needs_review
   general.bc_710_8_smoke_partition_ducts: needs_review
