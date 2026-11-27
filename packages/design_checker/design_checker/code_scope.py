@@ -328,6 +328,9 @@ DERIVED = {
     "sprinklered_903_3_1_1": ("sprinkler_system", lambda system: system == "nfpa_13"),
     "sprinklered_903_3_1_2": ("sprinkler_system", lambda system: system == "nfpa_13r"),
     "sprinklered_903_3_1_3": ("sprinkler_system", lambda system: system == "nfpa_13d"),
+    # the system as stated, whether it counts or not (903.3.1.2's flags show wherever a 13R system is stated, above
+    # its four stories too, where sprinklered_903_3_1_2 is no: Chapter 9 part a's review round 4)
+    "nfpa_13r_stated": ("sprinkler_system", lambda system: system == "nfpa_13r"),
     "egress_balcony_increase_taken": ("egress_balcony_increase_taken", lambda v: v),
     "building_has_atrium": ("building_has_atrium", lambda v: v),
     "assembly_fixed_seating": ("assembly_fixed_seating", lambda v: v),

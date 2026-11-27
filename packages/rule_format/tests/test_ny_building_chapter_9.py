@@ -125,7 +125,7 @@ def test_every_chapter_9_flag_is_a_persons_check_never_a_pass(labels, book, ctx)
     narrowed only by a fact the architect states (the groups, the sprinkler system) and needs review while that fact
     isn't stated."""
     allowed = ctx.allowed()
-    by = {"occupancy_group", "group_h_present", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3"}
+    by = {"occupancy_group", "group_h_present", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3", "nfpa_13r_stated"}
     for pid, v in labels.items():
         if v["label"] != "flag":
             continue
