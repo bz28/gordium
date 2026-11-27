@@ -5570,9 +5570,10 @@ labels:
       of any material tested for use in fire-resistance-rated assemblies, installed per their listing (1/8 inch unless listed
       otherwise; their listed separation, fireblocking per 718.2.1, putty pads or listed means); electrical boxes listed as
       part of a wall opening protective material system for use in fire-resistance-rated assemblies, installed per their listing;
-      other boxes in a membrane penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential
-      of at least 0.01 inch of water, with F and T ratings at least the wall''s, installed per their listing; sprinkler escutcheons;
-      and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or other listed materials and methods,
+      other boxes and their annular space protected by an approved membrane penetration firestop system installed as tested
+      per ASTM E814 or UL 1479 at a positive pressure differential of at least 0.01 inch of water, with F and T ratings at
+      least the wall''s, installed per their listing; the space around a sprinkler covered by a metal escutcheon plate; and
+      larger or more steel boxes in walls rated at most 2 hours with listed putty pads or other listed materials and methods,
       installed per the listing: a person''s check (general.bc_714_4_2_membrane_penetrations).'
     sources:
     - file: gov.ny.building.2025.pdf
@@ -5665,8 +5666,8 @@ labels:
       total at most 144 square inches in any 100 square feet of floor); steel, ferrous or copper conduits, pipes, tubes or
       vents at most 6 inches through a single concrete floor with concrete, grout or mortar the full thickness or the thickness
       that keeps its rating (more than one floor where each opening is at most 144 square inches); listed electrical boxes
-      tested for rated assemblies per their listing; and concrete floors or ramps of parking garages per 406.5 and 406.6 with
-      parking above and below: a person''s check (general.bc_714_5_1_floor_through_penetrations).'
+      of any material tested for use in fire-resistance-rated assemblies, installed per their listing; and concrete floors
+      or ramps of parking garages per 406.5 and 406.6 with parking above and below: a person''s check (general.bc_714_5_1_floor_through_penetrations).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 181
@@ -5753,12 +5754,13 @@ labels:
       inches of openings in any 100 square feet of ceiling (in assemblies tested without penetrations); steel electrical boxes
       in ceilings of assemblies rated at most 2 hours, each at most 16 square inches, at most 100 square inches in any 100
       square feet, an annular space at most 1/8 inch; electrical boxes listed as part of an opening protective material system
-      for use in horizontal assemblies, installed per their listing; listed electrical boxes tested for rated assemblies per
-      their listing (1/8 inch unless listed otherwise); sprinkler escutcheons; noncombustible items cast into concrete that
-      don''t pass both faces; the double wood top plate of a wall sheathed with Type X gypsum board interrupting the ceiling
-      of an assembly rated at most 2 hours, its penetrations protected per 714.5.1.1 or 714.5.1.2 and the ceiling tight to
-      the plates; and ceiling membrane penetrations by listed luminaires, or luminaires protected with listed materials, tested
-      for rated assemblies and installed per their listing: a person''s check (general.bc_714_5_2_floor_membrane_penetrations).'
+      for use in horizontal assemblies, installed per their listing; listed electrical boxes of any material tested for use
+      in fire-resistance-rated assemblies, installed per their listing (1/8 inch unless listed otherwise); the space around
+      a sprinkler covered by a metal escutcheon plate; noncombustible items cast into concrete that don''t pass both faces;
+      the double wood top plate of a wall sheathed with Type X gypsum board interrupting the ceiling of an assembly rated
+      at most 2 hours, its penetrations protected per 714.5.1.1 or 714.5.1.2 and the ceiling tight to the plates; and ceiling
+      membrane penetrations by listed luminaires, or luminaires protected with listed materials, tested for rated assemblies
+      and installed per their listing: a person''s check (general.bc_714_5_2_floor_membrane_penetrations).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 181

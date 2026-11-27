@@ -559,3 +559,16 @@ def test_part_d_review_round_3s_notes_and_labels(book, labels):
             rid = re.search(r"\((general\.bc_[a-z0-9_]+)\)\.?$", " ".join(v["reason"].split())).group(1)
             head = " ".join(v["reason"].split()).rsplit(": a person's check", 1)[0]
             assert shown(rid).startswith(head), pid
+
+
+def test_part_d_review_round_4s_notes(book):
+    """Part d review round 4, as a class over 714's notes: every firestop system is approved and installed as (or and)
+    tested; every escutcheon is a metal escutcheon plate; every listed electrical box is tested for use in
+    fire-resistance-rated assemblies and installed per its listing."""
+    for r in book:
+        if not re.match(r"general\.bc_714_", r["id"]):
+            continue
+        note = " ".join(_shown_note(r).split())
+        assert not re.search(r"(?<!installed as )(?<!installed and )tested per (?:ASTM E814|UL 1479)", note), r["id"]
+        assert "escutcheon" not in note or "metal escutcheon plate" in note, r["id"]
+        assert "listed electrical boxes tested for rated assemblies" not in note, r["id"]
