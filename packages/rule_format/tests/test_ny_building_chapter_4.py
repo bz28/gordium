@@ -71,11 +71,18 @@ def test_each_piece_has_its_flag_shown_only_where_the_building_may_be_that_use(c
                        if q.startswith(pid + "."))]
         assert len(rid) == 1, (pid, rid)
         rule = rules[rid[0]]
-        assert rule["kind"] == "flag" and rule["applies_when"] == fact, pid
+        if pid == "404.1":      # its ban covers every atrium; the fact, only those egress passes through or areas open to
+            assert rule["kind"] == "flag" and rule["applies_when"].startswith(fact + " or "), pid
+            for group in GROUPS + ["mixed"]:
+                want = "needs_review" if group.startswith("H") or group == "mixed" else "not_applicable"
+                assert outcome(rule, {fact: False, "occupancy_group": group}, ctx.allowed()) == want, group
+            assert outcome(rule, {fact: False}, ctx.allowed()) == "needs_review"
+        else:
+            assert rule["kind"] == "flag" and rule["applies_when"] == fact, pid
         quoted = {(s["page"], n) for s in rule["sources"] for n in range(s["lines"][0], s["lines"][1] + 1)}
         assert quoted == {(page, n) for page, a, b in pieces[pid]["lines"] for n in range(a, b + 1)}, pid
         for value, want in ((True, "needs_review"), (None, "needs_review"), (False, "not_applicable")):
-            given = {} if value is None else {fact: value}
+            given = {} if value is None else {fact: value, "occupancy_group": "B"}
             assert outcome(rule, given, ctx.allowed()) == want, (pid, value)
 
 
