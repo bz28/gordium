@@ -571,3 +571,17 @@ aircraft_related_occupancy:
   - general.bc_412_7_3_heliports_and_helistops
   - general.bc_table_1006_2_1_u
   - general.bc_table_412_6_aircraft_manufacturing_travel
+service_corridors:
+  meaning: 'The building has a service corridor (2025 BCNYS 202: a fully enclosed passage used for transporting HPM and
+    purposes other than required means of egress), as the architect states it: in Group H-5, 415.11.3''s flags show, and
+    Table 1017.2''s H-5 row can''t pass over 75 feet, a story with one exit, a dead end over 4 feet or any corridor width
+    (415.11.3.3, 415.11.3.4); left unstated, the same'
+  unit: yes_no
+  needed_by:
+  - general.bc_1020_3_corridor_capacity
+  - general.bc_1020_5_dead_end_other_groups
+  - general.bc_415_11_3_3_service_corridor_egress
+  - general.bc_415_11_3_4_service_corridor_width
+  - general.bc_table_1006_3_4_2__h_i_r
+  - general.bc_table_1017_2_h5
+  - general.bc_table_1020_3_corridor_width

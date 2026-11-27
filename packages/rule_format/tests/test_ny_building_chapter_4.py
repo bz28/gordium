@@ -28,7 +28,11 @@ SHOWN_WHERE = {"402": "special_egress_spaces", "404": "building_has_atrium",
                # part b: a high-rise (202) or a building over 420 ft (403.2.2, 403.5.2); an underground building (405.1)
                "403": "high_rise_building", "405": "underground_building",
                # part e: an ambulatory care facility, the fact Section 422, Table 1020.2 and 1020.3 read
-               "422": "ambulatory_care_facility"}
+               "422": "ambulatory_care_facility",
+               # part f: a stage, a platform or a technical production area (410.5); a special amusement area, a space
+               # the code gives its own exits or travel limit (the fact's words name it: 411); an aircraft-related
+               # occupancy (412's means of egress, Table 412.6 with them)
+               "410": "stages_or_platforms", "411": "special_egress_spaces", "412": "aircraft_related_occupancy"}
 
 
 @pytest.fixture(scope="module")
@@ -47,8 +51,15 @@ def _pieces():
 
 
 def _chapter_4(pieces, labels, section):
-    return [pid for pid in pieces if re.fullmatch(re.escape(section) + (r"(\.\d+)+" if "." not in section else r"(\.\d+)*"), pid)
+    """The section's pieces labeled rule or flag, its tables too (part f: Table 412.6 under 412.6)."""
+    return [pid for pid in pieces if re.fullmatch(r"(?:Table )?" + re.escape(section) +
+                                                  (r"(\.\d+)+" if "." not in section else r"(\.\d+)*"), pid)
             and labels.get(pid, {}).get("label") in ("rule", "flag")]
+
+
+def _prefix(pid):
+    """The id prefix of a piece's rule: general.bc_412_6_ for 412.6, general.bc_table_412_6_ for Table 412.6."""
+    return "general.bc_" + pid.replace("Table ", "table_").replace(".", "_") + "_"
 
 
 def _block_ids():
@@ -71,9 +82,8 @@ def test_each_piece_has_its_flag_shown_only_where_the_building_may_be_that_use(c
     wanted = _chapter_4(pieces, labels, section)
     assert wanted
     for pid in wanted:
-        rid = [r for r in block if r.startswith("general.bc_" + pid.replace(".", "_") + "_") and
-               not any(r.startswith("general.bc_" + q.replace(".", "_") + "_") for q in wanted
-                       if q.startswith(pid + "."))]
+        rid = [r for r in block if r.startswith(_prefix(pid)) and
+               not any(r.startswith(_prefix(q)) for q in wanted if q.startswith(pid + "."))]
         assert len(rid) == 1, (pid, rid)
         rule = rules[rid[0]]
         if pid == "404.1":      # its ban covers every atrium; the fact, only those egress passes through or areas open to
@@ -98,7 +108,10 @@ GROUP_GATED = {"407": ["I-2"], "408": ["I-3"],
                # cooking for Group I-1 alone
                "420.1": ["I-1", "R-1", "R-2", "R-3", "R-4"], "420.2": ["I-1", "R-1", "R-2", "R-3", "R-4"],
                "420.3": ["I-1", "R-1", "R-2", "R-3", "R-4"], "420.6": ["I-1"], "420.7": ["I-1"], "420.8": ["I-1"],
-               "420.9": ["I-1"]}
+               "420.9": ["I-1"],
+               # part f: public parking garages are Group S-2 (311.3); a service corridor is within a Group H-5
+               # occupancy (415.11.3); HPM rooms are H-2, H-3 or H-4 serving an H-5, liquid storage rooms H-3 (202)
+               "406.4.3": ["S-2"], "406.5.7": ["S-2"], "415.11.3": ["H-5"], "415.11.6": ["H-2", "H-3", "H-4", "H-5"]}
 # pieces a rule outside the Chapter 4 block already checks (Chapter 10's review round 1 brought them in alone)
 CHECKED_BEFORE = {"407.4.2": "general.bc_407_4_2_sleeping_room_travel"}
 
@@ -111,8 +124,8 @@ def test_each_piece_of_a_groups_section_has_its_flag_shown_only_for_that_group(c
     wanted = [pid for pid in _chapter_4(pieces, labels, section) if pid not in CHECKED_BEFORE]
     assert wanted and all(rid in rules for rid in CHECKED_BEFORE.values())
     for pid in wanted:
-        rid = [r for r in block if r.startswith("general.bc_" + pid.replace(".", "_") + "_") and
-               not any(r.startswith("general.bc_" + q.replace(".", "_") + "_") for q in wanted if q.startswith(pid + "."))]
+        rid = [r for r in block if r.startswith(_prefix(pid)) and
+               not any(r.startswith(_prefix(q)) for q in wanted if q.startswith(pid + "."))]
         assert len(rid) == 1, (pid, rid)
         rule = rules[rid[0]]
         gate = "occupancy_group in " + str(groups + ["mixed"]).replace("'", '"')
@@ -146,7 +159,7 @@ def test_what_404_1_shows_by_is_said_where_people_read_it():
 
 def test_the_block_holds_chapter_4_only_in_book_order(rules):
     block = _block_ids()
-    assert block and all(re.match(r"general\.bc_4\d\d_", r) for r in block)
+    assert block and all(re.match(r"general\.bc_(table_)?4\d\d_", r) for r in block)
     first = [(rules[r]["sources"][0]["page"], rules[r]["sources"][0]["lines"][0]) for r in block]
     assert first == sorted(first)
 
@@ -577,12 +590,12 @@ def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
         if re.fullmatch(r"4\d\d(\.\d+)+", str(pid)):
             for here, after in _misprinted(_numbers(pid, entry)):
                 found.setdefault(str(pid), []).append((here, after))
-    assert set(found) >= {"407.2.4", "407.3.1.1", "408.3.3", "408.8.3"}, found   # the walk finds the ones it was written for
+    assert set(found) >= {"407.2.4", "407.3.1.1", "408.3.3", "408.8.3", "410.5.3.2"}, found   # the walk finds the ones it was written for
     block = _block_ids()
     for pid, pairs in found.items():
         flags = " ".join(pieces[pid].get("flags") or [])
-        [rid] = [r for r in block if r.startswith("general.bc_" + pid.replace(".", "_") + "_")
-                 and not any(r.startswith("general.bc_" + q.replace(".", "_") + "_") for q in found if q.startswith(pid + "."))]
+        [rid] = [r for r in block if r.startswith(_prefix(pid))
+                 and not any(r.startswith(_prefix(q)) for q in found if q.startswith(pid + "."))]
         notes = rules[rid]["notes"]
         for here, after in pairs:
             assert here.split()[-3 if "square" in here else -2] in flags and after.split()[0] in flags, (pid, here, after)
@@ -637,7 +650,7 @@ def test_the_plans_parts_list_names_each_parts_sections():
     status = plan.split("## Status", 1)[1]
     listed = {p: _sections(re.search(r"- \*\*" + p + r"\.[^\n]*", parts).group().split(":", 1)[1])
               for p in "abcdef"}
-    for part in "abcde":
+    for part in "abcdef":
         line = re.search(r"- \*\*" + part + r"\.\*\* Drafted[^\n]*", status).group()
         # every section the line names, brackets included (its reasoning sits there too); a dotted number only, never
         # "420 ft" or a rule id's "bc_407" (review round 4's fix check)
@@ -723,3 +736,165 @@ def test_each_story_band_example_is_decided_by_its_band(ctx, rules, rid):
     for ex in shown:
         assert parts.worked_example(rule, ex, allowed)[0] == "needs_review", (rid, ex["note"][:60])
         assert parts.worked_example(bare, ex, allowed)[0] == "pass", (rid, ex["note"][:60])
+
+
+# ---- part f: the Chapter 10 limits its sections tighten, held where the building may be that use --------------------
+# From the law's words, never from the rules (pp.105, 109, 122):
+# - 415.11.3.3 (p.122, lines 45-48): in a Group H-5 service corridor, at most 75 ft from any point to an exit, an exit
+#   access corridor or a door into a fabrication area; dead ends at most 4 ft; at least two exits;
+# - 415.11.3.4 (lines 49-50): a service corridor at least 5 ft wide, or 33 in wider than the widest cart, whichever is
+#   greater (the carts aren't in the model, so no width is known to be enough);
+# - 412.4.2 (p.109, lines 53-54): a residential aircraft hangar (Group U, 312.1) has two means of egress;
+# - 410.5.3.3 (p.105, lines 57-59): where two means of egress are required from a technical production area, its
+#   common path is at most 100 ft.
+# Which corridor is a service corridor, which space a hangar or a technical production area, isn't in the model. A
+# Group H-5 rule reads the stated group (a building of two or more groups is a flag: Table 1017.2's, 1006.2.1's and
+# 1020.3's other-occupancies rows); the hangar and the technical production area by their stated facts, yes or not
+# stated.
+PART_F_GRID = {"egress_travel_distance": [10, 50, 74, 75, 75.5, 76, 100, 150, 200, 250, 300, 400],
+               "story_exit_count": [0, 1, 2, 3, 4], "story_occupant_load": [1, 3, 5, 10, 11, 29, 30, 49, 50, 500, 501],
+               "corridor_width": [24, 36, 44, 59.9, 60, 72, 96, 200],
+               "corridor_occupant_load": [5, 30, 49, 50, 99, 100, 300],
+               "corridor_dead_end_length": [0, 2, 4, 4.5, 10, 20, 30, 50],
+               "corridor_dead_end_least_width": [1, 2, 5, 10, 30],
+               "space_exit_count": [0, 1, 2, 3], "space_occupant_load": [1, 10, 20, 21, 30, 49, 50],
+               "space_common_path": [10, 75, 99, 100, 100.5, 110, 125, 126]}
+# each limit's measure, and the comparisons by which a rule's check holds a part to it: a story's travel at most
+# so far, its exits and a space's at least so many, a corridor's width at least, a dead end and a common path at most
+PART_F_LIMITS = {"egress_travel_distance": (ast.LtE, ast.Lt), "story_exit_count": (ast.GtE, ast.Gt),
+                 "corridor_width": (ast.GtE, ast.Gt), "corridor_dead_end_length": (ast.LtE, ast.Lt),
+                 "space_exit_count": (ast.GtE, ast.Gt), "space_common_path": (ast.LtE, ast.Lt)}
+
+
+def _holds(rule):
+    """The measures a rule's check holds to a limit (a comparison of the measure on its left, the limit's way); an exit
+    count only where it is held to two (1006.2.1.1's three or four exits for 501 occupants or more ask nothing of a
+    space with one), and a travel only by a rule holding no exit count (a story's single-exit allowance reads travel as
+    its condition, the exit count rules hold it to two)."""
+    out = set()
+    for n in ast.walk(formula.parse(rule["check"])):
+        if isinstance(n, ast.Compare):
+            for m, ops in PART_F_LIMITS.items():
+                held_to_two = re.search(r"(?<![\d.])2(?![\d.])", ast.unparse(n.comparators[0]))
+                if m in ast.unparse(n.left) and isinstance(n.ops[0], ops) and \
+                        (not m.endswith("exit_count") or held_to_two):
+                    out.add(m)
+    if out & {"story_exit_count", "space_exit_count"}:
+        out.discard("egress_travel_distance")
+    return out
+
+
+def _part_f_walked(rules):
+    """The rules each part f limit may tighten, found from the formulas: every per-part rule whose check holds one of
+    the measures to a limit (1007.1.1's separation reads the exit count only to know whether two are required, and
+    1006.2.1.1's three exits ask nothing of a space under 501: neither holds a count to at least two)."""
+    return {rid: _holds(r) for rid, r in rules.items() if r.get("kind") == "rule" and r.get("for_each") and _holds(r)}
+
+
+@pytest.mark.parametrize("seed", range(2))
+def test_no_rule_passes_short_of_part_fs_limits_where_they_may_apply(ctx, rules, seed):
+    """Property over every drafted rule whose check holds a story's travel or exits, a corridor's width or dead end, or
+    a space's exits or common path to a limit (found from the formulas): every group, a building of two or more and
+    one not stated, every sprinkler setting, every other fact yes, no or not stated, measures from a grid around each
+    limit. In a building that may be Group H-5 (stated, two or more groups, or not stated) and may have a service
+    corridor, no pass over 75 ft of travel, with fewer than two exits on a story, at any corridor width, or with a dead
+    end over 4 ft (415.11.3.3, 415.11.3.4); in one that may be Group S-2, no story with fewer than two exits (406.5.7's
+    two exit stairways); in one that may be Group U where an aircraft-related occupancy isn't ruled out, no space (not
+    itself an exit) with fewer than two exits (412.4.2); where a stage, a platform or a technical production area isn't
+    ruled out, no space (not itself an exit) with a common path over 100 ft (410.5.3.3)."""
+    walked = _part_f_walked(rules)
+    assert {"general.bc_table_1017_2_h5", "general.bc_table_1006_3_4_2__h_i_r", "general.bc_table_1020_3_corridor_width",
+            "general.bc_1020_5_dead_end_other_groups", "general.bc_table_1006_2_1_u",
+            "general.bc_table_1006_2_1_r2", "general.bc_table_1006_2_1_r3_r4"} <= set(walked), sorted(walked)
+    allowed = ctx.allowed()
+    rng = random.Random(seed)
+    bad, passed = [], set()
+    for rid in sorted(walked):
+        rule, held = rules[rid], walked[rid]
+        kind = rule["for_each"]
+        own = parts.measure_kinds(kind)
+        names = parts.formula_names(rule)
+        for _ in range(500):
+            given = {}
+            # half the time a group the rule names (so each band rule is reached), else any, two or more, or none
+            named = [g for g in GROUPS if f'"{g}"' in (rule.get("applies_when") or "")]
+            group = rng.choice(named) if named and rng.random() < 0.5 else \
+                rng.choice(GROUPS + ["mixed", None] + ["H-5", "S-2", "U", "R-2", "R-3"] * 3)
+            if group is not None:
+                given.update(occupancy_group=group, occupancy_group_i4=group == "I-4",
+                             other_occupancy_present=group != "I-4")
+            sprinkler = rng.choice([(True, False, False), (False, True, False), (False, False, True),
+                                    (False, False, False), None])
+            if sprinkler:
+                given.update(zip(("sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3"), sprinkler))
+            for n in names:
+                if n not in own and n not in given and allowed.get(n) == "boolean":
+                    v = rng.choice([True, False, None])
+                    if v is not None:
+                        given[n] = v
+            m = {}
+            for n in names & set(own):
+                if own[n] == "boolean":
+                    v = rng.choice([True, False, None])
+                    if v is not None:
+                        m[n] = v
+                else:
+                    m[n] = rng.choice(PART_F_GRID.get(n, GRID.get(n, NUMBERS)))
+            [row] = parts.rows(rule, {kind: [{"id": "p1", "measures": m}]}, given, allowed)
+            if row["outcome"] != "pass":
+                continue
+            passed.add(rid)
+            why = []
+            # the building may be Group g, and the rule may meet it: stated g, or two or more groups or none stated where
+            # the rule reads any group (1020.5's Group I-4 rule meets no Group H-5 building)
+            applies = rule.get("applies_when") or ""
+            may = lambda g: group == g or (group in ("mixed", None) and   # noqa: E731
+                                           (not applies or g in applies or "mixed" in applies))
+            if may("H-5") and given.get("service_corridors") is not False:
+                if "egress_travel_distance" in held and not m.get("egress_travel_distance", 1e6) <= 75:
+                    why.append("415.11.3.3's 75 ft")
+                if "story_exit_count" in held and not m.get("story_exit_count", 0) >= 2:
+                    why.append("415.11.3.3's two exits")
+                if "corridor_width" in held:
+                    why.append("415.11.3.4's width")
+                if "corridor_dead_end_length" in held and not m.get("corridor_dead_end_length", 1e6) <= 4:
+                    why.append("415.11.3.3's 4 ft dead end")
+            if may("S-2") and "story_exit_count" in held and not m.get("story_exit_count", 0) >= 2:
+                why.append("406.5.7's two exit stairways")
+            if m.get("space_is_exit") is not True:
+                if may("U") and given.get("aircraft_related_occupancy") is not False and "space_exit_count" in held \
+                        and not m.get("space_exit_count", 0) >= 2:
+                    why.append("412.4.2's two means of egress")
+                if given.get("stages_or_platforms") is not False and "space_common_path" in held and \
+                        not m.get("space_common_path", 1e6) <= 100:
+                    why.append("410.5.3.3's 100 ft")
+            if why:
+                bad.append((rid, why, given, m))
+    assert not bad, (sorted({(b[0], w) for b in bad for w in b[1]}), bad[:2])
+    # not vacuous: the band rules still pass where the limits hold
+    assert {"general.bc_table_1017_2_h5", "general.bc_table_1006_2_1_u", "general.bc_table_1006_2_1_r2",
+            "general.bc_table_1020_3_corridor_width"} - passed == set()
+
+
+PART_F_BANDS = {"general.bc_table_1017_2_h5": "415.11.3.3", "general.bc_table_1006_3_4_2__h_i_r": "415.11.3.3",
+                "general.bc_table_1020_3_corridor_width": "415.11.3.4",
+                "general.bc_1020_5_dead_end_other_groups": "415.11.3.3", "general.bc_table_1006_2_1_u": "412.4.2",
+                "general.bc_table_1006_2_1_r2": "410.5.3.3", "general.bc_table_1006_2_1_r3_r4": "410.5.3.3"}
+
+
+@pytest.mark.parametrize("rid", sorted(PART_F_BANDS))
+def test_each_part_f_band_is_shown_by_an_example_it_decides_and_quotes_its_section(ctx, rules, rid):
+    """Each band part f adds has an example that needs review with it and passes without it (so the band, not another
+    fact, decides it), and the rule quotes the section the band holds it to."""
+    import copy
+    rule, section = rules[rid], PART_F_BANDS[rid]
+    allowed = ctx.allowed()
+    bare = copy.deepcopy(rule)
+    bare["review_when"] = [w for w in rule["review_when"] if "(" + section + ")" not in w["reason"]]
+    assert len(bare["review_when"]) == len(rule["review_when"]) - 1, rid
+    shown = [ex for ex in rule["examples"] if section in (ex.get("note") or "") and ex["expect"] == "needs_review"]
+    assert shown, rid
+    for ex in shown:
+        assert parts.worked_example(rule, ex, allowed)[0] == "needs_review", (rid, ex["note"][:60])
+        assert parts.worked_example(bare, ex, allowed)[0] == "pass", (rid, ex["note"][:60])
+    assert any(src["quote"].startswith(("[F] " + section + " ", "[BE] " + section + " ")) for src in rule["sources"]), rid

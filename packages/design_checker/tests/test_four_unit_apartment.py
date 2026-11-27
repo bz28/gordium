@@ -219,10 +219,12 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     and penetration flags (141). Chapter 4 part a, 402.1 and 402.8's seventeen (a mall isn't ruled out) and 404.1, 404.9 to 404.11's four
     (nor an atrium) (+21); Chapter 4 part b, 403's sixteen (a high-rise isn't ruled out) and 405's eight (nor an
     underground building) (+24); Chapter 4 part e, 420.1 to 420.3 (Group R-2's scope and separations) and 422's six (an
-    ambulatory care facility isn't ruled out) (+9): 195."""
+    ambulatory care facility isn't ruled out) (+9); Chapter 4 part f, 410.5's nine (a stage, platform or technical
+    production area isn't ruled out), 411.4's two (nor a special amusement area) and 412's eleven (nor an
+    aircraft-related occupancy) (+22): 217."""
 
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 195 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 217 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -272,7 +274,8 @@ CH10_BUILDING_MARKS = ("assembly_fixed_seating", "special_egress_spaces", "merch
 
 @pytest.mark.parametrize("stated", [False, True])
 def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got, laws, stated):
-    """The apartment as built, with the five marks set: No moves exactly the 31 that wait on them (ten of Chapter 10's and Chapter 4 part a's 21 flags) (travel's
+    """The apartment as built, with the five marks set: No moves exactly the 33 that wait on them (ten of Chapter 10's, Chapter 4 part a's 21 flags and part f's
+    two of 411.4) (travel's
     54 ft within Table 1017.2's 200 ft now passes; each flag of a space the building states it hasn't is not
     applicable), and Yes leaves every rule as it was with them blank (needs review: a person checks those spaces),
     never a pass. Left blank they are not sent (the add-in's BuildingFacts), so `got` is the unset reading."""
@@ -289,9 +292,10 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
                          "bc_1006_2_2_3_refrigerated_rooms", "bc_1006_2_2_4_electrical_rooms",
                          "bc_1006_2_2_5_vehicular_ramps", "bc_table_1017_2_note_a", "bc_1017_2_1_balcony_increase",
                          "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")},
-                     # Chapter 4 part a: every flag of 402 (a mall: a space with its own exits) and 404 (an atrium)
+                     # Chapter 4 part a: every flag of 402 (a mall: a space with its own exits) and 404 (an atrium);
+                     # part f: 411.4's two (a special amusement area, a space with its own exits)
                      **{k: ("needs_review", "not_applicable") for k in got["results"]
-                        if re.match(r"general\.bc_40[24]_", k)}}
+                        if re.match(r"general\.bc_(40[24]|411_4)_", k)}}
 
 
 def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(no_mall, laws):
@@ -357,6 +361,34 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(no_mall, laws):
         **{k: ("needs_review", "not_applicable") for k in no_mall["results"] if k.startswith("general.bc_422_")},
         "general.bc_709_5_1_i2_smoke_barrier_doors": ("needs_review", "not_applicable")}
     assert all(m == {} for m in moved.values()), moved
+
+
+def test_chapter_4_part_fs_facts_stated_on_the_apartment(no_mall, laws):
+    """Chapter 4 part f's three stated facts on the apartment (Group R-2): no stage, platform or technical production
+    area sets 410.5's nine flags aside, and no aircraft-related occupancy 412's eleven; each, stated yes, moves nothing
+    (the flags already show, and the bands they feed read Group U's and the 125 ft rows' spaces, where the apartment
+    has no space with one exit within the row and a common path over 100 ft); a service corridor, either way, moves
+    nothing in a building stated Group R-2. Nothing else moves."""
+    moved = {}
+    for fact, value in (("stages_or_platforms", False), ("stages_or_platforms", True),
+                        ("aircraft_related_occupancy", False), ("aircraft_related_occupancy", True),
+                        ("service_corridors", False), ("service_corridors", True)):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], fact: value, **NO_MALL}
+        now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
+        moved[(fact, value)] = {k: (no_mall["results"][k], now[k]) for k in no_mall["results"]
+                                if no_mall["results"][k] != now[k]}
+    assert moved.pop(("stages_or_platforms", False)) == {
+        k: ("needs_review", "not_applicable") for k in no_mall["results"] if k.startswith("general.bc_410_5")}
+    assert moved.pop(("aircraft_related_occupancy", False)) == {
+        k: ("needs_review", "not_applicable") for k in no_mall["results"]
+        if k.startswith(("general.bc_412_", "general.bc_table_412_"))}
+    assert len([k for k in no_mall["results"] if k.startswith("general.bc_410_5")]) == 9
+    assert len([k for k in no_mall["results"] if k.startswith(("general.bc_412_", "general.bc_table_412_"))]) == 11
+    assert all(m == {} for m in moved.values()), moved
+    # with special egress spaces stated no (the fixture), 411.4's two are set aside already
+    assert {k: v for k, v in no_mall["results"].items() if k.startswith("general.bc_411_4")} == {
+        "general.bc_411_4_exit_marking": "not_applicable", "general.bc_411_4_1_photoluminescent_exit_signs": "not_applicable"}
 
 
 # ---- the ceiling on an occupant load not worked out (occupant_load._bounds, 2026-11-26: the egress UI audit's 6) -------

@@ -34,7 +34,8 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "high_rise_building": False,                       # Chapter 4 part b's
                                           "underground_building": False,
                                           "stages_or_platforms": False,                      # Chapter 4 part f's
-                                          "aircraft_related_occupancy": False})
+                                          "aircraft_related_occupancy": False,
+                                          "service_corridors": False})
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False
@@ -584,9 +585,10 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # (groups 4 and 5's four have theirs too, the Revit-fields PR for them: the set is empty)
     # (the occupant-load ceiling's mezzanines and loads not by area, 2026-11-26, came with their own)
     # Chapter 4 part b's two (a high-rise, an underground building) have theirs too (the Chapter 4 marks PR)
-    # Chapter 4 part f's two (a stage or platform, an aircraft-related occupancy) have no Revit mark yet: read only by
-    # flags' applies_when and by bands placed last in their chains; their marks follow in the Revit-fields work
-    assert keys - set(revit) == {"stages_or_platforms", "aircraft_related_occupancy"}
+    # Chapter 4 part f's three (a stage or platform, an aircraft-related occupancy, a service corridor) have no Revit
+    # mark yet: read only by flags' applies_when and by bands placed last in their chains; their marks follow in the
+    # Revit-fields work
+    assert keys - set(revit) == {"stages_or_platforms", "aircraft_related_occupancy", "service_corridors"}
     assert code_scope.MARK["mezzanines"] == revit["mezzanines"] == "Gordium: Mezzanines"
     assert code_scope.MARK["loads_not_by_area"] == revit["loads_not_by_area"] == "Gordium: Loads not by area"
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased",

@@ -78,9 +78,12 @@ FACTS = {
     # Chapter 4 part f: the building has a stage, a platform or a technical production area (202; 410.5, and Table
     # 1006.2.1's 125 ft rows held to 410.5.3.3's 100 ft common path); and it is or holds an aircraft-related occupancy
     # (Section 412: an airport traffic control tower, an aircraft hangar, an aircraft paint hangar, an aircraft
-    # manufacturing facility, a heliport or helistop; 412.4.2's two means of egress from a residential hangar)
+    # manufacturing facility, a heliport or helistop; 412.4.2's two means of egress from a residential hangar); and
+    # it has a service corridor (202: a fully enclosed passage for transporting HPM and purposes other than required
+    # means of egress; 415.11.3.3's 75 ft, 4 ft dead ends and two exits, 415.11.3.4's width in Group H-5)
     "stages_or_platforms": "yes_no",
     "aircraft_related_occupancy": "yes_no",
+    "service_corridors": "yes_no",
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
     # the decision reads each as stated and unread, never as not stated (review round 5)
     "facts_not_sent": "names",
@@ -321,7 +324,7 @@ def _given(building) -> tuple[dict, list[str]]:
 def building_measures(building: dict | None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the three sprinkler systems the limits name from the system, and the fifteen stated yes/no facts. A fact
+    groups, the three sprinkler systems the limits name from the system, and the sixteen stated yes/no facts. A fact
     not stated is left out (its rules need review)."""
     facts, _ = _given(building)
     return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
@@ -354,6 +357,7 @@ DERIVED = {
     "underground_building": ("underground_building", lambda v: v),
     "stages_or_platforms": ("stages_or_platforms", lambda v: v),
     "aircraft_related_occupancy": ("aircraft_related_occupancy", lambda v: v),
+    "service_corridors": ("service_corridors", lambda v: v),
 }
 
 

@@ -4404,7 +4404,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Service corridor travel, dead ends, exits and doors (BCNYS 415.11.3.3)
-  applies_when: occupancy_group in ["H-5", "mixed"]
+  applies_when: occupancy_group in ["H-5", "mixed"] and service_corridors
   sources:
   - file: gov.ny.building.2025.pdf
     page: 122
@@ -4419,6 +4419,7 @@ rules:
   examples:
   - given:
       occupancy_group: H-5
+      service_corridors: true
     expect: needs_review
     note: 'In a Group H-5 service corridor: at most 75 ft from any point to an exit, an exit access corridor or a door into
       a fabrication area; dead ends at most 4 ft; at least two exits, and at most half of the required means of egress through
@@ -4430,6 +4431,11 @@ rules:
       occupancy_group: R-2
     expect: not_applicable
     note: 'The building is stated one group, not Group H-5: not applicable.'
+  - given:
+      occupancy_group: H-5
+      service_corridors: false
+    expect: not_applicable
+    note: 'The architect states the building has no service corridor: not applicable.'
   notes: Which corridors are service corridors isn't in the model, so in a building stated Group H-5 Table 1017.2's H-5 row
     never passes over 75 ft, 1020.5's dead end rule over 4 ft, and Table 1006.3.4(2)'s rule a story with one exit; where each
     passage leads and the doors' closers aren't in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4
@@ -4440,7 +4446,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Service corridor 5 ft wide, or 33 in past the widest cart (BCNYS 415.11.3.4)
-  applies_when: occupancy_group in ["H-5", "mixed"]
+  applies_when: occupancy_group in ["H-5", "mixed"] and service_corridors
   sources:
   - file: gov.ny.building.2025.pdf
     page: 122
@@ -4452,6 +4458,7 @@ rules:
   examples:
   - given:
       occupancy_group: H-5
+      service_corridors: true
     expect: needs_review
     note: 'A Group H-5 service corridor is at least 5 ft wide, or 33 in wider than the widest cart or truck used in it, whichever
       is greater: a person''s check.'
@@ -4462,6 +4469,11 @@ rules:
       occupancy_group: R-2
     expect: not_applicable
     note: 'The building is stated one group, not Group H-5: not applicable.'
+  - given:
+      occupancy_group: H-5
+      service_corridors: false
+    expect: not_applicable
+    note: 'The architect states the building has no service corridor: not applicable.'
   notes: Which corridors are service corridors and the carts used in them aren't in the model, so in a building stated Group
     H-5 Table 1020.3's width rule never passes a corridor (no width is known to be 33 in wider than the widest cart). Hand-drafted
     in a Claude Code session (2026-11-27, Chapter 4 part f).
@@ -7962,8 +7974,9 @@ rules:
       that keeps its rating (more than one floor where each opening is at most 144 square inches); listed electrical boxes
       of any material tested for use in fire-resistance-rated assemblies, installed per their listing; and concrete floors
       or ramps of parking garages per 406.5 and 406.6 with parking above and below: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 406.5 and 406.6 aren't brought in. Shown for
-    every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Of 406.5 and 406.6 (open and enclosed parking
+    garages), only 406.5.7's means of egress is brought in (Chapter 4 part f, a flag); the rest are not. Shown for every
+    building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_714_5_1_1_floor_tested_assembly_penetrations
@@ -14851,9 +14864,10 @@ rules:
       (occupancy_group in ["H-2", "H-3"] and story_occupant_load <= 3 and egress_travel_distance <= 25 or occupancy_group
       in ["H-4", "H-5", "I-1", "I-2", "I-3", "R-1", "R-2"] and story_occupant_load <= 10 and egress_travel_distance <= 75)
       and (occupancy_group != "R-2" or (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031)))
-      and occupancy_group in ["H-5"]
-    reason: 'One exit, allowed by 1006.3.4, in Group H-5: a service corridor has at least two exits (415.11.3.3), and which
-      rooms are service corridors isn''t in the model: a person checks (Chapter 4 part f).'
+      and occupancy_group in ["H-5"] and service_corridors
+    reason: 'One exit, allowed by 1006.3.4, in a Group H-5 building which may have a service corridor (stated, or not ruled
+      out): a service corridor has at least two exits (415.11.3.3), and which rooms are service corridors isn''t in the model:
+      a person checks (Chapter 4 part f).'
   for_each: story
   when_none: needs_review
   sources:
@@ -15161,6 +15175,7 @@ rules:
     note: 'A story with one exit, a pass where the building states it isn''t underground, where it states it is: 405.7.1 asks
       two exits on each floor level, so a person checks.'
   - given:
+      service_corridors: true
       occupancy_group: H-5
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -15187,8 +15202,9 @@ rules:
     - part: p1
       outcome: needs_review
     expect: needs_review
-    note: 'Group H-5, one exit, 10 occupants, 75 ft on the first story: within 1006.3.4, but a service corridor has at least
-      two exits (415.11.3.3), and which rooms are service corridors isn''t in the model: a person checks.'
+    note: 'Group H-5 with a service corridor (stated), one exit, 10 occupants, 75 ft on the first story: within 1006.3.4,
+      but a service corridor has at least two exits (415.11.3.3), and which rooms are service corridors isn''t in the model:
+      a person checks.'
   notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4
     (the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling
     units (Table 1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with
@@ -19573,10 +19589,11 @@ rules:
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
       every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
-  - when: sprinklered_903_3_1_1 and egress_travel_distance > 75 and egress_travel_distance <= 200
-    reason: 'Within the row''s 200 ft but over 75 ft: in Group H-5, travel from any point in a service corridor to an exit,
-      an exit access corridor or a door into a fabrication area is at most 75 ft (415.11.3.3), and which rooms are service
-      corridors isn''t in the model: a person checks (Chapter 4 part f).'
+  - when: sprinklered_903_3_1_1 and egress_travel_distance > 75 and egress_travel_distance <= 200 and service_corridors
+    reason: 'Within the row''s 200 ft but over 75 ft, in a Group H-5 building which may have a service corridor (stated, or
+      not ruled out): travel from any point in a service corridor to an exit, an exit access corridor or a door into a fabrication
+      area is at most 75 ft (415.11.3.3), and which rooms are service corridors isn''t in the model: a person checks (Chapter
+      4 part f).'
   for_each: story
   when_none: needs_review
   sources:
@@ -19779,6 +19796,7 @@ rules:
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
   - given:
+      service_corridors: true
       occupancy_group: H-5
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -19797,8 +19815,9 @@ rules:
     - part: p1
       outcome: needs_review
     expect: needs_review
-    note: 'NFPA 13, 200 ft: within the row, but over 415.11.3.3''s 75 ft, which a point in a Group H-5 service corridor may
-      be from an exit, an exit access corridor or a door into a fabrication area: a person checks.'
+    note: 'A service corridor (stated), NFPA 13, 200 ft: within the row, but over 415.11.3.3''s 75 ft, which a point in a
+      Group H-5 service corridor may be from an exit, an exit access corridor or a door into a fabrication area: a person
+      checks.'
   notes: 'Table 1017.2''s H-5 row: Not Permitted without an automatic sprinkler system, 200 ft with one (note c: 903.3.1.1
     only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says . 1017.2.1''s balcony increase is a
     person''s check where taken or not stated and the distance is within it; the other sections note a lists are the rule
@@ -20560,9 +20579,10 @@ rules:
       is a mall isn''t in the model: a person checks.'
   - when: occupancy_group in ["H-5"] and corridor_dead_end_length > 4 and (corridor_dead_end_length <= (50 if occupancy_group
       in ["B", "E", "F-1", "F-2", "I-1", "M", "R-1", "R-2", "S-1", "S-2", "U"] and sprinklered_903_3_1_1 else 20) or corridor_dead_end_length
-      < 2.5 * corridor_dead_end_least_width)
-    reason: 'Within 1020.5''s limit but over 4 ft, in Group H-5: a dead end in a service corridor is at most 4 ft (415.11.3.3),
-      and which corridors are service corridors isn''t in the model: a person checks (Chapter 4 part f).'
+      < 2.5 * corridor_dead_end_least_width) and service_corridors
+    reason: 'Within 1020.5''s limit but over 4 ft, in a Group H-5 building which may have a service corridor (stated, or not
+      ruled out): a dead end in a service corridor is at most 4 ft (415.11.3.3), and which corridors are service corridors
+      isn''t in the model: a person checks (Chapter 4 part f).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -20827,6 +20847,7 @@ rules:
     note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
       ask more here, so a person checks.'
   - given:
+      service_corridors: true
       occupancy_group: H-5
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -20842,8 +20863,8 @@ rules:
     - part: p1
       outcome: needs_review
     expect: needs_review
-    note: 'Group H-5, a 10 ft dead end: within 1020.5''s 20 ft, but a dead end in a service corridor is at most 4 ft (415.11.3.3),
-      and which corridor is one isn''t in the model: a person checks.'
+    note: 'Group H-5 with a service corridor (stated), a 10 ft dead end: within 1020.5''s 20 ft, but a dead end in a service
+      corridor is at most 4 ft (415.11.3.3), and which corridor is one isn''t in the model: a person checks.'
   notes: '1020.5 and its exceptions for every group but I-4 (the rule “Dead end at most 20 ft, or under 2.5 x its width, I-4
     (BCNYS 1020.5)”): 20 ft; 50 ft in Groups B, E, F, I-1, M, R-1, R-2, S and U with an NFPA 13 system (903.3.1.1: exception
     2; a 13R system does not meet it); any length under 2.5 times the least width (exception 3). Exceptions 1 (Group I-3,
@@ -22149,6 +22170,15 @@ rules:
       a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): a mall taken
       as a corridor is held to 402.8.1.1''s width instead, and a corridor from it serves the mall''s occupants from 402.8.2.1''s
       formula on the gross leasable area, which may be more (402.8 governs over Chapter 10): a person checks.'
+  - when: occupancy_group in ["H-5", "mixed"] and (corridor_width >= (corridor_occupant_load * 0.15 if occupancy_group in
+      ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "I-1", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1",
+      "S-2", "U"] and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"]))
+      and emergency_voice_alarm_system else corridor_occupant_load * 0.2)) and service_corridors
+    reason: 'Enough for the corridor''s occupants, in a building that may be Group H-5 (stated, or two or more groups) and
+      may have a service corridor (stated, or not ruled out): a service corridor is at least 5 ft (60 in) wide, or 33 in wider
+      than the widest cart or truck used in it, whichever is greater (415.11.3.4); which corridors are service corridors,
+      and the carts used in them, aren''t in the model, so no width is known to be enough: a person checks (Chapter 4 part
+      f).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -22217,6 +22247,13 @@ rules:
       Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
       of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
       for determining the required means of egress for the mall building.'
+  - file: gov.ny.building.2025.pdf
+    page: 122
+    lines:
+    - 49
+    - 50
+    quote: '[F] 415.11.3.4 Minimum width. The clear width of a service corridor shall be not less than 5 feet (1524 mm), or
+      33 inches (838 mm) wider than the widest cart or truck used in the service corridor, whichever is greater.'
   examples:
   - given:
       occupancy_group: B
@@ -22333,6 +22370,7 @@ rules:
     expect: fail
     note: 'Group I-2 is outside exception 1: 0.2 in each, 58 in.'
   - given:
+      service_corridors: false
       occupancy_group: mixed
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -22372,6 +22410,7 @@ rules:
     expect: needs_review
     note: 'Fixed seating may be smoke-protected or open-air: its own factors are a person''s check.'
   - given:
+      service_corridors: false
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       emergency_voice_alarm_system: false
@@ -22422,6 +22461,28 @@ rules:
     expect: needs_review
     note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
       ask more here, so a person checks.'
+  - given:
+      occupancy_group: H-5
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      service_corridors: true
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor at 44 in, 220 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 220
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group H-5 with a service corridor (stated): enough for its occupants, but a service corridor is at least 5 ft wide,
+      or 33 in wider than the widest cart or truck used in it (415.11.3.4), and neither which corridor is one nor the carts
+      are in the model: a person checks.'
   notes: '1020.3''s capacity, determined by 1005.1: for a corridor, a component other than a stairway, 0.2 in for each occupant
     it serves (1005.3.2); 0.15 in exception 1''s buildings (a sprinkler system per 903.3.1.1, or 903.3.1.2 in Group R where
     that system is allowed, and an emergency voice/alarm system per 907.5.2.2, both stated, in one group other than H and
@@ -22464,10 +22525,11 @@ rules:
       (402.8.1.1) and an exit passageway or corridor from it 66 in (402.8.6), and which corridor is which isn''t in the model:
       a person checks.'
   - when: occupancy_group in ["H-5"] and (corridor_width >= (96 if occupancy_group == "I-2" else 72 if occupancy_group ==
-      "E" and corridor_occupant_load >= 100 else 36 if corridor_occupant_load < 50 else 44))
-    reason: 'Group H-5: a service corridor is at least 5 ft (60 in) wide, or 33 in wider than the widest cart or truck used
-      in it, whichever is greater (415.11.3.4); which corridors are service corridors, and the carts used in them, aren''t
-      in the model, so no width is known to be enough: a person checks (Chapter 4 part f).'
+      "E" and corridor_occupant_load >= 100 else 36 if corridor_occupant_load < 50 else 44)) and service_corridors
+    reason: 'A Group H-5 building which may have a service corridor (stated, or not ruled out): a service corridor is at least
+      5 ft (60 in) wide, or 33 in wider than the widest cart or truck used in it, whichever is greater (415.11.3.4); which
+      corridors are service corridors, and the carts used in them, aren''t in the model, so no width is known to be enough:
+      a person checks (Chapter 4 part f).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -22769,6 +22831,7 @@ rules:
     note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
       ask more here, so a person checks.'
   - given:
+      service_corridors: true
       occupancy_group: H-5
       ambulatory_care_facility: false
       special_egress_spaces: false
@@ -22783,9 +22846,9 @@ rules:
     - part: p1
       outcome: needs_review
     expect: needs_review
-    note: 'Group H-5, 72 in: more than Table 1020.3 asks, but a service corridor is at least 5 ft wide, or 33 in wider than
-      the widest cart or truck used in it (415.11.3.4), and neither which corridor is one nor the carts are in the model:
-      a person checks.'
+    note: 'Group H-5 with a service corridor (stated), 72 in: more than Table 1020.3 asks, but a service corridor is at least
+      5 ft wide, or 33 in wider than the widest cart or truck used in it (415.11.3.4), and neither which corridor is one nor
+      the carts are in the model: a person checks.'
   notes: 'Table 1020.3 for every group (section group 4 of the plan, docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md):
     44 in for any facility the table doesn''t list, 36 in with fewer than 50 occupants, 72 in in Group E with 100 or more,
     96 in in Group I-2 where beds are moved. Where the table loosens it for a corridor the model can''t tell apart (24 in

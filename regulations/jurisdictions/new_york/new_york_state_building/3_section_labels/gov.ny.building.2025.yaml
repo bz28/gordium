@@ -7053,7 +7053,7 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Service corridor travel, dead ends, exits and doors: not in the model, so a person''s check where the building
-      may be Group H-5 (general.bc_415_11_3_3_service_corridor_egress), and a review band on the Chapter 10 rules it tightens.'
+      may be Group H-5 with a service corridor (general.bc_415_11_3_3_service_corridor_egress), and a review band on the Chapter 10 rules it tightens.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 122
@@ -7073,7 +7073,7 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Service corridor 5 ft wide, or 33 in past the widest cart: not in the model, so a person''s check where the building
-      may be Group H-5 (general.bc_415_11_3_4_service_corridor_width), and a review band on the Chapter 10 rules it tightens.'
+      may be Group H-5 with a service corridor (general.bc_415_11_3_4_service_corridor_width), and a review band on the Chapter 10 rules it tightens.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 122

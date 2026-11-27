@@ -18,7 +18,9 @@ S1, S2 = "sprinklered_903_3_1_1", "sprinklered_903_3_1_2"
 NFPA13 = {S1: True, S2: False, "sprinklered_903_3_1_3": False}
 NONE = {S1: False, S2: False, "sprinklered_903_3_1_3": False}
 STATED = {"egress_balcony_increase_taken": False, "assembly_fixed_seating": False, "special_egress_spaces": False,
-          "building_has_atrium": False, "merchandise_pads": False}
+          "building_has_atrium": False, "merchandise_pads": False,
+          # Chapter 4 part f's three (NOT_PART_F, below)
+          "service_corridors": False, "aircraft_related_occupancy": False, "stages_or_platforms": False}
 # Chapter 4 part a: the building holds no covered or open mall (no space with its own exits or travel limit), so
 # 402.8, which governs over Chapter 10 there, can't change these rows (test_ny_building_chapter_4.py walks it)
 NO_MALL = {"special_egress_spaces": False}
@@ -28,6 +30,10 @@ NOT_TALL = {"high_rise_building": False, "underground_building": False}
 # Chapter 4 part e: no ambulatory care facility (422.2's fire partition between one and an adjacent corridor can't
 # change Table 1020.2's B row)
 NO_CARE = {"ambulatory_care_facility": False}
+# Chapter 4 part f: no service corridor (415.11.3.3's 75 ft, two exits and 4 ft dead ends, 415.11.3.4's width in Group
+# H-5), no aircraft-related occupancy (412.4.2's two means of egress from a Group U hangar) and no stage, platform or
+# technical production area (410.5.3.3's 100 ft common path), so none can change these rows
+NOT_PART_F = {"service_corridors": False, "aircraft_related_occupancy": False, "stages_or_platforms": False}
 
 # Table 1017.2, p.341: line -> (groups, without a sprinkler system (None: Not Permitted), with one, the rule)
 TABLE_1017_2 = {
@@ -196,7 +202,7 @@ def test_dead_ends_for_every_group_but_i4(ctx, rules):
     for g in groups:
         if g in ("I-4", "mixed"):
             continue
-        given = {"occupancy_group": g} | NO_MALL
+        given = {"occupancy_group": g} | NO_MALL | NOT_PART_F
         limit = 50 if g in EXCEPTION_2 else 20
         assert _one(rule, "corridor", {"corridor_dead_end_length": limit, "corridor_dead_end_least_width": 5},
                     given | NFPA13, ctx) == "pass", g
@@ -726,7 +732,7 @@ def test_table_1020_3_every_row_passes_at_its_width_and_not_just_short_of_it(ctx
     lines 23-24; stretcher traffic in an ambulatory care facility, stated)."""
     r = rules["general.bc_table_1020_3_corridor_width"]
     assert all(_cites(r, 344, line) for line in TABLE_1020_3)
-    no_amb = {"ambulatory_care_facility": False} | NO_MALL
+    no_amb = {"ambulatory_care_facility": False} | NO_MALL | NOT_PART_F
     for g in ONE_GROUP:
         given = {"occupancy_group": g} | no_amb
         if g == "I-2":

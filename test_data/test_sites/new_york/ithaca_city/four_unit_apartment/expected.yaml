@@ -179,6 +179,38 @@ results:
   general.bc_422_3_1_means_of_egress: needs_review
   general.bc_422_3_2_refuge_area: needs_review
   general.bc_422_3_3_independent_egress: needs_review
+  # Chapter 4 part f: 406.4.3 and 406.5.7 (Group S-2 parking garages), 415.11.3.3, 415.11.3.4 (Group H-5 service
+  # corridors), 415.11.6.6 and 415.11.6.7 (HPM, gas and liquid storage rooms) not applicable to a building stated
+  # Group R-2; 410.5 (stages, platforms and technical production areas), 411.4 (special amusement areas) and 412's
+  # means of egress (aircraft-related occupancies) show while the building doesn't rule them out (not stated)
+  general.bc_406_4_3_vehicle_ramps: not_applicable
+  general.bc_406_5_7_open_parking_garage_egress: not_applicable
+  general.bc_410_5_means_of_egress: needs_review
+  general.bc_410_5_1_arrangement: needs_review
+  general.bc_410_5_2_stairway_and_ramp_enclosure: needs_review
+  general.bc_410_5_3_technical_production_areas: needs_review
+  general.bc_410_5_3_1_number_of_means_of_egress: needs_review
+  general.bc_410_5_3_2_exit_access_travel_distance: needs_review
+  general.bc_410_5_3_3_two_means_of_egress: needs_review
+  general.bc_410_5_3_4_path_of_egress_travel: needs_review
+  general.bc_410_5_3_5_width: needs_review
+  general.bc_411_4_exit_marking: needs_review
+  general.bc_411_4_1_photoluminescent_exit_signs: needs_review
+  general.bc_412_2_2_airport_traffic_control_towers: needs_review
+  general.bc_412_2_2_1_stairways: needs_review
+  general.bc_412_2_2_2_exit_access: needs_review
+  general.bc_412_2_2_3_number_of_exits: needs_review
+  general.bc_412_2_2_3_1_interior_finish: needs_review
+  general.bc_412_2_2_3_2_exit_separation: needs_review
+  general.bc_412_4_2_residential_aircraft_hangar_egress: needs_review
+  general.bc_412_6_aircraft_manufacturing_facilities: needs_review
+  general.bc_table_412_6_aircraft_manufacturing_travel: needs_review
+  general.bc_412_6_1_ancillary_areas: needs_review
+  general.bc_412_7_3_heliports_and_helistops: needs_review
+  general.bc_415_11_3_3_service_corridor_egress: not_applicable
+  general.bc_415_11_3_4_service_corridor_width: not_applicable
+  general.bc_415_11_6_6_hpm_room_exits: not_applicable
+  general.bc_415_11_6_7_hpm_room_doors: not_applicable
   general.bc_1007_1_1_remoteness: pass                 # 0.5992 >= 1/2 on both stories (above)
   general.bc_1007_1_1_space_remoteness: pass           # "space_exit_count < 2 or ...": every space has one doorway
   general.bc_1007_1_2_space_three_or_more: pass        # "space_exit_count < 3 or ...": none has three

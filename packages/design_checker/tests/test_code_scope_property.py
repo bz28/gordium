@@ -71,6 +71,7 @@ BUILDING = {
     "underground_building": (None, True, False, "no"),
     "stages_or_platforms": (None, True, False, "no"),                 # Chapter 4 part f
     "aircraft_related_occupancy": (None, True, False, "no"),
+    "service_corridors": (None, True, False, "no"),
     "facts_not_sent": (None, [], ["dwelling_units"], ["sprinkler_system"], "use"),
 }
 DOMAIN = {**VALUES, **BUILDING}
@@ -91,7 +92,7 @@ BASE = {"use": "one_family_detached", "dwelling_units": 1, "attached_units_in_bu
         "corridors_within_dwelling_units": None, "emergency_voice_alarm_system": None, "mezzanines": None,
         "loads_not_by_area": None,
         "high_rise_building": None, "underground_building": None, "stages_or_platforms": None,
-        "aircraft_related_occupancy": None, "facts_not_sent": None}
+        "aircraft_related_occupancy": None, "service_corridors": None, "facts_not_sent": None}
 
 
 def count(v, least=0):
@@ -114,7 +115,7 @@ def law(f):
                                     "other_level_egress_into_corridors", "ambulatory_care_facility",
                                     "corridors_within_dwelling_units", "emergency_voice_alarm_system", "mezzanines",
                                     "loads_not_by_area", "high_rise_building", "underground_building",
-                                    "stages_or_platforms", "aircraft_related_occupancy")]
+                                    "stages_or_platforms", "aircraft_related_occupancy", "service_corridors")]
     kinds += [f[k] is None or count(f[k]) for k in ("dwelling_units", "attached_units_in_building", "adus_on_parcel",
                                                     "rooms_let_for_profit", "stories")]
     kinds += [f["stories_above_grade_plane"] is None or count(f["stories_above_grade_plane"], 1),
