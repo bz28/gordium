@@ -97,12 +97,18 @@ documents:
       # was brought in alone in review round 1 of Chapter 10's plan): Chapter 4 part c. 407.5 whole (Group I-2 smoke
       # barriers, pp.100-101), 407.6 whole (automatic-closing doors, p.101) and 407.10 (secured yards, p.101, with 407.11
       # after); 408.1, 408.2, 408.3 whole and 408.4 whole (Group I-3: general, other occupancies, means of egress, locks,
-      # pp.101-102, with 408.5 after): Chapter 4 part d.
-      pages: 32-68, 79, 84, 86-88, 90-93, 98-102, 147, 273-274, 311-318, 322-323, 340-345, 354-355
+      # pp.101-102, with 408.5 after): Chapter 4 part d. 408.6 whole (Group I-3 smoke barriers, p.103, with 408.7 after)
+      # and 408.8 whole (subdivision of resident housing areas, p.103, with 408.9 after); 420.1, 420.2, 420.3 (Groups I-1
+      # and R: separation walls and floors, p.127, with 420.4 after), 420.6 whole, 420.7, 420.8 and 420.9 (Group I-1:
+      # smoke barriers, assisted living housing units, cooking, pp.127-128, with 420.10 after); 422.1, 422.2 and 422.3
+      # whole (ambulatory care facilities: separation, smoke compartments and their egress, p.129, with 422.4 after):
+      # Chapter 4 part e.
+      pages: 32-68, 79, 84, 86-88, 90-93, 98-103, 127-129, 147, 273-274, 311-318, 322-323, 340-345, 354-355
       sections: ['308.5', '508.2', '1004', Table 1004.5, '1005.1', '1005.2', '1005.3', '1005.4', '1005.5', '1005.6', '1005.7', '1006.2.1', Table 1006.2.1, '1006.2.2', '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(1),
                  Table 1006.3.4(2),
                  '402.1', '402.8', '403.1', '403.2.2', '403.5', '403.6', '404.1', '404.9', '404.10', '404.11', '405.1', '405.4',
                  '405.7', '407.1', '407.2', '407.3', '407.4', '407.5', '407.6', '407.10', '408.1', '408.2', '408.3', '408.4',
+                 '408.6', '408.8', '420.1', '420.2', '420.3', '420.6', '420.7', '420.8', '420.9', '422.1', '422.2', '422.3',
                  '1007.1', '1010.1.1', '1010.1.2', '1016.2', '1017', Table 1017.2, '1018.4', '1020.1', '1020.2', Table 1020.2, '1020.3', Table 1020.3,
                  '1020.4', '1020.5', '1020.6', '1020.7']
       alone: ['903.3.1.1', '903.3.1.2', '1010.1', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
