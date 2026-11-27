@@ -212,12 +212,17 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     hoistway doors (24); its per-corridor flag (a rated corridor's walls) is a corridor's row, not a building line.
     Section group 4c adds 1020.4's and 1020.6's (26); 1020.7's is a corridor's row. Section group 5a adds 1005.3.1's
     stairways and 1005.3.2's doors, ramps and passageways (28); section group 5b 1005.4, 1005.5 and 1005.6 (31); section group 5c 1005.7.1 to 1005.7.3 (34);
-    section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37); Chapter 4 part a, 402.1 and 402.8's seventeen
-    (a mall isn't ruled out) and 404.1, 404.9 to 404.11's four (nor an atrium) (58); Chapter 4 part b, 403's sixteen
-    (a high-rise isn't ruled out) and 405's eight (nor an underground building) (82); Chapter 4 part e, 420.1 to 420.3
-    (Group R-2's scope and separations) and 422's six (an ambulatory care facility isn't ruled out) (91)."""
+    section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37). Chapter 7 part a (2026-11-26) adds its 28
+    fire-barrier and shaft-enclosure flags, each shown for every building (65); part b its 23 building-wide
+    opening-protective flags (88; Table 716.1(2)'s corridor doors are each corridor's row); part c 30 of its 31 fire
+    partition, smoke barrier and smoke partition flags (118; 710.5.3 is Group I-2's, not the stated R-2's); part d its 23 floor, vertical opening
+    and penetration flags (141). Chapter 4 part a, 402.1 and 402.8's seventeen (a mall isn't ruled out) and 404.1, 404.9 to 404.11's four
+    (nor an atrium) (+21); Chapter 4 part b, 403's sixteen (a high-rise isn't ruled out) and 405's eight (nor an
+    underground building) (+24); Chapter 4 part e, 420.1 to 420.3 (Group R-2's scope and separations) and 422's six (an
+    ambulatory care facility isn't ruled out) (+9): 195."""
+
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 91 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 195 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -331,7 +336,8 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(no_mall, laws):
     No (its stairs are enclosed exits discharging outside) bounds each corridor's load by its story's, so the corridor
     width and capacity rows pass at the whole story's load (two readings, none and the story's: a pass only if the
     story's passes); Yes leaves them by hand; the other three, either way, move nothing here (Group R-2, no sprinkler
-    system, no ambulatory care, the corridors already within Table 1020.3's widths)."""
+    system, no ambulatory care, the corridors already within Table 1020.3's widths), but Gordium: Ambulatory care
+    facility No, which sets aside 709.5.1's smoke barrier doors (Chapter 7 part c: Group R-2 with none stated)."""
     moved = {}
     for fact, value in (("other_level_egress_into_corridors", False), ("other_level_egress_into_corridors", True),
                         ("ambulatory_care_facility", False), ("corridors_within_dwelling_units", False),
@@ -345,9 +351,11 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(no_mall, laws):
     assert moved.pop(("other_level_egress_into_corridors", False)) == {
         "general.bc_1020_3_corridor_capacity": ("needs_review", "pass"),
         "general.bc_table_1020_3_corridor_width": ("needs_review", "pass")}
-    # Chapter 4 part e: no ambulatory care facility (stated) sets 422's six flags aside, and moves nothing else
+    # Chapter 4 part e: no ambulatory care facility (stated) sets 422's six flags aside; Chapter 7's 709.5.1 Group I-2
+    # smoke barrier doors flag too
     assert moved.pop(("ambulatory_care_facility", False)) == {
-        k: ("needs_review", "not_applicable") for k in no_mall["results"] if k.startswith("general.bc_422_")}
+        **{k: ("needs_review", "not_applicable") for k in no_mall["results"] if k.startswith("general.bc_422_")},
+        "general.bc_709_5_1_i2_smoke_barrier_doors": ("needs_review", "not_applicable")}
     assert all(m == {} for m in moved.values()), moved
 
 

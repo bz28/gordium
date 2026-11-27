@@ -80,6 +80,16 @@ public sealed record LevelRecord(string UniqueId, string Name, double Elevation)
 /// the finished faces runs along these, so the door's place in the middle of its wall is read from them.</summary>
 public sealed record WallFace(Xyz Point, Xyz Normal);
 
+/// <summary>An arc a door's plan symbol draws (its swing), as Revit gives it in a plan view made for the read
+/// (<c>get_Geometry</c> with <c>Options.View</c>: Fine, no template, no filters, the Doors category and its
+/// subcategories shown, rolled back), internal: its centre, radius and the point half way along it
+/// (<c>Arc.Evaluate(0.5, true)</c>). Only arcs in a horizontal plane.</summary>
+public sealed record SwingArc(Xyz Centre, double Radius, Xyz Mid);
+
+/// <summary>What a door's plan symbol draws of its swing: its arcs (none drawn: an empty list, never read as "it
+/// doesn't swing"), or why they couldn't be read (<see cref="NotRead"/>, the arcs then empty).</summary>
+public sealed record SwingDrawing(IReadOnlyList<SwingArc> Arcs, string? NotRead = null);
+
 /// <summary>An enclosed area on a level (a <c>PlanCircuit</c>).</summary>
 /// <param name="Level">The level's name (<c>Level.Name</c>), for the words.</param>
 /// <param name="Area">Its area (<c>PlanCircuit.Area</c>, sq ft).</param>
@@ -440,4 +450,8 @@ public sealed record OpeningRecord
     /// <summary>What the Revit layer looked at for this window (the wall's faces, the ids that generated them), for the
     /// trial's log only: never read by a decision.</summary>
     public IReadOnlyList<string> Diagnostics { get; init; } = [];
+
+    /// <summary>A door's swing as its plan symbol draws it (<see cref="SwingDrawing"/>), or null when it wasn't looked
+    /// at (a window, or a host that didn't read it): which side it swings into is then not read.</summary>
+    public SwingDrawing? Swing { get; init; }
 }

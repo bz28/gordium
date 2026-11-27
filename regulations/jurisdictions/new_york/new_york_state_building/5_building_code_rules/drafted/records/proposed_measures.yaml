@@ -29,6 +29,7 @@ sprinklered_903_3_1_1:
   - general.bc_1017_2_travel_distance
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -72,6 +73,7 @@ sprinklered_903_3_1_2:
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1007_1_2_space_three_or_more
   - general.bc_1020_3_corridor_capacity
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -236,6 +238,9 @@ occupancy_group:
   - general.bc_420_7_assisted_living_housing_units
   - general.bc_420_8_group_i1_cooking_facilities
   - general.bc_420_9_domestic_cooking_appliances
+  - general.bc_709_5_1_i2_smoke_barrier_doors
+  - general.bc_710_5_3_i2_pass_through_openings
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -501,6 +506,7 @@ ambulatory_care_facility:
   - general.bc_422_3_2_refuge_area
   - general.bc_422_3_3_independent_egress
   - general.bc_422_3_smoke_compartments
+  - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_table_1020_2_a_b_e_f_m_s_u
   - general.bc_table_1020_3_corridor_width
 corridors_within_dwelling_units:

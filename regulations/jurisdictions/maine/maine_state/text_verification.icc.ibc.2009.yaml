@@ -477,7 +477,7 @@ pieces:
     - '2'
     - '1'
     - '2'
-    - 51 square foot
+    - '51'
     - 1 square foot
     - 0.0929 m
     - 1 pound
@@ -671,7 +671,7 @@ pieces:
     - 15 gross
     - '15'
     - 500 gross
-    - 51 square foot
+    - '51'
     - 1 square foot
     - 0.0929 m
   1008.1.2:
@@ -895,7 +895,7 @@ pieces:
     - not exceed 50 foot
     - 15 mm
     - 240 mm
-    - 1 m
+    - '1'
     - not exceed 50 foot
     - 15 mm
     - 240 mm

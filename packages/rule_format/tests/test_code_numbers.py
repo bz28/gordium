@@ -278,18 +278,51 @@ def test_an_ifs_test_measure_never_lends_its_unit(ctx):
     assert got, "30 degrees backed a 30 in limit through an if's test measure"
 
 
-def test_a_list_items_own_number_in_a_quote_is_never_a_figure_it_states():
-    # Chapter 4 part c, review round 5: "Exceptions: 1. In open parking garages" read as 1 inch (then, with the
-    # number reader's sentence-end fix, as a count of one) let a quote back a number it never states
-    said = code_numbers.quote_statements("Exceptions: 1. In open parking garages, exit access travel distance shall "
-                                         "not exceed 400 feet. 2. In outpatient clinics, the distance shall be 250 feet.")
-    assert {v for v, _ in said} == {400, 250}
-    assert (2, "") in code_numbers.quote_statements("The stair shall have not more than 2. Where the stair")
-    building = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/new_york_state_building")
-    from rule_format.rulebook import load
-    rules = {r["id"]: r for r in load(REPO / "regulations/jurisdictions/new_york/new_york_state_building/"
-                                            "5_building_code_rules/drafted/general.yaml")["rules"]}
-    probe = copy.deepcopy(rules["general.bc_table_1017_2_f2_s2_u"])
-    assert not code_numbers.problems(probe, probe["sources"], building)
-    probe["applies_when"] = f"({probe['applies_when']}) and stories > 1"
-    assert code_numbers.problems(probe, probe["sources"], building)          # 1 is stated nowhere in its quotes
+def _rule(folder, rule_id):
+    import yaml
+    path = REPO / "regulations/jurisdictions" / folder / "5_building_code_rules/drafted/general.yaml"
+    rules = yaml.safe_load(path.read_text(encoding="utf-8"))["rules"]
+    return next(r for r in rules if r["id"] == rule_id), Context.for_jurisdiction(path.parents[2])
+
+
+def test_a_list_items_number_never_backs_a_reading_with_limit_words():
+    # 1017.3 reads "more than one" (>); the quote "Exceptions: 1. In open parking garages" prints only the list
+    # item's 1. Once the reader stopped taking "In" for inches, that bare 1 backed "more than one": stories > 1 in an
+    # applies_when would have made one-storey buildings "not applicable" (review round 1, skeptic)
+    rule, ctx = _rule("new_york/new_york_state_building", "general.bc_table_1017_2_f2_s2_u")
+    assert code_numbers.problems(rule, rule["sources"], ctx) == []
+    got = code_numbers.problems({**rule, "applies_when": "stories > 1"}, rule["sources"], ctx)
+    assert any("number 1 in 'applies_when'" in p for p in got), got
+
+
+def test_a_sections_number_is_never_compared_with_even_in_an_ifs_test():
+    # NFPA 101 16.2.5.2: "... in accordance with Section 9.7, in which case dead-end corridors shall not exceed 50 ft"
+    rule, ctx = _rule("maine/maine_state", "general.nfpa_16_2_5_2_dead_end")
+    assert code_numbers.problems(rule, rule["sources"], ctx) == []
+    got = code_numbers.problems({**rule, "check": "corridor_dead_end_length <= (50 if stories > 9.7 else 20)"},
+                                rule["sources"], ctx)
+    assert any("9.7" in p and "section" in p for p in got), got
+
+
+@pytest.mark.parametrize("change", [
+    {"applies_when": "nfpa_day_care_occupancy and stories * 9.7 <= 50"},      # a term multiplied in (review round 2)
+    {"check": "corridor_dead_end_length <= (50 if stories * 9.7 > 20 else 20)"},
+    {"review_when": [{"when": "stories > 9.7", "why": "a section's number as a count"}]}])
+def test_a_sections_number_backs_no_term_of_a_formula_nor_a_review_when(change):
+    rule, ctx = _rule("maine/maine_state", "general.nfpa_16_2_5_2_dead_end")
+    got = code_numbers.problems({**rule, **change}, rule["sources"], ctx)
+    assert any("9.7" in p and "section" in p for p in got), got
+
+
+def test_a_list_items_own_number_backs_no_reading_even_one_with_words_after_it():
+    # 1016.2 reads "two or more" (>=): limit words after the number, which _has_words doesn't see. Its item "2. In
+    # other than Group H occupancies" (once "2 inch") backed it as a bare 2 (review round 3)
+    rule, ctx = _rule("new_york/new_york_state_building", "general.bc_1016_2_intervening_spaces_other_groups")
+    source = {"file": "gov.ny.building.2025.pdf", "page": 340, "lines": [47, 48], "quote": (
+        "direct access to an exit is required by other sections of this code. 2. In other than Group H occupancies, "
+        "egress from a room or space is allowed to pass through adjoining or intervening rooms")}
+    got = code_numbers.problems({**rule, "applies_when": "stories >= 2"}, rule["sources"] + [source], ctx)
+    assert any("number 2 in 'applies_when'" in p for p in got), got
+    assert code_numbers.quote_statements("Exceptions: 1. In open parking garages") == set()
+    # a number ending a sentence after a word is a quantity, and stays
+    assert code_numbers.quote_statements("shall be not more than 2. Where") == {(2, "")}

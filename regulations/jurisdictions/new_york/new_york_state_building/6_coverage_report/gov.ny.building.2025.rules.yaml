@@ -660,6 +660,524 @@ pieces:
     heading: Accessory occupancies › Separation of occupancies
     rules:
     - general.bc_508_2_4_separation
+  703.2.1.1:
+    label: flag
+    heading: Nonsymmetrical wall construction
+    rules:
+    - general.bc_703_2_1_1_nonsymmetrical_walls
+  '703.5':
+    label: flag
+    heading: Marking and identification
+    rules:
+    - general.bc_703_5_marking
+  707.3.2:
+    label: flag
+    heading: Fire-resistance rating › Interior exit stairway and ramp construction
+    rules:
+    - general.bc_707_3_2_exit_stairway_fire_barriers
+  707.3.4:
+    label: flag
+    heading: Fire-resistance rating › Exit passageway
+    rules:
+    - general.bc_707_3_4_exit_passageway_fire_barriers
+  707.3.5:
+    label: flag
+    heading: Fire-resistance rating › Horizontal exit
+    rules:
+    - general.bc_707_3_5_horizontal_exit_separation
+  '707.4':
+    label: flag
+    heading: Exterior walls
+    rules:
+    - general.bc_707_4_exterior_walls
+  '707.5':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_707_5_continuity
+  707.5.1:
+    label: flag
+    heading: Continuity › Supporting construction
+    rules:
+    - general.bc_707_5_1_supporting_construction
+  '707.6':
+    label: flag
+    heading: Openings
+    rules:
+    - general.bc_707_6_openings
+  '707.7':
+    label: flag
+    heading: Penetrations
+    rules:
+    - general.bc_707_7_penetrations
+  707.7.1:
+    label: flag
+    heading: Penetrations › Prohibited penetrations
+    rules:
+    - general.bc_707_7_1_prohibited_penetrations
+  '707.8':
+    label: flag
+    heading: Joints
+    rules:
+    - general.bc_707_8_joints
+  '707.9':
+    label: flag
+    heading: Voids at intersections
+    rules:
+    - general.bc_707_9_voids
+  '707.10':
+    label: flag
+    heading: Ducts and air transfer openings
+    rules:
+    - general.bc_707_10_ducts
+  '708.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_708_1_which_walls_are_fire_partitions
+  '708.3':
+    label: flag
+    heading: Fire-resistance rating
+    rules:
+    - general.bc_708_3_fire_partition_rating
+  '708.4':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_708_4_fire_partition_continuity
+  708.4.1:
+    label: flag
+    heading: Continuity › Fire partition walls enclosing elevator lobbies
+    rules:
+    - general.bc_708_4_1_elevator_lobby_fire_partitions
+  708.4.2:
+    label: flag
+    heading: Continuity › Supporting construction
+    rules:
+    - general.bc_708_4_2_fire_partition_support
+  708.4.3:
+    label: flag
+    heading: Continuity › Fireblocks and draftstops in combustible construction
+    rules:
+    - general.bc_708_4_3_fireblocks_draftstops
+  '708.5':
+    label: flag
+    heading: Exterior walls
+    rules:
+    - general.bc_708_5_fire_partition_exterior_walls
+  '708.6':
+    label: flag
+    heading: Openings
+    rules:
+    - general.bc_708_6_fire_partition_openings
+  '708.7':
+    label: flag
+    heading: Penetrations
+    rules:
+    - general.bc_708_7_fire_partition_penetrations
+  '708.8':
+    label: flag
+    heading: Joints
+    rules:
+    - general.bc_708_8_fire_partition_joints
+  '708.9':
+    label: flag
+    heading: Ducts and air transfer openings
+    rules:
+    - general.bc_708_9_fire_partition_ducts
+  '709.3':
+    label: flag
+    heading: Fire-resistance rating
+    rules:
+    - general.bc_709_3_smoke_barrier_rating
+  '709.4':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_709_4_smoke_barrier_continuity
+  709.4.1:
+    label: flag
+    heading: Continuity › Smoke-barrier assemblies separating smoke compartments
+    rules:
+    - general.bc_709_4_1_smoke_compartment_barriers
+  709.4.2:
+    label: flag
+    heading: Continuity › Smoke-barrier walls enclosing areas of refuge or elevator lobbies
+    rules:
+    - general.bc_709_4_2_refuge_lobby_smoke_barriers
+  '709.5':
+    label: flag
+    heading: Openings
+    rules:
+    - general.bc_709_5_smoke_barrier_openings
+  709.5.1:
+    label: flag
+    heading: Openings › Group I-2 and ambulatory care facilities
+    rules:
+    - general.bc_709_5_1_i2_smoke_barrier_doors
+  '709.6':
+    label: flag
+    heading: Penetrations
+    rules:
+    - general.bc_709_6_smoke_barrier_penetrations
+  '709.7':
+    label: flag
+    heading: Joints
+    rules:
+    - general.bc_709_7_smoke_barrier_joints
+  '709.8':
+    label: flag
+    heading: Ducts and air transfer openings
+    rules:
+    - general.bc_709_8_smoke_barrier_ducts
+  '710.3':
+    label: flag
+    heading: Fire-resistance rating
+    rules:
+    - general.bc_710_3_smoke_partition_rating
+  '710.4':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_710_4_smoke_partition_continuity
+  710.4.1:
+    label: flag
+    heading: Continuity › Smoke partition walls enclosing elevator lobbies
+    rules:
+    - general.bc_710_4_1_elevator_lobby_smoke_partitions
+  710.5.1:
+    label: flag
+    heading: Openings › Windows
+    rules:
+    - general.bc_710_5_1_smoke_partition_windows
+  710.5.2.1:
+    label: flag
+    heading: Doors › Louvers
+    rules:
+    - general.bc_710_5_2_1_smoke_partition_door_louvers
+  710.5.2.2:
+    label: flag
+    heading: Doors › Smoke and draft control doors
+    rules:
+    - general.bc_710_5_2_2_smoke_partition_draft_control_doors
+  710.5.2.3:
+    label: flag
+    heading: Doors › Self- or automatic-closing doors
+    rules:
+    - general.bc_710_5_2_3_smoke_partition_self_closing_doors
+  710.5.3:
+    label: flag
+    heading: Openings › Pass-through openings in Group I-2, Condition 2
+    rules:
+    - general.bc_710_5_3_i2_pass_through_openings
+  '710.6':
+    label: flag
+    heading: Penetrations
+    rules:
+    - general.bc_710_6_smoke_partition_penetrations
+  '710.7':
+    label: flag
+    heading: Joints
+    rules:
+    - general.bc_710_7_smoke_partition_joints
+  '710.8':
+    label: flag
+    heading: Ducts and air transfer openings
+    rules:
+    - general.bc_710_8_smoke_partition_ducts
+  711.2.2:
+    label: flag
+    heading: Horizontal assemblies › Continuity
+    rules:
+    - general.bc_711_2_2_horizontal_assembly_continuity
+  711.2.3:
+    label: flag
+    heading: Horizontal assemblies › Supporting construction
+    rules:
+    - general.bc_711_2_3_horizontal_assembly_support
+  711.2.4:
+    label: flag
+    heading: Horizontal assemblies › Fire-resistance rating
+    rules:
+    - general.bc_711_2_4_horizontal_assembly_rating
+  711.2.4.4:
+    label: flag
+    heading: Fire-resistance rating › Separating smoke compartments
+    rules:
+    - general.bc_711_2_4_4_smoke_compartment_floors
+  711.2.4.6:
+    label: flag
+    heading: Fire-resistance rating › Other separations
+    rules:
+    - general.bc_711_2_4_6_other_horizontal_separations
+  711.3.2:
+    label: flag
+    heading: Nonfire-resistance-rated floor and roof assemblies › Continuity
+    rules:
+    - general.bc_711_3_2_unrated_floor_continuity
+  '712.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_712_1_vertical_openings
+  712.1.9:
+    label: flag
+    heading: General › Two-story openings
+    rules:
+    - general.bc_712_1_9_two_story_openings
+  '713.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_713_1_shafts_and_exit_stairways
+  '713.2':
+    label: flag
+    heading: Construction
+    rules:
+    - general.bc_713_2_shaft_construction
+  '713.4':
+    label: flag
+    heading: Fire-resistance rating
+    rules:
+    - general.bc_713_4_shaft_rating
+  '713.5':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_713_5_shaft_continuity
+  '713.6':
+    label: flag
+    heading: Exterior walls
+    rules:
+    - general.bc_713_6_shaft_exterior_walls
+  '713.7':
+    label: flag
+    heading: Openings
+    rules:
+    - general.bc_713_7_shaft_openings
+  713.7.1:
+    label: flag
+    heading: Openings › Prohibited openings
+    rules:
+    - general.bc_713_7_1_shaft_prohibited_openings
+  '713.8':
+    label: flag
+    heading: Penetrations
+    rules:
+    - general.bc_713_8_shaft_penetrations
+  713.8.1:
+    label: flag
+    heading: Penetrations › Prohibited penetrations
+    rules:
+    - general.bc_713_8_1_shaft_prohibited_penetrations
+  '713.9':
+    label: flag
+    heading: Joints
+    rules:
+    - general.bc_713_9_shaft_joints
+  '713.10':
+    label: flag
+    heading: Duct and air transfer openings
+    rules:
+    - general.bc_713_10_shaft_ducts
+  '713.11':
+    label: flag
+    heading: Enclosure at the bottom
+    rules:
+    - general.bc_713_11_shaft_bottom
+  '713.12':
+    label: flag
+    heading: Enclosure at top
+    rules:
+    - general.bc_713_12_shaft_top
+  '713.14':
+    label: flag
+    heading: Elevator, dumbwaiter and other hoistways
+    rules:
+    - general.bc_713_14_hoistways
+  '714.2':
+    label: flag
+    heading: Installation
+    rules:
+    - general.bc_714_2_penetration_firestop_installation
+  '714.3':
+    label: flag
+    heading: Sleeves
+    rules:
+    - general.bc_714_3_sleeves
+  '714.4':
+    label: flag
+    heading: Fire-resistance-rated walls
+    rules:
+    - general.bc_714_4_rated_wall_penetrations
+  714.4.1:
+    label: flag
+    heading: Fire-resistance-rated walls › Through penetrations
+    rules:
+    - general.bc_714_4_1_through_penetrations
+  714.4.1.1:
+    label: flag
+    heading: Through penetrations › Fire-resistance-rated assemblies
+    rules:
+    - general.bc_714_4_1_1_tested_assembly_penetrations
+  714.4.1.2:
+    label: flag
+    heading: Through penetrations › Through-penetration firestop system
+    rules:
+    - general.bc_714_4_1_2_through_penetration_firestop
+  714.4.2:
+    label: flag
+    heading: Fire-resistance-rated walls › Membrane penetrations
+    rules:
+    - general.bc_714_4_2_membrane_penetrations
+  714.4.3:
+    label: flag
+    heading: Fire-resistance-rated walls › Dissimilar materials
+    rules:
+    - general.bc_714_4_3_dissimilar_materials
+  '714.5':
+    label: flag
+    heading: Horizontal assemblies
+    rules:
+    - general.bc_714_5_horizontal_assembly_penetrations
+  714.5.1:
+    label: flag
+    heading: Horizontal assemblies › Through penetrations
+    rules:
+    - general.bc_714_5_1_floor_through_penetrations
+  714.5.1.1:
+    label: flag
+    heading: Through penetrations › Fire-resistance-rated assemblies
+    rules:
+    - general.bc_714_5_1_1_floor_tested_assembly_penetrations
+  714.5.1.2:
+    label: flag
+    heading: Through penetrations › Through-penetration firestop system
+    rules:
+    - general.bc_714_5_1_2_floor_firestop_systems
+  714.5.2:
+    label: flag
+    heading: Horizontal assemblies › Membrane penetrations
+    rules:
+    - general.bc_714_5_2_floor_membrane_penetrations
+  714.5.3:
+    label: flag
+    heading: Horizontal assemblies › Dissimilar materials
+    rules:
+    - general.bc_714_5_3_floor_dissimilar_materials
+  714.5.4:
+    label: flag
+    heading: Horizontal assemblies › Penetrations in smoke barriers
+    rules:
+    - general.bc_714_5_4_smoke_barrier_penetrations
+  '716.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_716_1_opening_protectives_general
+  Table 716.1(2):
+    label: flag
+    heading: Opening fire protection assemblies, ratings and markings
+    rules:
+    - general.bc_table_716_1_2__exit_enclosures
+    - general.bc_table_716_1_2__corridors
+    - general.bc_table_716_1_2__smoke_barriers
+    - general.bc_table_716_1_2__other_assemblies
+  Table 716.1(3):
+    label: flag
+    heading: Fire window assembly fire protection ratings
+    rules:
+    - general.bc_table_716_1_3__fire_windows
+  716.1.2.1:
+    label: flag
+    heading: Glazing › Safety glazing
+    rules:
+    - general.bc_716_1_2_1_safety_glazing
+  716.1.2.2:
+    label: flag
+    heading: Glazing › Marking fire-rated glazing assemblies
+    rules:
+    - general.bc_716_1_2_2_marking_glazing
+  716.1.2.2.1:
+    label: flag
+    heading: Marking fire-rated glazing assemblies › Fire-rated glazing identification
+    rules:
+    - general.bc_716_1_2_2_1_glazing_identification
+  716.1.2.2.2:
+    label: flag
+    heading: Marking fire-rated glazing assemblies › Fire-protection-rated glazing identification
+    rules:
+    - general.bc_716_1_2_2_2_fire_protection_glazing_identification
+  716.1.2.2.3:
+    label: flag
+    heading: Marking fire-rated glazing assemblies › Fire-resistance-rated glazing identification
+    rules:
+    - general.bc_716_1_2_2_3_fire_resistance_glazing_identification
+  716.2.1:
+    label: flag
+    heading: Fire door assemblies › Testing requirements
+    rules:
+    - general.bc_716_2_1_fire_door_testing
+  716.2.1.1:
+    label: flag
+    heading: Testing requirements › Side-hinged or pivoted swinging doors
+    rules:
+    - general.bc_716_2_1_1_swinging_door_tests
+  716.2.1.2:
+    label: flag
+    heading: Testing requirements › Other types of assemblies
+    rules:
+    - general.bc_716_2_1_2_other_door_tests
+  716.2.1.3:
+    label: flag
+    heading: Testing requirements › Glazing in transoms lights and sidelights in corridors and smoke barriers
+    rules:
+    - general.bc_716_2_1_3_transom_sidelight_glazing
+  716.2.1.4:
+    label: flag
+    heading: Testing requirements › Smoke and draft control
+    rules:
+    - general.bc_716_2_1_4_smoke_draft_control_test
+  716.2.2:
+    label: flag
+    heading: Fire door assemblies › Performance requirements
+    rules:
+    - general.bc_716_2_2_fire_door_performance
+  716.2.2.1:
+    label: flag
+    heading: Performance requirements › Door assemblies in corridors and smoke barriers
+    rules:
+    - general.bc_716_2_2_1_corridor_smoke_barrier_doors
+  716.2.2.1.1:
+    label: flag
+    heading: Door assemblies in corridors and smoke barriers › Smoke and draft control
+    rules:
+    - general.bc_716_2_2_1_1_smoke_draft_control
+  716.2.2.2:
+    label: flag
+    heading: Performance requirements › Door assemblies in other fire partitions
+    rules:
+    - general.bc_716_2_2_2_other_fire_partition_doors
+  716.2.2.3:
+    label: flag
+    heading: Performance requirements › Doors in interior exit stairways and ramps and exit passageways
+    rules:
+    - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
+  716.2.2.3.1:
+    label: flag
+    heading: Doors in interior exit stairways and ramps and exit passageways › Glazing in doors
+    rules:
+    - general.bc_716_2_2_3_1_glazing_in_exit_enclosure_doors
+  716.2.3:
+    label: flag
+    heading: Fire door assemblies › Fire doors
+    rules:
+    - general.bc_716_2_3_fire_doors
+  716.2.4:
+    label: flag
+    heading: Fire door assemblies › Fire door frames
+    rules:
+    - general.bc_716_2_4_fire_door_frames
   '1004.7':
     label: flag
     heading: Occupant load › Outdoor areas

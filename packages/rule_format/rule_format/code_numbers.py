@@ -30,7 +30,13 @@ wrong ("8 1/4" read as "8", a dropped "not"). Egress step 3 (2026-11-13). For ea
    upper <=. A number the walk can't place is reported, never let through. A number in an if's test, which picks which limit applies
    ("27 if stair_handrail_sides > 1 else 31.5": where handrails are on both sides), is checked by value only: a
    test written the wrong way round (">= 1") gives the looser limit to the wrong stairs and passes this check; the
-   worked examples and the answer key comparison are what catch it. review_when is checked by value only.
+   worked examples and the answer key comparison are what catch it. review_when is checked by value only. But a
+   section's number the law names ("Section 9.7, in which case": a decimal in digits, no unit, no limit words, read
+   "none") is never a quantity, so it backs no number anywhere: a comparison, an if's test, a term multiplied
+   into a formula, review_when (_named_part).
+   A reading with limit words of its own ("more than one") is backed only by a quote printing those words before
+   it, never by the bare value elsewhere in the quote (_has_words), and a list item's own number in a quote ("1. In
+   open parking garages", "this code. 2. In other than Group H") backs no reading at all (_without_list_numbers).
    A count, a degree or a percent backs only a number with no unit of its own (a count, or a coefficient such as
    the 0.5 of "one-half of the floor area"), never a length or an area.
 3. A number the verification file flags (a flag quoting it) counts only if the flag resolves it: it gives the
@@ -166,15 +172,6 @@ def _resolves(flag: str, comparison: str) -> bool:
         or "one length" in flag
 
 
-def _without_list_numbers(quote: str) -> str:
-    """A quote with its list items' own numbers taken out ("Exceptions: 1. In open parking garages", "... dwellings.
-    2. In occupancies"): a list number starts the quote or follows a sentence's end or a colon, and is followed by
-    ". ", so it is never a figure the quote states, as statements_of_lines cuts it from a piece's lines (Chapter 4 part
-    c, review round 5: "1." backed a count of one). A number ending a sentence ("not more than 2. Where") follows a
-    word and is kept."""
-    return re.sub(r"(^|[.:]\s)\d+(?:\.\d+)*\.\s", r"\1", quote)
-
-
 def _worded_statements(quote: str) -> set[tuple]:
     """(the words before it, value, unit) of every number a quote states, as the reading's own words are matched."""
     from document_extraction.numbers import statements
@@ -182,11 +179,39 @@ def _worded_statements(quote: str) -> set[tuple]:
             for s in statements(_without_list_numbers(quote)) if value_of(s["value"]) is not None}
 
 
+def _has_words(length: dict) -> bool:
+    """A reading with limit words of its own ("more than one", "not less than 36"): a quote backs it only where it
+    prints the same words before it, never by the bare value (1017.3's "more than one" was backed by "Exceptions:
+    1. In open parking garages", a list item's number)."""
+    return bool(length.get("worded") and length["worded"][0])
+
+
+def _named_part(fits: list[dict]) -> bool:
+    """Every reading a number fits is a decimal printed in digits with no unit or limit words of its own, read
+    "none": the number of a section the law names ("Section 9.7, in which case", "Section 1004.1. In each story"),
+    never a quantity, so no formula may use it anywhere. A section is never numbered 0.x, so a fraction such as the
+    0.5 of a coefficient is left to the checks below."""
+    return bool(fits) and all(c["comparison"] == "none" and not c.get("unit") and not (c.get("worded") or ("",))[0]
+                              and re.fullmatch(r"[1-9]\d*\.\d+", c["shown"].strip()) for c in fits)
+
+
 def quote_statements(quote: str) -> set[tuple]:
     """(value, unit) of every number a quote states."""
     from document_extraction.numbers import statements
     return {(value_of(s["value"]), s["unit"]) for s in statements(_without_list_numbers(quote))
             if value_of(s["value"]) is not None}
+
+
+# A list item's own number inside a quote: after the start, a stop, a colon or a semicolon, and followed by a stop
+# and a capital ("Exceptions: 1. In open parking garages", "this code. 2. In other than Group H", "3.1. Where")
+LIST_NUMBER = re.compile(r"(^|[.:;]\s+)\d+(?:\.\d+)*\.\s+(?=[A-Z\[])")
+
+
+def _without_list_numbers(quote: str) -> str:
+    """The quote with each list item's own number left out: it numbers an item, never a quantity, so it backs no
+    reading ("2. In other than Group H" once backed 1016.2's "two or more"). A number ending a sentence after a word
+    ("not more than 2. Where") is a quantity, and stays."""
+    return LIST_NUMBER.sub(lambda m: m[1], quote)
 
 
 def unverified_reading(entry: dict) -> dict:
@@ -227,7 +252,8 @@ def candidates(sources: list[dict], ctx, flag: bool = False) -> list[dict]:
             for length in lengths:
                 if not all(st in stated for st in length["statements"]):
                     continue
-                if len(ways[tuple(length["statements"])]) > 1 and length["worded"] not in worded:
+                if (len(ways[tuple(length["statements"])]) > 1 or _has_words(length)) \
+                        and length["worded"] not in worded:
                     continue
                 out.append(length | {"piece": pid})
             if not book.get("not_verified"):
@@ -420,6 +446,11 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
                        "the flag doesn't resolve it: a person decides (make the rule a flag, which needs review)")
             continue
         fits = [c for c in fits if c["resolved"]]
+        if _named_part(fits) and not all(c.get("unverified") for c in fits):   # anywhere: a test, a term, review_when
+            out.append(f"number {shown} in '{key}' is the number of a section the law names ({fits[0]['piece']}: "
+                       f"{fits[0]['shown']!r}), never a quantity: no formula may use it (a test, a term of a "
+                       "formula, review_when)")
+            continue
         if not directions or op is None:
             continue
         if op in ("==", "!="):

@@ -9,7 +9,8 @@ the field is left out or says so, never filled in.
 New fields on an item:
 
   asks        (C1, C2, C3, C5) on a row in review: one entry per thing it asks of the architect, in order, each
-              {kind, key, headline, why, elements, field?, fields?, measure?, rooms?, questions?}.
+              {kind, key, headline, why, elements, field?, fields?, measure?, rooms?, questions?, depends_on?}.
+              depends_on: on a follow-up question, the question it hangs on (depends_on() below).
               kind: "mark" (state a fact or set a mark: `field` names the description's field that answers it, so a
               host names its own mark; a field starting "facts." or "building." is a project question), "fix_model"
               (the model, as `why` says: `elements` the element ids to show), "survey" (the lot needs a survey),
@@ -85,6 +86,32 @@ FIELD_HEADLINES = {
     "facts.conversion": "Is it made by converting an existing building? (§325-3B)",
     "facts.primary_buildings_same_use": "Does every primary building hold the lot's use?",
 }
+# A follow-up question hangs on another: its parent is the fact the setup already waits on before it asks it
+# (host_core.facts.ROW_ONLY_FACTS: "is the ADU detached?" only once "is there an ADU?" is answered). The answers to
+# the parent that make the follow-up moot (every rule reading it then doesn't apply: its applies_when is false,
+# test_ui_data checks each against the rules) are below; a parent missing here (the garage's car count, whose limit
+# is the chart's) holds its follow-up back but never makes it moot.
+MOOT_WHEN = {"adu_detached": [False], "adus_on_parcel": [False], "adu_bedrooms": [False],
+             "adu_existing_building": [False],          # an attached ADU is in no accessory building
+             "adu_floor_area": [True], "primary_floor_area": [True]}    # §325-28's size limit is an attached ADU's
+
+
+def depends_on(field) -> dict | None:
+    """{"field": the parent question's field, "moot_if"?: [its answers that make this one moot]} for a follow-up
+    question's field ("facts.adu_detached"), else None. The pane holds the follow-up back until the parent is
+    answered, and drops it once the parent's answer is one of moot_if."""
+    from design_checker.host_core.facts import ROW_ONLY_FACTS
+    if not isinstance(field, str) or not field.startswith("facts."):
+        return None
+    fact = field[len("facts."):]
+    if fact not in ROW_ONLY_FACTS:
+        return None
+    out = {"field": f"facts.{ROW_ONLY_FACTS[fact]}"}
+    if fact in MOOT_WHEN:
+        out["moot_if"] = list(MOOT_WHEN[fact])
+    return out
+
+
 # the facts the site's own questions answer, by the measuring's stop that asks for them (model_measurement/stops.py)
 SITE_STOPS = {"corner_unknown": ["corner_lot"], "two_streets": ["corner_lot"], "one_street_or_two": ["corner_lot"],
               "survey_unknown": ["lot_surveyed"], "ground_unknown": ["ground_is_flat"]}
@@ -503,6 +530,10 @@ def add(view: dict, *, rules_by_id: dict, laws: list[dict], site: dict | None, v
                         why = str(a.get("why") or "").rstrip()      # a sentence of its own (marks PR round 2)
                         a["why"] = (why + ("" if not why or why[-1] in ".?!" else ".") + " " + high_rise_hint).strip()
                         a["hint"] = high_rise_hint
+            for a in got:                # a follow-up question names the one it hangs on
+                parent = depends_on(a.get("field"))
+                if parent is not None:
+                    a["depends_on"] = parent
             item["asks"] = got
         try:
             name = rule_name(item, rule)

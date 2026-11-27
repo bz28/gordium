@@ -1,5 +1,6 @@
 """Every number a piece of law states, with the words that make it a limit: the comparison words directly before it
-("not more than"), its unit after it ("inches", "square feet", "units horizontal"), and any comparison words after
+("not more than"), its unit straight after it ("inches", "square feet", "units horizontal"; never across a stop, a
+comma or a bracket, and never a sentence's capitalised "In"), and any comparison words after
 that ("or more"), also past a number and unit's conversion in brackets ("200 gross square feet (18.6 m²) or less" is
 "or less" for both numbers; never across another number, a comma or a stop). Comparison words further back ("not
 exceeding a total floor area of 200", "a minimum tread depth of 5 inches") are not caught. Used to check a book's
@@ -64,16 +65,15 @@ def statements(text: str) -> list[dict]:
         if m.start() < skip_to:
             continue
         before_text = text[:m.start()].lower().split()[-5:]
-        after_words = re.findall(r"[a-z]+|\(|\)", text[m.end():].lower())
-        if re.match(r"[.;:]", text[m.end():]):         # a sentence's end: "... Section 907. 4. In Group I-1" has no unit
-            after_words = []
+        after_words = _unit_words(text[m.end():])
         unit = next((UNITS[w] for w in after_words[:1] if w in UNITS), "")
         used = 1 if unit else 0
         if after_words[:1] and after_words[0] in TWO_WORD_UNITS and after_words[1:2] and after_words[1] in UNITS:
             unit, used = f"{after_words[0]} {UNITS[after_words[1]]}", 2
         elif after_words[:1] in (["gross"], ["net"]) and after_words[1:2] and after_words[1] in TWO_WORD_UNITS \
                 and after_words[2:3] and after_words[2] in UNITS:
-            unit, used = f"{after_words[0]} {after_words[1]} {UNITS[after_words[2]]}", 3   # "200 gross square feet"
+            # "200 gross square feet"; "30 net square feet" (BCNYS 407.10, Chapter 4 part c's conversion check)
+            unit, used = f"{after_words[0]} {after_words[1]} {UNITS[after_words[2]]}", 3
         if unit == "unit" and after_words[1:2] and after_words[1] in DIRECTIONS:
             unit, used = f"unit {after_words[1]}", 2
         # What follows, with numbers and stops kept, so a comparison word is never taken across them ("4 inches
@@ -89,6 +89,23 @@ def statements(text: str) -> list[dict]:
                     "unit": unit,
                     "after": next((a for a in AFTER if rest.startswith(a)), "")})
     return out
+
+
+UNIT_STOPS = re.compile(r"[A-Za-z]+|[()]|[,;:!?]|\.(?!\d)")
+
+
+def _unit_words(after: str) -> list[str]:
+    """The words straight after a number that can be its unit, lowercased: those before any stop, comma, colon,
+    semicolon or bracket. A unit is never taken across a sentence's or a list item's end ("less than 50. 3. In
+    courtrooms" is 50 with no unit, never 50 inches), and a capitalised "In" is a word starting a sentence, never
+    inches (a table's "IN." is). "12-inch" is still 12 inches: a hyphen joins, it does not stop; nor do digits
+    (the book's "(22 860 mm)" stays as it was read)."""
+    words = []
+    for t in UNIT_STOPS.findall(after):
+        if not t[0].isalpha() or t == "In":
+            break
+        words.append(t.lower())
+    return words
 
 
 def statements_of_lines(lines: list[str]) -> list[dict]:
