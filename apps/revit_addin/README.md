@@ -645,7 +645,7 @@ tests that read it count what they compare from the answer itself (its statuses 
 moves; the counting and its words are pinned with numbers on a small answer made in `ResultViewsTests` (`Small`).
 How we know: `tools/tests/test_make_apartment_answer.py` (the tool writes the checker's answer exactly and never an
 error, every CI job running `dotnet test` makes it first, the builds stop without it) and
-`tests/test_generated_not_committed.py` (git never tracks it).
+`packages/rule_format/tests/test_generated_not_committed.py` (git never tracks it).
 
 **Where Revit's thread went: `ui_thread`** (PR 8). Each `check_project` line from the button or the panel ends
 with `ended` (`shown`, `shown_stale`, `nothing_sent`, `cancelled`, `failed`), `answer_use`, `cancelled` (the stage

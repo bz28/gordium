@@ -4,8 +4,9 @@ renders) is made by tools/evals/make_apartment_answer.py from the checker, never
 and test_pane_answer_fresh.py failed whenever a rule change moved it (PR #181 review rounds 13 to 16), so almost every
 rule PR changed it and conflicted with every other waiting PR. These tests hold what replaced that: the tool writes the
 checker's answer exactly as the worker writes it and never writes an error; every CI job that runs the C# tests
-makes it first; and a C# build without it stops and says how to make it. That git never tracks it is
-tests/test_generated_not_committed.py's (nothing under apps/ starts a process: test_check.py's console-window check)."""
+makes it first; and a C# build without it stops and says how to make it. That git never tracks it is held by
+packages/rule_format/tests/test_generated_not_committed.py (nothing under apps/ may start a process: test_check.py's
+console-window check; and pytest collects only packages/ and apps/revit_addin/tools, never the top-level tests/)."""
 
 from __future__ import annotations
 
