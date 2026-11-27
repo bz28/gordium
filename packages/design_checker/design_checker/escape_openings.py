@@ -302,8 +302,9 @@ def _compliance(parts, rooms: list, openings, rules) -> None:
         if not held:
             why[COMPLIES] = "the law's escape-opening limits aren't read"
             continue
-        others = [complies(x, held) for x in by_room.get(o.get("within"), []) if x is not o]
-        if anywhere or o.get("within") in unread or id(o) not in good_ids:
+        where = o.get("within") if isinstance(o.get("within"), str) else None
+        others = [complies(x, held) for x in by_room.get(where, []) if x is not o]
+        if anywhere or where is None or where in unread or id(o) not in good_ids:
             others.append(None)
         if True in others:
             m[COMPLIES] = True

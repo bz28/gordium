@@ -504,3 +504,15 @@ def test_a_sleeping_room_whose_id_isnt_text_is_never_a_crash():
         escape_openings.link(parts, desc, _ny_rules())
         assert "sleeping_room_compliant_openings" not in parts["sleeping_room"][0]["measures"]
 
+
+def test_an_opening_whose_room_isnt_text_is_never_a_crash():
+    """#242's merge review (reachable from a description: an opening's `room` given as a list or a mapping): the
+    count and each opening's other-compliant fact are not known, never a crash."""
+    for where in (["b"], {"id": "b"}):
+        parts, desc = _parts(openings=[{"id": "w", "within": "b", "measures": dict(GOOD)},
+                                       {"id": "v", "within": where, "measures": dict(GOOD)}])
+        escape_openings.link(parts, desc, _ny_rules())
+        assert "sleeping_room_compliant_openings" not in parts["sleeping_room"][0]["measures"]
+        for o in parts["emergency_escape_opening"]:
+            assert "opening_room_other_compliant" not in (o.get("measures") or {}), where
+
