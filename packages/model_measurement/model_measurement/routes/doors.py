@@ -17,8 +17,10 @@ Each part says:
   reading measures them, model_measurement.interior.doors), must agree with the maker's within 1/16 in, and the
   drawing must be measurable, or that size isn't measured (which figure is the door's is unclear); where they
   agree, the smallest counts.
-- `moe_door_leaves` (count): the description's `leaves` (1, or 2 for a pair with no mullion): 1010.1.1 asks one
-  leaf of a pair for the 32 in, which a pair's clear opening doesn't show. Not given: not measured.
+- `moe_door_leaves` (count): the description's `leaves` (1, or 2 for a pair with no mullion; a pair with a mullion
+  is two openings, each needing the 32 in: 1 only where its stated clear width is the narrower leaf's own opening,
+  else 2): 1010.1.1 asks one leaf of a pair for the 32 in, which a pair's clear opening doesn't show. Not given: not
+  measured.
 - `moe_door_exit`: the door is marked an exit (`exit_kind`); `moe_door_exterior`: one side is outside;
   `moe_door_to_corridor`: one side is a room marked `corridor`; `moe_door_to_room_under_10_sf`: one side is a room
   under 10 sq ft inside its walls (1010.1.1 exception 3's storage closets). Each from the door's own sides, as the
