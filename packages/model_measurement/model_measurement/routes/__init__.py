@@ -93,17 +93,19 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
     items = {r["id"]: r for r in description.get("rooms") or [] if isinstance(r, dict) and isinstance(r.get("id"), str)}
     unknown = [u for u in description.get("unknown_spaces") or [] if isinstance(u, dict)]
     parts = {k: [] for k in KINDS}
+    toward = {}                                     # door id -> the side egress travel goes into, or why not known
     for level, story in floor.stories.items():
         uses = {rid: (items.get(rid) or {}).get("use") for rid in story.rooms}
         here = [u for u in unknown if u.get("level") == level]
-        _story_parts(story, uses, items, here, parts, clearance, description.get("building"), stairs,
-                     _links_listed(description))
+        toward.update(_egress_sides(story, _story_parts(story, uses, items, here, parts, clearance,
+                                                        description.get("building"), stairs,
+                                                        _links_listed(description))))
     for sp in parts["story"]:                            # where each story sits against the grade plane
         got = placed[sp["id"]]
         sp["measures"].update(got["measures"])
         sp["not_measured"].update(got["not_measured"])
         sp["more"].update(got["more"])
-    parts["means_of_egress_door"] = door_parts(description, floor)   # every door given (section group 6a)
+    parts["means_of_egress_door"] = door_parts(description, floor, toward)   # every door given (section group 6a)
     if floor.stops:                                      # a part that can't be placed on a story: none is "none"
         for u in unknown:
             if u.get("level") not in floor.stories:
@@ -171,7 +173,9 @@ def _readings(part, name, readings, words) -> None:
     part["not_measured"][name] = Stop("readings", question=question, words=words).reason
 
 
-def _story_parts(story, uses, items, unknown, parts, r, building, stairs, listed=()) -> None:
+def _story_parts(story, uses, items, unknown, parts, r, building, stairs, listed=()):
+    """The story's parts; returns its rooms' exit access ({room id: {door id: ...}} or a Stop), None where its routes
+    aren't measured."""
     sp = _part(story.level, story.name)
     parts["story"].append(sp)
     routes = None
@@ -225,6 +229,60 @@ def _story_parts(story, uses, items, unknown, parts, r, building, stairs, listed
             parts["corridor"].append(cp)
     for u in unknown:
         _maybe_parts(u, story.level, parts)
+    return access if routes is not None else None
+
+
+def _egress_sides(story, access) -> dict:
+    """{door id: the side (a room id, or "outside") egress travel goes into through it, or the Stop why that isn't
+    known} for each door the story's routes read (section group 6b, 1010.1.2.1: "swing in the direction of egress
+    travel"). Known only where the door can carry egress one way alone (review round 1 of section group 6b):
+
+    - A door into an exit enclosure or passageway (the room it enters): into the exit, only where that room has its own
+      door to outside on this story marked an exterior exit door at discharge (an unmarked one may be a way in: review
+      round 7), or the story has no door to outside at all, so the door can't be the exit's discharge (1028.1's
+      discharge through a lobby or corridor runs out of the stair through it). A horizontal exit:
+      not known (the routes count it an exit for the rooms on both its sides; it is often used both ways, 1026). An
+      exterior exit door at the level of exit discharge: outside; any other exit door with outside on one side (a
+      stair's door onto an occupiable roof, whose occupants egress into the stair: 1004.7): not known.
+    - Any other door to outside (not marked an exit): not known. Only a door marked an exterior exit door at the level
+      of exit discharge surely leads out (exits are marked, never guessed); an unmarked one may be a patio's, an
+      exterior walkway's or a balcony's way in, on any story, the building's lowest included where the model holds only
+      some of its stories (review rounds 4 to 6).
+    - Any other: away from the one room whose exit access it is (a door from which a route reaches an exit without
+      coming back into the room), only where that room is stated end-only (sleeping, an end-only use, lockable, or
+      pass_through stated false: `end_only_stated`), so no one else's route runs back through the door into it (a
+      corridor's occupants crossing a lobby to its own front door); a room whose crossing isn't stated may be crossed
+      (review rounds 1 and 2).
+
+    Else not known; a story whose routes aren't measured: every door not known."""
+    out = {}
+    outside_doors = {d.id for d in story.doors.values() if OUTSIDE in d.sides}
+    unclear = lambda d: Stop("egress_side_unclear", name=d.name)
+    for d in story.doors.values():
+        if access is None:
+            out[d.id] = Stop("story_not_measured", reasons="; ".join(story.stops))
+            continue
+        if d.exit_kind:
+            if OUTSIDE in d.sides:                   # only an exterior exit door at discharge surely leads out (round 3:
+                out[d.id] = OUTSIDE if d.exit_kind == "exterior_at_discharge" else unclear(d)   # a roof's door
+            elif d.exit_kind in ("exit_enclosure", "exit_passageway") and d.exit_id in d.sides:
+                own_outside = any(d.exit_id in story.doors[o].sides and story.doors[o].exit_kind == "exterior_at_discharge"
+                                  for o in outside_doors)       # round 7: an unmarked one may be a way in
+                out[d.id] = d.exit_id if own_outside or not outside_doors else unclear(d)
+            else:
+                out[d.id] = unclear(d)
+            continue
+        if OUTSIDE in d.sides:                       # round 4: only an exit's own way out (a balcony's door back in)
+            out[d.id] = unclear(d)
+            continue
+        rooms = [s for s in d.sides if s != OUTSIDE]
+        if any(isinstance(access.get(s), Stop) for s in rooms):
+            out[d.id] = unclear(d)
+            continue
+        from_ = [s for s in rooms if d.id in (access.get(s) or {})]
+        room = story.rooms.get(from_[0]) if len(from_) == 1 else None
+        out[d.id] = next(s for s in rooms if s != from_[0]) if room is not None and room.end_only_stated else unclear(d)
+    return out
 
 
 def _maybe_parts(u, level, parts) -> None:

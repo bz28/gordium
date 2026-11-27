@@ -3,7 +3,9 @@ each test names the spec criterion it pins. Results come from the checker; prese
 cautious, so most of these check that something is never shown as complying without evidence."""
 
 import ast
+import copy
 import json
+import random
 import re
 import sys
 from pathlib import Path
@@ -1137,6 +1139,92 @@ def test_side_yards_are_named_by_the_true_compass_on_a_turned_plan():
     assert {"Side yard, East", "Side yard, West"} <= names
 
 
+_LAWS_ONCE = {}
+
+
+@pytest.fixture
+def same_laws(monkeypatch):
+    """Many-house tests read the place's laws once, in the test only (the checker keeps no cache: one was tried
+    and taken out for stale-law bugs, docs/decisions/2026-11-23_laws_validation_speed.md). check_site asks
+    egress.laws for them on every call, and that re-checks the state law's whole rulebook each time (about 70% of
+    a call); between two houses it can't change (the same place, no file touched), so every check_site here is the
+    real one, run on laws read by the real egress.laws, each call getting its own deep copy (a deep copy shares
+    functions, so each law's section lookup and its table are shared; nothing writes to them, and the guard
+    below compares the table). Only for CITY; any other place is read as usual. It can't hide a stale-law bug:
+    these tests check the advice, not the reading of the laws, and after each test a fresh read must still
+    equal the reused one (a file changed, a shared table changed, or a result captured under another test's
+    patch, fails)."""
+    from design_checker import egress
+    real = egress.laws
+    if CITY not in _LAWS_ONCE:
+        _LAWS_ONCE[CITY] = real(CITY)
+    monkeypatch.setattr(egress, "laws",
+                        lambda j: copy.deepcopy(_LAWS_ONCE[CITY]) if j == CITY else real(j))
+    yield
+    assert _by_value(real(CITY)) == _by_value(_LAWS_ONCE[CITY]), "the laws reused are no longer a fresh read's"
+
+
+def _by_value(found):
+    """egress.laws's answer with each law's `section_of` (a new function on every read) as the code and the table
+    it reads, so two reads compare by what they hold."""
+    return {**found, "laws": [{**law, "section_of": law["section_of"] and (
+        law["section_of"].__code__, [c.cell_contents for c in law["section_of"].__closure__])}
+        for law in found["laws"]]}
+
+
+def test_two_reads_of_the_laws_compare_equal_and_a_changed_one_does_not():
+    """same_laws's guard really compares: a second read equals the first, and one changed section table, rule or
+    problem doesn't."""
+    import types
+    from design_checker import egress
+    a, b = egress.laws(CITY), egress.laws(CITY)
+    assert a != b and _by_value(a) == _by_value(b)                 # plain == fails only on the new function
+    n, law = next((n, law) for n, law in enumerate(a["laws"]) if law["section_of"] and law["rules"])
+    f = law["section_of"]
+    (spans,) = [c.cell_contents for c in f.__closure__]
+    changed = {**spans, next(iter(spans)): []}
+    other = types.FunctionType(f.__code__, f.__globals__, f.__name__, f.__defaults__, (types.CellType(changed),))
+
+    def with_law(**change):
+        return {**a, "laws": [{**x, **change} if i == n else x for i, x in enumerate(a["laws"])]}
+    assert _by_value(with_law(section_of=other)) != _by_value(a)
+    assert _by_value(with_law(rules=law["rules"][1:])) != _by_value(a)
+    assert _by_value(with_law(problems=["stale"])) != _by_value(a)
+
+
+def _random_houses():
+    """The 80 random houses, drawn from Random(21) in the order the single test drew them (a fixed list, so any
+    chunk of it is the same houses): (k, surveyed, x0, y0, x1, y1, height)."""
+    rnd = random.Random(21)
+    out = []
+    for k in range(80):
+        x0, y0 = rnd.uniform(4, 14), rnd.uniform(18, 30)
+        x1, y1 = rnd.uniform(36, 47), rnd.uniform(70, 82)
+        out.append((k, k % 2 == 0, x0, y0, x1, y1, rnd.choice((30, 35, 36.5, 38))))
+    return out
+
+
+# The 80 houses run in 8 chunks of 10 (as one test they took about 913 s on CI, past its 900 s per-test limit).
+# Each chunk asserts its share: at least 2 hints followed on a survey and 2 on the tax map (8 x 2 = 16, the whole
+# test's 15 or more on each; a run of all 80 followed 12-20 of each per chunk), and every kind the whole test
+# required that a run of all 80 found in that chunk (the "if it stays tall" figure only in house 78), so each
+# required kind is still required of a chunk that has it (checked below, without running a house).
+_CHUNKS = {f"houses_{a:02d}_{a + 9:02d}": range(a, a + 10) for a in range(0, 80, 10)}
+_EACH_TRIED = 2
+_KINDS_REQUIRED = {("need", True), ("need", False), ("lower", False), ("tall", False)}
+_KINDS_IN = {**dict.fromkeys(_CHUNKS, {("need", True), ("need", False), ("lower", False)}),
+             "houses_70_79": _KINDS_REQUIRED}
+
+
+def test_the_house_chunks_cover_all_80_houses_and_every_kind_the_whole_test_required():
+    """The split keeps the single test's guarantee: every house is in exactly one chunk, the chunks' "followed"
+    shares add up to at least 15 on each kind of lot, and every required kind is asserted by some chunk."""
+    ks = sorted(k for r in _CHUNKS.values() for k in r)
+    assert ks == list(range(80)) == [h[0] for h in _random_houses()]
+    assert _EACH_TRIED * len(_CHUNKS) >= 15
+    assert set(_KINDS_IN) == set(_CHUNKS) and _KINDS_REQUIRED <= set().union(*_KINDS_IN.values())
+
+
 def _feet(text):
     """4'-11 3/8" -> 4.921875 (feet_inches read back)."""
     import re
@@ -1145,22 +1233,11 @@ def _feet(text):
     return int(ft) + (int(inch) + int(num) / int(den)) / 12
 
 
-def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a_survey():
-    """The architect's review (pass 2, P1): on a tax-map lot "To comply" gave the shortfall as drawn, and moving
-    by it left the side yard needing review. The advice comes from the verdict's own reading set and the checker
-    confirms each piece (check.confirm_advice). For random houses on the plain lot, tax map and survey, doing
-    exactly what a row's "To comply" says (a yard: that wall pulled back by the figure, the house's height kept; the
-    height: the roof lowered, or the front yard made deeper) makes that row COMPLY and leaves no row worse (review
-    round 4: a whole-building move it said before broke other yards). The wording, the coordinator's: the
-    requirement first, "keep every part of the building at least 12'-0" from the west side lot line as drawn (10'-0"
-    required, the lot lines ±2'-0") — now 7'-0 5/8" at its closest"; on the tax map "whatever the survey shows" and the as-drawn
-    figure, on a survey one number; a yard the height bonus raises also says what it needs "if it stays 36'-6"
-    tall", or that alone when its own figure wouldn't do while it stays that tall."""
-    import random
-    import re
+def _follow_to_comply(houses):
+    """For each house, check it, then do exactly what each yard or height row's "To comply" says and check again:
+    that row must COMPLY and no row get worse. Returns (followed on a survey / on the tax map, kinds followed)."""
     from design_checker.check import check_site
     from test_measure import lot as lot_of
-    rnd = random.Random(21)
     plain = lot_of([(0, 0), (50, 0), (50, 100), (0, 100)])
     pull = {"Side yard, West": (1, 0), "Side yard, East": (-1, 2), "Front yard": (1, 1), "Rear yard": (-1, 3)}
     lines = {"Side yard, West": "the west side lot line", "Side yard, East": "the east side lot line",
@@ -1178,11 +1255,7 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
                         r" as drawn\))? deeper, keeping the other yards")
     tried = {True: 0, False: 0}
     kinds = set()
-    for k in range(80):
-        surveyed = k % 2 == 0
-        x0, y0 = rnd.uniform(4, 14), rnd.uniform(18, 30)
-        x1, y1 = rnd.uniform(36, 47), rnd.uniform(70, 82)
-        h = rnd.choice((30, 35, 36.5, 38))
+    for k, surveyed, x0, y0, x1, y1, h in houses:
         facts = {**FACTS, "jurisdiction": CITY, "lot_surveyed": surveyed}
         rows = {i["name"]: i for i in check_site(_plot(box(x0, y0, x1, y1, 0, h), lot_=plain), facts)["view"]["items"]}
 
@@ -1237,8 +1310,34 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
                         c[at] += sign * _feet(d.group(2))
                         follow(c, h, name, part)
                         kinds.add(("deeper", bool(d.group(3))))
-    assert tried[True] >= 15 and tried[False] >= 15, tried          # both kinds of lot really exercised
-    assert {("need", True), ("need", False), ("lower", False), ("tall", False)} <= kinds, kinds
+    return tried, kinds
+
+
+@pytest.mark.parametrize("chunk", list(_CHUNKS))
+def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a_survey(chunk, same_laws):
+    """The architect's review (pass 2, P1): on a tax-map lot "To comply" gave the shortfall as drawn, and moving
+    by it left the side yard needing review. The advice comes from the verdict's own reading set and the checker
+    confirms each piece (check.confirm_advice). For random houses on the plain lot, tax map and survey, doing
+    exactly what a row's "To comply" says (a yard: that wall pulled back by the figure, the house's height kept; the
+    height: the roof lowered, or the front yard made deeper) makes that row COMPLY and leaves no row worse (review
+    round 4: a whole-building move it said before broke other yards). The 80 houses run in 8 chunks, each asserting
+    its own share of the coverage (_CHUNKS); the wording, word for word, is the next test."""
+    houses = [h for h in _random_houses() if h[0] in _CHUNKS[chunk]]
+    tried, kinds = _follow_to_comply(houses)
+    assert tried[True] >= _EACH_TRIED and tried[False] >= _EACH_TRIED, tried   # both kinds of lot really exercised
+    assert _KINDS_IN[chunk] <= kinds, (chunk, kinds)
+
+
+def test_to_comply_says_the_requirement_word_for_word_and_doing_it_makes_the_row_comply(same_laws):
+    """The wording, the coordinator's: the requirement first, "keep every part of the building at least 12'-0" from
+    the west side lot line as drawn (10'-0" required, the lot lines ±2'-0") — now 7'-0 5/8" at its closest"; on the
+    tax map "whatever the survey shows" and the as-drawn figure, on a survey one number; a yard the height bonus
+    raises also says what it needs "if it stays 36'-6" tall", or that alone when its own figure wouldn't do while it
+    stays that tall. (Split from the 80 random houses above for time, every assert kept.) Plus the fixed cases
+    review rounds found (a lot's own size, the raised yard, G1 and G3)."""
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    plain = lot_of([(0, 0), (50, 0), (50, 100), (0, 100)])
     # the coordinator's case, word for word: a west side yard 2'-11 3/8" short as drawn; and the others
     words = {}
     for surveyed in (False, True):

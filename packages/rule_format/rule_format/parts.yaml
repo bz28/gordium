@@ -284,9 +284,9 @@ corridor:
 means_of_egress_door:
   meaning: "A door in a means of egress of the building: for Maine's rules (IBC 2009 1008.1.2 'egress doors'; NFPA 101 2012 16.2.2.2), as the architect marks it, not a door within a dwelling unit; for the 2025 Building Code of New York State (section group 6a), every door the interior description gives (model_measurement/routes/doors.py), doors within dwelling and sleeping units included, the rules' own exceptions deciding which ask what of it"
   measures:
-    moe_door_swinging:        {unit: yes_no, meaning: "The door is of the pivoted or side-hinged swinging type (IBC 2009 1008.1.2)"}
+    moe_door_swinging:        {unit: yes_no, meaning: "The door is of the pivoted or side-hinged swinging type (IBC 2009 1008.1.2); for the 2025 Building Code of New York State (1010.1.2: side-hinged swinging, pivoted or balanced), from the description's door `operation` (model_measurement/routes/doors.py: side_hinged yes; sliding, folding, pocket no; other not measured)"}
     moe_door_occupant_load:   {unit: count, meaning: "Occupant load the door serves: the occupants of every space whose egress passes through it (IBC 2009 1008.1.2, 1004.1)"}
-    moe_door_swings_with_egress: {unit: yes_no, meaning: "The door swings in the direction of egress travel (IBC 2009 1008.1.2)"}
+    moe_door_swings_with_egress: {unit: yes_no, meaning: "The door swings in the direction of egress travel (IBC 2009 1008.1.2; 2025 Building Code of New York State 1010.1.2.1): the side it swings into (the description's `swings_into`) is the side egress travel goes into through it, as the routes find it (into an exit door's exit or outside; else away from the one room it is an exit access door of)"}
     moe_door_area_occupant_load: {unit: count, meaning: "Occupant load of the area the door is in a required means of egress from (NFPA 101 2012 16.2.2.2.2: 'an area having an occupant load of 100 or more persons')"}
     moe_door_latched:         {unit: yes_no, meaning: "The door is provided with a latch or lock"}
     moe_door_panic_hardware:  {unit: yes_no, meaning: "The door's latch or lock is panic hardware or fire exit hardware complying with NFPA 101 2012 7.2.1.7 (3.3.133.1, 3.3.133.2)"}
