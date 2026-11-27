@@ -111953,9 +111953,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "d872cca2304ef49a3e2e0a5260112c7d2087fbeafe408a4a1ab4fb8b8205b1e2",
+  "worker_fingerprint": "ee8982a4100da2954fd254eb6c2e38e20b2f39e5e7a719aa5b48eac1848e286f",
   "rulebook": {
-   "new_york/ithaca_city": "06928f6bd257397b1fc1b87dda10a32cd019731f5ee0a0f9b3f654587c9f3f3b"
+   "new_york/ithaca_city": "4f1cbba1a5aade091d0dd96f322ff46098cbc193a8e5b7ec10acf0ba306058e1"
   }
  }
 }
