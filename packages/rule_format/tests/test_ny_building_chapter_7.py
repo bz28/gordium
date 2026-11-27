@@ -286,3 +286,119 @@ def test_every_section_a_chapter_7_note_names_is_brought_in_or_in_the_readmes_li
             if gone:
                 missing[r["id"]] = gone
     assert not missing, missing
+
+
+def test_part_b_review_round_1s_notes_say_what_the_tables_say(book):
+    """Part b review round 1 (2026-11-26), read on the page images of Tables 716.1(2) and 716.1(3): double fire walls'
+    doors are 3, 1 1/2 and 1 hours (not the walls' 3, 2 and 1); a window in a 1-hour fire partition is 3/4 hour; 716.1's
+    note names 1020.2.1 for elevator hoistway doors, not corridors."""
+    other = _shown_note([r for r in book if r["id"] == "general.bc_table_716_1_2__other_assemblies"][0])
+    assert "a door rated 3, 1 1/2 and 1 hours" in other
+    windows = _shown_note([r for r in book if r["id"] == "general.bc_table_716_1_3__fire_windows"][0])
+    assert "fire partitions rated 1 hour, 3/4 hour" in " ".join(windows.split())
+    general = _shown_note([r for r in book if r["id"] == "general.bc_716_1_opening_protectives_general"][0])
+    assert "elevator hoistway doors 1020.2.1" in general and "rated corridors 1020.2.1" not in general
+
+
+# Tables 716.1(2) and 716.1(3), typed row by row from the page images (PDF pp.184-186; never from the rules or the
+# extracted text, which loses the stacked fractions): for each flag, each row's own words in the note (an anchor that
+# starts the row's clause) and what the page prints for that row, each looked for only inside the row's own clause
+# (up to the next ";" or sentence end outside brackets), so one row's numbers can't stand in for another's
+CHART_716 = {
+    "general.bc_table_716_1_2__exit_enclosures": [
+        ("an interior exit ramp rated 2 hours", ["at least 1 1/2 hours"]),
+        ("in such an enclosure rated 1 hour", ["exit access stairway or ramp enclosure", "exit passageway", "at least 1 hour"]),
+        ("A vision panel", ["at most 100 square inches", "D-H-T-W-90 (2 hours)", "D-H-T-W-60 (1 hour)",
+                            "D-H-90 or D-H-60 up to 100 square inches"]),
+        ("sidelights and transoms", ["W-120", "W-60", "fire-protection-rated glazing is not permitted"])],
+    "general.bc_table_716_1_2__corridors": [
+        ("a door in a corridor wall rated 1 hour or 1/2 hour", ["at least 1/3 hour (20 minutes)", "D-20", "3/4 hour (D-H-OH-45) in a 1-hour wall",
+                                                               "1/3 hour (D-H-OH-20) in a 1/2-hour wall"])],
+    "general.bc_table_716_1_2__smoke_barriers": [
+        ("smoke barriers rated 1 hour", ["at least 1/3 hour (20 minutes)", "D-20", "3/4 hour (D-H-OH-45)"])],
+    "general.bc_table_716_1_2__other_assemblies": [
+        ("in fire walls and fire barriers rated over 1 hour", ["a door rated 3 hours in a 4-hour or 3-hour wall",
+                                                               "1 1/2 hours in a 2-hour or 1 1/2-hour wall"]),
+        ("in double fire walls per NFPA 221", ["a single-wall rating of 4, 3 or 2 hours", "each wall 3, 2 or 1 hours",
+                                               "a door rated 3, 1 1/2 and 1 hours"]),
+        ("horizontal exits in fire walls", ["3 hours"]),
+        ("other fire barriers rated 1 hour", ["3/4 hour"]),
+        ("other fire partitions", ["3/4 hour in a 1-hour wall", "1/3 hour in a 1/2-hour wall"]),
+        ("exterior walls", ["1 1/2 hours in a 3-hour or 2-hour wall", "3/4 hour in a 1-hour wall"]),
+        ("in a wall rated over 1 hour", ["sidelights and transoms are fire-resistance-rated glazing only",
+                                         "vision panel of fire-protection-rated glazing is at most 100 square inches",
+                                         "fire-resistance-rated only (note a)"]),
+        ("in a 2-hour exterior wall", ["fire-protection-rated 1 1/2 hours (D-H-OH-90)", "fire-resistance-rated 2 hours (W-120)"]),
+        ("in other fire barriers and fire partitions rated 1 hour", ["D-H-45 (3/4 hour)", "1/2-hour fire partitions D-H-20 (1/3 hour)"])],
+    "general.bc_table_716_1_3__fire_windows": [
+        ("a fire window in a fire wall or a fire barrier", ["is not permitted", "W with the wall's own rating"]),
+        ("in atrium separations", ["(707.3.6)", "(707.3.7)", "(707.3.9) rated 1 hour, 3/4 hour (OH-45", "or W-60)"]),
+        ("in fire partitions", ["rated 1 hour, 3/4 hour (OH-45 or W-60)", "rated 1/2 hour, 1/3 hour (OH-20 or W-30)"]),
+        ("in smoke barriers", ["rated 1 hour, 3/4 hour (OH-45 or W-60)"]),
+        ("in exterior walls", ["1 1/2 hours where rated over 1 hour", "3/4 hour where 1 hour", "1/3 hour where 1/2 hour"]),
+        ("never in a party wall", [])],
+}
+
+
+def _clause(note: str, anchor: str) -> str:
+    """The note's words from `anchor` to the end of its clause: the next ";" or ". " outside brackets."""
+    i = note.index(anchor)
+    depth = 0
+    for j in range(i, len(note)):
+        c = note[j]
+        depth += (c == "(") - (c == ")")
+        if depth == 0 and (c == ";" or note.startswith(". ", j)):
+            return note[i:j]
+    return note[i:]
+
+
+def _chart_misses(notes: dict) -> list:
+    out = []
+    for rid, rows in CHART_716.items():
+        note = " ".join(notes[rid].split())
+        for anchor, values in rows:
+            if anchor not in note:
+                out.append((rid, anchor))
+                continue
+            clause = _clause(note, anchor)
+            out += [(rid, anchor, v) for v in values if v not in clause]
+    return out
+
+
+def test_table_716s_flags_chart_match_the_page(book):
+    """Part b review rounds 1 and 2's class: each row of Tables 716.1(2) and 716.1(3), typed from the page image, is in
+    its flag's shown note with the rating and markings the page prints, inside that row's own clause (two rows had been
+    read off the jumbled extracted text, and a first chart let one row's numbers stand in for another's)."""
+    notes = {rid: _shown_note([r for r in book if r["id"] == rid][0]) for rid in CHART_716}
+    assert _chart_misses(notes) == []
+
+
+def test_the_chart_catches_a_row_changed(book):
+    """The pin: each change review round 2 tried, made to a copy of the notes, is caught."""
+    notes = {rid: " ".join(_shown_note([r for r in book if r["id"] == rid][0]).split()) for rid in CHART_716}
+    other, windows, exits = ("general.bc_table_716_1_2__other_assemblies", "general.bc_table_716_1_3__fire_windows",
+                             "general.bc_table_716_1_2__exit_enclosures")
+    changes = [(other, "other fire partitions, 3/4 hour in a 1-hour wall", "other fire partitions, 1/3 hour in a 1-hour wall"),
+               (windows, "(707.3.9) rated 1 hour, 3/4 hour", "(707.3.9) rated 1 hour, 1/3 hour"),
+               (windows, "fire barrier is not permitted", "fire barrier is permitted"),
+               (other, "single-wall rating of 4, 3 or 2 hours", "single-wall rating of 4, 3 or 1 hours"),
+               (exits, "D-H-T-W-90", "D-H-W-90"),
+               (other, "4-hour or 3-hour wall", "4-hour wall"),
+               (exits, "D-H-T-W-90 (2 hours) or D-H-T-W-60 (1 hour)", "D-H-T-W-90 (1 hour) or D-H-T-W-60 (2 hours)"),
+               (exits, "D-H-60 up to 100 square inches", "D-H-60 up to 200 square inches"),
+               (other, "fire-resistance-rated glazing only", "fire-resistance-rated glazing"),
+               ("general.bc_table_716_1_2__corridors", "(20 minutes)", "(45 minutes)")]
+    for rid, a, b in changes:
+        assert a in notes[rid], a
+        assert _chart_misses({**notes, rid: notes[rid].replace(a, b)}), (rid, a)
+
+
+
+
+def test_part_b_review_round_2s_notes_keep_their_sections_scope(book):
+    """Part b review round 2: 716.2.1.3 is about corridor and smoke barrier door assemblies (its heading), and
+    716.2.1.4's corridor and smoke barrier doors are examples, not the whole list (elevator lobby doors, 3006.3)."""
+    glazing = _shown_note([r for r in book if r["id"] == "general.bc_716_2_1_3_transom_sidelight_glazing"][0])
+    assert "in a corridor or a smoke barrier" in glazing
+    smoke = _shown_note([r for r in book if r["id"] == "general.bc_716_2_1_4_smoke_draft_control_test"][0])
+    assert "for one" in smoke and "3006.3" in smoke
