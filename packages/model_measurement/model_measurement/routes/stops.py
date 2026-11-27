@@ -144,6 +144,8 @@ STOPS = {
     "place_story_no_rooms": "the level {name} has no rooms: it isn't placed as a story",
     "place_floor_not_read": "the floor elevation of the room {name} isn't read: {reason}",
     "place_level_not_read": "the elevation of the level {name} isn't read",
+    "place_levels_disagree": "the model gives the level {name} two heights (its levels and its list of every level "
+                             "disagree): which is right isn't known",
     "place_under_lowest": "the lowest level is {gap} above the lowest ground stated: a story with no level of its own "
                           "(an undercroft drawn from the level above) may stand under it",
     "place_story_spread": "the rooms of {name} have floors {spread} apart: they may be two stories (a room drawn on a "

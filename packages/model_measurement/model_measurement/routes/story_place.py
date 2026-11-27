@@ -154,6 +154,15 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
             return none(Stop("place_level_not_read", name=name).reason)
     if any(lid not in elevation for lid in stories):
         return none(Stop("place_levels_not_all").reason)
+    for item in description.get("levels") if isinstance(description.get("levels"), list) else []:
+        lid = item.get("id") if isinstance(item, dict) else None
+        if isinstance(lid, str) and lid in elevation:    # the stories' levels and every level must agree on a height
+            try:
+                z = reader.length(item.get("elevation"), "its elevation")
+            except (InteriorStop, TypeError, AttributeError):
+                return none(Stop("place_level_not_read", name=names[lid]).reason)
+            if abs(z - elevation[lid]) > SAME:
+                return none(Stop("place_levels_disagree", name=names[lid]).reason)
     for lid, (f_lo, f_hi) in list(floors.items()):       # the level's own floor too: an enclosed space with no
         z = elevation[lid]                               # room drawn in it is on it, its floor not given
         floors[lid] = (min(f_lo, z), max(f_hi, z))
@@ -282,15 +291,20 @@ def _stated_ground(description, reader) -> list | None:
     """Every finished ground level the description states at an opening (`ground_outside`: one value or a list) and
     every area well's floor, in inches; None where one is given but can't be read."""
     out = []
-    for o in (description or {}).get("openings") or []:
+    openings = (description or {}).get("openings") if isinstance(description, dict) else None
+    if openings is not None and not isinstance(openings, list):
+        return None                                      # openings that aren't a list: their ground isn't read
+    for o in openings or []:
         if not isinstance(o, dict):
-            continue
+            return None                                  # an opening that isn't one: its ground isn't read
         given = o.get("ground_outside")
         well = o.get("area_well")
         try:
             for v in (given if isinstance(given, list) else [] if given is None else [given]):
                 out.append(reader.length(v, "the ground outside an opening"))
-            if isinstance(well, dict) and well.get("floor_elevation") is not None:
+            if well is not None and not (isinstance(well, dict) and well.get("floor_elevation") is not None):
+                return None                              # a well whose floor can't be read: the lowest ground isn't
+            if well is not None:
                 out.append(reader.length(well["floor_elevation"], "an area well's floor"))
         except InteriorStop:
             return None

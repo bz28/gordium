@@ -109,13 +109,38 @@ def factors_of(path) -> dict:
     return {"functions": data["functions"], "increase_cap": data["increase_cap"]["sq_ft_per_occupant"]}
 
 
+UNREAD_ROOMS = ("a room of the description can't be read (not a room, an id that isn't text, or an id two rooms "
+                "share), so which room each occupant load is isn't known and no story's total is: never one with a "
+                "room left out")
+
+
+def readable_rooms(description) -> tuple[dict, bool]:
+    """The description's rooms by id, and whether every room was read: a room that isn't a mapping, or whose id
+    isn't text or is two rooms', is never indexed (an id of any other kind can't be a key, and two can't share one)
+    and makes the second False."""
+    given = (description or {}).get("rooms") if isinstance(description, dict) else None
+    if not isinstance(given, list):
+        return {}, given is None
+    ids = [r.get("id") if isinstance(r, dict) else None for r in given]
+    texts = [i for i in ids if isinstance(i, str)]
+    shared = {i for i in texts if texts.count(i) > 1}
+    rooms = {r["id"]: r for r in given if isinstance(r, dict) and isinstance(r.get("id"), str) and r["id"] not in shared}
+    return rooms, len(rooms) == len(given)
+
+
 def apply(parts: dict, description: dict, factors: dict, building: dict | None) -> dict:
-    rooms = {r["id"]: r for r in (description or {}).get("rooms") or [] if isinstance(r, dict) and "id" in r}
+    rooms, every = readable_rooms(description)
     increase_ruled_out = isinstance(building, dict) and building.get("occupant_load_increased") is False
     cap = factors["increase_cap"]
     spaces = parts.get("space") or []
     corridors = {c["id"]: c for c in parts.get("corridor") or [] if isinstance(c, dict) and "id" in c}
     for story in parts.get("story") or []:
+        if not every:                                    # a room left out: no load is known, never a smaller one
+            for p in [p for p in spaces if p.get("within") == story["id"]]:
+                p["not_measured"]["space_occupant_load"] = UNREAD_ROOMS
+            story["not_measured"]["story_occupant_load"] = UNREAD_ROOMS
+            _corridor_loads(story, [c for c in corridors.values() if c.get("within") == story["id"]], building)
+            continue
         mine = [p for p in spaces if p.get("within") == story["id"]]
         gross = story["measures"].get("story_gross_floor_area")
         loads, open_, lacking = [], [], []
