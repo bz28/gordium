@@ -45,6 +45,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - run: pip install -e ".[dev]"
+      # compile, then freeze: each state law's certificate (gitignored while rules are draft), before anything reads it
+      - name: Publish each state law (refused if it has problems; rule_format/published.py)
+        run: python -m rule_format publish
       - name: Tests (this part, on every CPU)
         run: pytest -n auto --dist worksteal --shard ${{ matrix.part }}/${{ env.SHARDS }}
 
@@ -62,12 +65,17 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - run: pip install -e ".[dev]"
+      # compile, then freeze: each state law's certificate (gitignored while rules are draft), before anything reads it
+      - name: Publish each state law (refused if it has problems; rule_format/published.py)
+        run: python -m rule_format publish
       - name: The test parts add up to the whole suite (every test in exactly one part)
         run: python tests/check_shards.py ${{ env.SHARDS }}
       - name: Extracted text matches a fresh extraction (reproducible)
         run: python -m document_extraction --check
       - name: Rule files are valid (sources, quotes, worked examples, section labels)
         run: python -m rule_format
+      - name: Each law certificate is exactly what a fresh compile gives (byte for byte, every input named)
+        run: python -m rule_format publish --check
       - name: Every line of the law is in exactly one piece; coverage report is current (no AI)
         run: python -m section_labeling coverage --check
       - name: The residential coverage audit (every rule and flag piece x district) matches a fresh build (no AI)
@@ -114,6 +122,9 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -e ".[dev]"
+      # compile, then freeze: each state law's certificate (gitignored while rules are draft), before anything reads it
+      - name: Publish each state law (refused if it has problems; rule_format/published.py)
+        run: python -m rule_format publish
       # the pinned SDK (global.json, which brings the .NET 10 runtime) and the .NET 8 runtime: the client is built
       # for both (Revit 2025-2026 load add-ins on .NET 8, Revit 2027 on .NET 10) and tested on each. The NuGet
       # packages are cached by the lock files' contents (restore still runs --locked-mode below)
