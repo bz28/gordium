@@ -368,6 +368,37 @@ results:
   general.bc_907_5_2_2_3_voice_alarm_other_uses: needs_review
   general.bc_907_5_2_2_4_voice_alarm_captions: not_applicable
   general.bc_907_5_2_2_5_voice_alarm_standby_power: needs_review
+  # Chapter 9 part e (2026-11-27): the other Chapter 9 sections Chapter 10 names, each a person's check: standpipes
+  # (905.3 and 905.4, Group R-2 not stated as townhouses; 905.3.2 is Group A's), smoke control (909.1), smokeproof
+  # enclosures (909.20 and its parts) and a fire command center (911.1), none of them in the model
+  general.bc_905_3_standpipes_required: needs_review
+  general.bc_905_3_1_class_iii_by_height: needs_review
+  general.bc_905_3_2_group_a_standpipes: not_applicable
+  general.bc_905_3_3_mall_standpipes: needs_review
+  general.bc_905_3_4_underground_standpipes: needs_review
+  general.bc_905_3_5_helistop_standpipes: needs_review
+  general.bc_905_3_6_marina_standpipes: needs_review
+  general.bc_905_3_7_roof_garden_standpipes: needs_review
+  general.bc_905_4_class_i_hose_connections: needs_review
+  general.bc_905_4_1_standpipe_protection: needs_review
+  general.bc_905_4_2_standpipe_interconnection: needs_review
+  general.bc_909_1_smoke_control_scope: needs_review
+  general.bc_909_20_smokeproof_enclosures: needs_review
+  general.bc_909_20_1_smokeproof_access: needs_review
+  general.bc_909_20_2_smokeproof_construction: needs_review
+  general.bc_909_20_2_1_smokeproof_door_closers: needs_review
+  general.bc_909_20_3_1_smokeproof_balcony_doors: needs_review
+  general.bc_909_20_3_2_smokeproof_vestibule_doors: needs_review
+  general.bc_909_20_3_3_smokeproof_vestibule_ventilation: needs_review
+  general.bc_909_20_4_stair_pressurization: needs_review
+  general.bc_909_20_5_1_pressurized_vestibule_doors: needs_review
+  general.bc_909_20_5_2_pressure_difference: needs_review
+  general.bc_909_20_5_3_relief_opening: needs_review
+  general.bc_909_20_5_4_fan_smoke_detection: needs_review
+  general.bc_909_20_6_ventilating_equipment: needs_review
+  general.bc_909_20_6_1_ventilation_systems: needs_review
+  general.bc_909_20_6_2_smokeproof_standby_power: needs_review
+  general.bc_911_1_fire_command_center: needs_review
   general.bc_907_2_1_1_group_a_voice_alarm: not_applicable
   general.bc_907_2_1_1_mixed_voice_alarm: not_applicable
   general.bc_907_2_3_group_e_voice_alarm: not_applicable

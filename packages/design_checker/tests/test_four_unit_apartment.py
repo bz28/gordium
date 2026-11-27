@@ -210,9 +210,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     equipment, 907.2's fire alarm system and 907.2.2.1's ambulatory care detection (161). Part d adds Group R-2's three
     fire alarm and smoke alarm sections, 907.2.11 and its six for Groups R and I-1, 907.2.11.8's portable alarms (a
     nontransient hotel is Group R-2, 310.3), 907.2.10.2's battery storage and 907.5.2.2's five while the voice/alarm
-    system isn't stated (178)."""
+    system isn't stated (178). Part e adds the standpipe, smoke control, smokeproof enclosure and fire command center
+    flags but Group A's standpipes (205)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 178 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 205 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):

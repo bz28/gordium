@@ -235,6 +235,22 @@ labels:
       italics.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:anchor_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines ANCHOR BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 33
+      - 34
+      quote: '[BG] ANCHOR BUILDING. An exterior perimeter building of a group other than H having direct access to a covered
+        or open mall building but having required means of egress independent of the mall.'
+    piece_sha256: 16de02476496d378dd7a66f3846f77350102056e3320ebcfb8fd1d8c0e9a7121
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:annular_space:
     label: reference
     topic: definitions
@@ -715,6 +731,21 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:circulation_path:
+    label: reference
+    topic: definitions
+    reason: 'Defines CIRCULATION PATH, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 37
+      lines:
+      - 14
+      - 14
+      quote: '[BE] CIRCULATION PATH. An exterior or interior way of passage from one place to another for pedestrians.'
+    piece_sha256: 412c5477b8361f02ae77378356de6be320326154a74ff4b8b39292651608c8d0
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:combination_fire_smoke_damper:
     label: reference
     topic: definitions
@@ -785,6 +816,22 @@ labels:
         point of each'
     piece_sha256: 6f30a9e55e3491cabc607b0e4f176710d41936eba3429f2387a03e7b7738200a
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:common_use:
+    label: reference
+    topic: definitions
+    reason: 'Defines COMMON USE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 38
+      lines:
+      - 6
+      - 7
+      quote: '[BE] COMMON USE. Interior or exterior circulation paths, rooms, spaces or elements that are not for public use
+        and are made available for the shared use of two or more people.'
+    piece_sha256: 8fa4dd22bcae6ad46e5141164543c41fa1e407a27821dc80dec4bc9736150f69
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:compressed_gas:
@@ -961,6 +1008,47 @@ labels:
         walls or other'
     piece_sha256: 630e2e8b75ef5ce1f7a85b29abe33c3ef3404133ba7277f7d4223b80b68f9b83
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:covered_mall_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines COVERED MALL BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 29
+      - 39
+      quote: '[BG] COVERED MALL BUILDING. A single building enclosing a number of tenants and occupants, such as retail stores,
+        drinking and dining establishments, entertainment and amusement facilities, passenger transportation terminals, offices
+        and other similar uses wherein two or more tenants have a main entrance into one or more malls. Anchor buildings shall
+        not be considered as a part of the covered mall building. The term “covered mall building” shall include open mall
+        buildings as defined below. Mall. A roofed or covered common pedestrian area within a covered mall building that serves
+        as access for two or more tenants and not to exceed three levels that are open to each other. The term “mall” shall
+        include open malls as defined below. Open mall. An unroofed common pedestrian way serving a number of tenants not
+        exceeding three levels. Circulation at levels above grade shall be permitted to include open exterior balconies leading
+        to exits discharging at grade. Open mall building. Several structures housing a number of tenants, such as retail
+        stores, drinking and dining establishments, entertainment and amusement facilities, offices, and other similar uses,
+        wherein two or more tenants have a main entrance into one or more open malls. Anchor buildings are not considered
+        as a part of the open mall building.'
+    piece_sha256: 8f6ccfb2b77b1b2886d37e90f1e88369514f714e7ebc13b59cc5b85a41a607b9
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:critical_circuit:
+    label: reference
+    topic: definitions
+    reason: 'Defines CRITICAL CIRCUIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 44
+      - 44
+      quote: '[F] CRITICAL CIRCUIT. A circuit that requires continuous operation to ensure safety of the structure and occupants.'
+    piece_sha256: 656d05f811ac78bb2a3d32811f38fc058a302a7f5d90c72d25f4d7d82e805e1c
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:cryogenic_fluid:
@@ -1298,6 +1386,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:electrical_circuit_protective_system:
+    label: reference
+    topic: definitions
+    reason: 'Defines ELECTRICAL CIRCUIT PROTECTIVE SYSTEM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 6
+      - 8
+      quote: '[BF] ELECTRICAL CIRCUIT PROTECTIVE SYSTEM. A specific construction of devices, materials, or coatings installed
+        as a fire-resistive barrier system applied to electrical system components, such as cable trays, conduits and other
+        raceways, open run cables and conductors, cables, and conductors.'
+    piece_sha256: fe55c49a9e8dcb5e842d1773ccb400772afd523a8c6770156c2c4cacef3a23d7
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:elevator_group:
     label: reference
     topic: definitions
@@ -1345,6 +1450,51 @@ labels:
         building.'
     piece_sha256: 1cb2727fae4a878cad0cd0e957404b2695aef5d3dd6fb0def2900473e82af7ef
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:entrance_public:
+    label: reference
+    topic: definitions
+    reason: 'Defines ENTRANCE, PUBLIC, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 34
+      - 34
+      quote: ENTRANCE, PUBLIC. See “Public entrance.”
+    piece_sha256: fa28d21463f33107f725b0bd6e772b9ffd33c7f9bc3a9a3f14516fc3796a6349
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:entrance_restricted:
+    label: reference
+    topic: definitions
+    reason: 'Defines ENTRANCE, RESTRICTED, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 35
+      - 35
+      quote: ENTRANCE, RESTRICTED. See “Restricted entrance.”
+    piece_sha256: de9d5ea845e6da72ccb380ba65468a0d64058f8676e22ea70dd600a28a87367b
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:entrance_service:
+    label: reference
+    topic: definitions
+    reason: 'Defines ENTRANCE, SERVICE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 36
+      - 36
+      quote: ENTRANCE, SERVICE. See “Service entrance.”
+    piece_sha256: 69039ecb1b8d812a2de7b9b6c3785f8075624915ae7aba3edccffb25630b31cc
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:existing_building:
@@ -2516,6 +2666,39 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:heliport:
+    label: reference
+    topic: definitions
+    reason: 'Defines HELIPORT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 34
+      - 35
+      quote: '[F] HELIPORT. An area of land or water or a structural surface that is used, or intended for use, for the landing
+        and taking off of heli- copters, and any appurtenant areas that are used, or intended for use, for heliport buildings
+        or other heliport facilities.'
+    piece_sha256: bb38ebf45f0cfa36cf6b7585bd74a8d291818202af1a2731bb468170c2c1c9ff
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:helistop:
+    label: reference
+    topic: definitions
+    reason: 'Defines HELISTOP, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 36
+      - 36
+      quote: '[F] HELISTOP. The same as “heliport,” except that no fueling, defueling, maintenance, repairs or storage of
+        helicopters is permitted.'
+    piece_sha256: b0e5d31daa9a879a7aa54a3625d48c405df86704732ed354def558beb11d296c
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:highly_toxic:
     label: reference
     topic: definitions
@@ -2803,6 +2986,22 @@ labels:
         with the laboratory area, and are constructed in accordance with Section 428.'
     piece_sha256: 1f0db3c2efafdea90d0858a60c0fd4858e20fce5fd44deefb25a4d0ff36966e7
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:landscaped_roof:
+    label: reference
+    topic: definitions
+    reason: 'Defines LANDSCAPED ROOF, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 50
+      - 51
+      quote: '[BS] LANDSCAPED ROOF. An area over a roof assembly incorporating planters, vegetation, hardscaping or other
+        similar decorative appurtenances that are not part of the roof assembly.'
+    piece_sha256: 2245f8b8adf80f3a99918e41c8c4c55f1f7ffe987ee0d57217768d131ba76713
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:level_of_exit_discharge:
@@ -3771,6 +3970,21 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:public_entrance:
+    label: reference
+    topic: definitions
+    reason: 'Defines PUBLIC ENTRANCE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 14
+      - 14
+      quote: '[BE] PUBLIC ENTRANCE. An entrance that is not a service entrance or a restricted entrance.'
+    piece_sha256: e22b79b1e7873f749fdf20ca4e0a989acfed5df41835e374d62732c0c4302e38
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:public_way:
     label: reference
     topic: definitions
@@ -3941,6 +4155,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:restricted_entrance:
+    label: reference
+    topic: definitions
+    reason: 'Defines RESTRICTED ENTRANCE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 59
+      lines:
+      - 12
+      - 13
+      quote: '[BE] RESTRICTED ENTRANCE. An entrance that is made available for common use on a controlled basis, but not public
+        use, and that is not a service entrance.'
+    piece_sha256: f9932a091d0ec937998606777f0718eee3d56c02cb11372b402bea56e6355f80
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:roof_assembly_for_application_to_chapter_15_only:
     label: reference
     topic: definitions
@@ -4085,6 +4315,21 @@ labels:
         of egress.'
     piece_sha256: 76e77c5d12c0019e9d1f3e1ed0ef8a3b88059ec0030cee20635f0e1f0bf7bb88
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:service_entrance:
+    label: reference
+    topic: definitions
+    reason: 'Defines SERVICE ENTRANCE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 60
+      lines:
+      - 9
+      - 9
+      quote: '[BE] SERVICE ENTRANCE. An entrance intended primarily for delivery of goods or services.'
+    piece_sha256: 68181829e7dd68fad2461143ef649d732fe17c48d030d47b2d0addffcf913b4a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:shaft:
@@ -4280,6 +4525,22 @@ labels:
         is constructed to limit the transfer of smoke.'
     piece_sha256: 2c95fe8d28f512866a927ec836ef8d68a5b3f818828b53a23c607435d9cb0aea
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:smokeproof_enclosure:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKEPROOF ENCLOSURE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 17
+      - 18
+      quote: '[BF] SMOKEPROOF ENCLOSURE. An exit stairway or ramp designed and constructed so that the movement of the products
+        of combustion produced by a fire occurring in any part of the building into the enclosure is limited.'
+    piece_sha256: 60842050c2e0685bc0f261f4c58e1d9111e3b9edb353871267404accd305cb06
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:smoke_protected_assembly_seating:
@@ -4853,6 +5114,22 @@ labels:
       quote: '[F] USE (MATERIAL). Placing a material into action, including solids, liquids and gases.'
     piece_sha256: f92786d44959ec4e7f944bfc9b049cfd1a418c6194ac93b45ac3bf734c05ccae
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:vegetative_roof:
+    label: reference
+    topic: definitions
+    reason: 'Defines VEGETATIVE ROOF, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 66
+      lines:
+      - 16
+      - 17
+      quote: '[BS] VEGETATIVE ROOF. A roof assembly of interacting components designed to waterproof a building’s top surface
+        that includes, by design, a vegetative surface.'
+    piece_sha256: 264074bc9ebfb5ad73e75deb1db7cf05d253a2668c6f8537037fcf01b350e912
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:ventilation:
@@ -8936,6 +9213,251 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '905.3':
+    label: flag
+    topic: means_of_egress
+    reason: 'Standpipe systems are installed where 905.3.1 to 905.3.7 require them, and may be combined with sprinkler systems
+      (none in Group R-2 townhouses or Group R-3): a person''s check (general.bc_905_3_standpipes_required).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 279
+      lines:
+      - 13
+      - 17
+      quote: '[F] 905.3 Required installations. Standpipe systems shall be installed where required by Sections 905.3.1 through
+        905.3.7. Stand- pipe systems are allowed to be combined with automatic sprinkler systems. Exceptions: 1. Standpipe
+        systems are not required in Group R-2 townhouses. 2. Standpipe systems are not required in Group R-3 occupancies.'
+    piece_sha256: b8d41e0c9e723737aa757e0304e4059bf6b170573ff5fdaf7a49f1b14388e303
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  905.3.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Class III standpipes throughout a building with four or more stories above or below grade plane, or its highest
+      floor more than 30 feet above, or its lowest more than 30 feet below, the fire department''s vehicle access (Class I
+      allowed with a 903.3.1.1 or 903.3.1.2 system, in Groups B and E, parking garages, sprinklered basements, or where trained
+      personnel won''t use the hose lines; recessed loading docks for four vehicles or less and impractical topography left
+      out of the access level): a person''s check (general.bc_905_3_1_class_iii_by_height).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 279
+      lines:
+      - 18
+      - 36
+      quote: '[F] 905.3.1 Height. Class III standpipe systems shall be installed throughout buildings where any of the following
+        conditions exist: 1. Four or more stories are above or below grade plane. 2. The floor level of the highest story
+        is located more than 30 feet (9144 mm) above the lowest level of fire department vehi- cle access. 3. The floor level
+        of the lowest story is located more than 30 feet (9144 mm) below the highest level of fire department vehi- cle access.
+        Exceptions: 1. Class I standpipes are allowed in buildings equipped throughout with an automatic sprinkler system
+        in accordance with Section 903.3.1.1 or 903.3.1.2. 2. Class I standpipes are allowed in Group B and E occupancies.
+        3. Class I standpipes are allowed in parking garages. 4. Class I standpipes are allowed in basements equipped throughout
+        with an automatic sprinkler system. 5. Class I standpipes are allowed in buildings where occupant-use hose lines will
+        not be utilized by trained personnel or the fire department. 6. In determining the lowest level of fire department
+        vehicle access, it shall not be required to consider either of the following: 6.1. Recessed loading docks for four
+        vehicles or less. 6.2. Conditions where topography makes access from the fire department vehicle to the building impractical
+        or impossible.'
+    piece_sha256: 9d7ade90deb1224d671785e85dbe47a0bc64d434c64cc71ebf9fbfb873a0f1e0
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  905.3.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Class I automatic wet standpipes in a nonsprinklered Group A building with an occupant load over 1,000 (not open-air
+      seating without enclosed spaces; dry, semiautomatic dry or manual wet ones outside high-rise buildings): a person''s
+      check (general.bc_905_3_2_group_a_standpipes).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 279
+      lines:
+      - 37
+      - 42
+      quote: '[F] 905.3.2 Group A. Class I automatic wet standpipes shall be provided in nonsprinklered Group A buildings
+        having an occupant load exceeding 1,000 persons. Exceptions: 1. Open-air-seating spaces without enclosed spaces. 2.
+        Class I automatic dry and semiautomatic dry standpipes or manual wet standpipes are allowed in buildings that are
+        not high-rise buildings.'
+    piece_sha256: fd252ed59672e0de6baf5dd41a35cbb55e2dfa3ac424278ca5a80f569e67279b
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  905.3.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'A covered or open mall building has a standpipe system throughout where 905.3.1 requires one, else Class I hose
+      connections on the sprinkler system delivering 250 gallons per minute at the most remote one with at most a 50 psi loss
+      from the fire department connection, at each exit passageway or corridor entrance, each landing of interior exit stairways
+      opening on the mall, the public entrances, and so that no part of a tenant space is more than 200 feet from one: a person''s
+      check (general.bc_905_3_3_mall_standpipes).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 279
+      lines:
+      - 43
+      - 55
+      quote: '[F] 905.3.3 Covered and open mall buildings. Covered mall and open mall buildings shall be equipped throughout
+        with a stand- pipe system where required by Section 905.3.1. Mall buildings not required to be equipped with a standpipe
+        system by Section 905.3.1 shall be equipped with Class I hose connections connected to the automatic sprinkler system
+        sized to deliver water at 250 gallons per minute (946.4 L/min) at the hydraulically most remote hose connection while
+        concurrently supplying the automatic sprinkler system demand. The standpipe system shall be designed to not exceed
+        a 50 pounds per square inch (psi) (345 kPa) resid- ual pressure loss with a flow of 250 gallons per minute (946.4
+        L/min) from the fire department connection to the hydraulically most remote hose connection. Hose connections shall
+        be provided at each of the following locations: 1. Within the mall at the entrance to each exit passageway or corridor.
+        2. At each floor-level landing within interior exit stairways opening directly on the mall. 3. At exterior public
+        entrances to the mall of a covered mall building. 4. At public entrances at the perimeter line of an open mall building.
+        5. At other locations as necessary so that the distance to reach all portions of a tenant space does not exceed 200
+        feet (60 960 mm) from a hose connection.'
+    piece_sha256: db205a2464797e517aac36e1cdf45e4cf6f34157ddf172db3048fa3e40cddeb8
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  905.3.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'An underground building has a Class I automatic wet or manual wet standpipe system throughout: a person''s check
+      (general.bc_905_3_4_underground_standpipes).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 279
+      lines:
+      - 56
+      - 57
+      quote: '[F] 905.3.4 Underground buildings. Underground buildings shall be equipped throughout with a Class I automatic
+        wet or manual wet standpipe system.'
+    piece_sha256: caaab2cc3876b87c984e1a2db9df55c2ca968ba2574d537a8aebcdeb6ae16991
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  905.3.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'A building with a rooftop helistop or heliport has a Class I or III standpipe extended to that roof per Section
+      2007.5 of the Fire Code of New York State: a person''s check (general.bc_905_3_5_helistop_standpipes).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 280
+      lines:
+      - 3
+      - 5
+      quote: '[F] 905.3.5 Helistops and heliports. Buildings with a rooftop helistop or heliport shall be equipped with a
+        Class I or III standpipe system extended to the roof level on which the helistop or heliport is located in accordance
+        with Section 2007.5 of the Fire Code of New York State.'
+    piece_sha256: 8a29b368835571fd6d23a81b75e6cf6cc69ccf84c402f5a3678bff285317cbe5
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  905.3.6:
+    label: flag
+    topic: means_of_egress
+    reason: 'Standpipes in marinas and boatyards comply with Chapter 36 of the Fire Code of New York State: a person''s check
+      (general.bc_905_3_6_marina_standpipes).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 280
+      lines:
+      - 6
+      - 7
+      quote: '[F] 905.3.6 Marinas and boatyards. Standpipes in marinas and boatyards shall comply with Chapter 36 of the Fire
+        Code of New York State.'
+    piece_sha256: 0d83d54de53ea76819e27b429b9399d427d9776b9b7a75ec5b4829eb847821fc
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  905.3.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'A building with a landscaped or vegetative roof and a standpipe system has it extended to that roof: a person''s
+      check (general.bc_905_3_7_roof_garden_standpipes).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 280
+      lines:
+      - 8
+      - 10
+      quote: '[F] 905.3.7 Vegetative roof and landscaped roof standpipe systems. Buildings or structures that have landscaped
+        roofs or vegetative roofs and that are equipped with a standpipe system shall have the standpipe system extended to
+        the roof level on which the landscaped roof or vegetative roof is located.'
+    piece_sha256: eee75da51224e0590616fbba1cac5dd83f2857df229bda672df2a11c9f69b250
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '905.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'Class I hose connections in every required interior or exterior exit stairway, one for each story above and below
+      grade plane at the main floor landing (one in the open corridor or breezeway between open stairs 75 feet or less apart),
+      on each side of a horizontal exit''s wall, in every exit passageway at its entrance from other areas (not where a 30-foot
+      hose stream on 100 feet of hose from a stairway''s connection reaches those areas), at a mall''s public entrances and
+      its exit passageway and corridor entrances, at the roof or the highest landing with roof access per 1011.12 where the
+      roof''s slope is under 4 in 12, and more where the fire code official asks (a floor''s most remote point over 150 feet
+      from one, 200 feet sprinklered): a person''s check (general.bc_905_4_class_i_hose_connections).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 280
+      lines:
+      - 11
+      - 34
+      quote: '[F] 905.4 Location of Class I standpipe hose connections. Class I standpipe hose connections shall be provided
+        in all of the follow- ing locations: 1. In every required interior exit stairway or exterior exit stairway, a hose
+        connection shall be provided for each story above and below grade plane. Hose connections shall be located at the
+        main floor landing unless otherwise approved by the fire code official. Exception: A single hose connection shall
+        be permitted to be installed in the open corridor or open breezeway between open stairs that are not greater than
+        75 feet (22 860 mm) apart. 2. On each side of the wall adjacent to the exit opening of a horizontal exit. Exception:
+        Where floor areas adjacent to a horizontal exit are reachable from an interior exit stairway or exterior exit stairway
+        hose connection by a 30-foot (9144 mm) hose stream from a nozzle attached to 100 feet (30 480 mm) of hose, a hose
+        connection shall not be required at the horizontal exit. 3. In every exit passageway, at the entrance from the exit
+        passageway to other areas of a building. Exception: Where floor areas adjacent to an exit passageway are reachable
+        from an interior exit stairway or exterior exit stairway hose connection by a 30-foot (9144 mm) hose stream from a
+        nozzle attached to 100 feet (30 480 mm) of hose, a hose connection shall not be required at the entrance from the
+        exit passageway to other areas of the building. 4. In covered mall buildings, adjacent to each exterior public entrance
+        to the mall and adjacent to each entrance from an exit passageway or exit corridor to the mall. In open mall buildings,
+        adjacent to each public entrance to the mall at the perimeter line and adjacent to each entrance from an exit passageway
+        or exit corridor to the mall. 5. Where the roof has a slope less than 4 units vertical in 12 units horizontal (33.3-percent
+        slope), a hose connection shall be located to serve the roof or at the highest landing of an interior exit stairway
+        with access to the roof provided in accordance with Section 1011.12. 6. Where the most remote portion of a nonsprinklered
+        floor or story is more than 150 feet (45 720 mm) from a hose connection or the most remote portion of a sprinklered
+        floor or story is more than 200 feet (60 960 mm) from a hose connection, the fire code official is authorized to require
+        that additional hose connections be provided in approved locations.'
+    piece_sha256: 51a3a5cdae5fe8e338eb5f14c2666f6e81dc0d6a8433e3f9dc33a56b6f1aa0f1
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  905.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Class I standpipe risers and laterals not in an interior exit stairway have the fire resistance the building''s
+      vertical enclosures need (laterals left unenclosed in a building sprinklered throughout): a person''s check (general.bc_905_4_1_standpipe_protection).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 280
+      lines:
+      - 35
+      - 38
+      quote: '[F] 905.4.1 Protection. Risers and laterals of Class I standpipe systems not located within an interior exit
+        stairway shall be protected by a degree of fire resistance equal to that required for vertical enclosures in the building
+        in which they are located. Exception: In buildings equipped throughout with an approved automatic sprinkler system,
+        laterals that are not located within an interior exit stairway are not required to be enclosed within fire-resistance-rated
+        construction.'
+    piece_sha256: 49c8308b53863df183026ab0c2f1d0ca6f83b9a7905a2436777b4b3699f5e77d
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  905.4.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where a building has more than one standpipe, they are interconnected per NFPA 14: a person''s check (general.bc_905_4_2_standpipe_interconnection).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 280
+      lines:
+      - 39
+      - 40
+      quote: '[F] 905.4.2 Interconnection. In buildings where more than one standpipe is provided, the standpipes shall be
+        interconnected in accordance with NFPA 14.'
+    piece_sha256: 68ee996fcad144b89f7809fd3d4853d775514c8a0379e0cabd551336aef081c3
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   '907.1':
     label: reference
     topic: means_of_egress
@@ -10152,6 +10674,418 @@ labels:
         in accordance with Section 2702.'
     piece_sha256: d3ba72500b12c340e96acd279229d33bca1ad3c4b5779a6a0addbcbf88e2e20a
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '909.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'Where another section requires a mechanical or passive smoke control system (an atrium, smoke-protected assembly
+      seating per 1030.6.2.1, an underground building, a high-rise''s smokeproof enclosures among them), it is designed, installed
+      and acceptance-tested per Section 909 for a tenable environment while occupants evacuate or relocate (not 910''s smoke
+      and heat removal; not an exhaust system under Chapter 5 of the Mechanical Code of New York State): a person''s check
+      (general.bc_909_1_smoke_control_scope).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 296
+      lines:
+      - 8
+      - 14
+      quote: '[F] 909.1 Scope and purpose. This section applies to mechanical or passive smoke control systems where they
+        are required by other provisions of this code. The purpose of this section is to establish minimum requirements for
+        the design, installation and acceptance testing of smoke control systems that are intended to provide a tenable environment
+        for the evacuation or relocation of occupants. These provisions are not intended for the preservation of contents,
+        the timely restoration of operations or for assistance in fire suppression or overhaul activities. Smoke control systems
+        regulated by this section serve a different purpose than the smoke- and heat-removal provisions found in Section 910.
+        Mechanical smoke control systems shall not be considered exhaust systems under Chapter 5 of the Mechanical Code of
+        New York State.'
+    piece_sha256: 5d3fd484f25773fd2a65b67d9482756cf3d6f5abaab99a264c9098ca9d760b83
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '909.20':
+    label: flag
+    topic: means_of_egress
+    reason: 'Where 1023.12 requires a smokeproof enclosure, it is an interior exit stairway or ramp enclosed per Section 1023
+      with an open exterior balcony, or a pressurized stair and entrance vestibule, per 909.20, and roof access the Fire Code
+      of New York State requires is from it: a person''s check (general.bc_909_20_smokeproof_enclosures).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 301
+      lines:
+      - 50
+      - 54
+      quote: 909.20 Smokeproof enclosures. Where required by Section 1023.12, a smokeproof enclosure shall be constructed
+        in accordance with this section. A smokeproof enclosure shall consist of an interior exit stairway or ramp that is
+        enclosed in accordance with the applicable provisions of Section 1023 and an open exterior balcony or pressurized
+        stair and pressurized entrance vestibule meeting the requirements of this section. Where access to the roof is required
+        by the Fire Code of New York State, such access shall be from the smokeproof enclosure where a smokeproof enclosure
+        is required.
+    piece_sha256: 035d2061074592e60908de7698f9ee7b0ab785ecbb391a7c74c7a8c44e1fcc5e
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'The stairway or ramp is reached through a vestibule or open exterior balcony; the vestibule at least the corridor''s
+      required clear width, not under 44 inches wide nor 72 inches long in the direction of travel, measured straight between
+      the doorways'' centerlines: a person''s check (general.bc_909_20_1_smokeproof_access).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 301
+      lines:
+      - 55
+      - 58
+      quote: 909.20.1 Access. Access to the stairway or ramp shall be by way of a vestibule or an open exterior balcony. The
+        minimum dimen- sion of the vestibule shall be not less than the required clear width of the corridor leading to the
+        vestibule but shall not have a width of less than 44 inches (1118 mm) and shall not have a length of less than 72
+        inches (1829 mm) in the direction of egress travel into the stairway, measured in a straight line between the centerline
+        of the doorways into the vestibule and stairway.
+    piece_sha256: 1c34feaa1e56742414bdcb35013fab9141bb7e297b32e7e262a463d34a620dd5
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'The enclosure is separated from the rest of the building, and the vestibule from the stairway or ramp, by 2-hour
+      fire barriers per 707 or horizontal assemblies per 711, no openings but the required egress doors, an open exterior
+      balcony built to the floor assemblies'' rating: a person''s check (general.bc_909_20_2_smokeproof_construction).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 301
+      lines:
+      - 59
+      - 60
+      quote: 909.20.2 Construction. The smokeproof enclosure shall be separated from the remainder of the building by not
+        less than 2-hour fire barriers constructed in accordance with Section 707 or horizontal assemblies constructed in
+        accordance with Section 711, or
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 3
+      - 6
+      quote: both. Openings are not permitted other than the required means of egress doors. The vestibule shall be separated
+        from the stair- way or ramp by not less than 2-hour fire barriers constructed in accordance with Section 707 or horizontal
+        assemblies constructed in accordance with Section 711, or both. The open exterior balcony shall be constructed in
+        accordance with the fire-resistance rating requirements for floor assemblies.
+    piece_sha256: 3ea7d0242e2f7df03113b3f56e52c72e72ddc2d39690eefa4a4de51ab122f434
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Its doors are self-closing or close automatically on a smoke detector per 716.2.6.6 at the floor-side entrance,
+      any one detector closing every door of the enclosure at all levels, detectors per 907.3: a person''s check (general.bc_909_20_2_1_smokeproof_door_closers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 7
+      - 10
+      quote: 909.20.2.1 Door closers. Doors in a smokeproof enclosure shall be self- or automatic closing by actuation of
+        a smoke detector in accordance with Section 716.2.6.6 and shall be installed at the floor-side entrance to the smokeproof
+        enclosure. The actua- tion of the smoke detector on any door shall activate the closing devices on all doors in the
+        smokeproof enclosure at all levels. Smoke detectors shall be installed in accordance with Section 907.3.
+    piece_sha256: 8fea9d3d8a5cd0344006d04b1cb555210889e74ba12220374d8f3729b96d0fc8
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.3:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says 909.20.3.1 to 909.20.3.3 govern a smokeproof enclosure ventilated by natural means: a pointer, no requirement
+      of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 11
+      - 12
+      quote: 909.20.3 Natural ventilation alternative. The provisions of Sections 909.20.3.1 through 909.20.3.3 shall apply
+        to ventilation of smokeproof enclosures by natural means.
+    piece_sha256: 560bba1f83ae506b0f4707fdbf7d6b0d0e4c7081da8169b85c570a238e9d8312
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.3.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where an open exterior balcony leads to the stairway or ramp, the door into the enclosure is a fire door assembly
+      per 716: a person''s check (general.bc_909_20_3_1_smokeproof_balcony_doors).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 13
+      - 14
+      quote: 909.20.3.1 Balcony doors. Where access to the stairway or ramp is by way of an open exterior balcony, the door
+        assembly into the enclosure shall be a fire door assembly in accordance with Section 716.
+    piece_sha256: 51c1c36d8cc7b9f558dd08cbbbb20742768fd5e8fa089698b41308dbb8ece411
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.3.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where a vestibule leads to it, the door into the vestibule is a fire door assembly per 716, the door from the
+      vestibule to the stairway at least 20 minutes per 716: a person''s check (general.bc_909_20_3_2_smokeproof_vestibule_doors).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 15
+      - 17
+      quote: 909.20.3.2 Vestibule doors. Where access to the stairway or ramp is by way of a vestibule, the door assembly
+        into the vesti- bule shall be a fire door assembly complying with Section 716. The door assembly from the vestibule
+        to the stairway shall have not less than a 20-minute fire protection rating complying with Section 716.
+    piece_sha256: 284cdd660781c8fa9c49aa202ed3e30c4e7bbdc7c9fdd71f85a5ae39951fc209
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.3.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Each vestibule has at least 16 square feet of net opening in a wall facing an outer court, yard or public way
+      at least 20 feet wide: a person''s check (general.bc_909_20_3_3_smokeproof_vestibule_ventilation).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 18
+      - 19
+      quote: 909.20.3.3 Vestibule ventilation. Each vestibule shall have a minimum net area of 16 square feet (1.5 m[fn2])
+        of opening in a wall facing an outer court, yard or public way that is not less than 20 feet (6096 mm) in width.
+    piece_sha256: b9c9e19c32dd45c490deccb8134acf38bf0e435d601aecacf581d3e3d3a88110
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'With a 903.3.1.1 system throughout, the vestibule may be left out where each interior exit stairway or ramp is
+      pressurized to between 0.10 and 0.35 inch of water relative to the building with its doors closed under the worst stack
+      and wind effect: a person''s check (general.bc_909_20_4_stair_pressurization).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 20
+      - 24
+      quote: 909.20.4 Stairway and ramp pressurization alternative. Where the building is equipped throughout with an automatic
+        sprin- kler system in accordance with Section 903.3.1.1, the vestibule is not required, provided that each interior
+        exit stairway or ramp is pressurized to not less than 0.10 inch of water (25 Pa) and not more than 0.35 inches of
+        water (87 Pa) in the shaft relative to the building measured with all interior exit stairway and ramp doors closed
+        under maximum anticipated conditions of stack effect and wind effect.
+    piece_sha256: 4a140fe99286061414861a1106648ae90fd6b34042742061be48c584a36db53e
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.5:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says 909.20.5.1 to 909.20.5.3 govern a pressurized stair and entrance vestibule: a pointer, no requirement of
+      its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 25
+      - 26
+      quote: 909.20.5 Pressurized stair and vestibule alternative. The provisions of Sections 909.20.5.1 through 909.20.5.3
+        shall apply to smokeproof enclosures using a pressurized stair and pressurized entrance vestibule.
+    piece_sha256: 91f1b498666c3a8aa3658e4c810e4e36473200a120ee99542970e796d1f9854b
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.5.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'The door into the vestibule is a fire door assembly per 716.2.2.1; the door from the vestibule to the stairway
+      at least 20 minutes and a smoke door assembly per 716.2.2.1, installed per NFPA 105: a person''s check (general.bc_909_20_5_1_pressurized_vestibule_doors).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 27
+      - 30
+      quote: 909.20.5.1 Vestibule doors. The door assembly from the building into the vestibule shall be a fire door assembly
+        complying with Section 716.2.2.1. The door assembly from the vestibule to the stairway shall have not less than a
+        20-minute fire protection rating and meet the requirements for a smoke door assembly in accordance with Section 716.2.2.1.
+        The door shall be installed in accordance with NFPA 105.
+    piece_sha256: 1e4a796c12d92ad44089afcc0c5624f3138e28afff8432e8b3735dccb630887b
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.5.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'The stair is at least 0.05 inch of water above the vestibule, and the vestibule at least 0.05 inch above the
+      fire floor, doors closed, at most 30 pounds of force to begin opening a door: a person''s check (general.bc_909_20_5_2_pressure_difference).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 31
+      - 34
+      quote: 909.20.5.2 Pressure difference. The stair enclosure shall be pressurized to not less than 0.05 inch of water
+        gage (12.44 Pa) positive pressure relative to the vestibule with all stairway doors closed under the maximum anticipated
+        stack pressures. The vestibule, with doors closed, shall have not less than 0.05 inch of water gage (12.44 Pa) positive
+        pressure relative to the fire floor. The pressure difference across doors shall not exceed 30 pounds (133-N) maximum
+        force to begin opening the door.
+    piece_sha256: 4d586a2b273cfa438b1d3c1b3fa76d21f27035afcfd9a3fadbde38a21cde9d01
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.5.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'A controlled relief vent discharging at least 2,500 cubic feet per minute at the design pressure difference in
+      the upper part of the pressurized exit enclosure: a person''s check (general.bc_909_20_5_3_relief_opening).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 35
+      - 37
+      quote: 909.20.5.3 Dampered relief opening. A controlled relief vent having the capacity to discharge not less than 2,500
+        cubic feet per minute (1180 L/s) of air at the design pressure difference shall be located in the upper portion of
+        the pressurized exit enclosure.
+    piece_sha256: fb177cabe02a2fd7fc309ec2d3a47b0515ace8eb5db4462b174289f68a3fb443
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.5.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'The fan system has a smoke detector that shuts it down when smoke is detected within it: a person''s check (general.bc_909_20_5_4_fan_smoke_detection).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 38
+      - 39
+      quote: 909.20.5.4 Smoke detection. The fan system shall be equipped with a smoke detector that will automatically shut
+        down the fan system when smoke is detected within the system.
+    piece_sha256: bc21096aebc81685dc71e5193aef56d37692b6620538ffceeb74931d6d4aa617
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.6:
+    label: flag
+    topic: means_of_egress
+    reason: 'Smoke detectors at each floor at the enclosure''s entrance, per 907.3, start the ventilating equipment 909.20.4
+      and 909.20.5 require, which runs at its required performance when the doors'' closers act on smoke or power failure:
+      a person''s check (general.bc_909_20_6_ventilating_equipment).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 40
+      - 44
+      quote: 909.20.6 Ventilating equipment. The activation of ventilating equipment required by the alternatives in Sections
+        909.20.4 and 909.20.5 shall be by smoke detectors installed at each floor level at an approved location at the entrance
+        to the smokeproof enclo- sure. When the closing device for the stairway and ramp shaft and vestibule doors is activated
+        by smoke detection or power failure, the mechanical equipment shall activate and operate at the required performance
+        levels. Smoke detectors shall be installed in accordance with Section 907.3.
+    piece_sha256: 34c60282280253764c9a9cb269d6d340e484c612a2e572e6a66bec93180f3940
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.6.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'The enclosure''s ventilation is independent of other systems, its equipment, wiring and ductwork outside the
+      building, within the enclosure, or within the building behind 2-hour fire barriers per 707 or horizontal assemblies
+      per 711 (wiring outside them protected by 2-hour UL 2196 cables, 2 inches of concrete, or 2-hour electrical circuit
+      protective systems installed per their listing): a person''s check (general.bc_909_20_6_1_ventilation_systems).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 302
+      lines:
+      - 45
+      - 60
+      quote: '909.20.6.1 Ventilation systems. Smokeproof enclosure ventilation systems shall be independent of other building
+        ventilation systems. The equipment, control wiring, power wiring and ductwork shall comply with one of the following:
+        1. Equipment, control wiring, power wiring and ductwork shall be located exterior to the building and directly connected
+        to the smokeproof enclosure or connected to the smokeproof enclosure by ductwork enclosed by not less than 2-hour
+        fire barriers constructed in accordance with Section 707 or horizontal assemblies constructed in accor- dance with
+        Section 711, or both. 2. Equipment, control wiring, power wiring and ductwork shall be located within the smokeproof
+        enclosure with intake or exhaust directly from and to the outside or through ductwork enclosed by not less than 2-hour
+        fire barriers constructed in accordance with Section 707 or horizontal assemblies constructed in accordance with Section
+        711, or both. 3. Equipment, control wiring, power wiring and ductwork shall be located within the building if separated
+        from the remainder of the building, including other mechanical equipment, by not less than 2-hour fire barriers constructed
+        in accordance with Section 707 or horizontal assemblies constructed in accordance with Section 711, or both. Exception:
+        1. Control wiring and power wiring located outside of a 2-hour fire barrier construction shall be protected using
+        any one of the following methods:'
+    - file: gov.ny.building.2025.pdf
+      page: 303
+      lines:
+      - 3
+      - 7
+      quote: 1.1. Cables used for survivability of required critical circuits shall be listed in accordance with UL 2196 and
+        shall have a fire-resistance rating of not less than 2 hours. 1.2. Where encased with not less than 2 inches (51 mm)
+        of concrete. 1.3. Electrical circuit protective systems shall have a fire-resistance rating of not less than 2 hours.
+        Electrical circuit protective systems shall be installed in accordance with their listing requirements.
+    piece_sha256: 798f0cef0b27a516cef9a6150e04de2105dd32c25f00c9096de4b26141ee54a0
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.6.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'The vestibule and shaft ventilation and automatic fire detection have standby power per Section 2702: a person''s
+      check (general.bc_909_20_6_2_smokeproof_standby_power).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 303
+      lines:
+      - 8
+      - 9
+      quote: 909.20.6.2 Standby power. Mechanical vestibule and stairway and ramp shaft ventilation systems and automatic
+        fire detec- tion systems shall be provided with standby power in accordance with Section 2702.
+    piece_sha256: 9c775dce7159a0e8aeb2e15cc1feeea4b80a73f815bd5874d994e530571d25bc
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  909.20.6.3:
+    label: not_for_checking
+    topic: procedures
+    reason: 'The system tested before approval in the building official''s presence: an inspection, the permit process, not
+      the building''s design.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 303
+      lines:
+      - 10
+      - 11
+      quote: 909.20.6.3 Acceptance and testing. Before the mechanical equipment is approved, the system shall be tested in
+        the presence of the building official to confirm that the system is operating in compliance with these requirements.
+    piece_sha256: f773bf7b3a43cab606ae9dc2d66b54de4caf73b1d25f99d8abc995cfa35545eb
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '911.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'Where another section requires one, in a high-rise building, and in Group F-1 and S-1 occupancies with a building
+      footprint over 500,000 square feet, a fire command center for fire department operations is provided per 911.1.1 to
+      911.1.7 (approved location and access, a 1-hour separation, its size, an approved layout, no other storage, the features
+      NFPA 72 and 911.1.6 list, from the voice/alarm control unit and stair door unlocking to the building information card,
+      and its sign): a person''s check (general.bc_911_1_fire_command_center).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 305
+      lines:
+      - 27
+      - 29
+      quote: '[F] 911.1 General. Where required by other sections of this code, in buildings classified as high-rise buildings
+        by this code and in all F- 1 and S-1 occupancies with a building footprint of over 500,000 square feet (46 452 m[fn2]),
+        a fire command center for fire department operations shall be provided and shall comply with Sections 911.1.1 through
+        911.1.7.'
+    piece_sha256: 2efc03cd3ae00c07f7c55fd1ea373d9c585fd91289db74fd4bc18e4ff9ee3623
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1004':

@@ -131,7 +131,7 @@ def test_every_chapter_9_flag_is_a_persons_check_never_a_pass(labels, book, ctx)
     allowed = ctx.allowed()
     by = {"occupancy_group", "group_h_present", "sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3",
           "nfpa_13r_stated", "occupied_outdoor_areas", "ambulatory_care_facility",   # part b: 903.2.1.6, 903.2.2.1
-          "emergency_voice_alarm_system"}                                 # part c: 907.2.1.1's mixed flag
+          "emergency_voice_alarm_system", "townhouse_units"}              # part c: 907.2.1.1; part e: 905.3
     for pid, v in labels.items():
         if v["label"] != "flag":
             continue
@@ -616,3 +616,25 @@ def test_part_ds_review_round_1(book, ctx):
     two = _shown_note(_rule(book, "general.bc_907_2_11_2_group_r_smoke_alarm_locations"))
     assert "crawl spaces" in two and "upper-floor" in two and "prevent a required alarm" in two
     assert "prevent a required alarm" in _shown_note(_rule(book, "general.bc_907_2_11_1_group_r1_smoke_alarm_locations"))
+
+
+def test_part_es_standpipe_flags_follow_905_3s_exceptions(book, ctx):
+    """Part e: 905.3's exceptions leave standpipe systems out of Group R-3 and Group R-2 townhouses only; every other
+    building, a Group R-2 whose units aren't stated townhouse units among them, sees the standpipe flags; 909.20's
+    smokeproof enclosures and 911.1's fire command center are a person's check for every building (their triggers are
+    heights above the fire department's access the model doesn't show)."""
+    allowed = ctx.allowed()
+    standpipes = [r for r in book if r["id"].startswith("general.bc_905_") and r["id"] != "general.bc_905_3_2_group_a_standpipes"]
+    assert len(standpipes) == 10
+    for r in standpipes:
+        def got(b):
+            return outcome(r, code_scope.building_measures(b), allowed)
+        assert got({"occupancy_groups": ["R-3"]}) == "not_applicable", r["id"]
+        assert got({"occupancy_groups": ["R-2"], "townhouse_units": True}) == "not_applicable", r["id"]
+        for b in ({"occupancy_groups": ["R-2"]}, {"occupancy_groups": ["R-2"], "townhouse_units": False},
+                  {"occupancy_groups": ["B"]}, {}):
+            assert got(b) == "needs_review", (r["id"], b)
+    assert "four or more stories" in _shown_note(_rule(book, "general.bc_905_3_1_class_iii_by_height"))
+    for r in book:
+        if r["id"].startswith(("general.bc_909_", "general.bc_911_")):
+            assert "applies_when" not in r and outcome(r, {}, allowed) == "needs_review", r["id"]

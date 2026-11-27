@@ -808,6 +808,61 @@ pieces:
     heading: Standards › NFPA 13D sprinkler systems
     rules:
     - general.bc_903_3_1_3_nfpa_13d_scope
+  '905.3':
+    label: flag
+    heading: Required installations
+    rules:
+    - general.bc_905_3_standpipes_required
+  905.3.1:
+    label: flag
+    heading: Required installations › Height
+    rules:
+    - general.bc_905_3_1_class_iii_by_height
+  905.3.2:
+    label: flag
+    heading: Required installations › Group A
+    rules:
+    - general.bc_905_3_2_group_a_standpipes
+  905.3.3:
+    label: flag
+    heading: Required installations › Covered and open mall buildings
+    rules:
+    - general.bc_905_3_3_mall_standpipes
+  905.3.4:
+    label: flag
+    heading: Required installations › Underground buildings
+    rules:
+    - general.bc_905_3_4_underground_standpipes
+  905.3.5:
+    label: flag
+    heading: Required installations › Helistops and heliports
+    rules:
+    - general.bc_905_3_5_helistop_standpipes
+  905.3.6:
+    label: flag
+    heading: Required installations › Marinas and boatyards
+    rules:
+    - general.bc_905_3_6_marina_standpipes
+  905.3.7:
+    label: flag
+    heading: Required installations › Vegetative roof and landscaped roof standpipe systems
+    rules:
+    - general.bc_905_3_7_roof_garden_standpipes
+  '905.4':
+    label: flag
+    heading: Location of Class I standpipe hose connections
+    rules:
+    - general.bc_905_4_class_i_hose_connections
+  905.4.1:
+    label: flag
+    heading: Location of Class I standpipe hose connections › Protection
+    rules:
+    - general.bc_905_4_1_standpipe_protection
+  905.4.2:
+    label: flag
+    heading: Location of Class I standpipe hose connections › Interconnection
+    rules:
+    - general.bc_905_4_2_standpipe_interconnection
   907.1.3:
     label: flag
     heading: General › Equipment
@@ -1050,6 +1105,91 @@ pieces:
     heading: Emergency voice/alarm communication systems › Standby power
     rules:
     - general.bc_907_5_2_2_5_voice_alarm_standby_power
+  '909.1':
+    label: flag
+    heading: Scope and purpose
+    rules:
+    - general.bc_909_1_smoke_control_scope
+  '909.20':
+    label: flag
+    heading: Smokeproof enclosures
+    rules:
+    - general.bc_909_20_smokeproof_enclosures
+  909.20.1:
+    label: flag
+    heading: Smokeproof enclosures › Access
+    rules:
+    - general.bc_909_20_1_smokeproof_access
+  909.20.2:
+    label: flag
+    heading: Smokeproof enclosures › Construction
+    rules:
+    - general.bc_909_20_2_smokeproof_construction
+  909.20.2.1:
+    label: flag
+    heading: Construction › Door closers
+    rules:
+    - general.bc_909_20_2_1_smokeproof_door_closers
+  909.20.3.1:
+    label: flag
+    heading: Natural ventilation alternative › Balcony doors
+    rules:
+    - general.bc_909_20_3_1_smokeproof_balcony_doors
+  909.20.3.2:
+    label: flag
+    heading: Natural ventilation alternative › Vestibule doors
+    rules:
+    - general.bc_909_20_3_2_smokeproof_vestibule_doors
+  909.20.3.3:
+    label: flag
+    heading: Natural ventilation alternative › Vestibule ventilation
+    rules:
+    - general.bc_909_20_3_3_smokeproof_vestibule_ventilation
+  909.20.4:
+    label: flag
+    heading: Smokeproof enclosures › Stairway and ramp pressurization alternative
+    rules:
+    - general.bc_909_20_4_stair_pressurization
+  909.20.5.1:
+    label: flag
+    heading: Pressurized stair and vestibule alternative › Vestibule doors
+    rules:
+    - general.bc_909_20_5_1_pressurized_vestibule_doors
+  909.20.5.2:
+    label: flag
+    heading: Pressurized stair and vestibule alternative › Pressure difference
+    rules:
+    - general.bc_909_20_5_2_pressure_difference
+  909.20.5.3:
+    label: flag
+    heading: Pressurized stair and vestibule alternative › Dampered relief opening
+    rules:
+    - general.bc_909_20_5_3_relief_opening
+  909.20.5.4:
+    label: flag
+    heading: Pressurized stair and vestibule alternative › Smoke detection
+    rules:
+    - general.bc_909_20_5_4_fan_smoke_detection
+  909.20.6:
+    label: flag
+    heading: Smokeproof enclosures › Ventilating equipment
+    rules:
+    - general.bc_909_20_6_ventilating_equipment
+  909.20.6.1:
+    label: flag
+    heading: Ventilating equipment › Ventilation systems
+    rules:
+    - general.bc_909_20_6_1_ventilation_systems
+  909.20.6.2:
+    label: flag
+    heading: Ventilating equipment › Standby power
+    rules:
+    - general.bc_909_20_6_2_smokeproof_standby_power
+  '911.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_911_1_fire_command_center
   '1004.7':
     label: flag
     heading: Occupant load › Outdoor areas
