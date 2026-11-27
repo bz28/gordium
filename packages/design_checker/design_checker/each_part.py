@@ -485,7 +485,7 @@ MEASURE_NAMES = {
     "r2_sleeping_units": "R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit)",
     "emergency_escape_openings_1031": "emergency escape openings (whether every sleeping room has one, per 1031)",
     "occupied_outdoor_areas": "occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7)",
-    "ambulatory_care_facility": "ambulatory care facility (whether the building is or holds one, per Table 1020.3)",
+    "ambulatory_care_facility": "ambulatory care facility (whether the building is or holds one, per Section 422 and Tables 1020.2 and 1020.3)",
     "corridors_within_dwelling_units": "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit)",
     "emergency_voice_alarm_system": "emergency voice/alarm system (whether the whole building has one per 907.5.2.2)",
     "high_rise_building": "high-rise (whether the building is one, or more than 420 ft high, per 403)",

@@ -404,6 +404,10 @@ def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rule
     assert not bad, bad
 
 
+# the sections part e brings in only in part, whose left-out parts the README lists (review rounds 1 and 2 of part e)
+PARTLY_IN = ("420", "422")
+
+
 def test_the_readmes_list_names_every_section_a_brought_in_piece_sends_to_that_isnt_in():
     """Review round 1 of part e: 420.1 sends to "Sections 420.1 through 420.11" and 422.1 to 422.1 through 422.7, and
     the README says which parts of Sections 420 and 422 part e leaves out; each section of those ranges that isn't
@@ -417,7 +421,7 @@ def test_the_readmes_list_names_every_section_a_brought_in_piece_sends_to_that_i
         for src in _rules_by_id()[rid].get("sources") or []:
             for a, b in re.findall(r"Sections (4\d\d\.\d+) through (4\d\d\.\d+)", " ".join(src["quote"].split())):
                 head = a.rsplit(".", 1)[0]
-                if head != b.rsplit(".", 1)[0] or f"the parts of Section {head} " not in readme:
+                if head != b.rsplit(".", 1)[0] or head not in PARTLY_IN:
                     continue
                 for n in range(int(a.rsplit(".", 1)[1]), int(b.rsplit(".", 1)[1]) + 1):
                     s = f"{head}.{n}"
@@ -673,3 +677,15 @@ def test_an_unrated_group_b_corridor_where_an_ambulatory_care_facility_may_be_ne
         assert one({**given, "sprinklered_903_3_1_1": False}, 100, 0) != "pass", care
         assert one({**given, "sprinklered_903_3_1_1": True}, 100, 1) == "pass", care
     assert one({"ambulatory_care_facility": False, "sprinklered_903_3_1_1": True}, 100, 0) == "pass"
+
+
+def test_the_ambulatory_care_fact_says_what_it_decides():
+    """Review round 2 of part e: the fact's name, its meaning and its Revit mark said only Table 1020.3's 72 in, though
+    Section 422's flags and Table 1020.2's Group B band read it too."""
+    names = (REPO / "packages/design_checker/design_checker/each_part.py").read_text(encoding="utf-8")
+    name = names[names.index('    "ambulatory_care_facility": "'):].split('",\n', 1)[0]    # its words, both lines
+    meaning = load(NY / "5_building_code_rules/drafted/records/proposed_measures.yaml")["ambulatory_care_facility"]["meaning"]
+    marks = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
+    mark = marks[marks.index("AmbulatoryCareFacility = new("):][:1500].split(");", 1)[0]
+    for words in (name, meaning, mark):
+        assert "422" in words and "1020.2" in words and "1020.3" in words, words[:120]
