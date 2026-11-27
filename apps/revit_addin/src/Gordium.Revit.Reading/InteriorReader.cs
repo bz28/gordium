@@ -994,12 +994,13 @@ public static class InteriorReader
         var u = placed.Select(p => (p.X * along.X + p.Y * along.Y) / length).ToList();
         double width = u.Max() - u.Min(), height = placed.Max(p => p.Z) - placed.Min(p => p.Z);
         double clearWidth = now.ClearWidth!.Value, clearHeight = now.ClearHeight!.Value;
-        evidence[e.UniqueId] = new JsonObject
-        {
-            ["placed"] = new JsonObject { ["width"] = width, ["height"] = height },
-            ["wall_opening_by"] = rec.WallOpeningBy,
-            ["revit_layer"] = new JsonArray(rec.Diagnostics.Select(x => (JsonNode?)x).ToArray()),
-        };
+        // added to what is kept of the door already (its ground, read with it as an opening: review round 1), never in
+        // its place
+        if (evidence[e.UniqueId] is not JsonObject kept)
+            evidence[e.UniqueId] = kept = new JsonObject();
+        kept["placed"] = new JsonObject { ["width"] = width, ["height"] = height };
+        kept["wall_opening_by"] = rec.WallOpeningBy;
+        kept["revit_layer"] = new JsonArray(rec.Diagnostics.Select(x => (JsonNode?)x).ToArray());
         if (clearWidth > width + Sixteenth || clearHeight > height + Sixteenth)
         {
             why = $"its clear opening ({ClearStamp.Inches(clearWidth)} by {ClearStamp.Inches(clearHeight)}) doesn't fit inside the door " +

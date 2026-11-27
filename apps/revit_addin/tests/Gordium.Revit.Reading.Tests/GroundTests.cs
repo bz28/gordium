@@ -327,9 +327,52 @@ public sealed class GroundTests
         Assert.Null(Ground(read, "d2"));
         Assert.Null(Opening(read, "d2")["clear_bottom_between"]);
         Assert.StartsWith("its clear height isn't confirmed on its type", Why(read, "d2"));
+        // the door's ground is kept in the evidence beside what its door reading keeps (review round 1)
+        var kept = read.Evidence[FakeHouse.Uid("d1")]!.AsObject();
+        Assert.Equal(21, kept["ground"]!["samples"]!.AsArray().Count);
+        Assert.NotNull(kept["placed"]);
         // no ground drawn: no bounds either (nothing changes)
         house.Grounds = null;
         Assert.Null(Opening(InteriorReader.Read(house.Model()), "d1")["clear_bottom_between"]);
+    }
+
+    /// <summary>The bounds as DoorBottom makes them (review round 1): house 1's d1 drawn 3 in taller than its confirmed
+    /// clear height (head trim) has its bottom between 0 and 3 in, so a ground 1.2 in up settles nothing; the opening it
+    /// cuts in its wall starting 1 in up raises the lowest to 1 in; drawn 3 in shorter than its clear height, it gives no
+    /// bounds and no ground, and says so.</summary>
+    [Fact]
+    public void A_doors_bounds_come_from_its_drawing_its_wall_opening_and_its_clear_height()
+    {
+        FakeHouse House(double at, Func<Xyz, Xyz> placed, bool cut = false)
+        {
+            var house = Drawn("1_ranch_compliant", (_, _) => at);
+            var i = house.OpeningIndex("d1");
+            var points = house.Openings[i].Placed!.Select(placed).ToList();
+            house.Openings[i] = house.Openings[i] with
+            {
+                Placed = points,
+                WallOpening = cut ? points.Select(p => p with { Z = p.Z < 1e-9 ? 1.0 / 12 : p.Z }).ToList() : null,
+                WallSides = [new WallFace(house.Fake.Place(7.666666666666666, 25.5, 0), house.Fake.Place(0, 1, 0) - house.Fake.Place(0, 0, 0)),
+                             new WallFace(house.Fake.Place(7.666666666666666, 25, 0), house.Fake.Place(0, -1, 0) - house.Fake.Place(0, 0, 0))],
+                Around = [],
+            };
+            SetMark(house, "d1", Marks.EscapeOpening, new(true, 1));
+            SetMark(house, "living", Marks.SleepingRoom, new(true, 1));
+            return house;
+        }
+        List<double>? Bounds(InteriorReadResult read) =>
+            Opening(read, "d1")["clear_bottom_between"]?.AsArray().Select(z => Math.Round(z!.GetValue<double>(), 9)).ToList();
+        Xyz Taller(Xyz p) => p.Z > 1 ? p with { Z = p.Z + 0.25 } : p;
+        var read = InteriorReader.Read(House(0.1, Taller).Model());
+        Assert.Equal([0.0, 0.25], Bounds(read));
+        var m = Measured(read, "d1");
+        Assert.Null(m["m"]!["opening_below_grade"]);
+        Assert.Contains("lies between the lowest and the highest its clear opening's bottom could be (0 in to 3 in", m["not"]!["opening_below_grade"]!.GetValue<string>());
+        Assert.Equal([Math.Round(1.0 / 12, 9), 0.25], Bounds(InteriorReader.Read(House(0.1, Taller, cut: true).Model())));
+        read = InteriorReader.Read(House(0.1, p => p.Z > 1 ? p with { Z = p.Z - 0.25 } : p).Model());
+        Assert.Null(Bounds(read));
+        Assert.Null(Ground(read, "d1"));
+        Assert.Contains("is more than the door as placed leaves over its bottom", Why(read, "d1"));
     }
 
     /// <summary>An older topography's subregion (a walk, a patio) lies on its host, as a Toposolid subdivision does:
