@@ -19,15 +19,15 @@ second_reading:
     the 4 pieces of section group 5a (1005.1, 1005.2, 1005.3, 1005.3.1, 2026-11-25), a thirteenth for the 3 of section
     group 5b (1005.4, 1005.5, 1005.6), a fourteenth for the 6 of section group 5c (1005.7 to 1005.7.3 and 2
     definitions), a fifteenth for the 9 of section group 6a (1010.1, 1010.1.1, 1010.1.1.1 and 6 definitions,
-    2026-11-25), and a helper for the comparison words)
+    2026-11-25), a sixteenth for the 11 of section group 6b (1010.1.2, 1010.1.2.1 and 9 definitions), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), and 7 pages, 10 boxes as step_14 (section group 6a); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), and 6 pages, 11 boxes as step_15 (section group 6b); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 252 pieces, 663 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 263 pieces, 668 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -171,6 +171,12 @@ pieces:
     second_reading_comparisons: []
   202:automatic_sprinkler_system:
     piece_sha256: 89aac7169d32c3a7900eb907bf184a3a4014edc235d60d095ab99964147411b6
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:balanced_door:
+    piece_sha256: 68fe944b9c26a78653d6c8aa069f6404dccb0592462e13a0f4aeca6934e8565a
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -436,6 +442,30 @@ pieces:
     - two
     second_reading_comparisons:
     - none
+  202:door_balanced:
+    piece_sha256: 4108a506e3d397df95d44ff45929bdfab9463f4ac9d9ade452ff7e9e8b9412db
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:door_low_energy_power_operated:
+    piece_sha256: 0f70db8bcf022e00c88ae955c9b09a6b8933d0cb565865b76b7f1a1222410445
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:door_power_assisted:
+    piece_sha256: ebf5a73be8ce4d74b470a5a9b3fb3eb80396c224c3097dc3d3b9d684b467f0e0
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:door_power_operated:
+    piece_sha256: be74908d3fa79d439730f9fceca4e1deb49d0153e11559c3538ff7add5471d7b
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:doorway_exit_access:
     piece_sha256: 09fa36f30663686224fc2d11d1970e5dc52a58c43a7e2a2f6f84d14812387cff
     numbers: []
@@ -833,6 +863,12 @@ pieces:
     - one
     second_reading_comparisons:
     - none
+  202:low_energy_power_operated_door:
+    piece_sha256: 3b0151e86c26e482f1942593116a7541d772a1d9dabff9e58dc64da00d16fab1
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:masonry:
     piece_sha256: 224c9460f16ddec741ce1b8aa4b00f10a088ee0ef4b8f0dc8266b0fbc8d61d78
     numbers: []
@@ -994,6 +1030,30 @@ pieces:
     - <=
   202:plumbing_code_of_new_york_state:
     piece_sha256: 1d1e666b5250e6f76b3e98251099e4533448cbce3ff3152a850f71c500a95a3e
+    numbers:
+    - '2025'
+    - '2025'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2025'
+    - '2025'
+    second_reading_comparisons:
+    - none
+    - none
+  202:power_assisted_door:
+    piece_sha256: 5cb92c6cee4dcf43d2605d62bc190eb2a2d33f0059a2ee754a88090000f59c98
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:power_operated_door:
+    piece_sha256: 63fb51b248fb75d3b544e9cd0969d0ef0f33adf3244323ef543f560b8f9de705
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:private_garage:
+    piece_sha256: e66fa2394dfd7630998f331014f20a8c06eaac52637121b02e6614914e32becf
     numbers:
     - '2025'
     - '2025'
@@ -2941,6 +3001,27 @@ pieces:
       projection is at 34 inches or higher; ''and 80 inch'' (<=): the upper end of ''between 34 inches and 80 inches''; ''78
       inch'' (>=): ''not lower than 78 inches''. The recorded words miss them (numbers.py reads no ''lower than'' and no range''s
       upper end). The second reading is right. A flag: no rule uses them.'
+  1010.1.2:
+    piece_sha256: 9a0a566b14081a715d62a10d4761e167d0e53e9acf067b5017a4cf197ad635b3
+    numbers:
+    - 10 or less
+    - 10 or less
+    second_reading: agrees
+    second_reading_numbers:
+    - 10 or less
+    - 10 or less
+    second_reading_comparisons:
+    - <=
+    - <=
+  1010.1.2.1:
+    piece_sha256: a65bc3fae01ea8bd6d08c7d6f9bf8d8d33730adcf8232db5848f6f97772fc809
+    numbers:
+    - 50 or more
+    second_reading: agrees
+    second_reading_numbers:
+    - 50 or more
+    second_reading_comparisons:
+    - '>='
   '1016.2':
     piece_sha256: 75ce5120ce02dba41247b79ce0300db00da2a96dfe6066836bd5c20e9e0df752
     numbers:

@@ -225,6 +225,16 @@ pieces:
     heading: Size of doors › Projections into clear opening
     rules:
     - general.bc_1010_1_1_1_projections
+  1010.1.2:
+    label: flag
+    heading: General › Egress door types
+    rules:
+    - general.bc_1010_1_2_door_types
+  1010.1.2.1:
+    label: rule
+    heading: Egress door types › Direction of swing
+    rules:
+    - general.bc_1010_1_2_1_direction_of_swing
   '1016.2':
     label: rule
     heading: Egress through intervening spaces
