@@ -300,11 +300,12 @@ documents:
         202:concrete:
           perlite: 'One of CONCRETE''s own sub-entries (p.38, lines 24-41: carbonate aggregate, cellular, lightweight
             aggregate, perlite, sand-lightweight, siliceous aggregate, vermiculite), printed in italics; no term of
-            its own. A construction term, brought in by 403.2.2.2''s "Concrete", read by no rule (Chapter 4 part b).'
+            its own. A construction term, brought in by 403.2.2.2''s "Concrete" (Chapter 4 part b) and by the roman
+            "concrete" of 714.4.1''s exception 1 (Chapter 7 part d), read by no rule.'
           vermiculite: 'One of CONCRETE''s own sub-entries (p.38, lines 24-41: carbonate aggregate, cellular,
             lightweight aggregate, perlite, sand-lightweight, siliceous aggregate, vermiculite), printed in italics;
-            no term of its own. A construction term, brought in by 403.2.2.2''s "Concrete", read by no rule (Chapter
-            4 part b).'
+            no term of its own. A construction term, brought in by 403.2.2.2''s "Concrete" (Chapter 4 part b) and by
+            the roman "concrete" of 714.4.1''s exception 1 (Chapter 7 part d), read by no rule.'
         202:fire_alarm_signal:
           fire alarm-initiating device: 'The book prints "fire alarm-initiating device" in italics (p.44, line 56);
             Section 202 defines INITIATING DEVICE (p.50, line 54), which the phrase doesn''t name whole. A fire alarm
