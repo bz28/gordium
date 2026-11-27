@@ -34,7 +34,7 @@ public sealed class ResultViewListTests
         Assert.True(groups[0].Open);
         Assert.Equal(FixKind.Answer, groups[0].Group.Kind);
         Assert.All(groups.Skip(1), g => Assert.False(g.Open));
-        Assert.Equal(groups[0].Group.Cards.Count, fix.OfType<FixCardEntry>().Count());
+        Assert.Equal(ProjectQuestions.Of(groups[0].Group, null).Count, fix.OfType<FixCardEntry>().Count());   // the follow-ups held back (FollowUpQuestionsTests)
         var code = Layout(m, ResultsViewKind.ByCode, open).OfType<CodeNodeEntry>().ToList();
         Assert.All(code.Where(n => n.Depth == 0), n => Assert.True(n.Open));
         Assert.Equal(m.Views!.Code.Count, code.Count(n => n.Depth == 0));
