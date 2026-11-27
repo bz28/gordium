@@ -39,4 +39,10 @@
     <None Include="fixtures/*.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../tests/Gordium.Revit.Reading.Tests/answers/*.json" Link="answers/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <!-- the four-unit apartment's answer is made, never committed (it changes with almost every rule): a build
+       without it stops and says how to make it, rather than tests failing on a missing file -->
+  <Target Name="GordiumApartmentAnswerMade" BeforeTargets="Build"
+          Condition="!Exists('$(MSBuildThisFileDirectory)../../tests/Gordium.Revit.Reading.Tests/answers/four_unit_apartment_check_answer.json')">
+    <Error Text="Make the pane's apartment answer first, from the repository folder: python apps/revit_addin/tools/evals/make_apartment_answer.py (apps/revit_addin/README.md)" />
+  </Target>
 </Project>

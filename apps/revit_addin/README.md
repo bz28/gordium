@@ -633,10 +633,21 @@ panel itself is checked in Revit (it needs Revit to run). The Children's Odyssey
 law and the eval's building facts; the route parts as the eval measures them); the read stays outside the repo with
 the sheet it was built from. `GORDIUM_UPDATE_SNAPSHOTS=1` rewrites the snapshots (read the diff before committing).
 The four-unit apartment's answer (`answers/four_unit_apartment_check_answer.json`, for `ResultViewsTests`: the
-results as "What to fix" and "By code", UI polish PR 2) is the worker's answer to Ben's 2026-11-23 trial request,
+results as "What to fix" and "By code", UI polish PR 2, and the other pane tests and renders) is the worker's answer to
+Ben's 2026-11-23 trial request,
 `test_data/test_sites/new_york/ithaca_city/four_unit_apartment/revit_check_site_request.json`: `design_checker.__main__.answer`
-on that request, written with `json.dumps(answer, indent=1, ensure_ascii=False)`. Make it again whenever the checker's
-result for it changes (the `about` fingerprints aside) (`apps/revit_addin/tools/tests/test_pane_answer_fresh.py` fails until it is).
+on that request, written with `json.dumps(answer, indent=1, ensure_ascii=False)` by
+`python apps/revit_addin/tools/evals/make_apartment_answer.py` (run from the repository folder). It is **made, never
+committed** (`.gitignore`): almost every rule change changed it, and a committed copy made every waiting PR conflict with
+each merge (2026-11-27). It publishes each state law first (a law without a current certificate gives no
+rules, so an answer made then would lack them; one that can't be published stops it). CI publishes, then makes it,
+before `dotnet test` in both Revit client jobs; a build of the tests (or of
+`tools/pane_renders`) without it stops and says how to make it; a checker error is never written as the answer. The
+tests that read it count what they compare from the answer itself (its statuses and asks), never numbers a rule change
+moves; the counting and its words are pinned with numbers on a small answer made in `ResultViewsTests` (`Small`).
+How we know: `tools/tests/test_make_apartment_answer.py` (the tool writes the checker's answer exactly and never an
+error, every CI job running `dotnet test` makes it first, the builds stop without it) and
+`packages/rule_format/tests/test_generated_not_committed.py` (git never tracks it).
 
 **Where Revit's thread went: `ui_thread`** (PR 8). Each `check_project` line from the button or the panel ends
 with `ended` (`shown`, `shown_stale`, `nothing_sent`, `cancelled`, `failed`), `answer_use`, `cancelled` (the stage
@@ -735,14 +746,19 @@ LS1.0: 122 walls, 52 doors, 67 windows, 25 rooms, a floor; feet, origin at the S
 2. **The model** (`ModelBuild.cs`, its Revit-free decisions in `Gordium.Revit.Reading/BuildData.cs`): the request
    `%LOCALAPPDATA%\Gordium\trial\build_model_request.json`
    (`{"data": "<data.json>", "template": "<optional .rte>", "save_as": "<model>.rvt"}`, plus the script's toggles
-   `swing_opposite_facing`, `hinge_opposite_hand`, `use_phases`, each true when left out, and optional
+   `use_phases`, true when left out (`swing_opposite_facing` and `hinge_opposite_hand` are read and not used: the
+   log notes them; see below), and optional
    `corrections`: `[{"wall": "W16", "extend_end_to": [x, y], "why": "..."}]`, each moving a wall's end along its own
    line before drawing, logged as applied, or refused and not applied past 2 ft or off the wall's line) builds, as the script does:
    a new project from Revit's `English-Imperial\default.rte`; Level 1 and its plan; a wall type per status, thickness
    and rating (`LS Existing 12"`, `LS New 4.5" 1 HR`), each wall on its centre line with its Comments and Mark, Existing
    walls in the first phase; a door type per kind and size (the template's family; where there is none, as for double
    doors in Revit 2027's install, a family made from Revit's Door.rft with its leaves' swing drawn in plan), each door
-   flipped to swing (`swing_dir`) and hinge (`hinge`) as the data says; windows at their sill; the floor under the
+   flipped to swing (`swing_dir`) and hinge (`hinge`) as the data says, by what Revit draws, never a family's facing
+   or hand convention: its swing read back from its plan symbol (the reading's own, `RouteReader.ReadBuildSwings`),
+   its facing flipped where the side read isn't the data's, read again, its hand flipped where the hinge read isn't,
+   read once more, and the log's line for it what was read at the end ("swings as the data" only when it does; a
+   swing that can't be read back is a failure, with why); windows at their sill; the floor under the
    footprint; a Room at each tag point with its Name (in capitals, as the script) and Number, tagged. Saved, closed.
    The log line `build_model` gives the counts drawn beside the data's, **every element not built with Revit's
    reason** (the script dropped them quietly), each door's flips and each room's area beside the sheet's.
@@ -770,13 +786,19 @@ Needs the .NET 10 SDK, the .NET 8 runtime beside it (`dotnet --list-runtimes` sh
 10.x) and a Python with Gordium installed (`pip install -e ".[dev]"` at the repository root).
 
 ```bash
+python apps/revit_addin/tools/evals/make_apartment_answer.py   # first, from the repository folder (see below); ~30 s;
+                                                               # this checkout's Gordium (PYTHONPATH or pip install -e)
 cd apps/revit_addin          # dotnet reads global.json (the pinned SDK) from the folder it runs in
 GORDIUM_PYTHON=/path/to/.venv/bin/python dotnet test                       # both, one after the other
 GORDIUM_PYTHON=/path/to/.venv/bin/python dotnet test --framework net8.0    # or one at a time
 ```
 
-`GORDIUM_PYTHON` defaults to `python` on the PATH. CI runs it on Windows and Ubuntu (`.github/workflows/ci.yml`,
-job `revit_worker_client`). The test packages are pinned to exact versions, with lock files (`packages.lock.json`);
+The first line makes the four-unit apartment's answer the pane tests read (below, "The four-unit apartment's
+answer"); it is made, never committed, and a build of the tests without it stops with that line. Run it again after
+pulling or changing rules, so the tests read today's answer (CI always makes it fresh). `GORDIUM_PYTHON` defaults to
+`python` on the PATH. CI runs it on Ubuntu on every push (`.github/workflows/ci.yml`, job `revit_worker_client`) and on Windows
+once a PR is labelled merge-ready and every night on main (`.github/workflows/windows.yml`, job
+`revit_worker_client_windows`). The test packages are pinned to exact versions, with lock files (`packages.lock.json`);
 CI restores in locked mode.
 
 ## The add-in in Revit (Windows only)

@@ -26,9 +26,29 @@ sprinklered_903_3_1_1:
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1007_1_2_space_three_or_more
+  - general.bc_1009_3_2_stairway_width
+  - general.bc_1009_3_3_area_of_refuge_at_stairways
+  - general.bc_1009_4_2_elevator_area_of_refuge
+  - general.bc_1009_7_2_assisted_rescue_separation
+  - general.bc_1009_7_4_assisted_rescue_stairways
+  - general.bc_1013_2_low_level_exit_signs_group_r1
   - general.bc_1017_2_travel_distance
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
+  - general.bc_1031_2_escape_opening_where_required
+  - general.bc_1031_3_1_escape_opening_min_area
+  - general.bc_1031_3_2_escape_opening_min_height
+  - general.bc_1031_3_2_escape_opening_min_width
+  - general.bc_1031_3_3_escape_opening_max_sill_height
+  - general.bc_1031_4_escape_door_swinging_or_sliding
+  - general.bc_1031_5_1_area_well_allows_full_opening
+  - general.bc_1031_5_1_area_well_min_projection
+  - general.bc_1031_5_1_area_well_min_width
+  - general.bc_1031_5_2_1_area_well_ladder
+  - general.bc_1031_5_2_2_area_well_steps
+  - general.bc_1031_5_2_area_well_ladder_over_44
+  - general.bc_1031_5_area_well_required
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -71,7 +91,27 @@ sprinklered_903_3_1_2:
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1007_1_2_space_three_or_more
+  - general.bc_1009_3_2_stairway_width
+  - general.bc_1009_3_3_area_of_refuge_at_stairways
+  - general.bc_1009_4_2_elevator_area_of_refuge
+  - general.bc_1009_7_2_assisted_rescue_separation
+  - general.bc_1009_7_4_assisted_rescue_stairways
+  - general.bc_1013_2_low_level_exit_signs_group_r1
   - general.bc_1020_3_corridor_capacity
+  - general.bc_1031_2_escape_opening_where_required
+  - general.bc_1031_3_1_escape_opening_min_area
+  - general.bc_1031_3_2_escape_opening_min_height
+  - general.bc_1031_3_2_escape_opening_min_width
+  - general.bc_1031_3_3_escape_opening_max_sill_height
+  - general.bc_1031_4_escape_door_swinging_or_sliding
+  - general.bc_1031_5_1_area_well_allows_full_opening
+  - general.bc_1031_5_1_area_well_min_projection
+  - general.bc_1031_5_1_area_well_min_width
+  - general.bc_1031_5_2_1_area_well_ladder
+  - general.bc_1031_5_2_2_area_well_steps
+  - general.bc_1031_5_2_area_well_ladder_over_44
+  - general.bc_1031_5_area_well_required
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -100,6 +140,19 @@ sprinklered_903_3_1_3:
   unit: yes_no
   needed_by:
   - general.bc_1006_2_2_6_r3_r4_nfpa_13d
+  - general.bc_1031_2_escape_opening_where_required
+  - general.bc_1031_3_1_escape_opening_min_area
+  - general.bc_1031_3_2_escape_opening_min_height
+  - general.bc_1031_3_2_escape_opening_min_width
+  - general.bc_1031_3_3_escape_opening_max_sill_height
+  - general.bc_1031_4_escape_door_swinging_or_sliding
+  - general.bc_1031_5_1_area_well_allows_full_opening
+  - general.bc_1031_5_1_area_well_min_projection
+  - general.bc_1031_5_1_area_well_min_width
+  - general.bc_1031_5_2_1_area_well_ladder
+  - general.bc_1031_5_2_2_area_well_steps
+  - general.bc_1031_5_2_area_well_ladder_over_44
+  - general.bc_1031_5_area_well_required
   - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1020_2_a_b_e_f_m_s_u
   - general.bc_table_1020_2_i2
@@ -154,16 +207,66 @@ occupancy_group:
   - general.bc_1006_3_4_1_mixed_occupancies
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
+  - general.bc_1008_2_2_group_i2_exterior_landings
+  - general.bc_1008_2_illumination_required
+  - general.bc_1009_3_3_area_of_refuge_at_stairways
+  - general.bc_1009_8_two_way_communication
   - general.bc_1010_1_1_door_width
+  - general.bc_1010_1_2_1_direction_of_swing
+  - general.bc_1010_2_13_controlled_egress
+  - general.bc_1010_2_7_educational_locking
+  - general.bc_1010_2_8_panic_hardware
+  - general.bc_1013_1_exit_signs_where_required
+  - general.bc_1013_2_low_level_exit_signs_group_r1
   - general.bc_1016_2_intervening_spaces_other_groups
   - general.bc_1016_2_other_occupancies
   - general.bc_1017_2_2_f1_s1_increase
   - general.bc_1017_2_3_h5_increase
+  - general.bc_1018_3_aisles_groups_b_m
   - general.bc_1018_4_merchandise_pads
+  - general.bc_1018_5_aisles_other_occupancies
+  - general.bc_1019_3_exit_access_stairway_enclosure
+  - general.bc_1019_4_exit_access_stairways_groups_i2_i3
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_1020_5_other_occupancies
+  - general.bc_1025_1_luminous_markings_where_required
+  - general.bc_1025_2_1_steps
+  - general.bc_1025_2_2_landings
+  - general.bc_1025_2_3_handrails
+  - general.bc_1025_2_4_1_floor_mounted_lines
+  - general.bc_1025_2_4_2_wall_mounted_lines
+  - general.bc_1025_2_4_3_transition
+  - general.bc_1025_2_4_perimeter_demarcation_lines
+  - general.bc_1025_2_5_obstacles
+  - general.bc_1025_2_6_1_emergency_exit_symbol
+  - general.bc_1025_2_6_2_door_hardware_markings
+  - general.bc_1025_2_6_3_door_frame_markings
+  - general.bc_1025_3_uniformity
+  - general.bc_1025_4_self_luminous_photoluminescent
+  - general.bc_1025_5_illumination
+  - general.bc_1031_2_1_operational_constraints
+  - general.bc_1031_2_basements
+  - general.bc_1031_2_escape_opening_where_required
+  - general.bc_1031_2_openings_to_public_way
+  - general.bc_1031_3_1_escape_opening_min_area
+  - general.bc_1031_3_2_escape_opening_min_height
+  - general.bc_1031_3_2_escape_opening_min_width
+  - general.bc_1031_3_3_escape_opening_max_sill_height
+  - general.bc_1031_4_escape_door_swinging_or_sliding
+  - general.bc_1031_5_1_area_well_allows_full_opening
+  - general.bc_1031_5_1_area_well_min_projection
+  - general.bc_1031_5_1_area_well_min_width
+  - general.bc_1031_5_2_1_area_well_ladder
+  - general.bc_1031_5_2_2_area_well_steps
+  - general.bc_1031_5_2_area_well_ladder_over_44
+  - general.bc_1031_5_3_area_well_drainage
+  - general.bc_1031_5_area_well_required
+  - general.bc_1031_6_bars_grilles_covers_screens
   - general.bc_407_4_2_sleeping_room_travel
+  - general.bc_709_5_1_i2_smoke_barrier_doors
+  - general.bc_710_5_3_i2_pass_through_openings
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -258,6 +361,7 @@ special_egress_spaces:
   - general.bc_1006_2_2_5_vehicular_ramps
   - general.bc_1006_2_2_6_r3_r4_nfpa_13d
   - general.bc_1006_3_3_story_exits
+  - general.bc_1010_2_8_1_refrigeration_machinery_rooms
   - general.bc_1016_2_intervening_spaces_other_groups
   - general.bc_1017_2_travel_distance
   - general.bc_407_4_2_sleeping_room_travel
@@ -342,11 +446,14 @@ occupied_outdoor_areas:
   unit: yes_no
   needed_by:
   - general.bc_1004_7_outdoor_areas
+  - general.bc_1010_1_2_1_direction_of_swing
+  - general.bc_1010_2_8_panic_hardware
 ambulatory_care_facility:
   meaning: 'The building is or holds an ambulatory care facility (2025 BCNYS 202, Section 422; Group B, 304.1), as the architect
     states it: Table 1020.3 asks 72 inches of its corridors serving stretcher traffic'
   unit: yes_no
   needed_by:
+  - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_table_1020_3_corridor_width
 corridors_within_dwelling_units:
   meaning: 'The building has corridors within a dwelling unit or sleeping unit (2025 BCNYS 1020.2 exception 2: no rating

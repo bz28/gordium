@@ -270,7 +270,7 @@ public static class ResultViewList
     public static string? Spoken(ListEntry e) => e switch
     {
         FixGroupEntry g => $"{g.Group.Title}, {StatusLook.Word(g.Status)}, {g.Group.SeeWords}" + (g.Open ? ", open" : ", folded"),
-        FixCardEntry c => $"{c.Card.Headline}, {(c.Card.Rows.Count == 1 ? "1 result" : $"{c.Card.Rows.Count} results")}" + (c.Open ? ", open" : ", folded"),
+        FixCardEntry c => $"{c.Card.Title}, {(c.Card.Rows.Count == 1 ? "1 result" : $"{c.Card.Rows.Count} results")}" + (c.Open ? ", open" : ", folded"),
         CodeNodeEntry n => string.Join(", ", new[] { Title(n.Node), n.Node.Note, StatusLook.Word(n.Status), n.Node.Line, n.Node.Scope }.OfType<string>())
                            + (n.CanOpen ? n.Open ? ", open" : ", folded" : ""),
         QuestionEntry q => $"{q.Question.Card.Headline}, {ProjectQuestions.Affects(q.Question.Affects)}"
@@ -285,7 +285,9 @@ public static class ResultViewList
     /// the rest.</summary>
     public static string? Tip(ListEntry e) => e switch
     {
-        FixCardEntry c => c.Card.Why is { } why ? $"{c.Card.Headline}\n\nWhy: {why}" : c.Card.Headline,
+        // the checker's words under a card named by its rule (egress UI audit, finding 3)
+        FixCardEntry c => (c.Card.Title == c.Card.Headline ? c.Card.Headline : $"{c.Card.Title}\n{c.Card.Headline}")
+                          + (c.Card.Why is { } why ? $"\n\nWhy: {why}" : ""),
         CodeNodeEntry { Node.Note: { } note } n => n.Node.NoteTooltip is { } quotes ? $"{note}\n\n{quotes}" : note,
         _ => null,
     };

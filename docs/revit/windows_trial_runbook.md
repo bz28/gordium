@@ -39,8 +39,8 @@ Do these in order. Tick each when done and write the version you got in the note
 | [x] | Git for Windows installed | 2.56.1 |
 | [x] | Python installed: the 64-bit (x64) build of 3.12 from python.org, with "Add to PATH" and the `py` launcher ticked | 3.12.10 (the last 3.12 with an installer on python.org; winget's install failed with "Fast Cache data not found", so the python.org installer was run directly, its signature checked). The repo needs Python 3.12 to 3.14 (`requires-python` in `pyproject.toml`). CI's Windows job tests 3.12 and 3.14 on an x64 machine, so the 64-bit (x64) build is the one proven, and it is what this laptop runs |
 | [x] | `git clone https://github.com/bz28/gordium.git`, then check out the branch the trial uses (see Open items) | `main`, after PRs #112 to #115 merged (2026-11-18) |
-| [x] | From the clone: `py -3.12 -m venv .venv`, then `.venv\Scripts\activate`, then `pip install -e ".[dev]"` | pip 26.3. Matches the install step of the Windows job in `.github/workflows/ci.yml` |
-| [x] | `pytest` passes | 5,810 passed, 41 skipped, in 39.5 minutes with nothing else running (2026-11-18). The slowest test took 220 s; with the C# tests running beside it the same run took twice as long and Python crashed (an access violation, not a failed test); a re-run in 16 parallel groups showed the cause: the old 5-minute hang dump fired 3 times and crashed Python twice: `faulthandler_timeout` is now 15 minutes (`pyproject.toml`). The same step CI's Windows job runs. The Windows job runs more checks after it (rule validation, the audits, the goldens: see `ci.yml`); running them all is optional here, `pytest` is the one that proves the install |
+| [x] | From the clone: `py -3.12 -m venv .venv`, then `.venv\Scripts\activate`, then `pip install -e ".[dev]"` | pip 26.3. Matches the install step of the Windows job in `.github/workflows/windows.yml` |
+| [x] | `pytest` passes | 5,810 passed, 41 skipped, in 39.5 minutes with nothing else running (2026-11-18). The slowest test took 220 s; with the C# tests running beside it the same run took twice as long and Python crashed (an access violation, not a failed test); a re-run in 16 parallel groups showed the cause: the old 5-minute hang dump fired 3 times and crashed Python twice: `faulthandler_timeout` is now 15 minutes (`pyproject.toml`). The same step CI's Windows job runs. The Windows job runs more checks after it (rule validation, the audits, the goldens: see `windows.yml`); running them all is optional here, `pytest` is the one that proves the install |
 | [x] | `python -m design_checker.conformance` prints `OK: every scene conforms` | Printed 2026-11-18. Proves the Windows install reads the scenes and recordings as the Mac does |
 | [x] | The worker answers by hand (below) | 2026-11-18: `hello` answered `ok: true`, protocol 1.1, `gordium.site/1`, a `worker_fingerprint` and a `new_york/ithaca_city` rulebook; an unknown command answered `ok: false` and the worker stayed up |
 | [x] | Autodesk's Snowdon Towers sample copied onto the laptop, and each of the architects' 3 models as it arrives (see Open items 1; a model arriving later is added then, without restarting anything) | Snowdon Towers in `Documents/gordium_archive/revit/sample_models/` (2026-11-18). It links five other Snowdon models (Electrical, HVAC, Plumbing, Site, Structural) not copied, so Revit asks about them on opening ("Ignore and continue"). Architects' models: none yet. Keep copies out of the repo clone. The architects' models are the firms' files |
@@ -281,6 +281,17 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
 4. **Which branch the trial clones.** This page sits on the tidy-up stack's top branch (PR #78); the trial needs
    the stack merged, or that branch, since `recorded/revit/` and the conformance command only exist there.
 5. **Confirm the numbers in section 6** (3 minutes to open a model, 90% of RAM in use, 64 GB for a cloud machine, 2 and 10 seconds per edit).
+6. **Rebuild the script-built models before relying on any door's swing (2026-11-25).** The model build used to flip each
+   door by an assumed convention (`swing_opposite_facing` and `hinge_opposite_hand`, both true unless the request
+   said otherwise). In Revit 2027 the template's Single-Flush swings toward its facing and hinges on its hand's side,
+   so every template door built with those defaults came out turned 180 degrees from the data, while the build's log
+   said "swings as the data": the door swing check found it, and the plan picture showed it
+   (`test_data/test_sites/revit_door_swing/swing_check_recorded.json`, the first run). The model built from your drawing
+   script's data (the Children's Odyssey, 19 Libby St, Portland ME: 122 walls, 52 doors, 67 windows, 25 rooms; the
+   add-in README, "Build a model from data") was built with those defaults, so its doors are likely mirrored. Nothing read a door's swing until the swing reading (2026-11-25), so no past result is affected; rebuild
+   them before a check that reads swing. The build now reads each door's drawn swing back and flips it until what it
+   reads is the data, and its log says what was read, never what was meant (a door whose swing can't be read back is a
+   failure, never "swings as the data").
 
 **Checks the trial itself settles** (nothing in the repo answers them today):
 
@@ -311,7 +322,7 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
 Autodesk recommends 32 GB of RAM for Revit 2027; Revit has
 a 30-day free trial; `PropertyLine.GetBoundary` exists only in the Revit 2027 API; Rhino.Inside.Revit has no
 stable Revit 2027 release and pyRevit v7's CPython is experimental, which is why the add-in is C# talking to the
-same Python worker. CI already runs the tests on Windows (`.github/workflows/ci.yml`, job `windows`). The commands
+same Python worker. CI already runs the tests on Windows (`.github/workflows/windows.yml`, job `windows`: nightly on main, and on a PR once it is labelled merge-ready). The commands
 and file layouts above were read from the repository, and the worker, its BOM refusal and the conformance command
 were run on the Mac.
 

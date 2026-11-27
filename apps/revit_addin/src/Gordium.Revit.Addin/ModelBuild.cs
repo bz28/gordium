@@ -40,18 +40,16 @@ internal static class ModelBuild
 {
     internal static string RequestPath => Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "build_model_request.json");
 
-    /// <summary>The way a door family Gordium makes from Door.rft opens, drawn to match the stock families as the
-    /// script describes them: its leaf opens to the side opposite its facing (family -Y), hinged opposite its hand
-    /// (family -X). Its flips use these, whatever the request's toggles (which are about the stock families).</summary>
-    private const bool MadeSwingOppositeFacing = true, MadeHingeOppositeHand = true;
-
     internal static void Run(RevitApplication app, string requestFile)
     {
         var log = new Dictionary<string, object?> { ["request"] = requestFile };
         Document? doc = null;
         try
         {
-            var request = BuildRequest.Parse(JsonNode.Parse(File.ReadAllText(requestFile, Encoding.UTF8)));
+            var raw = JsonNode.Parse(File.ReadAllText(requestFile, Encoding.UTF8));
+            var request = BuildRequest.Parse(raw);
+            // the old flip conventions: read, never used (each door's swing is read back from what Revit draws)
+            var unused = new[] { "swing_opposite_facing", "hinge_opposite_hand" }.Where(k => raw is JsonObject o && o.ContainsKey(k)).ToList();
             log["data"] = request.Data;
             log["save_as"] = request.SaveAs;
             var model = BuildData.Parse(JsonNode.Parse(File.ReadAllText(request.Data, Encoding.UTF8)));
@@ -67,6 +65,8 @@ internal static class ModelBuild
             doc = app.NewProjectDocument(template);
             var report = new Report();
             report.Failed.AddRange(refused.Select(r => $"correction not applied: {r}"));
+            if (unused.Count > 0)
+                report.Notes.Add($"{string.Join(" and ", unused)} given: not used (each door is flipped until the swing its plan symbol draws is the data's)");
             Build(app, doc, model, request, report);
             report.Into(log);
             Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(request.SaveAs))!);
@@ -318,63 +318,13 @@ internal static class ModelBuild
                     report.Failed.Add($"{label}: not placed: {x.Message}");
                 }
             }
-            // flipped to swing and hinge as the data says: the facing first, then (regenerated) the hand
-            foreach (var (d, fi, madeHere) in doors)
-            {
-                bool swingOpp = madeHere ? MadeSwingOppositeFacing : request.SwingOppositeFacing;
-                bool hingeOpp = madeHere ? MadeHingeOppositeHand : request.HingeOppositeHand;
-                if (d.SwingDir is not { } swing)
-                {
-                    // the source doesn't say which way it swings: left as Revit placed it, never flipped on a guess
-                    report.Doors.Add($"{BuildData.DoorMark(d)} ({(madeHere ? "Gordium's family" : "the template's family")}): no swing in the data, " +
-                                     $"left as Revit placed it (facing {Xy(fi.FacingOrientation)}, hand {Xy(fi.HandOrientation)})");
-                    continue;
-                }
-                var words = new StringBuilder($"{BuildData.DoorMark(d)} ({(madeHere ? "Gordium's family" : "the template's family")}, " +
-                                              $"swing {Xy(swing)}): facing {Xy(fi.FacingOrientation)}");
-                try
-                {
-                    if (BuildData.FlipFacing(P(fi.FacingOrientation), swing, swingOpp))
-                    {
-                        if (!fi.CanFlipFacing || !fi.flipFacing())
-                            throw new InvalidOperationException("Revit wouldn't flip its facing");
-                        doc.Regenerate();
-                        words.Append($" flipped to {Xy(fi.FacingOrientation)}");
-                    }
-                    else
-                        words.Append(" kept");
-                    if (d.Hinge is { } hinge)
-                    {
-                        words.Append($"; hand {Xy(fi.HandOrientation)}");
-                        if (BuildData.FlipHand(P(fi.HandOrientation), d.Center, hinge, hingeOpp))
-                        {
-                            if (!fi.CanFlipHand || !fi.flipHand())
-                                throw new InvalidOperationException("Revit wouldn't flip its hand");
-                            doc.Regenerate();
-                            words.Append($" flipped to {Xy(fi.HandOrientation)}");
-                        }
-                        else
-                            words.Append(" kept");
-                    }
-                    else
-                        words.Append("; no hinge in the data (a double door): hand kept");
-                    // the door as it now stands, read the same way: it swings (and hinges) as the data says
-                    var swings = !BuildData.FlipFacing(P(fi.FacingOrientation), swing, swingOpp);
-                    var hinged = d.Hinge is not { } h2 || !BuildData.FlipHand(P(fi.HandOrientation), d.Center, h2, hingeOpp);
-                    words.Append(swings && hinged ? "; swings as the data" : "; NOT as the data");
-                    if (madeHere)
-                        words.Append($"; transform BasisY {Xy(fi.GetTransform().BasisY)}, mirrored {fi.Mirrored}");
-                    if (!swings || !hinged)
-                        report.Failed.Add($"door {BuildData.DoorMark(d)}: placed, but it doesn't swing as the data says ({words})");
-                }
-                catch (Exception x)
-                {
-                    report.Failed.Add($"door {BuildData.DoorMark(d)}: placed, but not flipped as the data says: {x.Message}");
-                    words.Append($"; {x.Message}");
-                }
-                report.Doors.Add(words.ToString());
-            }
         });
+        // flipped to swing and hinge as the data says, from what Revit draws (never a family's facing or hand
+        // convention: Revit 2027's own Single-Flush swings toward its facing, the opposite of what was once assumed,
+        // 2026-11-25): each door's swing read back from its plan symbol (RouteReader.ReadBuildSwings), its facing
+        // flipped where the side read isn't the data's, read again, its hand flipped where the hinge read isn't, and
+        // read once more; the log says what was read at the end, never what was meant
+        SwingDoors(doc, doors, report, made);
         report.Counts["doors"] = new { data = model.Doors.Count, placed = doors.Count(x => x.Fi.IsValidObject) };
 
         // ---- windows ----
@@ -811,6 +761,69 @@ internal static class ModelBuild
         {
             fdoc.Close(false);
         }
+    }
+
+    /// <summary>Each door the data gives a swing flipped until what its plan symbol draws is what the data says (see the
+    /// call), and every door's line in the log: what was read back at the end, with the flips made. A door whose swing
+    /// can't be read back is never flipped and never said to swing as the data (a failure, with why).</summary>
+    private static void SwingDoors(Document doc, List<(BuildDoor D, FamilyInstance Fi, bool Made)> doors, Report report,
+                                   Dictionary<ElementId, string> made)
+    {
+        var placed = doors.Where(x => x.Fi.IsValidObject).ToList();
+        var data = placed.Where(x => x.D.SwingDir is not null).ToDictionary(
+            x => x.Fi.UniqueId,
+            x => (new Xyz(x.D.SwingDir!.Value.X, x.D.SwingDir.Value.Y, 0),
+                  x.D.Hinge is { } h ? new Xyz(h.X, h.Y, 0) : (Xyz?)null,
+                  new Xyz(x.D.Center.X, x.D.Center.Y, 0)));
+        Dictionary<string, RouteReader.BuildSwing> Read() =>
+            RouteReader.ReadBuildSwings(RevitInterior.DoorsModel(doc), data).ToDictionary(r => r.Id, StringComparer.Ordinal);
+        var flips = placed.ToDictionary(x => x.Fi.UniqueId, _ => new List<string>(), StringComparer.Ordinal);
+        void Flip(string name, Func<RouteReader.BuildSwing, bool> needs, Func<FamilyInstance, bool> can, Func<FamilyInstance, bool> flip, string word)
+        {
+            var read = Read();
+            var labels = placed.Where(x => x.Fi.IsValidObject).ToDictionary(x => x.Fi.Id, x => $"door {BuildData.DoorMark(x.D)}");
+            Step(doc, name, report, labels, _ =>
+            {
+                foreach (var (_, fi, _) in placed)
+                    if (fi.IsValidObject && read.TryGetValue(fi.UniqueId, out var r) && needs(r))
+                    {
+                        if (!can(fi) || !flip(fi))
+                            report.Failed.Add($"door {Mark(fi)}: Revit wouldn't flip its {word}");
+                        else
+                            flips[fi.UniqueId].Add($"{word} flipped");
+                    }
+            });
+        }
+        Flip("Gordium: doors flipped to swing to the data's side", r => r.FlipFacing, fi => fi.CanFlipFacing, fi => fi.flipFacing(), "facing");
+        Flip("Gordium: doors flipped to hinge at the data's jamb", r => r.FlipHand, fi => fi.CanFlipHand, fi => fi.flipHand(), "hand");
+        var end = Read();
+        placed = placed.Where(x => x.Fi.IsValidObject).ToList();      // a door Revit removed in a flip: a failure, named by Step
+        static string Way(int? s) => s switch { 1 => "+", -1 => "-", _ => "not read" };
+        foreach (var (d, fi, madeHere) in placed)
+        {
+            var family = madeHere ? "Gordium's family" : "the template's family";
+            var flipped = flips[fi.UniqueId].Count == 0 ? "nothing flipped" : string.Join(", ", flips[fi.UniqueId]);
+            if (d.SwingDir is null)
+            {
+                report.Doors.Add($"{BuildData.DoorMark(d)} ({family}): no swing in the data, left as Revit placed it");
+                continue;
+            }
+            var r = end[fi.UniqueId];
+            var words = $"{BuildData.DoorMark(d)} ({family}, swing {Xy(d.SwingDir.Value)}): {flipped}; read back: swings {Way(r.Side)} " +
+                        $"(the data {Way(r.DataSide)})" + (d.Hinge is null
+                            ? d.IsDouble ? "" : ", no hinge in the data: its hand left as placed"
+                            : $", hinged {Way(r.Hinge)} (the data {(r.DataHinge == 0 ? "at its centre" : Way(r.DataHinge))})");
+            if (r.AsTheData)
+                report.Doors.Add(words + "; swings as the data");
+            else
+            {
+                var why = r.Side is null ? r.Why ?? "its swing isn't read" : r.DataSide is null || r.DataHinge == 0 ? r.Why! :
+                    r.Hinge is null && d.Hinge is not null ? "its hinge isn't read" : "what is read isn't the data's";
+                report.Doors.Add(words + $"; NOT shown to swing as the data: {why}");
+                report.Failed.Add($"door {BuildData.DoorMark(d)}: placed, but not shown to swing as the data ({why})");
+            }
+        }
+        string Mark(FamilyInstance fi) => fi.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? fi.UniqueId;
     }
 
     // ---- transactions and what Revit says in them ------------------------------------------------------------------

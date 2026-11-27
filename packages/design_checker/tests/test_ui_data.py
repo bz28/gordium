@@ -290,8 +290,10 @@ def test_the_contents_list_every_chapter_and_never_hide_a_rows_section(apartment
     chapters = [c for c in bc["chapters"] if c["kind"] == "chapter"]
     assert [c["number"] for c in chapters] == [str(n) for n in range(1, 36)]
     egress = next(c for c in chapters if c["number"] == "10")
-    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] >= 20
+    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 9   # section group 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009; 9d: 1019 (1018 left the count with 1018.4, round 1 of 2026-11-23); 9e: 1021, 1022 and 1023; 9f: 1024 and 1025
     sections = {s["number"]: s for s in egress["sections"]}
+    assert sections["1018"]["whole"] is True and sections["1019"]["whole"] is True   # group 9d review round 1
+    assert all(sections[s]["whole"] is True for s in ("1021", "1022", "1023", "1024", "1025"))   # groups 9e and 9f
     assert sections["1006"]["coverage"] == "rules" and sections["1006"]["whole"] is False
     assert sections["1017"]["whole"] is True and sections["1011"]["coverage"] == "not_brought_in"
     assert sections["1010"]["coverage"] == "rules" and sections["1010"]["whole"] is False   # group 6a: 1010.1, 1010.1.1
@@ -578,7 +580,10 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # and this branch's own: corridors_within_dwelling_units (their marks follow in the Revit-fields work)
     # and this branch's own: emergency_voice_alarm_system (their marks follow in the Revit-fields work)
     # (groups 4 and 5's four have theirs too, the Revit-fields PR for them: the set is empty)
+    # (the occupant-load ceiling's mezzanines and loads not by area, 2026-11-26, came with their own)
     assert keys - set(revit) == set()
+    assert code_scope.MARK["mezzanines"] == revit["mezzanines"] == "Gordium: Mezzanines"
+    assert code_scope.MARK["loads_not_by_area"] == revit["loads_not_by_area"] == "Gordium: Loads not by area"
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased",
               "other_level_egress_into_corridors", "ambulatory_care_facility", "corridors_within_dwelling_units",
               "emergency_voice_alarm_system"):

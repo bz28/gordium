@@ -26,6 +26,12 @@ Each part says:
   under 10 sq ft inside its walls (1010.1.1 exception 3's storage closets). Each from the door's own sides, as the
   routes read them; a side that isn't a room read (or a room with no use given, for the corridor) leaves it not
   measured, never a guess.
+- `moe_door_latched`, `moe_door_panic_hardware` and `moe_door_electric_lock` (section group 6e, BCNYS 1010.2.8):
+  the description's `hardware`, what latches or locks the door: `panic` (its only latch or lock is panic hardware or
+  fire exit hardware), `panic_electric` (panic or fire exit hardware, and an electric lock it releases: 1010.2.8
+  exception 2 allows that only in Groups A and E, per 1010.2.10, which excludes Group H), `latch` (another latch or
+  lock) or `none` (no latch or lock). Not given, or not one of those: none is measured; `latch` leaves the electric
+  lock unmeasured (it may be one; 1010.2.8 asks it only of a door with panic hardware).
 
 Lengths in inches, as interior/ reads them. Plain code, no AI.
 """
@@ -41,9 +47,15 @@ SQ_IN = 144.0
 CLOSET_MOST = 10.0                       # sq ft: 1010.1.1 exception 3, "storage closets less than 10 square feet"
 LEAVES = (1, 2)
 SIZES = ("moe_door_clear_width", "moe_door_clear_height")
+SWINGING = {"side_hinged": True, "sliding": False, "folding": False, "pocket": False}   # 1010.1.2's door types
+# (latched, panic hardware, electric lock): 1010.2.8 (review round 1 of group 6e: an electric lock released by the
+# panic hardware is a lock other than panic hardware, allowed only by exception 2 in Groups A and E)
+HARDWARE = {"panic": (True, True, False), "panic_electric": (True, True, True), "latch": (True, False, None),
+            "none": (False, False, False)}
+HARDWARE_MEASURES = ("moe_door_latched", "moe_door_panic_hardware", "moe_door_electric_lock")
 
 
-def door_parts(description, floor) -> list | None:
+def door_parts(description, floor, toward=None) -> list | None:
     """Every door's part, in the description's order; None where the doors (or the description) can't be read."""
     if not isinstance(description, dict):
         return None
@@ -54,11 +66,13 @@ def door_parts(description, floor) -> list | None:
         reader = _reader(description)
     except Stop:
         return None
-    rooms = {r["id"]: r for r in description.get("rooms") or [] if isinstance(r, dict) and isinstance(r.get("id"), str)}
+    rooms = {r["id"]: r for r in (description.get("rooms") if isinstance(description.get("rooms"), list) else [])
+             if isinstance(r, dict) and isinstance(r.get("id"), str)}
     read = {}                                         # room id -> Room (None: known, not read), across every story
     for story in floor.stories.values():
         read.update(story.rooms)
-    unknown = {u.get("id") for u in description.get("unknown_spaces") or [] if isinstance(u, dict)}
+    unknown = {u.get("id") for u in (description.get("unknown_spaces") if isinstance(description.get(
+        "unknown_spaces"), list) else []) if isinstance(u, dict) and isinstance(u.get("id"), str)}
     levels = set(floor.stories)
     out, seen = [], set()
     for n, item in enumerate(doors, 1):
@@ -72,6 +86,9 @@ def door_parts(description, floor) -> list | None:
         _sizes(part, item, reader)
         _leaves(part, item)
         _sides(part, item, rooms, read, unknown)
+        _operation(part, item)
+        _swing(part, item, (toward or {}).get(did) if isinstance(did, str) else None)
+        _hardware(part, item)
         out.append(part)
     return out
 
@@ -133,6 +150,66 @@ def _leaves(part, item) -> None:
         part["not_measured"]["moe_door_leaves"] = Stop("door_leaves_not_read", name=part["name"], got=got).reason
     else:
         part["measures"]["moe_door_leaves"] = int(got)
+
+
+def _operation(part, item) -> None:
+    """`moe_door_swinging` (section group 6b, 1010.1.2): side-hinged is a swinging door; sliding, folding and pocket
+    doors aren't; `other` may be a pivoted or balanced door (swinging) or not: not measured."""
+    got = item.get("operation")
+    if got is None:
+        part["not_measured"]["moe_door_swinging"] = Stop("door_operation_not_given", name=part["name"]).reason
+    elif got == "other":
+        part["not_measured"]["moe_door_swinging"] = Stop("door_operation_other", name=part["name"]).reason
+    elif got in SWINGING:
+        part["measures"]["moe_door_swinging"] = SWINGING[got]
+    else:
+        part["not_measured"]["moe_door_swinging"] = Stop(
+            "door_clear_not_read", name=part["name"],
+            reason=f"its operation is given as {got!r}, not one of side_hinged, sliding, folding, pocket, other").reason
+
+
+def _swing(part, item, toward) -> None:
+    """`moe_door_swings_with_egress` (section group 6b, 1010.1.2.1): the side the door swings into (`swings_into`,
+    stated) is the side egress travel goes into through it (the routes: model_measurement/routes/__init__.py
+    _egress_sides). Either one not known: not measured."""
+    m, why = part["measures"], part["not_measured"]
+    name = part["name"]
+    into, sides = item.get("swings_into"), item.get("sides")
+    if into is None:
+        why["moe_door_swings_with_egress"] = Stop("door_swing_not_given", name=name).reason
+        return
+    if not isinstance(sides, list) or not isinstance(into, str) or into not in sides:
+        why["moe_door_swings_with_egress"] = Stop("door_swing_not_read", name=name, got=into).reason
+        return
+    part["more"]["swings_into"] = into
+    if isinstance(toward, Stop):
+        why["moe_door_swings_with_egress"] = toward.reason
+    elif toward is None:
+        why["moe_door_swings_with_egress"] = Stop("door_not_on_routes", name=name).reason
+    else:
+        part["more"]["egress_into"] = toward
+        m["moe_door_swings_with_egress"] = into == toward
+
+
+def _hardware(part, item) -> None:
+    """`moe_door_latched`, `moe_door_panic_hardware` and `moe_door_electric_lock` (section group 6e, 1010.2.8) from
+    the description's `hardware`: panic (latched by panic or fire exit hardware only), panic_electric (that, and an
+    electric lock it releases), latch (latched by something else: whether electrically isn't asked) or none. Not
+    given or not one of those: none measured, so a rule asking them needs review, never a pass."""
+    got = item.get("hardware")
+    if isinstance(got, str) and got in HARDWARE:
+        for k, v in zip(HARDWARE_MEASURES, HARDWARE[got]):
+            if v is None:
+                part["not_measured"][k] = Stop("door_electric_lock_not_asked", name=part["name"]).reason
+            else:
+                part["measures"][k] = v
+        return
+    if got is None:
+        reason = Stop("door_hardware_not_given", name=part["name"]).reason
+    else:
+        reason = Stop("door_hardware_not_read", name=part["name"], got=got).reason
+    for k in HARDWARE_MEASURES:
+        part["not_measured"][k] = reason
 
 
 def _sides(part, item, rooms, read, unknown) -> None:

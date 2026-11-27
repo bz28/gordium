@@ -46,10 +46,10 @@ from rule_format import parts as part_rules
 from rule_format.formula import names as formula_names
 from rule_format.labels import load_pieces
 from rule_format.place import place as place_of
-from rule_format.rulebook import REPO, STATE_SETTINGS, Context, load, rulebook_file_problems
-from rule_format.state_law import state_settings_problems
+from rule_format.published import frozen, unreadable as _unreadable   # the validation, frozen (published.py)
+from rule_format.rulebook import REPO, STATE_SETTINGS, load, load_bytes
 
-from design_checker import code_scope, each_part, occupant_load, present
+from design_checker import code_scope, each_part, escape_openings, occupant_load, present
 
 WAITING = "waiting"                                 # a law's section state while no interior is read
 WAITING_REASON = "no rooms drawn yet"              # why a law waits: its waiting item's own `waiting` (the headline's words)
@@ -58,6 +58,10 @@ WAITING_WHY = ("Escape windows (size and sill), stairs (risers, treads, headroom
                "once the rooms are drawn; handrails, guards and sleeping lofts aren't read from the drawing yet, so "
                "their rules will need review. Until then this is not a pass")
 BAD_RULES = "The {title} rules don't pass the rule checks (python -m rule_format), so none of them was used: {why}"
+# the law's rules are checked once and frozen (rule_format/published.py): a certificate that is missing or no longer
+# matches the files gives no rules, never a check against rules no one validated
+UNPUBLISHED = ("None of the {title} rules was used: they are validated once and frozen, and the frozen copy can't be "
+               "used ({why}). Check this law by hand")
 NO_RULES = "No rulebook in {folder}/5_building_code_rules/: nothing of this law was checked"
 INTERIOR_PROBLEM = "The interior drawing: {why}"
 SKIPPED = ("{name} is marked as an escape opening but isn't checked: {why}. An escape opening may also be required in a "
@@ -111,30 +115,31 @@ def _folder(jurisdiction) -> Path:
 def laws(jurisdiction) -> dict:
     """The place and every state law it inherits, ready to check: {"place": its name, "folder": its folder (the code
     choice reads its uses.yaml names), "laws": [{key, title, short, folder, rulebook, rules, problems, section_of,
-    documents}]}. A rulebook that doesn't pass the rule checks gives
-    no rules and its problems (needs review, never a row)."""
+    documents, kinds, unpublished}]}. The validation is read frozen (rule_format/published.frozen: the certificate
+    `python -m rule_format publish` wrote, checked against every file it was worked out from); a certificate that is
+    missing or stale gives no rules and says so (`unpublished`), as a rulebook that doesn't pass the rule checks gives
+    no rules and its problems (needs review, never a row). There is no live validation to fall back on."""
     refuse_state_alone(jurisdiction)
     p = place_of(_folder(jurisdiction))
     out = []
     for folder, book in p.inherited_rulebooks():
         law = {"key": f"{folder.parent.name}/{folder.name}", "title": _title(folder), "folder": folder,
                "rulebook": book, "rules": [], "problems": [], "section_of": None, "documents": {},
-               "not_checked_yet": [], "coverage_problem": None, "kinds": {}, **_scope_settings(folder)}
+               "not_checked_yet": [], "coverage_problem": None, "kinds": {}, "unpublished": False,
+               **_scope_settings(folder)}
         law["short"] = law["title"].split(" (")[0]
         if book is None:
             law["problems"] = [NO_RULES.format(folder=law["key"])]
         else:
-            try:          # never a crash (zoning's answer goes with it), never a rule used unchecked
-                ctx = Context.for_jurisdiction(folder, use_cache=False)   # the same answer on every machine
-                law["problems"] = ctx.problems + state_settings_problems(folder, ctx) + rulebook_file_problems(book, ctx)
-                law["documents"] = ctx.sources
-                law["kinds"] = {k: v for k, v in ctx.allowed().items() if k not in ("use", "district")}
-                if not law["problems"]:
-                    law["rules"] = load(book)["rules"]
+            got = frozen(folder, book)
+            law.update(problems=got["problems"], documents=got["documents"], kinds=got["kinds"],
+                       unpublished=bool(got["problems"]))
+            if not law["problems"]:
+                try:      # never a crash (zoning's answer goes with it); the very bytes the certificate's sha256 is of
+                    law["rules"] = load_bytes(got["book"])["rules"]
                     law["section_of"] = _sections(folder)
-            except Exception as e:
-                law["problems"], law["rules"], law["section_of"] = \
-                    [f"its sources can't be read ({type(e).__name__}: {e})"], [], None
+                except Exception as e:
+                    law["problems"], law["rules"], law["section_of"] = [_unreadable(e)], [], None
         law["not_checked_yet"], law["coverage_problem"] = _not_checked_yet(folder, law["rules"])
         out.append(law)
     return {"place": p.name, "folder": p.folder, "laws": out}
@@ -248,7 +253,7 @@ def check(found: dict, interior, values: dict, allowed: dict, ground: dict | Non
     undecided = scope is not None and scope["code"] is None
     sections, items, rows, results, ids, readings = [], [], [], {}, set(), {}
     for law in run:
-        measured = None if waiting else _measured(law, interior, readings, ground)
+        measured = None if waiting else _measured(law, interior, readings, ground, values)
         law_values, law_allowed = _law_values(law, values, allowed, building)
         # rules that can't be used are said whether or not rooms are drawn: never hidden behind "waiting"
         mine = _law_items(law, measured, law_values, law_allowed, rows, results) if not waiting or law["problems"]             else [_waiting_item(law)]
@@ -327,26 +332,75 @@ def _stairs_and_guards(interior) -> dict:
     return {"parts": {k: got["parts"].get(k) for k in BUILDING_INTERIOR_KINDS}, "problems": got["problems"]}
 
 
-def _measured(law: dict, interior, readings: dict, ground: dict | None = None) -> dict:
+# the interior measuring's sleeping rooms and escape openings the Building Code reads (section group 8a: 1031,
+# emergency escape and rescue openings), from the description's own rooms and openings alone, no house claims
+BUILDING_ESCAPE_KINDS = ("sleeping_room", "emergency_escape_opening")
+READS_ESCAPE = ("sleeping_room", "emergency_escape_opening", "basement")
+ESCAPE = "escape openings"
+
+
+def _reads_escape(law: dict) -> bool:
+    """Whether any of the law's rules repeats over, or sits within, a kind of READS_ESCAPE."""
+    return any(isinstance(r, dict) and (r.get("for_each") in READS_ESCAPE or r.get("within") in READS_ESCAPE)
+               for r in law.get("rules") or [])
+
+
+def _escape_openings(interior) -> dict:
+    """The interior measuring of the description's rooms and escape openings alone (BUILDING_ESCAPE_KINDS): run on
+    the description with its stairs, guards and doors given as none and no `has_none` (a house's claims, never a
+    building's), so its only parts and problems are the sleeping rooms' and openings' own. A sleeping room is only a
+    room stated `sleeping: true` (or an enclosed space with no room drawn in it, a `maybe` whose every row needs
+    review): never a room said not to be one."""
+    if isinstance(interior, dict):
+        keep = {k: interior[k] for k in ("format", "units", "rooms", "openings", "unknown_spaces") if k in interior}
+        interior = {**keep, "stairs": [], "guards": [], "doors": []}
+    got = measure_interior(interior)
+    parts = {k: got["parts"].get(k) for k in BUILDING_ESCAPE_KINDS}
+    # a sleeping room is also a routes' space, and an opening's id may be a door's: each takes its kind into its id
+    # (a part id is one part across every kind, rule_format.parts), its description id kept in `more`
+    for kind, words in (("sleeping_room", "sleeping room"), ("emergency_escape_opening", "escape opening")):
+        for part in parts[kind] or []:
+            if isinstance(part, dict) and isinstance(part.get("id"), str):
+                part.setdefault("more", {})["described_id"] = part["id"]
+                part["id"] = f"{part['id']} ({words})"
+                if isinstance(part.get("within"), str):
+                    part["within"] = f"{part['within']} (sleeping room)"
+    return {"parts": parts, "problems": got["problems"]}
+
+
+def _measured(law: dict, interior, readings: dict, ground: dict | None = None, values: dict | None = None) -> dict:
     """The parts a law's rules read, measured once per kind of reading: the house code's from the interior measuring
     (model_measurement.interior), the Building Code's from the routes (model_measurement.routes: story, space,
     corridor and every door) and, for its stairs and guards, the interior measuring's (_stairs_and_guards), in the
-    same shape."""
+    same shape. `values`: the check's own, whose building facts (code_scope.FACTS) the rules read beside the
+    description's `building` block (_law_values), so the assembly seating reads the same occupancy groups (review
+    round 2)."""
     kind = ROUTES if law.get("scope") == code_scope.BUILDING else "interior"
-    if kind == ROUTES and _reads_interior(law):
+    stairs = kind == ROUTES and _reads_interior(law)
+    escape = kind == ROUTES and _reads_escape(law)
+    if stairs:
         kind = ROUTES_AND_INTERIOR
+    if escape:
+        kind = f"{kind} and the interior's {ESCAPE}"          # its own readings key (section group 8a)
     if kind not in readings:
-        if kind in (ROUTES, ROUTES_AND_INTERIOR):
+        if kind.startswith(ROUTES):
             got = measure_routes(interior, ground=ground)
             factors = Path(law["folder"]) / OCCUPANT_LOAD_FACTORS
             if factors.exists() and isinstance(interior, dict):      # 1004.5: each room's function's load
-                occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors),
-                                    interior.get("building"))
-            inside = _stairs_and_guards(interior) if kind == ROUTES_AND_INTERIOR else {"parts": {}, "problems": []}
+                block = interior.get("building")
+                stated = {**{k: v for k, v in (values or {}).items() if k in code_scope.FACTS},
+                          **(block if isinstance(block, dict) else {})}       # as _law_values merges them
+                occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors), block, stated)
+            inside = [_stairs_and_guards(interior)] if stairs else []
+            inside += [_escape_openings(interior)] if escape else []
             problems = [str(p) for p in got["problems"]]
-            problems += [str(p) for p in inside["problems"] if str(p) not in problems]
-            readings[kind] = {"parts": {**got["parts"], **inside["parts"]}, "problems": problems,
-                              "not_checked": [], "has_none": {}}
+            parts = dict(got["parts"])
+            for one in inside:
+                problems += [str(p) for p in one["problems"] if str(p) not in problems]
+                parts.update(one["parts"])
+            if escape:                                # each sleeping room linked to its story and doors (8a)
+                escape_openings.link(parts, interior)
+            readings[kind] = {"parts": parts, "problems": problems, "not_checked": [], "has_none": {}}
         else:
             readings[kind] = measure_interior(interior)
     return readings[kind]
@@ -419,8 +473,9 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
     if law["problems"]:
         why = "; ".join(law["problems"][:3]) + (f" (and {len(law['problems']) - 3} more)" if len(law["problems"]) > 3
                                                  else "")
+        words = UNPUBLISHED if law.get("unpublished") else BAD_RULES
         return [_own_item(law, f"{law['short'].lower()}.rules", f"{law['short']} rules", present.REVIEW,
-                          BAD_RULES.format(title=law["title"], why=why))]
+                          words.format(title=law["title"], why=why))]
     claims = measured.get("has_none") or {}
     got = each_part.check_parts(law["rules"], measured["parts"], values, allowed, claims)
     rows += got["rows"]

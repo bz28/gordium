@@ -31,6 +31,14 @@ public enum FixKind { Fails, Answer, Mark, FixModel, Survey, Measure, Decide, Op
 public sealed record FixCard(string Key, FixKind Kind, string Headline, string? Why, string? Field,
                              IReadOnlyList<string> Elements, IReadOnlyList<ResultRow> Rows)
 {
+    private readonly string? _title;
+
+    /// <summary>The card's one line in the list: its <see cref="Headline"/>, or, where the same words head other cards
+    /// of its group, the rule its results are about ("Corridor width kept clear (BCNYS 1020.4)"), so the cards can be
+    /// told apart (egress UI audit, finding 3: 29 cards read "Check this by hand: a person decides it"). The checker's
+    /// words stay the headline: the detail page's steps and the card's tooltip say them.</summary>
+    public string Title { get => _title ?? Headline; init => _title = value; }
+
     /// <summary>On a follow-up question, the question it hangs on (the ask's <c>depends_on</c>), else null.</summary>
     public DependsOn? DependsOn { get; init; }
 }
@@ -325,11 +333,39 @@ public static class ResultViews
                             DependsOn = parents.GetValueOrDefault(x.k),
                         })
                         .OrderByDescending(c => c.Rows.Count).ToList();   // stable: ties keep the answer's order
+            // cards of the group headed by the same words: each named by the rule its results are about, or, where two
+            // would share that name (one rule on two elements), by its one result's whole name; else the words stay
+            list = Named(list);
             var all = rows.Select(r => r.Row).Where(r => list.Any(c => c.Rows.Contains(r))).ToList();
             // the questions card counts the questions it shows: a follow-up held back until its parent is answered isn't one yet
             var (title, sub) = GroupWords(g.Key, g.Key == FixKind.Answer ? ProjectQuestions.Arrange(list, _ => null) : list, all.Count);
             return new FixGroup(g.Key, title, sub, list, all);
         }).ToList();
+    }
+
+    /// <summary>The cards of one group, those headed by the same words named apart (<see cref="FixCard.Title"/>): by
+    /// the rule their results are about; where that still leaves two alike, a one-result card by its result's whole name
+    /// ("Level 1 › CORRIDOR L1 (3) · …"); a card that can't be told apart so keeps the checker's words (review round 1).</summary>
+    public static List<FixCard> Named(IReadOnlyList<FixCard> cards)
+    {
+        ArgumentNullException.ThrowIfNull(cards);
+        var repeated = cards.GroupBy(c => c.Headline, StringComparer.Ordinal).Where(x => x.Count() > 1).Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+        var byRule = cards.Select(c => repeated.Contains(c.Headline) ? RuleOf(c.Rows) : null).ToList();
+        var twice = byRule.OfType<string>().GroupBy(t => t, StringComparer.Ordinal).Where(x => x.Count() > 1).Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+        var titles = cards.Select((c, i) => byRule[i] is not { } t ? null : !twice.Contains(t) ? t : c.Rows.Count == 1 ? c.Rows[0].Name : null).ToList();
+        // a whole name shared too (or a card left with its words beside one renamed alike): those keep the checker's words
+        var shared = titles.OfType<string>().GroupBy(t => t, StringComparer.Ordinal).Where(x => x.Count() > 1).Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+        return [.. cards.Select((c, i) => titles[i] is { } t && !shared.Contains(t) ? c with { Title = t } : c)];
+    }
+
+    /// <summary>The rule a card's results are about, as their names end ("Egress · Corridor width kept clear (BCNYS
+    /// 1020.4)" → "Corridor width kept clear (BCNYS 1020.4)"), when they are all about one; else null.</summary>
+    public static string? RuleOf(IReadOnlyList<ResultRow> rows)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+        var rules = rows.Select(r => r.Name[(r.Name.LastIndexOf(" \u00B7 ", StringComparison.Ordinal) is var i and >= 0 ? i + 3 : 0)..].Trim())
+                        .Distinct(StringComparer.Ordinal).ToList();
+        return rules.Count == 1 && rules[0].Length > 0 ? rules[0] : null;
     }
 
     /// <summary>A group's title and its one sub line (strings.md, "What to fix": action groups).</summary>
