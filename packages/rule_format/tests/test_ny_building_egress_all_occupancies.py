@@ -772,12 +772,12 @@ def test_a_corridors_capacity_is_1005_3_2s_factor_at_its_limit_and_just_past_it(
     own factors) needs review short of it. Was 4a's flag."""
     r = rules["general.bc_1020_3_corridor_capacity"]
     assert r["kind"] == "rule" and _cites(r, 314, 15) and _cites(r, 314, 20) and _cites(r, 344, 21)
-    plain = {S1: False, S2: False, "emergency_voice_alarm_system": False, "assembly_fixed_seating": False} | NO_MALL
+    plain = {S1: False, S2: False, "emergency_voice_alarm_system": False, "assembly_fixed_seating": False} | NO_MALL | NOT_PART_F
     for g in ("B", "I-2", "H-3", "mixed"):
         given = {"occupancy_group": g} | plain
         assert _one(r, "corridor", _corridor(44, 220), given, ctx) == "pass", g      # 0.2 x 220 = 44
         assert _one(r, "corridor", _corridor(44, 220.5), given, ctx) == "fail", g
-    voice = {S1: True, S2: False, "emergency_voice_alarm_system": True, "assembly_fixed_seating": False} | NO_MALL
+    voice = {S1: True, S2: False, "emergency_voice_alarm_system": True, "assembly_fixed_seating": False} | NO_MALL | NOT_PART_F
     # review round 1 of group 5a: a building of two or more groups is each portion's (1004.4): between the two
     # factors, a person's check, never a fail on 0.2 alone
     for g, want in (("B", "pass"), ("R-2", "pass"), ("I-2", "fail"), ("H-3", "fail"), ("mixed", "needs_review")):

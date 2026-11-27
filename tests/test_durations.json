@@ -1034,6 +1034,8 @@
 "packages/rule_format/tests/test_ny_building_chapter_4.py::test_no_rule_passes_on_a_figure_402_8_changes_where_a_mall_isnt_ruled_out[1]": 30.0,
 "packages/rule_format/tests/test_ny_building_chapter_4.py::test_no_rule_passes_on_a_figure_402_8_changes_where_a_mall_isnt_ruled_out[2]": 30.0,
 "packages/rule_format/tests/test_ny_building_chapter_4.py::test_no_rule_passes_on_a_figure_402_8_changes_where_a_mall_isnt_ruled_out[3]": 30.0,
+"packages/rule_format/tests/test_ny_building_chapter_4.py::test_no_rule_passes_short_of_part_fs_limits_where_they_may_apply[0]": 18.0,
+"packages/rule_format/tests/test_ny_building_chapter_4.py::test_no_rule_passes_short_of_part_fs_limits_where_they_may_apply[1]": 18.0,
 "packages/rule_format/tests/test_ny_building_chapter_4.py::test_no_story_passes_short_of_403_5_2_or_405_7_1_where_they_may_apply[0]": 12.0,
 "packages/rule_format/tests/test_ny_building_chapter_4.py::test_no_story_passes_short_of_403_5_2_or_405_7_1_where_they_may_apply[1]": 12.0,
 "packages/rule_format/tests/test_ny_building_door_walk.py::test_no_door_height_passes_short_of_the_law_or_fails_within_it": 2.3,

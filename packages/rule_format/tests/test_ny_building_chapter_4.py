@@ -111,7 +111,7 @@ GROUP_GATED = {"407": ["I-2"], "408": ["I-3"],
                "420.9": ["I-1"],
                # part f: public parking garages are Group S-2 (311.3); a service corridor is within a Group H-5
                # occupancy (415.11.3); HPM rooms are H-2, H-3 or H-4 serving an H-5, liquid storage rooms H-3 (202)
-               "406.4.3": ["S-2"], "406.5.7": ["S-2"], "415.11.3": ["H-5"], "415.11.6": ["H-2", "H-3", "H-4", "H-5"]}
+               "406.4.3": ["S-2"], "406.5.7": ["S-2"], "415.11.6": ["H-2", "H-3", "H-4", "H-5"]}
 # pieces a rule outside the Chapter 4 block already checks (Chapter 10's review round 1 brought them in alone)
 CHECKED_BEFORE = {"407.4.2": "general.bc_407_4_2_sleeping_room_travel"}
 
@@ -136,6 +136,30 @@ def test_each_piece_of_a_groups_section_has_its_flag_shown_only_for_that_group(c
             given = {} if group is None else {"occupancy_group": group}
             want = "needs_review" if group in groups + ["mixed", None] else "not_applicable"
             assert outcome(rule, given, ctx.allowed()) == want, (pid, group)
+
+
+def test_a_service_corridors_flags_show_where_the_building_may_be_group_h5_and_may_have_one(ctx, rules):
+    """Part f: 415.11.3.3's and 415.11.3.4's flags, for a service corridor within a Group H-5 occupancy (415.11.3),
+    show where the building may be Group H-5 (stated, two or more groups, or not stated) and doesn't state it has no
+    service corridor: every group, each yes, no or not stated."""
+    pieces, labels = _pieces(), load(LABELS)["labels"]
+    block = _block_ids()
+    wanted = _chapter_4(pieces, labels, "415.11.3")
+    assert wanted == ["415.11.3.3", "415.11.3.4"]
+    for pid in wanted:
+        [rid] = [r for r in block if r.startswith(_prefix(pid))]
+        rule = rules[rid]
+        assert rule["kind"] == "flag" and rule["applies_when"] == 'occupancy_group in ["H-5", "mixed"] and service_corridors'
+        quoted = {(s["page"], n) for s in rule["sources"] for n in range(s["lines"][0], s["lines"][1] + 1)}
+        assert quoted == {(page, n) for page, a, b in pieces[pid]["lines"] for n in range(a, b + 1)}, pid
+        for group in GROUPS + ["mixed", None]:
+            for corridors in (True, False, None):
+                given = {} if group is None else {"occupancy_group": group}
+                if corridors is not None:
+                    given["service_corridors"] = corridors
+                may = group in ("H-5", "mixed", None) and corridors is not False
+                assert outcome(rule, given, ctx.allowed()) == ("needs_review" if may else "not_applicable"), (
+                    pid, group, corridors)
 
 
 def test_each_flags_shown_words_hold_wherever_it_needs_review(rules):
@@ -871,8 +895,9 @@ def test_no_rule_passes_short_of_part_fs_limits_where_they_may_apply(ctx, rules,
             if why:
                 bad.append((rid, why, given, m))
     assert not bad, (sorted({(b[0], w) for b in bad for w in b[1]}), bad[:2])
-    # not vacuous: the band rules still pass where the limits hold
-    assert {"general.bc_table_1017_2_h5", "general.bc_table_1006_2_1_u", "general.bc_table_1006_2_1_r2",
+    # not vacuous: the band rules still pass where the limits hold (Table 1017.2's H-5 row passes only with NFPA 13
+    # and every fact it reads stated: its examples show it, test_each_part_f_band_is_shown_by_an_example...)
+    assert {"general.bc_table_1006_2_1_u", "general.bc_table_1006_2_1_r2",
             "general.bc_table_1020_3_corridor_width"} - passed == set()
 
 
