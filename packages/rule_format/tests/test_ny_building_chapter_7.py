@@ -268,3 +268,15 @@ def test_every_section_a_chapter_7_note_names_is_brought_in_or_in_the_readmes_li
             if gone:
                 missing[r["id"]] = gone
     assert not missing, missing
+
+
+def test_part_b_review_round_1s_notes_say_what_the_tables_say(book):
+    """Part b review round 1 (2026-11-26), read on the page images of Tables 716.1(2) and 716.1(3): double fire walls'
+    doors are 3, 1 1/2 and 1 hours (not the walls' 3, 2 and 1); a window in a 1-hour fire partition is 3/4 hour; 716.1's
+    note names 1020.2.1 for elevator hoistway doors, not corridors."""
+    other = _shown_note([r for r in book if r["id"] == "general.bc_table_716_1_2__other_assemblies"][0])
+    assert "a door rated 3, 1 1/2 and 1 hours" in other
+    windows = _shown_note([r for r in book if r["id"] == "general.bc_table_716_1_3__fire_windows"][0])
+    assert "fire partitions rated 1 hour, 3/4 hour" in " ".join(windows.split())
+    general = _shown_note([r for r in book if r["id"] == "general.bc_716_1_opening_protectives_general"][0])
+    assert "elevator hoistway doors 1020.2.1" in general and "rated corridors 1020.2.1" not in general
