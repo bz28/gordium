@@ -260,6 +260,8 @@ COLUMNS = {
              Col("Kind", 7, "kind", _get("kind")), Col("Topic", 14, "topic", _get("topic")),
              # a rule for each part (rule_format/parts.py): what it repeats over, and what "none" means
              Col("For each part", 26, ("for_each", "within", "when_none"), lambda e, s, n, t: _for_each(e)),
+             # section group 8d: a part's own requirement, apart from whether the law asks it of this part
+             Col("Part's own limit (formula)", 36, "limit", _get("limit"), every=False),
              Col("Check (formula)", 40, "check", _get("check"), every=False),
              Col("Applies when", 26, "applies_when", _get("applies_when"), every=False),
              Col("Needs review when", 34, "review_when", _get("review_when", lambda v: _bullets(
