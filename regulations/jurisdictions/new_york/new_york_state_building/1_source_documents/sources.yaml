@@ -354,10 +354,10 @@ documents:
             EXIT RAMP is defined in Section 202 and brought in (202:exterior_exit_ramp). Read by 1027.6''s flag (section
             group 9g).'
         '1028.2':
-          enclosure: 'The book prints "enclosure" in italics (p.352, line 18, "the requirements for the enclosure of
-            interior exit stairways or ramps", by position in the italic font); Section 202 has no ENCLOSURE entry, and
-            INTERIOR EXIT STAIRWAY, which follows, is defined and brought in. Read by 1028.2''s flag (section group
-            9g).'
+          enclosure: 'The book prints "interior exit stairway or ramp enclosure" in italics (p.352, line 30, exception
+            2.1, by position in the italic font: line 18''s "enclosure" is roman); INTERIOR EXIT STAIRWAY and RAMP, before
+            it, are defined and brought in, and Section 202 has no ENCLOSURE entry. Read by 1028.2''s flag (section group
+            9g; review round 1 put the line right).'
         '1029.3':
           fire-resistance-rated: 'As 1020.6.1 ("fire-resistance-rated construction", p.352, line 58): the defined term
             is FIRE-RESISTANCE RATING, brought in. Read by 1029.3''s flag (section group 9g).'

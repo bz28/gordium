@@ -243,6 +243,7 @@ occupancy_group:
   - general.bc_1025_3_uniformity
   - general.bc_1025_4_self_luminous_photoluminescent
   - general.bc_1025_5_illumination
+  - general.bc_1029_3_egress_court_construction
   - general.bc_1031_2_1_operational_constraints
   - general.bc_1031_2_basements
   - general.bc_1031_2_escape_opening_where_required

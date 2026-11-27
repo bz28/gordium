@@ -1469,6 +1469,7 @@ HIDDEN_WHERE = {
     "general.bc_1018_5_aisles_other_occupancies": lambda g, s: g in ("B", "M"),             # "other than ... B and M"
     "general.bc_1019_3_exit_access_stairway_enclosure": lambda g, s: g in ("I-2", "I-3"),   # "other than I-2 and I-3"
     "general.bc_1019_4_exit_access_stairways_groups_i2_i3": lambda g, s: g not in ("I-2", "I-3", "mixed", None),
+    "general.bc_1029_3_egress_court_construction": lambda g, s: g == "R-3",     # exception 2 (review round 1 of 9g)
     # section group 9f: 1025.1 names high-rise buildings of Groups A, B, E, I-1, M and R-1 only
     "general.bc_1025_1_luminous_markings_where_required": LUMINOUS_HIDDEN,
     "general.bc_1025_2_1_steps": LUMINOUS_HIDDEN,
@@ -1550,6 +1551,10 @@ SHOWN_MUST_SAY = {
                                                   "exit stairways and ramps in Group I-3 per 408.3.8"],
                                                  ["atrium enclosed per 404.6 or per 510.2"]),
     "general.bc_1023_3_termination": (["that form one continuous protected enclosure"], []),
+    # review round 1 of section group 9g: the combined cap of 1028.2's two exceptions by width or capacity too
+    "general.bc_1028_2_exit_discharge": (["the two together at most 50 percent of the number and of the minimum width or "
+                                          "required capacity of the required exits"],
+                                         ["the two together at most 50 percent of the required exits:"]),
     "general.bc_1023_7_2_roof_assemblies": (["unless the code otherwise requires it", "extending at least 10 feet above the roof"],
                                             ["up to 10 feet"]),
     "general.bc_1023_12_1_smokeproof_termination": (["and the openings are protected as for access from other floors",
@@ -1603,10 +1608,11 @@ def test_1022_1s_notes_name_what_of_1003_to_1015_isnt_brought_in(rules):
     """Review round 1 of section group 9e (P3): 1022.1 sends exits to 'the applicable requirements of Sections 1003
     through 1015'; its notes named only 1011, 1014 and 1015 as not brought in, but 1006's general parts and 1010.3 to
     1010.5.4 aren't either."""
-    notes = rules["general.bc_1022_1_exits_general"]["notes"]
-    assert all(s in notes for s in ("1006.1, 1006.2's own words and 1006.3 to 1006.3.2", "1010.3 to 1010.5.4", "1011",
-                                    "1014", "1015"))
-    assert "1006.1 to 1006.3.2" not in notes         # review round 2: that range holds 1006.2.1 and 1006.2.2, brought in
+    for rid in ("general.bc_1022_1_exits_general", "general.bc_1028_2_exit_discharge"):     # 1028.2: 9g round 1
+        notes = rules[rid]["notes"]
+        assert all(s in notes for s in ("1006.1, 1006.2's own words and 1006.3 to 1006.3.2", "1010.3 to 1010.5.4",
+                                        "1011", "1014", "1015")), rid
+        assert "1006.1 to 1006.3.2" not in notes     # review round 2: that range holds 1006.2.1 and 1006.2.2, brought in
 
 
 def test_the_readme_names_each_section_group_9e_flag_that_reads_icc_a117_1():
@@ -1683,3 +1689,37 @@ def test_each_luminous_marking_reason_says_where_the_markings_are_required(rules
         assert any(s["quote"].startswith("1025.2.6 Doors within the exit path") for s in rules[rid]["sources"]), rid
     tv = load(NY / "text_verification.yaml")["pieces"]["1025.2.1"]["flags"]
     assert any("double negative" in f for f in tv)
+
+
+def test_each_italic_word_entry_from_section_group_9e_on_cites_its_own_line():
+    """Review round 1 of section group 9g (P2): the italic 'enclosure' entry for 1028.2 cited line 18, where the word is
+    roman; the italic one is line 30's 'interior exit stairway or ramp enclosure'. From section group 9e on, each
+    brought_in.italic_not_defined entry that cites 'p.N, line L' (or 'lines L-M') has its italic word, and the first
+    phrase it quotes, on those lines of the cached page text (hyphens and spaces aside)."""
+    import json as _json
+    from pathlib import Path
+    brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]["italic_not_defined"]
+    cache = next(Path("C:/Users/benja/Documents/gordium_archive/code_cache").glob("729d2db7*/gov.ny.building.2025.text_*.jsonl"), None)         if Path("C:/Users/benja/Documents/gordium_archive/code_cache").exists() else None
+    if cache is None:
+        pytest.skip("the book's cached text isn't on this machine")
+    text = {}
+    for line in cache.read_text(encoding="utf-8").splitlines()[1:]:
+        row = _json.loads(line)
+        text[(row["page"], row["line"])] = row["text"]
+    squash = lambda s: re.sub(r"[\s\-]", "", s).lower()
+    checked = 0
+    for pid, words in brought.items():
+        if str(pid).split(".")[0] not in GROUP_9E_ON:
+            continue
+        for word, why in words.items():
+            m = re.search(r"p\.(\d+), lines? (\d+)(?:-(\d+))?", why)
+            if not m:
+                continue
+            page, a, b = int(m[1]), int(m[2]), int(m[3] or m[2])
+            lines = squash(" ".join(text[(page, n)] for n in range(a, b + 1)))
+            assert squash(word) in lines, (pid, word)
+            quoted = re.search(r'"([^"]+)"', why)
+            assert quoted is None or squash(quoted[1]) in lines, (pid, word, quoted[1])
+            checked += 1
+    assert checked >= 6
+

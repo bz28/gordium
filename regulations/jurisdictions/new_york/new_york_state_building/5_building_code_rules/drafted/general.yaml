@@ -24200,12 +24200,11 @@ rules:
       of the building''s greatest diagonal if less, from the exit stairway''s discharge door), or through a vestibule (separated
       from areas below as the enclosure is, at most 10 feet deep and 30 feet long, separated from the rest of the level by
       a fire partition per 708, used only for egress and exiting directly outside), the two together at most 50 percent of
-      the required exits; and horizontal exits per 1026 need not discharge directly outside: where each exit discharges isn''t
-      worked out, so a person''s check.'
+      the number and of the minimum width or required capacity of the required exits; and horizontal exits per 1026 need not
+      discharge directly outside: where each exit discharges isn''t worked out, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 1028.1 (its scope, labeled reference) is quoted
     here. 708 isn't brought in. Exterior exit doors are marked in the model, but a door marked at the level of exit discharge
-    doesn't say which exits pass through the lobby or a vestibule before it. Of 1003 to 1015, which 1028.1 names, 1011, 1014
-    and 1015 aren't brought in yet.
+    doesn't say which exits pass through the lobby or a vestibule before it. Of 1003 to 1015, which 1028.1 names, 1006.1, 1006.2's own words and 1006.3 to 1006.3.2, 1010.3 to 1010.5.4, 1011, 1014 and 1015 aren't brought in yet.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1028_3_exit_discharge_width
@@ -24311,6 +24310,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Narrow egress courts' walls rated 1 hour (BCNYS 1029.3)
+  applies_when: not occupancy_group in ["R-3"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 352
@@ -24338,6 +24338,15 @@ rules:
       Group R-3, or one at grade giving direct and unobstructed access to a public way by two or more independent paths, each
       keeping the required width or capacity, whichever is greater: egress courts and their walls aren''t in the model, so
       a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g.
+  - given:
+      occupancy_group: R-3
+    expect: not_applicable
+    note: 'Group R-3 alone: every egress court serves Group R-3 (exception 2).'
+  - given:
+      occupancy_group: mixed
+    expect: needs_review
+    note: 'Two or more groups: a court may serve a group other than R-3, a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. Not shown for a building stated Group
+    R-3 alone, exception 2 sparing every egress court there (review round 1).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
