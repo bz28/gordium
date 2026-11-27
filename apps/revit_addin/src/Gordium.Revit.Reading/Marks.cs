@@ -354,12 +354,12 @@ public static class Marks
         "Yes: a corridor's occupant load is worked out by hand (the story's doesn't bound it). No: none does, so each corridor's load lies between none and its whole story's. Blank: worked out by hand, as for Yes.");
 
     /// <summary>Whether the building is or holds an ambulatory care facility (<c>building.ambulatory_care_facility</c>,
-    /// BCNYS 202, Section 422, Table 1020.3).</summary>
+    /// BCNYS 202, Section 422, Tables 1020.2 and 1020.3).</summary>
     public static readonly MarkDefinition AmbulatoryCareFacility = new(
         "Gordium: Ambulatory care facility", new("2a31e2c4-cf29-4ac4-9c57-a41ca85748b3"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "building.ambulatory_care_facility",
         "Yes when the building is or holds an ambulatory care facility (BCNYS 202 AMBULATORY CARE FACILITY, Section 422: outpatient care where patients may be rendered incapable of self-preservation, Group B). " +
-        "Table 1020.3 asks 72 in for its corridors and areas serving stretcher traffic, which the model doesn't show. Yes: a Group B corridor under 72 in is a person's check. No: none. Blank: that check needs review.");
+        "Table 1020.3 asks 72 in for its corridors and areas serving stretcher traffic, which the model doesn't show; Section 422 asks its fire partition from adjacent corridors (422.2) and its smoke compartments (422.3). Yes: Section 422's flags, a Group B corridor under 72 in and an unrated Group B corridor (Table 1020.2) are a person's check. No: none of them. Blank: those checks need review.");
 
     /// <summary>Whether any corridor is inside a dwelling or sleeping unit (<c>building.corridors_within_dwelling_units</c>,
     /// BCNYS 1020.2 exception 2, Table 1020.3).</summary>

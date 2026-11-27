@@ -218,7 +218,9 @@ building:
                                        # (1005.6) or an exit stair discharging into one; only where false is a
                                        # corridor's occupant load bounded by its story's (1004.2.3; Table 1020.3)
   ambulatory_care_facility: false      # the building is or holds an ambulatory care facility (BCNYS 202, 422):
-                                       # Table 1020.3's 72 in for corridors serving stretcher traffic
+                                       # Section 422's flags (false sets them aside), Table 1020.2's Group B
+                                       # corridor rating (422.2's fire partition) and Table 1020.3's 72 in for
+                                       # corridors serving stretcher traffic
   corridors_within_dwelling_units: false  # a corridor is inside a dwelling unit or sleeping unit (BCNYS 1020.2
                                        # exception 2: no rating there in Groups I-1 and R; Table 1020.3: 36 in)
   emergency_voice_alarm_system: false  # an emergency voice/alarm communication system per BCNYS 907.5.2.2 (with a

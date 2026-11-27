@@ -214,9 +214,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     stairways and 1005.3.2's doors, ramps and passageways (28); section group 5b 1005.4, 1005.5 and 1005.6 (31); section group 5c 1005.7.1 to 1005.7.3 (34);
     section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37); Chapter 4 part a, 402.1 and 402.8's seventeen
     (a mall isn't ruled out) and 404.1, 404.9 to 404.11's four (nor an atrium) (58); Chapter 4 part b, 403's sixteen
-    (a high-rise isn't ruled out) and 405's eight (nor an underground building) (82)."""
+    (a high-rise isn't ruled out) and 405's eight (nor an underground building) (82); Chapter 4 part e, 420.1 to 420.3
+    (Group R-2's scope and separations) and 422's six (an ambulatory care facility isn't ruled out) (91)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 82 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 91 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -344,6 +345,9 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(no_mall, laws):
     assert moved.pop(("other_level_egress_into_corridors", False)) == {
         "general.bc_1020_3_corridor_capacity": ("needs_review", "pass"),
         "general.bc_table_1020_3_corridor_width": ("needs_review", "pass")}
+    # Chapter 4 part e: no ambulatory care facility (stated) sets 422's six flags aside, and moves nothing else
+    assert moved.pop(("ambulatory_care_facility", False)) == {
+        k: ("needs_review", "not_applicable") for k in no_mall["results"] if k.startswith("general.bc_422_")}
     assert all(m == {} for m in moved.values()), moved
 
 

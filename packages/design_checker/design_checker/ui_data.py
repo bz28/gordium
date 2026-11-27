@@ -62,7 +62,7 @@ FIELD_HEADLINES = {
     "building.r2_sleeping_units": "Say whether the Group R-2 units are all sleeping units, all dwelling units, or both",
     "building.emergency_escape_openings_1031": "Say whether every sleeping room has an emergency escape opening (1031)",
     "building.occupied_outdoor_areas": "Say whether the occupants use outdoor areas (yards, patios, roofs: 1004.7)",
-    "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Table 1020.3)",
+    "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Section 422)",
     "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
     "building.emergency_voice_alarm_system": "Say whether the whole building has an emergency voice/alarm communication system (907.5.2.2)",
     "building.high_rise_building": "Say whether the building is a high-rise (an occupied floor or occupiable roof more than 75 ft above the lowest level of fire department vehicle access, 202) or more than 420 ft in building height (403)",

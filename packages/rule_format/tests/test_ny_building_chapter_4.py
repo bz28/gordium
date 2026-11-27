@@ -26,7 +26,9 @@ GROUPS = ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2
 # (the fact's own words name "a covered or open mall (402.8)"); an atrium is its own fact
 SHOWN_WHERE = {"402": "special_egress_spaces", "404": "building_has_atrium",
                # part b: a high-rise (202) or a building over 420 ft (403.2.2, 403.5.2); an underground building (405.1)
-               "403": "high_rise_building", "405": "underground_building"}
+               "403": "high_rise_building", "405": "underground_building",
+               # part e: an ambulatory care facility, the fact Section 422, Table 1020.2 and 1020.3 read
+               "422": "ambulatory_care_facility"}
 
 
 @pytest.fixture(scope="module")
@@ -45,7 +47,7 @@ def _pieces():
 
 
 def _chapter_4(pieces, labels, section):
-    return [pid for pid in pieces if re.fullmatch(section + r"(\.\d+)+", pid)
+    return [pid for pid in pieces if re.fullmatch(re.escape(section) + (r"(\.\d+)+" if "." not in section else r"(\.\d+)*"), pid)
             and labels.get(pid, {}).get("label") in ("rule", "flag")]
 
 
@@ -91,7 +93,12 @@ def test_each_piece_has_its_flag_shown_only_where_the_building_may_be_that_use(c
 
 # part c: a section for one occupancy group, its flags shown where the building is stated that group, two or more
 # groups, or none (a building stated one other group: not applicable)
-GROUP_GATED = {"407": ["I-2"], "408": ["I-3"]}
+GROUP_GATED = {"407": ["I-2"], "408": ["I-3"],
+               # part e: 420's own scope and separations for Groups I-1 and R, its smoke barriers, housing units and
+               # cooking for Group I-1 alone
+               "420.1": ["I-1", "R-1", "R-2", "R-3", "R-4"], "420.2": ["I-1", "R-1", "R-2", "R-3", "R-4"],
+               "420.3": ["I-1", "R-1", "R-2", "R-3", "R-4"], "420.6": ["I-1"], "420.7": ["I-1"], "420.8": ["I-1"],
+               "420.9": ["I-1"]}
 # pieces a rule outside the Chapter 4 block already checks (Chapter 10's review round 1 brought them in alone)
 CHECKED_BEFORE = {"407.4.2": "general.bc_407_4_2_sleeping_room_travel"}
 
@@ -344,35 +351,96 @@ def test_a_story_with_more_exits_than_any_reading_asks_passes_with_the_facts_not
         assert row["outcome"] == "pass", (rid, row)
 
 
-# the uses Chapter 10's words name for Chapter 4's sections (Table 1017.2 note a's list, 1006.2.2's spaces)
-USES = {"a mall": "402.8", "an atrium": "404.9", "a Group I-2": "407.4", "Group I-2 care suite": "407.4.4",
-        "a high-rise": "403.5", "underground": "405.7"}
+def _said_not_brought_in(text):
+    """Each stretch of a text that calls something not brought in: its sentence from the start through the end of the
+    clause (between ";" or ":") holding the words, so a list before them counts ("a mall, a Group I-2 occupancy ...:
+    each has its own distance, not brought in"; "Covered malls (402.8); atriums are not brought in") and a clause
+    after them doesn't ("1014.9 (not brought in) is a person's check; Group I-2 ... per 407.4.3 (a flag) too")."""
+    for sentence in re.split(r"(?<=\.)\s", text):
+        clauses = list(re.finditer(r"[^;:]+(?:[;:]|$)", sentence))
+        for n, clause in enumerate(clauses):
+            if re.search(r"(?:not|n't|neither|nor) brought in", clause.group()):
+                # a list the words open with a colon is theirs too ("not brought in: covered malls (402.8) and ...")
+                end = clauses[n + 1].end() if clause.group().endswith(":") and n + 1 < len(clauses) else clause.end()
+                yield sentence[:end]
+
+
+def test_a_stretch_said_not_brought_in_runs_from_its_sentence_start_to_its_clause_end():
+    assert list(_said_not_brought_in("Covered malls (402.8); atriums are not brought in.")) == [
+        "Covered malls (402.8); atriums are not brought in."]
+    [got] = _said_not_brought_in("Handrails as 1014.9 allows (not brought in) are a check; Group I-2 per 407.4.3 too.")
+    assert "407.4.3" not in got and "Group I-2" not in got and "1014.9" in got
+    # review round 5: the list a colon opens after the words
+    [got] = _said_not_brought_in("Two uses are not brought in: covered malls (402.8) and Group I-2 occupancies.")
+    assert "402.8" in got and _named_uses(got) == {"402.8", "407.4"}
 
 
 def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rules):
     """Review round 1 of part c: Chapter 10's words still said 407.4 "aren't brought in" (the shared stale-words test
     reads only "not brought in" in a narrow pattern). No sentence of any rule's title, notes, review reasons or
-    example notes names a Chapter 4 section sources.yaml brings in (or a part under one) and calls it not brought in."""
+    example notes, nor any label's reason, names a Chapter 4 section sources.yaml brings in (or a part under one, or
+    the whole section a part is brought in from: "Section 420" once 420.2 is in, review round 1 of part e) and calls
+    it not brought in."""
     brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]
     ours = [str(s) for s in brought["sections"] + brought["alone"] if re.fullmatch(r"4\d\d(\.\d+)*", str(s))]
     assert ours
-    bad = []
+    texts = []
     for r in rules.values():
-        texts = [r.get("title"), r.get("notes")] + [w.get("reason") for w in r.get("review_when") or []] +                 [e.get("note") for e in r.get("examples") or []]
-        for text in (x for x in texts if isinstance(x, str)):
-            for sentence in re.split(r"(?<=[.:;])\s", text):
-                if not re.search(r"(?:not|n't) brought in", sentence):
-                    continue
-                named = re.findall(r"\b(4\d\d(?:\.\d+)+)\b", sentence)
-                bad += [(r["id"], n) for n in named if any(n == s or n.startswith(s + ".") for s in ours)]
-            # review round 2 of part c: the uses a whole sentence names stand for their sections too ("a mall, a
-            # Group I-2 occupancy ...: each has its own distance, not brought in")
-            for sentence in re.split(r"(?<=\.)\s", text):
-                if re.search(r"(?:not|n't) brought in", sentence):
-                    bad += [(r["id"], s) for use, s in USES.items() if use in sentence
-                            and any(s == o or s.startswith(o + ".") for o in ours)]
+        texts += [(r["id"], x) for x in [r.get("title"), r.get("notes")] + [w.get("reason") for w in
+                  r.get("review_when") or []] + [e.get("note") for e in r.get("examples") or []] if isinstance(x, str)]
+    for path in sorted((NY / "3_section_labels").glob("*.yaml")):
+        labels = load(path)["labels"]
+        assert isinstance(labels, dict) and labels, path
+        texts += [(f"label {pid}", e["reason"]) for pid, e in labels.items()
+                  if isinstance(e, dict) and isinstance(e.get("reason"), str)]
+    bad = []
+    for where, text in texts:
+        # review rounds 2 to 5 of part c: a section named by its number or by its use ("a mall, a Group I-2
+        # occupancy ...: each has its own distance, not brought in"), anywhere in the stretch said not brought in
+        for stretch in _said_not_brought_in(text):
+            named = re.findall(r"\b(4\d\d(?:\.\d+)+)\b", stretch) + re.findall(r"\bSection (4\d\d)\b", stretch)
+            bad += [(where, n) for n in named + sorted(_named_uses(stretch))
+                    if any(n == s or n.startswith(s + ".") or s.startswith(n + ".") for s in ours)]
     assert not bad, bad
 
+
+# the sections part e brings in only in part, whose left-out parts the README lists (review rounds 1 and 2 of part e)
+PARTLY_IN = ("420", "422")
+
+
+def test_the_readmes_list_names_every_section_a_brought_in_piece_sends_to_that_isnt_in():
+    """Review round 1 of part e: 420.1 sends to "Sections 420.1 through 420.11" and 422.1 to 422.1 through 422.7, and
+    the README says which parts of Sections 420 and 422 part e leaves out; each section of those ranges that isn't
+    brought in (nor under one that is) is in that list. (The other parts' scope sections send to ranges whose
+    remaining sections no rule meets, and the README lists none of them.)"""
+    brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]
+    ours = [str(s) for s in brought["sections"] + brought["alone"]]
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    missing = []
+    for rid in _block_ids():
+        for src in _rules_by_id()[rid].get("sources") or []:
+            for a, b in re.findall(r"Sections (4\d\d\.\d+) through (4\d\d\.\d+)", " ".join(src["quote"].split())):
+                head = a.rsplit(".", 1)[0]
+                if head != b.rsplit(".", 1)[0] or head not in PARTLY_IN:
+                    continue
+                for n in range(int(a.rsplit(".", 1)[1]), int(b.rsplit(".", 1)[1]) + 1):
+                    s = f"{head}.{n}"
+                    if not any(s == o or s.startswith(o + ".") for o in ours) and not _readme_names(readme, s):
+                        missing.append((rid, s))
+    assert not missing, sorted(set(missing))
+
+
+def _readme_names(readme, section):
+    """Whether the README names a section: by itself, or inside a range it prints ("422.4 to 422.7")."""
+    if re.search(r"(?<![\d.])" + re.escape(section) + r"(?![\d])", readme):
+        return True
+    head, n = section.rsplit(".", 1)
+    return any(int(lo) <= int(n) <= int(hi) for lo, hi in
+               re.findall(r"(?<![\d.])" + re.escape(head) + r"\.(\d+) to " + re.escape(head) + r"\.(\d+)(?![\d])", readme))
+
+
+def _rules_by_id():
+    return {r["id"]: r for r in load(RULEBOOK)["rules"]}
 
 
 def test_a_plural_term_is_the_definition_of_its_singular():
@@ -389,48 +457,127 @@ def test_a_plural_term_is_the_definition_of_its_singular():
     assert not said, said
 
 
+VALUE = r"(?<![\d.,/])(\d+[ -]\d+/\d+|\d+/\d+|[\d,]*\.\d+|[\d,]+)"
+# every unit the number reader (document_extraction/numbers.py) records that is imperial, and the metric ones
+IMPERIAL = ("gross square foot", "net square foot", "square foot", "square inch", "cubic foot", "foot", "inch", "pound",
+            "psf", "footcandle")
+METRIC = ("mm", "cm", "m", "kg", "N", "lux")
+
+
 def _figure(recorded):
-    """(value, unit) of a recorded number ("less than 500 square foot", "19.1 mm", "2/3 inch"), or None."""
-    m = re.search(r"(\d+/\d+|[\d,]+(?:\.\d+)?)\s+(square foot|foot|inch|pound|mm|m|N)\b", recorded)
+    """(value, unit) of a recorded number ("less than 500 square foot", "19.1 mm", "1 1/2 inch", ".5 inch"), or None."""
+    m = re.search(VALUE + r"\s+(" + "|".join(IMPERIAL + METRIC) + r")\b", recorded)
     if not m:
         return None
-    a, _, b = m.group(1).replace(",", "").partition("/")
-    return (float(a) / float(b) if b else float(a)), m.group(2)
+    whole, _, frac = m.group(1).replace(",", "").replace("-", " ").rpartition(" ") if "/" in m.group(1) \
+        else ("", "", m.group(1).replace(",", ""))
+    a, _, b = frac.partition("/")
+    return (float(whole or 0) + (float(a) / float(b) if b else float(a))), m.group(2)
 
 
-# an imperial figure and the conversion its unit is printed with (mm, or m2 read as "m" for square feet)
-CONVERSION = {"inch": (25.4, "mm"), "foot": (304.8, "mm"), "square foot": (0.092903, "m"), "pound": (4.448, "N")}
+def _imperial(recorded):
+    """Whether a recorded number carries an imperial unit word (whether or not _figure reads it)."""
+    return re.search(r"\d\s+(?:gross\s+|net\s+)?(?:square\s+|cubic\s+)?(?:inch|foot|pound|psf|footcandle)\b", recorded)
+
+
+def _metric(recorded):
+    """Whether a recorded number carries a metric unit word."""
+    return re.search(r"\d\s+(?:" + "|".join(METRIC) + r")\b", recorded)
+
+
+# each imperial unit and the conversions it is printed with (square metres are recorded as "m", square mm as "mm")
+CONVERSION = {"inch": {"mm": 25.4}, "foot": {"mm": 304.8, "m": 0.3048}, "square foot": {"m": 0.092903},
+              "gross square foot": {"m": 0.092903}, "net square foot": {"m": 0.092903},
+              "square inch": {"mm": 645.16, "m": 0.00064516}, "pound": {"kg": 0.45359, "N": 4.448}}
+# pieces where the number reader records a figure without its unit, and that unit: a metric one ("50 pounds (220 N)":
+# the newtons), or an imperial one (a unit word the reader doesn't know; "net" it reads since part c's fix check)
+UNIT_NOT_RECORDED = {"408.3.2": "N"}
+IMPERIAL_UNIT_NOT_RECORDED = {}
+
+
+def _numbers(pid, entry):
+    """A piece's recorded numbers, each unit the reader left out put back (the bare number before a metric figure takes
+    the piece's imperial unit; a bare number after an imperial figure, its metric unit)."""
+    numbers = list(entry["numbers"])
+    metric, imperial = UNIT_NOT_RECORDED.get(str(pid)), IMPERIAL_UNIT_NOT_RECORDED.get(str(pid))
+    for n, here in enumerate(numbers):
+        bare = re.fullmatch(r"(?:and |not less than |not more than )?[\d,.]+", here)
+        if bare and imperial and n + 1 < len(numbers) and _metric(numbers[n + 1]):
+            numbers[n] = here + " " + imperial
+        elif bare and metric and n and _imperial(numbers[n - 1]):
+            numbers[n] = here + " " + metric
+    return numbers
+
+
+def _walk(numbers):
+    """([(the imperial figure, the metric one printed after it, whether they disagree by more than 2%)], the indices of
+    the metric figures compared, a split "22 860 mm"'s two halves both)."""
+    out, used = [], set()
+    for n, (here, after) in enumerate(zip(numbers, numbers[1:])):
+        a, b = _figure(here), _figure(after)
+        if not a or not b or a[1] not in CONVERSION or b[1] not in CONVERSION[a[1]]:
+            continue
+        metric, used = b[0], used | {n + 1}
+        later = _figure(numbers[n + 2]) if n + 2 < len(numbers) else None
+        if b[1] == "mm" and later and later[1] == "mm" and metric < 1000 and 100 <= later[0] < 1000:
+            metric, used = metric * 1000 + later[0], used | {n + 2}      # "22 860 mm", read as "22 mm" and "860 mm"
+        want = a[0] * CONVERSION[a[1]][b[1]]
+        out.append((here, after, abs(metric - want) / want > 0.02))
+    return out, used
+
+
+def _compared(numbers):
+    return _walk(numbers)[0]
 
 
 def _misprinted(numbers):
-    """[(the imperial figure, the metric one printed after it)] where the two disagree by more than 2%."""
-    out = []
-    for n, (here, after) in enumerate(zip(numbers, numbers[1:])):
-        a, b = _figure(here), _figure(after)
-        if not a or not b or a[1] not in CONVERSION or b[1] != CONVERSION[a[1]][1]:
-            continue
-        metric = b[0]
-        later = _figure(numbers[n + 2]) if n + 2 < len(numbers) else None
-        if b[1] == "mm" and later and later[1] == "mm" and metric < 1000 and 100 <= later[0] < 1000:
-            metric = metric * 1000 + later[0]            # "22 860 mm", read as "22 mm" and "860 mm"
-        want = a[0] * CONVERSION[a[1]][0]
-        if want and abs(metric - want) / want > 0.02:
-            out.append((here, after))
-    return out
+    return [(here, after) for here, after, off in _compared(numbers) if off]
+
+
+def test_the_conversion_walk_compares_every_imperial_figure():
+    """Review rounds 3 to 5 of part c: the walk skipped feet printed with metres and pounds with kilograms, read
+    "1 1/2 inch" as 1/2 and ".5 inch" as 5, and never saw a figure whose unit the reader left out. Every imperial
+    figure a Chapter 4 piece records (by its unit word, read or not) is read, has a conversion, and is compared with
+    the metric figure printed after it; and every metric figure is one compared (none is printed alone)."""
+    assert _misprinted(["more than 420 foot", "12 m"]) and _misprinted(["not less than 3,500 pound", "158 kg"])
+    assert not _misprinted(["more than 420 foot", "128 m"]) and not _misprinted(["75 foot", "22 mm", "860 mm"])
+    assert _figure("not more than 1 1/2 inch") == (1.5, "inch") and _figure("2/3 inch") == (2 / 3, "inch")
+    assert _figure(".5 inch") == (0.5, "inch") and _figure("22-1/2 inch") == (22.5, "inch")
+    assert _compared(["greater than 1 1/2 square inch", "967 mm"]) == [("greater than 1 1/2 square inch", "967 mm", False)]
+    assert _compared(["not exceed 5,000 square inch", "3.2 m"]) == [("not exceed 5,000 square inch", "3.2 m", False)]
+    assert _compared(["not less than 30 net square foot", "2.8 m"]) == [("not less than 30 net square foot", "2.8 m", False)]
+    pieces = load(NY / "text_verification.yaml")["pieces"]
+    imperial = compared = 0
+    for pid, entry in pieces.items():
+        if re.fullmatch(r"4\d\d(\.\d+)*", str(pid)):
+            numbers = _numbers(pid, entry)
+            for n in numbers:
+                if _imperial(n):
+                    assert _figure(n) and _figure(n)[1] in CONVERSION, (pid, n)   # read, with a conversion
+                    imperial += 1
+            pairs, used = _walk(numbers)
+            compared += len(pairs)
+            alone = [m for k, m in enumerate(numbers) if _metric(m) and k not in used]
+            assert not alone, (pid, alone)                     # a metric figure whose imperial one wasn't read
+    assert imperial and compared == imperial, (compared, imperial)
+    # 408.3.2's "50 pounds (220 N)": the newtons are recorded without their unit, and still compared (part d round 1)
+    assert [x[:2] for x in _compared(_numbers("408.3.2", pieces["408.3.2"]))] == [
+        ("not greater than 50 pound", "220 N"), ("50 pound", "220 N")]
 
 
 def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
-    """Review rounds 1 and 2 of part c: 407.3.1.1 prints "2/3 inch (19.1 mm)" (19.1 mm is 3/4 inch) and 407.2.4
+    """Review rounds 1 to 3 of part c: 407.3.1.1 prints "2/3 inch (19.1 mm)" (19.1 mm is 3/4 inch) and 407.2.4
     "500 square feet (455 m2)" (500 sq ft is 46.45 m2). For every Chapter 4 piece, each imperial figure whose printed
-    metric conversion disagrees by more than 2% is named in the second reading's flags and said in its flag's notes,
-    so a person checks which the State means; never a claim about what another code prints without its source."""
+    metric conversion disagrees by more than 2% is named in the second reading's flags and said in its flag's notes;
+    which the State means is a person's check, and a reading Gordium gives cites where the same book prints the figure;
+    never a claim about what another code prints without its source."""
     pieces = load(NY / "text_verification.yaml")["pieces"]
     found = {}
     for pid, entry in pieces.items():
         if re.fullmatch(r"4\d\d(\.\d+)+", str(pid)):
-            for here, after in _misprinted(entry["numbers"]):
+            for here, after in _misprinted(_numbers(pid, entry)):
                 found.setdefault(str(pid), []).append((here, after))
-    assert set(found) >= {"407.2.4", "407.3.1.1"}, found          # the walk finds the two it was written for
+    assert set(found) >= {"407.2.4", "407.3.1.1", "408.3.3", "408.8.3"}, found   # the walk finds the ones it was written for
     block = _block_ids()
     for pid, pairs in found.items():
         flags = " ".join(pieces[pid].get("flags") or [])
@@ -441,3 +588,113 @@ def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
             assert here.split()[-3 if "square" in here else -2] in flags and after.split()[0] in flags, (pid, here, after)
             assert after.split()[0] in notes, (pid, after)
         assert "model code" not in flags + notes, pid
+        assert "person's check" in notes, pid
+        assert "misprint" not in flags or "person's check" in flags, pid   # the second reading's words too (round 4)
+        assert "misprint" not in notes or re.search(r"elsewhere \(p\.\d+, line \d+", notes), pid
+
+
+# the uses Chapter 10's words name for Chapter 4's sections (Table 1017.2 note a's list, 1006.2.2's spaces), as word
+# patterns matched in any case, so a plural, a missing article or a capital is caught too (review rounds 3 and 4 of part c)
+USES = {r"\bmalls?\b": "402.8", r"\batriums?\b": "404.9", r"\bGroup I-2\b": "407.4",
+        r"\bGroup I-2 care suites?\b": "407.4.4", r"\bhigh[- ]rise": "403.5", r"\bunderground\b": "405.7"}
+
+
+def _named_uses(sentence):
+    """The Chapter 4 sections a sentence names by their uses."""
+    return {s for use, s in USES.items() if re.search(use, sentence, re.IGNORECASE)}
+
+
+def test_the_uses_are_matched_in_any_number_case_and_without_an_article():
+    assert _named_uses("Covered mall buildings and atriums are not brought in.") == {"402.8", "404.9"}
+    assert _named_uses("Atriums and Group I-2 occupancies aren't brought in.") == {"404.9", "407.4"}
+    assert _named_uses("High rise buildings are not brought in.") == {"403.5"}
+
+
+def _sections(text):
+    """The section numbers a plan line names, ranges expanded by their last part ("407.1 to 407.4" is 407.1 to
+    407.4; "420.6 whole" is 420.6)."""
+    out = set()
+    for a, b in re.findall(r"(?<![\d.])(4\d\d(?:\.\d+)*)(?: to (4\d\d(?:\.\d+)*))?(?![\d])", text):
+        out.add(a)
+        if b and a.rsplit(".", 1)[0] == b.rsplit(".", 1)[0] and "." in a:
+            head, lo = a.rsplit(".", 1)
+            out |= {f"{head}.{n}" for n in range(int(lo), int(b.rsplit(".", 1)[1]) + 1)}
+        elif b:
+            out.add(b)
+    return out
+
+
+def _under(section, listed):
+    return any(section == s or section.startswith(s + ".") for s in listed)
+
+
+def test_the_plans_parts_list_names_each_parts_sections():
+    """Review rounds 3 and 4 of part d: the plan's "Parts, in order" list still gave part d its first scope, and
+    part d's status line reasoned about part e's 408.6.1. Each part's status line, up to what it brings in, names
+    only sections under its own list line, never one under another part's."""
+    plan = (REPO / "docs/decisions/2026-11-26_ny_building_chapter_4_egress.md").read_text(encoding="utf-8")
+    parts = plan.split("## Parts, in order", 1)[1].split("## Status", 1)[0]
+    status = plan.split("## Status", 1)[1]
+    listed = {p: _sections(re.search(r"- \*\*" + p + r"\.[^\n]*", parts).group().split(":", 1)[1])
+              for p in "abcdef"}
+    for part in "abcde":
+        line = re.search(r"- \*\*" + part + r"\.\*\* Drafted[^\n]*", status).group()
+        # every section the line names, brackets included (its reasoning sits there too); a dotted number only, never
+        # "420 ft" or a rule id's "bc_407" (review round 4's fix check)
+        stated = set(re.findall(r"(?<![\w.])(4\d\d\.\d+(?:\.\d+)*)(?!\d)", line.split("Drafted", 1)[1]))
+        assert stated, part
+        for s in stated:
+            mine = _under(s, listed[part])
+            theirs = [p for p in listed if p != part and _under(s, listed[p]) and not mine]
+            assert mine and not theirs, (part, s, theirs)
+    for part in listed:                                   # no part lists a section another part lists
+        for other in listed:
+            clash = [s for s in listed[part] if other != part and (_under(s, listed[other])
+                                                                    or any(_under(o, {s}) for o in listed[other]))]
+            assert not clash, (part, other, clash)
+    assert _sections("407.1 to 407.4; 408.1") == {"407.1", "407.2", "407.3", "407.4", "408.1"}
+    assert not _under("407.10", {"407.1"})
+
+
+def test_an_unrated_group_b_corridor_where_an_ambulatory_care_facility_may_be_needs_review(ctx, rules):
+    """Review round 1 of part e: 422.2 separates an ambulatory care facility (four or more care recipients who may be
+    incapable of self-preservation) from adjacent corridors with a fire partition (708), so Table 1020.2's B row no
+    longer passes an unrated corridor on its occupant load or NFPA 13 where one may be (stated, or not ruled out); a
+    sure fail stays a fail, and stated none, the table decides."""
+    r = rules["general.bc_table_1020_2_a_b_e_f_m_s_u"]
+    base = {"occupancy_group": "B", "special_egress_spaces": False, "sprinklered_903_3_1_2": False,
+            "sprinklered_903_3_1_3": False}
+
+    def one(given, load, hours):
+        [row] = parts.rows(r, {"corridor": [{"id": "c1", "measures": {"corridor_occupant_load": load,
+                                                                       "corridor_fire_rating_hours": hours}}]},
+                           {**base, **given}, ctx.allowed())
+        return row["outcome"]
+    for care in (True, None):
+        given = {} if care is None else {"ambulatory_care_facility": care}
+        assert one({**given, "sprinklered_903_3_1_1": True}, 100, 0) == "needs_review", care
+        assert one({**given, "sprinklered_903_3_1_1": False}, 20, 0) == "needs_review", care
+        assert one({**given, "sprinklered_903_3_1_1": False}, 100, 0) != "pass", care
+        assert one({**given, "sprinklered_903_3_1_1": True}, 100, 1) == "pass", care
+    assert one({"ambulatory_care_facility": False, "sprinklered_903_3_1_1": True}, 100, 0) == "pass"
+
+
+def test_the_ambulatory_care_fact_says_what_it_decides():
+    """Review round 2 of part e: the fact's name, its meaning and its Revit mark said only Table 1020.3's 72 in, though
+    Section 422's flags and Table 1020.2's Group B band read it too."""
+    names = (REPO / "packages/design_checker/design_checker/each_part.py").read_text(encoding="utf-8")
+    name = names[names.index('    "ambulatory_care_facility": "'):].split('",\n', 1)[0]    # its words, both lines
+    meaning = load(NY / "5_building_code_rules/drafted/records/proposed_measures.yaml")["ambulatory_care_facility"]["meaning"]
+    marks = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
+    mark = marks[marks.index("AmbulatoryCareFacility = new("):][:1500].split(");", 1)[0]
+    doc = (REPO / "docs/interior/interior_description_format.md").read_text(encoding="utf-8")
+    block = doc[doc.index("  ambulatory_care_facility: "):].split("\n  corridors_within_dwelling_units:", 1)[0]
+    summary = marks[:marks.index("AmbulatoryCareFacility = new(")].rsplit("/// <summary>", 1)[1]
+    scope = (REPO / "packages/design_checker/design_checker/code_scope.py").read_text(encoding="utf-8")
+    comment = scope[scope.index("# section group 4 (corridors)"):scope.index('"ambulatory_care_facility": "yes_no"')]
+    tests = (REPO / "apps/revit_addin/tests/Gordium.Revit.Reading.Tests/CorridorFactsTests.cs").read_text(encoding="utf-8")
+    test_summary = tests[:tests.index("public sealed class")]
+    notes = {r["id"]: r for r in load(RULEBOOK)["rules"]}["general.bc_422_1_ambulatory_care_facilities"]["notes"]
+    assert "1020.2" in notes and "1020.3" in notes                    # part e review round 4
+    for words in (name, meaning, mark, block, summary, comment, test_summary):
+        assert "422" in words and "1020.2" in words and "1020.3" in words, words[:120]

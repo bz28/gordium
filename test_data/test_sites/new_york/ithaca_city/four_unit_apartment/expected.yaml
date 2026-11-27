@@ -152,6 +152,33 @@ results:
   general.bc_408_4_2_power_operated_doors_and_locks: not_applicable
   general.bc_408_4_3_redundant_operation: not_applicable
   general.bc_408_4_4_relock_capability: not_applicable
+  # Chapter 4 part e: 408.6 and 408.8 (Group I-3) and 420.6 to 420.9 (Group I-1) not applicable to a building stated
+  # Group R-2; 420.1 to 420.3 (Groups I-1 and R: its scope, the fire partitions between units and the horizontal
+  # assemblies between floors) apply, a person's check; 422 (ambulatory care) shows while the building doesn't rule
+  # out an ambulatory care facility (not stated)
+  general.bc_408_6_smoke_barrier: not_applicable
+  general.bc_408_6_1_smoke_compartments: not_applicable
+  general.bc_408_6_2_refuge_area: not_applicable
+  general.bc_408_6_3_independent_egress: not_applicable
+  general.bc_408_8_subdivision_of_resident_housing_areas: not_applicable
+  general.bc_408_8_1_occupancy_conditions_3_and_4: not_applicable
+  general.bc_408_8_2_occupancy_condition_5: not_applicable
+  general.bc_408_8_3_openings_in_room_face: not_applicable
+  general.bc_408_8_4_smoke_tight_doors: not_applicable
+  general.bc_420_1_groups_i1_and_r: needs_review
+  general.bc_420_2_separation_walls: needs_review
+  general.bc_420_3_horizontal_separation: needs_review
+  general.bc_420_6_smoke_barriers_in_group_i1_condition_2: not_applicable
+  general.bc_420_6_1_refuge_area: not_applicable
+  general.bc_420_7_assisted_living_housing_units: not_applicable
+  general.bc_420_8_group_i1_cooking_facilities: not_applicable
+  general.bc_420_9_domestic_cooking_appliances: not_applicable
+  general.bc_422_1_ambulatory_care_facilities: needs_review
+  general.bc_422_2_separation: needs_review
+  general.bc_422_3_smoke_compartments: needs_review
+  general.bc_422_3_1_means_of_egress: needs_review
+  general.bc_422_3_2_refuge_area: needs_review
+  general.bc_422_3_3_independent_egress: needs_review
   general.bc_1007_1_1_remoteness: pass                 # 0.5992 >= 1/2 on both stories (above)
   general.bc_1007_1_1_space_remoteness: pass           # "space_exit_count < 2 or ...": every space has one doorway
   general.bc_1007_1_2_space_three_or_more: pass        # "space_exit_count < 3 or ...": none has three

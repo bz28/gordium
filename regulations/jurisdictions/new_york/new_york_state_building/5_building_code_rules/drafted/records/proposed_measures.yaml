@@ -219,6 +219,23 @@ occupancy_group:
   - general.bc_408_4_3_redundant_operation
   - general.bc_408_4_4_relock_capability
   - general.bc_408_4_locks
+  - general.bc_408_6_1_smoke_compartments
+  - general.bc_408_6_2_refuge_area
+  - general.bc_408_6_3_independent_egress
+  - general.bc_408_6_smoke_barrier
+  - general.bc_408_8_1_occupancy_conditions_3_and_4
+  - general.bc_408_8_2_occupancy_condition_5
+  - general.bc_408_8_3_openings_in_room_face
+  - general.bc_408_8_4_smoke_tight_doors
+  - general.bc_408_8_subdivision_of_resident_housing_areas
+  - general.bc_420_1_groups_i1_and_r
+  - general.bc_420_2_separation_walls
+  - general.bc_420_3_horizontal_separation
+  - general.bc_420_6_1_refuge_area
+  - general.bc_420_6_smoke_barriers_in_group_i1_condition_2
+  - general.bc_420_7_assisted_living_housing_units
+  - general.bc_420_8_group_i1_cooking_facilities
+  - general.bc_420_9_domestic_cooking_appliances
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -474,9 +491,17 @@ occupied_outdoor_areas:
   - general.bc_1010_1_2_1_direction_of_swing
 ambulatory_care_facility:
   meaning: 'The building is or holds an ambulatory care facility (2025 BCNYS 202, Section 422; Group B, 304.1), as the architect
-    states it: Table 1020.3 asks 72 inches of its corridors serving stretcher traffic'
+    states it: Section 422 asks its separation (422.2) and smoke compartments (422.3), so Table 1020.2''s Group B corridor
+    rating may not be all its corridors need, and Table 1020.3 asks 72 inches of its corridors serving stretcher traffic'
   unit: yes_no
   needed_by:
+  - general.bc_422_1_ambulatory_care_facilities
+  - general.bc_422_2_separation
+  - general.bc_422_3_1_means_of_egress
+  - general.bc_422_3_2_refuge_area
+  - general.bc_422_3_3_independent_egress
+  - general.bc_422_3_smoke_compartments
+  - general.bc_table_1020_2_a_b_e_f_m_s_u
   - general.bc_table_1020_3_corridor_width
 corridors_within_dwelling_units:
   meaning: 'The building has corridors within a dwelling unit or sleeping unit (2025 BCNYS 1020.2 exception 2: no rating
