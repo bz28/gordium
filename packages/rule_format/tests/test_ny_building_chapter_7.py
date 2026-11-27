@@ -448,3 +448,8 @@ def test_part_c_review_round_2s_wording(book):
     assert "except in buildings of Types IIB, IIIB and VB" in _shown_note(rules["general.bc_709_4_smoke_barrier_continuity"])
     for rid in ("general.bc_708_6_fire_partition_openings", "general.bc_709_5_smoke_barrier_openings"):
         assert "OH-45" in " ".join(_shown_note(rules[rid]).split()), rid
+    labels = load(LABELS)["labels"]                                     # review round 3: the labels and the note's end
+    for pid in ("708.6", "709.5"):
+        assert "OH-45" in " ".join(labels[pid]["reason"].split()), pid
+    assert "windows' ratings" in _shown_note(rules["general.bc_709_5_smoke_barrier_openings"])
+    assert "1/3 hour (D-H-20) in a 1/2-hour one" in " ".join(_shown_note(rules["general.bc_708_6_fire_partition_openings"]).split())
