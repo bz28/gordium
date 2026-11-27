@@ -2185,3 +2185,18 @@ def test_the_seating_measures_meaning_names_every_trigger():
                  "an exit or a corridor states a function"):
         assert must in meaning, must
 
+
+
+def test_the_stair_rules_never_call_section_1030_not_brought_in(rules):
+    """Merging #268 into section group 7c (review): three stair reasons still said 1030.14.2's stepped aisles and 1011.1's
+    stepped-aisle exception were "none brought in" once #268 brought Section 1030 in whole. A 1011 rule's reason that
+    names 1030 never calls it not brought in (1011.5.4.1, still not brought in, is named on its own)."""
+    bad = []
+    for rid, r in rules.items():
+        if not rid.startswith("general.bc_1011_"):
+            continue
+        for w in r.get("review_when") or []:
+            why = " ".join(w["reason"].split())
+            if "1030" in why and re.search(r"\b(?:none|neither) brought in|1030[^.:;]*\bnot brought in\)", why):
+                bad.append(rid)
+    assert not bad, bad

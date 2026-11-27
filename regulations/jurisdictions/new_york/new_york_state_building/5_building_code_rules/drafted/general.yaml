@@ -19401,7 +19401,7 @@ rules:
       != "R-3")) and not stair_in_exit_enclosure
     reason: 'A flight not shown to stand in an exit stair enclosure may connect stepped aisles to cross aisles (exception
       2: Section 1030.14.2), be a stepped aisle (1011.1''s exception), or have its bottom or top riser at a sloping public
-      way, walkway or driveway (1011.5.4.1, under 4 in): none brought in, so a person checks.'
+      way, walkway or driveway (1011.5.4.1, under 4 in): the first two Section 1030''s flags, the last not brought in, so a person checks.'
   for_each: stair
   when_none: not_applicable
   sources:
@@ -19768,7 +19768,7 @@ rules:
   - when: stair_riser_variation > 0.375 and not stair_in_exit_enclosure
     reason: 'A flight not shown to stand in an exit stair enclosure may connect stepped aisles to cross aisles (exception
       1: Section 1030.14.2), be a stepped aisle (1011.1''s exception), or have its bottom or top riser at a sloping public
-      way, walkway or driveway (exception 3: 1011.5.4.1), none brought in: a person checks.'
+      way, walkway or driveway (exception 3: 1011.5.4.1), the first two Section 1030''s flags, the last not brought in: a person checks.'
   for_each: stair
   when_none: not_applicable
   sources:
@@ -19869,7 +19869,7 @@ rules:
   - when: stair_tread_variation > 0.375 and (not stair_in_exit_enclosure or stair_spiral)
     reason: 'A flight not shown to stand in an exit stair enclosure may connect stepped aisles to cross aisles (exception
       1: Section 1030.14.2), be a stepped aisle (1011.1''s exception), or have its bottom or top riser at a sloping public
-      way, walkway or driveway (exception 3: 1011.5.4.1), none brought in: a person checks. Consistently shaped winders
+      way, walkway or driveway (exception 3: 1011.5.4.1), the first two Section 1030''s flags, the last not brought in: a person checks. Consistently shaped winders
       may differ from the flight''s rectangular treads (exception 2).'
   for_each: stair
   when_none: not_applicable
