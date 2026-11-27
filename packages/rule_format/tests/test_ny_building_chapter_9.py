@@ -496,3 +496,11 @@ def test_the_vehicle_storage_flags_show_for_every_group(book, ctx):
         for groups in (["B"], ["F-1"], ["R-2"], ["M"], ["S-2"]):
             assert outcome(_rule(book, rid), code_scope.building_measures({"occupancy_groups": groups}),
                            allowed) == "needs_review", (rid, groups)
+
+
+def test_the_group_e_rules_reason_keeps_its_exception_to_areas_below_exit_discharge(book):
+    """Part b review round 3: 903.2.3's exception (every classroom with an exterior exit door at ground level) lifts the
+    requirement only "in any area below the lowest level of exit discharge serving that area" (p.270 lines 29-30), never
+    for a Group E fire area on a floor above it; the review reason says so."""
+    reason = _rule(book, "general.bc_903_2_3_group_e_sprinklers")["review_when"][0]["reason"]
+    assert "below the lowest level of exit discharge" in reason
