@@ -188,6 +188,204 @@ documents:
         p.342 line 16: 1017.2.3 item 4 prints a ventilation rate in cubic metres per minute per square metre, "(0.556
           m3/min/m2)", the 3 and the 2 raised as powers of the unit; the slashes divide units, not a fraction.
       italic_not_defined:    # by piece: italic words Section 202 doesn't define, each with why (any other is a problem)
+        202:anchor_building:
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        202:covered_mall_building:
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          malls: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        202:food_court:
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.1':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.1.1':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.1':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          malls: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.1.1':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.2':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.2.1':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          factor: 'The last word of "occupant load factor", printed in italics (p.87, line 8, and "OLF = The occupant
+            load factor"); OCCUPANT LOAD is brought in, and the factor is Equation 4-1''s OLF (Chapter 4 part a).'
+          gla: 'Equation 4-1''s GLA, printed in italics: "The gross leasable area (square feet)", defined right under
+            the equation (p.87, line 12); GROSS LEASABLE AREA is brought in (202:gross_leasable_area) (Chapter 4 part
+            a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          olf: 'Equation 4-1''s OLF, printed in italics: "The occupant load factor (square feet per person)", defined
+            right under the equation (p.87, line 11); no Section 202 term (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.2.2':
+          olf: 'Equation 4-1''s OLF, printed in italics: "The occupant load factor (square feet per person)", defined
+            right under the equation (p.87, line 11); no Section 202 term (Chapter 4 part a).'
+        '402.8.2.3':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.2.4':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.3':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.4':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics;
+            the words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines,
+            under it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader
+            doesn''t take as terms of their own (Chapter 4 part a).'
+        '402.8.4.1':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          malls: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          nchor: 'The book prints "anchor buildings" with its first letter in roman and the rest in italics (p.87,
+            line 31, checked by each character''s font with pdfplumber); ANCHOR BUILDING is brought in
+            (202:anchor_building) (Chapter 4 part a).'
+        '402.8.5':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics;
+            the words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines,
+            under it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader
+            doesn''t take as terms of their own (Chapter 4 part a).'
+        '402.8.6':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics;
+            the words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines,
+            under it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader
+            doesn''t take as terms of their own (Chapter 4 part a).'
         202:area_for_masonry:
           specified: The book prints "specified dimensions" in italics across two lines (p.33, lines 48-49) with the
             first word on line 47's "out-to-out specified"; DIMENSIONS (Specified) is defined under DIMENSIONS, which
