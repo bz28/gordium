@@ -66,6 +66,8 @@ FIELD_HEADLINES = {
     "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
     "building.emergency_voice_alarm_system": "Say whether the whole building has an emergency voice/alarm communication system (907.5.2.2)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
+    "building.mezzanines": "Say whether the building has a mezzanine (505.2)",
+    "building.loads_not_by_area": "Say whether any area is counted by seats, lanes or actual load (fixed seats, bowling, call centers)",
     "doors[].leaves": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)",
     "rooms[].fire_rating_hours": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)",
     "rooms[].walls_smoke_partitions": "Say whether the corridor's walls are smoke partitions",

@@ -298,7 +298,8 @@ def _load_rules():
 
 def _collapse(parts, how):
     """One reading of the occupant loads: `low` / `high` puts each two-reading load at that end; `zero` / `huge`
-    gives each load not worked out 0 or a million (a pass on a load not worked out must hold whatever it is)."""
+    gives each load not worked out 0 or a million, or where it has a proven ceiling (occupant_load._bounds) that
+    ceiling, the most it can be (a pass on a load not worked out must hold whatever it can be)."""
     for kind, name in (("space", LOADS[0]), ("story", LOADS[1]), ("corridor", LOADS[2])):
         for p in parts.get(kind) or []:
             rs = (p.get("readings") or {}).get(name)
@@ -307,7 +308,8 @@ def _collapse(parts, how):
                 del p["readings"][name]
                 p["not_measured"].pop(name, None)
             elif how in ("zero", "huge") and not rs and name not in p["measures"]:
-                p["measures"][name] = 0 if how == "zero" else 1e6
+                top = ((p.get("bounds") or {}).get(name) or {}).get(occupant_load.BOUND)
+                p["measures"][name] = 0 if how == "zero" else 1e6 if top is None else top
                 p["not_measured"].pop(name, None)
     return parts
 
@@ -341,6 +343,10 @@ def _walk_case(rng, apartment):
                         **({} if increase is None else {"occupant_load_increased": increase}),
                         **({} if others is None else {occupant_load.OTHER_LEVELS: others}),
                         **({} if amb is None else {"ambulatory_care_facility": amb})}
+    for fact in occupant_load.NO_FACTS:                                          # the ceiling's facts
+        got = rng.choice((None, True, False, False))
+        if got is not None:
+            desc["building"][fact] = got
     return desc, increase
 
 
@@ -580,6 +586,9 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
     fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "FUNCTION_ROOMS", "LOAD_STATED",
                  "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "OTHER_LEVELS_FIELD", "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
                  "CORRIDOR_READINGS", "FUNCTIONS_ONLY",     # the readings' own words: a load given, never asked
+                 # the ceiling's (a load bounded, never a reason a load isn't given; BOUND_FACT_WHY is a fact's ask)
+                 "NOT_BY_AREA", "OUTDOOR", "MEZZANINES", "BOUND", "IF_STATED",
+                 "BOUND_WHY", "BOUND_FACT_WHY",
                  "SEATING_STORY", "SEATING_SPACE"}        # the assembly seating measures' names (1030.7), never a reason
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
@@ -656,6 +665,151 @@ def test_a_corridor_asks_the_rooms_functions_only_where_they_alone_wait():
     c = parts["corridor"][0]
     assert c["not_measured"]["corridor_occupant_load"] == occupant_load.CORRIDOR_NO_STORY
     assert "corridor_occupant_load" not in c["more"]
+
+
+# ---- the ceiling on a load not worked out (occupant_load._bounds; docs/decisions/2026-11-26_occupant_load_upper_bound.md)
+STATED = {"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r", "loads_not_by_area": False,
+          "occupied_outdoor_areas": False, "mezzanines": False}
+ELSEWHERE_FUNCTIONS = {"assembly_fixed_seats", "bowling_center", "concentrated_business", "mall"}
+NO_FACTS = ("loads_not_by_area", "occupied_outdoor_areas", "mezzanines")
+
+
+def _story(gross=1800.0, areas=(690.0, 690.0), functions=(None, None)):
+    """A story of the given gross floor area with spaces of these areas (none of them an exit), as the routes give
+    them, and its description's rooms."""
+    parts = {"story": [{"id": "L1", "measures": {"story_gross_floor_area": gross}, "not_measured": {}}],
+             "space": [{"id": f"r{i}", "name": f"Room {i}", "within": "L1",
+                        "measures": {"space_floor_area": a, "space_is_exit": False}, "not_measured": {}}
+                       for i, a in enumerate(areas)]}
+    desc = {"rooms": [{"id": f"r{i}", **({"function": f} if f else {})} for i, f in enumerate(functions)]}
+    return parts, desc
+
+
+def _ceilings(parts):
+    return [(p.get("bounds") or {}).get(n) for p, n in [(parts["story"][0], "story_occupant_load")]
+            + [(p, "space_occupant_load") for p in parts["space"]]]
+
+
+def test_the_densest_factor_is_standing_space_and_no_function_with_a_factor_is_denser():
+    """The proof's first step (1004.5, Table 1004.5, 1004.5.1): of every function the table gives a factor, the
+    fewest square feet per occupant is 5 (Standing space 5 net), and 1004.5.1's increase stops at 7, so no function
+    worked out from its area gives more than one occupant per 5 sq ft. The four the table sends elsewhere (fixed seats,
+    1004.6, in any use; bowling lanes; concentrated business use, NY 1004.8's 'actual occupant load as approved'; a
+    mall, 402.8.2) are the only ones without a factor, and all four are kept out by one stated fact, loads_not_by_area,
+    whatever the building's groups (round 2: a fixed-seat classroom isn't assembly, and a live/work unit's business
+    area is Group R-2, 508.5.2); stated on a room, any of them leaves its story with no ceiling."""
+    assert occupant_load.densest(FACTORS) == 5
+    assert [f for f, e in FACTORS["functions"].items() if e["factor"] == 5] == ["assembly_standing"]
+    assert FACTORS["functions"]["assembly_standing"]["source"]["quote"] == "Standing space 5 net"
+    assert {f for f, e in FACTORS["functions"].items() if e["factor"] is None} == ELSEWHERE_FUNCTIONS
+    assert FACTORS["increase_cap"] == 7 and occupant_load.densest({"functions": {}, "increase_cap": 7}) == 7
+    assert occupant_load.NO_FACTS == NO_FACTS
+    assert not hasattr(occupant_load, "UNBOUNDED_GROUPS")       # no group is taken as a proof of what's inside it
+    for fn in ELSEWHERE_FUNCTIONS:
+        parts, desc = _story(functions=(fn, None))
+        occupant_load.apply(parts, desc, FACTORS, STATED)
+        assert _ceilings(parts) == [None, None, None], fn
+
+
+@pytest.mark.parametrize("building, proven, hoped", [
+    (STATED, 360, None),                                                           # 1,800 / 5
+    ({**STATED, "sprinkler_system": "none"}, 360, None),                           # the sprinkler system: no matter
+    *[({**STATED, "occupancy_groups": g}, 360, None)                               # the groups: no matter (round 2)
+      for g in (["A-3"], ["B"], ["M"], ["F1"], None)],
+    ({**STATED, "mezzanines": None}, None, (360, ["mezzanines"])),                 # 1004.2.2: never assumed none
+    ({**STATED, "loads_not_by_area": None}, None, (360, ["loads_not_by_area"])),
+    ({**STATED, "loads_not_by_area": "no"}, None, (360, ["loads_not_by_area"])),   # not yes or no: not stated
+    ({**STATED, "occupied_outdoor_areas": None}, None, (360, ["occupied_outdoor_areas"])),
+    ({}, None, (360, list(NO_FACTS))),
+])
+def test_the_ceiling_by_hand(building, proven, hoped):
+    """The apartment's story by hand: 1,800 sq ft at one occupant per 5 sq ft is 360, proven only where the building
+    states each fact the ceiling needs no (no area counted by seats, lanes or actual load, no occupied outdoor areas,
+    no mezzanine), else what stating them would prove, naming the facts not stated."""
+    parts, desc = _story()
+    occupant_load.apply(parts, desc, FACTORS, building)
+    for got in _ceilings(parts):
+        assert got.get(occupant_load.BOUND) == proven
+        stated = got.get(occupant_load.IF_STATED)
+        if hoped:
+            assert (stated[occupant_load.BOUND], stated["facts"]) == hoped
+        else:
+            assert stated is None
+
+
+@pytest.mark.parametrize("fact", NO_FACTS)
+def test_no_ceiling_where_a_room_could_hold_more_than_its_area_allows(fact):
+    """The building stating an area counted by seats, lanes or actual load (1004.6, Table 1004.5's bowling row, 1004.8,
+    402.8.2), outdoor areas the occupants use (1004.7 adds their load to the building's) or a mezzanine (1004.2.2 adds
+    its people to a room on an adjacent level): no ceiling at all, and nothing to ask that would give one."""
+    parts, desc = _story()
+    occupant_load.apply(parts, desc, FACTORS, {**STATED, fact: True})
+    assert _ceilings(parts) == [None, None, None]
+
+
+@pytest.mark.parametrize("change", ["gross", "space", "unknown", "corridor"])
+def test_no_ceiling_where_an_area_isnt_measured_or_a_function_isnt_the_tables(change):
+    parts, desc = _story(functions=("no_such_function", None) if change == "unknown" else (None, None))
+    if change == "gross":
+        parts["story"][0]["measures"].pop("story_gross_floor_area")
+        parts["story"][0]["not_measured"]["story_gross_floor_area"] = "no outline is given for it"
+    elif change == "space":
+        parts["space"][1]["not_measured"]["space_floor_area"] = "its outline isn't closed"
+    elif change == "corridor":                        # a function on a corridor of the story counts too
+        parts["corridor"] = [{"id": "c", "within": "L1", "measures": {}, "not_measured": {}}]
+        desc["rooms"].append({"id": "c", "use": "corridor", "function": "assembly_fixed_seats"})
+    occupant_load.apply(parts, desc, FACTORS, STATED)
+    assert _ceilings(parts) == [None, None, None], change
+
+
+def test_the_ceiling_takes_the_larger_area_and_rounds_up_to_a_whole_person():
+    """A computed 49.5 is at least 50 persons (an occupant load is a number of persons: the finding on loads over
+    500), so a rule asking fewer than 50 is never passed on it; and the spaces' areas added count where they are
+    more than the story's gross floor area (rooms drawn past the exterior walls)."""
+    parts, desc = _story(gross=247.5, areas=(200.0,), functions=(None,))
+    occupant_load.apply(parts, desc, FACTORS, STATED)
+    assert {c[occupant_load.BOUND] for c in _ceilings(parts)} == {50}
+    parts, desc = _story(gross=100.0, areas=(300.0, 200.0))
+    occupant_load.apply(parts, desc, FACTORS, STATED)
+    assert {c[occupant_load.BOUND] for c in _ceilings(parts)} == {100}
+
+
+def test_a_load_worked_out_keeps_its_own_value_and_no_ceiling():
+    parts, desc = _story(functions=("classroom", "classroom"))                  # 690 / 20 each: one value
+    occupant_load.apply(parts, desc, FACTORS, {**STATED, "occupant_load_increased": False})
+    assert all("space_occupant_load" in p["measures"] and "bounds" not in p for p in parts["space"])
+    assert "story_occupant_load" in parts["story"][0]["measures"] and "bounds" not in parts["story"][0]
+
+
+def test_a_walk_over_every_function_never_puts_a_load_over_the_ceiling(apartment):
+    """The ceiling is a true one on the apartment: for 60 seeded cases of a function (any of the table's with a
+    factor) on each apartment, stair and corridor, rooms passed through or not, and 1004.5.1's increase stated or
+    not, every value and reading of every space's and story's load is at most the ceiling the same building gives
+    with no function stated at all (1,800 / 5 = 360, no mezzanine)."""
+    bare = copy.deepcopy(apartment)
+    for r in bare["rooms"]:
+        r.pop("function", None)
+    with_factor = sorted(f for f, e in FACTORS["functions"].items() if e["factor"] is not None)
+    rng = random.Random(1005)
+    for case in range(60):
+        building = {**STATED, "sprinkler_system": rng.choice(("none", "nfpa_13", "nfpa_13r"))}
+        increase = rng.choice((None, True, False))
+        if increase is not None:
+            building["occupant_load_increased"] = increase
+        parts = _loads(bare, building)
+        top = {p["id"]: ((p.get("bounds") or {}).get(n) or {}).get(occupant_load.BOUND)
+               for p, n in [(s, "story_occupant_load") for s in parts["story"]]
+               + [(p, "space_occupant_load") for p in parts["space"]]}
+        assert set(top.values()) == {360}, top
+        desc = copy.deepcopy(bare)
+        for r in desc["rooms"]:
+            if rng.random() < 0.85:
+                r["function"] = rng.choice(with_factor)
+            r["pass_through"] = rng.random() < 0.2
+        got = _loads(desc, building)
+        for p, n in [(s, "story_occupant_load") for s in got["story"]] + [(p, "space_occupant_load")
+                                                                          for p in got["space"]]:
+            assert all(v <= top[p["id"]] + EPS for v in _values(p, n)), (case, p["id"], _values(p, n))
 
 
 @pytest.mark.parametrize("bad", [["X"], {"id": "X"}, 5, None, "SHARED", 7.5])

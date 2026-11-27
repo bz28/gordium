@@ -282,7 +282,13 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
     kinds = _kinds(allowed, parts.measure_kinds(kind))
     known = {**parts.building_values(building), **(row.get("values") or {})}
     from design_checker.each_part import NOT_SENT, _usable, _words
-    if flag:                       # a person decides with every figure the rule reads: each one missing is a cause
+    from design_checker.occupant_load import BOUND_FACT_ONCE, BOUND_FACT_WHY
+    for fact in row.get("bound_facts") or []:   # stated, these would settle it on the floor area alone: asked first
+        if isinstance(fact, str) and fact in BOUND_FACT_ONCE:
+            add({"kind": MARK, "key": f"fact:{fact}", "words": BOUND_FACT_WHY.format(what=_words(rule, fact),
+                                                                                     once=BOUND_FACT_ONCE[fact]),
+                 "elements": [], "measure": fact, "field": f"building.{fact}"})
+    if flag:                      # a person decides with every figure the rule reads: each one missing is a cause
         try:
             missing = [m for m in sorted(parts.formula_names(rule)) if not _usable(known.get(m), kinds.get(m))]
         except formula.FormulaError:

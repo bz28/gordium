@@ -98,6 +98,8 @@ public sealed class MarksTests
             ("Gordium: Ambulatory care facility", "2a31e2c4-cf29-4ac4-9c57-a41ca85748b3", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Corridors within dwelling units", "a61d6738-cc50-4a7a-bf34-eb258e6b55d7", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Emergency voice/alarm system", "f4184d32-275e-4423-90c6-66a2e4d247ee", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Mezzanines", "c2f4615d-5335-49cc-a997-311bac414fbd", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Loads not by area", "501f87dd-fbc9-4ab6-8478-301feeb6d0a8", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // the dwelling's own facts the code decision reads (review round 1: an ask named marks Revit didn't have)
             ("Gordium: Dwelling units", "aa32131a-e757-47a3-abf8-9deb81d7a09a", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Units in the attached building", "bccb088a-c087-475f-9ff9-53fd10133d0e", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
@@ -142,6 +144,10 @@ public sealed class MarksTests
             Assert.False(string.IsNullOrWhiteSpace(m.Description));
         }
         Assert.Equal(Marks.All.Count, Marks.All.Select(m => m.Guid).Distinct().Count());
+        // a GUID that once meant a narrower question is never reused for a wider one: an answer to the old question
+        // would read as an answer to the new (review round 3: Gordium: Bowling lanes became Gordium: Loads not by area)
+        Guid[] retired = [Guid.Parse("5049ea17-952b-4916-b429-896167244126")];
+        Assert.DoesNotContain(Marks.All, m => retired.Contains(m.Guid));
     }
 
     [Fact]
