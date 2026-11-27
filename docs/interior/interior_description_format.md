@@ -248,10 +248,10 @@ building:
                                        # 1006.2.1's Group U row held to 412.4.2's two means of egress
   service_corridors: false             # a service corridor (BCNYS 202: a fully enclosed passage used for
                                        # transporting HPM and purposes other than required means of egress): in
-                                       # Group H-5, 415.11.3's flags, and Table 1017.2's H-5 row, Table
+                                       # Group H-5 or two or more groups, 415.11.3's flags and 1020.3's capacity
+                                       # held to 415.11.3.4; in Group H-5, Table 1017.2's H-5 row, Table
                                        # 1006.3.4(2)'s one-exit stories, 1020.5's dead ends and Table 1020.3's width
-                                       # held to 415.11.3.3 and 415.11.3.4; 1020.3's capacity too, in Group H-5 or
-                                       # two or more groups
+                                       # held to 415.11.3.3 and 415.11.3.4
   facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
 ```
 

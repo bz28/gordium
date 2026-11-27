@@ -961,5 +961,12 @@ def test_the_service_corridor_facts_words_name_every_rule_it_holds():
     notes = " ".join(rules["general.bc_415_11_3_4_service_corridor_width"]["notes"].split())
     for words in (meaning, block, notes):
         assert "1020.3's capacity" in words and "two or more groups" in words, words[:100]
+    # review round 3: each rule named with its own verb (once "1020.3's capacity no corridor"), and the flags, gated on
+    # Group H-5 or two or more groups, said so
+    assert "capacity no corridor" not in meaning
+    for words in (meaning, block):
+        assert "Group H-5 or two or more groups, 415.11.3's flags" in words, words[:160]
+    for rid in ("general.bc_415_11_3_3_service_corridor_egress", "general.bc_415_11_3_4_service_corridor_width"):
+        assert rules[rid]["applies_when"].startswith('occupancy_group in ["H-5", "mixed"]'), rid
     garage = " ".join(rules["general.bc_406_5_7_open_parking_garage_egress"]["notes"].split())
     assert "as any Group S-2 building" not in garage and "p.58, lines 8-9" in garage
