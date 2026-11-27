@@ -351,6 +351,9 @@ DERIVED = {
     "group_i1_i2_i3_present": ("occupancy_groups", lambda groups: any(g in ("I-1", "I-2", "I-3") for g in groups)),
     "stories_above_grade_plane": ("stories_above_grade_plane", lambda v: v),
     "townhouse_units": ("townhouse_units", lambda v: v),
+    # Chapter 9 part e: a BCNYS 202 TOWNHOUSE UNIT "has a separate means of egress", read with townhouse_units where
+    # 905.3's exception leaves standpipes out of "Group R-2 townhouses"
+    "separate_means_of_egress": ("separate_means_of_egress", lambda v: v),
 }
 
 

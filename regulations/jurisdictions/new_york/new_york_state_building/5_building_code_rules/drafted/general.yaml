@@ -6286,7 +6286,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Where standpipe systems are required (BCNYS 905.3)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units)
+  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 279
@@ -6305,15 +6305,16 @@ rules:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3: 905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building
-    is stated so. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
+    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_3_1_class_iii_by_height
   kind: flag
   topic: means_of_egress
   title: Class III standpipes by height (BCNYS 905.3.1)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units)
+  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 279
@@ -6336,16 +6337,18 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Class III standpipes throughout a building with four or more stories above or below grade plane, or its highest
-      floor more than 30 feet above, or its lowest more than 30 feet below, the fire department''s vehicle access (Class I
-      allowed with a 903.3.1.1 or 903.3.1.2 system, in Groups B and E, parking garages, sprinklered basements, or where trained
-      personnel won''t use the hose lines; recessed loading docks for four vehicles or less and impractical topography left
-      out of the access level): a person''s check.'
+      story''s floor more than 30 feet above the lowest level of fire department vehicle access, or its lowest story''s more
+      than 30 feet below the highest (Class I allowed with a 903.3.1.1 or 903.3.1.2 system, in Groups B and E, parking garages,
+      sprinklered basements, or where occupant-use hose lines won''t be used by trained personnel or the fire department;
+      recessed loading docks for four vehicles or less and impractical topography left out in finding the lowest level of
+      access): a person''s check.'
   - given:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3.1: 905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building
-    is stated so. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
+    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_3_2_group_a_standpipes
@@ -6373,15 +6376,15 @@ rules:
       occupancy_group: R-2
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3.2: 905.3.2: the standpipes aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part e).'
+  notes: '905.3.2: the standpipes aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_3_3_mall_standpipes
   kind: flag
   topic: means_of_egress
   title: Standpipes in covered and open mall buildings (BCNYS 905.3.3)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units)
+  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 279
@@ -6404,23 +6407,24 @@ rules:
   - given: {}
     expect: needs_review
     note: 'A covered or open mall building has a standpipe system throughout where 905.3.1 requires one, else Class I hose
-      connections on the sprinkler system delivering 250 gallons per minute at the most remote one with at most a 50 psi loss
-      from the fire department connection, at each exit passageway or corridor entrance, each landing of interior exit stairways
-      opening on the mall, the public entrances, and so that no part of a tenant space is more than 200 feet from one: a person''s
-      check.'
+      connections on the sprinkler system delivering 250 gallons per minute at the hydraulically most remote one while also
+      supplying the sprinkler system''s demand, with at most a 50 psi residual pressure loss at that flow from the fire department
+      connection, at each exit passageway or corridor entrance, each landing of interior exit stairways opening on the mall,
+      the public entrances, and so that no part of a tenant space is more than 200 feet from one: a person''s check.'
   - given:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3.3: 905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building
-    is stated so. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
+    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_3_4_underground_standpipes
   kind: flag
   topic: means_of_egress
   title: Standpipes in underground buildings (BCNYS 905.3.4)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units)
+  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 279
@@ -6437,15 +6441,16 @@ rules:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3.4: 905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building
-    is stated so. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
+    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_3_5_helistop_standpipes
   kind: flag
   topic: means_of_egress
   title: Standpipes for rooftop helistops and heliports (BCNYS 905.3.5)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units)
+  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -6464,15 +6469,16 @@ rules:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3.5: 905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building
-    is stated so. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
+    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_3_6_marina_standpipes
   kind: flag
   topic: means_of_egress
   title: Standpipes in marinas and boatyards (BCNYS 905.3.6)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units)
+  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -6489,15 +6495,16 @@ rules:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3.6: 905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building
-    is stated so. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
+    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_3_7_roof_garden_standpipes
   kind: flag
   topic: means_of_egress
   title: Standpipes to vegetative and landscaped roofs (BCNYS 905.3.7)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units)
+  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -6516,15 +6523,16 @@ rules:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3.7: 905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building
-    is stated so. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
+    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_4_class_i_hose_connections
   kind: flag
   topic: means_of_egress
   title: Class I hose connections in exit stairways and passageways (BCNYS 905.4)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units)
+  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -6566,15 +6574,16 @@ rules:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '905.4: 905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building
-    is stated so. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
+    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_4_1_standpipe_protection
   kind: flag
   topic: means_of_egress
   title: Protection of standpipe risers and laterals (BCNYS 905.4.1)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units)
+  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -6594,15 +6603,16 @@ rules:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '905.4.1: 905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building
-    is stated so. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
+    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_4_2_standpipe_interconnection
   kind: flag
   topic: means_of_egress
   title: Standpipes interconnected (BCNYS 905.4.2)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units)
+  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -6619,8 +6629,9 @@ rules:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '905.4.2: 905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building
-    is stated so. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
+    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_907_1_3_listed_equipment
@@ -8480,8 +8491,8 @@ rules:
       seating per 1030.6.2.1, an underground building, a high-rise''s smokeproof enclosures among them), it is designed, installed
       and acceptance-tested per Section 909 for a tenable environment while occupants evacuate or relocate (not 910''s smoke
       and heat removal; not an exhaust system under Chapter 5 of the Mechanical Code of New York State): a person''s check.'
-  notes: '909.1: 909.1: whether a smoke control system is required, and its design, aren''t in the model. Hand-drafted in
-    a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '909.1: whether a smoke control system is required, and its design, aren''t in the model. Hand-drafted in a Claude
+    Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_smokeproof_enclosures
@@ -8505,9 +8516,10 @@ rules:
     note: 'Where 1023.12 requires a smokeproof enclosure, it is an interior exit stairway or ramp enclosed per Section 1023
       with an open exterior balcony, or a pressurized stair and entrance vestibule, per 909.20, and roof access the Fire Code
       of New York State requires is from it: a person''s check.'
-  notes: '909.20: 909.20: whether a stair is a smokeproof enclosure isn''t in the model (1023.12: floors more than 75 feet
-    above or 30 feet below the fire department''s vehicle access). Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part e).'
+  notes: '909.20: whether a stair is a smokeproof enclosure isn''t in the model (1023.12 sends to 403.5.4: stairways serving
+    floors more than 75 feet above the lowest level of fire department vehicle access; 405.7.2: more than 30 feet below the
+    level of exit discharge; 412.2.2.1: airport traffic control towers). Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_1_smokeproof_access
@@ -8531,8 +8543,8 @@ rules:
     note: 'The stairway or ramp is reached through a vestibule or open exterior balcony; the vestibule at least the corridor''s
       required clear width, not under 44 inches wide nor 72 inches long in the direction of travel, measured straight between
       the doorways'' centerlines: a person''s check.'
-  notes: '909.20.1: 909.20.1: the vestibule isn''t marked in the model. Hand-drafted in a Claude Code session (2026-11-27,
-    Chapter 9 part e).'
+  notes: '909.20.1: the vestibule isn''t marked in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9
+    part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_2_smokeproof_construction
@@ -8563,8 +8575,7 @@ rules:
     note: 'The enclosure is separated from the rest of the building, and the vestibule from the stairway or ramp, by 2-hour
       fire barriers per 707 or horizontal assemblies per 711, no openings but the required egress doors, an open exterior
       balcony built to the floor assemblies'' rating: a person''s check.'
-  notes: '909.20.2: 909.20.2: the ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part e).'
+  notes: '909.20.2: the ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_2_1_smokeproof_door_closers
@@ -8586,8 +8597,8 @@ rules:
     expect: needs_review
     note: 'Its doors are self-closing or close automatically on a smoke detector per 716.2.6.6 at the floor-side entrance,
       any one detector closing every door of the enclosure at all levels, detectors per 907.3: a person''s check.'
-  notes: '909.20.2.1: 909.20.2.1: the doors'' closers aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
-    Chapter 9 part e).'
+  notes: '909.20.2.1: the doors'' closers aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_3_1_smokeproof_balcony_doors
@@ -8607,8 +8618,8 @@ rules:
     expect: needs_review
     note: 'Where an open exterior balcony leads to the stairway or ramp, the door into the enclosure is a fire door assembly
       per 716: a person''s check.'
-  notes: '909.20.3.1: 909.20.3.1: the doors'' ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
-    Chapter 9 part e).'
+  notes: '909.20.3.1: the doors'' ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_3_2_smokeproof_vestibule_doors
@@ -8629,14 +8640,14 @@ rules:
     expect: needs_review
     note: 'Where a vestibule leads to it, the door into the vestibule is a fire door assembly per 716, the door from the vestibule
       to the stairway at least 20 minutes per 716: a person''s check.'
-  notes: '909.20.3.2: 909.20.3.2: the doors'' ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
-    Chapter 9 part e).'
+  notes: '909.20.3.2: the doors'' ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_3_3_smokeproof_vestibule_ventilation
   kind: flag
   topic: means_of_egress
-  title: Vestibule ventilation (BCNYS 909.20.3.3)
+  title: Vestibule ventilation of a naturally ventilated enclosure (BCNYS 909.20.3.3)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 302
@@ -8648,10 +8659,10 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Each vestibule has at least 16 square feet of net opening in a wall facing an outer court, yard or public way at
-      least 20 feet wide: a person''s check.'
-  notes: '909.20.3.3: 909.20.3.3: the openings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part e).'
+    note: 'In a smokeproof enclosure ventilated by natural means (909.20.3), each vestibule has at least 16 square feet of
+      net opening in a wall facing an outer court, yard or public way at least 20 feet wide: a person''s check.'
+  notes: '909.20.3.3: the openings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_4_stair_pressurization
@@ -8675,8 +8686,8 @@ rules:
     note: 'With a 903.3.1.1 system throughout, the vestibule may be left out where each interior exit stairway or ramp is
       pressurized to between 0.10 and 0.35 inch of water relative to the building with its doors closed under the worst stack
       and wind effect: a person''s check.'
-  notes: '909.20.4: 909.20.4: pressurization isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part e).'
+  notes: '909.20.4: pressurization isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_5_1_pressurized_vestibule_doors
@@ -8698,8 +8709,8 @@ rules:
     expect: needs_review
     note: 'The door into the vestibule is a fire door assembly per 716.2.2.1; the door from the vestibule to the stairway
       at least 20 minutes and a smoke door assembly per 716.2.2.1, installed per NFPA 105: a person''s check.'
-  notes: '909.20.5.1: 909.20.5.1: the doors'' ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
-    Chapter 9 part e).'
+  notes: '909.20.5.1: the doors'' ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_5_2_pressure_difference
@@ -8722,8 +8733,7 @@ rules:
     expect: needs_review
     note: 'The stair is at least 0.05 inch of water above the vestibule, and the vestibule at least 0.05 inch above the fire
       floor, doors closed, at most 30 pounds of force to begin opening a door: a person''s check.'
-  notes: '909.20.5.2: 909.20.5.2: pressures aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part e).'
+  notes: '909.20.5.2: pressures aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_5_3_relief_opening
@@ -8744,8 +8754,7 @@ rules:
     expect: needs_review
     note: 'A controlled relief vent discharging at least 2,500 cubic feet per minute at the design pressure difference in
       the upper part of the pressurized exit enclosure: a person''s check.'
-  notes: '909.20.5.3: 909.20.5.3: the vent isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part e).'
+  notes: '909.20.5.3: the vent isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_5_4_fan_smoke_detection
@@ -8764,8 +8773,8 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The fan system has a smoke detector that shuts it down when smoke is detected within it: a person''s check.'
-  notes: '909.20.5.4: 909.20.5.4: the fan system isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part e).'
+  notes: '909.20.5.4: the fan system isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_6_ventilating_equipment
@@ -8789,8 +8798,7 @@ rules:
     note: 'Smoke detectors at each floor at the enclosure''s entrance, per 907.3, start the ventilating equipment 909.20.4
       and 909.20.5 require, which runs at its required performance when the doors'' closers act on smoke or power failure:
       a person''s check.'
-  notes: '909.20.6: 909.20.6: the equipment isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part e).'
+  notes: '909.20.6: the equipment isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_6_1_ventilation_systems
@@ -8832,8 +8840,8 @@ rules:
       within the enclosure, or within the building behind 2-hour fire barriers per 707 or horizontal assemblies per 711 (wiring
       outside them protected by 2-hour UL 2196 cables, 2 inches of concrete, or 2-hour electrical circuit protective systems
       installed per their listing): a person''s check.'
-  notes: '909.20.6.1: 909.20.6.1: the systems aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part e).'
+  notes: '909.20.6.1: the systems aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_909_20_6_2_smokeproof_standby_power
@@ -8853,8 +8861,8 @@ rules:
     expect: needs_review
     note: 'The vestibule and shaft ventilation and automatic fire detection have standby power per Section 2702: a person''s
       check.'
-  notes: '909.20.6.2: 909.20.6.2: the power supply isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
-    Chapter 9 part e).'
+  notes: '909.20.6.2: the power supply isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_911_1_fire_command_center
@@ -8879,8 +8887,8 @@ rules:
       911.1.7 (approved location and access, a 1-hour separation, its size, an approved layout, no other storage, the features
       NFPA 72 and 911.1.6 list, from the voice/alarm control unit and stair door unlocking to the building information card,
       and its sign): a person''s check.'
-  notes: '911.1: 911.1: whether the building is a high-rise or its footprint, and the room, aren''t in the model. Hand-drafted
-    in a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '911.1: whether the building is a high-rise or its footprint, and the room, aren''t in the model. Hand-drafted in
+    a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1004_7_outdoor_areas

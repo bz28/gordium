@@ -44,7 +44,9 @@ DERIVED = ("occupancy_group", "occupancy_group_i4", "other_occupancy_present", "
            # Chapter 9 part a's, read only by 903.2's rules (none reads an affected measure: their own walk is
            # test_ny_building_chapter_9.py's, over every group, system, stories and townhouse fact)
            "group_r_present", "group_h_present", "group_i1_i2_i3_present", "stories_above_grade_plane",
-           "townhouse_units", "nfpa_13r_stated")
+           "townhouse_units", "nfpa_13r_stated",
+           # part e's, read only by 905.3's standpipe flags with townhouse_units
+           "separate_means_of_egress")
 
 
 def _given(group, sprinkler, facts):

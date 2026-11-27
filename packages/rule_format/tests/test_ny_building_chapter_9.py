@@ -131,7 +131,8 @@ def test_every_chapter_9_flag_is_a_persons_check_never_a_pass(labels, book, ctx)
     allowed = ctx.allowed()
     by = {"occupancy_group", "group_h_present", "sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3",
           "nfpa_13r_stated", "occupied_outdoor_areas", "ambulatory_care_facility",   # part b: 903.2.1.6, 903.2.2.1
-          "emergency_voice_alarm_system", "townhouse_units"}              # part c: 907.2.1.1; part e: 905.3
+          "emergency_voice_alarm_system", "townhouse_units",              # part c: 907.2.1.1; part e: 905.3
+          "separate_means_of_egress"}
     for pid, v in labels.items():
         if v["label"] != "flag":
             continue
@@ -630,7 +631,8 @@ def test_part_es_standpipe_flags_follow_905_3s_exceptions(book, ctx):
         def got(b):
             return outcome(r, code_scope.building_measures(b), allowed)
         assert got({"occupancy_groups": ["R-3"]}) == "not_applicable", r["id"]
-        assert got({"occupancy_groups": ["R-2"], "townhouse_units": True}) == "not_applicable", r["id"]
+        assert got({"occupancy_groups": ["R-2"], "townhouse_units": True, "separate_means_of_egress": True}) == \
+            "not_applicable", r["id"]
         for b in ({"occupancy_groups": ["R-2"]}, {"occupancy_groups": ["R-2"], "townhouse_units": False},
                   {"occupancy_groups": ["B"]}, {}):
             assert got(b) == "needs_review", (r["id"], b)
@@ -638,3 +640,60 @@ def test_part_es_standpipe_flags_follow_905_3s_exceptions(book, ctx):
     for r in book:
         if r["id"].startswith(("general.bc_909_", "general.bc_911_")):
             assert "applies_when" not in r and outcome(r, {}, allowed) == "needs_review", r["id"]
+
+
+def test_a_verification_flag_names_the_comparison_its_second_reading_records():
+    """Part e review round 1's class: a second-reading flag that says "the second reading is right" quotes each number
+    with the comparison that reading records for it ('four' (<=) is 905.3.1's "four vehicles or less", not its "four or
+    more stories"), so the record a person reads says which number on the page differs."""
+    import yaml
+    tv = yaml.safe_load((NY / "text_verification.yaml").read_text(encoding="utf-8"))["pieces"]
+    checked, bad = 0, []
+    for pid, e in tv.items():
+        nums, cmps = e.get("numbers") or [], e.get("second_reading_comparisons")
+        if not cmps:
+            continue
+        for flag in e.get("flags") or []:
+            for part in re.split(r"(?<=\.) (?=')", flag):
+                if "second reading is right" not in part:
+                    continue
+                for n, c in re.findall(r"'([^']+)' \((<=|>=|<|>|none)\)", part):
+                    hit = [i for i, x in enumerate(nums) if x == n or x.endswith(" " + n)]
+                    if hit:
+                        checked += 1
+                        if not any(cmps[i] == c for i in hit):
+                            bad.append((pid, n, c, [cmps[i] for i in hit]))
+    assert checked >= 100 and not bad, bad
+    assert "loading docks" in " ".join(tv["905.3.1"]["flags"])
+
+
+def test_part_es_review_round_1(book, ctx):
+    """Part e review round 1: a Group R-2 building is a townhouse (905.3's exception) only where its units are
+    townhouse units with a separate means of egress (BCNYS 202), so stating townhouse units with no separate means of
+    egress, or leaving it unstated, keeps the standpipe flags; 905.3.1's exception 5 needs the fire department not to use
+    the hose lines too, and its heights are from the lowest and highest levels of access; 905.3.3's flow is while the
+    sprinklers are supplied; 909.20.3.3's opening is the natural ventilation's; 909.20's notes give 1023.12's three
+    sections."""
+    allowed = ctx.allowed()
+    for r in book:
+        if r["id"].startswith("general.bc_905_") and r["id"] != "general.bc_905_3_2_group_a_standpipes":
+            def got(b):
+                return outcome(r, code_scope.building_measures(b), allowed)
+            assert got({"occupancy_groups": ["R-2"], "townhouse_units": True, "separate_means_of_egress": True}) == \
+                "not_applicable", r["id"]
+            for b in ({"occupancy_groups": ["R-2"], "townhouse_units": True, "separate_means_of_egress": False},
+                      {"occupancy_groups": ["R-2"], "townhouse_units": True}):
+                assert got(b) == "needs_review", (r["id"], b)
+    n = _shown_note(_rule(book, "general.bc_905_3_1_class_iii_by_height"))
+    assert "trained personnel or the fire department" in n and "lowest level of fire department vehicle access" in n
+    assert "the highest" in n and "finding the lowest level of access" in n
+    n = _shown_note(_rule(book, "general.bc_905_3_3_mall_standpipes"))
+    assert "sprinkler system's demand" in n and "residual pressure loss at that flow" in n
+    r = _rule(book, "general.bc_909_20_3_3_smokeproof_vestibule_ventilation")
+    assert "naturally ventilated" in r["title"] and "ventilated by natural means" in _shown_note(r)
+    notes = _rule(book, "general.bc_909_20_smokeproof_enclosures")["notes"]
+    assert "403.5.4" in notes and "405.7.2" in notes and "412.2.2.1" in notes and "exit discharge" in notes
+    for r in book:
+        if r["id"].startswith(("general.bc_905_", "general.bc_909_", "general.bc_911_")):
+            pid = re.match(r"general\.bc_(\d+(?:_\d+)*)_", r["id"]).group(1).replace("_", ".")
+            assert f"{pid}: {pid}:" not in r["notes"], r["id"]

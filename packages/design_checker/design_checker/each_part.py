@@ -494,6 +494,7 @@ MEASURE_NAMES = {
     "group_i1_i2_i3_present": "occupancy group (whether any group is I-1, I-2 or I-3)",
     "stories_above_grade_plane": "stories above grade plane (the building's, as the architect counts them)",
     "townhouse_units": "townhouse units (whether every unit is a townhouse unit)",
+    "separate_means_of_egress": "separate means of egress (whether every unit has its own)",
     "space_is_exit": "exit status (whether the space is itself an exit)",
     "space_occupant_load": "occupant load",
     "story_first_above_or_below_grade": "whether the story is the first above or below grade",

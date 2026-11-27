@@ -9235,10 +9235,11 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Class III standpipes throughout a building with four or more stories above or below grade plane, or its highest
-      floor more than 30 feet above, or its lowest more than 30 feet below, the fire department''s vehicle access (Class I
-      allowed with a 903.3.1.1 or 903.3.1.2 system, in Groups B and E, parking garages, sprinklered basements, or where trained
-      personnel won''t use the hose lines; recessed loading docks for four vehicles or less and impractical topography left
-      out of the access level): a person''s check (general.bc_905_3_1_class_iii_by_height).'
+      story''s floor more than 30 feet above the lowest level of fire department vehicle access, or its lowest story''s more
+      than 30 feet below the highest (Class I allowed with a 903.3.1.1 or 903.3.1.2 system, in Groups B and E, parking garages,
+      sprinklered basements, or where occupant-use hose lines won''t be used by trained personnel or the fire department;
+      recessed loading docks for four vehicles or less and impractical topography left out in finding the lowest level of
+      access): a person''s check (general.bc_905_3_1_class_iii_by_height).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 279
@@ -9285,10 +9286,10 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'A covered or open mall building has a standpipe system throughout where 905.3.1 requires one, else Class I hose
-      connections on the sprinkler system delivering 250 gallons per minute at the most remote one with at most a 50 psi loss
-      from the fire department connection, at each exit passageway or corridor entrance, each landing of interior exit stairways
-      opening on the mall, the public entrances, and so that no part of a tenant space is more than 200 feet from one: a person''s
-      check (general.bc_905_3_3_mall_standpipes).'
+      connections on the sprinkler system delivering 250 gallons per minute at the hydraulically most remote one while also
+      supplying the sprinkler system''s demand, with at most a 50 psi residual pressure loss at that flow from the fire department
+      connection, at each exit passageway or corridor entrance, each landing of interior exit stairways opening on the mall,
+      the public entrances, and so that no part of a tenant space is more than 200 feet from one: a person''s check (general.bc_905_3_3_mall_standpipes).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 279
@@ -10847,8 +10848,8 @@ labels:
   909.20.3.3:
     label: flag
     topic: means_of_egress
-    reason: 'Each vestibule has at least 16 square feet of net opening in a wall facing an outer court, yard or public way
-      at least 20 feet wide: a person''s check (general.bc_909_20_3_3_smokeproof_vestibule_ventilation).'
+    reason: 'In a smokeproof enclosure ventilated by natural means (909.20.3), each vestibule has at least 16 square feet
+      of net opening in a wall facing an outer court, yard or public way at least 20 feet wide: a person''s check (general.bc_909_20_3_3_smokeproof_vestibule_ventilation).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 302

@@ -6489,9 +6489,8 @@ pieces:
     - none
     - <=
     flags:
-    - '''four'' (>=): item 1''s ''Four or more stories are above or below grade plane'', at least four; the recorded words
-      (none) and the comparisons reader (<=) both miss the ''or more'' after ''stories''. The page reads at least four. A
-      flag.'
+    - '''four'' (<=): exception 6.1''s ''Recessed loading docks for four vehicles or less'', at most four; the recorded words
+      (none) miss the ''or less'' after ''vehicles''. The second reading is right. A flag.'
   905.3.2:
     piece_sha256: fd252ed59672e0de6baf5dd41a35cbb55e2dfa3ac424278ca5a80f569e67279b
     numbers:
