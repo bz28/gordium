@@ -113,6 +113,10 @@ jobs:
       # compile, then freeze: each state law's certificate (gitignored while rules are draft), before anything reads it
       - name: Publish each state law (refused if it has problems; rule_format/published.py)
         run: python -m rule_format publish
+      # the pane's apartment answer, which the C# tests read, is the checker's answer of the day: made here, never
+      # committed (a committed copy changed with almost every rule and made every waiting PR conflict)
+      - name: Make the Revit pane's apartment answer (the checker's answer to its trial request; never committed)
+        run: python apps/revit_addin/tools/evals/make_apartment_answer.py
       # the pinned SDK (global.json, which brings the .NET 10 runtime) and the .NET 8 runtime: the client is built
       # for both (Revit 2025-2026 load add-ins on .NET 8, Revit 2027 on .NET 10) and tested on each. The NuGet
       # packages are cached by the lock files' contents (restore still runs --locked-mode below)
