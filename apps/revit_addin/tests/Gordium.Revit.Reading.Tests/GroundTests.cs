@@ -3,8 +3,8 @@ using Xunit;
 
 namespace Gordium.Revit.Reading.Tests;
 
-/// <summary>The ground just outside each window (<c>openings[].ground_outside</c>, GroundReader; a door's isn't read: its
-/// clear bottom isn't sent), read from a
+/// <summary>The ground just outside each window, and each door whose type's clear height is confirmed (its clear bottom
+/// then bounded, InteriorReader.DoorBottom) (<c>openings[].ground_outside</c>, GroundReader), read from a
 /// Toposolid the architect states shows the finished ground (Gordium: Toposolid is finished ground): RCNYS R202 "GRADE.
 /// The finished ground level adjoining the building at all exterior walls", read 1 in beyond the wall's outer face at
 /// each end of the opening and its middle. From it the measuring works out whether an escape opening is below grade and
@@ -470,7 +470,8 @@ public sealed class GroundTests
         Assert.Equal("its type's width isn't read, so whether the opening it takes in its wall holds more than the window isn't known", why);
     }
 
-    /// <summary>The marks' words say a window's ground is read, a door's not (its clear bottom isn't sent).</summary>
+    /// <summary>The marks' words say where the ground is read: at each window, and at a door only with its type's clear
+    /// height confirmed.</summary>
     [Fact]
     public void The_marks_say_where_the_ground_is_read()
     {
