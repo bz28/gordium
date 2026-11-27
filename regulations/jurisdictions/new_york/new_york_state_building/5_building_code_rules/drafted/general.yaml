@@ -4175,8 +4175,9 @@ rules:
   - when: not sprinklered_903_3_1_1 and not space_floor_area > 12000 and not space_occupant_load >= 300
     reason: 'No NFPA 13 system stated, and this room settles none of 903.2.3''s conditions (its own floor area is 12,000 square
       feet or less, its occupant load under 300 or not worked out); its fire area, which the model doesn''t show, may be larger
-      than the room and hold more people, or may be on a floor other than a level of exit discharge serving it (where not
-      every classroom has an exterior exit door at ground level, the exception): a person checks.'
+      than the room and hold more people, or may be on a floor other than a level of exit discharge serving it (an area
+      below the lowest level of exit discharge serving it needs none where every classroom has an exterior exit door at
+      ground level, the exception): a person checks.'
   for_each: space
   when_none: needs_review
   sources:

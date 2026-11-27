@@ -587,3 +587,11 @@ def test_part_cs_review_round_2(book, labels):
                  "test_the_13r_flag_says_what_chapter_10_counts", "test_no_rule_passes_on_a_13r_system_outside_group_r",
                  "test_the_vehicle_storage_flags_show_for_every_group"):
         assert name in globals(), name
+
+
+def test_the_group_e_rules_reason_keeps_its_exception_to_areas_below_exit_discharge(book):
+    """Part b review round 3: 903.2.3's exception (every classroom with an exterior exit door at ground level) lifts the
+    requirement only "in any area below the lowest level of exit discharge serving that area" (p.270 lines 29-30), never
+    for a Group E fire area on a floor above it; the review reason says so."""
+    reason = _rule(book, "general.bc_903_2_3_group_e_sprinklers")["review_when"][0]["reason"]
+    assert "below the lowest level of exit discharge" in reason
