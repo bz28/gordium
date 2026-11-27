@@ -8,11 +8,14 @@ site, down a slope), so the model never settles it: `high_rise_building` stays t
 unstated, Section 403's flags show and 403.5.2's band holds the story exit rules.
 
 What the model can show, as a figure on the question card only: how far the highest level it holds (a roof level
-included: an occupiable roof counts) is above the lowest FINISHED ground it states (the flat finished ground or the
+included where the model has one: an occupiable roof counts) is above the lowest FINISHED ground it states (the flat finished ground or the
 lowest finished spot grade the lot facts give, and the lowest finished ground stated at any opening or area well's
 floor). Existing ground is never used, and with no finished ground, no level list or a level that can't be read,
-there is no figure. Shown only where it is under 75 ft (a taller building is never told it is likely not one), as
-Gordium's reading for the architect to confirm by answering."""
+there is no figure. Shown only where it is under 75 ft, with what would still make the building a high-rise (vehicle
+access that much lower, a higher occupied floor or roof, or one in a linked model: the description holds this
+document's levels only), as Gordium's reading for the architect to answer."""
+
+import math
 
 from model_measurement.interior.read import Reader
 from model_measurement.interior.stops import Stop as InteriorStop
@@ -62,11 +65,14 @@ def figure(description, ground) -> dict | None:
 
 
 def words(fig: dict | None) -> str | None:
-    """The card's hint, only where the figure is under 75 ft; None otherwise."""
+    """The card's hint, only where the figure is under 75 ft; None otherwise. It says what the model shows and what
+    would still make the building a high-rise, never that it likely isn't one (review round 1 of the marks PR): the
+    figure is rounded down, so a figure under 75 ft never reads 75.0."""
     if not fig or not fig["height_in"] < LIMIT_IN:
         return None
-    ft = fig["height_in"] / 12.0
-    return (f"From the model: the highest level it holds ({fig['level']}, a roof level included) is {ft:.1f} ft above "
-            "the lowest finished ground it states. Fire department vehicle access is usually no lower than that "
-            "ground, so this is likely not a high-rise, but the model can't show where fire trucks reach the "
-            "building: Gordium's reading, decided only by your answer.")
+    ft = math.floor(fig["height_in"] / 12.0 * 10) / 10
+    margin = math.floor((LIMIT_IN - fig["height_in"]) / 12.0 * 10) / 10
+    return (f"From the model: its highest level ({fig['level']}) is {ft:.1f} ft above the lowest finished ground it "
+            f"states. The building is still a high-rise if fire department vehicles reach it more than {margin:.1f} ft "
+            "below that ground, or if an occupied floor or occupiable roof is higher than that level or in a linked "
+            "model. Gordium's reading only: decided by your answer.")

@@ -34,8 +34,13 @@ def test_no_figure_without_finished_ground_every_level_or_a_readable_one():
 
 def test_the_words_show_only_under_75_ft_and_say_the_answer_decides():
     words = high_rise_hint.words({"height_in": 22 * 12, "level": "Roof", "ground_in": 0})
-    assert "22.0 ft" in words and "Roof" in words and "decided only by your answer" in words
-    assert "likely not a high-rise" in words
+    assert "22.0 ft" in words and "Roof" in words and "decided by your answer" in words
+    # what would still make it a high-rise, never that it likely isn't one (review round 1 of the marks PR)
+    assert "more than 53.0 ft below that ground" in words and "linked model" in words and "occupiable roof" in words
+    for said in ("likely", "usually", "a roof level included"):
+        assert said not in words
+    near = high_rise_hint.words({"height_in": 74.96 * 12, "level": "Roof", "ground_in": 0})
+    assert "75.0" not in near and "74.9 ft above" in near and "more than 0.0 ft below" in near   # rounded down
     assert high_rise_hint.words({"height_in": 75 * 12, "level": "Roof", "ground_in": 0}) is None   # 75 ft or more
     assert high_rise_hint.words({"height_in": 200 * 12, "level": "Roof", "ground_in": 0}) is None
     assert high_rise_hint.words(None) is None
@@ -70,3 +75,13 @@ def test_the_fact_stays_unstated_until_the_architect_answers():
     import inspect
     src = inspect.getsource(high_rise_hint)
     assert "building_measures" not in src and "high_rise_building\"] =" not in src   # the hint writes no fact
+
+
+def test_the_plan_says_both_facts_have_their_marks_now():
+    # review round 1 of the marks PR: part b's line still said neither fact had a Revit mark
+    from pathlib import Path
+    doc = (Path(__file__).resolve().parents[3] / "docs/decisions/2026-11-26_ny_building_chapter_4_egress.md").read_text(
+        encoding="utf-8")
+    assert "Revit mark yet" not in doc and "likely isn't one" in doc
+    for fact in ("high_rise_building", "underground_building"):
+        assert code_scope.MARK[fact] in doc, fact

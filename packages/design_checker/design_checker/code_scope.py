@@ -117,7 +117,11 @@ CITES = {
               "enlargement, replacement, repair, equipment, use and occupancy, location, maintenance, removal and "
               "demolition of every building or structure"),
     "101.2 exception 1": (BCNYS, 22, "Application of the provisions of the Residential Code of New York State to"),
-    "202 LIVE/WORK UNIT": (BCNYS, 52, "A dwelling unit or sleeping unit in which a significant portion of the space "
+    # the underground building mark's quote, the line-break hyphen of "occu- pancy" joined (marks PR, review round 1)
+    "405.1": (BCNYS, 92, "The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level "
+              "used for human occupancy more than 30 feet (9144 mm) below the finished floor of the lowest level of "
+              "exit discharge."),
+    "202 LIVE/WORK UNIT": (BCNYS, 52,"A dwelling unit or sleeping unit in which a significant portion of the space "
                            "includes a nonresidential use that is operated by the tenant."),
     "308.2.4": (BCNYS, 78, "A facility with five or fewer persons receiving custodial care shall be classified as Group "
                 "R-3 or shall comply with the Residential Code of New York State provided an automatic sprinkler "
