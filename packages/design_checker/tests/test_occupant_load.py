@@ -12,7 +12,7 @@ import sys
 
 import pytest
 
-from design_checker import egress, occupant_load
+from design_checker import code_scope, egress, occupant_load
 from design_checker.egress import OCCUPANT_LOAD_FACTORS
 from model_measurement.routes import measure
 from rule_format.rulebook import REPO, Context, load
@@ -847,6 +847,18 @@ def test_the_assembly_functions_are_exactly_table_1004_5s_rows_under_its_assembl
     assert set(occupant_load.ASSEMBLY_LIKE_FUNCTIONS) <= set(rows) - under and len(occupant_load.ASSEMBLY_LIKE_FUNCTIONS) == 7
 
 
+@pytest.mark.parametrize("fn", sorted(FACTORS["functions"]))
+def test_the_seating_and_the_buildings_assembly_spaces_read_one_list_of_assembly_functions(fn):
+    """The assembly seating (1030.7: a story's travel measured along the aisles) and the building's assembly_spaces
+    (code_scope.building_measures, section group 9h) read the same Table 1004.5 rows, as one list each (merging main
+    into section group 9i found them written twice), so a row added to one is never missed by the other: a room
+    stating a function may seat people exactly where the rooms say the building has, or may have, assembly spaces."""
+    assert occupant_load.ASSEMBLY_FUNCTIONS is code_scope.ASSEMBLY_FUNCTIONS
+    assert occupant_load.ASSEMBLY_LIKE_FUNCTIONS is code_scope.ASSEMBLY_LIKE_FUNCTIONS
+    seen = code_scope.assembly_spaces_from_rooms({"rooms": [{"id": "r", "function": fn}]})
+    assert occupant_load._may_seat({"function": fn}, FACTORS["functions"]) is (seen is not None), fn
+
+
 _SEATING_PARTS = {}
 
 
@@ -921,6 +933,25 @@ def test_the_apartments_stories_seat_no_one_served_by_aisles(apartment):
     next(r for r in desc["rooms"] if r["id"] == "L2N").pop("function")
     parts = _loads(desc)
     assert {s["id"]: s["measures"][occupant_load.SEATING_STORY] for s in parts["story"]} == {"L1": False, "L2": True}
+
+
+def test_a_building_stated_to_have_assembly_spaces_with_none_shown_may_seat_people_on_every_story():
+    """Merging main into section group 9i (review, two skeptics): 9h's stated fact assembly_spaces (a room or space used
+    for assembly purposes, whatever the group: 303.1.1, 303.1.2) says what a stated Group A says, that an assembly room
+    exists, so where no room shows one, any room may be it, as for Group A: a Group B or R-2 building stating it, its
+    rooms all business, never passes a travel or common-path row on travel measured across seats (1030.7). Stated
+    false or not stated, the business story seats no one; with the assembly room shown, its business story neither."""
+    for groups in (["B"], ["R-2"], None):
+        building = {"assembly_spaces": True, "assembly_fixed_seating": False,
+                    **({"occupancy_groups": groups} if groups else {})}
+        assert _seating_story("business", building=building) is True, groups
+        assert _seating_story("business", building={**building, "assembly_spaces": False}) is False, groups
+    building = {"occupancy_groups": ["B"], "assembly_spaces": True}
+    shown = copy.deepcopy(_SEATING_PARTS["r"])
+    desc = _seating_desc_with_extra({"id": "dining", "name": "dining", "function": "assembly_unconcentrated"})
+    shown["space"].append({"id": "dining", "within": "elsewhere", "measures": {}, "not_measured": {}})
+    occupant_load.assembly_seating(shown, desc, FACTORS, building)
+    assert shown["story"][0]["measures"][occupant_load.SEATING_STORY] is False      # the dining room is shown, elsewhere
 
 
 @pytest.mark.parametrize("groups", [["A-1"], ["A-2"], ["A-3"], ["A-4"], ["A-5"], ["B", "A-3"]])

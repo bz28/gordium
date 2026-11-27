@@ -255,7 +255,7 @@ def check(found: dict, interior, values: dict, allowed: dict, ground: dict | Non
     sections, items, rows, results, ids, readings = [], [], [], {}, set(), {}
     for law in run:
         measured = None if waiting else _measured(law, interior, readings, ground, values)
-        law_values, law_allowed = _law_values(law, values, allowed, building)
+        law_values, law_allowed = _law_values(law, values, allowed, building, interior)
         # rules that can't be used are said whether or not rooms are drawn: never hidden behind "waiting"
         mine = _law_items(law, measured, law_values, law_allowed, rows, results) if not waiting or law["problems"]             else [_waiting_item(law)]
         if not waiting and not law["problems"]:   # rules refused: none was used (BAD_RULES says so); waiting stays
@@ -411,18 +411,20 @@ def _measured(law: dict, interior, readings: dict, ground: dict | None = None, v
     return readings[kind]
 
 
-def _law_values(law: dict, values: dict, allowed: dict, building) -> tuple[dict, dict]:
+def _law_values(law: dict, values: dict, allowed: dict, building, interior=None) -> tuple[dict, dict]:
     """The building values and allowed values a law's rules read: the check's own, and for the Building Code the
     building block's measures (code_scope.building_measures: occupancy group, sprinkler system...). A proposed
     measure's kind (the law's drafted/records/proposed_measures.yaml) is added only for one given a value, so a law
     reads exactly what it did where none is given; but the Building Code's every one, so a fact the architect
     hasn't stated is an unknown its rules read as their worked examples do (rule_format: three-valued, "True or
     unknown is True"), never a whole formula unread: a travel distance within every limit isn't held for an
-    unstated balcony increase it doesn't need (2026-11-23)."""
+    unstated balcony increase it doesn't need (2026-11-23). `interior`, the description checked, gives the rooms'
+    functions (code_scope.assembly_spaces_from_rooms: section group 9h)."""
     is_bc = law.get("scope") == code_scope.BUILDING
     if is_bc:
         given = {k: values[k] for k in code_scope.FACTS if k in values}
-        values = {**values, **code_scope.building_measures({**given, **(building if isinstance(building, dict) else {})})}
+        values = {**values, **code_scope.building_measures({**given, **(building if isinstance(building, dict) else {})},
+                                                           interior)}
     kinds = {k: v for k, v in (law.get("kinds") or {}).items() if (is_bc or k in values) and k not in allowed}
     return values, ({**allowed, **kinds} if kinds else allowed)
 
