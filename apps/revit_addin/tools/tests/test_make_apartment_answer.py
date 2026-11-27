@@ -41,7 +41,10 @@ def test_it_writes_the_checkers_answer_as_the_worker_writes_it(tmp_path):
         given.append(request)
         return made
 
-    out = tool.write(tmp_path / "answers" / "a.json", answer=answer)
+    order = []
+    out = tool.write(tmp_path / "answers" / "a.json", answer=lambda r: order.append("answer") or answer(r),
+                     publish=lambda: order.append("publish") or [])
+    assert order == ["publish", "answer"]                    # the laws are published before the checker answers
     assert given == [json.loads(tool.REQUEST.read_text(encoding="utf-8"))]
     assert out.read_bytes() == json.dumps(made, indent=1, ensure_ascii=False).encode("utf-8")   # "≥" kept, LF only
     assert [p.name for p in out.parent.iterdir()] == ["a.json"]                                  # no temporary file left
@@ -53,9 +56,28 @@ def test_a_checker_error_is_never_written_and_the_earlier_file_stays(tmp_path, b
     out = tmp_path / "a.json"
     out.write_text("earlier", encoding="utf-8")
     with pytest.raises(tool.CheckerFailed):
-        tool.write(out, answer=lambda request: bad)
+        tool.write(out, answer=lambda request: bad, publish=lambda: [])
     assert out.read_text(encoding="utf-8") == "earlier"
     assert [p.name for p in tmp_path.iterdir()] == ["a.json"]
+
+
+def test_a_law_that_cant_be_published_is_never_answered_without_and_the_earlier_file_stays(tmp_path):
+    """A law with no current certificate gives no rules (rule_format.published.frozen): an answer made then would be
+    the checker's without that law, so the tool stops before asking the checker (merge of #228, 2026-11-27)."""
+    out = tmp_path / "a.json"
+    out.write_text("earlier", encoding="utf-8")
+    asked = []
+    with pytest.raises(tool.CheckerFailed, match="isn't published"):
+        tool.write(out, answer=lambda request: asked.append(request) or {"ok": True, "result": {}},
+                   publish=lambda: ["new_york_state: a problem"])
+    assert asked == [] and out.read_text(encoding="utf-8") == "earlier"
+
+
+def test_by_default_it_publishes_with_the_same_ensure_the_tests_and_ci_use(monkeypatch, tmp_path):
+    from rule_format import published
+    monkeypatch.setattr(published, "ensure", lambda: ["stand-in law"])
+    with pytest.raises(tool.CheckerFailed, match="stand-in law"):
+        tool.write(tmp_path / "a.json", answer=lambda request: {"ok": True, "result": {}})
 
 
 def _steps_running(job: dict, words: str) -> list[int]:
@@ -72,8 +94,10 @@ def test_every_ci_job_that_runs_the_csharp_tests_makes_the_answer_first_after_in
             jobs += 1
             made = _steps_running(job, "python apps/revit_addin/tools/evals/make_apartment_answer.py")
             installed = _steps_running(job, "pip install")
-            assert made and installed, f"{workflow.name} {name}: make the apartment answer before dotnet test"
-            assert installed[0] < made[0] < tests[0], f"{workflow.name} {name}: install, then make the answer, then test"
+            published = [n for n in _steps_running(job, "python -m rule_format publish")
+                         if "--check" not in job["steps"][n]["run"]]
+            assert made and installed and published, f"{workflow.name} {name}: make the apartment answer before dotnet test"
+            assert installed[0] < published[0] < made[0] < tests[0],                 f"{workflow.name} {name}: install, publish the laws, then make the answer, then test"
             assert "working-directory" not in job["steps"][made[0]], "the tool runs from the repository folder"
     assert jobs >= 2                        # the Ubuntu leg (ci.yml) and the Windows leg (windows.yml)
 

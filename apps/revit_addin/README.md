@@ -639,7 +639,9 @@ Ben's 2026-11-23 trial request,
 on that request, written with `json.dumps(answer, indent=1, ensure_ascii=False)` by
 `python apps/revit_addin/tools/evals/make_apartment_answer.py` (run from the repository folder). It is **made, never
 committed** (`.gitignore`): almost every rule change changed it, and a committed copy made every waiting PR conflict with
-each merge (2026-11-27). CI makes it before `dotnet test` in both Revit client jobs; a build of the tests (or of
+each merge (2026-11-27). It publishes each state law first (a law without a current certificate gives no
+rules, so an answer made then would lack them; one that can't be published stops it). CI publishes, then makes it,
+before `dotnet test` in both Revit client jobs; a build of the tests (or of
 `tools/pane_renders`) without it stops and says how to make it; a checker error is never written as the answer. The
 tests that read it count what they compare from the answer itself (its statuses and asks), never numbers a rule change
 moves; the counting and its words are pinned with numbers on a small answer made in `ResultViewsTests` (`Small`).

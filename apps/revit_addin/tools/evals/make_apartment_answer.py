@@ -10,7 +10,10 @@ again after pulling or changing rules (apps/revit_addin/README.md):
 
     python apps/revit_addin/tools/evals/make_apartment_answer.py
 
-A checker error is never written as the answer: the tool stops with the error and leaves any earlier file as it was.
+Each state law is published first (`python -m rule_format publish`'s ensure: a missing or stale certificate made
+again), since a law with no current certificate gives no rules (rule_format/published.py, frozen) and the answer
+would be the checker's without them. A law that can't be published, or a checker error, is never written as the
+answer: the tool stops with why and leaves any earlier file as it was.
 """
 
 from __future__ import annotations
@@ -26,11 +29,18 @@ OUT = REPO / "apps/revit_addin/tests/Gordium.Revit.Reading.Tests/answers/four_un
 
 
 class CheckerFailed(RuntimeError):
-    """The checker answered the request with an error, not a result."""
+    """The checker answered the request with an error, not a result, or a state law couldn't be published."""
 
 
-def text(request: dict, answer=None) -> str:
-    """The answer file's text: the checker's answer as the worker writes it (indent 1, UTF-8 kept)."""
+def text(request: dict, answer=None, publish=None) -> str:
+    """The answer file's text: the checker's answer as the worker writes it (indent 1, UTF-8 kept), after every state
+    law is published (`publish`: what couldn't be, as rule_format.published.ensure gives it)."""
+    if publish is None:
+        from rule_format.published import ensure as publish
+    unpublished = publish()
+    if unpublished:
+        raise CheckerFailed("a state law isn't published, so the checker would answer without its rules: "
+                            + "; ".join(unpublished))
     if answer is None:
         from design_checker.__main__ import answer
     got = answer(request)
@@ -39,10 +49,10 @@ def text(request: dict, answer=None) -> str:
     return json.dumps(got, indent=1, ensure_ascii=False)
 
 
-def write(out: Path = OUT, request: Path = REQUEST, answer=None) -> Path:
+def write(out: Path = OUT, request: Path = REQUEST, answer=None, publish=None) -> Path:
     """Writes the answer to `out` whole or not at all (a temporary file, then one replace), so a C# test never reads
     half a file and a failed run keeps the earlier one."""
-    made = text(json.loads(request.read_text(encoding="utf-8")), answer)
+    made = text(json.loads(request.read_text(encoding="utf-8")), answer, publish)
     out.parent.mkdir(parents=True, exist_ok=True)
     tmp = out.with_name(f"{out.name}.{os.getpid()}.tmp")
     try:
