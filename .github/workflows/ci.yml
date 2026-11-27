@@ -7,7 +7,7 @@ on:
 
 # The Windows jobs are in windows.yml (Ben, 2026-11-26): GitHub runs about one CI run at a time and Windows is half
 # of the jobs, so a push to a PR runs this file (Linux, and the Revit client on Ubuntu), and Windows runs once the
-# merge script labels the PR merge-ready, and on every push to main. Two files, so the two never share a check name.
+# merge script labels the PR merge-ready, and every night on main. Two files, so the two never share a check name.
 
 # A newer push to the same PR replaces the older run, so the queue only holds
 # each branch's latest commit. Pushes to main are never cancelled.
