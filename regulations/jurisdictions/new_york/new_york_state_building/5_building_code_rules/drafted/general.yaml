@@ -1208,8 +1208,8 @@ rules:
       panel glazing marked D-20 to the maximum size tested, and a sidelight or transom rated 3/4 hour (D-H-OH-45). Smoke barriers
       enclose areas of refuge (1009.6.4) and elevator lobbies, and divide Group I-1, I-2 and I-3 buildings and ambulatory
       care facilities into smoke compartments: which walls are smoke barriers isn''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 1009.6.4 and Section 709 aren't brought in
-    (709 is Chapter 7 part c). Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 1009.6.4 isn't brought in; Section 709
+    is (Chapter 7 part c's flags). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_716_1_2__other_assemblies
@@ -1873,7 +1873,8 @@ rules:
       above a crawl space whose floor is rated at least 1 hour; a corridor wall whose ceiling membrane equals the wall''s,
       where the room side of the wall reaches a rated floor or roof above, or the building is sprinklered throughout per 903.3.1.1
       or 903.3.1.2 with sprinklers above the partition; a corridor wall ending at the upper membrane of a ceiling built as
-      the wall; and mall tenant separations per 402.4.2.1, which may stop at the ceiling: heights above the ceiling aren''t
+      the wall; and mall tenant separations per 402.4.2.1, which may stop at the ceiling (the ceiling need not be rated, nor the attic above
+      divided by fire partitions): heights above the ceiling aren''t
       in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 402.4.2.1 isn't brought in. Shown for every
     building.
@@ -2212,8 +2213,8 @@ rules:
 - id: general.bc_709_5_1_i2_smoke_barrier_doors
   kind: flag
   topic: means_of_egress
-  title: Group I-2 and ambulatory care smoke barrier doors held open (BCNYS 709.5.1)
-  applies_when: occupancy_group in ["I-2", "mixed"] or ambulatory_care_facility
+  title: Corridor smoke barrier doors held open, Groups I-1 and I-2 (BCNYS 709.5.1)
+  applies_when: occupancy_group in ["I-1", "I-2", "mixed"] or ambulatory_care_facility
   sources:
   - file: gov.ny.building.2025.pdf
     page: 175
@@ -2228,9 +2229,16 @@ rules:
   - given:
       occupancy_group: I-2
     expect: needs_review
-    note: 'In Group I-2 and ambulatory care facilities, smoke barrier doors across a corridor with hold-open devices close
-      automatically per 716.2.6.6, and have a vision panel of fire-protection-rated glazing in fire-protection-rated frames
-      no larger than tested: the doors aren''t in the model, so a person''s check.'
+    note: 'In Group I-2 and ambulatory care facilities (and a Group I-1 Condition 2 pair of corridor doors 709.5 exception 1
+      sends here), smoke barrier doors across a corridor with hold-open devices close automatically per 716.2.6.6, and have a
+      vision panel of fire-protection-rated glazing in fire-protection-rated frames no larger than tested: the doors aren''t
+      in the model, so a person''s check.'
+  - given:
+      occupancy_group: I-1
+      ambulatory_care_facility: false
+    expect: needs_review
+    note: 'Group I-1: 709.5 exception 1 sends a Condition 2 building''s pair of opposite-swinging corridor doors here, and
+      whether it is Condition 2 isn''t stated: a person''s check.'
   - given:
       occupancy_group: R-2
       ambulatory_care_facility: false
@@ -2243,8 +2251,9 @@ rules:
   - given: {}
     expect: needs_review
     note: 'No group stated: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 716.2.6.6 isn't brought in. Narrowed to Group
-    I-2, a building of two or more groups, and one where an ambulatory care facility is stated or not ruled out.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 716.2.6.6 isn't brought in. Narrowed to Groups
+    I-1 (709.5 exception 1 sends Condition 2's corridor door pairs here) and I-2, a building of two or more groups, and one
+    where an ambulatory care facility is stated or not ruled out.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_709_6_smoke_barrier_penetrations

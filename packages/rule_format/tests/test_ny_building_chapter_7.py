@@ -430,3 +430,10 @@ def test_part_b_review_round_2s_notes_keep_their_sections_scope(book):
     assert "in a corridor or a smoke barrier" in glazing
     smoke = _shown_note([r for r in book if r["id"] == "general.bc_716_2_1_4_smoke_draft_control_test"][0])
     assert "for one" in smoke and "3006.3" in smoke
+
+
+def test_709_5_1_reaches_group_i1_through_709_5s_exception(book, ctx):
+    """Part c review round 1 (P1): 709.5 exception 1 sends Group I-1 Condition 2's pair of corridor doors to 709.5.1, and
+    Condition 2 isn't a stated fact, so a stated Group I-1 never sets 709.5.1 aside."""
+    doors = [r for r in book if r["id"] == "general.bc_709_5_1_i2_smoke_barrier_doors"][0]
+    assert outcome(doors, {"occupancy_group": "I-1", "ambulatory_care_facility": False}, ctx.allowed()) == "needs_review"

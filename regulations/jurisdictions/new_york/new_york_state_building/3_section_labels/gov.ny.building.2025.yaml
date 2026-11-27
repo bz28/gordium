@@ -4228,7 +4228,7 @@ labels:
   709.5.1:
     label: flag
     topic: means_of_egress
-    reason: 'In Group I-2 and ambulatory care facilities, smoke barrier doors across a corridor with hold-open devices close
+    reason: 'In Group I-2 and ambulatory care facilities (and Group I-1 Condition 2, through 709.5 exception 1), smoke barrier doors across a corridor with hold-open devices close
       automatically per 716.2.6.6, and have a vision panel of fire-protection-rated glazing in fire-protection-rated frames
       no larger than tested: a person''s check (general.bc_709_5_1_i2_smoke_barrier_doors).'
     sources:
