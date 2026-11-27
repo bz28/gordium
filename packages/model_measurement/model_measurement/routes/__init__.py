@@ -65,6 +65,12 @@ STATED = {"story_occupant_load": "the story's design occupant load", "space_occu
           "corridor_fire_rating_hours": "the corridor walls' fire-resistance rating",
           "corridor_walls_smoke_partitions": "whether the corridor's walls are smoke partitions"}
 QUESTIONS = {areas.STORY_AREA_QUESTION: "3", areas.ACCESSORY_AREA_QUESTION: "3", dead_ends.QUESTION: "7"}
+# a corridor's facts the architect states on the corridor's room (docs/interior/interior_description_format.md): the
+# model can't show them for certain (a wall type's rating is the architect's statement of its assembly), so each is
+# read from its own key, never guessed: {measure: (the room's key, its kind, the host mark that states it)}. A reason
+# names the mark (Gordium: <its name>), never the key (an architect reads it: test_plain_words)
+CORRIDOR_STATED = {"corridor_fire_rating_hours": ("fire_rating_hours", "hours", "Corridor rating minutes"),
+                   "corridor_walls_smoke_partitions": ("walls_smoke_partitions", "yes_no", "Smoke partition walls")}
 
 
 def _listed(description, key) -> list:
@@ -154,7 +160,7 @@ def _story_parts(story, uses, items, unknown, parts, r):
         use, item = uses.get(rid), items.get(rid) or {}
         name = room.name if room is not None else name_of(item)
         if use == "corridor":
-            parts["corridor"] += _corridor_parts(rid, name, story, found.get(rid), room)
+            parts["corridor"] += _corridor_parts(rid, name, story, found.get(rid), room, item)
             continue
         parts["space"].append(_space_part(rid, name, story, routes, room, access.get(rid), figures,
                                           sp["not_measured"].get("common_path_of_travel")))
@@ -597,14 +603,28 @@ def _space_part(rid, name, story, routes, room, access, figures, why_not) -> dic
     return p
 
 
-def _corridor_parts(rid, name, story, found, room) -> list:
+def _corridor_stated(p: dict, item: dict) -> None:
+    """The corridor's stated facts (CORRIDOR_STATED) from its room's own keys: a value of the right kind is the
+    measure; one given but not of its kind, or one left out, is said, never guessed (needs review)."""
+    for m, (key, kind, mark) in CORRIDOR_STATED.items():
+        v = item.get(key) if isinstance(item, dict) else None
+        if v is None:
+            p["not_measured"][m] = Stop("corridor_fact_not_stated", what=STATED[m], mark=mark).reason
+        elif kind == "yes_no" and type(v) is bool or kind == "hours" and type(v) in (int, float) and v == v                 and 0 <= v < float("inf"):
+            p["measures"][m] = v
+        else:
+            p["not_measured"][m] = Stop("corridor_fact_not_read", what=STATED[m], got=v,
+                                        kind="yes or no" if kind == "yes_no" else "a number of hours, 0 or more").reason
+
+
+def _corridor_parts(rid, name, story, found, room, item=None) -> list:
     """The corridor's part, and one more for each further dead end in it (decision 6: each dead end is its own pair,
     its length with its own least width, never one's length with another's width): the first part holds the
     longest dead end, each further part (id "<corridor> (dead end n)") the corridor's other measures again with
     that dead end's pair, until the branch's `dead_end` part kind exists."""
     p = _part(rid, name, story.level)
-    for m in ("corridor_occupant_load", "corridor_fire_rating_hours", "corridor_walls_smoke_partitions"):
-        p["not_measured"][m] = Stop("stated_not_given", what=STATED[m]).reason
+    p["not_measured"]["corridor_occupant_load"] = Stop("stated_not_given", what=STATED["corridor_occupant_load"]).reason
+    _corridor_stated(p, item)
     if room is None or found is None:
         why = Stop("room_not_measured", name=name, reason="its story's routes need review").reason
         for m in ("corridor_width", "corridor_dead_end_length", "corridor_dead_end_least_width"):

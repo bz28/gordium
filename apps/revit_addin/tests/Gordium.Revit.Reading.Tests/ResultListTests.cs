@@ -449,7 +449,7 @@ public sealed class ResultListTests
         // the two results views' entries are ResultViewList's (UI polish PR 3, tested in ResultViewListTests); the plain
         // list (an answer without them) is ResultList's
         Assert.Contains("var layout = _content?.Model?.Views is { } views\n" +
-                        "            ? ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, labels, stale, _content?.Questions)\n" +
+                        "            ? ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, labels, stale, _content?.Questions, _answers)\n" +
                         "            : ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),\n" +
                         "                                    _summary is not null && AllCards.Count > 0, _filter, _search.Text);\n" +
                         "        _entries = _summary is null ? layout : ResultList.WithSummary(layout);", view, StringComparison.Ordinal);
