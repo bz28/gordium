@@ -408,9 +408,9 @@ rules:
       it passes through, though it need not be more than 2 hours; except as 1023.2 allows for Group I-3 per 408.3.8, exit
       stairways within an atrium enclosed per 404.6, and exit stairways per 510.2): an enclosure''s rating isn''t in the model,
       so a person''s check.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1023.1, 1023.2, 408.3.8, 404.6 and 510.2
-    aren''t brought in (1023 is Chapter 10''s interior exit stairways). Shown for every building: whether it has an interior exit stairway or ramp isn''t ruled
-    out by the model (a stair''s door not marked as an exit''s leaves it unseen).'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 408.3.8, 404.6 and 510.2 aren''t brought in
+    (1023 is Chapter 10''s interior exit stairways). Shown for every building: whether it has an interior exit stairway or
+    ramp isn''t ruled out by the model (a stair''s door not marked as an exit''s leaves it unseen).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_707_3_4_exit_passageway_fire_barriers
@@ -430,8 +430,8 @@ rules:
     expect: needs_review
     note: 'The fire barrier between the building and an exit passageway has the rating 1024.3 asks: the passageway''s rating
       isn''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1024.3 isn't brought in (Chapter 10's exit
-    passageways). Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1024.3 is brought in (Chapter 10's exit passageways).
+    Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_707_3_5_horizontal_exit_separation
@@ -485,8 +485,7 @@ rules:
       egress balconies), 1023.7 (interior exit stairways and ramps), 1024.8 (exit passageways), 1027.6 (exterior exit stairways
       and ramps) or 1207 of the Fire Code of New York State (energy storage systems) asks the exterior wall itself to be rated:
       which enclosure walls are exterior walls, and their ratings, a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 705, 1021, 1023.7, 1024.8, 1027.6 and the Fire
-    Code's 1207 aren't brought in. Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 705, 1027.6 and the Fire Code's 1207 aren't brought in. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_707_5_continuity
@@ -517,7 +516,7 @@ rules:
       or ramp enclosure (1023) or an exit access stairway or ramp enclosure (1019) may end at a top enclosure per 713.12,
       and an exit passageway enclosure (1024.3) that stops short is closed at the top with construction of the passageway''s
       rating: walls'' heights above the ceiling aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1019, 1023 and 1024.3 aren't brought in; 707.8,
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1019, 1023 and 1024.3 are brought in; 707.8,
     707.9 and 713.12 are (each its own flag). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -586,13 +585,14 @@ rules:
     expect: needs_review
     note: 'Openings in a fire barrier are protected per Section 716, at most 25 percent of the wall''s length in all and at
       most 156 square feet each; openings in shaft, interior exit stairway and ramp, and exit passageway enclosures also meet
-      713.7, 1023.4 and 1024.5. The limits are lifted where the adjoining floor areas are sprinklered throughout (903.3.1.1: the 156 square feet), fire doors
-      serving exit access or interior exit stairway and ramp enclosures, protectives tested to ASTM E119 or UL 263 at the
-      wall''s own rating, atrium fire windows (the 25 percent), the fire door between an exit stairway and its exit passageway
-      (1023.3.1), elevator car entrances in a hoistway enclosure, and shaft and chute rooms (713, 713.13.3, 713.13.4; the
-      25 percent): which walls are fire barriers and their openings'' sizes aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1023.3.1, 1023.4, 1024.5, 713.13.3 and 713.13.4
-    aren't brought in; 713.7 is (its own flag), and 716's opening protectives are Chapter 7 part b's flags. Shown for every building.
+      713.7, 1023.4 and 1024.5. The limits are lifted where the adjoining floor areas are sprinklered throughout (903.3.1.1:
+      the 156 square feet), fire doors serving exit access or interior exit stairway and ramp enclosures, protectives tested
+      to ASTM E119 or UL 263 at the wall''s own rating, atrium fire windows (the 25 percent), the fire door between an exit
+      stairway and its exit passageway (1023.3.1), elevator car entrances in a hoistway enclosure, and shaft and chute rooms
+      (713, 713.13.3, 713.13.4; the 25 percent): which walls are fire barriers and their openings'' sizes aren''t in the model,
+      so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 713.13.3 and 713.13.4 aren't brought in; 713.7
+    is (its own flag), and 716's opening protectives are Chapter 7 part b's flags. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_707_7_penetrations
@@ -632,8 +632,8 @@ rules:
     expect: needs_review
     note: 'Penetrations into shaft, interior exit stairway and ramp, and exit passageway enclosures are allowed only where
       713.8.1, 1023.5 and 1024.6 permit them: penetrations aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1023.5 and 1024.6 aren't brought in; 713.8.1
-    is (its own flag). Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1023.5 and 1024.6 are brought in; 713.8.1 is
+    (its own flag). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_707_8_joints
@@ -719,8 +719,8 @@ rules:
       to 1023.7, a barrier at the level of exit discharge per 1023.8, and smokeproof enclosures per 1023.12 where 403.5.4,
       405.7.2 or 412.2.2.1 require them: which stairways are interior exit stairways, and their enclosures, aren''t in the
       model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1023 isn't brought in (Chapter 10's interior
-    exit stairways). Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1023 is brought in (Chapter 10's interior exit
+    stairways). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_713_2_shaft_construction
@@ -818,8 +818,8 @@ rules:
     note: 'An exterior wall that is part of a required shaft enclosure follows Section 705 for exterior walls instead of the
       enclosure''s rating, except where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or
       1027.6 (exterior exit stairways and ramps) asks the exterior wall itself to be rated: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 705, 1021.2, 1023.7 and 1027.6 aren't brought
-    in. Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 705 and 1027.6 aren't brought in. Shown for
+    every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_713_7_shaft_openings
@@ -1226,8 +1226,8 @@ rules:
       Smoke barriers enclose areas of refuge (1009.6.4) and elevator lobbies, and divide Group I-1, I-2 and I-3 buildings
       and ambulatory care facilities into smoke compartments: which walls are smoke barriers isn''t in the model, so a person''s
       check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 1009.6.4 isn't brought in; Section 709
-    is (Chapter 7 part c's flags). Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 1009.6.4 is brought in; Section 709 is (Chapter
+    7 part c's flags). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_716_1_2__other_assemblies
@@ -2025,8 +2025,8 @@ rules:
     note: 'An exterior wall that is part of a required rated separation follows Section 705 for exterior walls instead, except
       where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways
       and ramps) asks the exterior wall itself to be rated: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 705, 1021.2, 1023.7 and 1027.6 aren't brought
-    in. Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 705 and 1027.6 aren't brought in. Shown for
+    every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_708_6_fire_partition_openings
@@ -2126,8 +2126,8 @@ rules:
       enclose areas of refuge (1009.6.4) and some elevator lobbies, and divide Group I-1, I-2 and I-3 buildings and ambulatory
       care facilities into smoke compartments: which walls are smoke barriers, and their ratings, aren''t in the model, so
       a person''s check.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 1009.6.4 isn''t brought in. Shown for every
-    building: an area of refuge may be in any group.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 1009.6.4 is brought in. Shown for every building:
+    an area of refuge may be in any group.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_709_4_smoke_barrier_continuity
@@ -2158,8 +2158,8 @@ rules:
       or floor it supports (except in buildings of Types IIB, IIIB and VB); walls dividing smoke compartments meet 709.4.1,
       walls enclosing areas of refuge (1009.6.4) or elevator lobbies (405.4.3, 3007.6.2, 3008.6.2) meet 709.4.2; except none
       is needed in an interstitial space whose ceilings or exterior walls resist fire and smoke as well: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 1009.6.4, 405.4.3, 3007.6.2 and 3008.6.2 aren't
-    brought in. Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 405.4.3, 3007.6.2 and 3008.6.2 aren't brought
+    in. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_709_4_1_smoke_compartment_barriers
@@ -2207,8 +2207,8 @@ rules:
       at a fire barrier rated at least 1 hour, another smoke barrier or an outside wall; a smoke and draft control door (716.2.2.1.1)
       isn''t required at each elevator hoistway door protected by a lobby, at each exit door into a protected lobby, or at
       each exit doorway between an area of refuge and the exit enclosure: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 1009.6.4, 405.4.3, 3007.6.2 and 3008.6.2 aren't
-    brought in; 716.2.2.1.1 is (its own flag). Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 405.4.3, 3007.6.2 and 3008.6.2 aren't brought
+    in; 716.2.2.1.1 is (its own flag). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_709_5_smoke_barrier_openings
@@ -2707,8 +2707,8 @@ rules:
     expect: needs_review
     note: 'Where another section requires a horizontal assembly (an exit stairway''s or passageway''s enclosure top or bottom,
       1023.2 and 1024.3; a shaft''s, 713), it is rated at least as that section asks: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 1023.2 and 1024.3 aren't brought in; 713 is
-    (Chapter 7 part a's flags). Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 1023.2 and 1024.3 are brought in; 713 is (Chapter
+    7 part a's flags). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_711_3_2_unrated_floor_continuity
@@ -2728,7 +2728,7 @@ rules:
     note: 'A floor or roof not required to be rated is continuous, with no vertical openings but those Section 712 permits
       (an exit access stairway per 1019, 712.1.12; a two-story opening, 712.1.9): the floors'' openings aren''t in the model,
       so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 1019 isn't brought in. Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 1019 is brought in. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_712_1_vertical_openings
@@ -2752,7 +2752,7 @@ rules:
       and the like, 712.1.2 to 712.1.8, 712.1.10, 712.1.11, 712.1.13 to 712.1.16): which openings the floors have, and how
       each is protected, aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 712.1.2 to 712.1.8, 712.1.10, 712.1.11 and
-    712.1.13 to 712.1.16 and 1019 aren't brought in. Shown for every building.
+    712.1.13 to 712.1.16 aren't brought in. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_712_1_9_two_story_openings
@@ -2780,8 +2780,8 @@ rules:
       fire areas and no smoke barrier separating smoke compartments, isn''t concealed in a wall or floor/ceiling, isn''t open
       to a corridor in Group I or R, isn''t open to a corridor on an unsprinklered floor, and is separated from floor and
       air transfer openings serving other floors by construction as for the required shaft enclosures: a person''s check.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 1019.3 isn''t brought in. Shown for every
-    building: whether an opening relies on it isn''t in the model.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 1019.3 is brought in. Shown for every building:
+    whether an opening relies on it isn''t in the model.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_714_2_penetration_firestop_installation
@@ -2988,8 +2988,7 @@ rules:
       per their listing; the space around a sprinkler covered by a metal escutcheon plate; and larger or more steel boxes
       in walls rated at most 2 hours with listed putty pads or other listed materials and methods, installed per the listing:
       a person''s check (1023.5 allows membrane penetrations on the outside of an exit stairway enclosure only so protected).'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 718.2.1 and 1023.5 aren't brought in. Shown
-    for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 718.2.1 isn't brought in. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_714_4_3_dissimilar_materials
@@ -3031,8 +3030,8 @@ rules:
     note: 'Penetrations of a rated floor, floor/ceiling assembly or a roof/ceiling assembly''s ceiling membrane (the top or
       bottom of an exit stairway or passageway enclosure among them, 1023.5, 1024.6) that 712.1 doesn''t require in a shaft
       meet 714.5.1 to 714.5.4: penetrations aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 1023.5 and 1024.6 aren't brought in; 714.5.1
-    to 714.5.4 are (their own flags). Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 1023.5 and 1024.6 are brought in; 714.5.1 to
+    714.5.4 are (their own flags). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_714_5_1_floor_through_penetrations
@@ -25548,7 +25547,7 @@ rules:
       box of at most 16 square inches), and structural elements supporting it or a roof at its top, each protected per 714;
       no penetration or opening joins two adjacent exit stairways or ramps; membrane penetrations on the outside are allowed
       per 714.4.2: penetrations aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 714 and 714.4.2 aren't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 714 isn't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_6_ventilation
@@ -26040,7 +26039,7 @@ rules:
       most 16 square inches), and structural elements supporting a floor or roof at its top, each protected per 714; no penetration
       or opening joins two adjacent exit passageways; membrane penetrations on the outside are allowed per 714.4.2: penetrations
       aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 714 and 714.4.2 aren't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 714 isn't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1024_7_exit_passageway_ventilation

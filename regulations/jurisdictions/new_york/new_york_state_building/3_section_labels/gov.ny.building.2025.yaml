@@ -4614,7 +4614,7 @@ labels:
   707.3.2:
     label: flag
     topic: means_of_egress
-    reason: 'The fire barrier around an interior exit stairway or ramp has the rating Section 1023 asks (not brought in):
+    reason: 'The fire barrier around an interior exit stairway or ramp has the rating Section 1023 asks:
       its rating isn''t in the model, a person''s check (general.bc_707_3_2_exit_stairway_fire_barriers).'
     sources:
     - file: gov.ny.building.2025.pdf
@@ -4647,7 +4647,7 @@ labels:
   707.3.4:
     label: flag
     topic: means_of_egress
-    reason: 'The fire barrier around an exit passageway has the rating 1024.3 asks (not brought in): its rating isn''t in
+    reason: 'The fire barrier around an exit passageway has the rating 1024.3 asks: its rating isn''t in
       the model, a person''s check (general.bc_707_3_4_exit_passageway_fire_barriers).'
     sources:
     - file: gov.ny.building.2025.pdf
@@ -5815,8 +5815,7 @@ labels:
   '713.1':
     label: flag
     topic: means_of_egress
-    reason: 'Section 713 applies to shafts through floors and roofs, and interior exit stairways and ramps are enclosed per
-      Section 1023 (not brought in): a requirement no other Chapter 7 flag carries, a person''s check (general.bc_713_1_shafts_and_exit_stairways).'
+    reason: 'Section 713 applies to shafts through floors and roofs, and interior exit stairways and ramps are enclosed per Section 1023: a requirement no other Chapter 7 flag carries, a person''s check (general.bc_713_1_shafts_and_exit_stairways).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 178
