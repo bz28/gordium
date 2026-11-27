@@ -1569,9 +1569,13 @@ internal static class RevitInterior
             var list = new List<NearbyElement>();
             foreach (var e in Collect(doc, outline))
             {
-                if (e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model } c)
+                // a linked model and a 3D CAD import are kept whatever their category says (whether Revit Links is a
+                // model category is to check, Records.cs; review round 4), as the outside reader keeps them
+                var kept = e is RevitLinkInstance || (e is ImportInstance && !e.ViewSpecific);
+                if (!kept && (e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model }))
                     continue;
-                list.Add(new NearbyElement(e.UniqueId, c.BuiltInCategory.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
+                var category = e.Category is { } c ? c.BuiltInCategory.ToString() : e is RevitLinkInstance ? "OST_RvtLinks" : "OST_ImportObjectStyles";
+                list.Add(new NearbyElement(e.UniqueId, category, e.Name, (e as FamilyInstance)?.Host?.UniqueId,
                                            Box: BoxOf(e), PhaseDemolished: Id(e.DemolishedPhaseId), DesignOption: Id(e.DesignOption?.Id)));
             }
             return list;

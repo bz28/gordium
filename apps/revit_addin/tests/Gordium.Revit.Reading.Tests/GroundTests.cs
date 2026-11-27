@@ -427,6 +427,38 @@ public sealed class GroundTests
         Assert.Contains("Blank: for a window, where Gordium: Toposolid is finished ground is Yes", Marks.WellDepth.Description, StringComparison.Ordinal);
     }
 
+    // ---- review round 4 ---------------------------------------------------------------------------------------------
+
+    /// <summary>What is in a linked model isn't read (a site model's patio or stoop over the ground outside house 1's
+    /// window): a link reaching over the outside, or with no box, or any coordination model, leaves the ground unread;
+    /// a link elsewhere changes nothing.</summary>
+    [Fact]
+    public void A_linked_model_over_the_ground_outside_it_leaves_the_ground_unread()
+    {
+        var house = Drawn("1_ranch_compliant", (_, _) => 0);
+        house.Links.Add(new InteriorLink("link-1", "Site", true, new RevitBox(house.Fake.Place(4, -3, 0), house.Fake.Place(8, -0.6, 1)), 0, 0, false));
+        var read = InteriorReader.Read(house.Model());
+        Assert.Null(Ground(read, "w1"));
+        Assert.Equal("the linked model \"Site\" reaches over the ground outside it, and what is in a link isn't read, so what the finished grade is there isn't known",
+                     Why(read, "w1"));
+        house.Links[0] = house.Links[0] with { Box = null };
+        Assert.StartsWith("the linked model \"Site\" has no box to place it by", Why(InteriorReader.Read(house.Model()), "w1"));
+        house.Links[0] = house.Links[0] with { Box = new RevitBox(house.Fake.Place(60, 60, 0), house.Fake.Place(70, 70, 1)) };
+        Assert.Equal([0.0, 0.0, 0.0], Ground(InteriorReader.Read(house.Model()), "w1"));
+        house.CoordinationModels = 1;
+        Assert.StartsWith("a coordination model is linked", Why(InteriorReader.Read(house.Model()), "w1"));
+    }
+
+    /// <summary>The Revit layer keeps a linked model's and a CAD import's instance among what stands round an opening,
+    /// whatever its category says (whether Revit Links is a model category is to check).</summary>
+    [Fact]
+    public void The_revit_layer_keeps_links_and_imports_round_an_opening()
+    {
+        var source = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "RevitInterior.cs"));
+        Assert.Contains("var kept = e is RevitLinkInstance || (e is ImportInstance && !e.ViewSpecific);", source);
+        Assert.Contains("if (!kept && (e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model }))", source);
+    }
+
     [Fact]
     public void Only_an_escape_opening_says_why_its_ground_isnt_read()
     {

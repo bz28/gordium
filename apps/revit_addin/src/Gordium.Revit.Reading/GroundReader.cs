@@ -21,7 +21,8 @@ namespace Gordium.Revit.Reading;
 /// the other (as the escape routes tell a door to outside, <see cref="RouteReader.Sides"/>).</item>
 /// <item>Out to <see cref="Reach"/> from the face, at each place along it, a finished ground is drawn, one ground only
 /// (a subdivision over its own host is its top), nothing else stands over it anywhere outside it below the opening's
-/// top (an area well drawn as a family, a step, a slab, a deck: what the finished grade is there isn't known), and the
+/// top (an area well drawn as a family, a step, a slab, a deck: what the finished grade is there isn't known; nor a
+/// linked model, whose contents aren't read, nor any coordination model), and the
 /// ground nowhere rises more than 1/16 in above the ground at the face: a well cut into the ground, or ground sloping
 /// toward the wall, leaves which ground adjoins the opening unclear (the well's floor at the face, the ground around it
 /// farther out).</item>
@@ -207,9 +208,25 @@ public static class GroundReader
         // anything whose box reaches over the ground anywhere outside it, from the line 1 in out to 6 ft, over its width,
         // above the lowest ground found there and below its top (never only at the places read)
         P2[] outside = [At(lo, Adjoin), At(hi, Adjoin), At(hi, Reach), At(lo, Reach)];
-        if (around.FirstOrDefault(e => Over(model, e, outside, lowest, top)) is { } over)
+        if (around.FirstOrDefault(e => Over(model, e.Box!, outside, lowest, top)) is { } over)
         {
             why = $"{InteriorReader.Named(over)} stands over the ground outside it, so what the finished grade is there isn't known";
+            return null;
+        }
+        // what is in a linked model isn't read (a site model's patio, stoop or deck over the ground, review round 4), as
+        // a linked model over a room leaves its floor unread: one reaching over the outside, or with no box to place it
+        // by, leaves the ground unread; a coordination model's contents aren't known at all
+        var records = model.Interior!;
+        if (records.CoordinationModels > 0)
+        {
+            why = "a coordination model is linked, and what is in it isn't read, so what stands outside it isn't known";
+            return null;
+        }
+        if (records.Links.FirstOrDefault(l => l.Box is null || Over(model, l.Box, outside, lowest, top)) is { } link)
+        {
+            why = link.Box is null
+                ? $"the linked model \"{link.Name}\" has no box to place it by, and what is in a link isn't read, so what stands outside it isn't known"
+                : $"the linked model \"{link.Name}\" reaches over the ground outside it, and what is in a link isn't read, so what the finished grade is there isn't known";
             return null;
         }
         var sent = new List<double>(faces);
@@ -353,12 +370,11 @@ public static class GroundReader
         return wa * a.Z + wb * b.Z + wc * c.Z;
     }
 
-    /// <summary>Whether the element's box (shared, around all 8 corners: only ever bigger) meets the plan rectangle
+    /// <summary>Whether an element's or a link's box (shared, around all 8 corners: only ever bigger) meets the plan rectangle
     /// <paramref name="outside"/> (four corners in order) and reaches above <paramref name="ground"/> (the lowest
     /// ground found there), below the opening's top: something that may stand over the ground outside it.</summary>
-    private static bool Over(RevitModel model, NearbyElement e, P2[] outside, double ground, double top)
+    private static bool Over(RevitModel model, RevitBox b, P2[] outside, double ground, double top)
     {
-        var b = e.Box!;
         var box = Box3.Turned(b.Min, b.Max, model.InternalToShared.After(b.Transform ?? Transform3.Identity));
         if (box.Max.Z <= ground + S || box.Min.Z >= top)
             return false;
