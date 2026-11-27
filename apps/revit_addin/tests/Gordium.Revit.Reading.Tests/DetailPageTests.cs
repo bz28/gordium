@@ -75,17 +75,38 @@ public sealed class DetailPageTests
             }
     }
 
-    /// <summary>Egress UI audit, finding 2: the apartment's hand checks (the corridor's fire partitions: a rating
-    /// worked out by hand and a judgment) say what to check and to tick it; the model changed after the check, Check
-    /// again comes first, then the tick.</summary>
+    /// <summary>Egress UI audit, finding 2: the apartment's hand checks (its judgment flags) say what to check and to
+    /// tick it; the model changed after the check, Check again comes first, then the tick. A result with several hand
+    /// checks says so in its headline, whatever the apartment holds today (CI on #229: the apartment's only such
+    /// results were each corridor's 716.1.2, 1020.2 fire-partition and 1020.7 continuity flags, a rating worked out by
+    /// hand and a judgment, until the rating got its room mark, Gordium: Corridor rating minutes; a result a mark can
+    /// settle isn't only a person's, so it ends with Check again).</summary>
     [Fact]
     public void A_result_only_a_person_settles_ends_with_the_tick_and_check_again_only_when_the_model_changed()
     {
-        var pages = Pages(Apartment());
+        var m = Apartment();
+        var pages = Pages(m);
         var hand = pages.Where(p => p.Row.Section != ListSection.Complies && p.Page.Steps[^1] == DetailPages.CheckAfterChangeStep).ToList();
         Assert.NotEmpty(hand);
-        Assert.Contains(hand, p => p.Page.Headline!.StartsWith("Gordium can't decide this result yet. Look at these ", StringComparison.Ordinal));
         Assert.All(hand, p => Assert.Equal(DetailPages.LookedStep, p.Page.Steps[^2]));
+        foreach (var p in hand)                                   // several hand checks: the headline says how many
+        {
+            var asks = ResultViews.CardsOf(m.Views!, p.Row.Row.Id).Where(c => c.Kind is not (FixKind.Fails or FixKind.NotChecked or FixKind.Done)).ToList();
+            if (asks.Count > 1)
+                Assert.Equal(DetailPages.SeveralByHand(asks.Count), p.Page.Headline);
+        }
+        var one = hand[0];                                        // two hand checks on one result, built here
+        FixCard Card(string key) => new(key, FixKind.Decide, "Look at it", null, null, [], [one.Row.Row]);
+        var two = DetailPages.Of(one.Detail, one.Row, [Card("a"), Card("b")]);
+        Assert.Equal(DetailPages.SeveralByHand(2), two.Headline);
+        Assert.Equal([DetailPages.LookedStep, DetailPages.CheckAfterChangeStep], two.Steps.TakeLast(2));
+        // a hand check beside one a mark settles: not only a person's, so Check again (the corridor's fire partitions)
+        var marked = DetailPages.Of(one.Detail, one.Row, [Card("a"), new("m", FixKind.Mark, "Give the corridor walls' fire rating", null, "rooms[].fire_rating_hours", [], [one.Row.Row])]);
+        Assert.Equal(DetailPages.CheckAgainStep, marked.Steps[^1]);
+        Assert.DoesNotContain(DetailPages.LookedStep, marked.Steps);
+        var partitions = pages.Where(p => p.Row.Row.Id.Contains("bc_1020_2_fire_partitions", StringComparison.Ordinal)).ToList();
+        Assert.NotEmpty(partitions);
+        Assert.All(partitions, p => Assert.Equal(DetailPages.CheckAgainStep, p.Page.Steps[^1]));
         Assert.Contains(pages, p => p.Page.Steps[^1] == DetailPages.CheckAgainStep);              // and the rest still do
         var stale = Pages(Apartment(), new DateTime(2026, 11, 23, 14, 32, 0));
         var after = stale.Single(p => p.Row.Row.Id == hand[0].Row.Row.Id);
