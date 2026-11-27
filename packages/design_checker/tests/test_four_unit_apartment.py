@@ -459,6 +459,15 @@ def test_a_story_whose_room_may_seat_people_served_by_aisles_never_passes_on_tra
                 r["function"] = "assembly_unconcentrated"
     assert row(stairs) == "needs_review"
 
+    def group_a_stair(d):                            # an exit stating an assembly function shows no assembly room
+        group_a(d)
+        next(r for r in d["rooms"] if r["id"] == "L1SE")["function"] = "assembly_unconcentrated"
+    interior = build.interior_of()
+    interior["building"] = {**interior["building"], **{k: False for k in CH10_BUILDING_MARKS}}
+    group_a_stair(interior)
+    parts = egress.check(laws, interior, VALUES, ALLOWED)["interior"]["parts"]
+    assert {s["id"]: s["measures"]["story_assembly_seating_possible"] for s in parts["story"]} == {"L1": True, "L2": True}
+
     # review round 2: the groups sent in the check's values (which the rules read beside the building block) count too
     interior = build.interior_of()
     interior["building"] = {k: v for k, v in interior["building"].items() if k != "occupancy_groups"}

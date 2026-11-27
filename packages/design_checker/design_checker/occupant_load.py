@@ -172,8 +172,9 @@ def assembly_seating(parts: dict, description: dict, factors: dict, building: di
     placed = {p.get("id") for p in spaces + corridors}
     unseen = not every or bool(unknown) or any(r not in placed for r in rooms)
     groups = building.get("occupancy_groups") if isinstance(building, dict) else None
-    shown = any(r.get("function") in ASSEMBLY_FUNCTIONS + ASSEMBLY_LIKE_FUNCTIONS for r in rooms.values()
-                if isinstance(r.get("function"), str))
+    exits = {p.get("id") for p in spaces if p["measures"].get("space_is_exit") is True}
+    shown = any(r.get("function") in ASSEMBLY_FUNCTIONS + ASSEMBLY_LIKE_FUNCTIONS for i, r in rooms.items()
+                if isinstance(r.get("function"), str) and i not in exits)   # an exit is no assembly room shown (round 3)
     if isinstance(groups, list) and any(isinstance(g, str) and g.startswith("A-") for g in groups) and not shown:
         unseen = True
     functions = factors["functions"]
