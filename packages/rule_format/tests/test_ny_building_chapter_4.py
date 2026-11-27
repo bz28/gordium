@@ -687,5 +687,8 @@ def test_the_ambulatory_care_fact_says_what_it_decides():
     meaning = load(NY / "5_building_code_rules/drafted/records/proposed_measures.yaml")["ambulatory_care_facility"]["meaning"]
     marks = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
     mark = marks[marks.index("AmbulatoryCareFacility = new("):][:1500].split(");", 1)[0]
-    for words in (name, meaning, mark):
+    doc = (REPO / "docs/interior/interior_description_format.md").read_text(encoding="utf-8")
+    block = doc[doc.index("  ambulatory_care_facility: "):].split("\n  corridors_within_dwelling_units:", 1)[0]
+    summary = marks[:marks.index("AmbulatoryCareFacility = new(")].rsplit("/// <summary>", 1)[1]
+    for words in (name, meaning, mark, block, summary):
         assert "422" in words and "1020.2" in words and "1020.3" in words, words[:120]

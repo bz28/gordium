@@ -354,7 +354,7 @@ public static class Marks
         "Yes: a corridor's occupant load is worked out by hand (the story's doesn't bound it). No: none does, so each corridor's load lies between none and its whole story's. Blank: worked out by hand, as for Yes.");
 
     /// <summary>Whether the building is or holds an ambulatory care facility (<c>building.ambulatory_care_facility</c>,
-    /// BCNYS 202, Section 422, Table 1020.3).</summary>
+    /// BCNYS 202, Section 422, Tables 1020.2 and 1020.3).</summary>
     public static readonly MarkDefinition AmbulatoryCareFacility = new(
         "Gordium: Ambulatory care facility", new("2a31e2c4-cf29-4ac4-9c57-a41ca85748b3"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "building.ambulatory_care_facility",

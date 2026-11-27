@@ -54,7 +54,8 @@ FACTS = {
     "occupant_load_increased": "yes_no",      # the design takes 1004.5.1's increased occupant load (up to 1 per 7 sq ft)
     # section group 4 (corridors): another level's occupants reach a corridor (an unenclosed stairway or ramp, a
     # mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's load doesn't
-    # bound the corridor's; and the building is (or holds) an ambulatory care facility (Table 1020.3's 72 in)
+    # bound the corridor's; and the building is (or holds) an ambulatory care facility (Section 422's flags, Table
+    # 1020.2's Group B corridor rating, Table 1020.3's 72 in)
     "other_level_egress_into_corridors": "yes_no",
     "ambulatory_care_facility": "yes_no",
     # section group 4b: the building has corridors within a dwelling or sleeping unit (1020.2 exception 2; Table
