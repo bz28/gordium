@@ -5831,7 +5831,6 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Storage of commercial motor vehicles (BCNYS 903.2.10.1)
-  applies_when: occupancy_group in ["S-1", "S-2", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 272
@@ -5845,11 +5844,8 @@ rules:
     expect: needs_review
     note: 'A building storing commercial motor vehicles is sprinklered throughout where the fire area exceeds 5,000 square
       feet: a person''s check.'
-  - given:
-      occupancy_group: R-2
-    expect: not_applicable
-    note: 'Not this building''s group or fact, as stated: not applicable.'
-  notes: '903.2.10.1: the vehicles aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+  notes: '903.2.10.1: the vehicles aren''t in the model, in a building of any group: the storage of vehicles accessory to another occupancy is part
+    of it (311.1.1), so a Group B office''s or F-1 plant''s truck bay is its own (review round 2). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
     b).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -5857,7 +5853,6 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Mechanical-access enclosed parking garages (BCNYS 903.2.10.2)
-  applies_when: occupancy_group in ["S-1", "S-2", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 272
@@ -5873,11 +5868,8 @@ rules:
     expect: needs_review
     note: 'A building storing motor vehicles in a mechanical-access enclosed parking garage has an approved sprinkler system
       throughout, the garage''s portion a specially engineered one: a person''s check.'
-  - given:
-      occupancy_group: R-2
-    expect: not_applicable
-    note: 'Not this building''s group or fact, as stated: not applicable.'
-  notes: '903.2.10.2: the garage''s kind isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9
+  notes: '903.2.10.2: the garage''s kind isn''t in the model, in a building of any group: the storage of vehicles accessory to another occupancy is part
+    of it (311.1.1), so a Group B office''s or F-1 plant''s truck bay is its own (review round 2). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9
     part b).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

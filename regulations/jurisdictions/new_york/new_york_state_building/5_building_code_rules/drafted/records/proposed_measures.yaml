@@ -193,8 +193,6 @@ occupancy_group:
   - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_710_5_3_i2_pass_through_openings
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
-  - general.bc_903_2_10_1_commercial_parking
-  - general.bc_903_2_10_2_mechanical_access_garages
   - general.bc_903_2_10_parking_garages
   - general.bc_903_2_1_1_group_a1_sprinklers
   - general.bc_903_2_1_2_group_a2_sprinklers

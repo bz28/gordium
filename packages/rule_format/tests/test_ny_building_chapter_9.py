@@ -477,3 +477,14 @@ def test_the_13r_flag_says_what_chapter_10_counts(book, ctx):
                        code_scope.building_measures(b), allowed)
     assert row["outcome"] == "pass"                     # what the note says Chapter 10 does
     assert _answer(_rule(book, "general.bc_903_2_8_group_r_sprinklers"), b, allowed) == "fail"
+
+
+def test_the_vehicle_storage_flags_show_for_every_group(book, ctx):
+    """Part b review round 2: 903.2.10.1 and 903.2.10.2 are worded for buildings used to store vehicles, whatever
+    their group, and storage accessory to another occupancy is part of it (311.1.1), so a Group B office's truck bay
+    or a Group R-2 building's car stacker is its own: both flags show for every group."""
+    allowed = ctx.allowed()
+    for rid in ("general.bc_903_2_10_1_commercial_parking", "general.bc_903_2_10_2_mechanical_access_garages"):
+        for groups in (["B"], ["F-1"], ["R-2"], ["M"], ["S-2"]):
+            assert outcome(_rule(book, rid), code_scope.building_measures({"occupancy_groups": groups}),
+                           allowed) == "needs_review", (rid, groups)

@@ -271,7 +271,8 @@ results:
   # Chapter 9 part b (2026-11-27): the groups whose requirement turns on a fire area's size, occupant load or story,
   # none of them this building's (Group R-2 alone); the flags for a building of any group show: an occupiable
   # roof's assembly use (903.2.1.6, while the building doesn't state its outdoor areas), an ambulatory care
-  # facility's floors (903.2.2.1, while it doesn't state none) and bulk tire storage (903.2.9.2)
+  # facility's floors (903.2.2.1, while it doesn't state none), bulk tire storage (903.2.9.2) and commercial or
+  # mechanical-access vehicle storage (903.2.10.1, 903.2.10.2: a building of any group, review round 2)
   general.bc_903_2_mixed_occupancies: not_applicable
   general.bc_903_2_1_1_group_a1_sprinklers: not_applicable
   general.bc_903_2_1_2_group_a2_sprinklers: not_applicable
@@ -298,8 +299,8 @@ results:
   general.bc_903_2_9_3_distilled_spirits_wine: not_applicable
   general.bc_903_2_9_4_upholstered_furniture: not_applicable
   general.bc_903_2_10_parking_garages: not_applicable
-  general.bc_903_2_10_1_commercial_parking: not_applicable
-  general.bc_903_2_10_2_mechanical_access_garages: not_applicable
+  general.bc_903_2_10_1_commercial_parking: needs_review
+  general.bc_903_2_10_2_mechanical_access_garages: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review
