@@ -487,7 +487,7 @@ def _outlines(outlines, reader, stories) -> None:
     given = {}
     for n, item in enumerate(outlines if isinstance(outlines, list) else [None], 1):
         level = item.get("level") if isinstance(item, dict) else None
-        if level not in stories:
+        if not isinstance(level, str) or level not in stories:
             for story in stories.values():
                 story.outline_stop = Stop("outline_not_read", reason=f"story outline #{n} isn't on one of the "
                                           "model's levels").reason
