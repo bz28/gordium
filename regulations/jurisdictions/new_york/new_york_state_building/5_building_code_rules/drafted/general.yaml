@@ -379,10 +379,10 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Where a floor, floor-ceiling or attic space is concealed but can be reached, each fire wall, fire barrier, fire
-      partition, smoke barrier, smoke partition or other wall with protected openings or penetrations carries signs or stenciling
-      there: within 15 feet of each end of the wall and at most every 30 feet along it, lettered at least 3 inches high with
-      a stroke of at least 3/8 inch in a contrasting colour, with wording such as "FIRE AND/OR SMOKE BARRIER - PROTECT ALL
-      OPENINGS": signs aren''t in the model, so a person''s check.'
+      partition, smoke barrier, smoke partition or other wall with protected openings or penetrations is effectively and permanently
+      marked there with signs or stenciling: within 15 feet of each end of the wall and at most every 30 feet along it, lettered
+      at least 3 inches high with a stroke of at least 3/8 inch in a contrasting colour, with wording such as "FIRE AND/OR
+      SMOKE BARRIER - PROTECT ALL OPENINGS": signs aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. A requirement for every rated wall, the exit
     enclosures' and rated corridors' among them; shown for every building.
   drafted_by: claude_code/claude-opus-5-5

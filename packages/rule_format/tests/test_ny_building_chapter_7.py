@@ -181,4 +181,32 @@ def test_review_round_1s_notes_say_what_the_law_says(book, labels):
     bottom = _note(book, "general.bc_713_11_shaft_bottom")
     assert "used for nothing else" in bottom and "needs no rated separation" in bottom
     assert "unless another section" in _note(book, "general.bc_707_5_1_supporting_construction")
+    assert "permanently" in _note(book, "general.bc_703_5_marking")                  # review round 3
+    assert "need not exceed 2 hours" in labels["713.4"]["reason"] and "403.2.1.2" in labels["713.4"]["reason"]
     assert labels["713.1"]["label"] == "flag" and _flags(book, "713.1")
+
+
+UNIT_NUMBER = re.compile(r"\b\d[\d,.]*(?= (?:square|feet|foot|inch|inches|percent|hours?|minutes|degrees|pounds?|cubic|stories))")
+
+
+def _brought_in(token: str, pieces_all: set[str]) -> bool:
+    """A section the folder brings in: a piece of that number, or one under it (716 is brought in where 716.1 is)."""
+    return any(p == token or p.startswith(token + ".") or p == "Table " + token for p in pieces_all)
+
+
+def test_every_section_a_chapter_7_note_names_is_brought_in_or_in_the_readmes_list():
+    """Review round 3 (2026-11-26), the class: a section, chapter or standard a Chapter 7 flag's shown note sends the
+    architect to is either brought in or named in the README's list of references not brought in, so that list never
+    lags behind what the notes cite."""
+    rows = [json.loads(line) for line in SECTIONS.read_text(encoding="utf-8").splitlines()]
+    pieces_all = {p["id"] for p in rows[1:]}
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    listed = _named(readme.split("## References in the brought-in sections that are not brought in", 1)[1])
+    missing = {}
+    for r in load(RULEBOOK)["rules"]:
+        if re.match(r"general\.bc_(table_)?7\d\d_", r["id"]):
+            note = UNIT_NUMBER.sub("", _shown_note(r))           # "156 square feet" is a size, not a section
+            gone = sorted(t for t in _named(note) if not _brought_in(t, pieces_all) and t not in listed)
+            if gone:
+                missing[r["id"]] = gone
+    assert not missing, missing
