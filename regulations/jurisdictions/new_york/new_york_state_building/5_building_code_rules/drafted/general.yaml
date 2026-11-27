@@ -6146,7 +6146,7 @@ rules:
       occupancy_group: U
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '903.2.11.6 and Table 903.2.11.6 and Table 903.2.11.6: each section the table names lies outside Chapter 9 and is a person''s check. Hand-drafted
+  notes: '903.2.11.6 and Table 903.2.11.6: each section the table names lies outside Chapter 9 and is a person''s check. Hand-drafted
     in a Claude Code session (2026-11-27, Chapter 9 part c).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6333,8 +6333,9 @@ rules:
     expect: needs_review
     note: 'Where Sections 907.2.1 to 907.2.23 require a fire alarm system, it is approved, installed per this code and NFPA
       72, and gives occupant notification per 907.5; one with automatic detectors or waterflow detection has at least one
-      manual fire alarm box (not for elevator recall and supervisory service only, nor in Group R-2 unless the fire code official
-      asks one for fire watch): a person''s check.'
+      manual fire alarm box, a single one still where another section lets sprinklers stand in for the boxes (not for elevator
+      recall and supervisory service only, nor in Group R-2 unless the fire code official asks one for fire watch, and then
+      not in an area open to the public): a person''s check.'
   notes: '907.2: a fire alarm system isn''t in the model; the groups'' sections say where one is required. Hand-drafted in
     a Claude Code session (2026-11-27, Chapter 9 part c).'
   drafted_by: claude_code/claude-opus-5-5
@@ -6400,11 +6401,162 @@ rules:
   applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5"]
   check: emergency_voice_alarm_system
   review_when:
-  - when: not emergency_voice_alarm_system and not story_occupant_load >= 1000
-    reason: 'An occupant load of 1,000 or more on this story alone isn''t shown (its load is under 1,000 or not worked out);
-      the Group A occupancy''s load on every floor together, which the model may not wholly hold, may reach it: a person checks.'
-  for_each: story
+  - when: not emergency_voice_alarm_system and not space_occupant_load >= 1000
+    reason: 'An occupant load of 1,000 or more in this room alone isn''t shown (its load is under 1,000 or not worked out);
+      the Group A occupancy it is part of (every Group A room not separated from it by fire barriers per 707.3.10, counted
+      as one, 907.2.1), on this floor and others, may reach it: a person checks.'
+  - when: occupancy_group in ["A-5"] and not emergency_voice_alarm_system
+    reason: 'Group A-5 outdoor bleacher-type seating needs no voice/alarm system where 907.2.1''s exception 2 (300 to under
+      15,000 occupants, a public address system with standby power, small separated enclosed spaces, egress open to the outside)
+      or exception 3 (temporary seating) applies, which the model doesn''t show: a person checks.'
+  for_each: space
   when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 9
+    - 14
+    quote: '[F] 907.2.1.1 System initiation in Group A occupancies with an occupant load of 1,000 or more. Activation of the
+      fire alarm in Group A occupancies with an occupant load of 1,000 or more shall initiate a signal using an emergency
+      voice/alarm communi- cations system in accordance with Section 907.5.2.2. Exception: Where approved, the prerecorded
+      announcement is allowed to be manually deactivated for a period of time, not to exceed 3 minutes, for the sole purpose
+      of allowing a live voice announcement from an approved, constantly attended location.'
+  - file: gov.ny.building.2025.pdf
+    page: 284
+    lines:
+    - 38
+    - 42
+    quote: '[F] 907.2.1 Group A. A manual fire alarm system that activates the occupant notification system in accordance
+      with Section 907.5 shall be installed in Group A occupancies where the occupant load due to the assembly occupancy is
+      300 or more, or where the Group A occupant load is more than 100 persons above or below the lowest level of exit discharge.
+      Group A occupancies not sepa- rated from one another in accordance with Section 707.3.10 shall be considered as a single
+      occupancy for the purposes of applying this section. Portions of Group E occupancies occupied for assembly purposes
+      shall be provided with a fire alarm system'
+  - file: gov.ny.building.2025.pdf
+    page: 284
+    lines:
+    - 48
+    - 50
+    quote: '2. Manual fire alarm boxes and the associated occupant notification system or emergency voice/alarm communication
+      system are not required for Group A-5 outdoor bleacher-type seating having an occupant load of greater than or equal
+      to 300 and less than 15,000 occupants, provided that all of the following are met:'
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 3
+    - 5
+    quote: '3. Manual fire alarm boxes and the associated occupant notification system or emergency voice/alarm communication
+      system are not required for temporary Group A-5 outdoor bleacher-type seating, provided that all of the following are
+      met:'
+  examples:
+  - given:
+      occupancy_group: A-1
+      emergency_voice_alarm_system: true
+    parts:
+      space:
+      - id: p1
+        name: Assembly room
+        measures:
+          space_occupant_load: 1200
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: An emergency voice/alarm communication system per 907.5.2.2, as the building states it.
+  - given:
+      occupancy_group: A-1
+      emergency_voice_alarm_system: false
+    parts:
+      space:
+      - id: p1
+        name: Assembly room
+        measures:
+          space_occupant_load: 1000
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A room with 1,000 occupants lies within one Group A occupancy, so its load is 1,000 or more: a voice/alarm system
+      is required, and none is stated.'
+  - given:
+      occupancy_group: A-1
+      emergency_voice_alarm_system: false
+    parts:
+      space:
+      - id: p1
+        name: Assembly room
+        measures:
+          space_occupant_load: 400
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A room of 400: the occupancy it is part of may reach 1,000, a person checks.'
+  - given:
+      occupancy_group: A-5
+      emergency_voice_alarm_system: false
+    parts:
+      space:
+      - id: p1
+        name: Assembly room
+        measures:
+          space_occupant_load: 5000
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group A-5 bleachers: exceptions 2 and 3 may leave the system out, a person checks.'
+  - given:
+      occupancy_group: A-2
+    parts:
+      space:
+      - id: p1
+        name: Assembly room
+        measures:
+          space_occupant_load: 1200
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Whether the building has a voice/alarm system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+      emergency_voice_alarm_system: false
+    parts:
+      space:
+      - id: p1
+        name: Assembly room
+        measures:
+          space_occupant_load: 1200
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not Group A: not applicable.'
+  - given:
+      occupancy_group: A-1
+      emergency_voice_alarm_system: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No room in the model: with none, the rule needs review.'
+  notes: '907.2.1.1: activating the fire alarm in Group A occupancies with an occupant load of 1,000 or more initiates a signal
+    through an emergency voice/alarm communication system per 907.5.2.2. Group A occupancies not separated per 707.3.10 count
+    as one (907.2.1), so separated ones are counted apart and a story''s load doesn''t settle it; a room lies wholly within
+    one fire area and occupancy, so a room''s own load (both readings) of 1,000 or more settles it: with no system stated,
+    that room fails; a stated system passes. 907.2.1''s exceptions 2 and 3 (Group A-5 outdoor bleachers) need review. Read
+    for a building stated as one Group A; a building of two or more groups is the flag beside it. Hand-drafted in a Claude
+    Code session (2026-11-27, Chapter 9 part c; review round 1).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_1_1_mixed_voice_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Group A of 1,000 or more in a building of two or more groups (BCNYS 907.2.1.1)
+  applies_when: occupancy_group in ["mixed"] and not emergency_voice_alarm_system
   sources:
   - file: gov.ny.building.2025.pdf
     page: 285
@@ -6418,101 +6570,22 @@ rules:
       of allowing a live voice announcement from an approved, constantly attended location.'
   examples:
   - given:
-      occupancy_group: A-1
+      occupancy_group: mixed
+    expect: needs_review
+    note: 'Where a Group A occupancy has an occupant load of 1,000 or more, activating the fire alarm initiates a signal through
+      an emergency voice/alarm communication system per 907.5.2.2 (a prerecorded announcement may be paused up to 3 minutes
+      for a live one where approved): in a building of two or more groups, which rooms are Group A is a person''s check.'
+  - given:
+      occupancy_group: mixed
       emergency_voice_alarm_system: true
-    parts:
-      story:
-      - id: p1
-        name: Level 1
-        measures:
-          story_occupant_load: 1050
-    rows:
-    - part: p1
-      outcome: pass
-    expect: pass
-    note: An emergency voice/alarm communication system per 907.5.2.2, as the building states it.
-  - given:
-      occupancy_group: A-1
-      emergency_voice_alarm_system: false
-    parts:
-      story:
-      - id: p1
-        name: Level 1
-        measures:
-          story_occupant_load: 1000
-    rows:
-    - part: p1
-      outcome: fail
-    expect: fail
-    note: 'A story with 1000 occupants: the Group A-1 occupancy''s load is 1,000 or more, so a voice/alarm system is required,
-      and none is stated.'
-  - given:
-      occupancy_group: A-1
-      emergency_voice_alarm_system: false
-    parts:
-      story:
-      - id: p1
-        name: Level 1
-        measures:
-          story_occupant_load: 999
-    rows:
-    - part: p1
-      outcome: needs_review
-    expect: needs_review
-    note: 'A story under the limit: the other floors'' occupants together may reach it, a person checks.'
-  - given:
-      occupancy_group: A-1
-      emergency_voice_alarm_system: false
-    parts:
-      story:
-      - id: p1
-        name: Level 1
-        measures: {}
-    rows:
-    - part: p1
-      outcome: needs_review
-    expect: needs_review
-    note: 'The story''s occupant load isn''t worked out: a person checks.'
-  - given:
-      occupancy_group: A-1
-    parts:
-      story:
-      - id: p1
-        name: Level 1
-        measures:
-          story_occupant_load: 1000
-    rows:
-    - part: p1
-      outcome: needs_review
-    expect: needs_review
-    note: 'Whether the building has a voice/alarm system isn''t stated: a person checks.'
-  - given:
-      occupancy_group: R-2
-      emergency_voice_alarm_system: false
-    parts:
-      story:
-      - id: p1
-        name: Level 1
-        measures:
-          story_occupant_load: 1000
-    rows:
-    - part: p1
-      outcome: not_applicable
     expect: not_applicable
-    note: 'Not this group: not applicable.'
+    note: 'A voice/alarm system stated: not applicable.'
   - given:
       occupancy_group: A-1
-      emergency_voice_alarm_system: false
-    parts:
-      story: []
-    rows:
-    - outcome: needs_review
-    expect: needs_review
-    note: 'No story in the model: with none, the rule needs review.'
-  notes: 'The occupancy''s occupant load is at least any one story''s: a story whose own load (both readings) is 1,000 or
-    more settles that a voice/alarm system is required, and with none stated the row fails; a stated system passes. Read for
-    a building stated as one group (a building of two or more groups is its fire alarm flag''s). The manual fire alarm system
-    itself is a flag (no fire alarm fact yet). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+    expect: not_applicable
+    note: 'One group: its rule reads the rooms.'
+  notes: 907.2.1.1 for a building of two or more groups, whose rooms' groups aren't stated; set aside where the building states
+    a voice/alarm system. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c; review round 1).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_907_2_1_2_captions
@@ -6904,7 +6977,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Group H's fire alarm and detection (BCNYS 907.2.5)
-  applies_when: occupancy_group in ["H-1", "H-2", "H-3", "H-4", "H-5", "mixed"]
+  applies_when: occupancy_group in ["F-1", "F-2", "H-1", "H-2", "H-3", "H-4", "H-5", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 286
@@ -6925,7 +6998,7 @@ rules:
       occupancy_group: R-2
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '907.2.5: no fire alarm fact is stated yet; what is stored isn''t in the model. Hand-drafted in a Claude Code session
+  notes: '907.2.5: shown for Group F too, where organic coatings may be made ("in occupancies used for the manufacture of organic coatings", review round 1); no fire alarm fact is stated yet; what is stored isn''t in the model. Hand-drafted in a Claude Code session
     (2026-11-27, Chapter 9 part c).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

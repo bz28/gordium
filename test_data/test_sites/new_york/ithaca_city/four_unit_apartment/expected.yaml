@@ -327,6 +327,7 @@ results:
   general.bc_907_2_4_1_battery_manufacturing: not_applicable
   general.bc_907_2_5_group_h_fire_alarm: not_applicable
   general.bc_907_2_1_1_group_a_voice_alarm: not_applicable
+  general.bc_907_2_1_1_mixed_voice_alarm: not_applicable
   general.bc_907_2_3_group_e_voice_alarm: not_applicable
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)

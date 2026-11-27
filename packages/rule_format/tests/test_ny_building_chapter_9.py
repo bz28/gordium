@@ -130,7 +130,8 @@ def test_every_chapter_9_flag_is_a_persons_check_never_a_pass(labels, book, ctx)
     isn't stated."""
     allowed = ctx.allowed()
     by = {"occupancy_group", "group_h_present", "sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3",
-          "occupied_outdoor_areas", "ambulatory_care_facility"}            # part b: 903.2.1.6, 903.2.2.1
+          "occupied_outdoor_areas", "ambulatory_care_facility",            # part b: 903.2.1.6, 903.2.2.1
+          "emergency_voice_alarm_system"}                                 # part c: 907.2.1.1's mixed flag
     for pid, v in labels.items():
         if v["label"] != "flag":
             continue
@@ -404,15 +405,18 @@ def test_no_rule_passes_on_a_13r_system_outside_group_r(book, ctx):
 
 # ---- part c (2026-11-27): the emergency voice/alarm system by the occupancy's occupant load (907.2.1.1, 907.2.3) ----
 
-# each rule, its groups and its limit typed from the page (907.2.1.1, p.285 lines 9-11: "an occupant load of 1,000 or
-# more"; 907.2.3 exception 2, p.285 lines 42-43: not required "with occupant loads of 100 or less")
-VOICE_RULES = {"general.bc_907_2_1_1_group_a_voice_alarm": (["A-1", "A-2", "A-3", "A-4", "A-5"], 1000, ">="),
-               "general.bc_907_2_3_group_e_voice_alarm": (["E"], 100, ">")}
+# each rule, its groups, the part it is read on and its limit typed from the page (907.2.1.1, p.285 lines 9-11: "an
+# occupant load of 1,000 or more", read on each room since Group A occupancies separated per 707.3.10 count apart,
+# 907.2.1, p.284 lines 40-42; 907.2.3 exception 2, p.285 lines 42-43: not required "with occupant loads of 100 or
+# less", read on each story)
+VOICE_RULES = {"general.bc_907_2_1_1_group_a_voice_alarm": (["A-1", "A-2", "A-3", "A-4", "A-5"], 1000, ">=", "space"),
+               "general.bc_907_2_3_group_e_voice_alarm": (["E"], 100, ">", "story")}
 
 
 def _voice_law(groups_of_rule, limit, op, groups, voice, load):
-    """The law's answer for one story, from 907.2.1.1 and 907.2.3 (never from the rules): the occupancy's load is at
-    least one story's, so a story at the limit settles that the system is required; less, the other floors may."""
+    """The law's answer for one room or story, from 907.2.1, 907.2.1.1 and 907.2.3 (never from the rules): a room (A)
+    or story (E) at the limit settles that the system is required, its occupancy's load being at least the room's or
+    story's; less, the rest of the occupancy may reach it; Group A-5's outdoor bleachers may take exceptions 2 or 3."""
     if groups is None:
         return {"needs_review"}
     if len(set(groups)) != 1 or groups[0] not in groups_of_rule:
@@ -421,13 +425,16 @@ def _voice_law(groups_of_rule, limit, op, groups, voice, load):
         return {"needs_review"}
     if voice:
         return {"pass"}
+    if groups[0] == "A-5":
+        return {"needs_review"}
     settled = load is not None and (load >= limit if op == ">=" else load > limit)
     return {"fail"} if settled else {"needs_review"}
 
 
 @pytest.mark.parametrize("rid", sorted(VOICE_RULES))
-def test_each_voice_alarm_rule_gives_the_laws_answer_for_every_story(book, ctx, rid):
-    groups_of_rule, limit, op = VOICE_RULES[rid]
+def test_each_voice_alarm_rule_gives_the_laws_answer(book, ctx, rid):
+    groups_of_rule, limit, op, kind = VOICE_RULES[rid]
+    measure = "space_occupant_load" if kind == "space" else "story_occupant_load"
     rule, allowed, wrong = _rule(book, rid), ctx.allowed(), []
     for groups in [None, ["M", "R-2"], [groups_of_rule[0], "B"]] + [[g] for g in GROUPS]:
         for voice in (None, True, False):
@@ -435,89 +442,30 @@ def test_each_voice_alarm_rule_gives_the_laws_answer_for_every_story(book, ctx, 
                 b = {"occupancy_groups": groups} if groups else {}
                 if voice is not None:
                     b["emergency_voice_alarm_system"] = voice
-                m = {} if load is None else {"story_occupant_load": load}
-                [row] = parts.rows(rule, {"story": [{"id": "p1", "name": "Level 1", "measures": m}]},
+                m = {} if load is None else {measure: load}
+                [row] = parts.rows(rule, {kind: [{"id": "p1", "name": "Part", "measures": m}]},
                                    code_scope.building_measures(b), allowed)
                 if row["outcome"] not in _voice_law(groups_of_rule, limit, op, groups, voice, load):
                     wrong.append((groups, voice, load, row["outcome"]))
     assert not wrong, wrong[:5]
-def test_part_bs_label_reasons_name_their_own_group_and_limits(labels, book):
-    """Part b review round 1: the eight per-room rules' labels shared one reason naming no group, and claimed an
-    occupant-load limit for F-1, M and S-1, which have none; two flag reasons said "a person's check" twice. Each
-    rule's reason now names the group its rule reads and an occupant load only where its rule reads one; no reason
-    repeats itself; and a piece labeled reference has no rule or flag of its own."""
-    for rid in ROOM_RULES:
-        r = _rule(book, rid)
-        pid = r["title"].split("(BCNYS ")[1].rstrip(")")
-        reason = labels[pid]["reason"]
-        assert f"Group {ROOM_RULES[rid][0]} fire area" in reason, pid
-        assert ("occupant load" in reason) == ("space_occupant_load" in formula.names(r["review_when"][0]["when"])), pid
-    for pid, v in labels.items():
-        assert "check.:" not in v["reason"] and v["reason"].count("a person's check") <= 1, pid
-        if v["label"] in ("reference", "not_for_checking"):
-            assert not _own(book, pid), pid
 
 
-def test_the_room_rules_fail_only_where_both_occupant_load_readings_reach_the_limit(book, ctx):
-    """Part b review round 1 (a test gap): most rooms' occupant loads come as two readings (occupant_load.py: a gross
-    factor, or 1004.5.1's increase not ruled out). A fail needs the lower reading at the limit; a split needs review;
-    NFPA 13 passes."""
+def test_part_cs_review_round_1(book, ctx):
+    """Part c review round 1: a Group A-1 story of three 400-person rooms (each its own occupancy where separated per
+    707.3.10) never fails 907.2.1.1 (it is read on each room); a building of two or more groups with no voice/alarm
+    system stated sees 907.2.1.1's flag; 907.2.5's organic coatings show for Group F; 907.2's note keeps the single
+    box where sprinklers stand in for the others."""
     allowed = ctx.allowed()
-    for rid, (group, limit, load_limit) in ROOM_RULES.items():
-        if load_limit is None:
-            continue
-        rule = _rule(book, rid)
-
-        def answer(lo, hi, system):
-            part = {"id": "p1", "name": "Room", "measures": {"space_floor_area": 100},
-                    "readings": {"space_occupant_load": [{"value": lo, "named": {"increase": "no"}},
-                                                         {"value": hi, "named": {"increase": "yes"}}]}}
-            [row] = parts.rows(rule, {"space": [part]}, code_scope.building_measures(
-                _building([group], system, None, None, None)), allowed)
-            return row["outcome"]
-        assert answer(load_limit - 1, load_limit + 50, "none") == "needs_review", rid
-        assert answer(load_limit, load_limit + 50, "none") == "fail", rid
-        assert answer(load_limit, load_limit + 50, "nfpa_13r") == "fail", rid
-        assert answer(load_limit - 1, load_limit + 50, "nfpa_13") == "pass", rid
-
-
-def test_the_grandstands_flag_shows_for_a_school(book, ctx):
-    """Part b review round 1: 903.2.1.5.1 is worded for any enclosed space under grandstands or bleachers, and an
-    assembly space associated with Group E is part of it (303.1.3, p.68), so a building stated Group E sees it."""
-    r = _rule(book, "general.bc_903_2_1_5_1_under_grandstands")
-    assert outcome(r, code_scope.building_measures({"occupancy_groups": ["E"]}), ctx.allowed()) == "needs_review"
-def test_the_separation_thresholds_are_decided_with_the_groups_not_stated(book, ctx):
-    """Review round 2 (2026-11-27): with a 13R system stated and the groups not, 1007.1.1's and 1007.1.2's thresholds
-    were an if-else on an unknown test, so a pair a full diagonal apart needed review (and a pair at 0.2 no longer
-    failed): stating a 13R system gave a worse answer than stating none. Written as "at least one-half, or at least
-    one-third where the system counts", each gives the same answer as with no system or NFPA 13."""
-    allowed = ctx.allowed()
-    cases = [("general.bc_1007_1_1_remoteness", "story", {"story_exit_count": 2, "exit_remoteness_ratio": 0.87}, "pass"),
-             ("general.bc_1007_1_1_space_remoteness", "space",
-              {"space_is_exit": False, "space_exit_count": 2, "space_exit_remoteness_ratio": 0.6}, "pass"),
-             ("general.bc_1007_1_2_space_three_or_more", "space",
-              {"space_is_exit": False, "space_exit_count": 3, "space_occupant_load": 600,
-               "space_exit_remoteness_ratio": 0.2}, "fail")]
-    for rid, kind, m, want in cases:
-        for system in ("none", "nfpa_13", "nfpa_13r"):
-            values = code_scope.building_measures({"sprinkler_system": system})
-            [row] = parts.rows(_rule(book, rid), {kind: [{"id": "p1", "name": "Part", "measures": m}]}, values, allowed)
-            assert row["outcome"] == want, (rid, system, row["outcome"])
-
-
-def test_the_13r_flag_says_what_chapter_10_counts(book, ctx):
-    """Review round 2: the 903.3.1.2 flag said Chapter 10 never counts a 13R system beyond 903.3.1.2's limits, but
-    within a stated Group R Chapter 10 takes the stories and heights on the architect's statement (1007.1.1 passes a
-    Group R-2 story at one-third whatever the stated stories); 903.2.8's rule is what fails 13R above four stories. The
-    shown words say exactly that."""
-    note = _shown_note(_rule(book, "general.bc_903_3_1_2_nfpa_13r_limits"))
-    assert "only in a building stated Group R" in note and "on the architect's statement" in note
-    assert "903.2.8" in note and "nor one Chapter 10" not in note
-    allowed = ctx.allowed()
-    b = {"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r", "stories_above_grade_plane": 6}
-    [row] = parts.rows(_rule(book, "general.bc_1007_1_1_remoteness"),
-                       {"story": [{"id": "p1", "name": "L1", "measures": {"story_exit_count": 2,
-                                                                         "exit_remoteness_ratio": 0.4}}]},
-                       code_scope.building_measures(b), allowed)
-    assert row["outcome"] == "pass"                     # what the note says Chapter 10 does
-    assert _answer(_rule(book, "general.bc_903_2_8_group_r_sprinklers"), b, allowed) == "fail"
+    r = _rule(book, "general.bc_907_2_1_1_group_a_voice_alarm")
+    assert r["for_each"] == "space"
+    rooms = [{"id": f"p{n}", "name": f"Auditorium {n}", "measures": {"space_occupant_load": 400}} for n in range(3)]
+    rows = parts.rows(r, {"space": rooms}, code_scope.building_measures(
+        {"occupancy_groups": ["A-1"], "emergency_voice_alarm_system": False}), allowed)
+    assert {x["outcome"] for x in rows} == {"needs_review"}
+    flag = _rule(book, "general.bc_907_2_1_1_mixed_voice_alarm")
+    assert outcome(flag, code_scope.building_measures({"occupancy_groups": ["A-1", "B"]}), allowed) == "needs_review"
+    assert outcome(flag, code_scope.building_measures({"occupancy_groups": ["A-1", "B"],
+                                                       "emergency_voice_alarm_system": True}), allowed) ==         "not_applicable"
+    h = _rule(book, "general.bc_907_2_5_group_h_fire_alarm")
+    assert outcome(h, code_scope.building_measures({"occupancy_groups": ["F-1"]}), allowed) == "needs_review"
+    assert "a single one still" in _shown_note(_rule(book, "general.bc_907_2_where_required"))

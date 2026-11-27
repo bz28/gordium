@@ -238,6 +238,7 @@ occupancy_group:
   - general.bc_903_2_mixed_occupancies
   - general.bc_903_3_1_3_nfpa_13d_scope
   - general.bc_907_2_1_1_group_a_voice_alarm
+  - general.bc_907_2_1_1_mixed_voice_alarm
   - general.bc_907_2_1_2_captions
   - general.bc_907_2_1_3_group_a_smoke_detection
   - general.bc_907_2_1_group_a_fire_alarm
@@ -456,6 +457,7 @@ emergency_voice_alarm_system:
   needed_by:
   - general.bc_1020_3_corridor_capacity
   - general.bc_907_2_1_1_group_a_voice_alarm
+  - general.bc_907_2_1_1_mixed_voice_alarm
   - general.bc_907_2_3_group_e_voice_alarm
 group_r_present:
   meaning: 'The building has a Group R occupancy (R-1 to R-4) among the groups the architect states, alone or with others
