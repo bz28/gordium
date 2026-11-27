@@ -230,7 +230,7 @@ def test_review_round_1s_notes_say_what_the_law_says(book, labels):
 
 
 def test_part_cs_group_i2_flags_never_set_aside_an_i2_or_unstated_building(book, ctx):
-    """709.5.1 (Group I-2 and ambulatory care smoke barrier doors) and 710.5.3 (Group I-2 Condition 2 pass-through
+    """709.5.1 (Groups I-1 and I-2 and ambulatory care smoke barrier doors) and 710.5.3 (Group I-2 Condition 2 pass-through
     openings) are set aside only where the stated group rules them out: Group I-2, a building of two or more groups,
     no group stated, or (709.5.1) an ambulatory care facility stated or not ruled out, all need review."""
     allowed = ctx.allowed()
@@ -293,7 +293,7 @@ def test_part_b_review_round_1s_notes_say_what_the_tables_say(book):
     doors are 3, 1 1/2 and 1 hours (not the walls' 3, 2 and 1); a window in a 1-hour fire partition is 3/4 hour; 716.1's
     note names 1020.2.1 for elevator hoistway doors, not corridors."""
     other = _shown_note([r for r in book if r["id"] == "general.bc_table_716_1_2__other_assemblies"][0])
-    assert "a door rated 3, 1 1/2 and 1 hours" in other
+    assert "double fire walls of 3 hours with each wall 2, a door rated 1 1/2 hours" in " ".join(other.split())
     windows = _shown_note([r for r in book if r["id"] == "general.bc_table_716_1_3__fire_windows"][0])
     assert "fire partitions rated 1 hour, 3/4 hour" in " ".join(windows.split())
     general = _shown_note([r for r in book if r["id"] == "general.bc_716_1_opening_protectives_general"][0])
@@ -317,19 +317,34 @@ CHART_716 = {
     "general.bc_table_716_1_2__smoke_barriers": [
         ("smoke barriers rated 1 hour", ["at least 1/3 hour (20 minutes)", "D-20", "3/4 hour (D-H-OH-45)"])],
     "general.bc_table_716_1_2__other_assemblies": [
-        ("in fire walls and fire barriers rated over 1 hour", ["a door rated 3 hours in a 4-hour or 3-hour wall",
-                                                               "1 1/2 hours in a 2-hour or 1 1/2-hour wall"]),
-        ("in double fire walls per NFPA 221", ["a single-wall rating of 4, 3 or 2 hours", "each wall 3, 2 or 1 hours",
-                                               "a door rated 3, 1 1/2 and 1 hours"]),
-        ("horizontal exits in fire walls", ["3 hours"]),
-        ("other fire barriers rated 1 hour", ["3/4 hour"]),
-        ("other fire partitions", ["3/4 hour in a 1-hour wall", "1/3 hour in a 1/2-hour wall"]),
-        ("exterior walls", ["1 1/2 hours in a 3-hour or 2-hour wall", "3/4 hour in a 1-hour wall"]),
-        ("in a wall rated over 1 hour", ["sidelights and transoms are fire-resistance-rated glazing only",
-                                         "vision panel of fire-protection-rated glazing is at most 100 square inches",
-                                         "fire-resistance-rated only (note a)"]),
-        ("in a 2-hour exterior wall", ["fire-protection-rated 1 1/2 hours (D-H-OH-90)", "fire-resistance-rated 2 hours (W-120)"]),
-        ("in other fire barriers and fire partitions rated 1 hour", ["D-H-45 (3/4 hour)", "1/2-hour fire partitions D-H-20 (1/3 hour)"])],
+        ("fire walls and fire barriers rated 4 hours", ["a door rated 3 hours", "D-H-W-240, note a",
+                                                        "sidelights fire-resistance-rated only (W-240)"]),
+        ("fire walls and fire barriers rated 3 hours", ["a door rated 3 hours", "note d", "D-H-W-180 only (note a)",
+                                                        "sidelights W-180 only"]),
+        ("fire walls and fire barriers rated 2 hours", ["a door rated 1 1/2 hours", "D-H-90 up to 100 square inches or D-H-W-90 over",
+                                                        "W-120 only"]),
+        ("fire walls and fire barriers rated 1 1/2 hours", ["a door rated 1 1/2 hours",
+                                                            "D-H-90 up to 100 square inches or D-H-W-90 over", "W-90 only"]),
+        ("of 4 hours with each wall 3", ["a door rated 3 hours", "D-H-W-180 only (note a)", "sidelights W-180 only"]),
+        ("double fire walls per NFPA 221", ["note e, 706.4", "note f, NFPA 221's 4.6"]),
+        ("double fire walls of 3 hours with each wall 2", ["a door rated 1 1/2 hours",
+                                                            "D-H-90 up to 100 square inches or D-H-W-90 over", "W-120 only"]),
+        ("double fire walls of 2 hours with each wall 1", ["a door rated 1 hour", "D-H-60 up to 100 square inches or D-H-W-60 over",
+                                                            "W-60 only"]),
+        ("horizontal exits in fire walls (note g", ["rated 4 hours, a door rated 3 hours",
+                                                    "D-H-180 up to 100 square inches or D-H-W-240 over", "W-240 only"]),
+        ("horizontal exits in fire walls rated 3 hours", ["a door rated 3 hours (note d)",
+                                                          "D-H-180 up to 100 square inches or D-H-W-180 over", "W-180 only"]),
+        ("other fire barriers rated 1 hour", ["a door rated 3/4 hour", "vision panel D-H-45", "rated 3/4 hour (D-H-45, note h)"]),
+        ("other fire partitions rated 1 hour", ["a door rated 3/4 hour", "note i", "vision panel D-H-45", "rated 3/4 hour (D-H-45)"]),
+        ("other fire partitions rated 1/2 hour", ["a door rated 1/3 hour", "vision panel D-H-20", "rated 1/3 hour (D-H-20)"]),
+        ("exterior walls rated 3 hours", ["a door rated 1 1/2 hours", "D-H-90 up to 100 square inches or D-H-W-90 over",
+                                          "W-180 only"]),
+        ("exterior walls rated 2 hours", ["a door rated 1 1/2 hours", "D-H-90 or D-H-W-90 to the maximum size tested",
+                                          "fire-protection-rated 1 1/2 hours (D-H-OH-90, note h)",
+                                          "fire-resistance-rated 2 hours (W-120)"]),
+        ("exterior walls rated 1 hour", ["a door rated 3/4 hour", "vision panel D-H-45", "rated 3/4 hour (D-H-45, note h)"]),
+        ("Where sidelights are fire-resistance-rated only", ["fire-protection-rated glazing is not permitted"])],
     "general.bc_table_716_1_3__fire_windows": [
         ("a fire window in a fire wall or a fire barrier", ["is not permitted", "W with the wall's own rating"]),
         ("in atrium separations", ["(707.3.6)", "(707.3.7)", "(707.3.9) rated 1 hour, 3/4 hour (OH-45", "or W-60)"]),
@@ -378,15 +393,28 @@ def test_the_chart_catches_a_row_changed(book):
     notes = {rid: " ".join(_shown_note([r for r in book if r["id"] == rid][0]).split()) for rid in CHART_716}
     other, windows, exits = ("general.bc_table_716_1_2__other_assemblies", "general.bc_table_716_1_3__fire_windows",
                              "general.bc_table_716_1_2__exit_enclosures")
-    changes = [(other, "other fire partitions, 3/4 hour in a 1-hour wall", "other fire partitions, 1/3 hour in a 1-hour wall"),
+    changes = [(other, "other fire partitions rated 1 hour, a door rated 3/4 hour", "other fire partitions rated 1 hour, a door rated 1/3 hour"),
                (windows, "(707.3.9) rated 1 hour, 3/4 hour", "(707.3.9) rated 1 hour, 1/3 hour"),
                (windows, "fire barrier is not permitted", "fire barrier is permitted"),
-               (other, "single-wall rating of 4, 3 or 2 hours", "single-wall rating of 4, 3 or 1 hours"),
+               (other, "of 4 hours with each wall 3, a door rated 3 hours, vision panel D-H-W-180 only", "of 4 hours with each wall 3, a door rated 3 hours, vision panel D-H-180"),
                (exits, "D-H-T-W-90", "D-H-W-90"),
-               (other, "4-hour or 3-hour wall", "4-hour wall"),
+               (other, "double fire walls of 2 hours with each wall 1, a door rated 1 hour, vision panel D-H-60", "double fire walls of 2 hours with each wall 1, a door rated 1 hour, vision panel D-H-90"),
                (exits, "D-H-T-W-90 (2 hours) or D-H-T-W-60 (1 hour)", "D-H-T-W-90 (1 hour) or D-H-T-W-60 (2 hours)"),
                (exits, "D-H-60 up to 100 square inches", "D-H-60 up to 200 square inches"),
-               (other, "fire-resistance-rated glazing only", "fire-resistance-rated glazing"),
+               (other, "W-120 only; fire walls and fire barriers rated 1 1/2", "W-120; fire walls and fire barriers rated 1 1/2"),
+               (other, "D-H-180 up to 100 square inches or D-H-W-240 over", "D-H-180 up to 100 square inches or D-H-W-180 over"),
+               (other, "vision panel D-H-90 or D-H-W-90 to the maximum size tested", "vision panel to the maximum size tested"),
+               (other, "sidelights fire-resistance-rated only (W-240)", "sidelights fire-resistance-rated only (W-180)"),
+               (other, "note a), sidelights W-180 only; fire walls and fire barriers rated 2",
+                "note a), sidelights W-120 only; fire walls and fire barriers rated 2"),
+               (other, "each wall 3, a door rated 3 hours, vision panel D-H-W-180 only (note a), sidelights W-180 only",
+                "each wall 3, a door rated 3 hours, vision panel D-H-W-180 only (note a), sidelights W-120 only"),
+               (other, "a door rated 3/4 hour, vision panel D-H-45 to the maximum", "a door rated 3/4 hour, vision panel D-H-20 to the maximum"),
+               (other, "note i), vision panel D-H-45", "note i), vision panel D-H-20"),
+               (other, "a door rated 1/3 hour, vision panel D-H-20", "a door rated 1/3 hour, vision panel D-H-45"),
+               (other, "exterior walls rated 1 hour, a door rated 3/4 hour, vision panel D-H-45",
+                "exterior walls rated 1 hour, a door rated 3/4 hour, vision panel D-H-20"),
+               (other, "note e, 706.4", "note f, 706.4"),
                ("general.bc_table_716_1_2__corridors", "(20 minutes)", "(45 minutes)")]
     for rid, a, b in changes:
         assert a in notes[rid], a
@@ -402,3 +430,26 @@ def test_part_b_review_round_2s_notes_keep_their_sections_scope(book):
     assert "in a corridor or a smoke barrier" in glazing
     smoke = _shown_note([r for r in book if r["id"] == "general.bc_716_2_1_4_smoke_draft_control_test"][0])
     assert "for one" in smoke and "3006.3" in smoke
+
+
+def test_709_5_1_reaches_group_i1_through_709_5s_exception(book, ctx):
+    """Part c review round 1 (P1): 709.5 exception 1 sends Group I-1 Condition 2's pair of corridor doors to 709.5.1, and
+    Condition 2 isn't a stated fact, so a stated Group I-1 never sets 709.5.1 aside."""
+    doors = [r for r in book if r["id"] == "general.bc_709_5_1_i2_smoke_barrier_doors"][0]
+    assert outcome(doors, {"occupancy_group": "I-1", "ambulatory_care_facility": False}, ctx.allowed()) == "needs_review"
+
+
+def test_part_c_review_round_2s_wording(book):
+    """Part c review round 2: 709.5.1's title keeps ambulatory care facilities (an R-2 or B building sees it only for
+    them); 709.4's support exception reads 'except in' Types IIB, IIIB and VB (not 'only in'); 708.6's and 709.5's
+    openings name Table 716.1(3)'s windows as well as Table 716.1(2)'s doors."""
+    rules = {r["id"]: r for r in book}
+    assert "ambulatory care" in rules["general.bc_709_5_1_i2_smoke_barrier_doors"]["title"]
+    assert "except in buildings of Types IIB, IIIB and VB" in _shown_note(rules["general.bc_709_4_smoke_barrier_continuity"])
+    for rid in ("general.bc_708_6_fire_partition_openings", "general.bc_709_5_smoke_barrier_openings"):
+        assert "OH-45" in " ".join(_shown_note(rules[rid]).split()), rid
+    labels = load(LABELS)["labels"]                                     # review round 3: the labels and the note's end
+    for pid in ("708.6", "709.5"):
+        assert "OH-45" in " ".join(labels[pid]["reason"].split()), pid
+    assert "windows' ratings" in _shown_note(rules["general.bc_709_5_smoke_barrier_openings"])
+    assert "1/3 hour (D-H-20) in a 1/2-hour one" in " ".join(_shown_note(rules["general.bc_708_6_fire_partition_openings"]).split())

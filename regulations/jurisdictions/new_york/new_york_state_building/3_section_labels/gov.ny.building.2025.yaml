@@ -4292,7 +4292,8 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Openings in a fire partition are protected per Section 716 (Table 716.1(2): a corridor wall''s doors at least
-      20 minutes, another fire partition''s 3/4 hour in a 1-hour wall): a person''s check (general.bc_708_6_fire_partition_openings).'
+      20 minutes, another fire partition''s 3/4 hour in a 1-hour wall, 1/3 hour in a 1/2-hour one; Table 716.1(3): a fire window 3/4 hour
+      (OH-45 or W-60) in a 1-hour fire partition, 1/3 hour (OH-20 or W-30) in a 1/2-hour one): a person''s check (general.bc_708_6_fire_partition_openings).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 174
@@ -4388,7 +4389,7 @@ labels:
     topic: means_of_egress
     reason: 'A smoke barrier is an effective membrane from the foundation or floor below to the underside of the floor or
       roof sheathing, deck or slab above, through concealed and interstitial spaces, its supporting construction rated as
-      the wall or floor it supports (but in Types IIB, IIIB and VB); walls dividing smoke compartments meet 709.4.1, walls
+      the wall or floor it supports (except in buildings of Types IIB, IIIB and VB); walls dividing smoke compartments meet 709.4.1, walls
       enclosing areas of refuge (1009.6.4) or elevator lobbies (405.4.3, 3007.6.2, 3008.6.2) meet 709.4.2; except none is
       needed in an interstitial space whose ceilings or exterior walls resist fire and smoke as well: a person''s check (general.bc_709_4_smoke_barrier_continuity).'
     sources:
@@ -4456,8 +4457,8 @@ labels:
   '709.5':
     label: flag
     topic: means_of_egress
-    reason: 'Openings in a smoke barrier are protected per Section 716 (Table 716.1(2): a door at least 20 minutes); except,
-      in Group I-1 Condition 2, Group I-2 and ambulatory care facilities, a pair of opposite-swinging doors across a corridor
+    reason: 'Openings in a smoke barrier are protected per Section 716 (Table 716.1(2): a door at least 20 minutes; Table 716.1(3):
+      a fire window 3/4 hour, OH-45 or W-60); except, in Group I-1 Condition 2, Group I-2 and ambulatory care facilities, a pair of opposite-swinging doors across a corridor
       per 709.5.1, close fitting, with no center mullion, undercuts over 3/4 inch, louvers or grilles, with head and jamb
       stops and astragals or rabbets at the meeting edges (positive latching not required; protective plates need no label),
       and special-purpose horizontal sliding, accordion or folding doors per 1010.3.3 protected per 716: a person''s check
@@ -4484,7 +4485,7 @@ labels:
   709.5.1:
     label: flag
     topic: means_of_egress
-    reason: 'In Group I-2 and ambulatory care facilities, smoke barrier doors across a corridor with hold-open devices close
+    reason: 'In Group I-2 and ambulatory care facilities (and Group I-1 Condition 2, through 709.5 exception 1), smoke barrier doors across a corridor with hold-open devices close
       automatically per 716.2.6.6, and have a vision panel of fire-protection-rated glazing in fire-protection-rated frames
       no larger than tested: a person''s check (general.bc_709_5_1_i2_smoke_barrier_doors).'
     sources:
