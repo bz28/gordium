@@ -92,7 +92,9 @@ def test_each_flags_shown_words_hold_wherever_it_needs_review(rules):
     said "The building states it has an atrium" where it showed for a Group H building stating none)."""
     for rid in _block_ids():
         shown = next(e["note"] for e in rules[rid]["examples"] if e.get("expect") == "needs_review" and e.get("note"))
-        assert not re.search(r"states (it|the|that)|is stated(?! or not)", shown), (rid, shown)
+        assert not re.search(r"\bstates (it|the|that)\b|\bis stated\b(?! or not)", shown), (rid, shown)
+    # the pattern itself catches the words round 2 found (a pattern that can't match pins nothing: found in part c)
+    assert re.search(r"\bstates (it|the|that)\b|\bis stated\b(?! or not)", "The building states it has an atrium: Sections 404.1 to 404.11 apply")
 
 
 def test_what_404_1_shows_by_is_said_where_people_read_it():
