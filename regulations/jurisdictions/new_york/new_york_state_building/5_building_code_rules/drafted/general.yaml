@@ -1718,8 +1718,9 @@ rules:
     expect: needs_review
     note: 'A fire door in an interior exit stairway or ramp or an exit passageway transmits a temperature rise of at most
       450 degrees F above ambient at the end of 30 minutes of the standard fire test, unless the building is equipped throughout
-      with an automatic sprinkler system per 903.3.1.1 or 903.3.1.2: with neither stated (a 13R system counts only in
-      Group R, within 903.3.1.2''s four stories), a person''s check (the doors'' test results aren''t in the model).'
+      with an automatic sprinkler system per 903.3.1.1 or 903.3.1.2: with neither stated (a 13R system counts only in Group
+      R, within 903.3.1.2''s four stories, and in Group I-1 Condition 1, 903.2.6 exception 1), a person''s check (the doors''
+      test results aren''t in the model).'
   - given:
       sprinklered_903_3_1_1: true
       occupancy_group: B
@@ -6553,14 +6554,15 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Where a Class I standpipe system is installed, required or not (901.2), Class I hose connections in every required
-      interior or exterior exit stairway, one for each story above and below grade plane at the main floor landing unless
-      the fire code official approves otherwise (one in the open corridor or breezeway between open stairs 75 feet or less
-      apart), on each side of a horizontal exit''s wall and in every exit passageway at its entrance from other areas (neither
-      where a 30-foot hose stream on 100 feet of hose from a stairway''s connection reaches the floor areas next to it), at
-      a mall''s public entrances and its exit passageway and corridor entrances, at the roof or the highest landing with roof
-      access per 1011.12 where the roof''s slope is under 4 in 12, and more where the fire code official asks (a floor''s
-      most remote point over 150 feet from one, 200 feet sprinklered): a person''s check.'
+    note: 'Where a Class I or Class III standpipe system is installed (Class III through 905.6 and 905.6.1), required or not
+      (901.2), Class I hose connections in every required interior or exterior exit stairway, one for each story above and
+      below grade plane at the main floor landing unless the fire code official approves otherwise (one in the open corridor
+      or breezeway between open stairs 75 feet or less apart), on each side of a horizontal exit''s wall and in every exit
+      passageway at its entrance from other areas (neither where a 30-foot hose stream on 100 feet of hose from a stairway''s
+      connection reaches the floor areas next to it), at a mall''s public entrances and its exit passageway and corridor entrances,
+      at the roof or the highest landing with roof access per 1011.12 where the roof''s slope is under 4 in 12, and more where
+      the fire code official asks (a floor''s most remote point over 150 feet from one, 200 feet sprinklered): a person''s
+      check.'
   notes: 'They bind any standpipe system provided, required or not (901.2: a system not required may be installed where it
     meets this code), so 905.3''s exceptions for Group R-2 townhouses and Group R-3 don''t set them aside (review round 2).
     Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
@@ -6583,9 +6585,9 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Where a Class I standpipe system is installed, required or not (901.2), its risers and laterals not in an interior
-      exit stairway have the fire resistance the building''s vertical enclosures need (laterals left unenclosed in a building
-      sprinklered throughout): a person''s check.'
+    note: 'Where a Class I or Class III standpipe system is installed (Class III through 905.6 and 905.6.1), required or not
+      (901.2), its risers and laterals not in an interior exit stairway have the fire resistance the building''s vertical
+      enclosures need (laterals left unenclosed in a building sprinklered throughout): a person''s check.'
   notes: 'They bind any standpipe system provided, required or not (901.2: a system not required may be installed where it
     meets this code), so 905.3''s exceptions for Group R-2 townhouses and Group R-3 don''t set them aside (review round 2).
     Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
@@ -8624,9 +8626,9 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'In a smokeproof enclosure ventilated by natural means (909.20.3), where a vestibule leads to the stairway, the
-      door into the vestibule is a fire door assembly per 716, the door from the vestibule to the stairway at least 20 minutes
-      per 716: a person''s check.'
+    note: 'In a smokeproof enclosure ventilated by natural means (909.20.3), where a vestibule leads to the stairway or ramp,
+      the door into the vestibule is a fire door assembly per 716, the door from the vestibule to the stairway at least 20
+      minutes per 716: a person''s check.'
   notes: '909.20.3.2: the doors'' ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
     9 part e).'
   drafted_by: claude_code/claude-opus-5-5
@@ -30312,8 +30314,8 @@ rules:
     note: 'Where 1013.1 requires exit signs in Group R-1, low-level exit signs complying with 1013.5 are added in every area
       serving guest rooms, their bottom at least 10 and at most 18 inches above the floor, flush on the door or wall, a wall
       sign''s edge within 4 inches of the door frame on the latch side; not required in a building sprinklered throughout
-      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories): exit signs aren''t
-      in the model, so a person''s check.'
+      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories, and in Group I-1
+      Condition 1, 903.2.6 exception 1): exit signs aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-1
       sprinklered_903_3_1_1: true
@@ -30727,9 +30729,10 @@ rules:
       sprinklered_903_3_1_2: false
     expect: needs_review
     note: 'A stairway in an accessible means of egress has at least 48 inches clear between handrails; not required in a building
-      sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories),
-      or for stairways reached from a refuge area with a horizontal exit: which stairways serve as an accessible means of
-      egress, and their width between handrails, aren''t measured, so a person''s check.'
+      sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories,
+      and in Group I-1 Condition 1, 903.2.6 exception 1), or for stairways reached from a refuge area with a horizontal exit:
+      which stairways serve as an accessible means of egress, and their width between handrails, aren''t measured, so a person''s
+      check.'
   - given:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -30786,9 +30789,9 @@ rules:
     note: 'A stairway in an accessible means of egress has an area of refuge within an enlarged floor-level landing or is
       reached from one complying with 1009.6; not required at exit access stairways with two-way communication at the elevator
       landing (1009.8), in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group
-      R, within 903.3.1.2''s four stories), at open parking garages'' stairways, for smoke-protected or open-air assembly
-      seating (1030.6.2 and 1030.6.3), in Group R-2, or for stairways reached from a refuge area with a horizontal exit: areas
-      of refuge aren''t in the model, so a person''s check.'
+      R, within 903.3.1.2''s four stories, and in Group I-1 Condition 1, 903.2.6 exception 1), at open parking garages'' stairways,
+      for smoke-protected or open-air assembly seating (1030.6.2 and 1030.6.3), in Group R-2, or for stairways reached from
+      a refuge area with a horizontal exit: areas of refuge aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
       sprinklered_903_3_1_1: false
@@ -30881,9 +30884,10 @@ rules:
     expect: needs_review
     note: 'An elevator in an accessible means of egress is reached from an area of refuge complying with 1009.6; not required
       in open parking garages, in buildings and facilities sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system
-      counts only in Group R, within 903.3.1.2''s four stories), at elevators 712 doesn''t require in a shaft, for smoke-protected
-      or open-air assembly seating (1030.6.2 and 1030.6.3), or for elevators reached from a refuge area with a horizontal
-      exit: elevators and areas of refuge aren''t in the model, so a person''s check.'
+      counts only in Group R, within 903.3.1.2''s four stories, and in Group I-1 Condition 1, 903.2.6 exception 1), at elevators
+      712 doesn''t require in a shaft, for smoke-protected or open-air assembly seating (1030.6.2 and 1030.6.3), or for elevators
+      reached from a refuge area with a horizontal exit: elevators and areas of refuge aren''t in the model, so a person''s
+      check.'
   - given:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -31165,7 +31169,8 @@ rules:
       at least 4 feet out from the wall beside the landing) and from the ground to at least 10 feet above the area''s floor
       or the roof line, whichever is lower, openings protected per 716; neither the rating nor the opening protectives is
       required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within
-      903.3.1.2''s four stories): such areas and wall ratings aren''t in the model, so a person''s check.'
+      903.3.1.2''s four stories, and in Group I-1 Condition 1, 903.2.6 exception 1): such areas and wall ratings aren''t in
+      the model, so a person''s check.'
   - given:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: true
@@ -31236,7 +31241,8 @@ rules:
     expect: needs_review
     note: 'Stairways in the means of egress from an exterior area for assisted rescue have at least 48 inches clear between
       handrails; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in
-      Group R, within 903.3.1.2''s four stories): such areas aren''t in the model, so a person''s check.'
+      Group R, within 903.3.1.2''s four stories, and in Group I-1 Condition 1, 903.2.6 exception 1): such areas aren''t in
+      the model, so a person''s check.'
   - given:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
