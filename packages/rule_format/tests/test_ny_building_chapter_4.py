@@ -436,7 +436,8 @@ CONVERSION = {"inch": {"mm": 25.4}, "foot": {"mm": 304.8, "m": 0.3048}, "square 
 # pieces where the number reader records a figure without its unit, and that unit: a metric one ("50 pounds (220 N)":
 # the newtons), or an imperial one ("30 net square feet (2.8 m2)": "net" between the number and its unit)
 UNIT_NOT_RECORDED = {"408.3.2": "N"}
-IMPERIAL_UNIT_NOT_RECORDED = {"407.5.3": "square foot", "407.10": "square foot"}
+IMPERIAL_UNIT_NOT_RECORDED = {"407.5.3": "square foot", "407.10": "square foot", "408.6.2": "square foot",
+                              "420.6.1": "square foot"}
 
 
 def _numbers(pid, entry):
@@ -520,7 +521,7 @@ def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
         if re.fullmatch(r"4\d\d(\.\d+)+", str(pid)):
             for here, after in _misprinted(_numbers(pid, entry)):
                 found.setdefault(str(pid), []).append((here, after))
-    assert set(found) >= {"407.2.4", "407.3.1.1", "408.3.3"}, found   # the walk finds the ones it was written for
+    assert set(found) >= {"407.2.4", "407.3.1.1", "408.3.3", "408.8.3"}, found   # the walk finds the ones it was written for
     block = _block_ids()
     for pid, pairs in found.items():
         flags = " ".join(pieces[pid].get("flags") or [])

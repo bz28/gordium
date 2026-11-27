@@ -3587,7 +3587,11 @@ rules:
       occupancy_group: R-2
     expect: not_applicable
     note: 'The building is stated one group, not Group I-3: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  notes: 'The book prints "120 square inches (0.77 m2)" (p.103, line 40), but 120 sq in is 0.077 m2. Gordium''s
+    reading is that the metric figure is misprinted and 120 sq in is the limit, as the same book prints 144 square inches
+    as 0.0929 m2 elsewhere (p.180, line 25) and 100 square inches as 0.0645 m2 (p.180, line 42); which the State means
+    is a person''s check (found by part c''s conversion walk, part e). Hand-drafted in a Claude Code session
+    (2026-11-26, Chapter 4 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_408_8_4_smoke_tight_doors
@@ -16932,7 +16936,8 @@ rules:
       sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
       system is the one the column means is a person''s check (never a pass on it).'
   - when: occupancy_group == "I-3" and sprinklered_903_3_1_1 and corridor_fire_rating_hours < 1
-    reason: 'Group I-3 under 1 hour: note b''s reduction (408.8, not brought in) may allow less: a person checks.'
+    reason: 'Group I-3 under 1 hour: note b''s reduction (408.8, a flag of Chapter 4 part e) may allow less: a person
+      checks.'
   - when: occupancy_group == "I-1" and not ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours
       >= 1) and corridors_within_dwelling_units
     reason: 'Unless the corridor is within a dwelling unit or sleeping unit (exception 2: no rating required there), which

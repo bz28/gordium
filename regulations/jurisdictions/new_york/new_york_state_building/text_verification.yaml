@@ -3325,14 +3325,14 @@ pieces:
     piece_sha256: 80d04e89207cc0bd4ccb92b3830aa342afc2fd28a10e2bd9c3a3e390697fc0fe
     numbers:
     - two or more
-    - not less than 30
+    - not less than 30 net square foot
     - 2.8 m
     - not less than 6 square foot
     - 0.56 m
     second_reading: agrees
     second_reading_numbers:
     - two or more
-    - not less than 30
+    - not less than 30 net square foot
     - 2.8 m
     - not less than 6 square foot
     - 0.56 m
@@ -3388,9 +3388,9 @@ pieces:
     piece_sha256: 1f3cfa5dfbaa8a6becb3315cf1ad93bc4eecd5e15fc10d09caafc574d89ddbea
     numbers:
     - '407.10'
-    - '30'
+    - 30 net square foot
     - 2.8 m
-    - and 6
+    - and 6 net square foot
     - 0.56 m
     - not less than 50 foot
     - 15 mm
@@ -3398,9 +3398,9 @@ pieces:
     second_reading: agrees
     second_reading_numbers:
     - '407.10'
-    - '30'
+    - 30 net square foot
     - 2.8 m
-    - and 6
+    - and 6 net square foot
     - 0.56 m
     - not less than 50 foot
     - 15 mm
@@ -3741,11 +3741,11 @@ pieces:
   408.6.2:
     piece_sha256: 846ca24b42a873d9f01cf5f738daf16e33a06ba19110f8c05d36f1972524e9e6
     numbers:
-    - not less than 6
+    - not less than 6 net square foot
     - 0.56 m
     second_reading: agrees
     second_reading_numbers:
-    - not less than 6
+    - not less than 6 net square foot
     - 0.56 m
     second_reading_comparisons:
     - '>='
@@ -3841,6 +3841,11 @@ pieces:
     - <=
     - none
     - none
+    flags:
+    - '''not exceed 120 square inch'' beside ''0.77 m'': the book prints "120 square inches (0.77 m2)", but 120 sq in is
+      0.077 m2; both readings agree on what is printed. The flag of 408.8.3 gives Gordium''s reading (the metric figure
+      misprinted, as the book prints 144 square inches as 0.0929 m2 elsewhere, p.180 line 25) and leaves which the
+      State means to a person''s check (Chapter 4 part e).'
   408.8.4:
     piece_sha256: 0aab87cc46ba72e08061e2876414e9a76b9b2fe2623fefaaf03bdd22513a4d6c
     numbers:
@@ -3936,16 +3941,16 @@ pieces:
     piece_sha256: f8f076b655ed6ac260c8232a52a7c47ca8635fe9d8bc7a85656055e59c5f63ef
     numbers:
     - two or more
-    - not less than 15
+    - not less than 15 net square foot
     - 1.4 m
-    - not less than 6
+    - not less than 6 net square foot
     - 0.56 m
     second_reading: agrees
     second_reading_numbers:
     - two or more
-    - not less than 15
+    - not less than 15 net square foot
     - 1.4 m
-    - not less than 6
+    - not less than 6 net square foot
     - 0.56 m
     second_reading_comparisons:
     - '>='
@@ -3958,7 +3963,7 @@ pieces:
     numbers:
     - '420.7'
     - '509'
-    - 907 inch
+    - '907'
     - '1'
     - '907'
     - '2'
@@ -3967,7 +3972,7 @@ pieces:
     second_reading_numbers:
     - '420.7'
     - '509'
-    - 907 inch
+    - '907'
     - '1'
     - '907'
     - '2'
@@ -3986,7 +3991,7 @@ pieces:
     - '420.8'
     - '1'
     - one
-    - not be greater than 30 inch
+    - not be greater than 30
     - '2'
     - one
     - not be greater than 30
@@ -3996,7 +4001,7 @@ pieces:
     - '420.8'
     - '1'
     - one
-    - not be greater than 30 inch
+    - not be greater than 30
     - '2'
     - one
     - not be greater than 30
@@ -4144,11 +4149,11 @@ pieces:
   422.3.2:
     piece_sha256: 4c28bf4938fc7cba96a7b27b1859a127a2f91a865031fa4e066490ac01392465
     numbers:
-    - not less than 30
+    - not less than 30 net square foot
     - 2.8 m
     second_reading: agrees
     second_reading_numbers:
-    - not less than 30
+    - not less than 30 net square foot
     - 2.8 m
     second_reading_comparisons:
     - '>='
@@ -5360,14 +5365,14 @@ pieces:
     piece_sha256: 580a41a3d1f1bbe500ce51da960d1605fa761c200d2bdadcc4eadab7ee52f9db
     numbers:
     - one
-    - 1004.1 inch
+    - '1004.1'
     - not exceed one
     - four
     - not exceed one
     second_reading: agrees
     second_reading_numbers:
     - one
-    - 1004.1 inch
+    - '1004.1'
     - not exceed one
     - four
     - not exceed one
