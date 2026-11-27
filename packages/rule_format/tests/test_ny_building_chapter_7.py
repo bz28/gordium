@@ -280,3 +280,33 @@ def test_part_b_review_round_1s_notes_say_what_the_tables_say(book):
     assert "fire partitions rated 1 hour, 3/4 hour" in " ".join(windows.split())
     general = _shown_note([r for r in book if r["id"] == "general.bc_716_1_opening_protectives_general"][0])
     assert "elevator hoistway doors 1020.2.1" in general and "rated corridors 1020.2.1" not in general
+
+
+# Table 716.1(2) and 716.1(3), typed row by row from the page images (PDF pp.184-186; never from the rules or the
+# extracted text, which loses the stacked fractions): the words each flag's note must hold for each row
+CHART_716 = {
+    "general.bc_table_716_1_2__exit_enclosures": [
+        "rated 2 hours is rated at least 1 1/2 hours", "rated 1 hour, or an exit access stairway or ramp enclosure, or an "
+        "exit passageway's walls rated 1 hour, at least 1 hour", "at most 100 square inches"],
+    "general.bc_table_716_1_2__corridors": ["rated 1 hour or 1/2 hour is a fire door rated at least 1/3 hour (20 minutes)",
+                                            "3/4 hour (D-H-OH-45) in a 1-hour wall or 1/3 hour (D-H-OH-20)"],
+    "general.bc_table_716_1_2__smoke_barriers": ["rated at least 1/3 hour (20 minutes)", "rated 3/4 hour (D-H-OH-45)"],
+    "general.bc_table_716_1_2__other_assemblies": [
+        "a door rated 3 hours in a 4-hour or 3-hour wall", "1 1/2 hours in a 2-hour or 1 1/2-hour wall",
+        "a door rated 3, 1 1/2 and 1 hours", "horizontal exits in fire walls", "3 hours; other fire barriers rated 1 hour, "
+        "3/4 hour", "3/4 hour in a 1-hour wall", "1/3 hour in a 1/2-hour wall",
+        "1 1/2 hours in a 3-hour or 2-hour wall and 3/4 hour in a 1-hour wall"],
+    "general.bc_table_716_1_3__fire_windows": [
+        "rated 1 hour, 3/4 hour (OH-45 or W-60", "fire partitions rated 1 hour, 3/4 hour (OH-45 or W-60)",
+        "rated 1/2 hour, 1/3 hour (OH-20 or W-30)", "in smoke barriers rated 1 hour, 3/4 hour (OH-45 or W-60)",
+        "1 1/2 hours where rated over 1 hour, 3/4 hour where 1 hour, 1/3 hour where 1/2 hour", "never in a party wall"],
+}
+
+
+def test_table_716s_flags_chart_match_the_page(book):
+    """Part b review round 1's class: each row of Tables 716.1(2) and 716.1(3), typed from the page image, is in its
+    flag's shown note with the rating the page prints (two rows had been read off the jumbled extracted text)."""
+    for rid, phrases in CHART_716.items():
+        note = " ".join(_shown_note([r for r in book if r["id"] == rid][0]).split())
+        for phrase in phrases:
+            assert phrase in note, (rid, phrase)
