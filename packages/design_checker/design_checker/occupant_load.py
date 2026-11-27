@@ -31,7 +31,18 @@ itself an exit, leaves its story's load not measured (said, never dropped). Stor
 A corridor's load (section group 4: Table 1020.3) is two readings, none and the whole story's, only where the
 building states no other level's occupants reach its corridors (`other_level_egress_into_corridors: false`), else not
 worked out (_corridor_loads).
+
+Where a space's or story's load isn't worked out (a room's function not stated, a room others pass through), it
+still has a ceiling: no occupant can take less than the densest factor Table 1004.5 gives (one per 5 sq ft net,
+standing space), so a story the building states has no area counted by seats, lanes or actual load, no occupied
+outdoor areas and no mezzanine can't hold more than its floor area / 5 (_bounds;
+docs/decisions/2026-11-26_occupant_load_upper_bound.md proves it from the law, with the facts it needs stated). The
+ceiling is given as the part's `bounds`; a rule settles on it only where the law's words are provably the same for
+every load from none up to it (rule_format.parts.rows), so it never decides a rule a load under it could decide
+otherwise.
 """
+
+import math
 
 from model_measurement.routes.stops import STOPS
 from rule_format.rulebook import load
@@ -95,6 +106,83 @@ CORRIDOR_READINGS = ("given as two readings (none, the least it can serve; {load
                      "none")
 CORRIDOR_FUNCTION = ("{name}'s use is corridor, yet it states the function {f!r}: a corridor holds no occupant load of "
                      "its own (Table 1004.5 has no corridor row), so which it is isn't known")
+
+
+# ---- the ceiling on a load not worked out (docs/decisions/2026-11-26_occupant_load_upper_bound.md) ----------------
+# the building facts it needs, each the building block's own (code_scope.FACTS) and each stated no: an area whose
+# load no floor area bounds (Table 1004.5's rows with no factor: fixed seats in any use, 1004.6; bowling lanes; a
+# concentrated business use, NY 1004.8's "actual occupant load as approved"; a mall, 402.8.2), outdoor areas whose
+# people add to the building's (1004.7), or a mezzanine whose people add to a room on an adjacent level (1004.2.2)
+NOT_BY_AREA, OUTDOOR, MEZZANINES = "loads_not_by_area", "occupied_outdoor_areas", "mezzanines"
+NO_FACTS = (NOT_BY_AREA, OUTDOOR, MEZZANINES)
+BOUND = "at_most"                 # a part's `bounds[measure]`: {BOUND: n, "why"} proven; IF_STATED: what stating
+IF_STATED = "if_stated"           # the facts would prove ({BOUND: n, "why", "facts": [...]}), never a value
+BOUND_WHY = ("the story's {area:,.0f} sq ft at the densest Table 1004.5 allows, one occupant per {d:g} sq ft as for "
+             "standing space, whatever the rooms' functions (the building states no area counted by seats, lanes or "
+             "actual load, no occupied outdoor areas and no mezzanine)")
+# a row the ceiling would settle once the building states these facts (rule_format.parts.rows' `bound_facts`): each
+# fact asked for, in words (panel_data's cause, the pane's ask), before the rooms' functions
+BOUND_FACT_WHY = ("{what}: not stated for the project. Once {once}, the story's floor area alone can settle this: no "
+                  "room holds more than one occupant per 5 sq ft, whatever its function")
+BOUND_FACT_ONCE = {NOT_BY_AREA: "the building states it has no area counted by seats, lanes or actual load",
+                   OUTDOOR: "the building states its occupants use no outdoor areas",
+                   MEZZANINES: "the building states it has no mezzanine"}
+
+
+def densest(factors: dict) -> float | None:
+    """The fewest square feet per occupant any function of Table 1004.5 gives, or 1004.5.1's increase allows (its
+    7): no room's occupant load, worked out from its area, can be more than its area divided by this."""
+    got = [e["factor"] for e in factors["functions"].values() if isinstance(e.get("factor"), (int, float))
+           and not isinstance(e.get("factor"), bool) and e["factor"] > 0]
+    cap = factors.get("increase_cap")
+    if isinstance(cap, (int, float)) and not isinstance(cap, bool) and cap > 0:
+        got.append(cap)
+    return min(got) if got else None
+
+
+def _area(part: dict, name: str):
+    v = part["measures"].get(name)
+    if name in (part.get("not_measured") or {}) or isinstance(v, bool) or not isinstance(v, (int, float)) \
+            or not v == v or v < 0 or v == float("inf"):
+        return None
+    return v
+
+
+def _bounds(story: dict, mine: list, rooms: dict, factors: dict, building: dict | None, corridor_ids=()) -> None:
+    """The ceiling on the story's occupant load, and on each of its spaces' (a space's load, its intervening rooms'
+    added by 1004.2.1, is part of its story's; 1004.2.3 adds no other story's), set as `bounds` on each that has no
+    value or readings: {BOUND: n, "why"} where the building states each of NO_FACTS no, and {IF_STATED: {BOUND: n,
+    "why", "facts"}} where stating the ones not yet stated would. n is the story's floor area (the larger of its gross
+    floor area and its spaces' areas added) divided by the densest factor, rounded up (an occupant load is a number of
+    persons). None at all where a room's stated function has no factor or isn't the table's, where the story's or a
+    space's area isn't measured, or where the building states one of NO_FACTS yes."""
+    b = building if isinstance(building, dict) else {}
+    d = densest(factors)
+    gross = _area(story, "story_gross_floor_area")
+    areas = [_area(p, "space_floor_area") for p in mine]
+    if d is None or gross is None or any(a is None for a in areas):
+        return
+    for rid in [p["id"] for p in mine] + list(corridor_ids):    # a function stated on a corridor counts too
+        fn = (rooms.get(rid) or {}).get("function")
+        if fn is None:
+            continue
+        f = ((factors["functions"].get(fn) if isinstance(fn, str) else None) or {}).get("factor")
+        if isinstance(f, bool) or not isinstance(f, (int, float)) or f <= 0:
+            return
+    missing = []
+    for fact in NO_FACTS:
+        if b.get(fact) is True:
+            return
+        if b.get(fact) is not False:                  # not stated, or not yes or no: never "none"
+            missing.append(fact)
+    area = max(gross, sum(areas))
+    n = math.ceil(area / d - 1e-9)
+    entry = {BOUND: n, "why": BOUND_WHY.format(area=area, d=d)}
+    got = entry if not missing else {IF_STATED: {**entry, "facts": missing}}
+    for part, name in [(story, "story_occupant_load")] + [(p, "space_occupant_load") for p in mine]:
+        if name in part["measures"] or (part.get("readings") or {}).get(name):
+            continue
+        part.setdefault("bounds", {})[name] = {k: dict(v) if isinstance(v, dict) else v for k, v in got.items()}
 
 
 def factors_of(path) -> dict:
@@ -303,6 +391,8 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None, 
             _give(story, "story_occupant_load", low, high, no_share)
         else:
             story["not_measured"]["story_occupant_load"] = STORY_NONE
+        _bounds(story, mine, rooms, factors, building,
+                [cid for cid, c in corridors.items() if c.get("within") == story["id"]])
         _corridor_loads(story, [c for c in corridors.values() if c.get("within") == story["id"]], building)
     return parts
 
