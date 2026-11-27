@@ -3415,7 +3415,7 @@ pieces:
     - none
     - none
     flags:
-    - '''30'' and ''and 6'' (>=): safe dispersal areas ''having 30 net square feet'' a bed or stretcher care recipient ''and
+    - '''30 net square foot'' and ''and 6 net square foot'' (>=, recorded with their unit since part c''s reader fix): safe dispersal areas ''having 30 net square feet'' a bed or stretcher care recipient ''and
       6 net square feet'' each other occupant, the least each is given; the recorded words miss it (numbers.py reads comparison
       words only directly before a number or after its unit). The second reading is right. Flag figures (Chapter 4 part d),
       read by no rule.'

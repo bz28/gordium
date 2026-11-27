@@ -114873,9 +114873,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "2e4cdd3997c3d85cf5798f6948856f9f1669cc48da03e9f56bb5efcb71cebd2d",
+  "worker_fingerprint": "bc75a36e4dca2c8be18312fd2972b94f193d324ff016f5c26bd2e04e00f4d565",
   "rulebook": {
-   "new_york/ithaca_city": "78aeacf373bdcff2c147efb981fe8410ee57dcdeb73395c67145826eb141a0ed"
+   "new_york/ithaca_city": "a8871694b888bb4b9ebdd1a1526dca374bf585b284cb7360fa8e19b51e38c23e"
   }
  }
 }

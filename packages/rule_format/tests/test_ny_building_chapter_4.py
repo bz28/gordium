@@ -357,9 +357,12 @@ def _said_not_brought_in(text):
     each has its own distance, not brought in"; "Covered malls (402.8); atriums are not brought in") and a clause
     after them doesn't ("1014.9 (not brought in) is a person's check; Group I-2 ... per 407.4.3 (a flag) too")."""
     for sentence in re.split(r"(?<=\.)\s", text):
-        for clause in re.finditer(r"[^;:]+(?:[;:]|$)", sentence):
+        clauses = list(re.finditer(r"[^;:]+(?:[;:]|$)", sentence))
+        for n, clause in enumerate(clauses):
             if re.search(r"(?:not|n't) brought in", clause.group()):
-                yield sentence[:clause.end()]
+                # a list the words open with a colon is theirs too ("not brought in: covered malls (402.8) and ...")
+                end = clauses[n + 1].end() if clause.group().endswith(":") and n + 1 < len(clauses) else clause.end()
+                yield sentence[:end]
 
 
 def test_a_stretch_said_not_brought_in_runs_from_its_sentence_start_to_its_clause_end():
@@ -367,6 +370,9 @@ def test_a_stretch_said_not_brought_in_runs_from_its_sentence_start_to_its_claus
         "Covered malls (402.8); atriums are not brought in."]
     [got] = _said_not_brought_in("Handrails as 1014.9 allows (not brought in) are a check; Group I-2 per 407.4.3 too.")
     assert "407.4.3" not in got and "Group I-2" not in got and "1014.9" in got
+    # review round 5: the list a colon opens after the words
+    [got] = _said_not_brought_in("Two uses are not brought in: covered malls (402.8) and Group I-2 occupancies.")
+    assert "402.8" in got and _named_uses(got) == {"402.8", "407.4"}
 
 
 def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rules):
@@ -405,7 +411,8 @@ def test_a_plural_term_is_the_definition_of_its_singular():
 
 VALUE = r"(?<![\d.,/])(\d+[ -]\d+/\d+|\d+/\d+|[\d,]*\.\d+|[\d,]+)"
 # every unit the number reader (document_extraction/numbers.py) records that is imperial, and the metric ones
-IMPERIAL = ("gross square foot", "square foot", "square inch", "cubic foot", "foot", "inch", "pound", "psf", "footcandle")
+IMPERIAL = ("gross square foot", "net square foot", "square foot", "square inch", "cubic foot", "foot", "inch", "pound",
+            "psf", "footcandle")
 METRIC = ("mm", "cm", "m", "kg", "N", "lux")
 
 
@@ -422,7 +429,7 @@ def _figure(recorded):
 
 def _imperial(recorded):
     """Whether a recorded number carries an imperial unit word (whether or not _figure reads it)."""
-    return re.search(r"\d\s+(?:gross\s+)?(?:square\s+|cubic\s+)?(?:inch|foot|pound|psf|footcandle)\b", recorded)
+    return re.search(r"\d\s+(?:gross\s+|net\s+)?(?:square\s+|cubic\s+)?(?:inch|foot|pound|psf|footcandle)\b", recorded)
 
 
 def _metric(recorded):
@@ -432,12 +439,12 @@ def _metric(recorded):
 
 # each imperial unit and the conversions it is printed with (square metres are recorded as "m", square mm as "mm")
 CONVERSION = {"inch": {"mm": 25.4}, "foot": {"mm": 304.8, "m": 0.3048}, "square foot": {"m": 0.092903},
+              "gross square foot": {"m": 0.092903}, "net square foot": {"m": 0.092903},
               "square inch": {"mm": 645.16, "m": 0.00064516}, "pound": {"kg": 0.45359, "N": 4.448}}
 # pieces where the number reader records a figure without its unit, and that unit: a metric one ("50 pounds (220 N)":
-# the newtons), or an imperial one ("30 net square feet (2.8 m2)": "net" between the number and its unit)
+# the newtons), or an imperial one (a unit word the reader doesn't know; "net" it reads since part c's fix check)
 UNIT_NOT_RECORDED = {"408.3.2": "N"}
-IMPERIAL_UNIT_NOT_RECORDED = {"407.5.3": "square foot", "407.10": "square foot", "408.6.2": "square foot",
-                              "420.6.1": "square foot"}
+IMPERIAL_UNIT_NOT_RECORDED = {}
 
 
 def _numbers(pid, entry):
@@ -490,6 +497,7 @@ def test_the_conversion_walk_compares_every_imperial_figure():
     assert _figure(".5 inch") == (0.5, "inch") and _figure("22-1/2 inch") == (22.5, "inch")
     assert _compared(["greater than 1 1/2 square inch", "967 mm"]) == [("greater than 1 1/2 square inch", "967 mm", False)]
     assert _compared(["not exceed 5,000 square inch", "3.2 m"]) == [("not exceed 5,000 square inch", "3.2 m", False)]
+    assert _compared(["not less than 30 net square foot", "2.8 m"]) == [("not less than 30 net square foot", "2.8 m", False)]
     pieces = load(NY / "text_verification.yaml")["pieces"]
     imperial = compared = 0
     for pid, entry in pieces.items():

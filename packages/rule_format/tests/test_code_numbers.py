@@ -276,3 +276,20 @@ def test_an_ifs_test_measure_never_lends_its_unit(ctx):
         "the floor or grade below shall not permit the passage of a 4-inch-diameter (102 mm) sphere.")}
     got = problems(ctx, "stair_riser_height <= (30 if stair_handrail_sides > 0 else 30)", risers, "stair", "applies_when")
     assert got, "30 degrees backed a 30 in limit through an if's test measure"
+
+
+def test_a_list_items_own_number_in_a_quote_is_never_a_figure_it_states():
+    # Chapter 4 part c, review round 5: "Exceptions: 1. In open parking garages" read as 1 inch (then, with the
+    # number reader's sentence-end fix, as a count of one) let a quote back a number it never states
+    said = code_numbers.quote_statements("Exceptions: 1. In open parking garages, exit access travel distance shall "
+                                         "not exceed 400 feet. 2. In outpatient clinics, the distance shall be 250 feet.")
+    assert {v for v, _ in said} == {400, 250}
+    assert (2, "") in code_numbers.quote_statements("The stair shall have not more than 2. Where the stair")
+    building = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/new_york_state_building")
+    from rule_format.rulebook import load
+    rules = {r["id"]: r for r in load(REPO / "regulations/jurisdictions/new_york/new_york_state_building/"
+                                            "5_building_code_rules/drafted/general.yaml")["rules"]}
+    probe = copy.deepcopy(rules["general.bc_table_1017_2_f2_s2_u"])
+    assert not code_numbers.problems(probe, probe["sources"], building)
+    probe["applies_when"] = f"({probe['applies_when']}) and stories > 1"
+    assert code_numbers.problems(probe, probe["sources"], building)          # 1 is stated nowhere in its quotes
