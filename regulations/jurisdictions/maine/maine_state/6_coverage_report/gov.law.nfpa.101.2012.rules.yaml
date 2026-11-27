@@ -26,7 +26,7 @@ pieces:
     - general.nfpa_6_1_14_4_4_separation_form
   Table 6.1.14.4.1(b):
     label: rule
-    heading: †
+    heading: Table 6.1.14.4.1(b) Required Separation of Occupancies (hours) , Part 2
     rules:
     - general.nfpa_table_6_1_14_4_1_b__separation_hours
   Table 7.3.1.2:
