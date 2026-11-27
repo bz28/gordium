@@ -313,7 +313,8 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
     No (its stairs are enclosed exits discharging outside) bounds each corridor's load by its story's, so the corridor
     width and capacity rows pass at the whole story's load (two readings, none and the story's: a pass only if the
     story's passes); Yes leaves them by hand; the other three, either way, move nothing here (Group R-2, no sprinkler
-    system, no ambulatory care, the corridors already within Table 1020.3's widths)."""
+    system, no ambulatory care, the corridors already within Table 1020.3's widths), but Gordium: Ambulatory care
+    facility No, which sets aside 709.5.1's smoke barrier doors (Chapter 7 part c: Group R-2 with none stated)."""
     moved = {}
     for fact, value in (("other_level_egress_into_corridors", False), ("other_level_egress_into_corridors", True),
                         ("ambulatory_care_facility", False), ("corridors_within_dwelling_units", False),
@@ -326,6 +327,8 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
     assert moved.pop(("other_level_egress_into_corridors", False)) == {
         "general.bc_1020_3_corridor_capacity": ("needs_review", "pass"),
         "general.bc_table_1020_3_corridor_width": ("needs_review", "pass")}
+    assert moved.pop(("ambulatory_care_facility", False)) == {
+        "general.bc_709_5_1_i2_smoke_barrier_doors": ("needs_review", "not_applicable")}
     assert all(m == {} for m in moved.values()), moved
 
 
