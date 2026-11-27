@@ -4785,7 +4785,7 @@ labels:
   '707.7':
     label: flag
     topic: means_of_egress
-    reason: 'Penetrations of fire barriers meet Section 714 (not brought in): not in the model, a person''s check (general.bc_707_7_penetrations).'
+    reason: 'Penetrations of fire barriers meet Section 714 (brought in only in part: 714.1 to 714.5): not in the model, a person''s check (general.bc_707_7_penetrations).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 172
