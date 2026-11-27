@@ -1698,12 +1698,12 @@ def test_a_restaurant_story_with_no_fixed_seats_never_passes_a_travel_or_common_
     for seats, want in ((True, "needs_review"), (False, "pass")):
         assert _one(cp, "space", {**space, "space_assembly_seating_possible": seats}, a2, ctx) == want
     for rid, r in rules.items():
-        fixed = [w["when"] for w in r.get("review_when") or [] if re.search(r"assembly_fixed_seating", w["when"])]
+        fixed = [w["when"] for w in r.get("review_when") or [] if re.search(r"\bassembly_fixed_seating\b", w["when"])]
         if not fixed or rid == "general.bc_1020_3_corridor_capacity":
             continue
         m = {"story": "story_assembly_seating_possible", "space": "space_assembly_seating_possible"}[r["for_each"]]
-        twins = [w["when"] for w in r["review_when"] if re.search(rf"{m}", w["when"])]
-        assert [re.sub(r"assembly_fixed_seating", m, f) for f in fixed] == twins, rid
+        twins = [w["when"] for w in r["review_when"] if re.search(rf"\b{m}\b", w["when"])]
+        assert [re.sub(r"\bassembly_fixed_seating\b", m, f) for f in fixed] == twins, rid
         assert all(_cites(r, 354, 50) or "1030.7" in w["reason"] for w in r["review_when"] if m in w["when"]), rid
 
 
