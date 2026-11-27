@@ -6766,7 +6766,8 @@ rules:
       less; exception 2: no voice/alarm system at 100 or less where the manual system initiates an approved notification
       signal per 907.5; exceptions 3 and 4: boxes left out with smoke detectors in corridors, heat detectors in assembly areas and shops
       and manual activation from a normally occupied location, or with a 903.3.1.1 system activating the voice/alarm system
-      on water flow): a person''s check. Whether the voice/alarm system is required is the rule of its own.'
+      on water flow): a person''s check. In a building stated Group E alone, whether the voice/alarm system is required
+      is the rule beside it; in a building of two or more groups it is this check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable

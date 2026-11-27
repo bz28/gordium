@@ -8871,8 +8871,9 @@ labels:
   907.2.1.1:
     label: rule
     topic: means_of_egress
-    reason: 'An emergency voice/alarm communication system required by the occupancy''s occupant load: a rule per story on
-      the stated group and system (general.bc_907_2_1_1_group_a_voice_alarm).'
+    reason: 'An emergency voice/alarm communication system for a Group A occupancy of 1,000 or more: a rule per room on the
+      stated group and system (general.bc_907_2_1_1_group_a_voice_alarm); in a building of two or more groups a person''s
+      check (general.bc_907_2_1_1_mixed_voice_alarm).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 285
@@ -8992,8 +8993,9 @@ labels:
     label: rule
     topic: means_of_egress
     reason: 'Group E has a manual fire alarm system initiating notification through an emergency voice/alarm communication
-      system per 907.5.2.2: the voice/alarm system, a stated fact, is a rule per story by the occupancy''s occupant load (general.bc_907_2_3_group_e_voice_alarm);
-      the manual fire alarm system and its exceptions are a person''s check (general.bc_907_2_3_group_e_manual_fire_alarm).'
+      system per 907.5.2.2: the voice/alarm system, a stated fact, is a rule per story by the occupancy''s occupant load for
+      a building stated Group E alone (general.bc_907_2_3_group_e_voice_alarm); the manual fire alarm system and its exceptions,
+      and the voice/alarm system in a building of two or more groups, are a person''s check (general.bc_907_2_3_group_e_manual_fire_alarm).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 285
