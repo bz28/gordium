@@ -137,6 +137,36 @@ results:
   # stated (no Revit mark yet), and how many people each door serves isn't worked out (50 or more can't be ruled out)
   general.bc_1010_1_2_door_types: not_applicable
   general.bc_1010_1_2_1_direction_of_swing: needs_review
+  # Chapter 7 part a (2026-11-26): the fire barriers and shaft enclosures that build exit stairway and passageway
+  # enclosures (703.2.1.1, 703.5, 707, 713): nothing they ask is in the model (an enclosure's rating, the stories it
+  # connects, its walls' construction, penetrations, joints), so each is a person's check for every building
+  general.bc_703_2_1_1_nonsymmetrical_walls: needs_review
+  general.bc_703_5_marking: needs_review
+  general.bc_707_3_2_exit_stairway_fire_barriers: needs_review
+  general.bc_707_3_4_exit_passageway_fire_barriers: needs_review
+  general.bc_707_3_5_horizontal_exit_separation: needs_review
+  general.bc_707_4_exterior_walls: needs_review
+  general.bc_707_5_continuity: needs_review
+  general.bc_707_5_1_supporting_construction: needs_review
+  general.bc_707_6_openings: needs_review
+  general.bc_707_7_penetrations: needs_review
+  general.bc_707_7_1_prohibited_penetrations: needs_review
+  general.bc_707_8_joints: needs_review
+  general.bc_707_9_voids: needs_review
+  general.bc_707_10_ducts: needs_review
+  general.bc_713_2_shaft_construction: needs_review
+  general.bc_713_4_shaft_rating: needs_review
+  general.bc_713_5_shaft_continuity: needs_review
+  general.bc_713_6_shaft_exterior_walls: needs_review
+  general.bc_713_7_shaft_openings: needs_review
+  general.bc_713_7_1_shaft_prohibited_openings: needs_review
+  general.bc_713_8_shaft_penetrations: needs_review
+  general.bc_713_8_1_shaft_prohibited_penetrations: needs_review
+  general.bc_713_9_shaft_joints: needs_review
+  general.bc_713_10_shaft_ducts: needs_review
+  general.bc_713_11_shaft_bottom: needs_review
+  general.bc_713_12_shaft_top: needs_review
+  general.bc_713_14_hoistways: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

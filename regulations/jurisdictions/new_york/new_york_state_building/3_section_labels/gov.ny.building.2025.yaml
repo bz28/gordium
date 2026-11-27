@@ -250,6 +250,21 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:attic:
+    label: reference
+    topic: definitions
+    reason: 'Defines ATTIC, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 8
+      - 8
+      quote: '[BG] ATTIC. The space between the ceiling framing of the top story and the underside of the roof.'
+    piece_sha256: 80df3100db8ea5e581946be967377cbc705368260e2843c45f6a6b59295bc972
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:automatic:
     label: reference
     topic: definitions
@@ -455,6 +470,44 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:ceiling_radiation_damper:
+    label: reference
+    topic: definitions
+    reason: 'Defines CEILING RADIATION DAMPER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 36
+      lines:
+      - 24
+      - 28
+      quote: '[BF] CEILING RADIATION DAMPER. A listed device installed in a ceiling membrane of a fire-resistance-rated floor/ceiling
+        or roof/ceil- ing assembly to limit automatically the radiative heat transfer through an air inlet/outlet opening.
+        Ceiling radiation dampers include air terminal units, ceiling dampers and ceiling air diffusers. Ceiling radiation
+        dampers are classified for use in either static systems that will automatically shut down in the event of a fire,
+        or in dynamic systems that continue to operate during a fire. A dynamic ceiling radi- ation damper is tested and rated
+        for closure under elevated temperature airflow.'
+    piece_sha256: a416d1098efb8bf2491e66320a0a82322b8493efa6352b063e12eaf19a6b7edd
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:combination_fire_smoke_damper:
+    label: reference
+    topic: definitions
+    reason: 'Defines COMBINATION FIRE/SMOKE DAMPER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 37
+      lines:
+      - 38
+      - 40
+      quote: '[BF] COMBINATION FIRE/SMOKE DAMPER. A listed device installed in ducts and air transfer openings designed to
+        close automati- cally upon the detection of heat and resist the passage of flame and smoke. The device is installed
+        to operate automatically, controlled by a smoke detection system, and where required, is capable of being positioned
+        from a fire command center.'
+    piece_sha256: 348b556d2b8b77b913785e2e134788d23f122d5f67ee81bed4ca261c0b7a5ffe
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:combustible_liquid:
     label: reference
     topic: definitions
@@ -517,6 +570,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:corridor_damper:
+    label: reference
+    topic: definitions
+    reason: 'Defines CORRIDOR DAMPER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 19
+      - 20
+      quote: '[BF] CORRIDOR DAMPER. A listed device intended for use where air ducts penetrate or terminate at horizontal
+        openings in the ceil- ings of fire-resistance-rated corridors, where the corridor ceiling is permitted to be constructed
+        as required for the corridor walls.'
+    piece_sha256: 27e1b04d24727cd892df4abab3d49cfdbdae36b143088f52300eb0f1868df57f
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:court:
     label: reference
     topic: definitions
@@ -563,6 +633,22 @@ labels:
         taking medication,'
     piece_sha256: 44133a2ce27f0e8a43479860532e14a23db315684f953b34ebe75ba63ffe579a
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:damper:
+    label: reference
+    topic: definitions
+    reason: 'Defines DAMPER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 56
+      - 56
+      quote: DAMPER. See “Ceiling radiation damper,” “Combination fire/smoke damper,” “Corridor damper,” “Fire damper” and
+        “Smoke damper.”
+    piece_sha256: 10dd8ef448ed9d27a213e6f63b89ea5c85deba794f5281633e0397c021af6d56
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:dead_load:
@@ -720,6 +806,23 @@ labels:
     piece_sha256: aca6cca14e19824f04f11a752c1026c08a33244abd33028d665663801a1bb629
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
       3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:draftstop:
+    label: reference
+    topic: definitions
+    reason: 'Defines DRAFTSTOP, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 37
+      - 38
+      quote: '[BF] DRAFTSTOP. A material, device or construction installed to restrict the movement of air within open spaces
+        of concealed areas of building components such as crawl spaces, floor/ceiling assemblies, roof/ceiling assemblies
+        and attics.'
+    piece_sha256: 7fd25ada750ab450dd0abccaae829232d6171c78319c0d265ff807c01609a566
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:dwelling:
@@ -942,6 +1045,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:exterior_wall_assembly:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXTERIOR WALL ASSEMBLY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 13
+      - 15
+      quote: '[BF] EXTERIOR WALL ASSEMBLY. A system including the exterior wall covering, framing, and components such as
+        weather-resistive barriers and insulating materials. This system provides protection of the building structural members
+        and conditioned interior space from the detrimental effects of the exterior environment.'
+    piece_sha256: 8d261f5ef4833f69cb7932fc2004db9906a313b6c8944a35f2dd020db850ba44
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:fabrication_area:
     label: reference
     topic: definitions
@@ -972,6 +1092,72 @@ labels:
         routes located on a'
     piece_sha256: d3218b5b4796d1c3140a4374dece0a2c36cfffc347e0330d47c51983c7993e69
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_barrier:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE BARRIER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 6
+      - 7
+      quote: '[BF] FIRE BARRIER. A fire-resistance-rated wall assembly of materials designed to restrict the spread of fire
+        in which continuity is maintained.'
+    piece_sha256: 0fdf51e0e90fb73c5088b18d8fea6b28c41e3d12f5ce5da5db4fa9121343d10b
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE CODE OF NEW YORK STATE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 8
+      - 9
+      quote: '[NY] FIRE CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Fire Code of New York State,”
+        published by the International Code Council, Inc. (publication date July 2025).'
+    piece_sha256: 6ca85564ff64eba1774763ca817dcf5bfebbea184e7de2a6dd9deda0a6028cb2
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_command_center:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE COMMAND CENTER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 10
+      - 11
+      quote: '[F] FIRE COMMAND CENTER. The principal attended or unattended location where the status of detection, alarm
+        communications and control systems is displayed, and from which the systems can be manually controlled.'
+    piece_sha256: 5c6af425e103a36ddcd19bcc03ac123db6dc7b9109b5ee76c18f67d31231ff1d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_damper:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE DAMPER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 12
+      - 15
+      quote: '[BF] FIRE DAMPER. A listed device installed in ducts and air transfer openings designed to close automatically
+        upon detection of heat and resist the passage of flame. Fire dampers are classified for use in either static systems
+        that will automatically shut down in the event of a fire, or in dynamic systems that continue to operate during a
+        fire. A dynamic fire damper is tested and rated for closure under elevated temperature airflow.'
+    piece_sha256: 1c97f3b6b2b400c38b31aa927d541aa7921053f85b9752c8080f4a616191b016
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_door:
@@ -1058,6 +1244,22 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
       4b (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor rating sections use, by
       the book''s italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_resistance:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE RESISTANCE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 31
+      - 32
+      quote: '[BF] FIRE RESISTANCE. That property of materials or their assemblies that prevents or retards the passage of
+        excessive heat, hot gases or flames under conditions of use.'
+    piece_sha256: 603e80d4f7ffd4c371cdc0c3e4118758d6ac51fdec274d05a3209ccd0862ceca
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_wall:
@@ -1316,6 +1518,38 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:high_rise_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines HIGH-RISE BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 3
+      - 4
+      quote: '[BG] HIGH-RISE BUILDING. A building with an occupied floor or occupiable roof located more than 75 feet (22
+        860 mm) above the lowest level of fire department vehicle access.'
+    piece_sha256: 2c9ef8382ec9fe199f1c24477190a8ec25ff7ff8eb1a001e4082a7060454b079
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:horizontal_assembly:
+    label: reference
+    topic: definitions
+    reason: 'Defines HORIZONTAL ASSEMBLY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 11
+      - 12
+      quote: '[BF] HORIZONTAL ASSEMBLY. A fire-resistance-rated floor or roof assembly of materials designed to restrict the
+        spread of fire in which continuity is maintained.'
+    piece_sha256: cceab85c133ff9e85ddb883279e03c330ced56f29f2a99c1b30d1c055244ad50
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:horizontal_exit:
     label: reference
     topic: definitions
@@ -1559,6 +1793,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:lowest_floor:
+    label: reference
+    topic: definitions
+    reason: 'Defines LOWEST FLOOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 53
+      lines:
+      - 3
+      - 5
+      quote: '[BS] LOWEST FLOOR. The lowest floor of the lowest enclosed area, including basement, but excluding any unfinished
+        or flood-resis- tant enclosure, usable solely for vehicle parking, building access or limited storage provided that
+        such enclosure is not built so as to render the structure in violation of Section 1612.'
+    piece_sha256: fc0159474cfc7d33ce040893bd54df86ebe8c1a4bbfe0a89f24f238f88299867
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:masonry:
     label: reference
     topic: definitions
@@ -1623,6 +1874,22 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
       of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
       table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:membrane_penetration:
+    label: reference
+    topic: definitions
+    reason: 'Defines MEMBRANE PENETRATION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 53
+      lines:
+      - 53
+      - 54
+      quote: '[BF] MEMBRANE PENETRATION. A breach in one side of a floor-ceiling, roof-ceiling or wall assembly to accommodate
+        an item installed into or passing through the breach.'
+    piece_sha256: 700178ccd9f80816d3ce17f4bdbbb82ea9b7ed179940d9f617a7e39d3c8f9e29
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:merchandise_pad:
@@ -2185,6 +2452,21 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:shaft_enclosure:
+    label: reference
+    topic: definitions
+    reason: 'Defines SHAFT ENCLOSURE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 60
+      lines:
+      - 15
+      - 15
+      quote: '[BF] SHAFT ENCLOSURE. The walls or construction forming the boundaries of a shaft.'
+    piece_sha256: 3bd99dcd092d885a677ef806629a25f2d998397938d27264b59275131019d734
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:shower:
     label: reference
     topic: definitions
@@ -2235,6 +2517,39 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:smoke_barrier:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKE BARRIER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 3
+      - 4
+      quote: '[BF] SMOKE BARRIER. A continuous membrane, either vertical or horizontal, such as a wall, floor or ceiling assembly,
+        that is designed and constructed to restrict the movement of smoke.'
+    piece_sha256: 2362bf8f9765ea07a0781a2aa97a6e85dcd42105b1868731ffc1abb41c737ea4
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:smoke_damper:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKE DAMPER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 7
+      - 9
+      quote: '[BF] SMOKE DAMPER. A listed device installed in ducts and air transfer openings designed to resist the passage
+        of smoke. The device is installed to operate automatically, controlled by a smoke detection system, and where required,
+        is capable of being positioned from a fire command center.'
+    piece_sha256: 075eceefb115623a861bfd512f11892af39f101ae61b3ce3866fdff0df5267e3
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:smoke_detector:
     label: reference
     topic: definitions
@@ -2249,6 +2564,23 @@ labels:
     piece_sha256: 522da15a335b767701eedf42bdfb4c346aca491af705eb998bf698ea50e567df
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
       4c (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term 1020.6.1 uses, by the book''s italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:smoke_partition:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKE PARTITION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 11
+      - 13
+      quote: '[BF] SMOKE PARTITION. A wall assembly that extends from the top of the foundation or floor below to the underside
+        of the floor or roof sheathing, deck or slab above or to the underside of the ceiling above where the ceiling membrane
+        is constructed to limit the transfer of smoke.'
+    piece_sha256: 2c95fe8d28f512866a927ec836ef8d68a5b3f818828b53a23c607435d9cb0aea
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:smoke_protected_assembly_seating:
@@ -2889,6 +3221,619 @@ labels:
       quote: 508.2.4 Separation of occupancies. No separation is required between accessory occupancies and the main occupancy.
     piece_sha256: b4b8646fbf04ad73870b73efa44ecb16e378d09aa6cae962efef8fb83232610b
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  703.2.1.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'An interior wall of nonsymmetrical construction is rated by the shorter of its two tests, one from each face:
+      how its walls were tested isn''t in the model, a person''s check (general.bc_703_2_1_1_nonsymmetrical_walls).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 160
+      lines:
+      - 25
+      - 29
+      quote: 703.2.1.1 Nonsymmetrical wall construction. Interior walls and partitions of nonsymmetrical construction shall
+        be tested with both faces exposed to the furnace, and the assigned fire-resistance rating shall be the shortest duration
+        obtained from the two tests conducted in compliance with ASTM E119 or UL 263. Where evidence is furnished to show
+        that the wall was tested with the least fire-resistant side exposed to the furnace, subject to acceptance of the building
+        official, the wall need not be subjected to tests from the opposite side (see Section 705.5 for exterior walls).
+    piece_sha256: 5e5dd52cd37ed986095cc1a8df7a2915efd1c52b434c46473fdbaa97818efd2c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '703.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'Rated walls are identified with signs or stenciling in accessible concealed spaces (at most 15 feet from each
+      end, every 30 feet, 3-inch letters): not in the model, a person''s check (general.bc_703_5_marking).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 161
+      lines:
+      - 22
+      - 28
+      quote: '703.5 Marking and identification. Where there is an accessible concealed floor, floor-ceiling or attic space,
+        fire walls, fire barriers, fire partitions, smoke barriers and smoke partitions or any other wall required to have
+        protected openings or penetrations shall be effectively and permanently identified with signs or stenciling in the
+        concealed space. Such identification shall: 1. Be located within 15 feet (4572 mm) of the end of each wall and at
+        intervals not exceeding 30 feet (9144 mm) measured hori- zontally along the wall or partition. 2. Include lettering
+        not less than 3 inches (76 mm) in height with a minimum 3/8-inch (9.5 mm) stroke in a contrasting color incorporating
+        the suggested wording, “FIRE AND/OR SMOKE BARRIER—PROTECT ALL OPENINGS,” or other wording.'
+    piece_sha256: e894a2efa8e3b503f313ac7432ed60d20cc5a7b2095780a7d7c74cb27e47dbf3
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '707.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Scope only: fire barriers that other sections require comply with Section 707, whose parts are labeled one by
+      one.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 171
+      lines:
+      - 23
+      - 24
+      quote: 707.1 General. Fire barriers installed as required elsewhere in this code or the Fire Code of New York State
+        shall comply with this section.
+    piece_sha256: 5c64a3d5adc42016b93c86acfcc3510bb6ad582612e8a8804997f9c38a8df6a5
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '707.3':
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: a fire barrier''s rating follows 707.3.1 to 707.3.11 (those that egress uses are brought in, each
+      labeled on its own).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 171
+      lines:
+      - 26
+      - 26
+      quote: 707.3 Fire-resistance rating. The fire-resistance rating of fire barriers shall comply with this section.
+    piece_sha256: 91a5a981d090908850c823c10b4b92904e5a4f4ca0739298a60a32da63ddd5cf
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  707.3.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: the fire barrier around a shaft is rated per 713.4 (brought in, its own flag).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 171
+      lines:
+      - 27
+      - 28
+      quote: 707.3.1 Shaft enclosures. The fire-resistance rating of the fire barrier separating building areas from a shaft
+        shall comply with Section 713.4.
+    piece_sha256: 0904009e35e0c61ea2f671e17fb21920359cb1592acb4981c26ffe60b0d0450f
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  707.3.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'The fire barrier around an interior exit stairway or ramp has the rating Section 1023 asks (not brought in):
+      its rating isn''t in the model, a person''s check (general.bc_707_3_2_exit_stairway_fire_barriers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 171
+      lines:
+      - 29
+      - 30
+      quote: 707.3.2 Interior exit stairway and ramp construction. The fire-resistance rating of the fire barrier separating
+        building areas from an interior exit stairway or ramp shall comply with Section 1023.1.
+    piece_sha256: f853473650af0ff1d2df3b07809a4d4947dfd15e4e15a1872ce44f00ebbc5763
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  707.3.3:
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: the fire barrier around an exit access stairway or ramp is rated per 713.4 (brought in, its own flag).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 171
+      lines:
+      - 31
+      - 32
+      quote: 707.3.3 Enclosures for exit access stairways. The fire-resistance rating of the fire barrier separating building
+        areas from an exit access stairway or ramp shall comply with Section 713.4.
+    piece_sha256: cd91f767100bce8a8498a8ad59303141a315f5f36bc0bc72a4ead0e35a1e9f7f
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  707.3.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'The fire barrier around an exit passageway has the rating 1024.3 asks (not brought in): its rating isn''t in
+      the model, a person''s check (general.bc_707_3_4_exit_passageway_fire_barriers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 171
+      lines:
+      - 33
+      - 34
+      quote: 707.3.4 Exit passageway. The fire-resistance rating of the fire barrier separating building areas from an exit
+        passageway shall comply with Section 1024.3.
+    piece_sha256: ebde9fe6b92584dfc87126c87f2e07cd6a45fb4a6b88aeef376ac7d47cd1281c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  707.3.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'A horizontal exit''s separation has the rating 1026.1 asks (not brought in): not in the model, a person''s check
+      (general.bc_707_3_5_horizontal_exit_separation).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 171
+      lines:
+      - 35
+      - 36
+      quote: 707.3.5 Horizontal exit. The fire-resistance rating of the separation between building areas connected by a horizontal
+        exit shall comply with Section 1026.1.
+    piece_sha256: 3100550949bfed6d7b49dc642f29305881889c44b2281d28484c3614e1116f26
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '707.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'An exterior wall that is part of a shaft, stairway, ramp or exit passageway enclosure follows Section 705 instead,
+      with its exceptions: a person''s check (general.bc_707_4_exterior_walls).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 172
+      lines:
+      - 5
+      - 13
+      quote: '707.4 Exterior walls. Where exterior walls serve as a part of a required fire-resistance-rated shaft, or separation
+        or enclosure for a stairway, ramp or exit passageway, such walls shall comply with the requirements of Section 705
+        for exterior walls and the fire-resis- tance-rated enclosure or separation requirements shall not apply. Exceptions:
+        1. Exterior walls required to be fire-resistance rated in accordance with Section 1021 for exterior egress balconies,
+        Section 1023.7 for interior exit stairways and ramps, Section 1024.8 for exit passageways and Section 1027.6 for exterior
+        exit stair- ways and ramps. 2. Exterior walls required to be fire-resistance rated in accordance with Section 1207
+        of the Fire Code of New York State for enclosure of energy storage systems.'
+    piece_sha256: 2fbd922411d8a1abf609ea2de0c042caa9050570970ce7e043bae8875d24dafc
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '707.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'Fire barriers run from the floor below to the deck above, through concealed spaces, with exceptions for enclosures
+      ending at a top enclosure: not in the model, a person''s check (general.bc_707_5_continuity).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 172
+      lines:
+      - 14
+      - 24
+      quote: '707.5 Continuity. Fire barriers shall extend from the top of the foundation or floor/ceiling assembly below
+        to the underside of the floor or roof sheathing, slab or deck above and shall be securely attached thereto. Such fire
+        barriers shall be continuous through concealed space, such as the space above a suspended ceiling. Joints and voids
+        at intersections shall comply with Sections 707.8 and 707.9 Exceptions: 1. Shaft enclosures shall be permitted to
+        terminate at a top enclosure complying with Section 713.12. 2. Interior exit stairway and ramp enclosures required
+        by Section 1023 and exit access stairway and ramp enclosures required by Section 1019 shall be permitted to terminate
+        at a top enclosure complying with Section 713.12. 3. An exit passageway enclosure required by Section 1024.3 that
+        does not extend to the underside of the floor sheathing, roof sheathing, slab or deck above shall be enclosed at the
+        top with construction of the same fire-resistance rating as required for the exit passageway.'
+    piece_sha256: 73536932830dea7dc68ee9da194b9ba4241f1004074224a372501b47cbecc594
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  707.5.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'The construction supporting a fire barrier has its rating, and hollow spaces in it are fireblocked: the structure
+      isn''t in the model, a person''s check (general.bc_707_5_1_supporting_construction).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 172
+      lines:
+      - 25
+      - 33
+      quote: '707.5.1 Supporting construction. The supporting construction for a fire barrier shall be protected to afford
+        the required fire- resistance rating of the fire barrier supported. Hollow vertical spaces within a fire barrier shall
+        be fireblocked in accordance with Section 718.2 at every floor level. Exceptions: 1. The maximum required fire-resistance
+        rating for assemblies supporting fire barriers separating tank storage as provided for in Section 415.9.1.2 shall
+        be 2 hours, but not less than required by Table 601 for the building construction type. 2. Supporting construction
+        for 1-hour fire barriers required by Table 509.1 in buildings of Types IIB, IIIB and VB construc- tion is not required
+        to be fire-resistance rated unless required by other sections of this code.'
+    piece_sha256: f269f176651bc6a78f39665f1599d9120555aaff65bcb8dac583921eb39bc21b
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '707.6':
+    label: flag
+    topic: means_of_egress
+    reason: 'Openings in fire barriers are protected per Section 716 and limited to 25 percent of the wall''s length and 156
+      square feet each, with exceptions: not in the model, a person''s check (general.bc_707_6_openings).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 172
+      lines:
+      - 34
+      - 58
+      quote: '707.6 Openings. Openings in a fire barrier shall be protected in accordance with Section 716. Openings shall
+        be limited to a maxi- mum aggregate width of 25 percent of the length of the wall, and the maximum area of any single
+        opening shall not exceed 156 square feet (15 m[fn2]). Openings in enclosures for shafts, interior exit stairways and
+        ramps and exit passageways shall also comply with Sections 713.7, 1023.4 and 1024.5, respectively. Exceptions: 1.
+        Openings shall not be limited to 156 square feet (15 m[fn2]) where adjoining floor areas are equipped throughout with
+        an automatic sprinkler system in accordance with Section 903.3.1.1. 2. Openings shall not be limited to 156 square
+        feet (15 m[fn2]) or an aggregate width of 25 percent of the length of the wall where the opening protective is a fire
+        door serving enclosures for exit access stairways and ramps, and interior exit stair- ways and ramps. 3. Openings
+        shall not be limited to 156 square feet (15 m[fn2]) or an aggregate width of 25 percent of the length of the wall
+        where the opening protective has been tested in accordance with ASTM E119 or UL 263 and has a minimum fire-resistance
+        rating not less than the fire-resistance rating of the wall. 4. Fire window assemblies permitted in atrium separation
+        walls shall not be limited to a maximum aggregate width of 25 percent of the length of the wall. 5. Openings shall
+        not be limited to 156 square feet (15 m[fn2]) or an aggregate width of 25 percent of the length of the wall where
+        the opening protective is a fire door assembly in a fire barrier separating an enclosure for exit access stairways
+        and ramps, and interior exit stairways and ramps from an exit passageway in accordance with Section 1023.3.1. 6. Openings
+        providing entrance to an elevator car shall not be limited to 156 square feet (15 m[fn2]) or an aggregate width of
+        25 percent of the length of the wall where the opening protective is a fire door assembly in a fire barrier that is
+        an elevator hoistway enclosure. 7. Openings shall not be limited to an aggregate width of 25 percent of the length
+        of the wall where opening serves a shaft enclosure in accordance with Section 713. 8. Openings shall not be limited
+        to an aggregate width of 25 percent of the length of the wall where opening serves a chute access room in accordance
+        with Section 713.13.3 or a chute discharge room in accordance with Section 713.13.4.'
+    piece_sha256: 8587be3731290ac13da8a92e93079e56fb5e5c2bcd64f6afbb279874b83333b8
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '707.7':
+    label: flag
+    topic: means_of_egress
+    reason: 'Penetrations of fire barriers meet Section 714 (not brought in): not in the model, a person''s check (general.bc_707_7_penetrations).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 172
+      lines:
+      - 59
+      - 59
+      quote: 707.7 Penetrations. Penetrations of fire barriers shall comply with Section 714.
+    piece_sha256: 221c380b980e031f68d38620b6b9ec655dcfc12920616b75b10f8cd438460069
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  707.7.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Penetrations into shaft, exit stairway and exit passageway enclosures only where 713.8.1, 1023.5 and 1024.6 allow:
+      not in the model, a person''s check (general.bc_707_7_1_prohibited_penetrations).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 173
+      lines:
+      - 3
+      - 4
+      quote: 707.7.1 Prohibited penetrations. Penetrations into enclosures for shafts, interior exit stairways and ramps,
+        and exit passage- ways shall be allowed only where permitted by Sections 713.8.1, 1023.5 and 1024.6, respectively.
+    piece_sha256: 9db7a3cfad26645a10f84cbbc4121365d81134b73619c3d9dd2a9cc12c68d4e1
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '707.8':
+    label: flag
+    topic: means_of_egress
+    reason: 'Joints in and at fire barriers meet Section 715 (not brought in): not in the model, a person''s check (general.bc_707_8_joints).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 173
+      lines:
+      - 5
+      - 7
+      quote: 707.8 Joints. Joints made in or between fire barriers, and joints made at the intersection of fire barriers with
+        the underside of a fire- resistance-rated floor or roof sheathing, slab or deck above, and with other fire-resistance-rated
+        wall assemblies shall comply with Section 715.
+    piece_sha256: 9bce1b535097f54f5c652593a3a6cae47dbf20aa1d064552f0eb41b39fecd2c1
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '707.9':
+    label: flag
+    topic: means_of_egress
+    reason: 'Voids where a fire barrier meets an unrated roof or exterior wall meet Section 715: not in the model, a person''s
+      check (general.bc_707_9_voids).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 173
+      lines:
+      - 8
+      - 9
+      quote: 707.9 Voids at intersections. The voids created at the intersection of a fire barrier and a nonfire-resistance-rated
+        roof assembly or a nonfire-resistance-rated exterior wall assembly shall comply with Section 715.
+    piece_sha256: e854113ab1c65f07db66bde63a7493fe91adaff67332b5b9f4c0682ad6356646
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '707.10':
+    label: flag
+    topic: means_of_egress
+    reason: 'Ducts and air transfer openings through fire barriers meet Section 717 (not brought in): not in the model, a
+      person''s check (general.bc_707_10_ducts).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 173
+      lines:
+      - 10
+      - 11
+      quote: 707.10 Ducts and air transfer openings. Penetrations in a fire barrier by ducts and air transfer openings shall
+        comply with Section 717.
+    piece_sha256: 741fb1f5915db977c4c3afca8eed5d832c7da4c0df0c29fc750d9f0eaff23a46
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Scope only: Section 713 applies to shafts through floors and roofs, and interior exit stairways and ramps are
+      enclosed per Section 1023 (707.3.2''s flag): no requirement of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 25
+      - 26
+      quote: 713.1 General. The provisions of this section shall apply to shafts required to protect openings and penetrations
+        through floor/ceil- ing and roof/ceiling assemblies. Interior exit stairways and ramps shall be enclosed in accordance
+        with Section 1023.
+    piece_sha256: 71c424080db0eca0dc28ad269146d15d73d0dc80c7c7061b4621d895faf3f276
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.2':
+    label: flag
+    topic: means_of_egress
+    reason: 'Shaft enclosures are built as fire barriers (707) or horizontal assemblies (711): not in the model, a person''s
+      check (general.bc_713_2_shaft_construction).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 27
+      - 28
+      quote: 713.2 Construction. Shaft enclosures shall be constructed as fire barriers in accordance with Section 707 or
+        horizontal assemblies in accordance with Section 711, or both.
+    piece_sha256: daddf27db2943097f9033045362902dc261ba1fea2b85daee36fbaf763fe1a5c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'A shaft enclosure is rated 2 hours where it connects four stories or more, 1 hour where fewer, at least the floor
+      it passes through: its rating and the stories it connects aren''t in the model, a person''s check (general.bc_713_4_shaft_rating).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 30
+      - 34
+      quote: '713.4 Fire-resistance rating. Shaft enclosures shall have a fire-resistance rating of not less than 2 hours
+        where connecting four stories or more, and not less than 1 hour where connecting less than four stories. The number
+        of stories connected by the shaft enclo- sure shall include any basements but not any mezzanines. Shaft enclosures
+        shall have a fire-resistance rating not less than the floor assembly penetrated, but need not exceed 2 hours. Shaft
+        enclosures shall meet the requirements of Section 703.2.1.1. Exception: Shafts having a reduced fire-resistance rating
+        in high-rise buildings in accordance with Section 403.2.1.2.'
+    piece_sha256: d412234f89d48b499548c95e8b1d9783fb039a7c347b3ad36c125ee9cfdf6826
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'Shaft enclosures are continuous per 707.5 or 711.2.2: not in the model, a person''s check (general.bc_713_5_shaft_continuity).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 35
+      - 37
+      quote: 713.5 Continuity. Shaft enclosures shall be constructed as fire barriers in accordance with Section 707 or horizontal
+        assemblies constructed in accordance with Section 711, or both, and shall have continuity in accordance with Section
+        707.5 for fire barriers or Section 711.2.2 for horizontal assemblies, as applicable.
+    piece_sha256: aa1c1231b7112a60b49f481770c0c7c76cc2f862ec0462d4f62865671cff88e2
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.6':
+    label: flag
+    topic: means_of_egress
+    reason: 'An exterior wall that is part of a shaft enclosure follows Section 705 instead, with its exceptions: a person''s
+      check (general.bc_713_6_shaft_exterior_walls).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 38
+      - 41
+      quote: '713.6 Exterior walls. Where exterior walls serve as a part of a required shaft enclosure, such walls shall comply
+        with the require- ments of Section 705 for exterior walls and the fire-resistance-rated enclosure requirements shall
+        not apply. Exception: Exterior walls required to be fire-resistance rated in accordance with Section 1021.2 for exterior
+        egress balconies, Section 1023.7 for interior exit stairways and ramps and Section 1027.6 for exterior exit stairways
+        and ramps.'
+    piece_sha256: 0458f5901f2d9ad581bfb36a2d7ab1de91df157b03a54cef7645c1aff23871eb
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.7':
+    label: flag
+    topic: means_of_egress
+    reason: 'Openings in shaft enclosures are protected per Section 716 and their doors self- or automatic-closing: not in
+      the model, a person''s check (general.bc_713_7_shaft_openings).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 42
+      - 43
+      quote: 713.7 Openings. Openings in a shaft enclosure shall be protected in accordance with Section 716 as required for
+        fire barriers. Doors shall be self- or automatic-closing by smoke detection in accordance with Section 716.2.6.6.
+    piece_sha256: 57380c9e9248d53e451229b23292c3354aed08a28dbe02554da57753e3f7b535
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  713.7.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'No openings in a shaft enclosure but those its purpose needs: a person''s check (general.bc_713_7_1_shaft_prohibited_openings).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 44
+      - 45
+      quote: 713.7.1 Prohibited openings. Openings other than those necessary for the purpose of the shaft shall not be permitted
+        in shaft enclosures.
+    piece_sha256: 8407e80fb38184e7478fae34024c980e58740aaa9ead00e3b26d0a79d18559d7
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.8':
+    label: flag
+    topic: means_of_egress
+    reason: 'Penetrations of shaft enclosures are protected per Section 714: not in the model, a person''s check (general.bc_713_8_shaft_penetrations).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 46
+      - 48
+      quote: 713.8 Penetrations. Penetrations in a shaft enclosure shall be protected in accordance with Section 714 as required
+        for fire barriers or horizontal assemblies or both. Structural elements, such as beams or joists, where protected
+        in accordance with Section 714 shall be permitted to penetrate a shaft enclosure.
+    piece_sha256: 3fee765a5a3437f33b0cd998d48ab9fe84668105bdb74be5ab0e0d9df1b72e49
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  713.8.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'No penetrations of a shaft enclosure but those its purpose needs, membrane penetrations on its outside per 714.4.2
+      aside: a person''s check (general.bc_713_8_1_shaft_prohibited_penetrations).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 49
+      - 52
+      quote: '713.8.1 Prohibited penetrations. Penetrations other than those necessary for the purpose of the shaft shall
+        not be permitted in shaft enclosures. Exception: Membrane penetrations shall be permitted on the outside of shaft
+        enclosures. Such penetrations shall be protected in accordance with Section 714.4.2.'
+    piece_sha256: 35e4ec4a1c0d2bacdcc9205ddfbba96f47bc545f317d33a5c4713dcdda492f53
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.9':
+    label: flag
+    topic: means_of_egress
+    reason: 'Joints in shaft enclosures meet Section 715: not in the model, a person''s check (general.bc_713_9_shaft_joints).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 53
+      - 53
+      quote: 713.9 Joints. Joints in a shaft enclosure shall comply with Section 715.
+    piece_sha256: 81b9fdb2e32c1ff3f06d31c4f648280f31694b75154574cd65e60737685f68cf
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.10':
+    label: flag
+    topic: means_of_egress
+    reason: 'Ducts and air transfer openings through shaft enclosures meet Section 717: not in the model, a person''s check
+      (general.bc_713_10_shaft_ducts).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 54
+      - 55
+      quote: 713.10 Duct and air transfer openings. Penetrations of a shaft enclosure by ducts and air transfer openings shall
+        comply with Section 717.
+    piece_sha256: 6add7de86f9106ea8ccfae767b01f2ea8fdfaa8fd3392ae75598eeb5a3bf8b6b
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.11':
+    label: flag
+    topic: means_of_egress
+    reason: 'A shaft that doesn''t reach the bottom of the building is closed at its foot in one of three ways, with exceptions:
+      a person''s check (general.bc_713_11_shaft_bottom).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 178
+      lines:
+      - 56
+      - 57
+      quote: '713.11 Enclosure at the bottom. Shafts that do not extend to the bottom of the building or structure shall comply
+        with one of the following:'
+    - file: gov.ny.building.2025.pdf
+      page: 179
+      lines:
+      - 3
+      - 20
+      quote: '1. Be enclosed at the lowest level with construction of the same fire-resistance rating as the lowest floor
+        through which the shaft passes, but not less than the rating required for the shaft enclosure. 2. Terminate in a room
+        having a use related to the purpose of the shaft. The room shall be separated from the remainder of the building by
+        fire barriers constructed in accordance with Section 707 or horizontal assemblies constructed in accordance with Section
+        711, or both. The fire-resistance rating and opening protectives shall be not less than the protection required for
+        the shaft enclosure. 3. Be protected by approved fire dampers installed in accordance with their listing at the lowest
+        floor level within the shaft enclosure. Exceptions: 1. The fire-resistance-rated room separation is not required,
+        provided that the only openings in or penetrations of the shaft enclosure to the interior of the building occur at
+        the bottom. The bottom of the shaft shall be closed off around the pene- trating items with materials permitted by
+        Section 718.3.1 for draftstops, or the room shall be provided with an approved automatic sprinkler system. 2. A shaft
+        enclosure containing a waste or linen chute shall not be used for any other purpose and shall discharge in a room
+        protected in accordance with Section 713.13.4. 3. The fire-resistance-rated room separation and the protection at
+        the bottom of the shaft are not required provided that there are no combustibles in the shaft and there are no openings
+        or other penetrations through the shaft enclosure to the interior of the building.'
+    piece_sha256: e6973622a3865d7c9edb172f05a04e436b737c37d29a98e8f234bb5e284b2802
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.12':
+    label: flag
+    topic: means_of_egress
+    reason: 'The top of a shaft enclosure reaches the roof, is closed below it at the topmost floor''s rating, or rises through
+      it per 1511: a person''s check (general.bc_713_12_shaft_top).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 179
+      lines:
+      - 21
+      - 26
+      quote: '713.12 Enclosure at top. The top of shaft enclosures shall comply with one of the following: 1. Extend to the
+        underside of the roof sheathing, deck or slab of the building, and the roof assembly shall comply with the requirements
+        for the type of construction as specified in Table 601. 2. Terminate below the roof assembly and be enclosed at the
+        top with construction of the same fire-resistance rating as the topmost floor penetrated by the shaft, but not less
+        than the fire-resistance rating required for the shaft enclosure. 3. Extend past the roof assembly and comply with
+        the requirements of Section 1511.'
+    piece_sha256: 91290ff39d211df8cbddeeea74bbf14930db227353a5834a7ffc4bc5562edcbe
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '713.14':
+    label: flag
+    topic: means_of_egress
+    reason: 'Hoistways meet Section 712, and where enclosed are shaft enclosures per 713 and Chapter 30: the elevators aren''t
+      in the model, a person''s check (general.bc_713_14_hoistways).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 179
+      lines:
+      - 58
+      - 60
+      quote: 713.14 Elevator, dumbwaiter and other hoistways. A hoistway for elevators, dumbwaiters and other vertical devices
+        shall comply with Section 712. Where the hoistway is required to be enclosed, it shall be constructed as a shaft enclosure
+        in accordance with Section 713 and Chapter 30.
+    piece_sha256: 3805738645f9d68b5dcbe43342fec7ea02956b6f8ed54ea9d0b46a99c70fd470
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   903.3.1.1:

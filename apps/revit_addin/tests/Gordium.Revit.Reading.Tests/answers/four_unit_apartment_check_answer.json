@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 73 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 100 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1364,6 +1364,33 @@
     "Egress · Accessory occupancies: allowable height: A person checks this (Gordium doesn't decide it): Section 504 is not brought in: a person checks.",
     "Egress · Accessory occupancies within Table 506.2's values: A person checks this (Gordium doesn't decide it): Table 506.2's tabular values for nonsprinklered buildings, for each accessory occupancy (Section 506, not brought in): a person checks.",
     "Egress · No separation from the main occupancy: A person checks this (Gordium doesn't decide it): Whether exception 1 (Group H-2 to H-5) or 2 (dwelling and sleeping units of I-1, R-1, R-2, R-3) applies is the architect's statement; 508.4 and Section 420 are not brought in.",
+    "Egress · Nonsymmetrical rated walls tested from both faces: A person checks this (Gordium doesn't decide it): An interior wall or partition built differently on its two faces (a shaft or exit enclosure wall with its layers on one side only, as 713.4 names) takes the shorter of its two fire tests, one from each face (ASTM E119 or UL 263), unless the building official accepts that it was tested with its weaker face to the fire; exterior walls go by 705.5 instead: which walls are built so, and how they were tested, isn't in the model, so a person's check.",
+    "Egress · Rated walls identified in concealed spaces: A person checks this (Gordium doesn't decide it): Where a floor, floor-ceiling or attic space is concealed but can be reached, each fire wall, fire barrier, fire partition, smoke barrier, smoke partition or other wall with protected openings or penetrations carries signs or stenciling there: within 15 feet of each end of the wall and at most every 30 feet along it, lettered at least 3 inches high with a stroke of at least 3/8 inch in a contrasting colour, with wording such as \"FIRE AND/OR SMOKE BARRIER - PROTECT ALL OPENINGS\": signs aren't in the model, so a person's check.",
+    "Egress · Rating of the fire barriers around exit stairways and ramps: A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+    "Egress · Rating of the fire barriers around exit passageways: A person checks this (Gordium doesn't decide it): The fire barrier between the building and an exit passageway has the rating 1024.3 asks: the passageway's rating isn't in the model, so a person's check.",
+    "Egress · Fire-resistance rating of a horizontal exit's separation: A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+    "Egress · Exterior walls that are part of a rated enclosure: A person checks this (Gordium doesn't decide it): Where an exterior wall is part of a required rated shaft, or of a stairway, ramp or exit passageway's separation or enclosure, it follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021 (exterior egress balconies), 1023.7 (interior exit stairways and ramps), 1024.8 (exit passageways), 1027.6 (exterior exit stairways and ramps) or 1207 of the Fire Code of New York State (energy storage systems) asks the exterior wall itself to be rated: which enclosure walls are exterior walls, and their ratings, a person's check.",
+    "Egress · Fire barriers run from floor to the deck above: A person checks this (Gordium doesn't decide it): A fire barrier runs from the top of the foundation or the floor/ceiling assembly below to the underside of the floor or roof sheathing, slab or deck above, fastened to both, and continues through concealed spaces such as above a suspended ceiling, its joints and voids per 707.8 and 707.9; except that a shaft enclosure, an interior exit stairway or ramp enclosure (1023) or an exit access stairway or ramp enclosure (1019) may end at a top enclosure per 713.12, and an exit passageway enclosure (1024.3) that stops short is closed at the top with construction of the passageway's rating: walls' heights above the ceiling aren't in the model, so a person's check.",
+    "Egress · What holds up a fire barrier has its rating: A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+    "Egress · Openings in fire barriers: A person checks this (Gordium doesn't decide it): Openings in a fire barrier are protected per Section 716, at most 25 percent of the wall's length in all and at most 156 square feet each; openings in shaft, interior exit stairway and ramp, and exit passageway enclosures also meet 713.7, 1023.4 and 1024.5. The limits are lifted for a sprinklered building (903.3.1.1: the 156 square feet), fire doors serving exit access or interior exit stairway and ramp enclosures, protectives tested to ASTM E119 or UL 263 at the wall's own rating, atrium fire windows (the 25 percent), the fire door between an exit stairway and its exit passageway (1023.3.1), elevator car entrances in a hoistway enclosure, and shaft and chute rooms (713, 713.13.3, 713.13.4; the 25 percent): which walls are fire barriers and their openings' sizes aren't in the model, so a person's check.",
+    "Egress · Penetrations of fire barriers: A person checks this (Gordium doesn't decide it): Penetrations of a fire barrier (pipes, conduits, cables, ducts) meet Section 714: they aren't in the model, so a person's check.",
+    "Egress · Penetrations into shaft and exit enclosures only where allowed: A person checks this (Gordium doesn't decide it): Penetrations into shaft, interior exit stairway and ramp, and exit passageway enclosures are allowed only where 713.8.1, 1023.5 and 1024.6 permit them: penetrations aren't in the model, so a person's check.",
+    "Egress · Joints in and at fire barriers: A person checks this (Gordium doesn't decide it): Joints in or between fire barriers, and where a fire barrier meets a rated floor or roof above or another rated wall, meet Section 715: joints aren't in the model, so a person's check.",
+    "Egress · Voids where a fire barrier meets an unrated roof or exterior wall: A person checks this (Gordium doesn't decide it): The voids where a fire barrier meets a roof or exterior wall that isn't rated meet Section 715: not in the model, so a person's check.",
+    "Egress · Ducts and air transfer openings through fire barriers: A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a fire barrier meet Section 717 (dampers): the ductwork isn't in the model, so a person's check.",
+    "Egress · Shaft enclosures built as fire barriers or horizontal assemblies: A person checks this (Gordium doesn't decide it): A shaft enclosure (an elevator hoistway, an exit access stairway or ramp enclosure, a duct or chute shaft) is built as fire barriers per 707, horizontal assemblies per 711, or both: the shafts and their walls aren't in the model, so a person's check.",
+    "Egress · Fire-resistance rating of shaft enclosures: A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+    "Egress · Shaft enclosures continuous: A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+    "Egress · Exterior walls that are part of a shaft enclosure: A person checks this (Gordium doesn't decide it): An exterior wall that is part of a required shaft enclosure follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways and ramps) asks the exterior wall itself to be rated: a person's check.",
+    "Egress · Openings in shaft enclosures: A person checks this (Gordium doesn't decide it): Openings in a shaft enclosure are protected per Section 716 as for fire barriers, and its doors are self-closing or close automatically on smoke detection per 716.2.6.6: the doors' ratings and closers aren't in the model, so a person's check.",
+    "Egress · No openings in a shaft enclosure but those its purpose needs: A person checks this (Gordium doesn't decide it): A shaft enclosure has no openings other than those its purpose needs: a person's check.",
+    "Egress · Penetrations of shaft enclosures: A person checks this (Gordium doesn't decide it): Penetrations of a shaft enclosure are protected per Section 714, as for fire barriers or horizontal assemblies; structural beams or joists may pass through where so protected: penetrations aren't in the model, so a person's check.",
+    "Egress · No penetrations of a shaft enclosure but those its purpose needs: A person checks this (Gordium doesn't decide it): A shaft enclosure has no penetrations other than those its purpose needs, except membrane penetrations on its outside, protected per 714.4.2: a person's check.",
+    "Egress · Joints in shaft enclosures: A person checks this (Gordium doesn't decide it): Joints in a shaft enclosure meet Section 715: not in the model, so a person's check.",
+    "Egress · Ducts and air transfer openings through shaft enclosures: A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a shaft enclosure meet Section 717: the ductwork isn't in the model, so a person's check.",
+    "Egress · A shaft not reaching the building's bottom closed at its foot: A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+    "Egress · The top of a shaft enclosure: A person checks this (Gordium doesn't decide it): A shaft enclosure reaches the underside of the roof (the roof built for its type of construction, Table 601), or ends below it with a top of the topmost floor's rating (at least the shaft's), or rises through the roof per 1511: a person's check. An interior exit stairway's or exit access stairway's enclosure may end at such a top (707.5).",
+    "Egress · Elevator and other hoistways: A person checks this (Gordium doesn't decide it): An elevator, dumbwaiter or other hoistway meets Section 712, and where it must be enclosed it is a shaft enclosure per Section 713 and Chapter 30: the elevators aren't in the model, so a person's check.",
     "Egress · Outdoor areas: means of egress and occupant load: A person checks this (Gordium doesn't decide it): Yards, patios, occupiable roofs or courts the occupants use: their means of egress and the occupant load the building official assigns are a person's check.",
     "Egress · An assembly room's occupant load posted: A person checks this (Gordium doesn't decide it): A sign near the main exit of each assembly room giving its occupant load: a person's check.",
     "Egress · Table 1006.2.1 in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy isn't marked yet, so a person checks.",
@@ -61700,6 +61727,1900 @@
      }
     },
     {
+     "id": "egress.general.bc_703_2_1_1_nonsymmetrical_walls",
+     "rule": "general.bc_703_2_1_1_nonsymmetrical_walls",
+     "name": "Egress · Nonsymmetrical rated walls tested from both faces (BCNYS 703.2.1.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An interior wall or partition built differently on its two faces (a shaft or exit enclosure wall with its layers on one side only, as 713.4 names) takes the shorter of its two fire tests, one from each face (ASTM E119 or UL 263), unless the building official accepts that it was tested with its weaker face to the fire; exterior walls go by 705.5 instead: which walls are built so, and how they were tested, isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An interior wall or partition built differently on its two faces (a shaft or exit enclosure wall with its layers on one side only, as 713.4 names) takes the shorter of its two fire tests, one from each face (ASTM E119 or UL 263), unless the building official accepts that it was tested with its weaker face to the fire; exterior walls go by 705.5 instead: which walls are built so, and how they were tested, isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "703.2.1.1 Nonsymmetrical wall construction. Interior walls and partitions of nonsymmetrical construction shall be tested with both faces exposed to the furnace, and the assigned fire-resistance rating shall be the shortest duration obtained from the two tests conducted in compliance with ASTM E119 or UL 263. Where evidence is furnished to show that the wall was tested with the least fire-resistant side exposed to the furnace, subject to acceptance of the building official, the wall need not be subjected to tests from the opposite side (see Section 705.5 for exterior walls).",
+        "where": "703.2.1.1, 2025 Building Code of New York State (BCNYS), PDF p.160"
+       }
+      ],
+      "citation": "703.2.1.1, 2025 Building Code of New York State (BCNYS), PDF p.160",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "703.2.1.1",
+      "quote": "703.2.1.1 Nonsymmetrical wall construction. Interior walls and partitions of nonsymmetrical construction shall be tested with both faces exposed to the furnace, and the assigned fire-resistance rating shall be the shortest duration obtained from the two tests conducted in compliance with ASTM E119 or UL 263. Where evidence is furnished to show that the wall was tested with the least fire-resistant side exposed to the furnace, subject to acceptance of the building official, the wall need not be subjected to tests from the opposite side (see Section 705.5 for exterior walls)."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_703_2_1_1_nonsymmetrical_walls",
+       "words": "A person checks this (Gordium doesn't decide it): An interior wall or partition built differently on its two faces (a shaft or exit enclosure wall with its layers on one side only, as 713.4 names) takes the shorter of its two fire tests, one from each face (ASTM E119 or UL 263), unless the building official accepts that it was tested with its weaker face to the fire; exterior walls go by 705.5 instead: which walls are built so, and how they were tested, isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_703_2_1_1_nonsymmetrical_walls",
+       "why": "A person checks this (Gordium doesn't decide it): An interior wall or partition built differently on its two faces (a shaft or exit enclosure wall with its layers on one side only, as 713.4 names) takes the shorter of its two fire tests, one from each face (ASTM E119 or UL 263), unless the building official accepts that it was tested with its weaker face to the fire; exterior walls go by 705.5 instead: which walls are built so, and how they were tested, isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Nonsymmetrical rated walls tested from both faces",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "703",
+      "section_title": "Fire-Resistance Ratings and Fire Tests",
+      "piece": "703.2.1.1",
+      "piece_title": "Nonsymmetrical wall construction"
+     }
+    },
+    {
+     "id": "egress.general.bc_703_5_marking",
+     "rule": "general.bc_703_5_marking",
+     "name": "Egress · Rated walls identified in concealed spaces (BCNYS 703.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Where a floor, floor-ceiling or attic space is concealed but can be reached, each fire wall, fire barrier, fire partition, smoke barrier, smoke partition or other wall with protected openings or penetrations carries signs or stenciling there: within 15 feet of each end of the wall and at most every 30 feet along it, lettered at least 3 inches high with a stroke of at least 3/8 inch in a contrasting colour, with wording such as \"FIRE AND/OR SMOKE BARRIER - PROTECT ALL OPENINGS\": signs aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Where a floor, floor-ceiling or attic space is concealed but can be reached, each fire wall, fire barrier, fire partition, smoke barrier, smoke partition or other wall with protected openings or penetrations carries signs or stenciling there: within 15 feet of each end of the wall and at most every 30 feet along it, lettered at least 3 inches high with a stroke of at least 3/8 inch in a contrasting colour, with wording such as \"FIRE AND/OR SMOKE BARRIER - PROTECT ALL OPENINGS\": signs aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "703.5 Marking and identification. Where there is an accessible concealed floor, floor-ceiling or attic space, fire walls, fire barriers, fire partitions, smoke barriers and smoke partitions or any other wall required to have protected openings or penetrations shall be effectively and permanently identified with signs or stenciling in the concealed space. Such identification shall: 1. Be located within 15 feet (4572 mm) of the end of each wall and at intervals not exceeding 30 feet (9144 mm) measured hori- zontally along the wall or partition. 2. Include lettering not less than 3 inches (76 mm) in height with a minimum 3/8-inch (9.5 mm) stroke in a contrasting color incorporating the suggested wording, “FIRE AND/OR SMOKE BARRIER—PROTECT ALL OPENINGS,” or other wording.",
+        "where": "703.5, 2025 Building Code of New York State (BCNYS), PDF p.161"
+       }
+      ],
+      "citation": "703.5, 2025 Building Code of New York State (BCNYS), PDF p.161",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "703.5",
+      "quote": "703.5 Marking and identification. Where there is an accessible concealed floor, floor-ceiling or attic space, fire walls, fire barriers, fire partitions, smoke barriers and smoke partitions or any other wall required to have protected openings or penetrations shall be effectively and permanently identified with signs or stenciling in the concealed space. Such identification shall: 1. Be located within 15 feet (4572 mm) of the end of each wall and at intervals not exceeding 30 feet (9144 mm) measured hori- zontally along the wall or partition. 2. Include lettering not less than 3 inches (76 mm) in height with a minimum 3/8-inch (9.5 mm) stroke in a contrasting color incorporating the suggested wording, “FIRE AND/OR SMOKE BARRIER—PROTECT ALL OPENINGS,” or other wording."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_703_5_marking",
+       "words": "A person checks this (Gordium doesn't decide it): Where a floor, floor-ceiling or attic space is concealed but can be reached, each fire wall, fire barrier, fire partition, smoke barrier, smoke partition or other wall with protected openings or penetrations carries signs or stenciling there: within 15 feet of each end of the wall and at most every 30 feet along it, lettered at least 3 inches high with a stroke of at least 3/8 inch in a contrasting colour, with wording such as \"FIRE AND/OR SMOKE BARRIER - PROTECT ALL OPENINGS\": signs aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_703_5_marking",
+       "why": "A person checks this (Gordium doesn't decide it): Where a floor, floor-ceiling or attic space is concealed but can be reached, each fire wall, fire barrier, fire partition, smoke barrier, smoke partition or other wall with protected openings or penetrations carries signs or stenciling there: within 15 feet of each end of the wall and at most every 30 feet along it, lettered at least 3 inches high with a stroke of at least 3/8 inch in a contrasting colour, with wording such as \"FIRE AND/OR SMOKE BARRIER - PROTECT ALL OPENINGS\": signs aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Rated walls identified in concealed spaces",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "703",
+      "section_title": "Fire-Resistance Ratings and Fire Tests",
+      "piece": "703.5",
+      "piece_title": "Marking and identification"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_3_2_exit_stairway_fire_barriers",
+     "rule": "general.bc_707_3_2_exit_stairway_fire_barriers",
+     "name": "Egress · Rating of the fire barriers around exit stairways and ramps (BCNYS 707.3.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "707.3.2 Interior exit stairway and ramp construction. The fire-resistance rating of the fire barrier separating building areas from an interior exit stairway or ramp shall comply with Section 1023.1.",
+        "where": "707.3.2, 2025 Building Code of New York State (BCNYS), PDF p.171"
+       }
+      ],
+      "citation": "707.3.2, 2025 Building Code of New York State (BCNYS), PDF p.171",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.3.2",
+      "quote": "707.3.2 Interior exit stairway and ramp construction. The fire-resistance rating of the fire barrier separating building areas from an interior exit stairway or ramp shall comply with Section 1023.1."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_3_2_exit_stairway_fire_barriers",
+       "words": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_3_2_exit_stairway_fire_barriers",
+       "why": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Rating of the fire barriers around exit stairways and ramps",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.3.2",
+      "piece_title": "Interior exit stairway and ramp construction"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_3_4_exit_passageway_fire_barriers",
+     "rule": "general.bc_707_3_4_exit_passageway_fire_barriers",
+     "name": "Egress · Rating of the fire barriers around exit passageways (BCNYS 707.3.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an exit passageway has the rating 1024.3 asks: the passageway's rating isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an exit passageway has the rating 1024.3 asks: the passageway's rating isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "707.3.4 Exit passageway. The fire-resistance rating of the fire barrier separating building areas from an exit passageway shall comply with Section 1024.3.",
+        "where": "707.3.4, 2025 Building Code of New York State (BCNYS), PDF p.171"
+       }
+      ],
+      "citation": "707.3.4, 2025 Building Code of New York State (BCNYS), PDF p.171",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.3.4",
+      "quote": "707.3.4 Exit passageway. The fire-resistance rating of the fire barrier separating building areas from an exit passageway shall comply with Section 1024.3."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_3_4_exit_passageway_fire_barriers",
+       "words": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an exit passageway has the rating 1024.3 asks: the passageway's rating isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_3_4_exit_passageway_fire_barriers",
+       "why": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an exit passageway has the rating 1024.3 asks: the passageway's rating isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Rating of the fire barriers around exit passageways",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.3.4",
+      "piece_title": "Exit passageway"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_3_5_horizontal_exit_separation",
+     "rule": "general.bc_707_3_5_horizontal_exit_separation",
+     "name": "Egress · Fire-resistance rating of a horizontal exit's separation (BCNYS 707.3.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+      "quotes": [
+       {
+        "text": "707.3.5 Horizontal exit. The fire-resistance rating of the separation between building areas connected by a horizontal exit shall comply with Section 1026.1.",
+        "where": "707.3.5, 2025 Building Code of New York State (BCNYS), PDF p.171"
+       }
+      ],
+      "citation": "707.3.5, 2025 Building Code of New York State (BCNYS), PDF p.171",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.3.5",
+      "quote": "707.3.5 Horizontal exit. The fire-resistance rating of the separation between building areas connected by a horizontal exit shall comply with Section 1026.1."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_3_5_horizontal_exit_separation",
+       "words": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_3_5_horizontal_exit_separation",
+       "why": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Fire-resistance rating of a horizontal exit's separation",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.3.5",
+      "piece_title": "Horizontal exit"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_4_exterior_walls",
+     "rule": "general.bc_707_4_exterior_walls",
+     "name": "Egress · Exterior walls that are part of a rated enclosure (BCNYS 707.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Where an exterior wall is part of a required rated shaft, or of a stairway, ramp or exit passageway's separation or enclosure, it follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021 (exterior egress balconies), 1023.7 (interior exit stairways and ramps), 1024.8 (exit passageways), 1027.6 (exterior exit stairways and ramps) or 1207 of the Fire Code of New York State (energy storage systems) asks the exterior wall itself to be rated: which enclosure walls are exterior walls, and their ratings, a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Where an exterior wall is part of a required rated shaft, or of a stairway, ramp or exit passageway's separation or enclosure, it follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021 (exterior egress balconies), 1023.7 (interior exit stairways and ramps), 1024.8 (exit passageways), 1027.6 (exterior exit stairways and ramps) or 1207 of the Fire Code of New York State (energy storage systems) asks the exterior wall itself to be rated: which enclosure walls are exterior walls, and their ratings, a person's check.",
+      "quotes": [
+       {
+        "text": "707.4 Exterior walls. Where exterior walls serve as a part of a required fire-resistance-rated shaft, or separation or enclosure for a stairway, ramp or exit passageway, such walls shall comply with the requirements of Section 705 for exterior walls and the fire-resis- tance-rated enclosure or separation requirements shall not apply. Exceptions: 1. Exterior walls required to be fire-resistance rated in accordance with Section 1021 for exterior egress balconies, Section 1023.7 for interior exit stairways and ramps, Section 1024.8 for exit passageways and Section 1027.6 for exterior exit stair- ways and ramps. 2. Exterior walls required to be fire-resistance rated in accordance with Section 1207 of the Fire Code of New York State for enclosure of energy storage systems.",
+        "where": "707.4, 2025 Building Code of New York State (BCNYS), PDF p.172"
+       }
+      ],
+      "citation": "707.4, 2025 Building Code of New York State (BCNYS), PDF p.172",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.4",
+      "quote": "707.4 Exterior walls. Where exterior walls serve as a part of a required fire-resistance-rated shaft, or separation or enclosure for a stairway, ramp or exit passageway, such walls shall comply with the requirements of Section 705 for exterior walls and the fire-resis- tance-rated enclosure or separation requirements shall not apply. Exceptions: 1. Exterior walls required to be fire-resistance rated in accordance with Section 1021 for exterior egress balconies, Section 1023.7 for interior exit stairways and ramps, Section 1024.8 for exit passageways and Section 1027.6 for exterior exit stair- ways and ramps. 2. Exterior walls required to be fire-resistance rated in accordance with Section 1207 of the Fire Code of New York State for enclosure of energy storage systems."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_4_exterior_walls",
+       "words": "A person checks this (Gordium doesn't decide it): Where an exterior wall is part of a required rated shaft, or of a stairway, ramp or exit passageway's separation or enclosure, it follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021 (exterior egress balconies), 1023.7 (interior exit stairways and ramps), 1024.8 (exit passageways), 1027.6 (exterior exit stairways and ramps) or 1207 of the Fire Code of New York State (energy storage systems) asks the exterior wall itself to be rated: which enclosure walls are exterior walls, and their ratings, a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_4_exterior_walls",
+       "why": "A person checks this (Gordium doesn't decide it): Where an exterior wall is part of a required rated shaft, or of a stairway, ramp or exit passageway's separation or enclosure, it follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021 (exterior egress balconies), 1023.7 (interior exit stairways and ramps), 1024.8 (exit passageways), 1027.6 (exterior exit stairways and ramps) or 1207 of the Fire Code of New York State (energy storage systems) asks the exterior wall itself to be rated: which enclosure walls are exterior walls, and their ratings, a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exterior walls that are part of a rated enclosure",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.4",
+      "piece_title": "Exterior walls"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_5_continuity",
+     "rule": "general.bc_707_5_continuity",
+     "name": "Egress · Fire barriers run from floor to the deck above (BCNYS 707.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A fire barrier runs from the top of the foundation or the floor/ceiling assembly below to the underside of the floor or roof sheathing, slab or deck above, fastened to both, and continues through concealed spaces such as above a suspended ceiling, its joints and voids per 707.8 and 707.9; except that a shaft enclosure, an interior exit stairway or ramp enclosure (1023) or an exit access stairway or ramp enclosure (1019) may end at a top enclosure per 713.12, and an exit passageway enclosure (1024.3) that stops short is closed at the top with construction of the passageway's rating: walls' heights above the ceiling aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A fire barrier runs from the top of the foundation or the floor/ceiling assembly below to the underside of the floor or roof sheathing, slab or deck above, fastened to both, and continues through concealed spaces such as above a suspended ceiling, its joints and voids per 707.8 and 707.9; except that a shaft enclosure, an interior exit stairway or ramp enclosure (1023) or an exit access stairway or ramp enclosure (1019) may end at a top enclosure per 713.12, and an exit passageway enclosure (1024.3) that stops short is closed at the top with construction of the passageway's rating: walls' heights above the ceiling aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "707.5 Continuity. Fire barriers shall extend from the top of the foundation or floor/ceiling assembly below to the underside of the floor or roof sheathing, slab or deck above and shall be securely attached thereto. Such fire barriers shall be continuous through concealed space, such as the space above a suspended ceiling. Joints and voids at intersections shall comply with Sections 707.8 and 707.9 Exceptions: 1. Shaft enclosures shall be permitted to terminate at a top enclosure complying with Section 713.12. 2. Interior exit stairway and ramp enclosures required by Section 1023 and exit access stairway and ramp enclosures required by Section 1019 shall be permitted to terminate at a top enclosure complying with Section 713.12. 3. An exit passageway enclosure required by Section 1024.3 that does not extend to the underside of the floor sheathing, roof sheathing, slab or deck above shall be enclosed at the top with construction of the same fire-resistance rating as required for the exit passageway.",
+        "where": "707.5, 2025 Building Code of New York State (BCNYS), PDF p.172"
+       }
+      ],
+      "citation": "707.5, 2025 Building Code of New York State (BCNYS), PDF p.172",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.5",
+      "quote": "707.5 Continuity. Fire barriers shall extend from the top of the foundation or floor/ceiling assembly below to the underside of the floor or roof sheathing, slab or deck above and shall be securely attached thereto. Such fire barriers shall be continuous through concealed space, such as the space above a suspended ceiling. Joints and voids at intersections shall comply with Sections 707.8 and 707.9 Exceptions: 1. Shaft enclosures shall be permitted to terminate at a top enclosure complying with Section 713.12. 2. Interior exit stairway and ramp enclosures required by Section 1023 and exit access stairway and ramp enclosures required by Section 1019 shall be permitted to terminate at a top enclosure complying with Section 713.12. 3. An exit passageway enclosure required by Section 1024.3 that does not extend to the underside of the floor sheathing, roof sheathing, slab or deck above shall be enclosed at the top with construction of the same fire-resistance rating as required for the exit passageway."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_5_continuity",
+       "words": "A person checks this (Gordium doesn't decide it): A fire barrier runs from the top of the foundation or the floor/ceiling assembly below to the underside of the floor or roof sheathing, slab or deck above, fastened to both, and continues through concealed spaces such as above a suspended ceiling, its joints and voids per 707.8 and 707.9; except that a shaft enclosure, an interior exit stairway or ramp enclosure (1023) or an exit access stairway or ramp enclosure (1019) may end at a top enclosure per 713.12, and an exit passageway enclosure (1024.3) that stops short is closed at the top with construction of the passageway's rating: walls' heights above the ceiling aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_5_continuity",
+       "why": "A person checks this (Gordium doesn't decide it): A fire barrier runs from the top of the foundation or the floor/ceiling assembly below to the underside of the floor or roof sheathing, slab or deck above, fastened to both, and continues through concealed spaces such as above a suspended ceiling, its joints and voids per 707.8 and 707.9; except that a shaft enclosure, an interior exit stairway or ramp enclosure (1023) or an exit access stairway or ramp enclosure (1019) may end at a top enclosure per 713.12, and an exit passageway enclosure (1024.3) that stops short is closed at the top with construction of the passageway's rating: walls' heights above the ceiling aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Fire barriers run from floor to the deck above",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.5",
+      "piece_title": "Continuity"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_5_1_supporting_construction",
+     "rule": "general.bc_707_5_1_supporting_construction",
+     "name": "Egress · What holds up a fire barrier has its rating (BCNYS 707.5.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "707.5.1 Supporting construction. The supporting construction for a fire barrier shall be protected to afford the required fire- resistance rating of the fire barrier supported. Hollow vertical spaces within a fire barrier shall be fireblocked in accordance with Section 718.2 at every floor level. Exceptions: 1. The maximum required fire-resistance rating for assemblies supporting fire barriers separating tank storage as provided for in Section 415.9.1.2 shall be 2 hours, but not less than required by Table 601 for the building construction type. 2. Supporting construction for 1-hour fire barriers required by Table 509.1 in buildings of Types IIB, IIIB and VB construc- tion is not required to be fire-resistance rated unless required by other sections of this code.",
+        "where": "707.5.1, 2025 Building Code of New York State (BCNYS), PDF p.172"
+       }
+      ],
+      "citation": "707.5.1, 2025 Building Code of New York State (BCNYS), PDF p.172",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.5.1",
+      "quote": "707.5.1 Supporting construction. The supporting construction for a fire barrier shall be protected to afford the required fire- resistance rating of the fire barrier supported. Hollow vertical spaces within a fire barrier shall be fireblocked in accordance with Section 718.2 at every floor level. Exceptions: 1. The maximum required fire-resistance rating for assemblies supporting fire barriers separating tank storage as provided for in Section 415.9.1.2 shall be 2 hours, but not less than required by Table 601 for the building construction type. 2. Supporting construction for 1-hour fire barriers required by Table 509.1 in buildings of Types IIB, IIIB and VB construc- tion is not required to be fire-resistance rated unless required by other sections of this code."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_5_1_supporting_construction",
+       "words": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_5_1_supporting_construction",
+       "why": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "What holds up a fire barrier has its rating",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.5.1",
+      "piece_title": "Supporting construction"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_6_openings",
+     "rule": "general.bc_707_6_openings",
+     "name": "Egress · Openings in fire barriers, protected and limited in size (BCNYS 707.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Openings in a fire barrier are protected per Section 716, at most 25 percent of the wall's length in all and at most 156 square feet each; openings in shaft, interior exit stairway and ramp, and exit passageway enclosures also meet 713.7, 1023.4 and 1024.5. The limits are lifted for a sprinklered building (903.3.1.1: the 156 square feet), fire doors serving exit access or interior exit stairway and ramp enclosures, protectives tested to ASTM E119 or UL 263 at the wall's own rating, atrium fire windows (the 25 percent), the fire door between an exit stairway and its exit passageway (1023.3.1), elevator car entrances in a hoistway enclosure, and shaft and chute rooms (713, 713.13.3, 713.13.4; the 25 percent): which walls are fire barriers and their openings' sizes aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Openings in a fire barrier are protected per Section 716, at most 25 percent of the wall's length in all and at most 156 square feet each; openings in shaft, interior exit stairway and ramp, and exit passageway enclosures also meet 713.7, 1023.4 and 1024.5. The limits are lifted for a sprinklered building (903.3.1.1: the 156 square feet), fire doors serving exit access or interior exit stairway and ramp enclosures, protectives tested to ASTM E119 or UL 263 at the wall's own rating, atrium fire windows (the 25 percent), the fire door between an exit stairway and its exit passageway (1023.3.1), elevator car entrances in a hoistway enclosure, and shaft and chute rooms (713, 713.13.3, 713.13.4; the 25 percent): which walls are fire barriers and their openings' sizes aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "707.6 Openings. Openings in a fire barrier shall be protected in accordance with Section 716. Openings shall be limited to a maxi- mum aggregate width of 25 percent of the length of the wall, and the maximum area of any single opening shall not exceed 156 square feet (15 m[fn2]). Openings in enclosures for shafts, interior exit stairways and ramps and exit passageways shall also comply with Sections 713.7, 1023.4 and 1024.5, respectively. Exceptions: 1. Openings shall not be limited to 156 square feet (15 m[fn2]) where adjoining floor areas are equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1. 2. Openings shall not be limited to 156 square feet (15 m[fn2]) or an aggregate width of 25 percent of the length of the wall where the opening protective is a fire door serving enclosures for exit access stairways and ramps, and interior exit stair- ways and ramps. 3. Openings shall not be limited to 156 square feet (15 m[fn2]) or an aggregate width of 25 percent of the length of the wall where the opening protective has been tested in accordance with ASTM E119 or UL 263 and has a minimum fire-resistance rating not less than the fire-resistance rating of the wall. 4. Fire window assemblies permitted in atrium separation walls shall not be limited to a maximum aggregate width of 25 percent of the length of the wall. 5. Openings shall not be limited to 156 square feet (15 m[fn2]) or an aggregate width of 25 percent of the length of the wall where the opening protective is a fire door assembly in a fire barrier separating an enclosure for exit access stairways and ramps, and interior exit stairways and ramps from an exit passageway in accordance with Section 1023.3.1. 6. Openings providing entrance to an elevator car shall not be limited to 156 square feet (15 m[fn2]) or an aggregate width of 25 percent of the length of the wall where the opening protective is a fire door assembly in a fire barrier that is an elevator hoistway enclosure. 7. Openings shall not be limited to an aggregate width of 25 percent of the length of the wall where opening serves a shaft enclosure in accordance with Section 713. 8. Openings shall not be limited to an aggregate width of 25 percent of the length of the wall where opening serves a chute access room in accordance with Section 713.13.3 or a chute discharge room in accordance with Section 713.13.4.",
+        "where": "707.6, 2025 Building Code of New York State (BCNYS), PDF p.172"
+       }
+      ],
+      "citation": "707.6, 2025 Building Code of New York State (BCNYS), PDF p.172",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.6",
+      "quote": "707.6 Openings. Openings in a fire barrier shall be protected in accordance with Section 716. Openings shall be limited to a maxi- mum aggregate width of 25 percent of the length of the wall, and the maximum area of any single opening shall not exceed 156 square feet (15 m[fn2]). Openings in enclosures for shafts, interior exit stairways and ramps and exit passageways shall also comply with Sections 713.7, 1023.4 and 1024.5, respectively. Exceptions: 1. Openings shall not be limited to 156 square feet (15 m[fn2]) where adjoining floor areas are equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1. 2. Openings shall not be limited to 156 square feet (15 m[fn2]) or an aggregate width of 25 percent of the length of the wall where the opening protective is a fire door serving enclosures for exit access stairways and ramps, and interior exit stair- ways and ramps. 3. Openings shall not be limited to 156 square feet (15 m[fn2]) or an aggregate width of 25 percent of the length of the wall where the opening protective has been tested in accordance with ASTM E119 or UL 263 and has a minimum fire-resistance rating not less than the fire-resistance rating of the wall. 4. Fire window assemblies permitted in atrium separation walls shall not be limited to a maximum aggregate width of 25 percent of the length of the wall. 5. Openings shall not be limited to 156 square feet (15 m[fn2]) or an aggregate width of 25 percent of the length of the wall where the opening protective is a fire door assembly in a fire barrier separating an enclosure for exit access stairways and ramps, and interior exit stairways and ramps from an exit passageway in accordance with Section 1023.3.1. 6. Openings providing entrance to an elevator car shall not be limited to 156 square feet (15 m[fn2]) or an aggregate width of 25 percent of the length of the wall where the opening protective is a fire door assembly in a fire barrier that is an elevator hoistway enclosure. 7. Openings shall not be limited to an aggregate width of 25 percent of the length of the wall where opening serves a shaft enclosure in accordance with Section 713. 8. Openings shall not be limited to an aggregate width of 25 percent of the length of the wall where opening serves a chute access room in accordance with Section 713.13.3 or a chute discharge room in accordance with Section 713.13.4."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_6_openings",
+       "words": "A person checks this (Gordium doesn't decide it): Openings in a fire barrier are protected per Section 716, at most 25 percent of the wall's length in all and at most 156 square feet each; openings in shaft, interior exit stairway and ramp, and exit passageway enclosures also meet 713.7, 1023.4 and 1024.5. The limits are lifted for a sprinklered building (903.3.1.1: the 156 square feet), fire doors serving exit access or interior exit stairway and ramp enclosures, protectives tested to ASTM E119 or UL 263 at the wall's own rating, atrium fire windows (the 25 percent), the fire door between an exit stairway and its exit passageway (1023.3.1), elevator car entrances in a hoistway enclosure, and shaft and chute rooms (713, 713.13.3, 713.13.4; the 25 percent): which walls are fire barriers and their openings' sizes aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_6_openings",
+       "why": "A person checks this (Gordium doesn't decide it): Openings in a fire barrier are protected per Section 716, at most 25 percent of the wall's length in all and at most 156 square feet each; openings in shaft, interior exit stairway and ramp, and exit passageway enclosures also meet 713.7, 1023.4 and 1024.5. The limits are lifted for a sprinklered building (903.3.1.1: the 156 square feet), fire doors serving exit access or interior exit stairway and ramp enclosures, protectives tested to ASTM E119 or UL 263 at the wall's own rating, atrium fire windows (the 25 percent), the fire door between an exit stairway and its exit passageway (1023.3.1), elevator car entrances in a hoistway enclosure, and shaft and chute rooms (713, 713.13.3, 713.13.4; the 25 percent): which walls are fire barriers and their openings' sizes aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Openings in fire barriers, protected and limited in size",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.6",
+      "piece_title": "Openings"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_7_penetrations",
+     "rule": "general.bc_707_7_penetrations",
+     "name": "Egress · Penetrations of fire barriers (BCNYS 707.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Penetrations of a fire barrier (pipes, conduits, cables, ducts) meet Section 714: they aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Penetrations of a fire barrier (pipes, conduits, cables, ducts) meet Section 714: they aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "707.7 Penetrations. Penetrations of fire barriers shall comply with Section 714.",
+        "where": "707.7, 2025 Building Code of New York State (BCNYS), PDF p.172"
+       }
+      ],
+      "citation": "707.7, 2025 Building Code of New York State (BCNYS), PDF p.172",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.7",
+      "quote": "707.7 Penetrations. Penetrations of fire barriers shall comply with Section 714."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_7_penetrations",
+       "words": "A person checks this (Gordium doesn't decide it): Penetrations of a fire barrier (pipes, conduits, cables, ducts) meet Section 714: they aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_7_penetrations",
+       "why": "A person checks this (Gordium doesn't decide it): Penetrations of a fire barrier (pipes, conduits, cables, ducts) meet Section 714: they aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Penetrations of fire barriers",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.7",
+      "piece_title": "Penetrations"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_7_1_prohibited_penetrations",
+     "rule": "general.bc_707_7_1_prohibited_penetrations",
+     "name": "Egress · Penetrations into shaft and exit enclosures only where allowed (BCNYS 707.7.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Penetrations into shaft, interior exit stairway and ramp, and exit passageway enclosures are allowed only where 713.8.1, 1023.5 and 1024.6 permit them: penetrations aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Penetrations into shaft, interior exit stairway and ramp, and exit passageway enclosures are allowed only where 713.8.1, 1023.5 and 1024.6 permit them: penetrations aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "707.7.1 Prohibited penetrations. Penetrations into enclosures for shafts, interior exit stairways and ramps, and exit passage- ways shall be allowed only where permitted by Sections 713.8.1, 1023.5 and 1024.6, respectively.",
+        "where": "707.7.1, 2025 Building Code of New York State (BCNYS), PDF p.173"
+       }
+      ],
+      "citation": "707.7.1, 2025 Building Code of New York State (BCNYS), PDF p.173",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.7.1",
+      "quote": "707.7.1 Prohibited penetrations. Penetrations into enclosures for shafts, interior exit stairways and ramps, and exit passage- ways shall be allowed only where permitted by Sections 713.8.1, 1023.5 and 1024.6, respectively."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_7_1_prohibited_penetrations",
+       "words": "A person checks this (Gordium doesn't decide it): Penetrations into shaft, interior exit stairway and ramp, and exit passageway enclosures are allowed only where 713.8.1, 1023.5 and 1024.6 permit them: penetrations aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_7_1_prohibited_penetrations",
+       "why": "A person checks this (Gordium doesn't decide it): Penetrations into shaft, interior exit stairway and ramp, and exit passageway enclosures are allowed only where 713.8.1, 1023.5 and 1024.6 permit them: penetrations aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Penetrations into shaft and exit enclosures only where allowed",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.7.1",
+      "piece_title": "Prohibited penetrations"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_8_joints",
+     "rule": "general.bc_707_8_joints",
+     "name": "Egress · Joints in and at fire barriers (BCNYS 707.8)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Joints in or between fire barriers, and where a fire barrier meets a rated floor or roof above or another rated wall, meet Section 715: joints aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Joints in or between fire barriers, and where a fire barrier meets a rated floor or roof above or another rated wall, meet Section 715: joints aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "707.8 Joints. Joints made in or between fire barriers, and joints made at the intersection of fire barriers with the underside of a fire- resistance-rated floor or roof sheathing, slab or deck above, and with other fire-resistance-rated wall assemblies shall comply with Section 715.",
+        "where": "707.8, 2025 Building Code of New York State (BCNYS), PDF p.173"
+       }
+      ],
+      "citation": "707.8, 2025 Building Code of New York State (BCNYS), PDF p.173",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.8",
+      "quote": "707.8 Joints. Joints made in or between fire barriers, and joints made at the intersection of fire barriers with the underside of a fire- resistance-rated floor or roof sheathing, slab or deck above, and with other fire-resistance-rated wall assemblies shall comply with Section 715."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_8_joints",
+       "words": "A person checks this (Gordium doesn't decide it): Joints in or between fire barriers, and where a fire barrier meets a rated floor or roof above or another rated wall, meet Section 715: joints aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_8_joints",
+       "why": "A person checks this (Gordium doesn't decide it): Joints in or between fire barriers, and where a fire barrier meets a rated floor or roof above or another rated wall, meet Section 715: joints aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Joints in and at fire barriers",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.8",
+      "piece_title": "Joints"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_9_voids",
+     "rule": "general.bc_707_9_voids",
+     "name": "Egress · Voids where a fire barrier meets an unrated roof or exterior wall (BCNYS 707.9)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The voids where a fire barrier meets a roof or exterior wall that isn't rated meet Section 715: not in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The voids where a fire barrier meets a roof or exterior wall that isn't rated meet Section 715: not in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "707.9 Voids at intersections. The voids created at the intersection of a fire barrier and a nonfire-resistance-rated roof assembly or a nonfire-resistance-rated exterior wall assembly shall comply with Section 715.",
+        "where": "707.9, 2025 Building Code of New York State (BCNYS), PDF p.173"
+       }
+      ],
+      "citation": "707.9, 2025 Building Code of New York State (BCNYS), PDF p.173",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.9",
+      "quote": "707.9 Voids at intersections. The voids created at the intersection of a fire barrier and a nonfire-resistance-rated roof assembly or a nonfire-resistance-rated exterior wall assembly shall comply with Section 715."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_9_voids",
+       "words": "A person checks this (Gordium doesn't decide it): The voids where a fire barrier meets a roof or exterior wall that isn't rated meet Section 715: not in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_9_voids",
+       "why": "A person checks this (Gordium doesn't decide it): The voids where a fire barrier meets a roof or exterior wall that isn't rated meet Section 715: not in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Voids where a fire barrier meets an unrated roof or exterior wall",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.9",
+      "piece_title": "Voids at intersections"
+     }
+    },
+    {
+     "id": "egress.general.bc_707_10_ducts",
+     "rule": "general.bc_707_10_ducts",
+     "name": "Egress · Ducts and air transfer openings through fire barriers (BCNYS 707.10)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a fire barrier meet Section 717 (dampers): the ductwork isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a fire barrier meet Section 717 (dampers): the ductwork isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "707.10 Ducts and air transfer openings. Penetrations in a fire barrier by ducts and air transfer openings shall comply with Section 717.",
+        "where": "707.10, 2025 Building Code of New York State (BCNYS), PDF p.173"
+       }
+      ],
+      "citation": "707.10, 2025 Building Code of New York State (BCNYS), PDF p.173",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "707.10",
+      "quote": "707.10 Ducts and air transfer openings. Penetrations in a fire barrier by ducts and air transfer openings shall comply with Section 717."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_707_10_ducts",
+       "words": "A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a fire barrier meet Section 717 (dampers): the ductwork isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_707_10_ducts",
+       "why": "A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a fire barrier meet Section 717 (dampers): the ductwork isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ducts and air transfer openings through fire barriers",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "707",
+      "section_title": "Fire Barriers",
+      "piece": "707.10",
+      "piece_title": "Ducts and air transfer openings"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_2_shaft_construction",
+     "rule": "general.bc_713_2_shaft_construction",
+     "name": "Egress · Shaft enclosures built as fire barriers or horizontal assemblies (BCNYS 713.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A shaft enclosure (an elevator hoistway, an exit access stairway or ramp enclosure, a duct or chute shaft) is built as fire barriers per 707, horizontal assemblies per 711, or both: the shafts and their walls aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A shaft enclosure (an elevator hoistway, an exit access stairway or ramp enclosure, a duct or chute shaft) is built as fire barriers per 707, horizontal assemblies per 711, or both: the shafts and their walls aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "713.2 Construction. Shaft enclosures shall be constructed as fire barriers in accordance with Section 707 or horizontal assemblies in accordance with Section 711, or both.",
+        "where": "713.2, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       }
+      ],
+      "citation": "713.2, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.2",
+      "quote": "713.2 Construction. Shaft enclosures shall be constructed as fire barriers in accordance with Section 707 or horizontal assemblies in accordance with Section 711, or both."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_2_shaft_construction",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure (an elevator hoistway, an exit access stairway or ramp enclosure, a duct or chute shaft) is built as fire barriers per 707, horizontal assemblies per 711, or both: the shafts and their walls aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_2_shaft_construction",
+       "why": "A person checks this (Gordium doesn't decide it): A shaft enclosure (an elevator hoistway, an exit access stairway or ramp enclosure, a duct or chute shaft) is built as fire barriers per 707, horizontal assemblies per 711, or both: the shafts and their walls aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Shaft enclosures built as fire barriers or horizontal assemblies",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.2",
+      "piece_title": "Construction"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_4_shaft_rating",
+     "rule": "general.bc_713_4_shaft_rating",
+     "name": "Egress · Fire-resistance rating of shaft enclosures, 1 or 2 hours (BCNYS 713.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "713.4 Fire-resistance rating. Shaft enclosures shall have a fire-resistance rating of not less than 2 hours where connecting four stories or more, and not less than 1 hour where connecting less than four stories. The number of stories connected by the shaft enclo- sure shall include any basements but not any mezzanines. Shaft enclosures shall have a fire-resistance rating not less than the floor assembly penetrated, but need not exceed 2 hours. Shaft enclosures shall meet the requirements of Section 703.2.1.1. Exception: Shafts having a reduced fire-resistance rating in high-rise buildings in accordance with Section 403.2.1.2.",
+        "where": "713.4, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       }
+      ],
+      "citation": "713.4, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.4",
+      "quote": "713.4 Fire-resistance rating. Shaft enclosures shall have a fire-resistance rating of not less than 2 hours where connecting four stories or more, and not less than 1 hour where connecting less than four stories. The number of stories connected by the shaft enclo- sure shall include any basements but not any mezzanines. Shaft enclosures shall have a fire-resistance rating not less than the floor assembly penetrated, but need not exceed 2 hours. Shaft enclosures shall meet the requirements of Section 703.2.1.1. Exception: Shafts having a reduced fire-resistance rating in high-rise buildings in accordance with Section 403.2.1.2."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_4_shaft_rating",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_4_shaft_rating",
+       "why": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Fire-resistance rating of shaft enclosures, 1 or 2 hours",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.4",
+      "piece_title": "Fire-resistance rating"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_5_shaft_continuity",
+     "rule": "general.bc_713_5_shaft_continuity",
+     "name": "Egress · Shaft enclosures continuous (BCNYS 713.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "713.5 Continuity. Shaft enclosures shall be constructed as fire barriers in accordance with Section 707 or horizontal assemblies constructed in accordance with Section 711, or both, and shall have continuity in accordance with Section 707.5 for fire barriers or Section 711.2.2 for horizontal assemblies, as applicable.",
+        "where": "713.5, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       }
+      ],
+      "citation": "713.5, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.5",
+      "quote": "713.5 Continuity. Shaft enclosures shall be constructed as fire barriers in accordance with Section 707 or horizontal assemblies constructed in accordance with Section 711, or both, and shall have continuity in accordance with Section 707.5 for fire barriers or Section 711.2.2 for horizontal assemblies, as applicable."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_5_shaft_continuity",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_5_shaft_continuity",
+       "why": "A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Shaft enclosures continuous",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.5",
+      "piece_title": "Continuity"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_6_shaft_exterior_walls",
+     "rule": "general.bc_713_6_shaft_exterior_walls",
+     "name": "Egress · Exterior walls that are part of a shaft enclosure (BCNYS 713.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An exterior wall that is part of a required shaft enclosure follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways and ramps) asks the exterior wall itself to be rated: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An exterior wall that is part of a required shaft enclosure follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways and ramps) asks the exterior wall itself to be rated: a person's check.",
+      "quotes": [
+       {
+        "text": "713.6 Exterior walls. Where exterior walls serve as a part of a required shaft enclosure, such walls shall comply with the require- ments of Section 705 for exterior walls and the fire-resistance-rated enclosure requirements shall not apply. Exception: Exterior walls required to be fire-resistance rated in accordance with Section 1021.2 for exterior egress balconies, Section 1023.7 for interior exit stairways and ramps and Section 1027.6 for exterior exit stairways and ramps.",
+        "where": "713.6, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       }
+      ],
+      "citation": "713.6, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.6",
+      "quote": "713.6 Exterior walls. Where exterior walls serve as a part of a required shaft enclosure, such walls shall comply with the require- ments of Section 705 for exterior walls and the fire-resistance-rated enclosure requirements shall not apply. Exception: Exterior walls required to be fire-resistance rated in accordance with Section 1021.2 for exterior egress balconies, Section 1023.7 for interior exit stairways and ramps and Section 1027.6 for exterior exit stairways and ramps."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_6_shaft_exterior_walls",
+       "words": "A person checks this (Gordium doesn't decide it): An exterior wall that is part of a required shaft enclosure follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways and ramps) asks the exterior wall itself to be rated: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_6_shaft_exterior_walls",
+       "why": "A person checks this (Gordium doesn't decide it): An exterior wall that is part of a required shaft enclosure follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways and ramps) asks the exterior wall itself to be rated: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exterior walls that are part of a shaft enclosure",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.6",
+      "piece_title": "Exterior walls"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_7_shaft_openings",
+     "rule": "general.bc_713_7_shaft_openings",
+     "name": "Egress · Openings in shaft enclosures, their doors self-closing (BCNYS 713.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Openings in a shaft enclosure are protected per Section 716 as for fire barriers, and its doors are self-closing or close automatically on smoke detection per 716.2.6.6: the doors' ratings and closers aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Openings in a shaft enclosure are protected per Section 716 as for fire barriers, and its doors are self-closing or close automatically on smoke detection per 716.2.6.6: the doors' ratings and closers aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "713.7 Openings. Openings in a shaft enclosure shall be protected in accordance with Section 716 as required for fire barriers. Doors shall be self- or automatic-closing by smoke detection in accordance with Section 716.2.6.6.",
+        "where": "713.7, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       }
+      ],
+      "citation": "713.7, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.7",
+      "quote": "713.7 Openings. Openings in a shaft enclosure shall be protected in accordance with Section 716 as required for fire barriers. Doors shall be self- or automatic-closing by smoke detection in accordance with Section 716.2.6.6."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_7_shaft_openings",
+       "words": "A person checks this (Gordium doesn't decide it): Openings in a shaft enclosure are protected per Section 716 as for fire barriers, and its doors are self-closing or close automatically on smoke detection per 716.2.6.6: the doors' ratings and closers aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_7_shaft_openings",
+       "why": "A person checks this (Gordium doesn't decide it): Openings in a shaft enclosure are protected per Section 716 as for fire barriers, and its doors are self-closing or close automatically on smoke detection per 716.2.6.6: the doors' ratings and closers aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Openings in shaft enclosures, their doors self-closing",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.7",
+      "piece_title": "Openings"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_7_1_shaft_prohibited_openings",
+     "rule": "general.bc_713_7_1_shaft_prohibited_openings",
+     "name": "Egress · No openings in a shaft enclosure but those its purpose needs (BCNYS 713.7.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A shaft enclosure has no openings other than those its purpose needs: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A shaft enclosure has no openings other than those its purpose needs: a person's check.",
+      "quotes": [
+       {
+        "text": "713.7.1 Prohibited openings. Openings other than those necessary for the purpose of the shaft shall not be permitted in shaft enclosures.",
+        "where": "713.7.1, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       }
+      ],
+      "citation": "713.7.1, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.7.1",
+      "quote": "713.7.1 Prohibited openings. Openings other than those necessary for the purpose of the shaft shall not be permitted in shaft enclosures."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_7_1_shaft_prohibited_openings",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure has no openings other than those its purpose needs: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_7_1_shaft_prohibited_openings",
+       "why": "A person checks this (Gordium doesn't decide it): A shaft enclosure has no openings other than those its purpose needs: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "No openings in a shaft enclosure but those its purpose needs",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.7.1",
+      "piece_title": "Prohibited openings"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_8_shaft_penetrations",
+     "rule": "general.bc_713_8_shaft_penetrations",
+     "name": "Egress · Penetrations of shaft enclosures (BCNYS 713.8)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Penetrations of a shaft enclosure are protected per Section 714, as for fire barriers or horizontal assemblies; structural beams or joists may pass through where so protected: penetrations aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Penetrations of a shaft enclosure are protected per Section 714, as for fire barriers or horizontal assemblies; structural beams or joists may pass through where so protected: penetrations aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "713.8 Penetrations. Penetrations in a shaft enclosure shall be protected in accordance with Section 714 as required for fire barriers or horizontal assemblies or both. Structural elements, such as beams or joists, where protected in accordance with Section 714 shall be permitted to penetrate a shaft enclosure.",
+        "where": "713.8, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       }
+      ],
+      "citation": "713.8, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.8",
+      "quote": "713.8 Penetrations. Penetrations in a shaft enclosure shall be protected in accordance with Section 714 as required for fire barriers or horizontal assemblies or both. Structural elements, such as beams or joists, where protected in accordance with Section 714 shall be permitted to penetrate a shaft enclosure."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_8_shaft_penetrations",
+       "words": "A person checks this (Gordium doesn't decide it): Penetrations of a shaft enclosure are protected per Section 714, as for fire barriers or horizontal assemblies; structural beams or joists may pass through where so protected: penetrations aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_8_shaft_penetrations",
+       "why": "A person checks this (Gordium doesn't decide it): Penetrations of a shaft enclosure are protected per Section 714, as for fire barriers or horizontal assemblies; structural beams or joists may pass through where so protected: penetrations aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Penetrations of shaft enclosures",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.8",
+      "piece_title": "Penetrations"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_8_1_shaft_prohibited_penetrations",
+     "rule": "general.bc_713_8_1_shaft_prohibited_penetrations",
+     "name": "Egress · No penetrations of a shaft enclosure but those its purpose needs (BCNYS 713.8.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A shaft enclosure has no penetrations other than those its purpose needs, except membrane penetrations on its outside, protected per 714.4.2: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A shaft enclosure has no penetrations other than those its purpose needs, except membrane penetrations on its outside, protected per 714.4.2: a person's check.",
+      "quotes": [
+       {
+        "text": "713.8.1 Prohibited penetrations. Penetrations other than those necessary for the purpose of the shaft shall not be permitted in shaft enclosures. Exception: Membrane penetrations shall be permitted on the outside of shaft enclosures. Such penetrations shall be protected in accordance with Section 714.4.2.",
+        "where": "713.8.1, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       }
+      ],
+      "citation": "713.8.1, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.8.1",
+      "quote": "713.8.1 Prohibited penetrations. Penetrations other than those necessary for the purpose of the shaft shall not be permitted in shaft enclosures. Exception: Membrane penetrations shall be permitted on the outside of shaft enclosures. Such penetrations shall be protected in accordance with Section 714.4.2."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_8_1_shaft_prohibited_penetrations",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure has no penetrations other than those its purpose needs, except membrane penetrations on its outside, protected per 714.4.2: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_8_1_shaft_prohibited_penetrations",
+       "why": "A person checks this (Gordium doesn't decide it): A shaft enclosure has no penetrations other than those its purpose needs, except membrane penetrations on its outside, protected per 714.4.2: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "No penetrations of a shaft enclosure but those its purpose needs",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.8.1",
+      "piece_title": "Prohibited penetrations"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_9_shaft_joints",
+     "rule": "general.bc_713_9_shaft_joints",
+     "name": "Egress · Joints in shaft enclosures (BCNYS 713.9)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Joints in a shaft enclosure meet Section 715: not in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Joints in a shaft enclosure meet Section 715: not in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "713.9 Joints. Joints in a shaft enclosure shall comply with Section 715.",
+        "where": "713.9, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       }
+      ],
+      "citation": "713.9, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.9",
+      "quote": "713.9 Joints. Joints in a shaft enclosure shall comply with Section 715."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_9_shaft_joints",
+       "words": "A person checks this (Gordium doesn't decide it): Joints in a shaft enclosure meet Section 715: not in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_9_shaft_joints",
+       "why": "A person checks this (Gordium doesn't decide it): Joints in a shaft enclosure meet Section 715: not in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Joints in shaft enclosures",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.9",
+      "piece_title": "Joints"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_10_shaft_ducts",
+     "rule": "general.bc_713_10_shaft_ducts",
+     "name": "Egress · Ducts and air transfer openings through shaft enclosures (BCNYS 713.10)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a shaft enclosure meet Section 717: the ductwork isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a shaft enclosure meet Section 717: the ductwork isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "713.10 Duct and air transfer openings. Penetrations of a shaft enclosure by ducts and air transfer openings shall comply with Section 717.",
+        "where": "713.10, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       }
+      ],
+      "citation": "713.10, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.10",
+      "quote": "713.10 Duct and air transfer openings. Penetrations of a shaft enclosure by ducts and air transfer openings shall comply with Section 717."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_10_shaft_ducts",
+       "words": "A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a shaft enclosure meet Section 717: the ductwork isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_10_shaft_ducts",
+       "why": "A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a shaft enclosure meet Section 717: the ductwork isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ducts and air transfer openings through shaft enclosures",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.10",
+      "piece_title": "Duct and air transfer openings"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_11_shaft_bottom",
+     "rule": "general.bc_713_11_shaft_bottom",
+     "name": "Egress · A shaft not reaching the building's bottom closed at its foot (BCNYS 713.11)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+      "quotes": [
+       {
+        "text": "713.11 Enclosure at the bottom. Shafts that do not extend to the bottom of the building or structure shall comply with one of the following:",
+        "where": "713.11, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       },
+       {
+        "text": "1. Be enclosed at the lowest level with construction of the same fire-resistance rating as the lowest floor through which the shaft passes, but not less than the rating required for the shaft enclosure. 2. Terminate in a room having a use related to the purpose of the shaft. The room shall be separated from the remainder of the building by fire barriers constructed in accordance with Section 707 or horizontal assemblies constructed in accordance with Section 711, or both. The fire-resistance rating and opening protectives shall be not less than the protection required for the shaft enclosure. 3. Be protected by approved fire dampers installed in accordance with their listing at the lowest floor level within the shaft enclosure. Exceptions: 1. The fire-resistance-rated room separation is not required, provided that the only openings in or penetrations of the shaft enclosure to the interior of the building occur at the bottom. The bottom of the shaft shall be closed off around the pene- trating items with materials permitted by Section 718.3.1 for draftstops, or the room shall be provided with an approved automatic sprinkler system. 2. A shaft enclosure containing a waste or linen chute shall not be used for any other purpose and shall discharge in a room protected in accordance with Section 713.13.4. 3. The fire-resistance-rated room separation and the protection at the bottom of the shaft are not required provided that there are no combustibles in the shaft and there are no openings or other penetrations through the shaft enclosure to the interior of the building.",
+        "where": "713.11, 2025 Building Code of New York State (BCNYS), PDF p.179"
+       }
+      ],
+      "citation": "713.11, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.11",
+      "quote": "713.11 Enclosure at the bottom. Shafts that do not extend to the bottom of the building or structure shall comply with one of the following:"
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_11_shaft_bottom",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_11_shaft_bottom",
+       "why": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "A shaft not reaching the building's bottom closed at its foot",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.11",
+      "piece_title": "Enclosure at the bottom"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_12_shaft_top",
+     "rule": "general.bc_713_12_shaft_top",
+     "name": "Egress · The top of a shaft enclosure (BCNYS 713.12)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A shaft enclosure reaches the underside of the roof (the roof built for its type of construction, Table 601), or ends below it with a top of the topmost floor's rating (at least the shaft's), or rises through the roof per 1511: a person's check. An interior exit stairway's or exit access stairway's enclosure may end at such a top (707.5).",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A shaft enclosure reaches the underside of the roof (the roof built for its type of construction, Table 601), or ends below it with a top of the topmost floor's rating (at least the shaft's), or rises through the roof per 1511: a person's check. An interior exit stairway's or exit access stairway's enclosure may end at such a top (707.5).",
+      "quotes": [
+       {
+        "text": "713.12 Enclosure at top. The top of shaft enclosures shall comply with one of the following: 1. Extend to the underside of the roof sheathing, deck or slab of the building, and the roof assembly shall comply with the requirements for the type of construction as specified in Table 601. 2. Terminate below the roof assembly and be enclosed at the top with construction of the same fire-resistance rating as the topmost floor penetrated by the shaft, but not less than the fire-resistance rating required for the shaft enclosure. 3. Extend past the roof assembly and comply with the requirements of Section 1511.",
+        "where": "713.12, 2025 Building Code of New York State (BCNYS), PDF p.179"
+       }
+      ],
+      "citation": "713.12, 2025 Building Code of New York State (BCNYS), PDF p.179",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.12",
+      "quote": "713.12 Enclosure at top. The top of shaft enclosures shall comply with one of the following: 1. Extend to the underside of the roof sheathing, deck or slab of the building, and the roof assembly shall comply with the requirements for the type of construction as specified in Table 601. 2. Terminate below the roof assembly and be enclosed at the top with construction of the same fire-resistance rating as the topmost floor penetrated by the shaft, but not less than the fire-resistance rating required for the shaft enclosure. 3. Extend past the roof assembly and comply with the requirements of Section 1511."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_12_shaft_top",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure reaches the underside of the roof (the roof built for its type of construction, Table 601), or ends below it with a top of the topmost floor's rating (at least the shaft's), or rises through the roof per 1511: a person's check. An interior exit stairway's or exit access stairway's enclosure may end at such a top (707.5).",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_12_shaft_top",
+       "why": "A person checks this (Gordium doesn't decide it): A shaft enclosure reaches the underside of the roof (the roof built for its type of construction, Table 601), or ends below it with a top of the topmost floor's rating (at least the shaft's), or rises through the roof per 1511: a person's check. An interior exit stairway's or exit access stairway's enclosure may end at such a top (707.5).",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "The top of a shaft enclosure",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.12",
+      "piece_title": "Enclosure at top"
+     }
+    },
+    {
+     "id": "egress.general.bc_713_14_hoistways",
+     "rule": "general.bc_713_14_hoistways",
+     "name": "Egress · Elevator and other hoistways (BCNYS 713.14)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An elevator, dumbwaiter or other hoistway meets Section 712, and where it must be enclosed it is a shaft enclosure per Section 713 and Chapter 30: the elevators aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An elevator, dumbwaiter or other hoistway meets Section 712, and where it must be enclosed it is a shaft enclosure per Section 713 and Chapter 30: the elevators aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "713.14 Elevator, dumbwaiter and other hoistways. A hoistway for elevators, dumbwaiters and other vertical devices shall comply with Section 712. Where the hoistway is required to be enclosed, it shall be constructed as a shaft enclosure in accordance with Section 713 and Chapter 30.",
+        "where": "713.14, 2025 Building Code of New York State (BCNYS), PDF p.179"
+       }
+      ],
+      "citation": "713.14, 2025 Building Code of New York State (BCNYS), PDF p.179",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.14",
+      "quote": "713.14 Elevator, dumbwaiter and other hoistways. A hoistway for elevators, dumbwaiters and other vertical devices shall comply with Section 712. Where the hoistway is required to be enclosed, it shall be constructed as a shaft enclosure in accordance with Section 713 and Chapter 30."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_14_hoistways",
+       "words": "A person checks this (Gordium doesn't decide it): An elevator, dumbwaiter or other hoistway meets Section 712, and where it must be enclosed it is a shaft enclosure per Section 713 and Chapter 30: the elevators aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_14_hoistways",
+       "why": "A person checks this (Gordium doesn't decide it): An elevator, dumbwaiter or other hoistway meets Section 712, and where it must be enclosed it is a shaft enclosure per Section 713 and Chapter 30: the elevators aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Elevator and other hoistways",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.14",
+      "piece_title": "Elevator, dumbwaiter and other hoistways"
+     }
+    },
+    {
      "id": "egress.general.bc_1004_7_outdoor_areas",
      "rule": "general.bc_1004_7_outdoor_areas",
      "name": "Egress · Outdoor areas: means of egress and occupant load (BCNYS 1004.7)",
@@ -69091,7 +71012,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 73 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 100 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -69607,6 +71528,33 @@
       "egress.general.bc_508_2_2_height",
       "egress.general.bc_508_2_3_tabular_values",
       "egress.general.bc_508_2_4_separation",
+      "egress.general.bc_703_2_1_1_nonsymmetrical_walls",
+      "egress.general.bc_703_5_marking",
+      "egress.general.bc_707_3_2_exit_stairway_fire_barriers",
+      "egress.general.bc_707_3_4_exit_passageway_fire_barriers",
+      "egress.general.bc_707_3_5_horizontal_exit_separation",
+      "egress.general.bc_707_4_exterior_walls",
+      "egress.general.bc_707_5_continuity",
+      "egress.general.bc_707_5_1_supporting_construction",
+      "egress.general.bc_707_6_openings",
+      "egress.general.bc_707_7_penetrations",
+      "egress.general.bc_707_7_1_prohibited_penetrations",
+      "egress.general.bc_707_8_joints",
+      "egress.general.bc_707_9_voids",
+      "egress.general.bc_707_10_ducts",
+      "egress.general.bc_713_2_shaft_construction",
+      "egress.general.bc_713_4_shaft_rating",
+      "egress.general.bc_713_5_shaft_continuity",
+      "egress.general.bc_713_6_shaft_exterior_walls",
+      "egress.general.bc_713_7_shaft_openings",
+      "egress.general.bc_713_7_1_shaft_prohibited_openings",
+      "egress.general.bc_713_8_shaft_penetrations",
+      "egress.general.bc_713_8_1_shaft_prohibited_penetrations",
+      "egress.general.bc_713_9_shaft_joints",
+      "egress.general.bc_713_10_shaft_ducts",
+      "egress.general.bc_713_11_shaft_bottom",
+      "egress.general.bc_713_12_shaft_top",
+      "egress.general.bc_713_14_hoistways",
       "egress.general.bc_1004_7_outdoor_areas",
       "egress.general.bc_1004_9_posting",
       "egress.general.bc_table_1006_2_1_other_occupancies",
@@ -70243,6 +72191,357 @@
        "name": "Egress · No separation from the main occupancy, with exceptions (BCNYS 508.2.4)"
       },
       {
+       "key": "review#f8e5b6766d",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_703_2_1_1_nonsymmetrical_walls"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Nonsymmetrical rated walls tested from both faces (BCNYS 703.2.1.1): A person checks this (Gordium doesn't decide it): An interior wall or partition built differently on its two faces (a shaft or exit enclosure wall with its layers on one side only, as 713.4 names) takes the shorter of its two fire tests, one from each face (ASTM E119 or UL 263), unless the building official accepts that it was tested with its weaker face to the fire; exterior walls go by 705.5 instead: which walls are built so, and how they were tested, isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Nonsymmetrical rated walls tested from both faces (BCNYS 703.2.1.1)"
+      },
+      {
+       "key": "review#ca31fbee7d",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_703_5_marking"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Rated walls identified in concealed spaces (BCNYS 703.5): A person checks this (Gordium doesn't decide it): Where a floor, floor-ceiling or attic space is concealed but can be reached, each fire wall, fire barrier, fire partition, smoke barrier, smoke partition or other wall with protected openings or penetrations carries signs or stenciling there: within 15 feet of each end of the wall and at most every 30 feet along it, lettered at least 3 inches high with a stroke of at least 3/8 inch in a contrasting colour, with wording such as \"FIRE AND/OR SMOKE BARRIER - PROTECT ALL OPENINGS\": signs aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Rated walls identified in concealed spaces (BCNYS 703.5)"
+      },
+      {
+       "key": "review#042cdab678",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_3_2_exit_stairway_fire_barriers"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Rating of the fire barriers around exit stairways and ramps (BCNYS 707.3.2): A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Rating of the fire barriers around exit stairways and ramps (BCNYS 707.3.2)"
+      },
+      {
+       "key": "review#ea0079b4ae",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_3_4_exit_passageway_fire_barriers"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Rating of the fire barriers around exit passageways (BCNYS 707.3.4): A person checks this (Gordium doesn't decide it): The fire barrier between the building and an exit passageway has the rating 1024.3 asks: the passageway's rating isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Rating of the fire barriers around exit passageways (BCNYS 707.3.4)"
+      },
+      {
+       "key": "review#93a817a354",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_3_5_horizontal_exit_separation"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Fire-resistance rating of a horizontal exit's separation (BCNYS 707.3.5): A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+       "mark": "?",
+       "name": "Egress · Fire-resistance rating of a horizontal exit's separation (BCNYS 707.3.5)"
+      },
+      {
+       "key": "review#62a40c4ab8",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_4_exterior_walls"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exterior walls that are part of a rated enclosure (BCNYS 707.4): A person checks this (Gordium doesn't decide it): Where an exterior wall is part of a required rated shaft, or of a stairway, ramp or exit passageway's separation or enclosure, it follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021 (exterior egress balconies), 1023.7 (interior exit stairways and ramps), 1024.8 (exit passageways), 1027.6 (exterior exit stairways and ramps) or 1207 of the Fire Code of New York State (energy storage systems) asks the exterior wall itself to be rated: which enclosure walls are exterior walls, and their ratings, a person's check.",
+       "mark": "?",
+       "name": "Egress · Exterior walls that are part of a rated enclosure (BCNYS 707.4)"
+      },
+      {
+       "key": "review#83e15ba009",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_5_continuity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Fire barriers run from floor to the deck above (BCNYS 707.5): A person checks this (Gordium doesn't decide it): A fire barrier runs from the top of the foundation or the floor/ceiling assembly below to the underside of the floor or roof sheathing, slab or deck above, fastened to both, and continues through concealed spaces such as above a suspended ceiling, its joints and voids per 707.8 and 707.9; except that a shaft enclosure, an interior exit stairway or ramp enclosure (1023) or an exit access stairway or ramp enclosure (1019) may end at a top enclosure per 713.12, and an exit passageway enclosure (1024.3) that stops short is closed at the top with construction of the passageway's rating: walls' heights above the ceiling aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Fire barriers run from floor to the deck above (BCNYS 707.5)"
+      },
+      {
+       "key": "review#c5858e2160",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_5_1_supporting_construction"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · What holds up a fire barrier has its rating (BCNYS 707.5.1): A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · What holds up a fire barrier has its rating (BCNYS 707.5.1)"
+      },
+      {
+       "key": "review#0c5fbc01d9",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_6_openings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Openings in fire barriers, protected and limited in size (BCNYS 707.6): A person checks this (Gordium doesn't decide it): Openings in a fire barrier are protected per Section 716, at most 25 percent of the wall's length in all and at most 156 square feet each; openings in shaft, interior exit stairway and ramp, and exit passageway enclosures also meet 713.7, 1023.4 and 1024.5. The limits are lifted for a sprinklered building (903.3.1.1: the 156 square feet), fire doors serving exit access or interior exit stairway and ramp enclosures, protectives tested to ASTM E119 or UL 263 at the wall's own rating, atrium fire windows (the 25 percent), the fire door between an exit stairway and its exit passageway (1023.3.1), elevator car entrances in a hoistway enclosure, and shaft and chute rooms (713, 713.13.3, 713.13.4; the 25 percent): which walls are fire barriers and their openings' sizes aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Openings in fire barriers, protected and limited in size (BCNYS 707.6)"
+      },
+      {
+       "key": "review#a8d204fbc9",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_7_penetrations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Penetrations of fire barriers (BCNYS 707.7): A person checks this (Gordium doesn't decide it): Penetrations of a fire barrier (pipes, conduits, cables, ducts) meet Section 714: they aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Penetrations of fire barriers (BCNYS 707.7)"
+      },
+      {
+       "key": "review#a5cd42a582",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_7_1_prohibited_penetrations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Penetrations into shaft and exit enclosures only where allowed (BCNYS 707.7.1): A person checks this (Gordium doesn't decide it): Penetrations into shaft, interior exit stairway and ramp, and exit passageway enclosures are allowed only where 713.8.1, 1023.5 and 1024.6 permit them: penetrations aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Penetrations into shaft and exit enclosures only where allowed (BCNYS 707.7.1)"
+      },
+      {
+       "key": "review#3cc5bd2826",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_8_joints"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Joints in and at fire barriers (BCNYS 707.8): A person checks this (Gordium doesn't decide it): Joints in or between fire barriers, and where a fire barrier meets a rated floor or roof above or another rated wall, meet Section 715: joints aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Joints in and at fire barriers (BCNYS 707.8)"
+      },
+      {
+       "key": "review#c7b7b3da81",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_9_voids"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Voids where a fire barrier meets an unrated roof or exterior wall (BCNYS 707.9): A person checks this (Gordium doesn't decide it): The voids where a fire barrier meets a roof or exterior wall that isn't rated meet Section 715: not in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Voids where a fire barrier meets an unrated roof or exterior wall (BCNYS 707.9)"
+      },
+      {
+       "key": "review#a044546dbf",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_707_10_ducts"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ducts and air transfer openings through fire barriers (BCNYS 707.10): A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a fire barrier meet Section 717 (dampers): the ductwork isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ducts and air transfer openings through fire barriers (BCNYS 707.10)"
+      },
+      {
+       "key": "review#99341c8583",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_2_shaft_construction"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Shaft enclosures built as fire barriers or horizontal assemblies (BCNYS 713.2): A person checks this (Gordium doesn't decide it): A shaft enclosure (an elevator hoistway, an exit access stairway or ramp enclosure, a duct or chute shaft) is built as fire barriers per 707, horizontal assemblies per 711, or both: the shafts and their walls aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Shaft enclosures built as fire barriers or horizontal assemblies (BCNYS 713.2)"
+      },
+      {
+       "key": "review#2481afc6b7",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_4_shaft_rating"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Fire-resistance rating of shaft enclosures, 1 or 2 hours (BCNYS 713.4): A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Fire-resistance rating of shaft enclosures, 1 or 2 hours (BCNYS 713.4)"
+      },
+      {
+       "key": "review#58ebbde5f4",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_5_shaft_continuity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Shaft enclosures continuous (BCNYS 713.5): A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Shaft enclosures continuous (BCNYS 713.5)"
+      },
+      {
+       "key": "review#51a9b71716",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_6_shaft_exterior_walls"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exterior walls that are part of a shaft enclosure (BCNYS 713.6): A person checks this (Gordium doesn't decide it): An exterior wall that is part of a required shaft enclosure follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways and ramps) asks the exterior wall itself to be rated: a person's check.",
+       "mark": "?",
+       "name": "Egress · Exterior walls that are part of a shaft enclosure (BCNYS 713.6)"
+      },
+      {
+       "key": "review#a55051971c",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_7_shaft_openings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Openings in shaft enclosures, their doors self-closing (BCNYS 713.7): A person checks this (Gordium doesn't decide it): Openings in a shaft enclosure are protected per Section 716 as for fire barriers, and its doors are self-closing or close automatically on smoke detection per 716.2.6.6: the doors' ratings and closers aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Openings in shaft enclosures, their doors self-closing (BCNYS 713.7)"
+      },
+      {
+       "key": "review#0c9595b115",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_7_1_shaft_prohibited_openings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · No openings in a shaft enclosure but those its purpose needs (BCNYS 713.7.1): A person checks this (Gordium doesn't decide it): A shaft enclosure has no openings other than those its purpose needs: a person's check.",
+       "mark": "?",
+       "name": "Egress · No openings in a shaft enclosure but those its purpose needs (BCNYS 713.7.1)"
+      },
+      {
+       "key": "review#e699290944",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_8_shaft_penetrations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Penetrations of shaft enclosures (BCNYS 713.8): A person checks this (Gordium doesn't decide it): Penetrations of a shaft enclosure are protected per Section 714, as for fire barriers or horizontal assemblies; structural beams or joists may pass through where so protected: penetrations aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Penetrations of shaft enclosures (BCNYS 713.8)"
+      },
+      {
+       "key": "review#7bdaa93bb5",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_8_1_shaft_prohibited_penetrations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · No penetrations of a shaft enclosure but those its purpose needs (BCNYS 713.8.1): A person checks this (Gordium doesn't decide it): A shaft enclosure has no penetrations other than those its purpose needs, except membrane penetrations on its outside, protected per 714.4.2: a person's check.",
+       "mark": "?",
+       "name": "Egress · No penetrations of a shaft enclosure but those its purpose needs (BCNYS 713.8.1)"
+      },
+      {
+       "key": "review#c8e76f3065",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_9_shaft_joints"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Joints in shaft enclosures (BCNYS 713.9): A person checks this (Gordium doesn't decide it): Joints in a shaft enclosure meet Section 715: not in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Joints in shaft enclosures (BCNYS 713.9)"
+      },
+      {
+       "key": "review#41e488d0b6",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_10_shaft_ducts"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ducts and air transfer openings through shaft enclosures (BCNYS 713.10): A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a shaft enclosure meet Section 717: the ductwork isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ducts and air transfer openings through shaft enclosures (BCNYS 713.10)"
+      },
+      {
+       "key": "review#efe61801e2",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_11_shaft_bottom"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · A shaft not reaching the building's bottom closed at its foot (BCNYS 713.11): A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+       "mark": "?",
+       "name": "Egress · A shaft not reaching the building's bottom closed at its foot (BCNYS 713.11)"
+      },
+      {
+       "key": "review#930b657812",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_12_shaft_top"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · The top of a shaft enclosure (BCNYS 713.12): A person checks this (Gordium doesn't decide it): A shaft enclosure reaches the underside of the roof (the roof built for its type of construction, Table 601), or ends below it with a top of the topmost floor's rating (at least the shaft's), or rises through the roof per 1511: a person's check. An interior exit stairway's or exit access stairway's enclosure may end at such a top (707.5).",
+       "mark": "?",
+       "name": "Egress · The top of a shaft enclosure (BCNYS 713.12)"
+      },
+      {
+       "key": "review#e54a5ab955",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_14_hoistways"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Elevator and other hoistways (BCNYS 713.14): A person checks this (Gordium doesn't decide it): An elevator, dumbwaiter or other hoistway meets Section 712, and where it must be enclosed it is a shaft enclosure per Section 713 and Chapter 30: the elevators aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Elevator and other hoistways (BCNYS 713.14)"
+      },
+      {
        "key": "review#0c7dd9ebb8",
        "tier": "review",
        "items": [
@@ -70789,7 +73088,7 @@
        "name": "Egress · Nothing projects into a door's clear opening (BCNYS 1010.1.1.1)"
       }
      ],
-     "count": 73,
+     "count": 100,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -71200,6 +73499,276 @@
        "elements": [],
        "items": [
         "egress.general.bc_508_2_4_separation"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_703_2_1_1_nonsymmetrical_walls",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An interior wall or partition built differently on its two faces (a shaft or exit enclosure wall with its layers on one side only, as 713.4 names) takes the shorter of its two fire tests, one from each face (ASTM E119 or UL 263), unless the building official accepts that it was tested with its weaker face to the fire; exterior walls go by 705.5 instead: which walls are built so, and how they were tested, isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_703_2_1_1_nonsymmetrical_walls"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_703_5_marking",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Where a floor, floor-ceiling or attic space is concealed but can be reached, each fire wall, fire barrier, fire partition, smoke barrier, smoke partition or other wall with protected openings or penetrations carries signs or stenciling there: within 15 feet of each end of the wall and at most every 30 feet along it, lettered at least 3 inches high with a stroke of at least 3/8 inch in a contrasting colour, with wording such as \"FIRE AND/OR SMOKE BARRIER - PROTECT ALL OPENINGS\": signs aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_703_5_marking"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_3_2_exit_stairway_fire_barriers",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_3_2_exit_stairway_fire_barriers"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_3_4_exit_passageway_fire_barriers",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an exit passageway has the rating 1024.3 asks: the passageway's rating isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_3_4_exit_passageway_fire_barriers"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_3_5_horizontal_exit_separation",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_3_5_horizontal_exit_separation"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_4_exterior_walls",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Where an exterior wall is part of a required rated shaft, or of a stairway, ramp or exit passageway's separation or enclosure, it follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021 (exterior egress balconies), 1023.7 (interior exit stairways and ramps), 1024.8 (exit passageways), 1027.6 (exterior exit stairways and ramps) or 1207 of the Fire Code of New York State (energy storage systems) asks the exterior wall itself to be rated: which enclosure walls are exterior walls, and their ratings, a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_4_exterior_walls"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_5_continuity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A fire barrier runs from the top of the foundation or the floor/ceiling assembly below to the underside of the floor or roof sheathing, slab or deck above, fastened to both, and continues through concealed spaces such as above a suspended ceiling, its joints and voids per 707.8 and 707.9; except that a shaft enclosure, an interior exit stairway or ramp enclosure (1023) or an exit access stairway or ramp enclosure (1019) may end at a top enclosure per 713.12, and an exit passageway enclosure (1024.3) that stops short is closed at the top with construction of the passageway's rating: walls' heights above the ceiling aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_5_continuity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_5_1_supporting_construction",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_5_1_supporting_construction"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_6_openings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Openings in a fire barrier are protected per Section 716, at most 25 percent of the wall's length in all and at most 156 square feet each; openings in shaft, interior exit stairway and ramp, and exit passageway enclosures also meet 713.7, 1023.4 and 1024.5. The limits are lifted for a sprinklered building (903.3.1.1: the 156 square feet), fire doors serving exit access or interior exit stairway and ramp enclosures, protectives tested to ASTM E119 or UL 263 at the wall's own rating, atrium fire windows (the 25 percent), the fire door between an exit stairway and its exit passageway (1023.3.1), elevator car entrances in a hoistway enclosure, and shaft and chute rooms (713, 713.13.3, 713.13.4; the 25 percent): which walls are fire barriers and their openings' sizes aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_6_openings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_7_penetrations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Penetrations of a fire barrier (pipes, conduits, cables, ducts) meet Section 714: they aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_7_penetrations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_7_1_prohibited_penetrations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Penetrations into shaft, interior exit stairway and ramp, and exit passageway enclosures are allowed only where 713.8.1, 1023.5 and 1024.6 permit them: penetrations aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_7_1_prohibited_penetrations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_8_joints",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Joints in or between fire barriers, and where a fire barrier meets a rated floor or roof above or another rated wall, meet Section 715: joints aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_8_joints"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_9_voids",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The voids where a fire barrier meets a roof or exterior wall that isn't rated meet Section 715: not in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_9_voids"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_707_10_ducts",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a fire barrier meet Section 717 (dampers): the ductwork isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_707_10_ducts"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_2_shaft_construction",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure (an elevator hoistway, an exit access stairway or ramp enclosure, a duct or chute shaft) is built as fire barriers per 707, horizontal assemblies per 711, or both: the shafts and their walls aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_2_shaft_construction"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_4_shaft_rating",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_4_shaft_rating"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_5_shaft_continuity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_5_shaft_continuity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_6_shaft_exterior_walls",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An exterior wall that is part of a required shaft enclosure follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways and ramps) asks the exterior wall itself to be rated: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_6_shaft_exterior_walls"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_7_shaft_openings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Openings in a shaft enclosure are protected per Section 716 as for fire barriers, and its doors are self-closing or close automatically on smoke detection per 716.2.6.6: the doors' ratings and closers aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_7_shaft_openings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_7_1_shaft_prohibited_openings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure has no openings other than those its purpose needs: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_7_1_shaft_prohibited_openings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_8_shaft_penetrations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Penetrations of a shaft enclosure are protected per Section 714, as for fire barriers or horizontal assemblies; structural beams or joists may pass through where so protected: penetrations aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_8_shaft_penetrations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_8_1_shaft_prohibited_penetrations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure has no penetrations other than those its purpose needs, except membrane penetrations on its outside, protected per 714.4.2: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_8_1_shaft_prohibited_penetrations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_9_shaft_joints",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Joints in a shaft enclosure meet Section 715: not in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_9_shaft_joints"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_10_shaft_ducts",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a shaft enclosure meet Section 717: the ductwork isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_10_shaft_ducts"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_11_shaft_bottom",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_11_shaft_bottom"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_12_shaft_top",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure reaches the underside of the roof (the roof built for its type of construction, Table 601), or ends below it with a top of the topmost floor's rating (at least the shaft's), or rises through the roof per 1511: a person's check. An interior exit stairway's or exit access stairway's enclosure may end at such a top (707.5).",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_12_shaft_top"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_713_14_hoistways",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An elevator, dumbwaiter or other hoistway meets Section 712, and where it must be enclosed it is a shaft enclosure per Section 713 and Chapter 30: the elevators aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_14_hoistways"
        ],
        "rules": 1
       },
@@ -71975,7 +74544,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "73 to review · 30 comply"
+     "summary": "100 to review · 30 comply"
     }
    ],
    "contents": [
@@ -84242,7 +86811,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 167
+          "not_for_checking": 187
          },
          "pieces": [
           {
@@ -84336,6 +86905,12 @@
            "rules": []
           },
           {
+           "id": "202:attic",
+           "title": "ATTIC",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:automatic",
            "title": "AUTOMATIC",
            "coverage": "not_for_checking",
@@ -84414,6 +86989,18 @@
            "rules": []
           },
           {
+           "id": "202:ceiling_radiation_damper",
+           "title": "CEILING RADIATION DAMPER",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:combination_fire_smoke_damper",
+           "title": "COMBINATION FIRE/SMOKE DAMPER",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:combustible_liquid",
            "title": "COMBUSTIBLE LIQUID",
            "coverage": "not_for_checking",
@@ -84438,6 +87025,12 @@
            "rules": []
           },
           {
+           "id": "202:corridor_damper",
+           "title": "CORRIDOR DAMPER",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:court",
            "title": "COURT",
            "coverage": "not_for_checking",
@@ -84452,6 +87045,12 @@
           {
            "id": "202:custodial_care",
            "title": "CUSTODIAL CARE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:damper",
+           "title": "DAMPER",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -84512,6 +87111,12 @@
           {
            "id": "202:dormitory",
            "title": "DORMITORY",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:draftstop",
+           "title": "DRAFTSTOP",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -84600,6 +87205,12 @@
            "rules": []
           },
           {
+           "id": "202:exterior_wall_assembly",
+           "title": "EXTERIOR WALL ASSEMBLY",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:fabrication_area",
            "title": "FABRICATION AREA",
            "coverage": "not_for_checking",
@@ -84608,6 +87219,30 @@
           {
            "id": "202:facility",
            "title": "FACILITY",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_barrier",
+           "title": "FIRE BARRIER",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_code_of_new_york_state",
+           "title": "FIRE CODE OF NEW YORK STATE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_command_center",
+           "title": "FIRE COMMAND CENTER",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_damper",
+           "title": "FIRE DAMPER",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -84632,6 +87267,12 @@
           {
            "id": "202:fire_partition",
            "title": "FIRE PARTITION",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_resistance",
+           "title": "FIRE RESISTANCE",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -84738,6 +87379,18 @@
            "rules": []
           },
           {
+           "id": "202:high_rise_building",
+           "title": "HIGH-RISE BUILDING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:horizontal_assembly",
+           "title": "HORIZONTAL ASSEMBLY",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:horizontal_exit",
            "title": "HORIZONTAL EXIT",
            "coverage": "not_for_checking",
@@ -84828,6 +87481,12 @@
            "rules": []
           },
           {
+           "id": "202:lowest_floor",
+           "title": "LOWEST FLOOR",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:masonry",
            "title": "MASONRY",
            "coverage": "not_for_checking",
@@ -84848,6 +87507,12 @@
           {
            "id": "202:mechanical_code_of_new_york_state",
            "title": "MECHANICAL CODE OF NEW YORK STATE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:membrane_penetration",
+           "title": "MEMBRANE PENETRATION",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -85056,6 +87721,12 @@
            "rules": []
           },
           {
+           "id": "202:shaft_enclosure",
+           "title": "SHAFT ENCLOSURE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:shower",
            "title": "SHOWER",
            "coverage": "not_for_checking",
@@ -85074,8 +87745,26 @@
            "rules": []
           },
           {
+           "id": "202:smoke_barrier",
+           "title": "SMOKE BARRIER",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:smoke_damper",
+           "title": "SMOKE DAMPER",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:smoke_detector",
            "title": "SMOKE DETECTOR",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:smoke_partition",
+           "title": "SMOKE PARTITION",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -85928,10 +88617,29 @@
          "number": "703",
          "title": "Fire-Resistance Ratings and Fire Tests",
          "book_page": 139,
-         "coverage": "not_brought_in",
+         "coverage": "flag",
          "whole": false,
-         "counts": {},
-         "pieces": []
+         "counts": {
+          "flag": 2
+         },
+         "pieces": [
+          {
+           "id": "703.2.1.1",
+           "title": "Nonsymmetrical wall construction",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_703_2_1_1_nonsymmetrical_walls"
+           ]
+          },
+          {
+           "id": "703.5",
+           "title": "Marking and identification",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_703_5_marking"
+           ]
+          }
+         ]
         },
         {
          "number": "704",
@@ -85964,10 +88672,134 @@
          "number": "707",
          "title": "Fire Barriers",
          "book_page": 150,
-         "coverage": "not_brought_in",
+         "coverage": "flag",
          "whole": false,
-         "counts": {},
-         "pieces": []
+         "counts": {
+          "flag": 12,
+          "not_for_checking": 4
+         },
+         "pieces": [
+          {
+           "id": "707.3.2",
+           "title": "Interior exit stairway and ramp construction",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_3_2_exit_stairway_fire_barriers"
+           ]
+          },
+          {
+           "id": "707.3.4",
+           "title": "Exit passageway",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_3_4_exit_passageway_fire_barriers"
+           ]
+          },
+          {
+           "id": "707.3.5",
+           "title": "Horizontal exit",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_3_5_horizontal_exit_separation"
+           ]
+          },
+          {
+           "id": "707.4",
+           "title": "Exterior walls",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_4_exterior_walls"
+           ]
+          },
+          {
+           "id": "707.5",
+           "title": "Continuity",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_5_continuity"
+           ]
+          },
+          {
+           "id": "707.5.1",
+           "title": "Supporting construction",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_5_1_supporting_construction"
+           ]
+          },
+          {
+           "id": "707.6",
+           "title": "Openings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_6_openings"
+           ]
+          },
+          {
+           "id": "707.7",
+           "title": "Penetrations",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_7_penetrations"
+           ]
+          },
+          {
+           "id": "707.7.1",
+           "title": "Prohibited penetrations",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_7_1_prohibited_penetrations"
+           ]
+          },
+          {
+           "id": "707.8",
+           "title": "Joints",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_8_joints"
+           ]
+          },
+          {
+           "id": "707.9",
+           "title": "Voids at intersections",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_9_voids"
+           ]
+          },
+          {
+           "id": "707.10",
+           "title": "Ducts and air transfer openings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_707_10_ducts"
+           ]
+          },
+          {
+           "id": "707.1",
+           "title": "General",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "707.3",
+           "title": "Fire-resistance rating",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "707.3.1",
+           "title": "Shaft enclosures",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "707.3.3",
+           "title": "Enclosures for exit access stairways",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "708",
@@ -86018,10 +88850,124 @@
          "number": "713",
          "title": "Shaft Enclosures",
          "book_page": 157,
-         "coverage": "not_brought_in",
+         "coverage": "flag",
          "whole": false,
-         "counts": {},
-         "pieces": []
+         "counts": {
+          "flag": 13,
+          "not_for_checking": 1
+         },
+         "pieces": [
+          {
+           "id": "713.2",
+           "title": "Construction",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_2_shaft_construction"
+           ]
+          },
+          {
+           "id": "713.4",
+           "title": "Fire-resistance rating",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_4_shaft_rating"
+           ]
+          },
+          {
+           "id": "713.5",
+           "title": "Continuity",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_5_shaft_continuity"
+           ]
+          },
+          {
+           "id": "713.6",
+           "title": "Exterior walls",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_6_shaft_exterior_walls"
+           ]
+          },
+          {
+           "id": "713.7",
+           "title": "Openings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_7_shaft_openings"
+           ]
+          },
+          {
+           "id": "713.7.1",
+           "title": "Prohibited openings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_7_1_shaft_prohibited_openings"
+           ]
+          },
+          {
+           "id": "713.8",
+           "title": "Penetrations",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_8_shaft_penetrations"
+           ]
+          },
+          {
+           "id": "713.8.1",
+           "title": "Prohibited penetrations",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_8_1_shaft_prohibited_penetrations"
+           ]
+          },
+          {
+           "id": "713.9",
+           "title": "Joints",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_9_shaft_joints"
+           ]
+          },
+          {
+           "id": "713.10",
+           "title": "Duct and air transfer openings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_10_shaft_ducts"
+           ]
+          },
+          {
+           "id": "713.11",
+           "title": "Enclosure at the bottom",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_11_shaft_bottom"
+           ]
+          },
+          {
+           "id": "713.12",
+           "title": "Enclosure at top",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_12_shaft_top"
+           ]
+          },
+          {
+           "id": "713.14",
+           "title": "Elevator, dumbwaiter and other hoistways",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_14_hoistways"
+           ]
+          },
+          {
+           "id": "713.1",
+           "title": "General",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "714",
@@ -86105,9 +89051,10 @@
          "pieces": []
         }
        ],
-       "coverage": "not_brought_in",
+       "coverage": "flag",
        "counts": {
-        "not_brought_in": 22
+        "flag": 3,
+        "not_brought_in": 19
        }
       },
       {
@@ -91192,6 +94139,33 @@
    "egress.general.bc_508_2_2_height": "needs_review",
    "egress.general.bc_508_2_3_tabular_values": "needs_review",
    "egress.general.bc_508_2_4_separation": "needs_review",
+   "egress.general.bc_703_2_1_1_nonsymmetrical_walls": "needs_review",
+   "egress.general.bc_703_5_marking": "needs_review",
+   "egress.general.bc_707_3_2_exit_stairway_fire_barriers": "needs_review",
+   "egress.general.bc_707_3_4_exit_passageway_fire_barriers": "needs_review",
+   "egress.general.bc_707_3_5_horizontal_exit_separation": "needs_review",
+   "egress.general.bc_707_4_exterior_walls": "needs_review",
+   "egress.general.bc_707_5_continuity": "needs_review",
+   "egress.general.bc_707_5_1_supporting_construction": "needs_review",
+   "egress.general.bc_707_6_openings": "needs_review",
+   "egress.general.bc_707_7_penetrations": "needs_review",
+   "egress.general.bc_707_7_1_prohibited_penetrations": "needs_review",
+   "egress.general.bc_707_8_joints": "needs_review",
+   "egress.general.bc_707_9_voids": "needs_review",
+   "egress.general.bc_707_10_ducts": "needs_review",
+   "egress.general.bc_713_2_shaft_construction": "needs_review",
+   "egress.general.bc_713_4_shaft_rating": "needs_review",
+   "egress.general.bc_713_5_shaft_continuity": "needs_review",
+   "egress.general.bc_713_6_shaft_exterior_walls": "needs_review",
+   "egress.general.bc_713_7_shaft_openings": "needs_review",
+   "egress.general.bc_713_7_1_shaft_prohibited_openings": "needs_review",
+   "egress.general.bc_713_8_shaft_penetrations": "needs_review",
+   "egress.general.bc_713_8_1_shaft_prohibited_penetrations": "needs_review",
+   "egress.general.bc_713_9_shaft_joints": "needs_review",
+   "egress.general.bc_713_10_shaft_ducts": "needs_review",
+   "egress.general.bc_713_11_shaft_bottom": "needs_review",
+   "egress.general.bc_713_12_shaft_top": "needs_review",
+   "egress.general.bc_713_14_hoistways": "needs_review",
    "egress.general.bc_1004_7_outdoor_areas": "needs_review",
    "egress.general.bc_1004_9_posting": "needs_review",
    "egress.general.bc_table_1006_2_1_other_occupancies": "needs_review",
@@ -91278,7 +94252,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "73 to review · 30 comply"
+    "summary": "100 to review · 30 comply"
    }
   ],
   "egress": {
@@ -95995,6 +98969,33 @@
     "general.bc_508_2_2_height": "needs_review",
     "general.bc_508_2_3_tabular_values": "needs_review",
     "general.bc_508_2_4_separation": "needs_review",
+    "general.bc_703_2_1_1_nonsymmetrical_walls": "needs_review",
+    "general.bc_703_5_marking": "needs_review",
+    "general.bc_707_3_2_exit_stairway_fire_barriers": "needs_review",
+    "general.bc_707_3_4_exit_passageway_fire_barriers": "needs_review",
+    "general.bc_707_3_5_horizontal_exit_separation": "needs_review",
+    "general.bc_707_4_exterior_walls": "needs_review",
+    "general.bc_707_5_continuity": "needs_review",
+    "general.bc_707_5_1_supporting_construction": "needs_review",
+    "general.bc_707_6_openings": "needs_review",
+    "general.bc_707_7_penetrations": "needs_review",
+    "general.bc_707_7_1_prohibited_penetrations": "needs_review",
+    "general.bc_707_8_joints": "needs_review",
+    "general.bc_707_9_voids": "needs_review",
+    "general.bc_707_10_ducts": "needs_review",
+    "general.bc_713_2_shaft_construction": "needs_review",
+    "general.bc_713_4_shaft_rating": "needs_review",
+    "general.bc_713_5_shaft_continuity": "needs_review",
+    "general.bc_713_6_shaft_exterior_walls": "needs_review",
+    "general.bc_713_7_shaft_openings": "needs_review",
+    "general.bc_713_7_1_shaft_prohibited_openings": "needs_review",
+    "general.bc_713_8_shaft_penetrations": "needs_review",
+    "general.bc_713_8_1_shaft_prohibited_penetrations": "needs_review",
+    "general.bc_713_9_shaft_joints": "needs_review",
+    "general.bc_713_10_shaft_ducts": "needs_review",
+    "general.bc_713_11_shaft_bottom": "needs_review",
+    "general.bc_713_12_shaft_top": "needs_review",
+    "general.bc_713_14_hoistways": "needs_review",
     "general.bc_1004_7_outdoor_areas": "needs_review",
     "general.bc_1004_9_posting": "needs_review",
     "general.bc_table_1006_2_1_other_occupancies": "needs_review",
@@ -99952,7 +102953,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "8d2321657d8408ab261707daa58643ef65049c5193114ac2f8cc5f0b31bc1d3f",
   "rulebook": {
-   "new_york/ithaca_city": "92f32eebda7424d6700eca76731be458f910765d4a2f082ae2cf4ab5a36b9087"
+   "new_york/ithaca_city": "aac2c7624fcf3305c2c56338f302a95c1eb51ff843fd4eeac79cd970f08da84b"
   }
  }
 }
