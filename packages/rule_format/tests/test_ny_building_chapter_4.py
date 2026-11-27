@@ -317,3 +317,29 @@ def test_no_story_passes_short_of_403_5_2_or_405_7_1_where_they_may_apply(ctx, r
             if given.get("underground_building", None) is not False and not (count is not None and count >= 2):
                 bad.append((rid, "405.7.1", given, m))
     assert not bad, (sorted({(b[0], b[1]) for b in bad}), bad[:3])
+
+
+@pytest.mark.parametrize("mall", [True, None])
+def test_a_story_with_more_exits_than_any_reading_asks_passes_with_the_facts_not_stated(ctx, rules, mall):
+    """Review round 1 of part b: a band whose bound was `(4 + 1 if ... high_rise_building else 4)` stopped on an
+    unstated high-rise (a conditional on an unknown fact is never three-valued), so a story with six exits needed
+    review in a building that may hold a mall. More exits than any reading asks (Table 1006.3.3's four, 402.8's four,
+    403.5.2's one more) pass whatever the mall, high-rise and underground facts are."""
+    story = {"story_exit_count": 6, "story_occupant_load": 100, "egress_travel_distance": 50,
+             "story_first_above_or_below_grade": True, "story_rooms_exit_directly_outside": False,
+             "story_second_above_grade_plane": False, "story_fourth_or_higher_above_grade_plane": False,
+             "story_dwelling_units": 1}
+    plain = {"sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False, "sprinklered_903_3_1_3": False,
+             "assembly_fixed_seating": False, "emergency_escape_openings_1031": True}
+    if mall is not None:
+        plain["special_egress_spaces"] = mall
+    cases = {"general.bc_1006_3_3_story_exits": {"occupancy_group": "I-4", "occupancy_group_i4": True,
+                                                 "other_occupancy_present": False},
+             "general.bc_table_1006_3_4_2__a_b_e_f_m_u": {"occupancy_group": "B"},
+             "general.bc_table_1006_3_4_2__h_i_r": {"occupancy_group": "R-1"},
+             "general.bc_table_1006_3_4_2__s": {"occupancy_group": "S-1"},
+             "general.bc_table_1006_3_4_1__r2_dwelling_units": {"occupancy_group": "R-2", "r2_sleeping_units": False}}
+    for rid, group in cases.items():
+        [row] = parts.rows(rules[rid], {"story": [{"id": "p1", "measures": story}]}, {**plain, **group}, ctx.allowed())
+        assert row["outcome"] == "pass", (rid, row)
+

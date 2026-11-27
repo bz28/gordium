@@ -1463,7 +1463,7 @@
     "Egress · Fixed seating's common path: A person checks this (Gordium doesn't decide it): Fixed seating in any group (an E school's auditorium, a B lecture hall): the common path from any seat (30 ft; 75 ft under 50 occupants; 50 ft smoke-protected or open-air) is a person's check.",
     "Egress · Dead ends in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy isn't marked yet, so a person checks.",
     "Egress · Corridor rating in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent; which room is which occupancy isn't marked yet, so a person checks.",
-    "Egress · Group I-2 corridors: A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (not brought in): a person checks.",
+    "Egress · Group I-2 corridors: A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (flags of Chapter 4 part c): a person checks.",
     "Egress · Elevator hoistway doors protected: A person checks this (Gordium doesn't decide it): Elevator hoistway doors in rated enclosures: Sections 716 and 3006.2 (not brought in), a person's check.",
     "Egress · Corridor width in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
     "Egress · Corridor width kept clear: A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (its own flags since section group 5c) are a person's check.",
@@ -70664,11 +70664,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (not brought in): a person checks.",
+     "reason": "A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (flags of Chapter 4 part c): a person checks.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (not brought in): a person checks.",
+      "line": "A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (flags of Chapter 4 part c): a person checks.",
       "quotes": [
        {
         "text": "I-2[fna] All Not Permitted 0",
@@ -70697,14 +70697,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_table_1020_2_note_a_group_i2",
-       "words": "A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (not brought in): a person checks.",
+       "words": "A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (flags of Chapter 4 part c): a person checks.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_table_1020_2_note_a_group_i2",
-       "why": "A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (not brought in): a person checks.",
+       "why": "A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (flags of Chapter 4 part c): a person checks.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -78716,7 +78716,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Group I-2 corridors, 407.2 and 407.3 (BCNYS Table 1020.2 note a): A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (not brought in): a person checks.",
+       "title": "Egress · Group I-2 corridors, 407.2 and 407.3 (BCNYS Table 1020.2 note a): A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (flags of Chapter 4 part c): a person checks.",
        "mark": "?",
        "name": "Egress · Group I-2 corridors, 407.2 and 407.3 (BCNYS Table 1020.2 note a)"
       },
@@ -80323,7 +80323,7 @@
       {
        "key": "reason:egress.general.bc_table_1020_2_note_a_group_i2",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (not brought in): a person checks.",
+       "words": "A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (flags of Chapter 4 part c): a person checks.",
        "elements": [],
        "items": [
         "egress.general.bc_table_1020_2_note_a_group_i2"
@@ -109780,9 +109780,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "90350a4e202a40d0fe5f980decdd414912c496d9a7255f46405d0ff9a7138428",
+  "worker_fingerprint": "2e4cdd3997c3d85cf5798f6948856f9f1669cc48da03e9f56bb5efcb71cebd2d",
   "rulebook": {
-   "new_york/ithaca_city": "44a8968647ba97becb1fb4413fa7adae6e68aeffe75a91849fcfdec7bdc6ee40"
+   "new_york/ithaca_city": "5f7fead6181d9ba45e4b25e18df40f0351e865dc92092fc1b665033b72e474a7"
   }
  }
 }

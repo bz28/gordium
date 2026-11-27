@@ -687,3 +687,15 @@ def test_every_restatement_of_the_leaves_rule_carries_the_mullioned_pair():
     assert "narrower leaf" in STOPS["door_leaves_not_given"]
     fmt = (REPO / "docs/interior/interior_description_format.md").read_text(encoding="utf-8")
     assert "narrower leaf" in next(line for line in fmt.splitlines() if line.startswith("| `leaves`"))
+
+
+def test_the_high_rise_question_asks_the_whole_definition():
+    """Review round 1 of Chapter 4 part b: the question once left out 202's occupiable roof, so a building whose roof
+    deck is the high part could be answered No and lose every Section 403 flag."""
+    words = ui_data.FIELD_HEADLINES["building.high_rise_building"]
+    assert "occupiable roof" in words and "lowest level of fire department vehicle access" in words
+    assert "420 ft in building height" in words
+    # the class: the underground question, too, in 405.1's own words
+    words = ui_data.FIELD_HEADLINES["building.underground_building"]
+    assert "floor level used for human occupancy" in words and "finished floor of the lowest level of exit discharge" in words
+

@@ -7876,9 +7876,8 @@ rules:
       to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
       space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
       pass.)'
-  - when: special_egress_spaces and story_exit_count < (4 + 1 if occupancy_group != "R-2" and high_rise_building else 4) and
-      story_exit_count >= (2 if story_occupant_load <= 500 else 3 if
-      story_occupant_load <= 1000 else 4)
+  - when: special_egress_spaces and story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) and (story_exit_count < 4 or story_exit_count < 4 + 1 and occupancy_group != "R-2" and high_rise_building)
     reason: 'Enough exits for the story''s occupant load worked out from its rooms, but fewer than four (five in a building other than Group R-2 that may be a high-rise more than 420 ft high,
       403.5.2), in a building that may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
       mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
@@ -8361,9 +8360,8 @@ rules:
       to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
       space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
       pass.)'
-  - when: special_egress_spaces and story_exit_count < (4 + 1 if occupancy_group != "R-2" and high_rise_building else 4) and
-      story_exit_count >= (2 if story_occupant_load <= 500 else 3 if
-      story_occupant_load <= 1000 else 4)
+  - when: special_egress_spaces and story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) and (story_exit_count < 4 or story_exit_count < 4 + 1 and occupancy_group != "R-2" and high_rise_building)
     reason: 'Enough exits for the story''s occupant load worked out from its rooms, but fewer than four (five in a building other than Group R-2 that may be a high-rise more than 420 ft high,
       403.5.2), in a building that may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
       mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
@@ -8888,9 +8886,8 @@ rules:
       (Table 1017.2 note a) also limits travel to a door in a smoke barrier (150 ft from a room''s door, 200 ft from any point),
       and smoke barriers aren''t drawn: a person checks. (Only where the story would otherwise pass: a measured fail still
       fails.)'
-  - when: special_egress_spaces and story_exit_count < (4 + 1 if occupancy_group != "R-2" and high_rise_building else 4) and
-      story_exit_count >= (2 if story_occupant_load <= 500 else 3 if
-      story_occupant_load <= 1000 else 4)
+  - when: special_egress_spaces and story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) and (story_exit_count < 4 or story_exit_count < 4 + 1 and occupancy_group != "R-2" and high_rise_building)
     reason: 'Enough exits for the story''s occupant load worked out from its rooms, but fewer than four (five in a building other than Group R-2 that may be a high-rise more than 420 ft high,
       403.5.2), in a building that may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
       mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
@@ -9261,9 +9258,8 @@ rules:
       to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
       space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
       pass.)'
-  - when: special_egress_spaces and story_exit_count < (4 + 1 if occupancy_group != "R-2" and high_rise_building else 4) and
-      story_exit_count >= (2 if story_occupant_load <= 500 else 3 if
-      story_occupant_load <= 1000 else 4)
+  - when: special_egress_spaces and story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) and (story_exit_count < 4 or story_exit_count < 4 + 1 and occupancy_group != "R-2" and high_rise_building)
     reason: 'Enough exits for the story''s occupant load worked out from its rooms, but fewer than four (five in a building other than Group R-2 that may be a high-rise more than 420 ft high,
       403.5.2), in a building that may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
       mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
