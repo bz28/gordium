@@ -12468,8 +12468,8 @@ rules:
     reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
       sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
       system is the one the column means is a person''s check (never a pass on it).'
-  - when: special_egress_spaces and corridor_occupant_load <= 30 and not ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
-      and corridor_fire_rating_hours >= 1)
+  - when: special_egress_spaces and corridor_occupant_load <= 30 and not (sprinklered_903_3_1_1 and corridor_fire_rating_hours
+      >= 1)
     reason: 'Not rated, allowed only by the corridor''s occupant load worked out from its story''s rooms, in a building that
       may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): a
       mall''s occupants, and those of a corridor from it, come from 402.8.2.1''s formula on the gross leasable area and may
@@ -12856,7 +12856,7 @@ rules:
       Group R-4 only in Condition 1 (903.2.8.2); in Condition 1 the 1 hour is met, in Condition 2 the system isn''t one 903.3.1.3
       allows and the table''s Not Permitted applies. The condition isn''t stated: a person checks.'
   - when: special_egress_spaces and corridor_occupant_load <= 10 and not (((sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
-      and corridor_fire_rating_hours >= 0.5) or (occupancy_group in ["R-3", "R-4"] and sprinklered_903_3_1_3 and corridor_fire_rating_hours
+      and corridor_fire_rating_hours >= 0.5) or (occupancy_group == "R-3" and sprinklered_903_3_1_3 and corridor_fire_rating_hours
       >= 1))
     reason: 'Not rated, allowed only by the corridor''s occupant load (10 or fewer) worked out from its story''s rooms, in
       a building that may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel
