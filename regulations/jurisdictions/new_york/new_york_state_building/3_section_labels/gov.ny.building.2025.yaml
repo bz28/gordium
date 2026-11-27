@@ -3598,7 +3598,7 @@ labels:
   707.3.5:
     label: flag
     topic: means_of_egress
-    reason: 'A horizontal exit''s separation has the rating 1026.1 asks (not brought in): not in the model, a person''s check
+    reason: 'A horizontal exit''s separation has the rating Section 1026 asks (1026.2: at least 2 hours; not brought in): not in the model, a person''s check
       (general.bc_707_3_5_horizontal_exit_separation).'
     sources:
     - file: gov.ny.building.2025.pdf
