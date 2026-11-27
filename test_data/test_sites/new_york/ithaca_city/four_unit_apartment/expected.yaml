@@ -254,6 +254,20 @@ results:
   general.bc_714_5_2_floor_membrane_penetrations: needs_review
   general.bc_714_5_3_floor_dissimilar_materials: needs_review
   general.bc_714_5_4_smoke_barrier_penetrations: needs_review
+  # Chapter 9 part a (2026-11-27, docs/decisions/2026-11-27_ny_building_chapter_9.md): 903.2.8 (p.271 lines 35-36)
+  # requires a sprinkler system "throughout all buildings with a Group R fire area"; the building is Group R-2 with
+  # none, so it fails, whatever its size. Groups H and I and H-5's design are not this building's; 903.3.1.2's and
+  # 903.3.1.3's flags are for a stated 13R or 13D system (none here); the alternative systems (903.1.1) and pyroxylin
+  # plastics (903.2.5.3) are a person's check for every building
+  general.bc_903_1_1_alternative_protection: needs_review
+  general.bc_903_2_5_1_group_h_sprinklers: not_applicable
+  general.bc_903_2_5_2_h5_sprinkler_design: not_applicable
+  general.bc_903_2_5_3_pyroxylin_plastics: needs_review
+  general.bc_903_2_6_group_i_sprinklers: not_applicable
+  general.bc_903_2_8_group_r_sprinklers: fail
+  general.bc_903_3_1_2_nfpa_13r_limits: not_applicable
+  general.bc_903_3_1_2_2_corridors_balconies_13r: not_applicable
+  general.bc_903_3_1_3_nfpa_13d_scope: not_applicable
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

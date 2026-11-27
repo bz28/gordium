@@ -202,9 +202,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     fire-barrier and shaft-enclosure flags, each shown for every building (65); part b its 23 building-wide
     opening-protective flags (88; Table 716.1(2)'s corridor doors are each corridor's row); part c 30 of its 31 fire
     partition, smoke barrier and smoke partition flags (118; 710.5.3 is Group I-2's, not the stated R-2's); part d its 23 floor, vertical opening
-    and penetration flags (141)."""
+    and penetration flags (141). Chapter 9 part a (2026-11-27) adds 903.1.1's alternative systems and 903.2.5.3's
+    pyroxylin plastics (143); its other flags are Group H-5's or a 13R or 13D system's, not this building's."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 141 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 143 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -432,3 +433,36 @@ def test_a_door_to_outside_asks_whether_the_occupants_use_outdoor_areas(got):
         for i in items:
             asks = [ui_data._from_cause(c, "means_of_egress_door") for c in i.get("causes") or []]
             assert "building.occupied_outdoor_areas" in {a.get("field") for a in asks}, i["name"]
+
+
+# ---- Chapter 9 part a (2026-11-27): where a sprinkler system is required, 903.2.8 for Group R -----------------------
+
+R_RULE = "general.bc_903_2_8_group_r_sprinklers"
+
+
+def test_903_2_8_fails_the_apartment_as_stated_and_follows_each_sprinkler_system(got, routes):
+    """The apartment, Group R-2 with no sprinkler system: 903.2.8 asks a system throughout every building with a
+    Group R fire area, so it fails on each story, whatever its size. Stated NFPA 13 it passes; NFPA 13R needs review
+    at its two stories (903.3.1.2's heights aren't in the model) and fails at five; NFPA 13D fails in an R-2 of
+    dwelling units, not townhouses (903.3.1.3), and needs review while either isn't stated. 903.3.1.2's two flags show
+    only with a 13R system, 903.3.1.3's only with a 13D one; nothing outside Chapter 9 is compared here."""
+    rows = [r for r in got["rows"] if r["rule"] == R_RULE]
+    assert len(rows) == 2 and {r["outcome"] for r in rows} == {"fail"} and got["results"][R_RULE] == "fail"
+    cases = [({"sprinkler_system": "nfpa_13"}, "pass"),
+             ({"sprinkler_system": "nfpa_13r", "stories_above_grade_plane": 2}, "needs_review"),
+             ({"sprinkler_system": "nfpa_13r", "stories_above_grade_plane": 5}, "fail"),
+             ({"sprinkler_system": "nfpa_13r"}, "needs_review"),
+             ({"sprinkler_system": "nfpa_13d", "townhouse_units": False, "r2_sleeping_units": False}, "fail"),
+             ({"sprinkler_system": "nfpa_13d", "r2_sleeping_units": False}, "needs_review")]
+    for stated, want in cases:
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], **stated}
+        now = _check(interior, routes)["results"]
+        assert now[R_RULE] == want, stated
+        system = stated["sprinkler_system"]
+        assert now["general.bc_903_3_1_2_nfpa_13r_limits"] == ("needs_review" if system == "nfpa_13r"
+                                                                else "not_applicable"), stated
+        assert now["general.bc_903_3_1_3_nfpa_13d_scope"] == ("needs_review" if system == "nfpa_13d"
+                                                               else "not_applicable"), stated
+        assert now["general.bc_903_2_5_1_group_h_sprinklers"] == "not_applicable"
+        assert now["general.bc_903_2_6_group_i_sprinklers"] == "not_applicable"

@@ -17,6 +17,7 @@ occupancy_group_i4:
   - general.bc_1016_2_intervening_spaces
   - general.bc_1017_2_travel_distance
   - general.bc_1020_5_dead_end
+  - general.bc_903_2_6_group_i_sprinklers
 sprinklered_903_3_1_1:
   meaning: The building is equipped throughout with an automatic sprinkler system in accordance with 2025 BCNYS Section 903.3.1.1
     (NFPA 13), as the architect states it
@@ -30,6 +31,9 @@ sprinklered_903_3_1_1:
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
+  - general.bc_903_2_5_1_group_h_sprinklers
+  - general.bc_903_2_6_group_i_sprinklers
+  - general.bc_903_2_8_group_r_sprinklers
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -74,6 +78,11 @@ sprinklered_903_3_1_2:
   - general.bc_1007_1_2_space_three_or_more
   - general.bc_1020_3_corridor_capacity
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
+  - general.bc_903_2_5_1_group_h_sprinklers
+  - general.bc_903_2_6_group_i_sprinklers
+  - general.bc_903_2_8_group_r_sprinklers
+  - general.bc_903_3_1_2_2_corridors_balconies_13r
+  - general.bc_903_3_1_2_nfpa_13r_limits
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -102,6 +111,10 @@ sprinklered_903_3_1_3:
   unit: yes_no
   needed_by:
   - general.bc_1006_2_2_6_r3_r4_nfpa_13d
+  - general.bc_903_2_5_1_group_h_sprinklers
+  - general.bc_903_2_6_group_i_sprinklers
+  - general.bc_903_2_8_group_r_sprinklers
+  - general.bc_903_3_1_3_nfpa_13d_scope
   - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1020_2_a_b_e_f_m_s_u
   - general.bc_table_1020_2_i2
@@ -170,6 +183,11 @@ occupancy_group:
   - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_710_5_3_i2_pass_through_openings
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
+  - general.bc_903_2_5_1_group_h_sprinklers
+  - general.bc_903_2_5_2_h5_sprinkler_design
+  - general.bc_903_2_6_group_i_sprinklers
+  - general.bc_903_2_8_group_r_sprinklers
+  - general.bc_903_3_1_3_nfpa_13d_scope
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -333,6 +351,7 @@ r2_sleeping_units:
     dwelling units use Table 1006.3.4(1), sleeping units Table 1006.3.4(2)), as the architect states it'
   unit: yes_no
   needed_by:
+  - general.bc_903_2_8_group_r_sprinklers
   - general.bc_table_1006_3_4_1__r2_dwelling_units
   - general.bc_table_1006_3_4_2__h_i_r
 emergency_escape_openings_1031:
@@ -373,3 +392,36 @@ emergency_voice_alarm_system:
   unit: yes_no
   needed_by:
   - general.bc_1020_3_corridor_capacity
+group_r_present:
+  meaning: 'The building has a Group R occupancy (R-1 to R-4) among the groups the architect states, alone or with others
+    (2025 BCNYS 903.2.8: a sprinkler system "throughout all buildings with a Group R fire area")'
+  unit: yes_no
+  needed_by:
+  - general.bc_903_2_8_group_r_sprinklers
+group_h_present:
+  meaning: 'The building has a Group H occupancy (H-1 to H-5) among the groups the architect states, alone or with others
+    (2025 BCNYS 903.2.5.1: "An automatic sprinkler system shall be installed in Group H occupancies")'
+  unit: yes_no
+  needed_by:
+  - general.bc_903_2_5_1_group_h_sprinklers
+  - general.bc_903_2_5_2_h5_sprinkler_design
+group_i1_i2_i3_present:
+  meaning: 'The building has a Group I-1, I-2 or I-3 occupancy among the groups the architect states, alone or with others
+    (2025 BCNYS 903.2.6: a sprinkler system "throughout buildings with a Group I fire area", its exceptions 2 and 3 for
+    Group I-4 only)'
+  unit: yes_no
+  needed_by:
+  - general.bc_903_2_6_group_i_sprinklers
+stories_above_grade_plane:
+  meaning: 'The building''s stories above grade plane (2025 BCNYS 202 STORY ABOVE GRADE PLANE), as the architect counts
+    them: 903.3.1.2 permits an NFPA 13R system only in a Group R occupancy of four stories or fewer above grade plane'
+  unit: count
+  needed_by:
+  - general.bc_903_2_8_group_r_sprinklers
+townhouse_units:
+  meaning: 'Every dwelling unit of the building is a townhouse unit (2025 BCNYS 202 TOWNHOUSE UNIT: a single-family dwelling
+    unit in a townhouse that extends from the foundation to the roof, with a yard or public way on not less than two sides),
+    as the architect states it: 903.3.1.3 permits an NFPA 13D system in townhouses'
+  unit: yes_no
+  needed_by:
+  - general.bc_903_2_8_group_r_sprinklers

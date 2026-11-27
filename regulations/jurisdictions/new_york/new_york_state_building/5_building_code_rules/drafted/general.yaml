@@ -3238,6 +3238,888 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_903_1_1_alternative_protection
+  kind: flag
+  topic: means_of_egress
+  title: An alternative fire-extinguishing system instead of sprinklers (BCNYS 903.1.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 269
+    lines:
+    - 17
+    - 19
+    quote: '[F] 903.1.1 Alternative protection. Alternative automatic fire-extinguishing systems complying with Section 904
+      shall be permit- ted instead of automatic sprinkler system protection where recognized by the applicable standard and
+      approved by the fire code official.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An alternative automatic fire-extinguishing system complying with Section 904 takes the place of sprinkler protection
+      only where the applicable standard recognizes it and the fire code official approves it (903.1.1): whether any is used
+      instead of a sprinkler system 903.2 requires is a person''s check.'
+  notes: '903.1.1: an alternative system per 904 is permitted instead of sprinklers where the standard recognizes it and the
+    fire code official approves; the stated sprinkler system says nothing of one. Gordium''s reading (2026-11-27): such systems
+    protect particular hazards or rooms; a stated "none" in a building 903.2 requires sprinklered fails the group''s rule,
+    and this flag shows wherever an approved alternative might stand in. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part a).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_5_1_group_h_sprinklers
+  kind: rule
+  topic: means_of_egress
+  title: 'Sprinkler system required: Group H (BCNYS 903.2.5.1)'
+  applies_when: group_h_present
+  check: sprinklered_903_3_1_1
+  review_when:
+  - when: occupancy_group in ["mixed"] and not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+    reason: 'A building of two or more groups with an NFPA 13R or 13D system stated: its Group H portion needs a system per
+      903.3.1.1 (903.3.1 permits 13R only in Group R, 903.3.1.2, and 13D only in dwellings, Group R-3, Group R-4 Condition
+      1 and townhouses, 903.3.1.3), and the one stated system can''t say which portion has which: a person checks.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 48
+    - 50
+    quote: '[F] 903.2.5 Group H. Automatic sprinkler systems shall be provided in high-hazard occupancies as required in Sections
+      903.2.5.1 through 903.2.5.3. [F] 903.2.5.1 General. An automatic sprinkler system shall be installed in Group H occupancies.'
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 41
+    - 45
+    quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+      903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.
+      [F] 903.3.1.1 NFPA 13 sprinkler systems. Where the provisions of this code require that a building or portion thereof
+      be equipped throughout with an automatic sprinkler system in accordance with this section, sprinklers shall be installed
+      through- out in accordance with NFPA 13 except as provided in Sections 903.3.1.1.1 through 903.3.1.1.3.'
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 16
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+  - file: gov.ny.building.2025.pdf
+    page: 275
+    lines:
+    - 11
+    - 12
+    quote: '[F] 903.3.1.3 NFPA 13D sprinkler systems. Automatic sprinkler systems installed in one- and two-family dwellings;
+      Group R-3; Group R-4, Condition 1; and townhouses shall be permitted to be installed throughout in accordance with NFPA
+      13D.'
+  examples:
+  - given:
+      group_h_present: true
+      occupancy_group: H-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group H with an NFPA 13 system throughout (903.3.1.1): the system 903.2.5.1 requires.'
+  - given:
+      group_h_present: true
+      occupancy_group: H-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Group H with no sprinkler system: 903.2.5.1 requires one.'
+  - given:
+      group_h_present: true
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'An NFPA 13R system in Group H: 903.3.1 has every system follow 903.3.1.1 unless 903.3.1.2 (Group R only) or 903.3.1.3
+      permits otherwise, so it isn''t the system 903.2.5.1 asks.'
+  - given:
+      group_h_present: true
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Two or more groups, one of them H, with no sprinkler system: the Group H portion needs one.'
+  - given:
+      group_h_present: true
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups with an NFPA 13R system: which portion has which system isn''t stated.'
+  - given:
+      group_h_present: false
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No Group H occupancy: not applicable.'
+  - given:
+      group_h_present: true
+      occupancy_group: H-2
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The sprinkler system isn''t stated: a person checks.'
+  - given: {group_h_present: true, occupancy_group: H-2, sprinklered_903_3_1_1: false, sprinklered_903_3_1_2: false,
+      sprinklered_903_3_1_3: false}
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story in the model: with none, the rule needs review, never a pass or a fail on a building not drawn.'
+  notes: '903.2.5.1: "An automatic sprinkler system shall be installed in Group H occupancies", whatever their size; 903.3.1
+    has it follow 903.3.1.1 (NFPA 13) unless 903.3.1.2 (NFPA 13R, Group R) or 903.3.1.3 (NFPA 13D, dwellings, R-3, R-4 Condition
+    1, townhouses) permits otherwise, so only an NFPA 13 system passes, in a building of one group or two or more (any stated
+    group H-1 to H-5); no sprinkler system fails, and 13R or 13D fails in a Group H building. 903.1.1''s alternative systems
+    are their own flag. 903.2''s exception (spaces used only for telecommunications equipment, in a telecommunications building)
+    leaves those spaces out, never a Group H occupancy''s own (Gordium''s reading, 2026-11-27: Fire Code 1207 governs the
+    batteries it names). H-5''s design and 903.2.5.3''s pyroxylin plastics are flags. Read on each story the model holds (the system is "throughout"; the Building Code
+    check reads its rules part by part), each story''s row the building''s answer. Hand-drafted in a Claude Code session
+    (2026-11-27, Chapter 9 part a).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_5_2_h5_sprinkler_design
+  kind: flag
+  topic: means_of_egress
+  title: Group H-5's sprinkler system throughout and its design (BCNYS 903.2.5.2)
+  applies_when: group_h_present and occupancy_group in ["H-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 270
+    lines:
+    - 51
+    - 55
+    quote: '[F] 903.2.5.2 Group H-5 occupancies. An automatic sprinkler system shall be installed throughout buildings containing
+      Group H-5 occupancies. The design of the automatic sprinkler system shall be not less than that required by this code
+      for the occu- pancy hazard classifications in accordance with Table 903.2.5.2. Where the design area of the automatic
+      sprinkler system consists of a corridor protected by one row of sprinklers, the maxi- mum number of sprinklers required
+      to be calculated is 13.'
+  - file: gov.ny.building.2025.pdf
+    page: 271
+    lines:
+    - 3
+    - 9
+    quote: '[F] TABLE 903.2.5.2—GROUP H-5 AUTOMATIC SPRINKLER SYSTEM DESIGN CRITERIA LOCATION OCCUPANCY HAZARD CLASSIFICATION
+      Fabrication areas Ordinary Hazard Group 2 Service corridors Ordinary Hazard Group 2 Storage rooms without dispensing
+      Ordinary Hazard Group 2 Storage rooms with dispensing Extra Hazard Group 2 Corridors Ordinary Hazard Group 2'
+  examples:
+  - given:
+      group_h_present: true
+      occupancy_group: H-5
+    expect: needs_review
+    note: 'A building containing Group H-5 is sprinklered throughout, designed for at least Table 903.2.5.2''s hazard classes
+      (Ordinary Hazard Group 2 in fabrication areas, service corridors, corridors and storage rooms without dispensing; Extra
+      Hazard Group 2 in storage rooms with dispensing), a corridor with one row of sprinklers calculated for at most 13: a
+      person''s check.'
+  - given:
+      group_h_present: true
+      occupancy_group: H-2
+    expect: not_applicable
+    note: 'Group H-2, not H-5: not applicable.'
+  - given:
+      group_h_present: false
+      occupancy_group: mixed
+    expect: not_applicable
+    note: 'Two or more groups, none of them H: not applicable.'
+  notes: '903.2.5.2 and Table 903.2.5.2: a building containing Group H-5 is sprinklered throughout, the design at least the
+    table''s hazard class for each location; the design isn''t in the model. Narrowed to a stated H-5, or two or more groups
+    with an H among them. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part a).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_5_3_pyroxylin_plastics
+  kind: flag
+  topic: means_of_egress
+  title: A sprinkler system where pyroxylin plastics are kept (BCNYS 903.2.5.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 271
+    lines:
+    - 10
+    - 11
+    quote: '[F] 903.2.5.3 Pyroxylin plastics. An automatic sprinkler system shall be provided in buildings, or portions thereof,
+      where cellu- lose nitrate film or pyroxylin plastics are manufactured, stored or handled in quantities exceeding 100
+      pounds (45 kg).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where cellulose nitrate film or pyroxylin plastics are manufactured, stored or handled in quantities over 100 pounds,
+      the building, or that portion of it, has a sprinkler system: what is kept isn''t in the model, a person''s check.'
+  notes: '903.2.5.3: in any building, of any group, where over 100 pounds of cellulose nitrate film or pyroxylin plastics
+    are manufactured, stored or handled; the contents aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part a).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_6_group_i_sprinklers
+  kind: rule
+  topic: means_of_egress
+  title: 'Sprinkler system required: Group I (BCNYS 903.2.6)'
+  applies_when: group_i1_i2_i3_present or occupancy_group_i4
+  check: sprinklered_903_3_1_1
+  review_when:
+  - when: occupancy_group in ["I-1"] and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1
+    reason: 'Group I-1 with an NFPA 13R system: exception 1 permits one in a Condition 1 facility, and the condition isn''t
+      stated: a person checks.'
+  - when: occupancy_group in ["I-4"] and not sprinklered_903_3_1_1
+    reason: 'Group I-4 day care: no system is required where the care is at the level of exit discharge and every room where
+      care is provided has an exterior exit door (exception 2), and NFPA 13 on the floors where it is above or below that
+      level (exception 3); neither is in the model: a person checks.'
+  - when: occupancy_group in ["mixed"] and not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3 or
+      not group_i1_i2_i3_present)
+    reason: 'A building of two or more groups whose Group I is I-4 alone (exceptions 2 and 3), or whose one stated NFPA 13R
+      or 13D system can''t say which portion it covers: a person checks.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 271
+    lines:
+    - 12
+    - 21
+    quote: '[F] 903.2.6 Group I. An automatic sprinkler system shall be provided throughout buildings with a Group I fire
+      area. Exceptions: 1. An automatic sprinkler system installed in accordance with Section 903.3.1.2 shall be permitted
+      in Group I-1, Condi- tion 1 facilities. 2. An automatic sprinkler system is not required where Group I-4 day care facilities
+      are at the level of exit discharge and where every room where care is provided has not fewer than one exterior exit
+      door. 3. In buildings where Group I-4 day care is provided on levels other than the level of exit discharge, an automatic
+      sprinkler system in accordance with Section 903.3.1.1 shall be installed on the entire floor where care is provided,
+      all floors between the level of care and the level of exit discharge, and all floors below the level of exit discharge
+      other than areas classified as an open parking garage.'
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 41
+    - 45
+    quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+      903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.
+      [F] 903.3.1.1 NFPA 13 sprinkler systems. Where the provisions of this code require that a building or portion thereof
+      be equipped throughout with an automatic sprinkler system in accordance with this section, sprinklers shall be installed
+      through- out in accordance with NFPA 13 except as provided in Sections 903.3.1.1.1 through 903.3.1.1.3.'
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 16
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+  - file: gov.ny.building.2025.pdf
+    page: 275
+    lines:
+    - 11
+    - 12
+    quote: '[F] 903.3.1.3 NFPA 13D sprinkler systems. Automatic sprinkler systems installed in one- and two-family dwellings;
+      Group R-3; Group R-4, Condition 1; and townhouses shall be permitted to be installed throughout in accordance with NFPA
+      13D.'
+  examples:
+  - given:
+      group_i1_i2_i3_present: true
+      occupancy_group_i4: false
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group I-2 with an NFPA 13 system throughout: the system 903.2.6 requires.'
+  - given:
+      group_i1_i2_i3_present: true
+      occupancy_group_i4: false
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Group I-1 with no sprinkler system: 903.2.6 requires one throughout.'
+  - given:
+      group_i1_i2_i3_present: true
+      occupancy_group_i4: false
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13R in Group I-3: only Group I-1 Condition 1 may use it (exception 1).'
+  - given:
+      group_i1_i2_i3_present: true
+      occupancy_group_i4: false
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: true
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13D in Group I-1: 903.3.1.3 permits it only in dwellings, Group R-3, Group R-4 Condition 1 and townhouses.'
+  - given:
+      group_i1_i2_i3_present: true
+      occupancy_group_i4: false
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'NFPA 13R in Group I-1: permitted in Condition 1 (exception 1), not stated.'
+  - given:
+      group_i1_i2_i3_present: false
+      occupancy_group_i4: true
+      occupancy_group: I-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group I-4 with no sprinkler system: exception 2 may leave it out.'
+  - given:
+      group_i1_i2_i3_present: true
+      occupancy_group_i4: false
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Two or more groups, one of them I-1, I-2 or I-3, with no sprinkler system: the exceptions are Group I-4''s.'
+  - given:
+      group_i1_i2_i3_present: false
+      occupancy_group_i4: true
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups whose Group I is I-4 alone: exception 2 may leave it out.'
+  - given:
+      group_i1_i2_i3_present: false
+      occupancy_group_i4: false
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No Group I occupancy: not applicable.'
+  - given: {}
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The groups aren''t stated: a person checks.'
+  - given: {group_i1_i2_i3_present: true, occupancy_group_i4: false, occupancy_group: I-1, sprinklered_903_3_1_1: false,
+      sprinklered_903_3_1_2: false, sprinklered_903_3_1_3: false}
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story in the model: with none, the rule needs review, never a pass or a fail on a building not drawn.'
+  notes: '903.2.6: a sprinkler system throughout every building with a Group I fire area (I-1 to I-4), per 903.3.1.1 unless
+    903.3.1.2 or 903.3.1.3 permits otherwise (903.3.1): exception 1 permits NFPA 13R in Group I-1 Condition 1 (needs review:
+    the condition isn''t stated); exceptions 2 and 3 are Group I-4 day care''s (none at the level of exit discharge with an
+    exterior exit door in every care room; NFPA 13 on the floors above or below it), not in the model, so I-4 with less than
+    NFPA 13 needs review. NFPA 13D is never permitted in Group I. A building of two or more groups with an I-1, I-2 or I-3
+    among them and no system fails. Read on each story the model holds (the system is "throughout"; the Building Code
+    check reads its rules part by part), each story''s row the building''s answer. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part a).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_8_group_r_sprinklers
+  kind: rule
+  topic: means_of_egress
+  title: 'Sprinkler system required: Group R (BCNYS 903.2.8)'
+  applies_when: group_r_present
+  check: sprinklered_903_3_1_1 or (occupancy_group in ["R-3"] and sprinklered_903_3_1_3)
+  review_when:
+  - when: occupancy_group in ["R-1", "R-2", "R-3", "R-4"] and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and not
+      stories_above_grade_plane > 4
+    reason: 'An NFPA 13R system is permitted where the Group R occupancy is four stories or fewer above grade plane, its roof
+      (Group R-2) or highest floor (other Group R) within 903.3.1.2''s height above the lowest level of fire department vehicle
+      access and its lowest floor within 30 feet below it; the stories are the architect''s, the heights aren''t in the model:
+      a person checks.'
+  - when: occupancy_group in ["R-4"] and sprinklered_903_3_1_3 and not sprinklered_903_3_1_1
+    reason: 'Group R-4 with an NFPA 13D system: 903.2.8.2 permits one in Condition 1 only, and the condition isn''t stated:
+      a person checks.'
+  - when: sprinklered_903_3_1_3 and not sprinklered_903_3_1_1 and (occupancy_group in ["R-1"] or (occupancy_group in ["R-2"]
+      and (townhouse_units or r2_sleeping_units)))
+    reason: 'An NFPA 13D system is permitted in one- and two-family dwellings and townhouses (903.3.1.3), which a Group R-1
+      building, or a Group R-2 one of townhouse units or with sleeping units, may be, as the building states it or doesn''t
+      rule out: a person checks.'
+  - when: occupancy_group in ["mixed"] and not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+    reason: 'A building of two or more groups with an NFPA 13R or 13D system stated: 903.3.1.2 and 903.3.1.3 permit them only
+      in some groups, and the one stated system can''t say which portion has which: a person checks.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 271
+    lines:
+    - 35
+    - 42
+    quote: '[F] 903.2.8 Group R. An automatic sprinkler system installed in accordance with Section 903.3 shall be provided
+      throughout all buildings with a Group R fire area. [F] 903.2.8.1 Group R-3. An automatic sprinkler system installed
+      in accordance with Section 903.3.1.3 shall be permitted in Group R-3 occupancies. [F] 903.2.8.2 Group R-4, Condition
+      1. An automatic sprinkler system installed in accordance with Section 903.3.1.3 shall be permitted in Group R-4, Condition
+      1 occupancies. [F] 903.2.8.3 Care facilities. An automatic sprinkler system installed in accordance with Section 903.3.1.3
+      shall be permitted in care facilities with five or fewer individuals in a single-family dwelling.'
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 41
+    - 45
+    quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+      903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.
+      [F] 903.3.1.1 NFPA 13 sprinkler systems. Where the provisions of this code require that a building or portion thereof
+      be equipped throughout with an automatic sprinkler system in accordance with this section, sprinklers shall be installed
+      through- out in accordance with NFPA 13 except as provided in Sections 903.3.1.1.1 through 903.3.1.1.3.'
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 26
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:
+      1. Four stories or fewer above grade plane. 2. For other than Group R-2 occupancies, the floor level of the highest
+      story is 30 feet (9144 mm) or less above the lowest level of fire department vehicle access. For Group R-2 occupancies,
+      the roof assembly is less than 45 feet (13 716 mm) above the lowest level of fire depart- ment vehicle access. The height
+      of the roof assembly shall be determined by measuring the distance from the lowest required fire vehicle access road
+      surface adjacent to the building to the eave of the highest pitched roof, the intersec- tion of the highest roof to
+      the exterior wall, or the top of the highest parapet, whichever yields the greatest distance. 3. The floor level of
+      the lowest story is 30 feet (9144 mm) or less below the lowest level of fire department vehicle access. The number of
+      stories of Group R occupancies constructed in accordance with Sections 510.2 and 510.4 shall be measured from grade
+      plane.'
+  - file: gov.ny.building.2025.pdf
+    page: 275
+    lines:
+    - 11
+    - 12
+    quote: '[F] 903.3.1.3 NFPA 13D sprinkler systems. Automatic sprinkler systems installed in one- and two-family dwellings;
+      Group R-3; Group R-4, Condition 1; and townhouses shall be permitted to be installed throughout in accordance with NFPA
+      13D.'
+  examples:
+  - given:
+      group_r_present: true
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2 with an NFPA 13 system throughout: a system per 903.3.'
+  - given:
+      group_r_present: true
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Group R-2 with no sprinkler system: 903.2.8 requires one throughout every building with a Group R fire area.'
+  - given:
+      group_r_present: true
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: true
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group R-3 with an NFPA 13D system: 903.2.8.1 permits it.'
+  - given:
+      group_r_present: true
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+      stories_above_grade_plane: 4
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'NFPA 13R in a four-story Group R-2 building: 903.3.1.2''s heights above fire department vehicle access aren''t
+      in the model.'
+  - given:
+      group_r_present: true
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+      stories_above_grade_plane: 5
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13R in a Group R-2 building of five stories above grade plane: 903.3.1.2 permits it only at four stories or
+      fewer.'
+  - given:
+      group_r_present: true
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: true
+      townhouse_units: false
+      r2_sleeping_units: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13D in a Group R-2 building of dwelling units, not townhouses: more than two dwelling units (310.3), neither
+      a one- or two-family dwelling nor a townhouse (903.3.1.3).'
+  - given:
+      group_r_present: true
+      occupancy_group: R-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: true
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'NFPA 13D in Group R-4: Condition 1 only (903.2.8.2), not stated.'
+  - given:
+      group_r_present: true
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Two or more groups, one of them R, with no sprinkler system: the whole building needs one.'
+  - given:
+      group_r_present: false
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No Group R occupancy: not applicable.'
+  - given: {}
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The groups aren''t stated: a person checks.'
+  - given: {group_r_present: true, occupancy_group: R-2, sprinklered_903_3_1_1: false, sprinklered_903_3_1_2: false,
+      sprinklered_903_3_1_3: false}
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story in the model: with none, the rule needs review, never a pass or a fail on a building not drawn.'
+  notes: '903.2.8: a sprinkler system per 903.3 "throughout all buildings with a Group R fire area", whatever their size:
+    a building with a Group R occupancy among its stated groups, alone or with others. 903.3.1: NFPA 13 (903.3.1.1) unless
+    903.3.1.2 (13R) or 903.3.1.3 (13D) permits otherwise. NFPA 13 passes; NFPA 13D passes in Group R-3 (903.2.8.1), needs
+    review in R-4 (903.2.8.2: Condition 1 only) and in R-1 or R-2 where it may be a dwelling or of townhouse units (903.3.1.3),
+    and fails in an R-2 of dwelling units, not townhouses (310.3: more than two dwelling units); NFPA 13R needs review (903.3.1.2''s
+    heights aren''t in the model) and fails where the building states more than four stories above grade plane; a building
+    of two or more groups with 13R or 13D needs review; no system fails. 903.2.8.3''s care facilities for five or fewer in
+    a single-family dwelling are Group R-3 (308.2.4, 310.4.1). Read on each story the model holds (the system is "throughout"; the Building Code
+    check reads its rules part by part), each story''s row the building''s answer. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part a).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_3_1_2_nfpa_13r_limits
+  kind: flag
+  topic: means_of_egress
+  title: Where an NFPA 13R system is permitted (BCNYS 903.3.1.2)
+  applies_when: sprinklered_903_3_1_2
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 26
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:
+      1. Four stories or fewer above grade plane. 2. For other than Group R-2 occupancies, the floor level of the highest
+      story is 30 feet (9144 mm) or less above the lowest level of fire department vehicle access. For Group R-2 occupancies,
+      the roof assembly is less than 45 feet (13 716 mm) above the lowest level of fire depart- ment vehicle access. The height
+      of the roof assembly shall be determined by measuring the distance from the lowest required fire vehicle access road
+      surface adjacent to the building to the eave of the highest pitched roof, the intersec- tion of the highest roof to
+      the exterior wall, or the top of the highest parapet, whichever yields the greatest distance. 3. The floor level of
+      the lowest story is 30 feet (9144 mm) or less below the lowest level of fire department vehicle access. The number of
+      stories of Group R occupancies constructed in accordance with Sections 510.2 and 510.4 shall be measured from grade
+      plane.'
+  examples:
+  - given:
+      sprinklered_903_3_1_2: true
+    expect: needs_review
+    note: 'An NFPA 13R system is permitted only in Group R occupancies four stories or fewer above grade plane (stories counted
+      from grade plane where built per 510.2 or 510.4), the roof assembly less than 45 feet (Group R-2) or the highest floor
+      30 feet or less (other Group R) above the lowest level of fire department vehicle access, and the lowest floor 30 feet
+      or less below it; elsewhere it isn''t a system 903.3.1 accepts, nor one Chapter 10''s sprinklered allowances count:
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      sprinklered_903_3_1_2: false
+    expect: not_applicable
+    note: 'No NFPA 13R system: not applicable.'
+  notes: '903.3.1.2: an NFPA 13R system only in Group R, four stories or fewer above grade plane, within its heights of the
+    lowest level of fire department vehicle access (not in the model). Chapter 10''s rules count a stated 13R system only
+    in Group R (Chapter 10 plan, group 5a''s round 1: a 13R system outside Group R had passed). Hand-drafted in a Claude Code
+    session (2026-11-27, Chapter 9 part a).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_3_1_2_2_corridors_balconies_13r
+  kind: flag
+  topic: means_of_egress
+  title: NFPA 13R's corridors and balconies in the means of egress (BCNYS 903.3.1.2.2)
+  applies_when: sprinklered_903_3_1_2
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 35
+    - 41
+    quote: '[F] 903.3.1.2.2 Corridors and balconies in the means of egress. Sprinkler protection shall be provided in corridors
+      and for balconies in the means of egress where any of the following conditions apply: 1. Corridors with combustible
+      floor or walls. 2. Corridors with an interior change of direction exceeding 45 degrees (0.79 rad). 3. Corridors that
+      are less than 50 percent open to the outside atmosphere at the ends. 4. Open-ended corridors and associated exterior
+      stairways and ramps as specified in Section 1027.6, Exception 3. 5. Egress balconies not complying with Sections 1021.2
+      and 1021.3.'
+  examples:
+  - given:
+      sprinklered_903_3_1_2: true
+    expect: needs_review
+    note: 'With an NFPA 13R system, corridors and balconies in the means of egress are sprinklered where a corridor has a
+      combustible floor or walls, turns more than 45 degrees inside, is less than 50 percent open to the outside at its ends,
+      or is open-ended with exterior stairways and ramps per 1027.6 exception 3, and egress balconies not complying with 1021.2
+      and 1021.3: a person''s check.'
+  - given:
+      sprinklered_903_3_1_2: false
+    expect: not_applicable
+    note: 'No NFPA 13R system: not applicable.'
+  notes: '903.3.1.2.2: NFPA 13R may leave some corridors and balconies unsprinklered; this section asks them sprinklered on
+    any of five conditions, none in the model (the corridors'' materials, turns and openness, the balconies). Hand-drafted
+    in a Claude Code session (2026-11-27, Chapter 9 part a).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_3_1_3_nfpa_13d_scope
+  kind: flag
+  topic: means_of_egress
+  title: Where an NFPA 13D system is permitted (BCNYS 903.3.1.3)
+  applies_when: sprinklered_903_3_1_3 and not occupancy_group in ["R-3"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 275
+    lines:
+    - 11
+    - 12
+    quote: '[F] 903.3.1.3 NFPA 13D sprinkler systems. Automatic sprinkler systems installed in one- and two-family dwellings;
+      Group R-3; Group R-4, Condition 1; and townhouses shall be permitted to be installed throughout in accordance with NFPA
+      13D.'
+  examples:
+  - given:
+      sprinklered_903_3_1_3: true
+      occupancy_group: R-4
+    expect: needs_review
+    note: 'An NFPA 13D system is permitted only in one- and two-family dwellings, Group R-3, Group R-4 Condition 1 and townhouses;
+      elsewhere it isn''t a system 903.3.1 accepts: a person''s check.'
+  - given:
+      sprinklered_903_3_1_3: true
+      occupancy_group: R-3
+    expect: not_applicable
+    note: 'Group R-3: 903.3.1.3 permits NFPA 13D.'
+  - given:
+      sprinklered_903_3_1_3: false
+    expect: not_applicable
+    note: 'No NFPA 13D system: not applicable.'
+  notes: '903.3.1.3: NFPA 13D in one- and two-family dwellings, Group R-3, Group R-4 Condition 1 and townhouses. Set aside
+    in a building stated Group R-3 alone, where it is permitted. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part a).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_1004_7_outdoor_areas
   kind: flag
   topic: means_of_egress
@@ -5185,7 +6067,7 @@ rules:
       say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
       or the Department of State.
   notes: 'Table 1006.2.1''s H-1, H-2, H-3 row: 3 occupants; Not Permitted (NP) without an automatic sprinkler system, 25 ft
-    with one (note b: 903.2.5, Group H''s own system, not brought in: a space with one exit can fail, never pass). As the
+    with one (note b: 903.2.5, Group H''s own system, a rule of its own since Chapter 9 part a: a space with one exit can fail, never pass). As the
     I-4 rule (the rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space with two exits
     and a common path over the value needs review (open question 1); a space that is itself an exit (an exit stair enclosure)
     is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative
@@ -5487,7 +6369,7 @@ rules:
       say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
       or the Department of State.
   notes: 'Table 1006.2.1''s H-4, H-5 row: 10 occupants; Not Permitted (NP) without an automatic sprinkler system, 75 ft with
-    one (note b: 903.2.5, Group H''s own system, not brought in: a space with one exit can fail, never pass). As the I-4 rule
+    one (note b: 903.2.5, Group H''s own system, a rule of its own since Chapter 9 part a: a space with one exit can fail, never pass). As the I-4 rule
     (the rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space with two exits and a common
     path over the value needs review (open question 1); a space that is itself an exit (an exit stair enclosure) is not one
     1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load
@@ -12447,7 +13329,7 @@ rules:
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s H-1 row: Not Permitted without an automatic sprinkler system, 75 ft with one (note d: 903.2.5.1,
-    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
+    Group H''s own system, a rule of its own since Chapter 9 part a: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
     Tables 1017.2 note d and 1006.2.1 note b (BCNYS)” shown for a person to confirm it). Measured as 1017.3 says . 1017.2.1''s
     balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
     a lists are the rule “Table 1017.2 note a: sections that change the distance (BCNYS)”. Hand-drafted in a Claude Code session
@@ -12638,7 +13520,7 @@ rules:
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s H-2 row: Not Permitted without an automatic sprinkler system, 100 ft with one (note d: 903.2.5.1,
-    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
+    Group H''s own system, a rule of its own since Chapter 9 part a: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
     Tables 1017.2 note d and 1006.2.1 note b (BCNYS)” shown for a person to confirm it). Measured as 1017.3 says . 1017.2.1''s
     balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
     a lists are the rule “Table 1017.2 note a: sections that change the distance (BCNYS)”. Hand-drafted in a Claude Code session
@@ -12829,7 +13711,7 @@ rules:
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s H-3 row: Not Permitted without an automatic sprinkler system, 150 ft with one (note d: 903.2.5.1,
-    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
+    Group H''s own system, a rule of its own since Chapter 9 part a: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
     Tables 1017.2 note d and 1006.2.1 note b (BCNYS)” shown for a person to confirm it). Measured as 1017.3 says . 1017.2.1''s
     balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
     a lists are the rule “Table 1017.2 note a: sections that change the distance (BCNYS)”. Hand-drafted in a Claude Code session
@@ -13020,7 +13902,7 @@ rules:
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s H-4 row: Not Permitted without an automatic sprinkler system, 175 ft with one (note d: 903.2.5.1,
-    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
+    Group H''s own system, a rule of its own since Chapter 9 part a: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
     Tables 1017.2 note d and 1006.2.1 note b (BCNYS)” shown for a person to confirm it). Measured as 1017.3 says . 1017.2.1''s
     balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
     a lists are the rule “Table 1017.2 note a: sections that change the distance (BCNYS)”. Hand-drafted in a Claude Code session
@@ -13567,14 +14449,14 @@ rules:
   - given:
       occupancy_group: H-2
     expect: needs_review
-    note: 'Group H: the sprinklered columns ask for a system per 903.2.5 and 903.2.5.1 (Group H''s own requirement, not brought
-      in); the rows read the stated NFPA 13 system as one, a person confirms it.'
+    note: 'Group H: the sprinklered columns ask for a system per 903.2.5 and 903.2.5.1 (Group H''s own requirement, a rule
+      of its own since Chapter 9 part a); the rows read the stated NFPA 13 system as one, a person confirms it.'
   - given:
       occupancy_group: B
     expect: not_applicable
     note: 'Not Group H: not applicable.'
   notes: Group H's rows of Tables 1017.2 (note d) and 1006.2.1 (note b) give their sprinklered values to a system per 903.2.5.1
-    and 903.2.5 (not brought in); 903.3.1 has every system follow 903.3.1.1 unless another section permits otherwise, so the
+    and 903.2.5 (Chapter 9 part a's rule); 903.3.1 has every system follow 903.3.1.1 unless another section permits otherwise, so the
     rows read the stated NFPA 13 system (an NFPA 13 system) as one, and this flag shows for a person to confirm. Hand-drafted
     in a Claude Code session (2026-11-23).
   drafted_by: claude_code/claude-opus-5-5

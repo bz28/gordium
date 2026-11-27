@@ -294,9 +294,10 @@ def _given(building) -> tuple[dict, list[str]]:
 
 def building_measures(building: dict | None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
-    states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the three sprinkler systems the limits name from the system, and the eleven stated yes/no facts. A fact
-    not stated is left out (its rules need review)."""
+    states: occupancy_group_i4, other_occupancy_present, occupancy_group (the one group, or "mixed") and whether a
+    Group R, H or I-1 to I-3 occupancy is among them (903.2's) from the groups, the three sprinkler systems the limits
+    name from the system, the stories above grade plane, and the twelve stated yes/no facts. A fact not stated is
+    left out (its rules need review)."""
     facts, _ = _given(building)
     return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
 
@@ -324,6 +325,15 @@ DERIVED = {
     "ambulatory_care_facility": ("ambulatory_care_facility", lambda v: v),
     "corridors_within_dwelling_units": ("corridors_within_dwelling_units", lambda v: v),
     "emergency_voice_alarm_system": ("emergency_voice_alarm_system", lambda v: v),
+    # Chapter 9 part a (docs/decisions/2026-11-27_ny_building_chapter_9.md): the groups 903.2 requires a sprinkler
+    # system for whatever the building's size (903.2.8 "all buildings with a Group R fire area", 903.2.5.1 Group H,
+    # 903.2.6 Group I but I-4's exceptions), each read in a building of two or more groups too; the stories 903.3.1.2's
+    # NFPA 13R is limited to; townhouses, where 903.3.1.3 permits NFPA 13D
+    "group_r_present": ("occupancy_groups", lambda groups: any(g.startswith("R-") for g in groups)),
+    "group_h_present": ("occupancy_groups", lambda groups: any(g.startswith("H-") for g in groups)),
+    "group_i1_i2_i3_present": ("occupancy_groups", lambda groups: any(g in ("I-1", "I-2", "I-3") for g in groups)),
+    "stories_above_grade_plane": ("stories_above_grade_plane", lambda v: v),
+    "townhouse_units": ("townhouse_units", lambda v: v),
 }
 
 

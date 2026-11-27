@@ -573,6 +573,51 @@ pieces:
     heading: Fire door assemblies › Fire door frames
     rules:
     - general.bc_716_2_4_fire_door_frames
+  903.1.1:
+    label: flag
+    heading: General › Alternative protection
+    rules:
+    - general.bc_903_1_1_alternative_protection
+  903.2.5.1:
+    label: rule
+    heading: Group H › General
+    rules:
+    - general.bc_903_2_5_1_group_h_sprinklers
+  903.2.5.2:
+    label: flag
+    heading: Group H › Group H-5 occupancies
+    rules:
+    - general.bc_903_2_5_2_h5_sprinkler_design
+  903.2.5.3:
+    label: flag
+    heading: Group H › Pyroxylin plastics
+    rules:
+    - general.bc_903_2_5_3_pyroxylin_plastics
+  903.2.6:
+    label: rule
+    heading: Where required › Group I
+    rules:
+    - general.bc_903_2_6_group_i_sprinklers
+  903.2.8:
+    label: rule
+    heading: Where required › Group R
+    rules:
+    - general.bc_903_2_8_group_r_sprinklers
+  903.3.1.2:
+    label: flag
+    heading: Standards › NFPA 13R sprinkler systems
+    rules:
+    - general.bc_903_3_1_2_nfpa_13r_limits
+  903.3.1.2.2:
+    label: flag
+    heading: NFPA 13R sprinkler systems › Corridors and balconies in the means of egress
+    rules:
+    - general.bc_903_3_1_2_2_corridors_balconies_13r
+  903.3.1.3:
+    label: flag
+    heading: Standards › NFPA 13D sprinkler systems
+    rules:
+    - general.bc_903_3_1_3_nfpa_13d_scope
   '1004.7':
     label: flag
     heading: Occupant load › Outdoor areas

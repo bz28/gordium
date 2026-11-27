@@ -345,6 +345,38 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:automatic_fire_extinguishing_system:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTOMATIC FIRE-EXTINGUISHING SYSTEM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 14
+      - 15
+      quote: '[F] AUTOMATIC FIRE-EXTINGUISHING SYSTEM. An approved system of devices and equipment which automatically detects
+        a fire and discharges an approved fire-extinguishing agent onto or in the area of a fire.'
+    piece_sha256: a65cb5ed6e62f93f27a2881f08ea33896a87d4bafd67ac3cfc1c7386773cb6d9
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:automatic_smoke_detection_system:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTOMATIC SMOKE DETECTION SYSTEM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 20
+      - 21
+      quote: '[F] AUTOMATIC SMOKE DETECTION SYSTEM. A fire alarm system that has initiation devices that utilize smoke detectors
+        for protec- tion of an area such as a room or space with detectors to provide early warning of fire.'
+    piece_sha256: ef5952c3c71c6749ae5ff6d096078c1366f9b095a2e90ba81dad5f40faa7c6ec
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:automatic_sprinkler_system:
     label: reference
     topic: definitions
@@ -680,6 +712,21 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:corridor_open_ended:
+    label: reference
+    topic: definitions
+    reason: 'Defines CORRIDOR, OPEN-ENDED, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 18
+      - 18
+      quote: CORRIDOR, OPEN-ENDED. See “Open-ended corridor.”
+    piece_sha256: 10df5e75248f1d8d636eef565d3ee3d1930b9853efe46ee3d3093f15ae5fecaf
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:corridor_damper:
     label: reference
     topic: definitions
@@ -823,6 +870,22 @@ labels:
         common wall'
     piece_sha256: 02dac78ea38bd502c7ab3345cd9a66aae210c77018a7754d3b77e1303816f038
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:dispensing:
+    label: reference
+    topic: definitions
+    reason: 'Defines DISPENSING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 27
+      - 28
+      quote: '[F] DISPENSING. The pouring or transferring of any material from a container, tank or similar vessel, whereby
+        vapors, dusts, fumes, mists or gases are liberated to the atmosphere.'
+    piece_sha256: 9d19487edbd975b73c73191f59eb96cfdb97eec4b756fa052cd8580bf2f9de67
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:door_balanced:
@@ -1218,6 +1281,23 @@ labels:
         routes located on a'
     piece_sha256: d3218b5b4796d1c3140a4374dece0a2c36cfffc347e0330d47c51983c7993e69
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_alarm_system:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE ALARM SYSTEM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 58
+      - 59
+      quote: '[F] FIRE ALARM SYSTEM. A system or portion of a combination system consisting of components and circuits arranged
+        to monitor and annunciate the status of fire alarm or supervisory signal-initiating devices and to initiate the appropriate
+        response to those signals.'
+    piece_sha256: 33a8b800345bc2a4672d91c19cf4409e58c17002f0d1953342ee3bb1bce8a85d
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_area:
@@ -1802,6 +1882,24 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:hazardous_production_material_hpm:
+    label: reference
+    topic: definitions
+    reason: 'Defines HAZARDOUS PRODUCTION MATERIAL (HPM), a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 21
+      - 23
+      quote: '[F] HAZARDOUS PRODUCTION MATERIAL (HPM). A solid, liquid or gas associated with semiconductor manufacturing
+        that has a degree-of-hazard rating in health, flammability or instability of Class 3 or 4 as ranked by NFPA 704 and
+        which is used directly in research, laboratory or production processes which have as their end product materials that
+        are not hazardous.'
+    piece_sha256: 730f7a987c70f11997cbea16c3e8688cf608c9339a459ae0d47b2370fb663e11
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:head_joint:
     label: reference
     topic: definitions
@@ -1879,6 +1977,21 @@ labels:
         intended to'
     piece_sha256: 8fc7ca31651bf9c8156e635c8956075f018c2be5c8cdc5868f41fe560f1f8bf1
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:hpm:
+    label: reference
+    topic: definitions
+    reason: 'Defines HPM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 19
+      - 19
+      quote: HPM. See “Hazardous Production Material.”
+    piece_sha256: 4bc37934cc73650fd87facd433226c86cc83295480f8030c7f4ae3554d6de60a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:incapable_of_self_preservation:
@@ -2506,6 +2619,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:open_ended_corridor:
+    label: reference
+    topic: definitions
+    reason: 'Defines OPEN-ENDED CORRIDOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 36
+      - 37
+      quote: '[BE] OPEN-ENDED CORRIDOR. An interior corridor that is open on each end and connects to an exterior stairway
+        or ramp at each end with no intervening doors or separation from the corridor.'
+    piece_sha256: 26ba2bd65aa79a15019f63c2891a97fad1f692d5cedbb655c446b8a430bb96b3
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:opening_protective:
     label: reference
     topic: definitions
@@ -2950,6 +3079,22 @@ labels:
       italics.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:service_corridor:
+    label: reference
+    topic: definitions
+    reason: 'Defines SERVICE CORRIDOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 60
+      lines:
+      - 8
+      - 8
+      quote: '[F] SERVICE CORRIDOR. A fully enclosed passage used for transporting HPM and purposes other than required means
+        of egress.'
+    piece_sha256: 76e77c5d12c0019e9d1f3e1ed0ef8a3b88059ec0030cee20635f0e1f0bf7bb88
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:shaft:
     label: reference
     topic: definitions
@@ -3332,6 +3477,24 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:supervisory_signal_initiating_device:
+    label: reference
+    topic: definitions
+    reason: 'Defines SUPERVISORY SIGNAL-INITIATING DEVICE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 64
+      lines:
+      - 13
+      - 16
+      quote: '[F] SUPERVISORY SIGNAL-INITIATING DEVICE. An initiation device, such as a valve supervisory switch, water-level
+        indicator or low- air pressure switch on a dry-pipe sprinkler system, whose change of state signals an off-normal
+        condition and its restoration to normal of a fire protection or life safety system, or a need for action in connection
+        with guard tours, fire suppression systems or equipment or maintenance features of related systems.'
+    piece_sha256: 6e0e706319eef21505ea4e93da0244898cabec2aaf1e70dc6f478d0b40e6833f
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:swimming_pool:
     label: reference
     topic: definitions
@@ -3433,6 +3596,37 @@ labels:
         of time.'
     piece_sha256: 6ed649c5a645afdd376890a5541d2a74d71f1863fe7aec0a7d8dec78002c2a56
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:townhouse:
+    label: reference
+    topic: definitions
+    reason: 'Defines TOWNHOUSE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 65
+      lines:
+      - 4
+      - 4
+      quote: '[A] TOWNHOUSE. A building that contains three or more attached townhouse units.'
+    piece_sha256: 1fe5e377ed53a182269e162cf0545ebd76f3b97f5d1eaeea0dc419093b1ae8fa
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:townhouse_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines TOWNHOUSE UNIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 65
+      lines:
+      - 5
+      - 6
+      quote: '[NY] TOWNHOUSE UNIT. A single-family dwelling unit in a townhouse that extends from the foundation to the roof,
+        that has a yard or public way on not fewer than two sides, and has a separate means of egress.'
+    piece_sha256: 90ae99c76159e42cab3754450fc6509e4ed5d328338f274bdbdd55be7c751d77
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:trim:
@@ -6412,6 +6606,273 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '903.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Says sprinkler systems comply with Section 903: a pointer, no requirement of its own (the parts under it are
+      labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 269
+      lines:
+      - 16
+      - 16
+      quote: '[F] 903.1 General. Automatic sprinkler systems shall comply with this section.'
+    piece_sha256: 45cda6bb6c4619e484151cbdcb37f1bbb37cba15e59e417ec7c2fa6e746072c0
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.1.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'An alternative fire-extinguishing system per 904 instead of sprinklers, where the standard recognizes it and
+      the fire code official approves: a person''s check (general.bc_903_1_1_alternative_protection).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 269
+      lines:
+      - 17
+      - 19
+      quote: '[F] 903.1.1 Alternative protection. Alternative automatic fire-extinguishing systems complying with Section
+        904 shall be permit- ted instead of automatic sprinkler system protection where recognized by the applicable standard
+        and approved by the fire code official.'
+    piece_sha256: c8fb97f7134b6942d5251bd81a4d9d1fcaa11d4e7c2975f82da45be0484b7a4e
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '903.2':
+    label: reference
+    topic: means_of_egress
+    reason: 'Says sprinkler systems are required in new buildings where 903.2.1 to 903.2.12 say: read by each group''s rule
+      (903.2.5.1, 903.2.6, 903.2.8). Its exception leaves out spaces used only for telecommunications equipment in a telecommunications
+      building, never a Group R, H or I occupancy''s own (Chapter 9 part b reads it for the other groups).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 269
+      lines:
+      - 20
+      - 27
+      quote: '[F] 903.2 Where required. Approved automatic sprinkler systems in new buildings and structures shall be provided
+        in the locations described in Sections 903.2.1 through 903.2.12. Exception: Spaces or areas in telecommunications
+        buildings used exclusively for telecommunications equipment, associated electrical power distribution equipment, batteries
+        not required to have an automatic sprinkler system by Section 1207 of the Fire Code of New York State for energy storage
+        systems and standby engines, provided that those spaces or areas are equipped throughout with an automatic smoke detection
+        system in accordance with Section 907.2 and are separated from the remainder of the building by not less than 1-hour
+        fire barriers constructed in accordance with Section 707 or not less than 2-hour horizontal assemblies constructed
+        in accordance with Section 711, or both.'
+    piece_sha256: fc81ce31eb15ccdc6d4552a606051251ecfba644b720b9fbfc3fb7156f51d3e4
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.5:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says Group H''s sprinkler systems are as 903.2.5.1 to 903.2.5.3 require: a pointer, no requirement of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 48
+      - 49
+      quote: '[F] 903.2.5 Group H. Automatic sprinkler systems shall be provided in high-hazard occupancies as required in
+        Sections 903.2.5.1 through 903.2.5.3.'
+    piece_sha256: ba1b15c67ce584a29951a77f1de6ef7a48836dcd30bdbd6d84d426d5ae3e6409
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.5.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'Group H requires a sprinkler system, whatever its size: a rule on the stated groups and sprinkler system (general.bc_903_2_5_1_group_h_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 50
+      - 50
+      quote: '[F] 903.2.5.1 General. An automatic sprinkler system shall be installed in Group H occupancies.'
+    piece_sha256: 4d7497828563505630d3b38fcbbadf085a514daa0d5ea325bba55f7ea2b67dee
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.5.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A building containing Group H-5 sprinklered throughout, its design per Table 903.2.5.2: the design isn''t in
+      the model, a person''s check (general.bc_903_2_5_2_h5_sprinkler_design).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 270
+      lines:
+      - 51
+      - 55
+      quote: '[F] 903.2.5.2 Group H-5 occupancies. An automatic sprinkler system shall be installed throughout buildings containing
+        Group H-5 occupancies. The design of the automatic sprinkler system shall be not less than that required by this code
+        for the occu- pancy hazard classifications in accordance with Table 903.2.5.2. Where the design area of the automatic
+        sprinkler system consists of a corridor protected by one row of sprinklers, the maxi- mum number of sprinklers required
+        to be calculated is 13.'
+    piece_sha256: 62a2b8c3ec279b0f7bdbc77f3700b6e33c91315c121169b63bd0f1abe26b4be6
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 903.2.5.2:
+    label: reference
+    topic: means_of_egress
+    reason: The hazard classes 903.2.5.2 sends Group H-5's sprinkler design to, quoted by its flag (general.bc_903_2_5_2_h5_sprinkler_design).
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 3
+      - 9
+      quote: '[F] TABLE 903.2.5.2—GROUP H-5 AUTOMATIC SPRINKLER SYSTEM DESIGN CRITERIA LOCATION OCCUPANCY HAZARD CLASSIFICATION
+        Fabrication areas Ordinary Hazard Group 2 Service corridors Ordinary Hazard Group 2 Storage rooms without dispensing
+        Ordinary Hazard Group 2 Storage rooms with dispensing Extra Hazard Group 2 Corridors Ordinary Hazard Group 2'
+    piece_sha256: f881ab20277b61eb0f7096fd5c60a7d74ecc07d2dcc9365fb704e4e40ce8a9b3
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.5.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'A sprinkler system where over 100 pounds of cellulose nitrate film or pyroxylin plastics are kept, in any building:
+      the contents aren''t in the model, a person''s check (general.bc_903_2_5_3_pyroxylin_plastics).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 10
+      - 11
+      quote: '[F] 903.2.5.3 Pyroxylin plastics. An automatic sprinkler system shall be provided in buildings, or portions
+        thereof, where cellu- lose nitrate film or pyroxylin plastics are manufactured, stored or handled in quantities exceeding
+        100 pounds (45 kg).'
+    piece_sha256: 89841893bbf7c324cba0863ac1ea2404d27cbe9e0d9e6a9088babcfd35ae769b
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.6:
+    label: rule
+    topic: means_of_egress
+    reason: 'Group I requires a sprinkler system throughout, its exceptions Group I-1 Condition 1''s NFPA 13R and Group I-4''s
+      day care at the level of exit discharge: a rule on the stated groups and sprinkler system (general.bc_903_2_6_group_i_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 12
+      - 21
+      quote: '[F] 903.2.6 Group I. An automatic sprinkler system shall be provided throughout buildings with a Group I fire
+        area. Exceptions: 1. An automatic sprinkler system installed in accordance with Section 903.3.1.2 shall be permitted
+        in Group I-1, Condi- tion 1 facilities. 2. An automatic sprinkler system is not required where Group I-4 day care
+        facilities are at the level of exit discharge and where every room where care is provided has not fewer than one exterior
+        exit door. 3. In buildings where Group I-4 day care is provided on levels other than the level of exit discharge,
+        an automatic sprinkler system in accordance with Section 903.3.1.1 shall be installed on the entire floor where care
+        is provided, all floors between the level of care and the level of exit discharge, and all floors below the level
+        of exit discharge other than areas classified as an open parking garage.'
+    piece_sha256: 95b8b0762f79619ac06e2ad7fecf4b35eb2dcb302f92ae3bd61b38c172895b9b
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.8:
+    label: rule
+    topic: means_of_egress
+    reason: 'Every building with a Group R fire area requires a sprinkler system per 903.3: a rule on the stated groups, sprinkler
+      system and stories (general.bc_903_2_8_group_r_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 35
+      - 36
+      quote: '[F] 903.2.8 Group R. An automatic sprinkler system installed in accordance with Section 903.3 shall be provided
+        throughout all buildings with a Group R fire area.'
+    piece_sha256: 8fb3d163cf98cb0936a6b1205f720189a9e99a6fcf5614eefc09f805c9f5e94f
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.8.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'Permits NFPA 13D in Group R-3: read by 903.2.8''s rule (general.bc_903_2_8_group_r_sprinklers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 37
+      - 38
+      quote: '[F] 903.2.8.1 Group R-3. An automatic sprinkler system installed in accordance with Section 903.3.1.3 shall
+        be permitted in Group R-3 occupancies.'
+    piece_sha256: 5bc3d0fd0dd37b75d7b1e1810074fbab49ab3cde6f6402a36c10f5792eb26118
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.8.2:
+    label: reference
+    topic: means_of_egress
+    reason: 'Permits NFPA 13D in Group R-4 Condition 1: read by 903.2.8''s rule, which needs review there (the condition isn''t
+      stated).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 39
+      - 40
+      quote: '[F] 903.2.8.2 Group R-4, Condition 1. An automatic sprinkler system installed in accordance with Section 903.3.1.3
+        shall be permitted in Group R-4, Condition 1 occupancies.'
+    piece_sha256: 059a77cdb1bc934009c9655c06fce5c7ba46e53df96eb9a4d96f830acb23a372
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.8.3:
+    label: reference
+    topic: means_of_egress
+    reason: 'Permits NFPA 13D in care facilities for five or fewer in a single-family dwelling, which 308.2.4 and 310.4.1
+      class as Group R-3: read by 903.2.8''s rule.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 271
+      lines:
+      - 41
+      - 42
+      quote: '[F] 903.2.8.3 Care facilities. An automatic sprinkler system installed in accordance with Section 903.3.1.3
+        shall be permitted in care facilities with five or fewer individuals in a single-family dwelling.'
+    piece_sha256: 632a47d5f9500e39a1aa0c8479a8e36d048b964b229c0bd20def060918aba983
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '903.3':
+    label: reference
+    topic: means_of_egress
+    reason: 'Says sprinkler systems are designed and installed per 903.3.1 to 903.3.8: a pointer, no requirement of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 273
+      lines:
+      - 39
+      - 40
+      quote: '[F] 903.3 Installation requirements. Automatic sprinkler systems shall be designed and installed in accordance
+        with Sections 903.3.1 through 903.3.8.'
+    piece_sha256: 7745d9e0ce17281be697998d25fe644fb890be157ee0a90e574d2d8109d362af
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.3.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says every sprinkler system follows 903.3.1.1 (NFPA 13) unless 903.3.1.2 or 903.3.1.3 permits otherwise: read
+      by each group''s rule (a 13R or 13D system where not permitted isn''t the system required).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 273
+      lines:
+      - 41
+      - 42
+      quote: '[F] 903.3.1 Standards. Automatic sprinkler systems shall be designed and installed in accordance with Section
+        903.3.1.1 unless otherwise permitted by Sections 903.3.1.2 and 903.3.1.3 and other chapters of this code, as applicable.'
+    piece_sha256: 6b0d7e0f6feff2ef6eb49579aa2ea3bca9cb3aa29cc9f2684fdc78ea98b86c52
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   903.3.1.1:
     label: reference
     topic: means_of_egress
@@ -6432,10 +6893,12 @@ labels:
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   903.3.1.2:
-    label: reference
+    label: flag
     topic: means_of_egress
-    reason: 'Says when a Group R occupancy may use an NFPA 13R system instead: the second sprinkler system Table 1006.2.1''s
-      note a and 1007.1.1''s exception 2 accept, stated by the architect.'
+    reason: 'Says when a Group R occupancy may use an NFPA 13R system instead (the second sprinkler system Table 1006.2.1''s
+      note a and 1007.1.1''s exception 2 accept, stated by the architect): four stories or fewer, within its heights of fire
+      department vehicle access, which the model doesn''t show; a person''s check wherever a 13R system is stated or the
+      system isn''t (general.bc_903_3_1_2_nfpa_13r_limits; Chapter 9 part a, 2026-11-27).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 274
@@ -6446,7 +6909,46 @@ labels:
         to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
     piece_sha256: 6875f3b979acb6459c3661f539a488c29bc14cb5573cf9d26df5cc44eca86663
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Brought in without the parts under
-      it (balconies, corridors, attics).
+      it, but 903.3.1.2.2 (corridors and balconies in the means of egress, Chapter 9 part a), so balconies and attics.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.3.1.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'With an NFPA 13R system, corridors and balconies in the means of egress sprinklered on five conditions the model
+      doesn''t show: a person''s check (general.bc_903_3_1_2_2_corridors_balconies_13r).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 274
+      lines:
+      - 35
+      - 41
+      quote: '[F] 903.3.1.2.2 Corridors and balconies in the means of egress. Sprinkler protection shall be provided in corridors
+        and for balconies in the means of egress where any of the following conditions apply: 1. Corridors with combustible
+        floor or walls. 2. Corridors with an interior change of direction exceeding 45 degrees (0.79 rad). 3. Corridors that
+        are less than 50 percent open to the outside atmosphere at the ends. 4. Open-ended corridors and associated exterior
+        stairways and ramps as specified in Section 1027.6, Exception 3. 5. Egress balconies not complying with Sections 1021.2
+        and 1021.3.'
+    piece_sha256: 8e82656178dbc2169e91642f940cd35ac68bdb861f71455ae255bbd4aab4ba94
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.3.1.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where an NFPA 13D system is permitted: dwellings, Group R-3, Group R-4 Condition 1 and townhouses; read by the
+      groups'' rules, and a person''s check wherever a 13D system is stated outside Group R-3 (general.bc_903_3_1_3_nfpa_13d_scope).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 275
+      lines:
+      - 11
+      - 12
+      quote: '[F] 903.3.1.3 NFPA 13D sprinkler systems. Automatic sprinkler systems installed in one- and two-family dwellings;
+        Group R-3; Group R-4, Condition 1; and townhouses shall be permitted to be installed throughout in accordance with
+        NFPA 13D.'
+    piece_sha256: 60aeadbc694319da9910359658b644832668fb3b17d31519789c3b2b3a620a68
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1004':

@@ -40,7 +40,11 @@ FACTS = ("assembly_fixed_seating", "special_egress_spaces", "merchandise_pads", 
          "emergency_voice_alarm_system")   # the last: Table 1020.3's (the corridor walk's,
 # test_ny_building_corridor_walk.py, which varies it with every width and load; here for completeness)
 DERIVED = ("occupancy_group", "occupancy_group_i4", "other_occupancy_present", "sprinklered_903_3_1_1",
-           "sprinklered_903_3_1_2", "sprinklered_903_3_1_3")
+           "sprinklered_903_3_1_2", "sprinklered_903_3_1_3",
+           # Chapter 9 part a's, read only by 903.2's rules (none reads an affected measure: their own walk is
+           # test_ny_building_chapter_9.py's, over every group, system, stories and townhouse fact)
+           "group_r_present", "group_h_present", "group_i1_i2_i3_present", "stories_above_grade_plane",
+           "townhouse_units")
 
 
 def _given(group, sprinkler, facts):
