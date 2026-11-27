@@ -77,10 +77,10 @@ public sealed class DetailPageTests
 
     /// <summary>Egress UI audit, finding 2: the apartment's hand checks (its judgment flags) say what to check and to
     /// tick it; the model changed after the check, Check again comes first, then the tick. A result with several hand
-    /// checks says so in its headline, whatever the apartment holds today (CI on #229: the corridor's fire partitions
-    /// were the apartment's only one, a rating worked out by hand and a judgment, until the rating got its room mark,
-    /// Gordium: Corridor rating minutes; a result a mark can settle isn't only a person's, so it ends with Check
-    /// again).</summary>
+    /// checks says so in its headline, whatever the apartment holds today (CI on #229: the apartment's only such
+    /// results were each corridor's 716.1.2, 1020.2 fire-partition and 1020.7 continuity flags, a rating worked out by
+    /// hand and a judgment, until the rating got its room mark, Gordium: Corridor rating minutes; a result a mark can
+    /// settle isn't only a person's, so it ends with Check again).</summary>
     [Fact]
     public void A_result_only_a_person_settles_ends_with_the_tick_and_check_again_only_when_the_model_changed()
     {
@@ -101,7 +101,7 @@ public sealed class DetailPageTests
         Assert.Equal(DetailPages.SeveralByHand(2), two.Headline);
         Assert.Equal([DetailPages.LookedStep, DetailPages.CheckAfterChangeStep], two.Steps.TakeLast(2));
         // a hand check beside one a mark settles: not only a person's, so Check again (the corridor's fire partitions)
-        var marked = DetailPages.Of(one.Detail, one.Row, [Card("a"), new("m", FixKind.Answer, "Give the corridor walls' fire rating", null, "rooms[].fire_rating_hours", [], [one.Row.Row])]);
+        var marked = DetailPages.Of(one.Detail, one.Row, [Card("a"), new("m", FixKind.Mark, "Give the corridor walls' fire rating", null, "rooms[].fire_rating_hours", [], [one.Row.Row])]);
         Assert.Equal(DetailPages.CheckAgainStep, marked.Steps[^1]);
         Assert.DoesNotContain(DetailPages.LookedStep, marked.Steps);
         var partitions = pages.Where(p => p.Row.Row.Id.Contains("bc_1020_2_fire_partitions", StringComparison.Ordinal)).ToList();
