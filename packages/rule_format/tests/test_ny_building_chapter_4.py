@@ -344,6 +344,24 @@ def test_a_story_with_more_exits_than_any_reading_asks_passes_with_the_facts_not
         assert row["outcome"] == "pass", (rid, row)
 
 
+def _said_not_brought_in(text):
+    """Each stretch of a text that calls something not brought in: its sentence from the start through the end of the
+    clause (between ";" or ":") holding the words, so a list before them counts ("a mall, a Group I-2 occupancy ...:
+    each has its own distance, not brought in"; "Covered malls (402.8); atriums are not brought in") and a clause
+    after them doesn't ("1014.9 (not brought in) is a person's check; Group I-2 ... per 407.4.3 (a flag) too")."""
+    for sentence in re.split(r"(?<=\.)\s", text):
+        for clause in re.finditer(r"[^;:]+(?:[;:]|$)", sentence):
+            if re.search(r"(?:not|n't) brought in", clause.group()):
+                yield sentence[:clause.end()]
+
+
+def test_a_stretch_said_not_brought_in_runs_from_its_sentence_start_to_its_clause_end():
+    assert list(_said_not_brought_in("Covered malls (402.8); atriums are not brought in.")) == [
+        "Covered malls (402.8); atriums are not brought in."]
+    [got] = _said_not_brought_in("Handrails as 1014.9 allows (not brought in) are a check; Group I-2 per 407.4.3 too.")
+    assert "407.4.3" not in got and "Group I-2" not in got and "1014.9" in got
+
+
 def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rules):
     """Review round 1 of part c: Chapter 10's words still said 407.4 "aren't brought in" (the shared stale-words test
     reads only "not brought in" in a narrow pattern). No sentence of any rule's title, notes, review reasons or
@@ -355,17 +373,11 @@ def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rule
     for r in rules.values():
         texts = [r.get("title"), r.get("notes")] + [w.get("reason") for w in r.get("review_when") or []] +                 [e.get("note") for e in r.get("examples") or []]
         for text in (x for x in texts if isinstance(x, str)):
-            for sentence in re.split(r"(?<=[.:;])\s", text):
-                if not re.search(r"(?:not|n't) brought in", sentence):
-                    continue
-                named = re.findall(r"\b(4\d\d(?:\.\d+)+)\b", sentence)
+            # review rounds 2 to 5 of part c: a section named by its number or by its use ("a mall, a Group I-2
+            # occupancy ...: each has its own distance, not brought in"), anywhere in the stretch said not brought in
+            for stretch in _said_not_brought_in(text):
+                named = re.findall(r"\b(4\d\d(?:\.\d+)+)\b", stretch) + sorted(_named_uses(stretch))
                 bad += [(r["id"], n) for n in named if any(n == s or n.startswith(s + ".") for s in ours)]
-            # review round 2 of part c: the uses a whole sentence names stand for their sections too ("a mall, a
-            # Group I-2 occupancy ...: each has its own distance, not brought in")
-            for sentence in re.split(r"(?<=[.;])\s", text):     # a list after a colon stays whole
-                if re.search(r"(?:not|n't) brought in", sentence):
-                    bad += [(r["id"], s) for s in _named_uses(sentence)
-                            if any(s == o or s.startswith(o + ".") for o in ours)]
     assert not bad, bad
 
 
@@ -384,14 +396,14 @@ def test_a_plural_term_is_the_definition_of_its_singular():
     assert not said, said
 
 
-VALUE = r"(\d+[ -]\d+/\d+|\d+/\d+|[\d,]+(?:\.\d+)?)"
+VALUE = r"(?<![\d.,/])(\d+[ -]\d+/\d+|\d+/\d+|[\d,]*\.\d+|[\d,]+)"
 # every unit the number reader (document_extraction/numbers.py) records that is imperial, and the metric ones
 IMPERIAL = ("gross square foot", "square foot", "square inch", "cubic foot", "foot", "inch", "pound", "psf", "footcandle")
-METRIC = ("mm", "m", "kg", "N", "lux")
+METRIC = ("mm", "cm", "m", "kg", "N", "lux")
 
 
 def _figure(recorded):
-    """(value, unit) of a recorded number ("less than 500 square foot", "19.1 mm", "1 1/2 inch", "1588 kg"), or None."""
+    """(value, unit) of a recorded number ("less than 500 square foot", "19.1 mm", "1 1/2 inch", ".5 inch"), or None."""
     m = re.search(VALUE + r"\s+(" + "|".join(IMPERIAL + METRIC) + r")\b", recorded)
     if not m:
         return None
@@ -406,32 +418,53 @@ def _imperial(recorded):
     return re.search(r"\d\s+(?:gross\s+)?(?:square\s+|cubic\s+)?(?:inch|foot|pound|psf|footcandle)\b", recorded)
 
 
+def _metric(recorded):
+    """Whether a recorded number carries a metric unit word."""
+    return re.search(r"\d\s+(?:" + "|".join(METRIC) + r")\b", recorded)
+
+
 # each imperial unit and the conversions it is printed with (square metres are recorded as "m", square mm as "mm")
 CONVERSION = {"inch": {"mm": 25.4}, "foot": {"mm": 304.8, "m": 0.3048}, "square foot": {"m": 0.092903},
-              "square inch": {"mm": 645.16}, "pound": {"kg": 0.45359, "N": 4.448}}
-# pieces whose metric figure the number reader records without its unit, and that unit
+              "square inch": {"mm": 645.16, "m": 0.00064516}, "pound": {"kg": 0.45359, "N": 4.448}}
+# pieces where the number reader records a figure without its unit, and that unit: a metric one ("50 pounds (220 N)":
+# the newtons), or an imperial one ("30 net square feet (2.8 m2)": "net" between the number and its unit)
 UNIT_NOT_RECORDED = {}
+IMPERIAL_UNIT_NOT_RECORDED = {}
 
 
 def _numbers(pid, entry):
-    unit = UNIT_NOT_RECORDED.get(str(pid))
-    return [n + " " + unit if unit and re.fullmatch(r"[\d,.]+", n) else n for n in entry["numbers"]]
+    """A piece's recorded numbers, each unit the reader left out put back (the bare number before a metric figure takes
+    the piece's imperial unit; a bare number after an imperial figure, its metric unit)."""
+    numbers = list(entry["numbers"])
+    metric, imperial = UNIT_NOT_RECORDED.get(str(pid)), IMPERIAL_UNIT_NOT_RECORDED.get(str(pid))
+    for n, here in enumerate(numbers):
+        bare = re.fullmatch(r"(?:and |not less than |not more than )?[\d,.]+", here)
+        if bare and imperial and n + 1 < len(numbers) and _metric(numbers[n + 1]):
+            numbers[n] = here + " " + imperial
+        elif bare and metric and n and _imperial(numbers[n - 1]):
+            numbers[n] = here + " " + metric
+    return numbers
 
 
-def _compared(numbers):
-    """[(the imperial figure, the metric one printed after it, whether they disagree by more than 2%)]."""
-    out = []
+def _walk(numbers):
+    """([(the imperial figure, the metric one printed after it, whether they disagree by more than 2%)], the indices of
+    the metric figures compared, a split "22 860 mm"'s two halves both)."""
+    out, used = [], set()
     for n, (here, after) in enumerate(zip(numbers, numbers[1:])):
         a, b = _figure(here), _figure(after)
         if not a or not b or a[1] not in CONVERSION or b[1] not in CONVERSION[a[1]]:
             continue
-        metric = b[0]
+        metric, used = b[0], used | {n + 1}
         later = _figure(numbers[n + 2]) if n + 2 < len(numbers) else None
         if b[1] == "mm" and later and later[1] == "mm" and metric < 1000 and 100 <= later[0] < 1000:
-            metric = metric * 1000 + later[0]            # "22 860 mm", read as "22 mm" and "860 mm"
+            metric, used = metric * 1000 + later[0], used | {n + 2}      # "22 860 mm", read as "22 mm" and "860 mm"
         want = a[0] * CONVERSION[a[1]][b[1]]
         out.append((here, after, abs(metric - want) / want > 0.02))
-    return out
+    return out, used
+
+
+def _compared(numbers):
+    return _walk(numbers)[0]
 
 
 def _misprinted(numbers):
@@ -439,22 +472,29 @@ def _misprinted(numbers):
 
 
 def test_the_conversion_walk_compares_every_imperial_figure():
-    """Review rounds 3 and 4 of part c: the walk skipped feet printed with metres and pounds with kilograms, and read
-    "1 1/2 inch" as 1/2. Every imperial figure a Chapter 4 piece records (by its unit word, read or not) is read, has a
-    conversion, and is compared with the metric figure printed after it (none is printed alone)."""
+    """Review rounds 3 to 5 of part c: the walk skipped feet printed with metres and pounds with kilograms, read
+    "1 1/2 inch" as 1/2 and ".5 inch" as 5, and never saw a figure whose unit the reader left out. Every imperial
+    figure a Chapter 4 piece records (by its unit word, read or not) is read, has a conversion, and is compared with
+    the metric figure printed after it; and every metric figure is one compared (none is printed alone)."""
     assert _misprinted(["more than 420 foot", "12 m"]) and _misprinted(["not less than 3,500 pound", "158 kg"])
     assert not _misprinted(["more than 420 foot", "128 m"]) and not _misprinted(["75 foot", "22 mm", "860 mm"])
     assert _figure("not more than 1 1/2 inch") == (1.5, "inch") and _figure("2/3 inch") == (2 / 3, "inch")
-    assert not _misprinted(["greater than 1 1/2 square inch", "967 mm"])
+    assert _figure(".5 inch") == (0.5, "inch") and _figure("22-1/2 inch") == (22.5, "inch")
+    assert _compared(["greater than 1 1/2 square inch", "967 mm"]) == [("greater than 1 1/2 square inch", "967 mm", False)]
+    assert _compared(["not exceed 5,000 square inch", "3.2 m"]) == [("not exceed 5,000 square inch", "3.2 m", False)]
     pieces = load(NY / "text_verification.yaml")["pieces"]
     imperial = compared = 0
     for pid, entry in pieces.items():
         if re.fullmatch(r"4\d\d(\.\d+)*", str(pid)):
-            for n in entry["numbers"]:
+            numbers = _numbers(pid, entry)
+            for n in numbers:
                 if _imperial(n):
                     assert _figure(n) and _figure(n)[1] in CONVERSION, (pid, n)   # read, with a conversion
                     imperial += 1
-            compared += len(_compared(_numbers(pid, entry)))
+            pairs, used = _walk(numbers)
+            compared += len(pairs)
+            alone = [m for k, m in enumerate(numbers) if _metric(m) and k not in used]
+            assert not alone, (pid, alone)                     # a metric figure whose imperial one wasn't read
     assert imperial and compared == imperial, (compared, imperial)
 
 
