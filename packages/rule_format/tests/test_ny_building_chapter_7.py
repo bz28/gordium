@@ -189,6 +189,23 @@ def test_review_round_1s_notes_say_what_the_law_says(book, labels):
 UNIT_NUMBER = re.compile(r"\b\d[\d,.]*(?= (?:square|feet|foot|inch|inches|percent|hours?|minutes|degrees|pounds?|cubic|stories))")
 
 
+def _ranges(note: str) -> set[str]:
+    """The sections inside a range a note names, "1023.4 to 1023.7" naming 1023.5 and 1023.6 too (review round 4: the
+    README's list missed 1023.6, inside 713.1's range)."""
+    out = set()
+    for a, b in re.findall(r"(\d{3,4}(?:\.\d+)+) to (\d{3,4}(?:\.\d+)+)", note):
+        head_a, last_a = a.rsplit(".", 1)
+        head_b, last_b = b.rsplit(".", 1)
+        if head_a == head_b:
+            out |= {f"{head_a}.{n}" for n in range(int(last_a), int(last_b) + 1)}
+    return out
+
+
+def test_a_range_names_every_section_inside_it():
+    want = {"1023.4", "1023.5", "1023.6", "1023.7", "716.2.1.1", "716.2.1.2", "716.2.1.3", "716.2.1.4"}
+    assert _ranges("per 1023.4 to 1023.7, and 716.2.1.1 to 716.2.1.4") == want
+
+
 def _brought_in(token: str, pieces_all: set[str]) -> bool:
     """A section the folder brings in: a piece of that number, or one under it (716 is brought in where 716.1 is)."""
     return any(p == token or p.startswith(token + ".") or p == "Table " + token for p in pieces_all)
@@ -206,7 +223,7 @@ def test_every_section_a_chapter_7_note_names_is_brought_in_or_in_the_readmes_li
     for r in load(RULEBOOK)["rules"]:
         if re.match(r"general\.bc_(table_)?7\d\d_", r["id"]):
             note = UNIT_NUMBER.sub("", _shown_note(r))           # "156 square feet" is a size, not a section
-            gone = sorted(t for t in _named(note) if not _brought_in(t, pieces_all) and t not in listed)
+            gone = sorted(t for t in _named(note) | _ranges(note) if not _brought_in(t, pieces_all) and t not in listed)
             if gone:
                 missing[r["id"]] = gone
     assert not missing, missing
