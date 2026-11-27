@@ -22,3 +22,8 @@ build/
 # Claude Code (personal settings and scratch worktrees; commands are shared)
 .claude/settings.local.json
 .claude/worktrees/
+
+# Made, never committed: the Revit pane's apartment answer, the checker's answer of the day
+# (python apps/revit_addin/tools/evals/make_apartment_answer.py; CI makes it before the C# tests)
+apps/revit_addin/tests/Gordium.Revit.Reading.Tests/answers/four_unit_apartment_check_answer.json
+apps/revit_addin/tests/Gordium.Revit.Reading.Tests/answers/four_unit_apartment_check_answer.json.*.tmp

@@ -3,7 +3,6 @@
 "apps/revit_addin/tools/tests/test_ny_eval.py::test_the_106_design_checked_by_the_real_worker_differs_from_the_architects_only_where_expected[the Revit parts]": 6.3,
 "apps/revit_addin/tools/tests/test_ny_eval.py::test_the_106_design_checked_by_the_real_worker_differs_from_the_architects_only_where_expected[the box]": 4.7,
 "apps/revit_addin/tools/tests/test_ny_eval.py::test_the_orangetown_reading_checked_by_the_real_worker_compares_as_predicted": 3.2,
-"apps/revit_addin/tools/tests/test_pane_answer_fresh.py::test_the_panes_saved_apartment_answer_is_the_checkers_answer_today": 54.0,
 "packages/design_checker/tests/stress/test_oracle.py::test_the_old_tax_map_starting_house_by_hand": 2.0,
 "packages/design_checker/tests/stress/test_oracle.py::test_the_tax_map_tolerance_by_hand": 3.3,
 "packages/design_checker/tests/stress/test_stress.py::test_a_new_false_pass_is_never_merged_into_a_known_findings_entry": 2.6,
