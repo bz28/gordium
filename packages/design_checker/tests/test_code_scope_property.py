@@ -65,6 +65,8 @@ BUILDING = {
     "ambulatory_care_facility": (None, True, False, "no"),
     "corridors_within_dwelling_units": (None, True, False, "no"),     # section group 4b
     "emergency_voice_alarm_system": (None, True, False, "no"),        # section group 5a
+    "mezzanines": (None, True, False, "no"),                          # the occupant-load ceiling (2026-11-26)
+    "loads_not_by_area": (None, True, False, "no"),
     "facts_not_sent": (None, [], ["dwelling_units"], ["sprinkler_system"], "use"),
 }
 DOMAIN = {**VALUES, **BUILDING}
@@ -82,7 +84,8 @@ BASE = {"use": "one_family_detached", "dwelling_units": 1, "attached_units_in_bu
         "special_egress_spaces": None, "merchandise_pads": None,
         "emergency_escape_openings_1031": None, "r2_sleeping_units": None, "occupied_outdoor_areas": None,
         "occupant_load_increased": None, "other_level_egress_into_corridors": None, "ambulatory_care_facility": None,
-        "corridors_within_dwelling_units": None, "emergency_voice_alarm_system": None, "facts_not_sent": None}
+        "corridors_within_dwelling_units": None, "emergency_voice_alarm_system": None, "mezzanines": None,
+        "loads_not_by_area": None, "facts_not_sent": None}
 
 
 def count(v, least=0):
@@ -103,7 +106,8 @@ def law(f):
                                     "special_egress_spaces", "merchandise_pads", "emergency_escape_openings_1031",
                                     "r2_sleeping_units", "occupied_outdoor_areas", "occupant_load_increased",
                                     "other_level_egress_into_corridors", "ambulatory_care_facility",
-                                    "corridors_within_dwelling_units", "emergency_voice_alarm_system")]
+                                    "corridors_within_dwelling_units", "emergency_voice_alarm_system", "mezzanines",
+                                    "loads_not_by_area")]
     kinds += [f[k] is None or count(f[k]) for k in ("dwelling_units", "attached_units_in_building", "adus_on_parcel",
                                                     "rooms_let_for_profit", "stories")]
     kinds += [f["stories_above_grade_plane"] is None or count(f["stories_above_grade_plane"], 1),

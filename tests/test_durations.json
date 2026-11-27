@@ -385,6 +385,8 @@
 "packages/design_checker/tests/test_four_unit_apartment.py::test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them[False]": 22.1,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them[True]": 19.1,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_the_story_figures_are_the_hand_worked_ones": 51.2,
+"packages/design_checker/tests/test_four_unit_apartment.py::test_the_three_exit_rule_settles_on_the_floor_area_with_no_function_stated[nfpa_13r-False-360]": 5.3,
+"packages/design_checker/tests/test_four_unit_apartment.py::test_the_three_exit_rule_settles_on_the_floor_area_with_no_function_stated[none-False-360]": 5.7,
 "packages/design_checker/tests/test_frozen_laws.py::test_a_check_takes_the_frozen_answer_and_the_very_rulebook_it_is_of": 1.7,
 "packages/design_checker/tests/test_frozen_laws.py::test_a_check_with_a_stale_certificate_needs_review_for_that_law_and_says_why": 5.1,
 "packages/design_checker/tests/test_frozen_laws.py::test_the_frozen_validation_equals_a_live_compile_for_ithaca_and_for_maine_through_its_stand_in": 4.3,

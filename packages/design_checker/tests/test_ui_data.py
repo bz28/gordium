@@ -578,7 +578,10 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # and this branch's own: corridors_within_dwelling_units (their marks follow in the Revit-fields work)
     # and this branch's own: emergency_voice_alarm_system (their marks follow in the Revit-fields work)
     # (groups 4 and 5's four have theirs too, the Revit-fields PR for them: the set is empty)
+    # (the occupant-load ceiling's mezzanines and loads not by area, 2026-11-26, came with their own)
     assert keys - set(revit) == set()
+    assert code_scope.MARK["mezzanines"] == revit["mezzanines"] == "Gordium: Mezzanines"
+    assert code_scope.MARK["loads_not_by_area"] == revit["loads_not_by_area"] == "Gordium: Loads not by area"
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased",
               "other_level_egress_into_corridors", "ambulatory_care_facility", "corridors_within_dwelling_units",
               "emergency_voice_alarm_system"):
