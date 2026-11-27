@@ -499,8 +499,11 @@ public sealed class GroundTests
     {
         var read = InteriorReader.Read(Phased(false).Model());
         Assert.Null(Ground(read, "we1"));
-        Assert.StartsWith("Gordium: Toposolid is finished ground is No on Project Information, yet the phases show the ground drawn " +
-                          "(Toposolid \"Finished grade\") as the finished ground", Why(read, "we1"));
+        Assert.StartsWith("Gordium: Toposolid is finished ground is No on Project Information, yet the phases point to the ground drawn " +
+                          "(Toposolid \"Finished grade\") being the finished ground", Why(read, "we1"));
+        // the tooltip says what happens: the ground isn't read, the window's own marks decide (review round 2)
+        Assert.DoesNotContain("is the finished ground needs review", Marks.ToposolidFinished.Description, StringComparison.Ordinal);
+        Assert.Contains("Read inside notes that the two disagree", Marks.ToposolidFinished.Description, StringComparison.Ordinal);
         Assert.EndsWith("which is right isn't clear, so it isn't read", Why(read, "we1"));
     }
 

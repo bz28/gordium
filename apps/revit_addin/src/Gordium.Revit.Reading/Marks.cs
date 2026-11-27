@@ -109,7 +109,7 @@ public static class Marks
     /// existing ground, which nothing in Revit tells apart (Rhino's picked terrain isn't taken as finished either). On
     /// Project Information, as <see cref="GroundFrom"/> is. Yes: the ground at each window is read from them (a door's
     /// isn't: its clear bottom isn't sent). Blank: it is where the phases show it (GroundReader.PhasesShow), else not;
-    /// No: it isn't (the Gordium: Below grade and Well marks, or a review), and No the phases contradict needs review.</summary>
+    /// No: it isn't (the Gordium: Below grade and Well marks, or a review; one the phases contradict is noted).</summary>
     public static readonly MarkDefinition ToposolidFinished = new(
         "Gordium: Toposolid is finished ground", new("bbb69f1e-d644-4830-8ba0-cd958c04bbb8"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "openings[].ground_outside",
@@ -117,7 +117,7 @@ public static class Marks
         "RCNYS R202: \"GRADE. The finished ground level adjoining the building at all exterior walls.\" " +
         "Yes: Gordium reads the ground just outside each window from them (a door's isn't read yet: its clear bottom isn't sent), so whether an escape window is below grade, and how deep its area well is at least, are measured (a Gordium: Below grade or Well depth mark set on the opening wins, and one that disagrees with the ground needs review). " +
         "Blank: read where the project's phases show it (its existing ground drawn in an earlier phase and demolished in a later one, under the ground at the window, and every Toposolid of the design made in the last phase), else not read. " +
-        "No: not read; No where the phases show it is the finished ground needs review. Not read, the Gordium: Below grade and Well marks are what the area well rules use.");
+        "No: not read (where the phases point to it being the finished ground, Read inside notes that the two disagree). Not read, the Gordium: Below grade and Well marks are what the area well rules use, and blank ones need review.");
 
     // ---- an escape opening's place below the ground and its area well (BCNYS 1031.5; RCNYS R319.4 for a house): set on
     // each window or door, sent as openings[].stated_well. A well isn't in Revit's vocabulary (firms draw it as a generic

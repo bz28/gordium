@@ -84,9 +84,10 @@ public static class GroundReader
         var names = Named(drawn[0]) + (drawn.Count > 1 ? $" and {drawn.Count - 1} more" : "");
         if (stated is false && shown)
         {
-            set.Why = $"{Marks.ToposolidFinished.Name} is No on Project Information, yet the phases show the ground drawn ({names}) " +
-                      "as the finished ground (created in the last phase, the existing ground drawn in an earlier one and demolished): " +
-                      "which is right isn't clear, so it isn't read";
+            // the phases' evidence is the design's (review round 2: at a window they speak only over the existing ground)
+            set.Why = $"{Marks.ToposolidFinished.Name} is No on Project Information, yet the phases point to the ground drawn ({names}) " +
+                      "being the finished ground (every Toposolid of the design created in the last phase, and an existing ground " +
+                      "drawn in an earlier one and demolished): which is right isn't clear, so it isn't read";
             return set;
         }
         if (stated is not true && !shown)
