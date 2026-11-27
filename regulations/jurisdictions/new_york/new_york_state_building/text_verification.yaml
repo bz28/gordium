@@ -5601,14 +5601,14 @@ pieces:
     piece_sha256: 580a41a3d1f1bbe500ce51da960d1605fa761c200d2bdadcc4eadab7ee52f9db
     numbers:
     - one
-    - 1004.1 inch
+    - '1004.1'
     - not exceed one
     - four
     - not exceed one
     second_reading: agrees
     second_reading_numbers:
     - one
-    - 1004.1 inch
+    - '1004.1'
     - not exceed one
     - four
     - not exceed one
@@ -6415,9 +6415,9 @@ pieces:
     - '24'
     - less than 50
     - '36'
-    - 36 inch
+    - '36'
     - 100 or more
-    - 72 inch
+    - '72'
     - '72'
     - '96'
     - 1 inch
@@ -6429,9 +6429,9 @@ pieces:
     - '24'
     - less than 50
     - '36'
-    - 36 inch
+    - '36'
     - 100 or more
-    - 72 inch
+    - '72'
     - '72'
     - '96'
     - 1 inch
@@ -6454,10 +6454,6 @@ pieces:
       only in its column heading MINIMUM WIDTH, never beside the number; read on the page image, one width a row).
       The table prints no comparison words, so each is recorded ''none''; 1020.3 says ''the minimum width shall be
       not less than that specified in Table 1020.3'', so each is the least a corridor may have: the second reading
-      is right.'
-    - '''36 inch'' and ''72 inch'' (>=): the cells of lines 30 and 31 (Within a dwelling unit 36; In Group E ... 72),
-      which the text reader joins to the next row''s first word ''In'' and so reads with a unit; each is that row''s
-      width in inches, the least a corridor may have, as the other width cells. Recorded ''none''; the second reading
       is right.'
   '1020.4':
     piece_sha256: 03d09568a1997d6f4328ec97063c07e1911171614a193f032fc130f032ad3027

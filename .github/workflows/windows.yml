@@ -3,17 +3,21 @@ name: Windows
 # The Windows half of CI (Ben, 2026-11-26), split from ci.yml because GitHub runs about one CI run at a time and
 # Windows is half of the jobs. A push to a PR runs only `windows (3.14)`, which fails saying Windows hasn't run.
 # When the merge script (gordium_handoff_tools/merge_when_green.py) takes a PR, it labels it merge-ready: that runs
-# every Windows job on the same commit, and every later push to the labelled PR runs them too. A push to main runs
-# them always. The merge script merges only when `windows (3.14)` and the Revit client on Windows passed on the head.
+# every Windows job on the same commit, and every later push to the labelled PR runs them too. The merge script
+# merges only when `windows (3.14)` and the Revit client on Windows passed on the head, and only a PR that holds
+# main's head, so main after a merge is the very tree Windows just passed: a push to main runs no Windows (it held the
+# one-at-a-time queue for 90 minutes per merge, 2026-11-26). Every night, and on demand, main runs it all, on both
+# Pythons.
 on:
-  push:
-    branches: [main]
+  schedule:
+    - cron: "0 7 * * *"     # 07:00 UTC: 02:00 in New York in winter, 03:00 in summer
+  workflow_dispatch:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
 
 # A newer push or the merge-ready label replaces the PR's older Windows run (the label's run replaces the push run
 # that only said Windows hasn't run). Any other label gets a group of its own name, so it never cancels Windows.
-# Pushes to main are never cancelled.
+# The nightly run on main is never cancelled.
 concurrency:
   group: windows-${{ github.event.pull_request.number || github.sha }}${{ (github.event.action == 'labeled' && github.event.label.name != 'merge-ready') && format('-label-{0}', github.event.label.name) || '' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -26,7 +30,7 @@ jobs:
   # not set: the job proves the code names its encodings, as an architect's Windows PC runs it.
   windows_tests:
     name: windows tests (${{ matrix.python-version }}, part ${{ matrix.part }} of 4)
-    if: ${{ github.event_name == 'push' || (contains(github.event.pull_request.labels.*.name, 'merge-ready') && (github.event.action != 'labeled' || github.event.label.name == 'merge-ready')) }}
+    if: ${{ github.event_name != 'pull_request' || (contains(github.event.pull_request.labels.*.name, 'merge-ready') && (github.event.action != 'labeled' || github.event.label.name == 'merge-ready')) }}
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -45,7 +49,7 @@ jobs:
         run: pytest -n auto --dist worksteal --shard ${{ matrix.part }}/${{ env.SHARDS }}
 
   windows_checks:
-    if: ${{ github.event_name == 'push' || (contains(github.event.pull_request.labels.*.name, 'merge-ready') && (github.event.action != 'labeled' || github.event.label.name == 'merge-ready')) }}
+    if: ${{ github.event_name != 'pull_request' || (contains(github.event.pull_request.labels.*.name, 'merge-ready') && (github.event.action != 'labeled' || github.event.label.name == 'merge-ready')) }}
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -101,7 +105,7 @@ jobs:
   # The Revit add-in's worker client on Windows, where the add-in runs (the Ubuntu leg is in ci.yml)
   revit_worker_client_windows:
     name: revit_worker_client (windows-latest)
-    if: ${{ github.event_name == 'push' || (contains(github.event.pull_request.labels.*.name, 'merge-ready') && (github.event.action != 'labeled' || github.event.label.name == 'merge-ready')) }}
+    if: ${{ github.event_name != 'pull_request' || (contains(github.event.pull_request.labels.*.name, 'merge-ready') && (github.event.action != 'labeled' || github.event.label.name == 'merge-ready')) }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
