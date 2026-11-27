@@ -355,8 +355,8 @@ def stated_well(o: dict, reader, more: dict, bottoms=()) -> tuple[dict, dict, di
         return Stop(which, name=name, what=Words(words), mark=Words(mark), **more_blanks)
 
     # what the ground given shows, used only with no drawn well (whose own floor and depth are the drawing's)
-    shown, top = ("none", None) if o.get("area_well") is not None else ground_shows(o, reader, bottoms)
-    least = tidy(top - max(bottoms)) if shown == "below" else None
+    shown, top, low, high = ("none", None, None, None) if o.get("area_well") is not None else ground_shows(o, reader, bottoms)
+    least = tidy(top - high) if shown == "below" else None
     measures, stopped, confirm = {}, {}, {}
     for key, (measure, words, kind, _) in STATED_WELL.items():
         if kind == "word":
@@ -364,7 +364,8 @@ def stated_well(o: dict, reader, more: dict, bottoms=()) -> tuple[dict, dict, di
         got = s.get(key)
         try:
             if key == "below_grade":
-                measures[measure] = _below_grade(got, shown, top, o, reader, bottoms, lambda w, **b: stop(w, key, **b))
+                measures[measure] = _below_grade(got, shown, top, o, reader, bottoms, lambda w, **b: stop(w, key, **b),
+                                                 low=low, high=high)
                 continue
             if got is None:
                 drawn = more.get(measure)
@@ -429,29 +430,59 @@ def stated_well(o: dict, reader, more: dict, bottoms=()) -> tuple[dict, dict, di
     return measures, stopped, confirm
 
 
-def ground_shows(o: dict, reader, bottoms) -> tuple[str, float | str | None]:
-    """What the ground given outside the opening (`ground_outside`) shows of its clear opening's bottom (`bottoms`,
-    every bottom it could have), as (what, ground): ("none", None) no ground given; ("unread", why) a ground that
-    can't be read; ("no_bottom", top) no bottom known; ("below", top) the ground stands more than 1/16 in above a
-    bottom; ("above", top) every bottom stands more than 1/16 in above it; ("near", top) within 1/16 in. `top`, the
-    highest ground given, in inches: grade is the finished ground "adjoining the building" (RCNYS R202 GRADE), so the
-    ground over any part of the opening's bottom puts it below grade there."""
+def ground_shows(o: dict, reader, bottoms) -> tuple[str, float | str | None, float | None, float | None]:
+    """What the ground given outside the opening (`ground_outside`) shows of its clear opening's bottom, as (what,
+    ground, low, high): `bottoms`, every bottom it could have (low and high their least and greatest), else, with none,
+    the bounds the description gives (`clear_bottom_between`: a door's, its threshold not drawn). ("none", None) no
+    ground given; ("unread", why) a ground that can't be read; ("no_bottom", top) no bottom known; ("bounds_bad", why)
+    bounds that can't be read; ("below", top) the ground stands more than 1/16 in above a bottom (bounds: above the
+    highest); ("above", top) every bottom stands more than 1/16 in above it (bounds: the lowest does); ("near", top)
+    within 1/16 in; ("between", top) between the bounds. `top`, the highest ground given, in inches: grade is the
+    finished ground "adjoining the building" (RCNYS R202 GRADE), so the ground over any part of the opening's bottom
+    puts it below grade there."""
     if o.get("ground_outside") is None:
-        return "none", None
+        return "none", None, None, None
     try:
         top = max(grounds(o, reader))
     except Stop as s:
-        return "unread", s.reason
+        return "unread", s.reason, None, None
     if not bottoms:
-        return "no_bottom", top
+        try:
+            bounds = bottom_bounds(o, reader)
+        except Stop as s:
+            return "bounds_bad", s.reason, None, None
+        if bounds is None:
+            return "no_bottom", top, None, None
+        low, high = bounds
+        if high < top - AGREE:
+            return "below", top, low, high
+        if low > top + AGREE:
+            return "above", top, low, high
+        return "between", top, low, high
+    low, high = min(bottoms), max(bottoms)
     if any(b < top - AGREE for b in bottoms):
-        return "below", top
+        return "below", top, low, high
     if all(b > top + AGREE for b in bottoms):
-        return "above", top
-    return "near", top
+        return "above", top, low, high
+    return "near", top, low, high
 
 
-def _below_grade(got, shown, top, o, reader, bottoms, stop) -> bool:
+def bottom_bounds(o: dict, reader) -> tuple[float, float] | None:
+    """The lowest and highest its clear opening's bottom could be (`clear_bottom_between`, in inches: a door's, its
+    threshold not drawn), None where not given; Stop where they aren't two elevations, the lower first."""
+    given = o.get("clear_bottom_between")
+    if given is None:
+        return None
+    if not isinstance(given, list) or len(given) != 2:
+        raise Stop("bottom_between_bad", got=given_as(given))
+    low = reader.length(given[0], "the lowest its clear opening's bottom could be")
+    high = reader.length(given[1], "the highest its clear opening's bottom could be")
+    if high < low:
+        raise Stop("bottom_between_bad", got=Words(f"{tidy(low):g} in over {tidy(high):g} in"))
+    return low, high
+
+
+def _below_grade(got, shown, top, o, reader, bottoms, stop, low=None, high=None) -> bool:
     """Whether the opening is below grade: the architect's statement, else what the ground given shows; a statement
     the ground contradicts by more than 1/16 in gives no value (Stop), naming both."""
     if got is None:
@@ -461,6 +492,11 @@ def _below_grade(got, shown, top, o, reader, bottoms, stop) -> bool:
             return False
         if shown == "near":
             raise stop("well_ground_near", ground=Words(f"{tidy(top):g}"))
+        if shown == "between":
+            raise stop("well_ground_between", ground=Words(f"{tidy(top):g}"), low=Words(f"{tidy(low):g}"),
+                       high=Words(f"{tidy(high):g}"))
+        if shown == "bounds_bad":
+            raise stop("well_bottom_unread", reason=Words(top))
         if shown == "no_bottom":
             raise stop("well_ground_no_bottom")
         if shown == "unread":
@@ -471,8 +507,7 @@ def _below_grade(got, shown, top, o, reader, bottoms, stop) -> bool:
     if got is False and (said := _drawn_below(o, reader, bottoms)):
         raise stop("well_below_disagree", shown=Words(said))
     if got is True and shown == "above":
-        raise stop("well_above_disagree", ground=Words(f"{tidy(top):g}"),
-                   gap=Words(f"{tidy(min(bottoms) - top):g}"))
+        raise stop("well_above_disagree", ground=Words(f"{tidy(top):g}"), gap=Words(f"{tidy(low - top):g}"))
     return got
 
 
@@ -481,11 +516,13 @@ def _drawn_below(o: dict, reader, bottoms) -> str | None:
     more than 1/16 in above a bottom its clear opening could have (ground_shows), or one that can't be compared."""
     if o.get("area_well") is not None:
         return "a drawn area well"
-    shown, top = ground_shows(o, reader, bottoms)
+    shown, top, _, _ = ground_shows(o, reader, bottoms)
     if shown == "unread":
         return "a ground outside it Gordium can't read"
     if shown == "no_bottom":
         return "a ground outside it, while its clear opening's bottom isn't known"
+    if shown == "bounds_bad":
+        return "a ground outside it, while where its clear opening's bottom lies can't be read"
     return f"the ground outside it at {tidy(top):g} in, above its clear opening's bottom" if shown == "below" else None
 
 

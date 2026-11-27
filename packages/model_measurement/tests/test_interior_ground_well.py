@@ -182,6 +182,58 @@ def test_the_least_depth_is_measured_only_below_grade():
         p["not_measured"]["area_well_depth"]
 
 
+# ---- a door's clear bottom, between bounds (its threshold isn't drawn) ---------------------------------------------
+
+def door(at, bounds, well=None):
+    """base()'s opening with no clear opening known, its bottom only bounded (`clear_bottom_between`, a door's)."""
+    return ground(at, well, frame=None, clear_bottom_between=bounds)
+
+
+@pytest.mark.parametrize("at, bounds, below", [(10, [0, 2], True), (2 + 1 / 8, [0, 2], True), (-5, [0, 2], False),
+                                               (-1 / 8, [0, 2], False)])
+def test_a_doors_bounds_settle_below_grade_only_when_both_agree(at, bounds, below):
+    p = part(door(at, bounds))
+    assert p["measures"]["opening_below_grade"] is below
+
+
+@pytest.mark.parametrize("at", [1, 0, 2, 2 + 1 / 32])
+def test_a_ground_between_a_doors_bounds_settles_nothing(at):
+    p = part(door(at, [0, 2]))
+    assert "opening_below_grade" not in p["measures"]
+    assert "lies between the lowest and the highest its clear opening's bottom could be (0 in to 2 in" in \
+        p["not_measured"]["opening_below_grade"] or "within" in p["not_measured"]["opening_below_grade"]
+
+
+def test_a_doors_least_depth_is_from_the_highest_its_bottom_could_be():
+    p = part(door(60, [0, 2]))                              # at least 58 in deep: the highest bottom, never the lowest
+    assert p["measures"]["area_well_depth"] == 58.0 and "area_well_depth" in p["confirm"]
+
+
+def test_a_doors_mark_wins_unless_the_bounds_contradict_it():
+    assert part(door(1, [0, 2], {"below_grade": False}))["measures"]["opening_below_grade"] is False   # between
+    assert part(door(1, [0, 2], {"below_grade": True}))["measures"]["opening_below_grade"] is True
+    p = part(door(10, [0, 2], {"below_grade": False}))
+    assert "opening_below_grade" not in p["measures"]
+    assert "is stated not to be below the adjacent grade" in p["not_measured"]["opening_below_grade"]
+    p = part(door(-5, [0, 2], {"below_grade": True}))
+    assert "5 in below its clear opening's bottom" in p["not_measured"]["opening_below_grade"]
+
+
+@pytest.mark.parametrize("bounds", [[2, 0], [0], "0 to 2", [0, "high"]])
+def test_bounds_that_cant_be_read_settle_nothing(bounds):
+    p = part(door(10, bounds))
+    assert "opening_below_grade" not in p["measures"] and "area_well_depth" not in p["measures"]
+    assert "can't be read" in p["not_measured"]["opening_below_grade"]
+    p = part(door(10, bounds, {"below_grade": False}))
+    assert "opening_below_grade" not in p["measures"]
+
+
+def test_bounds_never_stand_in_for_a_clear_bottom_that_is_known():
+    # base()'s window: its clear bottom at 20 in; bounds beside it are not read
+    p = part(ground(30, clear_bottom_between=[100, 200]))
+    assert p["measures"]["opening_below_grade"] is True
+
+
 # ---- through the Building Code's area well rules -------------------------------------------------------------------
 
 WELL_RULES = ("general.bc_1031_5_area_well_required", "general.bc_1031_5_2_area_well_ladder_over_44")

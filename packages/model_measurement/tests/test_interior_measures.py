@@ -1990,6 +1990,12 @@ STOP_CASES = {
     # what the ground given shows against the clear bottom (20 in): test_interior_ground_well.py
     "well_above_disagree": _set(("openings", 0, "stated_well"), {"below_grade": True}),
     "grade_floor_well_unknown": _with(base, lambda d: d["openings"][0].update(ground_outside=30, stated_well={})),
+    "well_ground_between": _with(base, lambda d: d["openings"][0].update(
+        frame=None, ground_outside=10, clear_bottom_between=[0, 20], stated_well={})),
+    "well_bottom_unread": _with(base, lambda d: d["openings"][0].update(
+        frame=None, ground_outside=10, clear_bottom_between=[20, 0], stated_well={})),
+    "bottom_between_bad": _with(base, lambda d: d["openings"][0].update(
+        frame=None, ground_outside=10, clear_bottom_between=[0], stated_well={})),
     "well_ground_near": _with(base, lambda d: d["openings"][0].update(ground_outside=20, stated_well={})),
     "well_ground_no_bottom": _with(base, lambda d: d["openings"][0].update(frame=None, ground_outside=30,
                                                                             stated_well={})),

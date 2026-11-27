@@ -107,15 +107,15 @@ public static class Marks
     /// (<c>openings[].ground_outside</c>, GroundReader): the code measures from the finished ground (RCNYS R202 GRADE,
     /// "The finished ground level adjoining the building at all exterior walls"), and a Toposolid may be the survey's
     /// existing ground, which nothing in Revit tells apart (Rhino's picked terrain isn't taken as finished either). On
-    /// Project Information, as <see cref="GroundFrom"/> is. Yes: the ground at each window is read from them (a door's
-    /// isn't: its clear bottom isn't sent). Blank: it is where the phases show it (GroundReader.PhasesShow), else not;
+    /// Project Information, as <see cref="GroundFrom"/> is. Yes: the ground at each window is read from them, and at each door
+    /// whose type's clear height is confirmed (GroundReader, InteriorReader.DoorBottom). Blank: it is where the phases show it (GroundReader.PhasesShow), else not;
     /// No: it isn't (the Gordium: Below grade and Well marks, or a review; one the phases contradict is noted).</summary>
     public static readonly MarkDefinition ToposolidFinished = new(
         "Gordium: Toposolid is finished ground", new("bbb69f1e-d644-4830-8ba0-cd958c04bbb8"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "openings[].ground_outside",
         "Yes when the Toposolids (or older topography surfaces) in this design show the finished ground, as it will be built after any regrading, not the existing ground of a survey. " +
         "RCNYS R202: \"GRADE. The finished ground level adjoining the building at all exterior walls.\" " +
-        "Yes: Gordium reads the ground just outside each window from them (a door's isn't read yet: its clear bottom isn't sent), so whether an escape window is below grade, and how deep its area well is at least, are measured (a Gordium: Below grade or Well depth mark set on the opening wins, and one that disagrees with the ground needs review). " +
+        "Yes: Gordium reads the ground just outside each window from them (a door's only where its type's clear height is confirmed, its clear bottom then bounded), so whether an escape window is below grade, and how deep its area well is at least, are measured (a Gordium: Below grade or Well depth mark set on the opening wins, and one that disagrees with the ground needs review). " +
         "Blank: read where the project's phases show it (its existing ground drawn in an earlier phase and demolished in a later one, under the ground at the window, and every Toposolid of the design made in the last phase), else not read. " +
         "No: not read (where the phases point to it being the finished ground, Read inside notes that the two disagree). Not read, the Gordium: Below grade and Well marks are what the area well rules use, and blank ones need review.");
 
@@ -134,7 +134,7 @@ public static class Marks
         [Windows, Doors], "openings[].stated_well.below_grade",
         "Yes when the bottom of this escape opening's clear opening is below the ground outside it (the adjacent grade). " +
         "BCNYS 1031.5: \"An emergency escape and rescue opening with the bottom of the clear opening below the adjacent grade shall be provided with an area well in accordance with Sections 1031.5.1 through 1031.5.3.\" " +
-        "Yes: its area well is checked from its Gordium: Well marks. No: it needs no area well. Blank: for a window, read from the Toposolid where Gordium: Toposolid is finished ground is Yes, or blank and the phases show the finished ground (see that mark), else (and for a door) the area well rules need review. Set, it wins over the Toposolid; the two disagreeing needs review.");
+        "Yes: its area well is checked from its Gordium: Well marks. No: it needs no area well. Blank: read from the Toposolid where Gordium: Toposolid is finished ground is Yes, or blank and the phases show the finished ground (see that mark; for a door, only with its type's clear height confirmed), else the area well rules need review. Set, it wins over the Toposolid; the two disagreeing needs review.");
 
     public static readonly MarkDefinition WellArea = new(
         "Gordium: Well area", new("6e368439-8dd1-48c8-99bf-eff9afd45b39"), MarkValueKind.Area, MarkBinding.Instance,
@@ -157,7 +157,7 @@ public static class Marks
         [Windows, Doors], "openings[].stated_well.depth",
         LengthWords + Projected + "the vertical depth of this escape opening's area well, from the ground around it down to the well's floor. " +
         "BCNYS 1031.5.2: \"Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped with an approved permanently affixed ladder or steps.\" " +
-        "Blank: for a window, where Gordium: Toposolid is finished ground is Yes, or blank and the phases show the finished ground, the ground over the opening's bottom is the least the well can be deep (its floor isn't drawn), used only past 44 in and as a reading to confirm; else whether it needs a ladder or steps needs review. Set less than that least depth: review.");
+        "Blank: where Gordium: Toposolid is finished ground is Yes, or blank and the phases show the finished ground (a door with its type's clear height confirmed), the ground over the opening's bottom is the least the well can be deep (its floor isn't drawn), used only past 44 in and as a reading to confirm; else whether it needs a ladder or steps needs review. Set less than that least depth: review.");
 
     public static readonly MarkDefinition WellLadder = new(
         "Gordium: Well ladder or steps", new("a9a70071-4f69-40e0-9db5-a713f65b7e6a"), MarkValueKind.Text, MarkBinding.Instance,

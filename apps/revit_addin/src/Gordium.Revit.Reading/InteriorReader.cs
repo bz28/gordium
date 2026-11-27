@@ -809,22 +809,69 @@ public static class InteriorReader
         }
         else if (o.Kind == MarkedKind.Door)
             Out("stated_clear", "a door's maker's clear opening is sent with the door (doors); as an escape opening its " +
-                                "bottom isn't stated by a door's marks yet");
+                                "bottom isn't stated, only bounded where a ground is read (clear_bottom_between)");
         opening["stated_well"] = StatedWell(e, o, Out);
         // the ground just outside it, from a Toposolid stated to show the finished ground (GroundReader): below grade
         // and the well's least depth are then measured; only an escape opening's reason why not is said (its rules
-        // read it), and nothing at all where no ground is drawn. A window's only: a door's clear bottom isn't sent, so
-        // its ground could only unsettle its Below grade mark, never measure it (review round 1)
-        if (ground is { } g && rec is not null && o.Kind == MarkedKind.Window)
+        // read it), and nothing at all where no ground is drawn. A door's only beside the bounds of its clear bottom
+        // (DoorBottom: its threshold isn't drawn); without them its ground could only unsettle its Below grade mark
+        if (ground is { } g && rec is not null)
         {
+            string? why = null;
+            JsonArray? between = null;
+            if (o.Kind == MarkedKind.Door && (between = DoorBottom(model, e, rec, out why)) is null)
+            {
+                if (o.Escape is true)
+                    Out("ground_outside", why!);
+                return opening;
+            }
             if (evidence[id] is not JsonObject seen)
                 evidence[id] = seen = new JsonObject();
-            if (GroundReader.Outside(model, g.Set, rec, opening["room"]?.GetValue<string>(), "window", plans, g.Unknown, seen, out var why) is { } at)
+            var noun = o.Kind == MarkedKind.Door ? "door" : "window";
+            if (GroundReader.Outside(model, g.Set, rec, opening["room"]?.GetValue<string>(), noun, plans, g.Unknown, seen, out why) is { } at)
+            {
                 opening["ground_outside"] = at;
+                if (between is not null)
+                    opening["clear_bottom_between"] = between;
+            }
             else if (o.Escape is true)
                 Out("ground_outside", why!);
         }
         return opening;
+    }
+
+    /// <summary>The lowest and highest a door's clear opening's bottom could be (shared, ft; <c>clear_bottom_between</c>):
+    /// its threshold isn't drawn (door families don't model it consistently), but its clear opening lies within the
+    /// door as placed and the opening it cuts in its wall, so its bottom is at least the higher of their bottoms, and at
+    /// most the door's top less its stamp-confirmed clear height. Null, with why, without a confirmed clear height or the
+    /// door's drawn geometry, or where the clear height is more than the door as placed.</summary>
+    internal static JsonArray? DoorBottom(RevitModel model, MarkedElement e, OpeningRecord rec, out string? why)
+    {
+        why = null;
+        var now = ClearNow(e, rec, door: true);
+        if (ClearStamp.Why(Marks.Text(MarkReading.Value(e, Marks.ClearConfirmed)), now, rec.TypeLengths) is { } stamp
+            || now.ClearHeight is not { } clearHeight)
+        {
+            why = "its clear height isn't confirmed on its type, so how high its clear opening's bottom could be isn't known (its ground isn't read)";
+            return null;
+        }
+        if (rec.Placed is not { Count: > 0 } placed)
+        {
+            why = "its drawn geometry couldn't be read, so where its clear opening's bottom lies isn't known (its ground isn't read)";
+            return null;
+        }
+        var t = model.InternalToShared;
+        var z = placed.Select(t.Apply).Select(p => p.Z).ToList();
+        var low = z.Min();
+        if (rec.WallOpening is { Count: > 0 } cut)
+            low = Math.Max(low, cut.Select(t.Apply).Min(p => p.Z));
+        var high = z.Max() - clearHeight;
+        if (high < low - Sixteenth)
+        {
+            why = $"its clear height ({ClearStamp.Inches(clearHeight)}) is more than the door as placed leaves over its bottom, so where its clear opening's bottom lies isn't known (its ground isn't read)";
+            return null;
+        }
+        return new JsonArray(low, Math.Max(high, low));
     }
 
     /// <summary>What the architect states of the opening and its area well (<c>stated_well</c>, BCNYS 1031.5): every

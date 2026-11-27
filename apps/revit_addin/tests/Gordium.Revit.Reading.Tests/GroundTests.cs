@@ -294,14 +294,18 @@ public sealed class GroundTests
         Assert.NotNull(Ground(InteriorReader.Read(house.Model()), "we1"));
     }
 
-    /// <summary>A door's clear bottom isn't sent, so its ground would only unsettle its Below grade mark: no door's
-    /// ground is sent (house 1's two doors to outside).</summary>
-    [Fact]
-    public void No_doors_ground_is_sent()
+    /// <summary>A door's threshold isn't drawn, so its clear bottom is bounded (InteriorReader.DoorBottom): at least the
+    /// door's own bottom, at most its top less its confirmed clear height. House 1's d1 (its type's clear height
+    /// confirmed, 6 ft 8 in, as tall as the door: bounds 0 to 0) sends its ground and bounds, and the measuring settles
+    /// below grade from them; d2 (none confirmed) sends no ground, and says why.</summary>
+    [Theory]
+    [InlineData(1.0, true)]
+    [InlineData(-0.5, false)]
+    public void A_doors_ground_is_sent_with_its_clear_bottoms_bounds(double at, bool below)
     {
-        var house = Drawn("1_ranch_compliant", (_, _) => 0);
+        var house = Drawn("1_ranch_compliant", (_, _) => at);
         // the doors' wall faces, as the windows' (the room's at the centre line, the outside one a wall's thickness out
-        // toward +y): without them no door could be placed, and the test would pass whatever the reader does
+        // toward +y): without them no door could be placed
         foreach (var (d, x) in new[] { ("d1", 7.666666666666666), ("d2", 15.333333333333332) })
         {
             var i = house.OpeningIndex(d);
@@ -311,14 +315,21 @@ public sealed class GroundTests
                              new WallFace(house.Fake.Place(x, 25, 0), house.Fake.Place(0, -1, 0) - house.Fake.Place(0, 0, 0))],
                 Around = [],
             };
+            SetMark(house, d, Marks.EscapeOpening, new(true, 1));
         }
+        SetMark(house, "living", Marks.SleepingRoom, new(true, 1));       // so the measuring checks the door as one
         var read = InteriorReader.Read(house.Model());
-        Assert.NotNull(Ground(read, "w1"));
-        foreach (var d in new[] { "d1", "d2" })
-        {
-            Assert.Null(Ground(read, d));
-            Assert.Null(Why(read, d));
-        }
+        Assert.Equal([at, at, at], Ground(read, "d1")!.Select(z => Math.Round(z, 9)));
+        Assert.Equal([0.0, 0.0], Opening(read, "d1")["clear_bottom_between"]!.AsArray().Select(z => z!.GetValue<double>()));
+        var m = Measured(read, "d1");
+        Assert.Equal(below, m["m"]!["opening_below_grade"]!.GetValue<bool>());
+        Assert.Null(m["m"]!["area_well_depth"]);                          // at least 12 in deep: settles nothing
+        Assert.Null(Ground(read, "d2"));
+        Assert.Null(Opening(read, "d2")["clear_bottom_between"]);
+        Assert.StartsWith("its clear height isn't confirmed on its type", Why(read, "d2"));
+        // no ground drawn: no bounds either (nothing changes)
+        house.Grounds = null;
+        Assert.Null(Opening(InteriorReader.Read(house.Model()), "d1")["clear_bottom_between"]);
     }
 
     /// <summary>An older topography's subregion (a walk, a patio) lies on its host, as a Toposolid subdivision does:
@@ -418,13 +429,13 @@ public sealed class GroundTests
 
     /// <summary>The marks' words say a window's ground is read, a door's not (its clear bottom isn't sent).</summary>
     [Fact]
-    public void The_marks_say_the_ground_is_read_at_windows_only()
+    public void The_marks_say_where_the_ground_is_read()
     {
         Assert.DoesNotContain("window and door", Marks.ToposolidFinished.Description, StringComparison.Ordinal);
         Assert.DoesNotContain("each window and door", File.ReadAllText(Path.Combine(Env.Repo, "docs", "revit", "revit_reading_design.md")), StringComparison.Ordinal);
-        Assert.Contains("a door's isn't read yet", Marks.ToposolidFinished.Description, StringComparison.Ordinal);
-        Assert.Contains("Blank: for a window, read from the Toposolid", Marks.BelowGrade.Description, StringComparison.Ordinal);
-        Assert.Contains("Blank: for a window, where Gordium: Toposolid is finished ground is Yes", Marks.WellDepth.Description, StringComparison.Ordinal);
+        Assert.Contains("a door's only where its type's clear height is confirmed", Marks.ToposolidFinished.Description, StringComparison.Ordinal);
+        Assert.Contains("for a door, only with its type's clear height confirmed", Marks.BelowGrade.Description, StringComparison.Ordinal);
+        Assert.Contains("(a door with its type's clear height confirmed)", Marks.WellDepth.Description, StringComparison.Ordinal);
         // and blank where the phases show it (review round 1 of the phases)
         Assert.Contains("or blank and the phases show the finished ground", Marks.WellDepth.Description, StringComparison.Ordinal);
         Assert.Contains("or blank and the phases show the finished ground", Marks.BelowGrade.Description, StringComparison.Ordinal);

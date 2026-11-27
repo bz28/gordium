@@ -4,7 +4,8 @@ using System.Text.Json.Nodes;
 namespace Gordium.Revit.Reading;
 
 /// <summary>
-/// The ground just outside each window (<c>openings[].ground_outside</c>; a door's isn't sent, its clear bottom not being,
+/// The ground just outside each window and each door whose clear bottom is bounded (<c>openings[].ground_outside</c>;
+/// InteriorReader.DoorBottom,
 /// docs/interior/interior_description_format.md), read from the Toposolids (and older topography surfaces) the
 /// architect states show the finished ground (<see cref="Marks.ToposolidFinished"/>), so that the measuring works out
 /// whether an escape opening's clear bottom is below grade and how deep its area well is at least

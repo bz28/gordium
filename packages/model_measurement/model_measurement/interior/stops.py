@@ -189,6 +189,13 @@ STOPS = {
                                 "it is the well's floor or the ground around the well is an open question (4.6)",
     "well_ground_near": "the opening {name} doesn't state {what}, and the ground outside it (at {ground} in) is within "
                         "1/16 in of its clear opening's bottom, so the model doesn't settle it ({mark})",
+    "well_ground_between": "the opening {name} doesn't state {what}, and the ground outside it (at {ground} in) lies "
+                           "between the lowest and the highest its clear opening's bottom could be ({low} in to {high} "
+                           "in: its threshold isn't drawn), so the model doesn't settle it ({mark})",
+    "well_bottom_unread": "the opening {name} doesn't state {what}, and where its clear opening's bottom lies can't be "
+                          "read ({reason}) ({mark})",
+    "bottom_between_bad": "the lowest and highest its clear opening's bottom could be aren't two elevations, the lower "
+                          "first: {got}",
     "well_ground_no_bottom": "the opening {name} doesn't state {what}, and its clear opening's bottom isn't known, to "
                              "compare with the ground outside it ({mark})",
     "well_ground_unread": "the opening {name} doesn't state {what}, and the ground outside it can't be read ({reason}) "
