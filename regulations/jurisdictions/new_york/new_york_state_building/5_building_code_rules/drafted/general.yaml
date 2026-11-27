@@ -2922,8 +2922,8 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Through penetrations of a rated wall, where not protected as tested in the assembly per 714.4.1.1, are protected
-      by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential
-      of at least 0.01 inch of water, with an F rating at least the wall''s required rating: a person''s check.'
+      by an approved through-penetration firestop system installed as tested per ASTM E814 or UL 1479 at a positive pressure
+      differential of at least 0.01 inch of water, with an F rating at least the wall''s required rating: a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -2978,13 +2978,15 @@ rules:
       steel electrical boxes in walls rated at most 2 hours, each at most 16 square inches, at most 100 square inches of openings
       in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches apart
       where the stud cavities don''t communicate (or the wall cavity''s depth where filled with cellulose, rockwool or slag
-      wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes per their
-      listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); electrical boxes
-      listed as part of a wall opening protective material system for use in fire-resistance-rated assemblies, installed per
-      their listing; other boxes in a membrane penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure
-      differential of at least 0.01 inch of water, with F and T ratings at least the wall''s, installed per their listing;
-      sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or listed
-      means: a person''s check (1023.5 allows membrane penetrations on the outside of an exit stairway enclosure only so protected).'
+      wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes of any
+      material tested for use in fire-resistance-rated assemblies, installed per their listing (1/8 inch unless listed otherwise;
+      their listed separation, fireblocking per 718.2.1, putty pads or listed means); electrical boxes listed as part of a
+      wall opening protective material system for use in fire-resistance-rated assemblies, installed per their listing; other
+      boxes in a membrane penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential
+      of at least 0.01 inch of water, with F and T ratings at least the wall''s, installed per their listing; sprinkler escutcheons;
+      and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or other listed materials and methods,
+      installed per the listing: a person''s check (1023.5 allows membrane penetrations on the outside of an exit stairway
+      enclosure only so protected).'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 718.2.1 and 1023.5 aren't brought in. Shown
     for every building.
   drafted_by: claude_code/claude-opus-5-5
@@ -3120,10 +3122,10 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Through penetrations of a rated floor, where not protected as tested in the assembly per 714.5.1.1, are protected
-      by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential
-      of at least 0.01 inch of water, with an F rating and a T rating of at least 1 hour and at least the floor''s required
-      rating; no T rating is needed for floor penetrations within a wall cavity above or below, floor, tub or shower drains
-      within a horizontal assembly''s concealed space, metal conduit or tubing at most 4 inches nominal diameter penetrating
+      by an approved through-penetration firestop system installed and tested per ASTM E814 or UL 1479 at a positive pressure
+      differential of at least 0.01 inch of water, with an F rating and a T rating of at least 1 hour and at least the floor''s
+      required rating; no T rating is needed for floor penetrations within a wall cavity above or below, floor, tub or shower
+      drains within a horizontal assembly''s concealed space, metal conduit or tubing at most 4 inches nominal diameter penetrating
       directly into metal-enclosed electrical power switchgear, or steel, ferrous or copper conduits, pipes, tubes or vents
       at most 6 inches through a single concrete floor (more than one floor where each opening is at most 144 square inches):
       a person''s check.'
@@ -3227,10 +3229,10 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Penetrations in smoke barriers are protected by an approved through-penetration firestop system tested per UL 1479
-      for air leakage, its L rating at 0.30 inch of water in both the ambient and elevated temperature tests at most 5.0 cfm
-      per square foot of penetration opening for each system, and at most 50 cfm in all for any 100 square feet of wall or
-      floor area: a person''s check.'
+    note: 'Penetrations in smoke barriers are protected by an approved through-penetration firestop system installed and tested
+      per UL 1479 for air leakage, its L rating at 0.30 inch of water in both the ambient and elevated temperature tests at
+      most 5.0 cfm per square foot of penetration opening for each system, and at most 50 cfm in all for any 100 square feet
+      of wall or floor area: a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft

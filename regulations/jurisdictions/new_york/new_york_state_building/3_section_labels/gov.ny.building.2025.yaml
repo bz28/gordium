@@ -5498,9 +5498,9 @@ labels:
     topic: means_of_egress
     reason: 'A through penetration of a rated wall meets 714.4.1.1 or 714.4.1.2; except a steel, ferrous or copper pipe, tube
       or conduit, whose annular space may be filled with concrete, grout or mortar the full thickness of a concrete or masonry
-      wall (an item at most 6 inches nominal diameter through an opening at most 144 square inches), or with a material that
-      stops flame and hot gases for the wall''s rating under ASTM E119 or UL 263 fire conditions at a positive pressure differential
-      of at least 0.01 inch of water: a person''s check (general.bc_714_4_1_through_penetrations).'
+      wall or the thickness that keeps its rating (an item at most 6 inches nominal diameter through an opening at most 144
+      square inches), or with a material that stops flame and hot gases for the wall''s rating under ASTM E119 or UL 263 fire
+      conditions at a positive pressure differential of at least 0.01 inch of water: a person''s check (general.bc_714_4_1_through_penetrations).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 180
@@ -5524,8 +5524,8 @@ labels:
   714.4.1.1:
     label: flag
     topic: means_of_egress
-    reason: 'Through penetrations are protected by systems installed as tested in the approved rated assembly: a person''s
-      check (general.bc_714_4_1_1_tested_assembly_penetrations).'
+    reason: 'Through penetrations of a rated wall, where not protected per 714.4.1.2 (a firestop system), are protected by
+      systems installed as tested in the approved rated assembly: a person''s check (general.bc_714_4_1_1_tested_assembly_penetrations).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 180
@@ -5541,7 +5541,8 @@ labels:
   714.4.1.2:
     label: flag
     topic: means_of_egress
-    reason: 'Or by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure
+    reason: 'Through penetrations of a rated wall, where not protected as tested in the assembly per 714.4.1.1, are protected
+      by an approved through-penetration firestop system installed as tested per ASTM E814 or UL 1479 at a positive pressure
       differential of at least 0.01 inch of water, with an F rating at least the wall''s required rating: a person''s check
       (general.bc_714_4_1_2_through_penetration_firestop).'
     sources:
@@ -5566,11 +5567,13 @@ labels:
       of openings in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches
       apart where the stud cavities don''t communicate (or the wall cavity''s depth where filled with cellulose, rockwool
       or slag wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes
-      per their listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); electrical
-      boxes listed as part of a wall opening protective material system for use in fire-resistance-rated assemblies, installed
-      per their listing; other boxes in a membrane firestop system per ASTM E814 or UL 1479 with F and T ratings of the wall;
-      sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or listed
-      means: a person''s check (general.bc_714_4_2_membrane_penetrations).'
+      of any material tested for use in fire-resistance-rated assemblies, installed per their listing (1/8 inch unless listed
+      otherwise; their listed separation, fireblocking per 718.2.1, putty pads or listed means); electrical boxes listed as
+      part of a wall opening protective material system for use in fire-resistance-rated assemblies, installed per their listing;
+      other boxes in a membrane penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential
+      of at least 0.01 inch of water, with F and T ratings at least the wall''s, installed per their listing; sprinkler escutcheons;
+      and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or other listed materials and methods,
+      installed per the listing: a person''s check (general.bc_714_4_2_membrane_penetrations).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 180
@@ -5712,10 +5715,10 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Through penetrations of a rated floor, where not protected as tested in the assembly per 714.5.1.1, are protected
-      by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential
-      of at least 0.01 inch of water, with an F rating and a T rating of at least 1 hour and at least the floor''s required
-      rating; no T rating is needed for floor penetrations within a wall cavity above or below, floor, tub or shower drains
-      within a horizontal assembly''s concealed space, metal conduit or tubing at most 4 inches nominal diameter penetrating
+      by an approved through-penetration firestop system installed and tested per ASTM E814 or UL 1479 at a positive pressure
+      differential of at least 0.01 inch of water, with an F rating and a T rating of at least 1 hour and at least the floor''s
+      required rating; no T rating is needed for floor penetrations within a wall cavity above or below, floor, tub or shower
+      drains within a horizontal assembly''s concealed space, metal conduit or tubing at most 4 inches nominal diameter penetrating
       directly into metal-enclosed electrical power switchgear, or steel, ferrous or copper conduits, pipes, tubes or vents
       at most 6 inches through a single concrete floor (more than one floor where each opening is at most 144 square inches):
       a person''s check (general.bc_714_5_1_2_floor_firestop_systems).'
@@ -5816,10 +5819,10 @@ labels:
   714.5.4:
     label: flag
     topic: means_of_egress
-    reason: 'Penetrations in smoke barriers are protected by an approved through-penetration firestop system tested per UL
-      1479 for air leakage, its L rating at 0.30 inch of water in both the ambient and elevated temperature tests at most
-      5.0 cfm per square foot of penetration opening for each system, and at most 50 cfm in all for any 100 square feet of
-      wall or floor area: a person''s check (general.bc_714_5_4_smoke_barrier_penetrations).'
+    reason: 'Penetrations in smoke barriers are protected by an approved through-penetration firestop system installed and
+      tested per UL 1479 for air leakage, its L rating at 0.30 inch of water in both the ambient and elevated temperature
+      tests at most 5.0 cfm per square foot of penetration opening for each system, and at most 50 cfm in all for any 100
+      square feet of wall or floor area: a person''s check (general.bc_714_5_4_smoke_barrier_penetrations).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 182

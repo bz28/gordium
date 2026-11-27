@@ -539,3 +539,23 @@ def test_part_d_review_round_2s_notes(book):
     assert "wall opening protective material system for use in fire-resistance-rated assemblies, installed per their listing" \
         in shown("general.bc_714_4_2_membrane_penetrations")
     assert "positive pressure differential" in shown("general.bc_714_4_1_through_penetrations")
+
+
+def test_part_d_review_round_3s_notes_and_labels(book, labels):
+    """Part d review round 3: 714.4.2's exceptions 2 and 6 keep "tested for use in fire-resistance-rated assemblies",
+    "unless listed otherwise" and "installed per the listing"; the firestop systems are installed as tested; and, the
+    class, each part d flag's label reason says what its note says (a label lagged its note twice)."""
+    rules = {r["id"]: r for r in book}
+    def shown(rid):
+        return " ".join(_shown_note(rules[rid]).split())
+    membrane = shown("general.bc_714_4_2_membrane_penetrations")
+    assert "tested for use in fire-resistance-rated assemblies, installed per their listing (1/8 inch unless listed otherwise" in membrane
+    assert "other listed materials and methods, installed per the listing" in membrane
+    assert "installed as tested per ASTM E814" in shown("general.bc_714_4_1_2_through_penetration_firestop")
+    for rid in ("general.bc_714_5_1_2_floor_firestop_systems", "general.bc_714_5_4_smoke_barrier_penetrations"):
+        assert "installed and tested per" in shown(rid), rid
+    for pid, v in labels.items():
+        if v["label"] == "flag" and re.match(r"71[124]\.", pid):
+            rid = re.search(r"\((general\.bc_[a-z0-9_]+)\)\.?$", " ".join(v["reason"].split())).group(1)
+            head = " ".join(v["reason"].split()).rsplit(": a person's check", 1)[0]
+            assert shown(rid).startswith(head), pid
