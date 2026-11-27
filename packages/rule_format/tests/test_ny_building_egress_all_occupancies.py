@@ -1656,5 +1656,11 @@ def test_each_luminous_marking_reason_says_where_the_markings_are_required(rules
     assert "alternating equal bands" in flags["general.bc_1025_2_5_obstacles"]
     # 1025.2.1's printed double negative is read as its evident meaning, and says so in the flag and the verification
     assert "Gordium's reading" in rules["general.bc_1025_2_1_steps"]["notes"]
+    assert "Gordium's reading of the printed double negative" in flags["general.bc_1025_2_1_steps"]   # round 2
+    # review round 2: the door markings are for the doors on the exit path (1025.2.6), each flag quoting it
+    for rid in ("general.bc_1025_2_6_1_emergency_exit_symbol", "general.bc_1025_2_6_2_door_hardware_markings",
+                "general.bc_1025_2_6_3_door_frame_markings"):
+        assert "occupants pass through to complete the exit path" in flags[rid], rid
+        assert any(s["quote"].startswith("1025.2.6 Doors within the exit path") for s in rules[rid]["sources"]), rid
     tv = load(NY / "text_verification.yaml")["pieces"]["1025.2.1"]["flags"]
     assert any("double negative" in f for f in tv)

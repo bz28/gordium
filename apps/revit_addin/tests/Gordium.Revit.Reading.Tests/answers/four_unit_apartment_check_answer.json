@@ -1580,8 +1580,8 @@
     "Egress · Demarcation lines continuous from wall to floor: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
     "Egress · Obstacles in the exit path outlined: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating equal bands of luminous material and black, at most 2 inches thick, at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
     "Egress · Low-location emergency exit symbol on exit path doors: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
-    "Egress · Luminous markings on exit path door hardware: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
-    "Egress · Luminous stripes on exit path door frames: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+    "Egress · Luminous markings on exit path door hardware: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), its hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+    "Egress · Luminous stripes on exit path door frames: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), the top and sides of its frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
     "Egress · Luminous markings uniform within an enclosure: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
     "Egress · Luminous marking materials: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
     "Egress · Light for photoluminescent markings: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
@@ -79497,15 +79497,19 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), its hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), its hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.6.2 Door hardware markings. Door hardware shall be marked with not less than 16 square inches (10 323 mm[fn2)] of luminous material. This marking shall be located behind, immediately adjacent to, or on the door handle or escutcheon. Where a panic bar is installed, such material shall be not less than 1 inch (25 mm) wide for the entire length of the actuating bar or touchpad.",
         "where": "1025.2.6.2, 2025 Building Code of New York State (BCNYS), PDF p.350"
+       },
+       {
+        "text": "1025.2.6 Doors within the exit path. Doors through which occupants must pass in order to complete the exit path shall be provided with markings complying with Sections 1025.2.6.1 through 1025.2.6.3.",
+        "where": "1025.2.6, 2025 Building Code of New York State (BCNYS), PDF p.349"
        }
       ],
       "citation": "1025.2.6.2, 2025 Building Code of New York State (BCNYS), PDF p.350",
@@ -79526,14 +79530,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_6_2_door_hardware_markings",
-       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), its hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_6_2_door_hardware_markings",
-       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), its hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79567,15 +79571,19 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), the top and sides of its frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), the top and sides of its frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.6.3 Door frame markings. The top and sides of the door frame shall be marked with a solid and continuous 1-inch- to 2-inch-wide (25 mm to 51 mm) stripe. Where the door molding does not provide sufficient flat surface on which to locate the stripe, the stripe shall be permitted to be located on the wall surrounding the frame.",
         "where": "1025.2.6.3, 2025 Building Code of New York State (BCNYS), PDF p.350"
+       },
+       {
+        "text": "1025.2.6 Doors within the exit path. Doors through which occupants must pass in order to complete the exit path shall be provided with markings complying with Sections 1025.2.6.1 through 1025.2.6.3.",
+        "where": "1025.2.6, 2025 Building Code of New York State (BCNYS), PDF p.349"
        }
       ],
       "citation": "1025.2.6.3, 2025 Building Code of New York State (BCNYS), PDF p.350",
@@ -79596,14 +79604,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_6_3_door_frame_markings",
-       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), the top and sides of its frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_6_3_door_frame_markings",
-       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), the top and sides of its frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -88164,7 +88172,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Luminous markings on exit path door hardware (BCNYS 1025.2.6.2): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "title": "Egress · Luminous markings on exit path door hardware (BCNYS 1025.2.6.2): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), its hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Luminous markings on exit path door hardware (BCNYS 1025.2.6.2)"
       },
@@ -88177,7 +88185,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Luminous stripes on exit path door frames (BCNYS 1025.2.6.3): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "title": "Egress · Luminous stripes on exit path door frames (BCNYS 1025.2.6.3): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), the top and sides of its frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Luminous stripes on exit path door frames (BCNYS 1025.2.6.3)"
       },
@@ -90635,7 +90643,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_6_2_door_hardware_markings",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), its hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_6_2_door_hardware_markings"
@@ -90645,7 +90653,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_6_3_door_frame_markings",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), the top and sides of its frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_6_3_door_frame_markings"
@@ -121839,7 +121847,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "3064d58e393b65f0a9ea0d2cb4f8f07c6e4b9bc4848af6a7a561b5b0379cbbc4",
   "rulebook": {
-   "new_york/ithaca_city": "32b9efb0fa1d2a4202c3986902b25d151b0b6c5c981b9267ed435eac84dc6d44"
+   "new_york/ithaca_city": "65c5316a93f3fb39feef49f7a8a6984d70a0c459077f2a0752571112fa5f8be8"
   }
  }
 }
