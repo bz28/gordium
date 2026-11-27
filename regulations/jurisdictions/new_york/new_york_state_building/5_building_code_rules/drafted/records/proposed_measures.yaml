@@ -261,6 +261,9 @@ special_egress_spaces:
   - general.bc_1006_3_3_story_exits
   - general.bc_1016_2_intervening_spaces_other_groups
   - general.bc_1017_2_travel_distance
+  - general.bc_1020_3_corridor_capacity
+  - general.bc_1020_5_dead_end
+  - general.bc_1020_5_dead_end_other_groups
   - general.bc_402_1_mall_buildings
   - general.bc_402_8_1_1_mall_minimum_width
   - general.bc_402_8_1_mall_width
@@ -306,6 +309,10 @@ special_egress_spaces:
   - general.bc_table_1017_2_i1
   - general.bc_table_1017_2_i2_i3
   - general.bc_table_1017_2_note_a
+  - general.bc_table_1020_2_a_b_e_f_m_s_u
+  - general.bc_table_1020_2_h4_h5
+  - general.bc_table_1020_2_r
+  - general.bc_table_1020_3_corridor_width
 merchandise_pads:
   meaning: 'The building holds Group M merchandise pads (2025 BCNYS 202 MERCHANDISE PAD; 1018.4: a common path of at most
     30 ft from any point in a pad, 75 ft for not more than 50 occupants), as the architect states it'

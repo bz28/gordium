@@ -6176,6 +6176,12 @@ rules:
       to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
       space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
       pass.)'
+  - when: special_egress_spaces and story_exit_count < 4 and story_exit_count >= (2 if story_occupant_load <= 500 else 3 if
+      story_occupant_load <= 1000 else 4)
+    reason: 'Enough exits for the story''s occupant load worked out from its rooms, but fewer than four, in a building that
+      may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
+      mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
+      ask more exits (402.8 governs over Chapter 10): a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -6209,6 +6215,27 @@ rules:
     - 41
     quote: First story above or below grade plane and occupiable H-2, H-3 3 25 roofs over the first story above grade plane
       H-4, H-5, I, R-1, R-2a, c 10 75
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 6
+    - 15
+    quote: '[BE] 402.8.2.1 Occupant formula. In determining required means of egress of the mall, the number of occupants
+      for whom means of egress are to be provided shall be based on gross leasable area of the covered or open mall building
+      (excluding anchor buildings) and the occupant load factor as determined by Equation 4-1. Equation 4-1 OLF = (0.00007)(GLA)
+      + 25 where: OLF = The occupant load factor (square feet per person). GLA = The gross leasable area (square feet). Exception:
+      Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
+      of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
+      for determining the required means of egress for the mall building.'
   examples:
   - given:
       occupancy_group_i4: true
@@ -6330,6 +6357,7 @@ rules:
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
       occupancy_group: I-4
+      special_egress_spaces: false
     parts:
       story:
       - id: p6
@@ -6352,6 +6380,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       occupancy_group: mixed
+      special_egress_spaces: false
     parts:
       story:
       - id: p5
@@ -6370,12 +6399,36 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       story: []
     rows:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      other_occupancy_present: false
+      occupancy_group: I-4
+      assembly_fixed_seating: false
+      special_egress_spaces: true
+    parts:
+      story:
+      - id: p1
+        name: First floor, 120
+        measures:
+          story_exit_count: 2
+          story_occupant_load: 120
+          story_first_above_or_below_grade: true
+          egress_travel_distance: 130.667
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
+      ask more here, so a person checks.'
   notes: 'Table 1006.3.3: two exits up to 500 occupants, three from 501 to 1,000, four above, for every occupancy. One
     exit is enough only where 1006.3.4 allows it: this rule reads item 1 for Group I-4 (Table 1006.3.4(2)''s I row: the
     first story above or below grade plane, at most 10 occupants and 75 ft of exit access travel; Group I is not in the
@@ -6496,6 +6549,12 @@ rules:
       to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
       space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
       pass.)'
+  - when: special_egress_spaces and story_exit_count < 4 and story_exit_count >= (2 if story_occupant_load <= 500 else 3 if
+      story_occupant_load <= 1000 else 4)
+    reason: 'Enough exits for the story''s occupant load worked out from its rooms, but fewer than four, in a building that
+      may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
+      mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
+      ask more exits (402.8 governs over Chapter 10): a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -6550,6 +6609,27 @@ rules:
       This table is used for Group R-2 occupancies consisting of sleeping units. For Group R-2 occupancies consisting of dwelling
       units, use Table 1006.3.4(1). d.The length of exit access travel distance in a Group S-2 open parking garage shall be
       not more than 100 feet.
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 6
+    - 15
+    quote: '[BE] 402.8.2.1 Occupant formula. In determining required means of egress of the mall, the number of occupants
+      for whom means of egress are to be provided shall be based on gross leasable area of the covered or open mall building
+      (excluding anchor buildings) and the occupant load factor as determined by Equation 4-1. Equation 4-1 OLF = (0.00007)(GLA)
+      + 25 where: OLF = The occupant load factor (square feet per person). GLA = The gross leasable area (square feet). Exception:
+      Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
+      of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
+      for determining the required means of egress for the mall building.'
   examples:
   - given:
       occupancy_group: B
@@ -6741,6 +6821,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
+      special_egress_spaces: false
     parts:
       story: []
     rows:
@@ -6752,6 +6833,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
+      special_egress_spaces: false
     parts:
       story:
       - id: p1
@@ -6774,12 +6856,34 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
+      special_egress_spaces: false
     parts:
       story: []
     rows:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: true
+    parts:
+      story:
+      - id: p1
+        name: Office floor, two exits
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 2
+          story_occupant_load: 120
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
+      ask more here, so a person checks.'
   notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4
     (the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling
     units (Table 1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with
@@ -6851,6 +6955,12 @@ rules:
       (Table 1017.2 note a) also limits travel to a door in a smoke barrier (150 ft from a room''s door, 200 ft from any point),
       and smoke barriers aren''t drawn: a person checks. (Only where the story would otherwise pass: a measured fail still
       fails.)'
+  - when: special_egress_spaces and story_exit_count < 4 and story_exit_count >= (2 if story_occupant_load <= 500 else 3 if
+      story_occupant_load <= 1000 else 4)
+    reason: 'Enough exits for the story''s occupant load worked out from its rooms, but fewer than four, in a building that
+      may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
+      mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
+      ask more exits (402.8 governs over Chapter 10): a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -6905,6 +7015,27 @@ rules:
       This table is used for Group R-2 occupancies consisting of sleeping units. For Group R-2 occupancies consisting of dwelling
       units, use Table 1006.3.4(1). d.The length of exit access travel distance in a Group S-2 open parking garage shall be
       not more than 100 feet.
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 6
+    - 15
+    quote: '[BE] 402.8.2.1 Occupant formula. In determining required means of egress of the mall, the number of occupants
+      for whom means of egress are to be provided shall be based on gross leasable area of the covered or open mall building
+      (excluding anchor buildings) and the occupant load factor as determined by Equation 4-1. Equation 4-1 OLF = (0.00007)(GLA)
+      + 25 where: OLF = The occupant load factor (square feet per person). GLA = The gross leasable area (square feet). Exception:
+      Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
+      of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
+      for determining the required means of egress for the mall building.'
   examples:
   - given:
       occupancy_group: R-3
@@ -6981,6 +7112,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
+      special_egress_spaces: false
     parts:
       story:
       - id: p1
@@ -7003,12 +7135,34 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
+      special_egress_spaces: false
     parts:
       story: []
     rows:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: true
+    parts:
+      story:
+      - id: p1
+        name: Two exits for the story's load
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 2
+          story_occupant_load: 40
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits for the story''s load, a pass where the building states it may hold a covered or open mall (special egress
+      spaces yes): 402.8 may ask more here, so a person checks.'
   notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4
     (the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling
     units (Table 1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with
@@ -7067,6 +7221,12 @@ rules:
       to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
       space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
       pass.)'
+  - when: special_egress_spaces and story_exit_count < 4 and story_exit_count >= (2 if story_occupant_load <= 500 else 3 if
+      story_occupant_load <= 1000 else 4)
+    reason: 'Enough exits for the story''s occupant load worked out from its rooms, but fewer than four, in a building that
+      may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
+      mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
+      ask more exits (402.8 governs over Chapter 10): a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -7121,12 +7281,34 @@ rules:
       This table is used for Group R-2 occupancies consisting of sleeping units. For Group R-2 occupancies consisting of dwelling
       units, use Table 1006.3.4(1). d.The length of exit access travel distance in a Group S-2 open parking garage shall be
       not more than 100 feet.
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 6
+    - 15
+    quote: '[BE] 402.8.2.1 Occupant formula. In determining required means of egress of the mall, the number of occupants
+      for whom means of egress are to be provided shall be based on gross leasable area of the covered or open mall building
+      (excluding anchor buildings) and the occupant load factor as determined by Equation 4-1. Equation 4-1 OLF = (0.00007)(GLA)
+      + 25 where: OLF = The occupant load factor (square feet per person). GLA = The gross leasable area (square feet). Exception:
+      Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
+      of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
+      for determining the required means of egress for the mall building.'
   examples:
   - given:
       occupancy_group: S-2
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
+      special_egress_spaces: false
     parts:
       story:
       - id: p1
@@ -7221,6 +7403,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
+      special_egress_spaces: false
     parts:
       story:
       - id: p1
@@ -7243,12 +7426,38 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
+      special_egress_spaces: false
     parts:
       story: []
     rows:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: true
+    parts:
+      story:
+      - id: p1
+        name: Two exits for the story's load
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 2
+          story_occupant_load: 29
+          egress_travel_distance: 100
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits for the story''s load, a pass where the building states it may hold a covered or open mall (special egress
+      spaces yes): 402.8 may ask more here, so a person checks.'
   notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4
     (the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling
     units (Table 1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with
@@ -7303,6 +7512,12 @@ rules:
       to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
       space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
       pass.)'
+  - when: special_egress_spaces and story_exit_count < 4 and story_exit_count >= (2 if story_occupant_load <= 500 else 3 if
+      story_occupant_load <= 1000 else 4)
+    reason: 'Enough exits for the story''s occupant load worked out from its rooms, but fewer than four, in a building that
+      may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): the
+      mall''s own occupants come from 402.8.2.1''s formula on the gross leasable area, not the rooms'' functions, and may
+      ask more exits (402.8 governs over Chapter 10): a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -7353,6 +7568,27 @@ rules:
       903.3.1.1 or 903.3.1.2 and provided with emergency escape and rescue openings in accordance with Section 1031. b.This
       table is used for Group R-2 occupancies consisting of dwelling units. For Group R-2 occupancies consisting of sleeping
       units, use Table 1006.3.4(2).
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 6
+    - 15
+    quote: '[BE] 402.8.2.1 Occupant formula. In determining required means of egress of the mall, the number of occupants
+      for whom means of egress are to be provided shall be based on gross leasable area of the covered or open mall building
+      (excluding anchor buildings) and the occupant load factor as determined by Equation 4-1. Equation 4-1 OLF = (0.00007)(GLA)
+      + 25 where: OLF = The occupant load factor (square feet per person). GLA = The gross leasable area (square feet). Exception:
+      Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
+      of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
+      for determining the required means of egress for the mall building.'
   examples:
   - given:
       occupancy_group: R-2
@@ -7501,6 +7737,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
+      special_egress_spaces: false
     parts:
       story:
       - id: p1
@@ -7523,12 +7760,35 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       emergency_escape_openings_1031: true
+      special_egress_spaces: false
     parts:
       story: []
     rows:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: false
+      assembly_fixed_seating: false
+      special_egress_spaces: true
+    parts:
+      story:
+      - id: p1
+        name: Apartment floor, two exits
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 2
+          story_occupant_load: 9
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
+      ask more here, so a person checks.'
   notes: 'Table 1006.3.4(1) for Group R-2 of dwelling units (note b; one of sleeping units is Table 1006.3.4(2)''s): a
     basement or the first, second or third story above grade plane may have one exit with at most 4 dwelling units and
     125 ft of exit access travel, only in a building sprinklered per 903.3.1.1 or 903.3.1.2 with emergency escape and
@@ -11627,11 +11887,40 @@ rules:
     - 45
     quote: 3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5
       times the least width of the dead-end corridor.
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 40
+    - 45
+    quote: '[BE] 402.8.6 Access to exits. Where more than one exit is required, they shall be so arranged that it is possible
+      to travel in either direction from any point in a mall of a covered mall building to separate exits or from any point
+      in an open mall of an open mall building to two separate locations on the perimeter line, provided that neither location
+      is an exterior wall of an anchor building or parking garage. The width of an exit passageway or corridor from a mall
+      shall be not less than 66 inches (1676 mm). Exception: Access to exits is permitted by way of a dead-end mall that does
+      not exceed a length equal to twice the width of the mall measured at the narrowest location within the dead-end portion
+      of the mall.'
+  review_when:
+  - when: special_egress_spaces and corridor_dead_end_length > corridor_dead_end_least_width + corridor_dead_end_least_width
+      and (corridor_dead_end_length <= 20 or corridor_dead_end_length < 2.5 * corridor_dead_end_least_width)
+    reason: 'Within 1020.5''s limit but longer than twice its least width, in a building that may hold a covered or open mall
+      (stated, or not ruled out: a space the code gives its own exits or travel limit): a dead-end mall is at most twice the
+      mall''s narrowest width within the dead end (402.8.6''s exception, 402.8 governing over Chapter 10), and which corridor
+      is a mall isn''t in the model: a person checks.'
   examples:
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -11649,6 +11938,7 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p2
@@ -11665,6 +11955,7 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p3
@@ -11680,12 +11971,31 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor: []
     rows:
     - outcome: not_applicable
     expect: not_applicable
     note: 'No corridor: with none, the rule doesn''t apply.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      special_egress_spaces: true
+    parts:
+      corridor:
+      - id: p1
+        name: Corridor (the sheet)
+        measures:
+          corridor_dead_end_length: 21.5
+          corridor_dead_end_least_width: 10
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
+      ask more here, so a person checks.'
   notes: 'Exception 2''s 50 ft (sprinklered per 903.3.1.1) lists Groups B, E, F, I-1, M, R-1, R-2, S and U, not I-4; exceptions
     1 and 4 are I-3 and I-2. It applies where more than one exit or exit access doorway is required (1006.2.1): with one,
     there is no limit, so this rule may only be stricter there. The 2009 IBC (1018.4, the Maine sheet''s code) set the same.
@@ -11749,6 +12059,13 @@ rules:
       >= 2.5 * corridor_dead_end_least_width
     reason: 'Group I-2: within exception 4''s 30 ft for Condition 2 corridors that don''t serve patient rooms or treatment
       spaces (not stated): a person checks.'
+  - when: special_egress_spaces and corridor_dead_end_length > corridor_dead_end_least_width + corridor_dead_end_least_width
+      and (corridor_dead_end_length <= (50 if occupancy_group in ["B", "E", "F-1", "F-2", "I-1", "M", "R-1", "R-2", "S-1",
+      "S-2", "U"] and sprinklered_903_3_1_1 else 20) or corridor_dead_end_length < 2.5 * corridor_dead_end_least_width)
+    reason: 'Within 1020.5''s limit but longer than twice its least width, in a building that may hold a covered or open mall
+      (stated, or not ruled out: a space the code gives its own exits or travel limit): a dead-end mall is at most twice the
+      mall''s narrowest width within the dead end (402.8.6''s exception, 402.8 governing over Chapter 10), and which corridor
+      is a mall isn''t in the model: a person checks.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -11782,11 +12099,33 @@ rules:
     - 47
     quote: 4. In Group I-2, Condition 2 occupancies, the length of dead-end corridors that do not serve patient rooms or patient
       treat- ment spaces shall not exceed 30 feet (9144 mm).
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 40
+    - 45
+    quote: '[BE] 402.8.6 Access to exits. Where more than one exit is required, they shall be so arranged that it is possible
+      to travel in either direction from any point in a mall of a covered mall building to separate exits or from any point
+      in an open mall of an open mall building to two separate locations on the perimeter line, provided that neither location
+      is an exterior wall of an anchor building or parking garage. The width of an exit passageway or corridor from a mall
+      shall be not less than 66 inches (1676 mm). Exception: Access to exits is permitted by way of a dead-end mall that does
+      not exceed a length equal to twice the width of the mall measured at the narrowest location within the dead-end portion
+      of the mall.'
   examples:
   - given:
       occupancy_group: B
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -11803,6 +12142,7 @@ rules:
       occupancy_group: B
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -11819,6 +12159,7 @@ rules:
       occupancy_group: R-2
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -11835,6 +12176,7 @@ rules:
       occupancy_group: R-2
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -11851,6 +12193,7 @@ rules:
       occupancy_group: R-2
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -11867,6 +12210,7 @@ rules:
       occupancy_group: A-3
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -11883,6 +12227,7 @@ rules:
       occupancy_group: R-2
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: true
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -11899,6 +12244,7 @@ rules:
       occupancy_group: I-3
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -11915,6 +12261,7 @@ rules:
       occupancy_group: I-2
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -11931,6 +12278,7 @@ rules:
       occupancy_group: I-4
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -11946,12 +12294,31 @@ rules:
       occupancy_group: B
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      special_egress_spaces: false
     parts:
       corridor: []
     rows:
     - outcome: not_applicable
     expect: not_applicable
     note: 'No corridor: with none, the rule doesn''t apply.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      special_egress_spaces: true
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor, NFPA 13, at 50 ft
+        measures:
+          corridor_dead_end_length: 50
+          corridor_dead_end_least_width: 6
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
+      ask more here, so a person checks.'
   notes: '1020.5 and its exceptions for every group but I-4 (the rule “Dead end at most 20 ft, or under 2.5 x its width, I-4
     (BCNYS 1020.5)”): 20 ft; 50 ft in Groups B, E, F, I-1, M, R-1, R-2, S and U with an NFPA 13 system (903.3.1.1: exception
     2; a 13R system does not meet it); any length under 2.5 times the least width (exception 3). Exceptions 1 (Group I-3,
@@ -12101,6 +12468,12 @@ rules:
     reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
       sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
       system is the one the column means is a person''s check (never a pass on it).'
+  - when: special_egress_spaces and corridor_occupant_load <= 30 and not ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
+      and corridor_fire_rating_hours >= 1)
+    reason: 'Not rated, allowed only by the corridor''s occupant load worked out from its story''s rooms, in a building that
+      may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): a
+      mall''s occupants, and those of a corridor from it, come from 402.8.2.1''s formula on the gross leasable area and may
+      be more (402.8 governs over Chapter 10): a person checks.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -12113,12 +12486,34 @@ rules:
     - 8
     quote: H-4, H-5 Greater than 30 Not Permitted 1[fnc]
   - *id003
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 6
+    - 15
+    quote: '[BE] 402.8.2.1 Occupant formula. In determining required means of egress of the mall, the number of occupants
+      for whom means of egress are to be provided shall be based on gross leasable area of the covered or open mall building
+      (excluding anchor buildings) and the occupant load factor as determined by Equation 4-1. Equation 4-1 OLF = (0.00007)(GLA)
+      + 25 where: OLF = The occupant load factor (square feet per person). GLA = The gross leasable area (square feet). Exception:
+      Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
+      of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
+      for determining the required means of egress for the mall building.'
   examples:
   - given:
       occupancy_group: H-4
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12136,6 +12531,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12153,6 +12549,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12170,6 +12567,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12187,12 +12585,32 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor: []
     rows:
     - outcome: not_applicable
     expect: not_applicable
     note: 'No corridor: with none, the rule doesn''t apply.'
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+      special_egress_spaces: true
+    parts:
+      corridor:
+      - id: p1
+        name: 30 occupants, unrated
+        measures:
+          corridor_occupant_load: 30
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
+      ask more here, so a person checks.'
   notes: 'Table 1020.2''s row for Groups H-4 and H-5: a corridor serving more than 30 occupants is Not Permitted without a
     sprinkler system and 1 hour with one (note c); 30 or fewer, no rating. Hand-drafted in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
@@ -12214,6 +12632,12 @@ rules:
     reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
       sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
       system is the one the column means is a person''s check (never a pass on it).'
+  - when: special_egress_spaces and corridor_occupant_load <= 30 and not (sprinklered_903_3_1_1 or corridor_fire_rating_hours
+      >= 1)
+    reason: 'Not rated, allowed only by the corridor''s occupant load worked out from its story''s rooms, in a building that
+      may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): a
+      mall''s occupants, and those of a corridor from it, come from 402.8.2.1''s formula on the gross leasable area and may
+      be more (402.8 governs over Chapter 10): a person checks.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -12247,12 +12671,34 @@ rules:
     - 51
     quote: 4. A fire-resistance rating is not required for corridors in an occupancy in Group B that is a space requiring
       only a single means of egress complying with Section 1006.2.
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 6
+    - 15
+    quote: '[BE] 402.8.2.1 Occupant formula. In determining required means of egress of the mall, the number of occupants
+      for whom means of egress are to be provided shall be based on gross leasable area of the covered or open mall building
+      (excluding anchor buildings) and the occupant load factor as determined by Equation 4-1. Equation 4-1 OLF = (0.00007)(GLA)
+      + 25 where: OLF = The occupant load factor (square feet per person). GLA = The gross leasable area (square feet). Exception:
+      Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
+      of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
+      for determining the required means of egress for the mall building.'
   examples:
   - given:
       occupancy_group: M
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12270,6 +12716,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12287,6 +12734,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12304,6 +12752,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12320,6 +12769,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12337,6 +12787,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: true
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12354,12 +12805,32 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor: []
     rows:
     - outcome: not_applicable
     expect: not_applicable
     note: 'No corridor: with none, the rule doesn''t apply.'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+      special_egress_spaces: true
+    parts:
+      corridor:
+      - id: p1
+        name: Store corridor, 30 occupants, unrated
+        measures:
+          corridor_occupant_load: 30
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
+      ask more here, so a person checks.'
   notes: 'Table 1020.2''s row for Groups A, B, E, F, M, S and U: more than 30 occupants, 1 hour without a sprinkler system
     and 0 with one; 30 or fewer, none. The row''s cell names no system: NFPA 13 (903.3.1.1) counts, an NFPA 13R or 13D system
     (not allowed for these groups by their own scope) needs review, never a pass. Exceptions 1, 3 and 4 need review where
@@ -12384,6 +12855,13 @@ rules:
     reason: 'Group R-4 with an NFPA 13D system and a 1-hour corridor: note d sends to 903.2.8, which permits 903.3.1.3 in
       Group R-4 only in Condition 1 (903.2.8.2); in Condition 1 the 1 hour is met, in Condition 2 the system isn''t one 903.3.1.3
       allows and the table''s Not Permitted applies. The condition isn''t stated: a person checks.'
+  - when: special_egress_spaces and corridor_occupant_load <= 10 and not (((sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
+      and corridor_fire_rating_hours >= 0.5) or (occupancy_group in ["R-3", "R-4"] and sprinklered_903_3_1_3 and corridor_fire_rating_hours
+      >= 1))
+    reason: 'Not rated, allowed only by the corridor''s occupant load (10 or fewer) worked out from its story''s rooms, in
+      a building that may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel
+      limit): a mall''s occupants, and those of a corridor from it, come from 402.8.2.1''s formula on the gross leasable area
+      and may be more (402.8 governs over Chapter 10): a person checks.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -12411,6 +12889,27 @@ rules:
     - 48
     quote: 2. A fire-resistance rating is not required for corridors contained within a dwelling unit or sleeping unit in
       an occupancy in Groups I-1 and R.
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 6
+    - 15
+    quote: '[BE] 402.8.2.1 Occupant formula. In determining required means of egress of the mall, the number of occupants
+      for whom means of egress are to be provided shall be based on gross leasable area of the covered or open mall building
+      (excluding anchor buildings) and the occupant load factor as determined by Equation 4-1. Equation 4-1 OLF = (0.00007)(GLA)
+      + 25 where: OLF = The occupant load factor (square feet per person). GLA = The gross leasable area (square feet). Exception:
+      Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
+      of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
+      for determining the required means of egress for the mall building.'
   examples:
   - given:
       occupancy_group: R-2
@@ -12418,6 +12917,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
       corridors_within_dwelling_units: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12436,6 +12936,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
       corridors_within_dwelling_units: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12454,6 +12955,7 @@ rules:
       sprinklered_903_3_1_2: true
       sprinklered_903_3_1_3: false
       corridors_within_dwelling_units: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12472,6 +12974,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
       corridors_within_dwelling_units: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12490,6 +12993,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: true
       corridors_within_dwelling_units: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12508,6 +13012,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: true
       corridors_within_dwelling_units: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12526,6 +13031,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: true
       corridors_within_dwelling_units: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12544,6 +13050,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
       corridors_within_dwelling_units: true
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -12561,12 +13068,33 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      special_egress_spaces: false
     parts:
       corridor: []
     rows:
     - outcome: not_applicable
     expect: not_applicable
     note: 'No corridor: with none, the rule doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+      corridors_within_dwelling_units: false
+      special_egress_spaces: true
+    parts:
+      corridor:
+      - id: p1
+        name: 10 occupants, unrated
+        measures:
+          corridor_occupant_load: 10
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
+      ask more here, so a person checks.'
   notes: 'Table 1020.2''s row for Group R: more than 10 occupants, Not Permitted without a sprinkler system, 0.5 hour with
     903.3.1.1 or 903.3.1.2 (note c) and 1 hour for Groups R-3 and R-4 with 903.3.1.3 (note d); 10 or fewer, none. Exception
     2 (a corridor within a dwelling or sleeping unit needs no rating) needs review where it falls short while the building
@@ -13043,6 +13571,14 @@ rules:
     reason: 'Between 0.15 and 0.2 in per occupant in a building of two or more groups with a sprinkler system and a voice/alarm
       system: each portion follows its own occupancy and a shared corridor the more stringent (1004.4), so 0.15 holds unless
       a Group H or I-2 portion uses the corridor, which isn''t shown: a person checks.'
+  - when: special_egress_spaces and corridor_width >= (corridor_occupant_load * 0.15 if occupancy_group in ["A-1", "A-2",
+      "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "I-1", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"]
+      and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and emergency_voice_alarm_system
+      else corridor_occupant_load * 0.2)
+    reason: 'Wide enough for the corridor''s occupant load worked out from its story''s rooms, in a building that may hold
+      a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): a mall taken
+      as a corridor is held to 402.8.1.1''s width instead, and a corridor from it serves the mall''s occupants from 402.8.2.1''s
+      formula on the gross leasable area, which may be more (402.8 governs over Chapter 10): a person checks.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -13082,6 +13618,35 @@ rules:
       909. 3. Facilities with open-air assembly seating shall be permitted to the capacity factors in Section 1030.6.3 indicated
       for level or ramped aisles for means of egress components other than stairways where the entire path for means of egress
       from the seating to the exit discharge is open to the outdoors.
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 51
+    - 52
+    quote: '[BE] 402.8.1 Mall width. For the purpose of providing required egress, malls are permitted to be considered as
+      corridors but need not comply with the requirements of Section 1005.1 of this code where the width of the mall is as
+      specified in this section.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 6
+    - 15
+    quote: '[BE] 402.8.2.1 Occupant formula. In determining required means of egress of the mall, the number of occupants
+      for whom means of egress are to be provided shall be based on gross leasable area of the covered or open mall building
+      (excluding anchor buildings) and the occupant load factor as determined by Equation 4-1. Equation 4-1 OLF = (0.00007)(GLA)
+      + 25 where: OLF = The occupant load factor (square feet per person). GLA = The gross leasable area (square feet). Exception:
+      Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
+      of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
+      for determining the required means of egress for the mall building.'
   examples:
   - given:
       occupancy_group: B
@@ -13089,6 +13654,7 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_voice_alarm_system: false
       assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13107,6 +13673,7 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_voice_alarm_system: false
       assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13125,6 +13692,7 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_voice_alarm_system: true
       assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13143,6 +13711,7 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_voice_alarm_system: true
       assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13161,6 +13730,7 @@ rules:
       sprinklered_903_3_1_2: true
       emergency_voice_alarm_system: true
       assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13179,6 +13749,7 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_voice_alarm_system: true
       assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13197,6 +13768,7 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_voice_alarm_system: true
       assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13216,6 +13788,7 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_voice_alarm_system: true
       assembly_fixed_seating: true
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13233,6 +13806,7 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_voice_alarm_system: false
       assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13251,12 +13825,33 @@ rules:
       sprinklered_903_3_1_2: false
       emergency_voice_alarm_system: false
       assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       corridor: []
     rows:
     - outcome: not_applicable
     expect: not_applicable
     note: 'No corridor: with none, the rule doesn''t apply.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: false
+      assembly_fixed_seating: false
+      special_egress_spaces: true
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor at 44 in, 220 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 220
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
+      ask more here, so a person checks.'
   notes: '1020.3''s capacity, determined by 1005.1: for a corridor, a component other than a stairway, 0.2 in for each occupant
     it serves (1005.3.2); 0.15 in exception 1''s buildings (a sprinkler system per 903.3.1.1, or 903.3.1.2 in Group R where
     that system is allowed, and an emergency voice/alarm system per 907.5.2.2, both stated, in one group other than H and
@@ -13292,6 +13887,12 @@ rules:
       else 44) and corridor_width < 72
     reason: 'Group B in an ambulatory care facility (stated, or not ruled out): Table 1020.3 asks 72 in for corridors serving
       stretcher traffic in one, and which corridors do isn''t shown: a person checks.'
+  - when: special_egress_spaces and corridor_width < 240 and corridor_width >= (96 if occupancy_group == "I-2" else 72 if
+      occupancy_group == "E" and corridor_occupant_load >= 100 else 36 if corridor_occupant_load < 50 else 44)
+    reason: 'At least Table 1020.3''s width but under 20 ft, in a building that may hold a covered or open mall (stated, or
+      not ruled out: a space the code gives its own exits or travel limit): a mall taken as a corridor is at least 20 ft wide
+      (402.8.1.1) and an exit passageway or corridor from it 66 in (402.8.6), and which corridor is which isn''t in the model:
+      a person checks.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -13318,10 +13919,42 @@ rules:
       or equipment 24 With an occupant load of less than 50 36 Within a dwelling unit 36 In Group E with a corridor having
       an occupant load of 100 or more 72 In corridors and areas serving stretcher traffic in ambulatory care facilities 72
       Group I-2 in areas where required for bed movement 96
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall building
+      shall be provided with means of egress as required by this section and this code. Where there is a conflict between
+      the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of Sections
+      402.8.1 through 402.8.8 shall apply.'
+  - file: gov.ny.building.2025.pdf
+    page: 86
+    lines:
+    - 53
+    - 57
+    quote: '[BE] 402.8.1.1 Minimum width. The aggregate clear egress width of the mall in either a covered or open mall building
+      shall be not less than 20 feet (6096 mm). The mall width shall be sufficient to accommodate the occupant load served.
+      Any portion of the minimum required aggregate egress width shall be not less than 10 feet (3048 mm) measured to a height
+      of 8 feet (2438 mm) between any projection of a tenant space bordering the mall and the nearest kiosk, vending machine,
+      bench, display opening, food court or other obstruction to means of egress travel.'
+  - file: gov.ny.building.2025.pdf
+    page: 87
+    lines:
+    - 40
+    - 45
+    quote: '[BE] 402.8.6 Access to exits. Where more than one exit is required, they shall be so arranged that it is possible
+      to travel in either direction from any point in a mall of a covered mall building to separate exits or from any point
+      in an open mall of an open mall building to two separate locations on the perimeter line, provided that neither location
+      is an exterior wall of an anchor building or parking garage. The width of an exit passageway or corridor from a mall
+      shall be not less than 66 inches (1676 mm). Exception: Access to exits is permitted by way of a dead-end mall that does
+      not exceed a length equal to twice the width of the mall measured at the narrowest location within the dead-end portion
+      of the mall.'
   examples:
   - given:
       occupancy_group: R-2
       ambulatory_care_facility: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13337,6 +13970,7 @@ rules:
   - given:
       occupancy_group: R-2
       ambulatory_care_facility: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13353,6 +13987,7 @@ rules:
   - given:
       occupancy_group: B
       ambulatory_care_facility: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13368,6 +14003,7 @@ rules:
   - given:
       occupancy_group: B
       ambulatory_care_facility: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13379,10 +14015,11 @@ rules:
     - part: p1
       outcome: needs_review
     expect: needs_review
-    note: 'Under 36 in, within the 24 in a corridor to mechanical, plumbing or electrical equipment takes (not shown).'
+    note: Under 36 in, within the 24 in a corridor to mechanical, plumbing or electrical equipment takes (not shown).
   - given:
       occupancy_group: B
       ambulatory_care_facility: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13398,6 +14035,7 @@ rules:
   - given:
       occupancy_group: E
       ambulatory_care_facility: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13413,6 +14051,7 @@ rules:
   - given:
       occupancy_group: E
       ambulatory_care_facility: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13428,6 +14067,7 @@ rules:
   - given:
       occupancy_group: E
       ambulatory_care_facility: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13443,6 +14083,7 @@ rules:
   - given:
       occupancy_group: I-2
       ambulatory_care_facility: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13458,6 +14099,7 @@ rules:
   - given:
       occupancy_group: I-2
       ambulatory_care_facility: false
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13473,6 +14115,7 @@ rules:
   - given:
       occupancy_group: B
       ambulatory_care_facility: true
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13488,6 +14131,7 @@ rules:
   - given:
       occupancy_group: B
       ambulatory_care_facility: true
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13502,6 +14146,7 @@ rules:
     note: 'An ambulatory care facility: 72 in serves stretcher traffic too.'
   - given:
       occupancy_group: mixed
+      special_egress_spaces: false
     parts:
       corridor:
       - id: p1
@@ -13517,12 +14162,30 @@ rules:
   - given:
       occupancy_group: R-2
       ambulatory_care_facility: false
+      special_egress_spaces: false
     parts:
       corridor: []
     rows:
     - outcome: not_applicable
     expect: not_applicable
     note: 'No corridor: with none, the rule doesn''t apply.'
+  - given:
+      occupancy_group: R-2
+      ambulatory_care_facility: false
+      special_egress_spaces: true
+    parts:
+      corridor:
+      - id: p1
+        name: Apartment corridor at 44 in, 60 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
+      ask more here, so a person checks.'
   notes: 'Table 1020.3 for every group (section group 4 of the plan, docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md):
     44 in for any facility the table doesn''t list, 36 in with fewer than 50 occupants, 72 in in Group E with 100 or more,
     96 in in Group I-2 where beds are moved. Where the table loosens it for a corridor the model can''t tell apart (24 in
