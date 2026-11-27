@@ -290,13 +290,14 @@ CHART_716 = {
     "general.bc_table_716_1_2__exit_enclosures": [
         ("an interior exit ramp rated 2 hours", ["at least 1 1/2 hours"]),
         ("in such an enclosure rated 1 hour", ["exit access stairway or ramp enclosure", "exit passageway", "at least 1 hour"]),
-        ("A vision panel", ["100 square inches", "D-H-T-W-90", "D-H-T-W-60", "D-H-90", "D-H-60"]),
+        ("A vision panel", ["at most 100 square inches", "D-H-T-W-90 (2 hours)", "D-H-T-W-60 (1 hour)",
+                            "D-H-90 or D-H-60 up to 100 square inches"]),
         ("sidelights and transoms", ["W-120", "W-60", "fire-protection-rated glazing is not permitted"])],
     "general.bc_table_716_1_2__corridors": [
-        ("a door in a corridor wall rated 1 hour or 1/2 hour", ["at least 1/3 hour", "D-20", "3/4 hour (D-H-OH-45) in a 1-hour wall",
+        ("a door in a corridor wall rated 1 hour or 1/2 hour", ["at least 1/3 hour (20 minutes)", "D-20", "3/4 hour (D-H-OH-45) in a 1-hour wall",
                                                                "1/3 hour (D-H-OH-20) in a 1/2-hour wall"])],
     "general.bc_table_716_1_2__smoke_barriers": [
-        ("smoke barriers rated 1 hour", ["at least 1/3 hour", "D-20", "3/4 hour (D-H-OH-45)"])],
+        ("smoke barriers rated 1 hour", ["at least 1/3 hour (20 minutes)", "D-20", "3/4 hour (D-H-OH-45)"])],
     "general.bc_table_716_1_2__other_assemblies": [
         ("in fire walls and fire barriers rated over 1 hour", ["a door rated 3 hours in a 4-hour or 3-hour wall",
                                                                "1 1/2 hours in a 2-hour or 1 1/2-hour wall"]),
@@ -305,10 +306,15 @@ CHART_716 = {
         ("horizontal exits in fire walls", ["3 hours"]),
         ("other fire barriers rated 1 hour", ["3/4 hour"]),
         ("other fire partitions", ["3/4 hour in a 1-hour wall", "1/3 hour in a 1/2-hour wall"]),
-        ("exterior walls", ["1 1/2 hours in a 3-hour or 2-hour wall", "3/4 hour in a 1-hour wall"])],
+        ("exterior walls", ["1 1/2 hours in a 3-hour or 2-hour wall", "3/4 hour in a 1-hour wall"]),
+        ("in a wall rated over 1 hour", ["sidelights and transoms are fire-resistance-rated glazing only",
+                                         "vision panel of fire-protection-rated glazing is at most 100 square inches",
+                                         "fire-resistance-rated only (note a)"]),
+        ("in a 2-hour exterior wall", ["fire-protection-rated 1 1/2 hours (D-H-OH-90)", "fire-resistance-rated 2 hours (W-120)"]),
+        ("in other fire barriers and fire partitions rated 1 hour", ["D-H-45 (3/4 hour)", "1/2-hour fire partitions D-H-20 (1/3 hour)"])],
     "general.bc_table_716_1_3__fire_windows": [
         ("a fire window in a fire wall or a fire barrier", ["is not permitted", "W with the wall's own rating"]),
-        ("in atrium separations", ["(707.3.6)", "(707.3.7)", "(707.3.9) rated 1 hour, 3/4 hour (OH-45 or W-60"]),
+        ("in atrium separations", ["(707.3.6)", "(707.3.7)", "(707.3.9) rated 1 hour, 3/4 hour (OH-45", "or W-60)"]),
         ("in fire partitions", ["rated 1 hour, 3/4 hour (OH-45 or W-60)", "rated 1/2 hour, 1/3 hour (OH-20 or W-30)"]),
         ("in smoke barriers", ["rated 1 hour, 3/4 hour (OH-45 or W-60)"]),
         ("in exterior walls", ["1 1/2 hours where rated over 1 hour", "3/4 hour where 1 hour", "1/3 hour where 1/2 hour"]),
@@ -359,7 +365,11 @@ def test_the_chart_catches_a_row_changed(book):
                (windows, "fire barrier is not permitted", "fire barrier is permitted"),
                (other, "single-wall rating of 4, 3 or 2 hours", "single-wall rating of 4, 3 or 1 hours"),
                (exits, "D-H-T-W-90", "D-H-W-90"),
-               (other, "4-hour or 3-hour wall", "4-hour wall")]
+               (other, "4-hour or 3-hour wall", "4-hour wall"),
+               (exits, "D-H-T-W-90 (2 hours) or D-H-T-W-60 (1 hour)", "D-H-T-W-90 (1 hour) or D-H-T-W-60 (2 hours)"),
+               (exits, "D-H-60 up to 100 square inches", "D-H-60 up to 200 square inches"),
+               (other, "fire-resistance-rated glazing only", "fire-resistance-rated glazing"),
+               ("general.bc_table_716_1_2__corridors", "(20 minutes)", "(45 minutes)")]
     for rid, a, b in changes:
         assert a in notes[rid], a
         assert _chart_misses({**notes, rid: notes[rid].replace(a, b)}), (rid, a)
