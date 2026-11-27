@@ -572,3 +572,6 @@ def test_part_d_review_round_4s_notes(book):
         assert not re.search(r"(?<!installed as )(?<!installed and )tested per (?:ASTM E814|UL 1479)", note), r["id"]
         assert "escutcheon" not in note or "metal escutcheon plate" in note, r["id"]
         assert "listed electrical boxes tested for rated assemblies" not in note, r["id"]
+        assert not re.search(r"(?<!listed )putty pads", note), r["id"]                      # review round 5
+        assert "cellulose" not in note or "cellulose loose-fill" in note, r["id"]
+        assert not re.search(r"(?<!solid )fireblock", note), r["id"]

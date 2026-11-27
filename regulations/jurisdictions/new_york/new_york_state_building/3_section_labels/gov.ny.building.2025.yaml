@@ -5565,16 +5565,17 @@ labels:
     reason: 'A membrane penetration of a rated wall meets 714.4.1, and recessed fixtures don''t reduce the wall''s rating;
       except steel electrical boxes in walls rated at most 2 hours, each at most 16 square inches, at most 100 square inches
       of openings in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches
-      apart where the stud cavities don''t communicate (or the wall cavity''s depth where filled with cellulose, rockwool
-      or slag wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes
-      of any material tested for use in fire-resistance-rated assemblies, installed per their listing (1/8 inch unless listed
-      otherwise; their listed separation, fireblocking per 718.2.1, putty pads or listed means); electrical boxes listed as
-      part of a wall opening protective material system for use in fire-resistance-rated assemblies, installed per their listing;
-      other boxes and their annular space protected by an approved membrane penetration firestop system installed as tested
-      per ASTM E814 or UL 1479 at a positive pressure differential of at least 0.01 inch of water, with F and T ratings at
-      least the wall''s, installed per their listing; the space around a sprinkler covered by a metal escutcheon plate; and
-      larger or more steel boxes in walls rated at most 2 hours with listed putty pads or other listed materials and methods,
-      installed per the listing: a person''s check (general.bc_714_4_2_membrane_penetrations).'
+      apart where the stud cavities don''t communicate (or the wall cavity''s depth where filled with cellulose loose-fill,
+      rockwool or slag wool, or solid fireblocking per 718.2.1, or both boxes with listed putty pads, or other listed materials
+      and methods); listed electrical boxes of any material tested for use in fire-resistance-rated assemblies, installed
+      per their listing (1/8 inch unless listed otherwise; their listed separation, solid fireblocking per 718.2.1, both boxes
+      with listed putty pads, or other listed materials and methods); electrical boxes listed as part of a wall opening protective
+      material system for use in fire-resistance-rated assemblies, installed per their listing; other boxes and their annular
+      space protected by an approved membrane penetration firestop system installed as tested per ASTM E814 or UL 1479 at
+      a positive pressure differential of at least 0.01 inch of water, with F and T ratings at least the wall''s, installed
+      per their listing; the space around a sprinkler covered by a metal escutcheon plate; and larger or more steel boxes
+      in walls rated at most 2 hours with listed putty pads or other listed materials and methods, installed per the listing:
+      a person''s check (general.bc_714_4_2_membrane_penetrations).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 180
