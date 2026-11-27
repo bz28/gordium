@@ -1701,6 +1701,8 @@ def test_each_italic_word_entry_from_section_group_9e_on_cites_its_own_line():
     brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]["italic_not_defined"]
     from rule_format.rulebook import cached_text
     cache = cached_text(load(NY / "1_source_documents/sources.yaml")["documents"][0])   # the cache code_cache() names
+    # without the cache too (CI, review round 3): 1028.2's entry is the line 30 one (round 1 had line 18, roman there)
+    assert "p.352, line 30" in brought["1028.2"]["enclosure"]
     if not cache.exists():
         pytest.skip("the book's cached text isn't on this machine")
     text, boxes = {}, {}
@@ -1744,8 +1746,6 @@ def test_each_italic_word_entry_from_section_group_9e_on_cites_its_own_line():
                 assert squash(word) in squash(italic), (pid, word, "not in the italic font on the cited lines")
             checked += 1
     assert checked >= 6
-    # and without the cache: 1028.2's entry is the line 30 one (round 1 had line 18, where the word is roman)
-    assert "p.352, line 30" in brought["1028.2"]["enclosure"]
 
 
 
