@@ -1835,9 +1835,10 @@ rules:
       occupancy_group: R-2
     expect: not_applicable
     note: 'The building is stated one group, not Group I-2: not applicable.'
-  notes: 'The book prints "500 square feet (455 m2)" (p.98, line 38), but 500 sq ft is 46.45 m2: the metric figure is
-    misprinted, and the 500 sq ft, as printed, is the limit (review round 2). Hand-drafted in a Claude Code session
-    (2026-11-26, Chapter 4 part c).'
+  notes: 'The book prints "500 square feet (455 m2)" (p.98, line 38), but 500 sq ft is 46.45 m2. Gordium''s reading
+    is that the metric figure is misprinted and 500 sq ft is the limit, as the same book prints 500 square feet as 46.5
+    m2 elsewhere (p.123, line 20) and as 46 m2 (p.315, line 51); which the State means is a person''s check (review
+    rounds 2 and 3). Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_407_2_5_nursing_home_housing_units
@@ -3019,7 +3020,11 @@ rules:
       occupancy_group: R-2
     expect: not_applicable
     note: 'The building is stated one group, not Group I-3: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  notes: 'The book prints "16 square feet (610 m2)" (p.101, line 55), but 16 sq ft is 1.49 m2 (610 is the 2 ft''s
+    610 mm). Gordium''s reading is that the metric figure is misprinted and 16 sq ft is the hatch''s least area, as the
+    same book prints 16 square feet as 1.5 m2 elsewhere (p.302, line 18; p.334, line 39); which the State means is a
+    person''s check (part c''s conversion walk, review round 3). Hand-drafted in a Claude Code session (2026-11-26,
+    Chapter 4 part d).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_408_3_4_spiral_stairways

@@ -351,11 +351,6 @@ def test_a_story_with_more_exits_than_any_reading_asks_passes_with_the_facts_not
         assert row["outcome"] == "pass", (rid, row)
 
 
-# the uses Chapter 10's words name for Chapter 4's sections (Table 1017.2 note a's list, 1006.2.2's spaces)
-USES = {"a mall": "402.8", "an atrium": "404.9", "a Group I-2": "407.4", "Group I-2 care suite": "407.4.4",
-        "a high-rise": "403.5", "underground": "405.7"}
-
-
 def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rules):
     """Review round 1 of part c: Chapter 10's words still said 407.4 "aren't brought in" (the shared stale-words test
     reads only "not brought in" in a narrow pattern). No sentence of any rule's title, notes, review reasons or
@@ -376,7 +371,7 @@ def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rule
             # Group I-2 occupancy ...: each has its own distance, not brought in")
             for sentence in re.split(r"(?<=\.)\s", text):
                 if re.search(r"(?:not|n't) brought in", sentence):
-                    bad += [(r["id"], s) for use, s in USES.items() if use in sentence
+                    bad += [(r["id"], s) for use, s in USES.items() if re.search(use, sentence)
                             and any(s == o or s.startswith(o + ".") for o in ours)]
     assert not bad, bad
 
@@ -397,45 +392,71 @@ def test_a_plural_term_is_the_definition_of_its_singular():
 
 
 def _figure(recorded):
-    """(value, unit) of a recorded number ("less than 500 square foot", "19.1 mm", "2/3 inch"), or None."""
-    m = re.search(r"(\d+/\d+|[\d,]+(?:\.\d+)?)\s+(square foot|foot|inch|pound|mm|m|N)\b", recorded)
+    """(value, unit) of a recorded number ("less than 500 square foot", "19.1 mm", "2/3 inch", "1588 kg"), or None."""
+    m = re.search(r"(\d+/\d+|[\d,]+(?:\.\d+)?)\s+(square foot|foot|inch|pound|mm|m|kg|N)\b", recorded)
     if not m:
         return None
     a, _, b = m.group(1).replace(",", "").partition("/")
     return (float(a) / float(b) if b else float(a)), m.group(2)
 
 
-# an imperial figure and the conversion its unit is printed with (mm, or m2 read as "m" for square feet)
-CONVERSION = {"inch": (25.4, "mm"), "foot": (304.8, "mm"), "square foot": (0.092903, "m"), "pound": (4.448, "N")}
+# each imperial unit and the conversions it is printed with (square metres are recorded as "m")
+CONVERSION = {"inch": {"mm": 25.4}, "foot": {"mm": 304.8, "m": 0.3048}, "square foot": {"m": 0.092903},
+              "pound": {"kg": 0.45359, "N": 4.448}}
+# pieces whose metric figure the number reader records without its unit, and that unit (408.3.2: "50 pounds (220 N)")
+UNIT_NOT_RECORDED = {"408.3.2": "N"}
 
 
-def _misprinted(numbers):
-    """[(the imperial figure, the metric one printed after it)] where the two disagree by more than 2%."""
+def _numbers(pid, entry):
+    unit = UNIT_NOT_RECORDED.get(str(pid))
+    return [n + " " + unit if unit and re.fullmatch(r"[\d,.]+", n) else n for n in entry["numbers"]]
+
+
+def _compared(numbers):
+    """[(the imperial figure, the metric one printed after it, whether they disagree by more than 2%)]."""
     out = []
     for n, (here, after) in enumerate(zip(numbers, numbers[1:])):
         a, b = _figure(here), _figure(after)
-        if not a or not b or a[1] not in CONVERSION or b[1] != CONVERSION[a[1]][1]:
+        if not a or not b or a[1] not in CONVERSION or b[1] not in CONVERSION[a[1]]:
             continue
         metric = b[0]
         later = _figure(numbers[n + 2]) if n + 2 < len(numbers) else None
         if b[1] == "mm" and later and later[1] == "mm" and metric < 1000 and 100 <= later[0] < 1000:
             metric = metric * 1000 + later[0]            # "22 860 mm", read as "22 mm" and "860 mm"
-        want = a[0] * CONVERSION[a[1]][0]
-        if want and abs(metric - want) / want > 0.02:
-            out.append((here, after))
+        want = a[0] * CONVERSION[a[1]][b[1]]
+        out.append((here, after, abs(metric - want) / want > 0.02))
     return out
 
 
+def _misprinted(numbers):
+    return [(here, after) for here, after, off in _compared(numbers) if off]
+
+
+def test_the_conversion_walk_compares_every_imperial_figure():
+    """Review round 3 of part c: the walk skipped feet printed with metres and pounds with kilograms. Every imperial
+    figure a Chapter 4 piece records is compared with the metric figure printed after it (none is printed alone)."""
+    assert _misprinted(["more than 420 foot", "12 m"]) and _misprinted(["not less than 3,500 pound", "158 kg"])
+    assert not _misprinted(["more than 420 foot", "128 m"]) and not _misprinted(["75 foot", "22 mm", "860 mm"])
+    pieces = load(NY / "text_verification.yaml")["pieces"]
+    imperial = compared = 0
+    for pid, entry in pieces.items():
+        if re.fullmatch(r"4\d\d(\.\d+)*", str(pid)):
+            imperial += sum(1 for n in entry["numbers"] if (_figure(n) or (0, ""))[1] in CONVERSION)
+            compared += len(_compared(_numbers(pid, entry)))
+    assert imperial and compared == imperial, (compared, imperial)
+
+
 def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
-    """Review rounds 1 and 2 of part c: 407.3.1.1 prints "2/3 inch (19.1 mm)" (19.1 mm is 3/4 inch) and 407.2.4
+    """Review rounds 1 to 3 of part c: 407.3.1.1 prints "2/3 inch (19.1 mm)" (19.1 mm is 3/4 inch) and 407.2.4
     "500 square feet (455 m2)" (500 sq ft is 46.45 m2). For every Chapter 4 piece, each imperial figure whose printed
-    metric conversion disagrees by more than 2% is named in the second reading's flags and said in its flag's notes,
-    so a person checks which the State means; never a claim about what another code prints without its source."""
+    metric conversion disagrees by more than 2% is named in the second reading's flags and said in its flag's notes;
+    which the State means is a person's check, and a reading Gordium gives cites where the same book prints the figure;
+    never a claim about what another code prints without its source."""
     pieces = load(NY / "text_verification.yaml")["pieces"]
     found = {}
     for pid, entry in pieces.items():
         if re.fullmatch(r"4\d\d(\.\d+)+", str(pid)):
-            for here, after in _misprinted(entry["numbers"]):
+            for here, after in _misprinted(_numbers(pid, entry)):
                 found.setdefault(str(pid), []).append((here, after))
     assert set(found) >= {"407.2.4", "407.3.1.1"}, found          # the walk finds the two it was written for
     block = _block_ids()
@@ -448,3 +469,16 @@ def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
             assert here.split()[-3 if "square" in here else -2] in flags and after.split()[0] in flags, (pid, here, after)
             assert after.split()[0] in notes, (pid, after)
         assert "model code" not in flags + notes, pid
+        assert "person's check" in notes, pid
+        assert "misprint" not in notes or re.search(r"elsewhere \(p\.\d+, line \d+", notes), pid
+
+
+# the uses Chapter 10's words name for Chapter 4's sections (Table 1017.2 note a's list, 1006.2.2's spaces), as word
+# patterns so a plural or a missing article is caught too (review round 3 of part c)
+USES = {r"\bmalls?\b": "402.8", r"\batriums?\b": "404.9", r"\ba Group I-2\b": "407.4",
+        r"\bGroup I-2 care suites?\b": "407.4.4", r"\bhigh-rise": "403.5", r"\bunderground\b": "405.7"}
+
+
+def test_the_uses_are_matched_in_any_number_and_without_an_article():
+    sentence = "Covered mall buildings and atriums are not brought in."
+    assert {s for use, s in USES.items() if re.search(use, sentence)} == {"402.8", "404.9"}
