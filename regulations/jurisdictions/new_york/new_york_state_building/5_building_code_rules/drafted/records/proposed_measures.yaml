@@ -29,6 +29,7 @@ sprinklered_903_3_1_1:
   - general.bc_1017_2_travel_distance
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -72,6 +73,7 @@ sprinklered_903_3_1_2:
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1007_1_2_space_three_or_more
   - general.bc_1020_3_corridor_capacity
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -165,6 +167,9 @@ occupancy_group:
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_1020_5_other_occupancies
   - general.bc_407_4_2_sleeping_room_travel
+  - general.bc_709_5_1_i2_smoke_barrier_doors
+  - general.bc_710_5_3_i2_pass_through_openings
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -349,6 +354,7 @@ ambulatory_care_facility:
     states it: Table 1020.3 asks 72 inches of its corridors serving stretcher traffic'
   unit: yes_no
   needed_by:
+  - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_table_1020_3_corridor_width
 corridors_within_dwelling_units:
   meaning: 'The building has corridors within a dwelling unit or sleeping unit (2025 BCNYS 1020.2 exception 2: no rating
