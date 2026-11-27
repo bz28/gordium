@@ -23,8 +23,25 @@ Building Code's own reading of the building already knows of it, with no new geo
 Each one the description or the routes don't give is not measured, with its reason: never a guess, so a rule
 reading it needs review. A sleeping room is only a room the description states is one (`sleeping: true`), or an
 enclosed space with no room drawn in it (the interior measuring's `maybe`, every row about it a review): never a
-room the description says isn't one. Plain code, no AI.
+room the description says isn't one.
+
+Section group 8d: which openings comply. Each escape-opening rule of the law carries its `limit`, the opening's own
+requirement (rule_format/parts.py: the check is exactly "(<limit>) or <set-aside>", so the two can't drift). Each
+opening is held to every such limit with the rulebook's own three-valued evaluator (rule_format.formula.evaluate):
+it complies only where every limit is known true, it doesn't where any is known false, and otherwise it isn't known.
+Then:
+
+- `sleeping_room_compliant_openings`: how many openings in the room are known to comply; not measured where none
+  is known to and one isn't known either way (or the openings, or the rules, aren't read).
+- `opening_room_other_compliant` on each opening: another opening in its room is known to comply (yes), or every
+  other is known not to (no, none other counting no); else not measured.
+
+The limits are the rulebook's (never a size written in this code). Plain code, no AI.
 """
+
+from rule_format import formula
+from rule_format import parts as part_rules
+from rule_format.parts import measure_kinds
 
 KIND = "sleeping_room"
 OPENINGS = "emergency_escape_opening"
@@ -53,10 +70,9 @@ NEW_MEASURES = ("sleeping_room_escape_openings", *LINKED, "sleeping_room_door_to
 # rules (1031.3, 1031.4) fail only an opening the law asks for (a rule reads only its own part's measures)
 FROM_ROOM = {"opening_room_fourth_or_higher": "sleeping_room_fourth_or_higher",
              "opening_room_one_exit": "sleeping_room_story_one_exit",
-             "opening_room_door_to_outside": "sleeping_room_door_to_outside",
-             # review round 1 of 8b: 1031.2 asks one opening per room; another marked one may be the one relied on
-             "opening_room_has_other_openings": "sleeping_room_escape_openings"}
-WORKED = {"opening_room_has_other_openings": lambda count: count > 1}
+             "opening_room_door_to_outside": "sleeping_room_door_to_outside"}
+COMPLIES = "opening_room_other_compliant"           # section group 8d: on each opening
+COUNT = "sleeping_room_compliant_openings"           # section group 8d: on each sleeping room
 
 
 def _stray(parts, openings) -> bool:
@@ -85,9 +101,9 @@ def _count(v) -> bool:
     return v >= 0 and (isinstance(v, int) or (v - v == 0 and v.is_integer()))     # a float: finite and whole
 
 
-def link(parts: dict, description) -> None:
+def link(parts: dict, description, rules=None) -> None:
     """Add the four measures to every sleeping room part in `parts` (the routes' parts and the interior measuring's
-    sleeping rooms and openings, together), in place."""
+    sleeping rooms and openings, together), in place; with the law's `rules`, which openings comply (8d)."""
     rooms = parts.get(KIND)
     if not isinstance(rooms, list):
         return
@@ -191,6 +207,132 @@ def link(parts: dict, description) -> None:
             continue
         m["sleeping_room_door_to_outside"] = any(rid in s and OUTSIDE in s for s in sides)
     _to_openings(rooms, openings)
+    _compliance(parts, rooms, openings, rules)
+
+
+def _when(rule) -> str:
+    w = rule.get("applies_when")
+    return " ".join(w.split()) if isinstance(w, str) else repr(w)
+
+
+def limits(rules) -> list[str]:
+    """Every escape-opening rule's `limit` (section group 8d), in the rulebook's order. None at all (so no opening is
+    known to comply) where one such rule has no limit (review round 1 of 8d: never count an opening compliant past a
+    rule whose requirement isn't known), or where any such rule's `applies_when` isn't word for word the one of the
+    rules that count compliant openings (1031.2's): a limit is held to every opening only because its rule applies
+    wherever 1031.2 does (review round 2 of 8d: a narrower rule held where it doesn't apply would be a wrong fail)."""
+    rules = [r for r in rules or [] if isinstance(r, dict)]
+    over = [r for r in rules if r.get("for_each") == OPENINGS]
+    counting = [r for r in rules if isinstance(r.get("check"), str) and COUNT in r["check"]]
+    if not over or any(not isinstance(r.get("limit"), str) for r in over):
+        return []
+    if any(r.get("within") != KIND for r in over):       # review round 4: a rule held within another kind (a
+        return []                                         # basement's) isn't a sleeping room opening's requirement
+    if any(part_rules.rule_problems(r) for r in over + counting):   # review round 3: a rule its own validation
+        return []                                                     # refuses (a drifted limit) never counts
+    if len({_when(r) for r in over + counting}) != 1:
+        return []
+    return [r["limit"] for r in over]
+
+
+def complies(opening: dict, held: list[str]):
+    """True where every limit is known true of the opening's own measures, False where any is known false, else None
+    (never compliant on an unknown). An opening whose measures aren't a mapping, or that gives a reading to confirm
+    (`confirm`) or named readings (`readings`) for a figure a limit reads, isn't known either way: its rows never pass
+    on those (review round 2 of 8d)."""
+    kinds = measure_kinds(OPENINGS)
+    values = opening.get("measures") if isinstance(opening, dict) else None
+    if not isinstance(values, dict):
+        return None
+    read = set().union(*(formula.names(t) for t in held)) if held else set()
+    for extra in ("confirm", "readings"):
+        given = opening.get(extra)
+        if given is not None and (not isinstance(given, dict) or read & set(given)):
+            return None
+    answers = []
+    for text in held:
+        try:
+            answers.append(bool(formula.evaluate(text, values, kinds)))
+        except (formula.MissingMeasure, formula.EvaluationError, formula.FormulaError, ArithmeticError):
+            answers.append(None)
+    if False in answers:
+        return False
+    return True if held and all(a is True for a in answers) else None
+
+
+def _missing(opening, held) -> list[str]:
+    """The figures an opening doesn't give that its limits read (for a reason a person can act on)."""
+    values = opening.get("measures") if isinstance(opening, dict) else None
+    if not isinstance(values, dict):
+        return []
+    unsure = [t for t in held if complies(opening, [t]) is None]       # only the limits it isn't known on
+    return sorted({n for t in unsure for n in formula.names(t)} & set(measure_kinds(OPENINGS)) - set(values))
+
+
+def _unknown_why(answers, held) -> str:
+    names = [f"{o.get('name') or o.get('id')} ({', '.join(_missing(o, held)) or 'a reading to confirm'})"
+             for o, a in answers if a is None and isinstance(o, dict)]
+    return ("whether its escape openings comply isn't known: " + "; ".join(names)) if names else \
+        "whether its escape openings comply isn't known (one of them can't be read)"
+
+
+def _compliance(parts, rooms: list, openings, rules) -> None:
+    held = limits(rules)
+    by_room, unread = {}, set()
+    good, _, doubtful = part_rules._read(parts, OPENINGS, part_rules._ids(parts)) if isinstance(openings, list) \
+        else ([], [], set())
+    anywhere = any(d is part_rules.ANYWHERE for d in doubtful) or _stray(parts, good or [])
+    unread = {d for d in doubtful if isinstance(d, str)}
+    for o in good or []:
+        by_room.setdefault(o.get("within"), []).append(o)
+    good_ids = {id(o) for o in good or []}
+    for r in rooms:
+        if not isinstance(r, dict) or r.get("maybe") or not isinstance(r.get("measures"), dict) \
+                or not isinstance(r.get("not_measured"), dict):
+            continue                             # a room link left alone (it can't be read): its rows say so
+        m, why = r["measures"], r["not_measured"]
+        why.pop(COUNT, None)
+        m.pop(COUNT, None)
+        if not isinstance(openings, list):
+            why[COUNT] = WHY["openings_not_read"]
+            continue
+        if not held:
+            why[COUNT] = "the law's escape-opening limits aren't read"
+            continue
+        if "sleeping_room_escape_openings" not in m:            # its openings can't be told apart (a shared id)
+            why[COUNT] = why.get("sleeping_room_escape_openings", "its openings aren't known")
+            continue
+        if not isinstance(r.get("id"), str):
+            why[COUNT] = "the sleeping room's id isn't text, so which openings are its isn't known"
+            continue
+        pairs = [(o, complies(o, held)) for o in by_room.get(r["id"], [])]
+        answers = [a for _, a in pairs]
+        if anywhere or r.get("id") in unread:     # an opening that may be in it can't be read: never counted as none
+            answers.append(None)
+        if True in answers or None not in answers:
+            m[COUNT] = answers.count(True)
+        else:
+            why[COUNT] = _unknown_why(pairs, held)
+    for o in openings if isinstance(openings, list) else []:
+        if not isinstance(o, dict) or not isinstance(o.get("measures", {}), dict) \
+                or not isinstance(o.get("not_measured", {}), dict):
+            continue
+        m, why = o.setdefault("measures", {}), o.setdefault("not_measured", {})
+        why.pop(COMPLIES, None)
+        m.pop(COMPLIES, None)
+        if not held:
+            why[COMPLIES] = "the law's escape-opening limits aren't read"
+            continue
+        where = o.get("within") if isinstance(o.get("within"), str) else None
+        others = [complies(x, held) for x in by_room.get(where, []) if x is not o]
+        if anywhere or where is None or where in unread or id(o) not in good_ids:
+            others.append(None)
+        if True in others:
+            m[COMPLIES] = True
+        elif None not in others:
+            m[COMPLIES] = False
+        else:
+            why[COMPLIES] = "whether another escape opening in its room complies isn't known"
 
 
 def _to_openings(rooms: list, openings) -> None:
@@ -224,11 +366,7 @@ def _to_openings(rooms: list, openings) -> None:
             why.pop(mine, None)
             given, said = (room["measures"], room.get("not_measured") or {}) if room is not None else ({}, {})
             if room is not None and theirs in given and theirs not in said:     # its own value, no reason beside it
-                try:
-                    m[mine] = WORKED.get(mine, lambda v: v)(given[theirs])
-                except TypeError:                          # a value that isn't one (a count that isn't a number)
-                    why[mine] = "its room's isn't known"
-                    continue
+                m[mine] = given[theirs]
                 read = _map(room.get("confirm")).get(theirs)
                 if read:                                   # the room's value stands on a reading (its routes run
                     if not isinstance(o.get("confirm"), dict):     # through a room it serves): said on the opening
@@ -274,4 +412,4 @@ def _reach(found: list, name):
     return False, got["doors"]
 
 
-__all__ = ["link", "NEW_MEASURES"]
+__all__ = ["link", "NEW_MEASURES", "complies", "limits"]
