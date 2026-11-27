@@ -437,6 +437,9 @@ def test_the_conversion_walk_compares_every_imperial_figure():
             imperial += sum(1 for n in entry["numbers"] if (_figure(n) or (0, ""))[1] in CONVERSION)
             compared += len(_compared(_numbers(pid, entry)))
     assert imperial and compared == imperial, (compared, imperial)
+    # 408.3.2's "50 pounds (220 N)": the newtons are recorded without their unit, and still compared (part d round 1)
+    assert [x[:2] for x in _compared(_numbers("408.3.2", pieces["408.3.2"]))] == [
+        ("not greater than 50 pound", "220 N"), ("50 pound", "220 N")]
 
 
 def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
@@ -451,7 +454,7 @@ def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
         if re.fullmatch(r"4\d\d(\.\d+)+", str(pid)):
             for here, after in _misprinted(_numbers(pid, entry)):
                 found.setdefault(str(pid), []).append((here, after))
-    assert set(found) >= {"407.2.4", "407.3.1.1"}, found          # the walk finds the two it was written for
+    assert set(found) >= {"407.2.4", "407.3.1.1", "408.3.3"}, found   # the walk finds the ones it was written for
     block = _block_ids()
     for pid, pairs in found.items():
         flags = " ".join(pieces[pid].get("flags") or [])
