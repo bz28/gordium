@@ -37,6 +37,7 @@ corridor's rating and smoke partitions) are marks the description doesn't carry 
 """
 
 import copy
+import itertools
 import math
 
 from model_measurement.interior.read import Reader, name_of
@@ -565,8 +566,11 @@ def _exits_reached(story, routes, room, access, figure, building=None) -> dict:
     whose door out isn't marked, leads back through the same story (review round 1, `_egress_sides`' own test). Not
     worked out: a space with two or more ways out to the halls, exits or outside (two units joined by a door, a
     lock-off, can't be told apart), a passage out of the room, a room routes cross, a room it serves (decision 1a), a
-    door of the room that is itself an exit, a door reaching one exit only. Never a guess: two exits set aside the
-    escape opening 1031.2 item 1 asks."""
+    door of the room that is itself an exit, a door reaching one exit only. And two count only where they are
+    separate and distinct as 1007.1.1 places them (`_apart`, merge review): exit rooms joined to or adjoining each
+    other are one exit, and the room's `remoteness_ratio` (its exits' distance over the story's diagonal) is given for
+    escape_openings.py to hold to the law's 1007.1.1 rule; the diagonal not measured, not two. Never a guess: two exits set aside the escape opening 1031.2 item 1
+    asks (for the stories with one exit Tables 1006.3.4(1) and (2) permit)."""
     if isinstance(access, Stop):
         return {"two": False, "why": access.reason}
     if isinstance(figure, Stop) or figure is None:
@@ -651,7 +655,61 @@ def _exits_reached(story, routes, room, access, figure, building=None) -> dict:
                            + ("" if within is False else " (a corridor is crossed only where the building states none "
                                                          "is within a dwelling unit)")
                            + "".join(f"; not counted, {doubt[e]}" for e in sorted(set(doubt) - got))}
-    return {"two": True, "doors": reached}
+    apart, ratio = _apart(story, exits, links, reached)
+    if apart is not None:
+        return {"two": False, "doors": reached, "why": f"{room.name}: {apart}"}
+    return {"two": True, "doors": reached, "remoteness_ratio": ratio}
+
+
+def _apart(story, exits, links, reached) -> tuple:
+    """(why not, None) where the exits a door of the room reaches aren't two separate and distinct ones, else (None,
+    the room's remoteness ratio) (merge review of #240). Exit rooms joined to each other by a door or passage, or
+    whose floors lie within a wall's thickness of each other (a scissor or interlocking stair drawn as two rooms), are
+    one exit: BCNYS 1007.1.1 (p.318) "Interlocking or scissor stairways shall be counted as one exit stairway". The
+    ratio is 1007.1.1's figure for the exits this room reaches, as straight.py measures the story's: for each of its
+    doors, the farthest-apart pair of the exits it reaches (nearest edges of their closest doors) over the story's
+    outer diagonal; the room's is the least over its doors. Which ratio is enough is the law's
+    (`general.bc_1007_1_1_remoteness`, held in design_checker/escape_openings.py), never this code's. The diagonal
+    not measured: (why, None), never two."""
+    group = {e: e for e in exits}
+
+    def top(e):
+        while group[e] != e:
+            e = group[e]
+        return e
+    near = [(a, b) for a, b in links if a in exits and b in exits]
+    near += [(a, b) for a, b in itertools.combinations(sorted(exits), 2)
+             if story.rooms.get(a) is not None and story.rooms.get(b) is not None
+             and story.rooms[a].outline.distance(story.rooms[b].outline) <= ADJOINING]
+    for a, b in near:
+        if top(a) != top(b):
+            group[top(a)] = top(b)
+
+    def one(e):                                          # an exit that isn't a room (a door out) is its own
+        return top(e) if e in group else e
+    for did, got in sorted(reached.items()):
+        if len({one(e) for e in got}) < 2:
+            return (f"the exits its door {did} reaches ({', '.join(got)}) are exit rooms joined to or adjoining each "
+                    "other, one exit (BCNYS 1007.1.1: interlocking or scissor stairways are counted as one exit "
+                    "stairway)"), None
+    try:
+        across = straight.diagonal(story).length
+    except Stop as s:
+        return ("the story's diagonal isn't measured, so how far apart the exits it reaches are (BCNYS 1007.1.1) "
+                f"isn't known ({s.reason})"), None
+    doors_of = straight._exits(story)
+    least = None
+    for did, got in sorted(reached.items()):
+        best = 0.0
+        for a, b in itertools.combinations(sorted(got), 2):
+            if one(a) != one(b) and a in doors_of and b in doors_of:
+                best = max(best, min(straight.opening(x).distance(straight.opening(y))
+                                     for x in doors_of[a] for y in doors_of[b]))
+        least = best if least is None else min(least, best)
+    return None, (least or 0.0) / across
+
+
+ADJOINING = 12.0             # in: exit rooms this close (a wall between) are one stair drawn as two (1007.1.1)
 
 
 HALLS = ("corridor",)        # shared circulation, where the building states no corridor is within a dwelling unit

@@ -55,9 +55,16 @@ def corridor(split=False, exits=("x", "y"), bedroom_exit=False, served=False, pa
     if bedroom_exit:
         doors.append(door("bx", (12.25 + 11.5, 5), (0, 1), ("b1", "outside"), exit_id="z"))
     desc = description(rooms, doors, passages)
+    desc["story_outlines"] = [outline(-0.5, -7, 36, 18.5)]   # the diagonal 1007.1.1's distance is measured on
     if within is not None:                               # the building states whether a corridor is within a unit
         desc["building"] = {"corridors_within_dwelling_units": within}
     return desc
+
+
+def outline(x0, y0, x1, y1) -> dict:
+    """The story's outer and inner outlines, one rectangle (ft)."""
+    return {"level": "L1", "outer": [list(p) for p in rect(x0, y0, x1, y1)],
+            "inner": [list(p) for p in rect(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 0.5)]}
 
 
 def reached(desc) -> dict:
@@ -96,7 +103,8 @@ def test_a_bedroom_through_a_living_room_reaches_two_through_it():
     (not a sleeping room either)."""
     out = measure(corridor(served=True))
     b1 = next(p for p in out["parts"]["space"] if p["id"] == "b1")
-    assert b1["more"][EXITS_REACHED] == {"two": True, "doors": {"i1": ["x", "y"]}}, b1["more"][EXITS_REACHED]
+    got = b1["more"][EXITS_REACHED]
+    assert got["two"] is True and got["doors"] == {"i1": ["x", "y"]}, got
     l1 = next(p for p in out["parts"]["space"] if p["id"] == "l1")
     assert EXITS_REACHED not in l1["more"]
 
@@ -146,13 +154,14 @@ def test_a_corridor_is_shared_only_where_the_building_states_none_is_within_a_un
     the building states no corridor is within a dwelling unit, that hall may be inside the neighbour's unit, so its
     exit never counts (1016.2.1); and with no such statement no corridor is crossed at all (not two)."""
     desc = corridor(exits=("x",), within=within)
-    desc["rooms"].append(room("ah", rect(12, -12, 24, -7), use="corridor", pass_through=True))
-    desc["doors"] += [door("aentry", (14, -6.75), (1, 0), ("ah", "c")),
-                      door("aback", (18, -12.25), (1, 0), ("ah", "outside"), exit_id="z")]
+    desc["rooms"].append(room("ah", rect(12, -12, 34, -7), use="corridor", pass_through=True))
+    desc["doors"] += [door("aentry", (14, -6.75), (1, 0), ("ah", "c")),     # its back door far enough from x to be a
+                      door("aback", (32, -12.25), (1, 0), ("ah", "outside"), exit_id="z")]   # second exit (1007.1.1)
+    desc["story_outlines"] = [outline(-0.5, -12.5, 36, 18.5)]
     got = reached(desc)
     for b in ("b0", "b1", "b2"):
         if within is False:                              # stated: the hall is shared, its exit door one of two
-            assert got[b] == {"two": True, "doors": {f"e{b[1]}": ["x", "z"]}}, got[b]
+            assert got[b]["two"] is True and got[b]["doors"] == {f"e{b[1]}": ["x", "z"]}, got[b]
         else:
             assert got[b]["two"] is False and "states none is within a dwelling unit" in got[b]["why"], got[b]
     assert reached(corridor(within=None))["b0"]["two"] is False         # the plain corridor: not stated, not two
@@ -171,7 +180,7 @@ def test_a_stair_entered_on_the_level_it_discharges_is_no_second_exit_unless_its
                                   **({"exit_id": "S"} if how == "door_out_marked" else {})))
     got = reached(desc)
     if how == "door_out_marked":
-        assert got["b0"] == {"two": True, "doors": {"e0": ["S", "x"]}}, got["b0"]
+        assert got["b0"]["two"] is True and got["b0"]["doors"] == {"e0": ["S", "x"]}, got["b0"]
     else:
         assert got["b0"]["two"] is False and "no door out of its own marked an exterior exit door" in got["b0"]["why"]
 
@@ -184,3 +193,59 @@ def test_an_exit_not_counted_says_its_own_reason():
     got = reached(desc)["b0"]
     assert got["two"] is False and "H: a horizontal exit, not counted here" in got["why"], got
     assert "a stair or passageway" not in got["why"]
+
+
+# --- merge review of #240: two exits count only where they are separate and distinct (BCNYS 1007.1.1) ---------------
+
+def side_by_side():
+    """The corridor with its two exterior exit doors 3 ft apart on its west wall (x and x2, both at discharge)."""
+    d = corridor(exits=("x",))
+    d["doors"][0]["plan"].update(clear_width=2.5, centre=[-0.25, -5.0])
+    d["doors"].append(door("dx2", (-0.25, -2.0), (0, 1), ("c", "outside"), exit_id="x2", width=2.5))
+    return d
+
+
+def test_each_room_says_how_far_apart_the_exits_it_reaches_are():
+    """BCNYS 1007.1.1 (p.318) places two exits "a distance apart equal to not less than one-half of the length of the
+    maximum overall diagonal dimension of the building or area to be served" (one-third sprinklered, exception 2):
+    the routes give each room's own figure, its exits' distance (straight.py: nearest edges) over the story's outer
+    diagonal, and the law's rule decides (design_checker/escape_openings.py). The corridor's end exits: about 35 ft of
+    a 44.5 ft diagonal. Two doors 3 ft apart (a false pass before the merge review, as two exits): under a tenth."""
+    for got in (g for g in reached(corridor()).values() if g is not None):
+        assert got["two"] is True and 0.75 < got["remoteness_ratio"] < 0.85, got
+    for got in (g for g in reached(side_by_side()).values() if g is not None):
+        assert got["two"] is True and got["remoteness_ratio"] < 0.1, got
+
+
+def test_no_story_outline_leaves_the_exits_not_shown_apart():
+    """The diagonal not measured: 1007.1.1's distance isn't known, so never two (a wrong two sets aside 1031.2's
+    escape opening)."""
+    d = corridor()
+    d["story_outlines"] = []
+    for got in (g for g in reached(d).values() if g is not None):
+        assert got["two"] is False and "diagonal isn't measured" in got["why"], got
+
+
+@pytest.mark.parametrize("join", ["passage", "door", "adjoining"])
+def test_two_exit_stair_rooms_joined_to_each_other_are_one_exit(join):
+    """BCNYS 1007.1.1 (p.318): "Interlocking or scissor stairways shall be counted as one exit stairway": two exit
+    enclosures that open into each other (a passage or a door between them), or that adjoin with only a wall between
+    (the usual drawing of a scissor stair), are one exit, so the bedrooms reaching only them don't reach two (an upper
+    story: no door to outside)."""
+    d = corridor(exits=())
+    d["story_outlines"] = [outline(-0.5, -7, 44.5, 18.5)]
+    d["rooms"] += [room("S1", rect(36, -6.5, 44, -3.6), use="other", lockable=True),
+                   room("S2", rect(36, -3.4, 44, -0.5), use="other", lockable=True)]
+    d["doors"] += [door("d1", (35.75, -5), (0, 1), ("c", "S1"), exit_id="S1", kind="exit_enclosure", width=2.5),
+                   door("d2", (35.75, -2), (0, 1), ("c", "S2"), exit_id="S2", kind="exit_enclosure", width=2.5)]
+    if join == "passage":
+        d["passages"].append({"rooms": ["S1", "S2"], "line": [[36, -3.5], [44, -3.5]]})
+        d["rooms"][-2]["floor"] = [list(p) for p in rect(36, -6.5, 44, -3.5)]
+        d["rooms"][-1]["floor"] = [list(p) for p in rect(36, -3.5, 44, -0.5)]
+    elif join == "door":
+        d["doors"].append(door("d12", (40, -3.5), (1, 0), ("S1", "S2"), thickness=0.2))
+    # adjoining: a wall between them and no way through, a scissor stair drawn as two rooms
+    for b, got in reached(d).items():
+        if got is None:
+            continue
+        assert got["two"] is False and "one exit" in got["why"], (b, got)
