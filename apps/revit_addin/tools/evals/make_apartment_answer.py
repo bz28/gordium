@@ -69,7 +69,7 @@ def write(out: Path = OUT, request: Path = REQUEST, answer=None, publish=None) -
     half a file and a failed run keeps the earlier one."""
     made = text(json.loads(request.read_text(encoding="utf-8")), answer, publish)
     out.parent.mkdir(parents=True, exist_ok=True)
-    tmp = out.with_name(f"{out.name}.{os.getpid()}.tmp")
+    tmp = out.with_name(f".{out.name}.{os.getpid()}.tmp")         # hidden: a generated name (rulebook.generated_name)
     try:
         tmp.write_text(made, encoding="utf-8", newline="\n")
         os.replace(tmp, out)
