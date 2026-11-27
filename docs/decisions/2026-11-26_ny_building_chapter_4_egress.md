@@ -20,9 +20,10 @@ Chapter 4 adds requirements for particular buildings and uses: a covered or open
 
 - **a. Malls and atriums:** 402.1 with 402.1.1, 402.8 whole; 404.1, 404.9 to 404.11.
 - **b. High-rise and underground buildings:** 403.1, 403.2.2, 403.5, 403.6; 405.1, 405.4.1, 405.7.
-- **c. Group I-2:** 407.2 to 407.6, 407.10.
-- **d. Group I-3, Groups I-1 and R, ambulatory care:** 408.3, 408.4, 408.6, 408.8; 420; 422.3.
-- **e. The rest:** 406.4.3 and 406.5.7 (parking garages), 410.5 (stages and platforms), 411.4 (special amusement areas), 412 (aircraft-related), 415.11.3 and 415.11.6 (Group H-5), 428.3.5 (laboratories).
+- **c. Group I-2:** 407.1 to 407.4.
+- **d. Group I-2 and Group I-3:** 407.5, 407.6, 407.10; 408.1 to 408.4.
+- **e. Group I-3, Groups I-1 and R, ambulatory care:** 408.6, 408.8; 420.1 to 420.3, 420.6 to 420.9; 422.1 to 422.3.
+- **f. The rest:** 406.4.3 and 406.5.7 (parking garages), 410.5 (stages and platforms), 411.4 (special amusement areas), 412 (aircraft-related), 415.11.3 and 415.11.6 (Group H-5), 428.3.5 (laboratories).
 
 ## Status
 

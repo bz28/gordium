@@ -553,3 +553,16 @@ def test_the_uses_are_matched_in_any_number_case_and_without_an_article():
     assert _named_uses("Covered mall buildings and atriums are not brought in.") == {"402.8", "404.9"}
     assert _named_uses("Atriums and Group I-2 occupancies aren't brought in.") == {"404.9", "407.4"}
     assert _named_uses("High rise buildings are not brought in.") == {"403.5"}
+
+
+def test_the_plans_parts_list_names_each_parts_sections():
+    """Review round 3 of part d: the plan's "Parts, in order" list still gave part d its first scope. Each part's
+    status line names sections its list line names too."""
+    plan = (REPO / "docs/decisions/2026-11-26_ny_building_chapter_4_egress.md").read_text(encoding="utf-8")
+    parts = plan.split("## Parts, in order", 1)[1].split("## Status", 1)[0]
+    status = plan.split("## Status", 1)[1]
+    for part in "abcd":
+        listed = re.search(r"- \*\*" + part + r"\.[^\n]*", parts).group()
+        stated = re.search(r"- \*\*" + part + r"\.\*\* Drafted[^\n]*", status).group()
+        first = re.search(r"\b4\d\d\.\d+", stated.split("Drafted", 1)[1]).group()
+        assert first.split(".")[0] in listed and (first in listed or first.rsplit(".", 1)[0] in listed), (part, first)
