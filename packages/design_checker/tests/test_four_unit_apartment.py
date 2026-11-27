@@ -432,3 +432,67 @@ def test_a_door_to_outside_asks_whether_the_occupants_use_outdoor_areas(got):
         for i in items:
             asks = [ui_data._from_cause(c, "means_of_egress_door") for c in i.get("causes") or []]
             assert "building.occupied_outdoor_areas" in {a.get("field") for a in asks}, i["name"]
+
+
+def test_a_story_whose_room_may_seat_people_served_by_aisles_never_passes_on_travel(got, laws):
+    """BCNYS 1030.7 (p.354, lines 50-51): "Where aisles are provided for seating, the distance shall be measured along
+    the aisles and aisle accessways without travel over or on the seats", fixed seats or loose (1030.9, 1030.13.1). With
+    the five marks No, the apartment's travel passes Table 1017.2 (its rooms all state residential, its corridors and
+    exit stairs none: no seating). With one apartment's function left out, that room may be anything, a dining room or
+    a meeting room with chairs, so its story's travel, measured across where seats may be, needs review, and with it
+    stated a restaurant's (tables and chairs, assembly_unconcentrated) too; never a pass."""
+    def row(change):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], **{k: False for k in CH10_BUILDING_MARKS}}
+        change(interior)
+        return egress.check(laws, interior, VALUES, ALLOWED)["results"]["general.bc_table_1017_2_a_e_f1_m_r_s1"]
+    assert row(lambda d: None) == "pass"
+    assert row(lambda d: next(r for r in d["rooms"] if r["id"] == "L2N").pop("function")) == "needs_review"
+    assert row(lambda d: next(r for r in d["rooms"] if r["id"] == "L1S").update(
+        function="assembly_unconcentrated")) == "needs_review"
+    assert row(lambda d: next(r for r in d["rooms"] if r["id"] == "L1S").update(function="courtroom")) == "needs_review"
+
+    def group_a(d):                                  # review round 1: a Group A building whose assembly room isn't shown
+        d["building"]["occupancy_groups"] = ["A-2"]
+        for r in d["rooms"]:
+            if r.get("function") is not None:
+                r["function"] = "business"
+    assert row(group_a) == "needs_review"
+
+    # review round 3: the exit stairs stating a function (an assembly one here) are rooms whose use isn't known
+    def stairs(d):
+        for r in d["rooms"]:
+            if r["id"] in ("L1SW", "L1SE", "L2SW", "L2SE"):
+                r["function"] = "assembly_unconcentrated"
+    assert row(stairs) == "needs_review"
+
+    def group_a_stair(d):                            # an exit stating an assembly function shows no assembly room
+        group_a(d)
+        next(r for r in d["rooms"] if r["id"] == "L1SE")["function"] = "assembly_unconcentrated"
+    interior = build.interior_of()
+    interior["building"] = {**interior["building"], **{k: False for k in CH10_BUILDING_MARKS}}
+    group_a_stair(interior)
+    parts = egress.check(laws, interior, VALUES, ALLOWED)["interior"]["parts"]
+    assert {s["id"]: s["measures"]["story_assembly_seating_possible"] for s in parts["story"]} == {"L1": True, "L2": True}
+
+    # review round 4: a corridor stating a function is the same clash: it may seat people and shows no assembly room
+    for fn in ("assembly_unconcentrated", "business"):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], **{k: False for k in CH10_BUILDING_MARKS}}
+        group_a(interior)
+        next(r for r in interior["rooms"] if r["id"] == "L1C")["function"] = fn
+        parts = egress.check(laws, interior, VALUES, ALLOWED)["interior"]["parts"]
+        assert {s["id"]: s["measures"]["story_assembly_seating_possible"] for s in parts["story"]} ==             {"L1": True, "L2": True}, fn
+    def corridor(d):                                 # not Group A: the corridor's own story only
+        next(r for r in d["rooms"] if r["id"] == "L2C")["function"] = "business"
+    assert row(corridor) == "needs_review"
+
+    # review round 2: the groups sent in the check's values (which the rules read beside the building block) count too
+    interior = build.interior_of()
+    interior["building"] = {k: v for k, v in interior["building"].items() if k != "occupancy_groups"}
+    interior["building"].update({k: False for k in CH10_BUILDING_MARKS})
+    for r in interior["rooms"]:
+        if r.get("function") is not None:
+            r["function"] = "business"
+    sent = egress.check(laws, interior, {**VALUES, "occupancy_groups": ["A-2"]}, ALLOWED)["results"]
+    assert sent["general.bc_table_1017_2_a_e_f1_m_r_s1"] == "needs_review"

@@ -164,9 +164,39 @@ internal sealed class FakeFloor
     /// <summary>A door hosted in a straight wall: <paramref name="horizontal"/> for a wall along x (faces at y = n0 and
     /// n1, the door at x = u), else along y. Its frame, a solid within the wall's thickness, <see cref="Frame"/> wide;
     /// its type's confirmed clear opening <see cref="Clear"/> wide.</summary>
+    /// <summary>Where each door was drawn (<see cref="Door"/>): along x (horizontal) or y, its centre u along the wall,
+    /// its wall's faces at n0 and n1 across it.</summary>
+    public Dictionary<string, (bool Horizontal, double U, double N0, double N1)> Drawn { get; } = [];
+
+    /// <summary>Draws a swing in a door's plan symbol, as the Revit layer reads it in its plan view: a leaf of
+    /// <paramref name="radius"/> (the clear width when not given) hinged at the jamb on the side <paramref name="hinge"/>
+    /// (-1: toward smaller u, +1: larger) on the face at n1 (<paramref name="into"/> +1: it swings toward larger n) or
+    /// n0 (-1), its arc's middle half way between closed (along the wall) and open 90 degrees. Adds to its arcs.</summary>
+    public void Swing(string id, int into, int hinge = -1, double? radius = null, double? hingeN = null)
+    {
+        var (horizontal, u, n0, n1) = Drawn[id];
+        var r = radius ?? Clear;
+        var pinU = u + hinge * Clear / 2;
+        var pinN = hingeN ?? (into > 0 ? n1 : n0);
+        var midU = pinU - hinge * r * Math.Cos(Math.PI / 4);
+        var midN = pinN + into * r * Math.Sin(Math.PI / 4);
+        (double X, double Y) At(double a, double n) => horizontal ? (a, n) : (n, a);
+        var (cx, cy) = At(pinU, pinN);
+        var (mx, my) = At(midU, midN);
+        AddArc(id, new SwingArc(Fake.Place(cx, cy, 0), r, Fake.Place(mx, my, 0)));
+    }
+
+    /// <summary>Adds an arc to a door's plan symbol as read (a drawing that read none yet starts empty).</summary>
+    public void AddArc(string id, SwingArc arc)
+    {
+        var i = OpeningIndex(id);
+        Openings[i] = Openings[i] with { Swing = new SwingDrawing([.. Openings[i].Swing?.Arcs ?? [], arc]) };
+    }
+
     public void Door(string id, string from, string? to, bool horizontal, double u, double n0, double n1, string? exit = null)
     {
         var uid = Uid(id);
+        Drawn[id] = (horizontal, u, n0, n1);
         const string word = "Side-hinged door";
         var type = new Dictionary<Guid, MarkValue>
         {
