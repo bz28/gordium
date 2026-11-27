@@ -42,6 +42,7 @@ from pathlib import Path
 from model_measurement.interior import measure as measure_interior
 from model_measurement.interior.read import FORMAT as INTERIOR_FORMAT
 from model_measurement.routes import measure as measure_routes
+from model_measurement.routes import stair_rooms
 from rule_format import parts as part_rules
 from rule_format.formula import names as formula_names
 from rule_format.labels import load_pieces
@@ -392,6 +393,10 @@ def _measured(law: dict, interior, readings: dict, ground: dict | None = None, v
                           **(block if isinstance(block, dict) else {})}       # as _law_values merges them
                 occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors), block, stated)
             inside = [_stairs_and_guards(interior)] if stairs else []
+            if stairs:
+                # each flight's room (in an exit stair enclosure, so no dwelling-unit exception reaches it) and its
+                # risers, for the Building Code's stair rules alone (section group 7c)
+                stair_rooms.apply(inside[0]["parts"].get("stair"), interior, got["parts"].get("space"))
             inside += [_escape_openings(interior)] if escape else []
             problems = [str(p) for p in got["problems"]]
             parts = dict(got["parts"])

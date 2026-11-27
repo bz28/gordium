@@ -506,6 +506,10 @@ MEASURE_NAMES = {
     "story_dwelling_units": "dwelling units on the story",
     "space_exit_remoteness_ratio": "exit remoteness (the exits' distance apart over the diagonal)",
     "exit_remoteness_ratio": "exit remoteness (the exits' distance apart over the diagonal)",
+    # section group 7c: the Building Code's own values of a flight of stairs
+    "stair_in_exit_enclosure": "flight's room (whether it is an exit stair enclosure)",
+    "stair_headroom_past_bottom": "headroom past the bottom riser",
+    "stair_handrail_each_side": "handrail on each side",
 }
 # a key's leading word for its part kind, in words ("moe_door_latched": "door latched", never "moe latched")
 PREFIX_WORDS = (("moe_door_", "door "), ("atd_", "alternating tread device "), ("ladder_", "ship's ladder "),

@@ -296,12 +296,13 @@ def test_the_contents_list_every_chapter_and_never_hide_a_rows_section(apartment
     chapters = [c for c in bc["chapters"] if c["kind"] == "chapter"]
     assert [c["number"] for c in chapters] == [str(n) for n in range(1, 36)]
     egress = next(c for c in chapters if c["number"] == "10")
-    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 5   # section group 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009; 9d: 1019 (1018 left the count with 1018.4, round 1 of 2026-11-23); 9e: 1021, 1022 and 1023; 9f: 1024 and 1025; 9g: 1026 to 1029
+    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 4   # section group 7c: 1011 (in parts); 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009; 9d: 1019 (1018 left the count with 1018.4, round 1 of 2026-11-23); 9e: 1021, 1022 and 1023; 9f: 1024 and 1025; 9g: 1026 to 1029
     sections = {s["number"]: s for s in egress["sections"]}
     assert sections["1018"]["whole"] is True and sections["1019"]["whole"] is True   # group 9d review round 1
     assert all(sections[s]["whole"] is True for s in ("1021", "1022", "1023", "1024", "1025", "1026", "1027", "1028", "1029"))   # groups 9e to 9g
     assert sections["1006"]["coverage"] == "rules" and sections["1006"]["whole"] is False
-    assert sections["1017"]["whole"] is True and sections["1011"]["coverage"] == "not_brought_in"
+    assert sections["1017"]["whole"] is True and sections["1014"]["coverage"] == "not_brought_in"   # handrails (1011: 7c's; 1012: 9a's)
+    assert sections["1011"]["coverage"] == "rules" and sections["1011"]["whole"] is False          # group 7c's stairs
     assert sections["1010"]["coverage"] == "rules" and sections["1010"]["whole"] is False   # group 6a: 1010.1, 1010.1.1
     # every row's section is in its book's contents, never as not brought in
     listed = {(b["key"], s["number"]): s for b in apartment["view"]["contents"] for c in b["chapters"]
@@ -407,9 +408,10 @@ _FIELDS = []
 
 def _known_fields() -> set:
     """Every field a host's description has, read from where it is defined, never copied: the Revit add-in's own
-    fields (every "building.…", "facts.…" and "kind[].flag" its C# names), the stated facts the start box and the
-    rows' Enter… ask for (host_core.facts.STATED_FACTS), the building block's facts (code_scope.FACTS) and the
-    site's own questions (ui_data.SITE_STOPS)."""
+    fields (every "building.…", "facts.…" and "kind[].flag" its C# names, and every whole list a mark's Feeds names
+    as the pane matches it: stairs, guards, buildings, unknown_spaces), the stated facts the start box and the rows'
+    Enter… ask for (host_core.facts.STATED_FACTS), the building block's facts (code_scope.FACTS) and the site's own
+    questions (ui_data.SITE_STOPS)."""
     if not _FIELDS:
         import re
         from design_checker.host_core.facts import STATED_FACTS
@@ -418,6 +420,10 @@ def _known_fields() -> set:
             if "obj" not in cs.parts:
                 found |= set(re.findall(r'"((?:building|facts)\.[a-z0-9_]+|[a-z]+\[\]\.[a-z0-9_]+)"',
                                         cs.read_text(encoding="utf-8")))
+                # a whole list a mark feeds, the first word of a part of its Feeds as CauseCards.Fields reads it
+                # ("stairs (sent only when Yes)": stairs, Gordium: These are all the stairs)
+                for feeds in re.findall(r'MarkBinding\.\w+,\s*\[[^\]]*\],\s*"([^"]+)"', cs.read_text(encoding="utf-8")):
+                    found |= {w for w in (p.split(" ")[0] for p in feeds.split(", ")) if re.fullmatch(r"[a-z_]+", w)}
         found |= {f"facts.{k}" for k in STATED_FACTS} | {f"building.{k}" for k in code_scope.FACTS}
         found |= {f"facts.{f}" for facts in ui_data.SITE_STOPS.values() for f in facts}
         _FIELDS.append(found)
