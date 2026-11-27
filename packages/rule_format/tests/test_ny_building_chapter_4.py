@@ -26,7 +26,9 @@ GROUPS = ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2
 # (the fact's own words name "a covered or open mall (402.8)"); an atrium is its own fact
 SHOWN_WHERE = {"402": "special_egress_spaces", "404": "building_has_atrium",
                # part b: a high-rise (202) or a building over 420 ft (403.2.2, 403.5.2); an underground building (405.1)
-               "403": "high_rise_building", "405": "underground_building"}
+               "403": "high_rise_building", "405": "underground_building",
+               # part e: an ambulatory care facility, the fact Table 1020.3's width rule reads
+               "422": "ambulatory_care_facility"}
 
 
 @pytest.fixture(scope="module")
@@ -45,7 +47,7 @@ def _pieces():
 
 
 def _chapter_4(pieces, labels, section):
-    return [pid for pid in pieces if re.fullmatch(section + r"(\.\d+)+", pid)
+    return [pid for pid in pieces if re.fullmatch(re.escape(section) + (r"(\.\d+)+" if "." not in section else r"(\.\d+)*"), pid)
             and labels.get(pid, {}).get("label") in ("rule", "flag")]
 
 
@@ -91,7 +93,12 @@ def test_each_piece_has_its_flag_shown_only_where_the_building_may_be_that_use(c
 
 # part c: a section for one occupancy group, its flags shown where the building is stated that group, two or more
 # groups, or none (a building stated one other group: not applicable)
-GROUP_GATED = {"407": ["I-2"], "408": ["I-3"]}
+GROUP_GATED = {"407": ["I-2"], "408": ["I-3"],
+               # part e: 420's own scope and separations for Groups I-1 and R, its smoke barriers, housing units and
+               # cooking for Group I-1 alone
+               "420.1": ["I-1", "R-1", "R-2", "R-3", "R-4"], "420.2": ["I-1", "R-1", "R-2", "R-3", "R-4"],
+               "420.3": ["I-1", "R-1", "R-2", "R-3", "R-4"], "420.6": ["I-1"], "420.7": ["I-1"], "420.8": ["I-1"],
+               "420.9": ["I-1"]}
 # pieces a rule outside the Chapter 4 block already checks (Chapter 10's review round 1 brought them in alone)
 CHECKED_BEFORE = {"407.4.2": "general.bc_407_4_2_sleeping_room_travel"}
 
