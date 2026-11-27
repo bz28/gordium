@@ -64,6 +64,7 @@ FIELD_HEADLINES = {
     "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Table 1020.3)",
     "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
     "building.emergency_voice_alarm_system": "Say whether the whole building has an emergency voice/alarm communication system (907.5.2.2)",
+    "building.assembly_spaces": "Say whether any room or space is used for assembly purposes, whatever the building's group (1030.1)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
     "doors[].leaves": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",

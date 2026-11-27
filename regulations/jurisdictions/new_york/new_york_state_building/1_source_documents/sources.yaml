@@ -104,12 +104,16 @@ documents:
       # (exit passageways, pp.348-349) and 1025 (luminous egress path markings, pp.349-350, with SECTION 1026 after):
       # section group 9f. Sections 1026 (horizontal exits, pp.350-351), 1027 (exterior exit stairways and ramps, p.351),
       # 1028 (exit discharge, pp.351-352) and 1029 (egress courts, pp.352-353, with SECTION 1030 after): section group 9g.
-      pages: 32-68, 79, 99, 147, 273-274, 310-329, 335-337, 340-355, 359-362
+      # 1030.1 to 1030.9 with Table 1030.6.2 (assembly: general, bleachers, main and other exits, foyers, balconies,
+      # aisle capacity, travel distance, common path, aisles, pp.353-356, with 1030.10 after; 1030.7 and 1030.8, brought
+      # in alone since 2026-11-23, now with the parts under them): section group 9h.
+      pages: 32-68, 79, 99, 147, 273-274, 310-329, 335-337, 340-356, 359-362
       sections: ['308.5', '508.2', '1003', '1004', Table 1004.5, '1005.1', '1005.2', '1005.3', '1005.4', '1005.5', '1005.6', '1005.7', '1006.2.1', Table 1006.2.1, '1006.2.2', '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(1),
                  Table 1006.3.4(2),
                  '1007.1', '1008', '1009', '1010.1.1', '1010.1.2', '1010.1.3', '1010.1.4', '1010.1.5', '1010.1.6', '1010.1.7', '1010.2.1', '1010.2.2', '1010.2.3', '1010.2.4', Table 1010.2.4, '1010.2.5', '1010.2.6', '1010.2.7', '1010.2.8', '1010.2.9', '1010.2.10', '1010.2.11', '1010.2.12', '1010.2.13', '1010.2.14', '1010.2.15', '1012', '1013', '1016.2', '1017', Table 1017.2, '1018', '1019', '1020.1', '1020.2', Table 1020.2, '1020.3', Table 1020.3,
-                 '1020.4', '1020.5', '1020.6', '1020.7', '1021', '1022', '1023', '1024', '1025', '1026', '1027', '1028', '1029', '1031.1', '1031.2', '1031.3', '1031.4', '1031.5', '1031.6']
-      alone: ['407.4.2', '903.3.1.1', '903.3.1.2', '1010.1', '1010.2', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
+                 '1020.4', '1020.5', '1020.6', '1020.7', '1021', '1022', '1023', '1024', '1025', '1026', '1027', '1028', '1029', '1030.1', '1030.2', '1030.3', '1030.4', '1030.5',
+                 '1030.6', Table 1030.6.2, '1030.7', '1030.8', '1030.9', '1031.1', '1031.2', '1031.3', '1031.4', '1031.5', '1031.6']
+      alone: ['407.4.2', '903.3.1.1', '903.3.1.2', '1010.1', '1010.2']   # brought in without the parts under them (exempt locations, balconies, attics)
       definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
           the rule measures the story's floor area by both of the book's own measures of floor area (README).
@@ -361,6 +365,23 @@ documents:
         '1029.3':
           fire-resistance-rated: 'As 1020.6.1 ("fire-resistance-rated construction", p.352, line 58): the defined term
             is FIRE-RESISTANCE RATING, brought in. Read by 1029.3''s flag (section group 9g).'
+        '1030.1.1.1':
+          fire-resistance-rated: 'The book prints "fire-resistance-rated" in italics broken across two lines (p.353, lines
+            17-18: "fire-resis-" / "tance-rated construction", both in the italic font by position); the defined term is
+            FIRE-RESISTANCE RATING, brought in (202:fire_resistance_rating), which the adjective names but not whole. Read
+            by 1030.1.1.1''s flag (section group 9h).'
+        '1030.6.2':
+          smoke-protected: 'The book prints "smoke-protected" in italics before "environment" (p.354, line 7: "the same
+            smoke-protected environment"); the defined term is SMOKE-PROTECTED ASSEMBLY SEATING (brought in), which the
+            word doesn''t name whole. Read by 1030.6.2''s flag (section group 9h).'
+        '1030.8.1':
+          smoke-protected: 'As 1030.8 (p.355, line 23, the exception: "smoke-protected or open-air assembly seating"):
+            the defined term is SMOKE-PROTECTED ASSEMBLY SEATING (brought in), which the word doesn''t name whole. Read by
+            1030.8.1''s flag (section group 9h).'
+        '1030.9.5':
+          smoke-protected: 'As 1030.8 (p.356, lines 6-7, exceptions 4 and 5: "smoke-protected or open-air assembly
+            seating"): the defined term is SMOKE-PROTECTED ASSEMBLY SEATING (brought in), which the word doesn''t name
+            whole. Read by 1030.9.5''s flag (section group 9h).'
         '1023.13':
           standpipes: 'The book prints "Standpipes" in italics (p.348, line 9); Section 202 has no STANDPIPE entry, only
             STANDPIPE, TYPES OF and STANDPIPE SYSTEM, CLASSES OF (p.62, lines 15 and 30), which name kinds of standpipe

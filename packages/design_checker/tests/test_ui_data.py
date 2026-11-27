@@ -30,7 +30,8 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "occupied_outdoor_areas": False,                   # group 3's
                                           "ambulatory_care_facility": False,                 # group 4's
                                           "corridors_within_dwelling_units": False,
-                                          "emergency_voice_alarm_system": False})            # group 5a's
+                                          "emergency_voice_alarm_system": False,             # group 5a's
+                                          "assembly_spaces": False})                         # group 9h's
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False
@@ -579,8 +580,11 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # Revit-fields work. Groups 2 and 3's facts have theirs (PR #194).
     # and this branch's own: corridors_within_dwelling_units (their marks follow in the Revit-fields work)
     # and this branch's own: emergency_voice_alarm_system (their marks follow in the Revit-fields work)
-    # (groups 4 and 5's four have theirs too, the Revit-fields PR for them: the set is empty)
-    assert keys - set(revit) == set()
+    # (groups 4 and 5's four have theirs too, the Revit-fields PR for them)
+    # section group 9h's assembly_spaces has none yet (asked for by name, never by a mark: the Section 1030 flags
+    # that read it are a person's check whatever it is; its Project Information Yes/No follows in the Revit-fields work)
+    assert keys - set(revit) == {"assembly_spaces"}
+    assert "assembly_spaces" not in code_scope.MARK and code_scope.field_of("assembly_spaces") == "building.assembly_spaces"
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased",
               "other_level_egress_into_corridors", "ambulatory_care_facility", "corridors_within_dwelling_units",
               "emergency_voice_alarm_system"):

@@ -224,6 +224,16 @@ building:
                                        # exception 2: no rating there in Groups I-1 and R; Table 1020.3: 36 in)
   emergency_voice_alarm_system: false  # an emergency voice/alarm communication system per BCNYS 907.5.2.2 (with a
                                        # 903.3.1.1 or 903.3.1.2 sprinkler system: 1005.3's smaller capacity factors)
+  assembly_spaces: false               # a room or space used for assembly purposes, whatever the building's group
+                                       # (BCNYS 1030.1; 303.1.1 and 303.1.2 put small ones in Group B or the main
+                                       # occupancy): Section 1030's checks show where true or not stated. Also true
+                                       # where any room states a Table 1004.5 Assembly function (gaming_floor,
+                                       # exhibit_gallery_museum, assembly_fixed_seats, assembly_concentrated,
+                                       # assembly_standing, assembly_unconcentrated, bowling_center), whatever is
+                                       # stated; a stated false is not read where a room states courtroom,
+                                       # library_reading_room, exercise_room, rink_pool, pool_deck, stage_platform or
+                                       # airport_waiting (each may be an assembly use). Never false from the rooms: a
+                                       # description may hold only some floors
   facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
 ```
 

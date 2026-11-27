@@ -1205,11 +1205,136 @@ pieces:
     heading: Egress courts › Construction and openings
     rules:
     - general.bc_1029_3_egress_court_construction
+  1030.1.1:
+    label: flag
+    heading: General › Bleachers
+    rules:
+    - general.bc_1030_1_1_bleachers
+  1030.1.1.1:
+    label: flag
+    heading: Bleachers › Spaces under grandstands and bleachers
+    rules:
+    - general.bc_1030_1_1_1_spaces_under_grandstands
+  '1030.2':
+    label: flag
+    heading: Assembly main exit
+    rules:
+    - general.bc_1030_2_assembly_main_exit
+  '1030.3':
+    label: flag
+    heading: Assembly other exits
+    rules:
+    - general.bc_1030_3_assembly_other_exits
+  '1030.4':
+    label: flag
+    heading: Foyers and lobbies
+    rules:
+    - general.bc_1030_4_foyers_and_lobbies
+  '1030.5':
+    label: flag
+    heading: Interior balcony and gallery means of egress
+    rules:
+    - general.bc_1030_5_balcony_and_gallery_egress
+  1030.6.1:
+    label: flag
+    heading: Capacity of aisle for assembly › Without smoke protection
+    rules:
+    - general.bc_1030_6_1_aisle_capacity_without_smoke_protection
+  1030.6.2:
+    label: flag
+    heading: Capacity of aisle for assembly › Smoke-protected assembly seating
+    rules:
+    - general.bc_1030_6_2_smoke_protected_aisle_capacity
+  Table 1030.6.2:
+    label: flag
+    heading: Capacity for aisles for smoke-protected assembly
+    rules:
+    - general.bc_table_1030_6_2_smoke_protected_aisle_factors
+  1030.6.2.1:
+    label: flag
+    heading: Smoke-protected assembly seating › Smoke control
+    rules:
+    - general.bc_1030_6_2_1_smoke_control
+  1030.6.2.2:
+    label: flag
+    heading: Smoke-protected assembly seating › Roof height
+    rules:
+    - general.bc_1030_6_2_2_roof_height
+  1030.6.2.3:
+    label: flag
+    heading: Smoke-protected assembly seating › Automatic sprinklers
+    rules:
+    - general.bc_1030_6_2_3_smoke_protected_sprinklers
+  1030.6.3:
+    label: flag
+    heading: Capacity of aisle for assembly › Open-air assembly seating
+    rules:
+    - general.bc_1030_6_3_open_air_aisle_capacity
+  1030.6.3.1:
+    label: flag
+    heading: Open-air assembly seating › Automatic sprinklers
+    rules:
+    - general.bc_1030_6_3_1_open_air_sprinklers
   '1030.8':
     label: flag
     heading: Common path of egress travel
     rules:
     - general.bc_1030_8_fixed_seating_common_path
+  1030.8.1:
+    label: flag
+    heading: Common path of egress travel › Path through adjacent row
+    rules:
+    - general.bc_1030_8_1_path_through_adjacent_row
+  '1030.9':
+    label: flag
+    heading: Assembly aisles are required
+    rules:
+    - general.bc_1030_9_assembly_aisles_required
+  1030.9.1:
+    label: flag
+    heading: Assembly aisles are required › Minimum aisle width
+    rules:
+    - general.bc_1030_9_1_minimum_aisle_width
+  1030.9.2:
+    label: flag
+    heading: Assembly aisles are required › Aisle catchment area
+    rules:
+    - general.bc_1030_9_2_aisle_catchment_area
+  1030.9.3:
+    label: flag
+    heading: Assembly aisles are required › Converging aisles
+    rules:
+    - general.bc_1030_9_3_converging_aisles
+  1030.9.4:
+    label: flag
+    heading: Assembly aisles are required › Uniform width and capacity
+    rules:
+    - general.bc_1030_9_4_uniform_width_and_capacity
+  1030.9.5:
+    label: flag
+    heading: Assembly aisles are required › Dead-end aisles
+    rules:
+    - general.bc_1030_9_5_dead_end_aisles
+  1030.9.6:
+    label: flag
+    heading: Assembly aisles are required › Aisle measurement
+    rules:
+    - general.bc_1030_9_6_aisle_measurement
+  1030.9.6.1:
+    label: flag
+    heading: Aisle measurement › Assembly aisle obstructions
+    rules:
+    - general.bc_1030_9_6_1_assembly_aisle_obstructions
+  1030.9.7:
+    label: flag
+    heading: Assembly aisles are required › Stairways connecting to stepped aisles
+    rules:
+    - general.bc_1030_9_7_stairways_connecting_to_stepped_aisles
+  1030.9.8:
+    label: flag
+    heading: Assembly aisles are required › Stairways connecting to vomitories
+    rules:
+    - general.bc_1030_9_8_stairways_connecting_to_vomitories
   '1031.2':
     label: rule
     heading: Where required

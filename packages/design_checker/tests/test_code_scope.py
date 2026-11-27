@@ -138,6 +138,57 @@ def test_the_one_occupancy_group_or_mixed_for_two_and_the_seating_fact():
     assert code_scope.building_measures({"assembly_fixed_seating": False}) == {"assembly_fixed_seating": False}
 
 
+# ---- section group 9h: assembly spaces, from the rooms' functions and the architect's statement -----------------------
+
+FACTORS = REPO / "regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/drafted/records/occupant_load_factors.yaml"
+
+
+def _rooms(*functions):
+    return {"rooms": [{"id": f"r{i}", **({"function": f} if f is not None else {})} for i, f in enumerate(functions)]}
+
+
+def test_the_assembly_functions_are_exactly_table_1004_5s_rows_under_its_assembly_heading():
+    """Table 1004.5 prints "Assembly" on p.312, line 19, its rows on lines 20 to 27 (Gaming floors to Bowling centers),
+    and "Business areas" on line 28: the functions that say a room is used for assembly purposes are those rows, read
+    from the frozen table's own sources, never a hand list alone. Every assembly-like function is one of the table's
+    other rows."""
+    rows = load(FACTORS)["functions"]
+    under = {f for f, v in rows.items() if v["source"]["page"] == 312 and 20 <= v["source"]["lines"][0] <= 27}
+    assert set(code_scope.ASSEMBLY_FUNCTIONS) == under
+    assert set(code_scope.ASSEMBLY_LIKE_FUNCTIONS) <= set(rows) - under
+    assert len(code_scope.ASSEMBLY_LIKE_FUNCTIONS) == 7
+
+
+@pytest.mark.parametrize("fn", code_scope.ASSEMBLY_FUNCTIONS)
+def test_a_room_with_an_assembly_function_makes_assembly_spaces_yes_whatever_is_stated(fn):
+    for stated in ({}, {"assembly_spaces": False}, {"assembly_spaces": True}):
+        got = code_scope.building_measures(stated, _rooms("residential", fn, None))
+        assert got["assembly_spaces"] is True, (fn, stated)
+
+
+@pytest.mark.parametrize("fn", code_scope.ASSEMBLY_LIKE_FUNCTIONS)
+def test_an_assembly_like_room_is_never_yes_and_never_lets_a_stated_no_stand(fn):
+    assert "assembly_spaces" not in code_scope.building_measures({}, _rooms(fn))
+    assert "assembly_spaces" not in code_scope.building_measures({"assembly_spaces": False}, _rooms(fn, "business"))
+    assert code_scope.building_measures({"assembly_spaces": True}, _rooms(fn))["assembly_spaces"] is True
+
+
+def test_rooms_never_make_assembly_spaces_no_only_the_statement_does():
+    """A description may hold only some of the building's floors (review round 6 of section group 6b): rooms of
+    other functions, or none, or no rooms at all, leave the fact not stated; only `assembly_spaces: false` makes it
+    no. Whatever the rooms hold, building_measures never gives false without the statement."""
+    every = list(load(FACTORS)["functions"]) + [None, "not a function", 7, ["gaming_floor"], {"a": 1}]
+    others = [f for f in every if f not in code_scope.ASSEMBLY_FUNCTIONS + code_scope.ASSEMBLY_LIKE_FUNCTIONS]
+    for interior in (None, {}, {"rooms": []}, {"rooms": "x"}, {"rooms": [None, 3]}, _rooms(*others),
+                     *(_rooms(f) for f in others)):
+        assert "assembly_spaces" not in code_scope.building_measures({}, interior), interior
+        assert code_scope.building_measures({"assembly_spaces": False}, interior)["assembly_spaces"] is False
+    for fn in every:
+        for stated in ({}, {"assembly_spaces": False}, {"assembly_spaces": True}, {"assembly_spaces": "no"}):
+            got = code_scope.building_measures(stated, _rooms(fn)).get("assembly_spaces")
+            assert got is not False or stated.get("assembly_spaces") is False, (fn, stated)
+
+
 # ---- in the check -----------------------------------------------------------------------------------------------------
 
 def ranch():
