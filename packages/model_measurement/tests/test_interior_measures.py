@@ -2365,6 +2365,16 @@ def test_no_stairs_beside_rooms_on_two_levels_as_the_building_code_places_them()
     assert "(Room's at 0 in, Area's at 120 in)" in _refused(measure(d, whole=lone))
     lone["levels"][0]["elevation"] = 0.25
     assert measure(d, whole=lone)["parts"]["stair"] == []
+    lone["levels"][0]["elevation"] = "abc"                       # round 4: a level's height that can't be read
+    assert "the height of Area's level can't be read" in _refused(measure(d, whole=lone))
+    del lone["levels"][0]["elevation"]                           # not given: nothing against it
+    assert measure(d, whole=lone)["parts"]["stair"] == []
+    # round 4: a room with no floor given stands at its level's height, against the ground as any floor
+    up = {"rooms": [{"id": "r", "name": "Room", "level": "L2"}], "levels": [{"id": "L2", "elevation": 120}],
+          "openings": [{"id": "w", "ground_outside": 0}]}
+    assert "its lowest floor (Room's, at 120 in)" in _refused(measure(d, whole=up))
+    up["levels"][0]["elevation"] = 4
+    assert measure(d, whole=up)["parts"]["stair"] == []
     for odd in (True, ["L2"], 2.0, {"id": "L2"}, " "):           # round 3: a level given that can't be read
         assert "r1's level can't be read" in _refused(measure(d, whole=whole("L1", odd))), odd
     assert "(1 and 2)" in _refused(measure(d, whole=whole(1, 2)))            # skeptic B: number ids are levels too

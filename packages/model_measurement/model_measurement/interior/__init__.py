@@ -1,11 +1,14 @@
 """Measuring the inside of a house for egress (escape openings, stairs, guards, the exit door), from a host-neutral
 interior description. Plain code written by engineers, no AI (principle 6): same description, same numbers.
 
-    measure(description, whole=None, stated_stories=None) -> {"parts": {kind: [part, …] | None}, "problems": [...], "not_checked": [...], …}
+    measure(description, whole=None, stated_stories=None)
+        -> {"parts": {kind: [part, …] | None}, "problems": [...], "not_checked": [...], "refused"?: {kind: why}, …}
 
 `parts` is exactly what rule_format.parts.rows reads: each part {"id", "name", "within"?, "measures"}, measures
 named as rule_format/parts.yaml names them, in inches and square feet. A kind not given in the description is None
-(not read, so its rules need review), never an empty list; [] means the description says there are none. A
+(not read, so its rules need review), never an empty list; [] means the description says there are none, unless
+that is refused beside what it shows ("no stairs" beside more than one floor: _stairs_against_floors; the stairs
+are then None and `refused` says why, {"stair": the reason}). A
 measure the description can't settle is left out of `measures` and its reason put in `not_measured` (a rule
 reading it then needs review). Other values worked out are in `more`, not yet handed to the rules; a parts.yaml
 measure kept there says so in `not_measured` (and guards are their own kind). The input format: docs/interior/interior_description_format.md; each measure's definition:
@@ -104,8 +107,10 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
     building may have more than one floor the claim needs review, never a stair rule set aside:
     - its rooms or enclosed spaces with no room drawn (`unknown_spaces`) are on two or more `level`s (as the Building
       Code's description and the Revit add-in place them), named from `levels` where it names them;
-    - its rooms' floors are more than 1/2 in apart (`floor_elevation`, as a house's gives them; a change of floor
-      that size is a step, or a ramp), or a room's floor is given but can't be read (it may be on another floor);
+    - a level given that can't be read (it may be another floor);
+    - its floors are more than 1/2 in apart (a room's `floor_elevation`, as a house's gives them; a room with none,
+      and an enclosed space, at its level's height in `levels`; a change of floor that size is a step, or a ramp),
+      or a floor or level height given can't be read (it may be on another floor);
     - every room's floor is more than 8 1/4 in above the highest ground given outside the openings (`ground_outside`:
       only an upper floor drawn, or a floor a landing's step can't reach the ground from, R318.3.2);
     - the check gives two or more stories (`stated_stories`: a count, or (count, whose words with {n}),
@@ -126,11 +131,11 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
                                                        "another floor").reason
     on_rooms = {_level_id(r.get("level")) for r in rooms} - {None}
     levels = on_rooms | ({_level_id(u.get("level")) for u in spaces} - {None})
+    listed = {}                        # the description's levels by id (`levels`: {id, name, elevation})
+    for lv in whole.get("levels") if isinstance(whole.get("levels"), list) else []:
+        if isinstance(lv, dict) and _level_id(lv.get("id")) is not None:
+            listed[lv["id"]] = lv
     if len(levels) > 1:
-        listed = {}
-        for lv in whole.get("levels") if isinstance(whole.get("levels"), list) else []:
-            if isinstance(lv, dict) and _level_id(lv.get("id")) is not None:
-                listed[lv["id"]] = lv
 
         def named(level_id):
             lv = listed.get(level_id) or {}
@@ -142,16 +147,17 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
         who = "its rooms are" if levels == on_rooms else "its rooms, and enclosed spaces with no room drawn, are"
         return Stop("stairs_none_several_floors", what=f"{who} on {len(order)} levels ({shown})").reason
     floors = []
-    heights = {}                       # a level's height, where `levels` gives one that can be read
-    for lv in whole.get("levels") if isinstance(whole.get("levels"), list) else []:
-        if isinstance(lv, dict) and _level_id(lv.get("id")) is not None and lv.get("elevation") is not None:
-            try:
-                heights[lv["id"]] = reader.length(lv["elevation"], "a level's elevation")
-            except Stop:
-                continue
-    for u in spaces:                   # round 3: an enclosed space on a level above the rooms' floors
-        if _level_id(u.get("level")) in heights:
-            floors.append((heights[u["level"]], name_of(u)))
+    # a room with no floor given, or an enclosed space, stands at its level's height where `levels` gives one (rounds
+    # 3 and 4): a height given that can't be read may be another floor, as a room's floor that can't be
+    for p in spaces + [r for r in rooms if r.get("floor_elevation") is None]:
+        lv = listed.get(_level_id(p.get("level"))) if _level_id(p.get("level")) is not None else None
+        if lv is None or lv.get("elevation") is None:
+            continue
+        try:
+            floors.append((reader.length(lv["elevation"], "a level's elevation"), name_of(p)))
+        except Stop:
+            return Stop("stairs_none_several_floors", what=f"the height of {name_of(p)}'s level can't be read, so "
+                                                           "it may be on another floor").reason
     for r in rooms:
         if r.get("floor_elevation") is None:
             continue
@@ -259,8 +265,8 @@ def measure(description, whole=None, stated_stories=None) -> dict:
         return out
     reader = Reader(units)
     parts = out["parts"]
-    claims, refused = none_of.read(description)
-    problems += refused
+    claims, claims_refused = none_of.read(description)
+    problems += claims_refused
 
     rooms = _given(description, "sleeping_room", problems)
     spaces = _unknown_spaces(description, problems) if rooms is not None else None
