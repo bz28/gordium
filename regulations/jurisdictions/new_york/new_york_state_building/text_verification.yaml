@@ -2843,6 +2843,10 @@ pieces:
     second_reading_comparisons:
     - <
     - none
+    flags:
+    - '''less than 500 square foot'' beside ''455 m'': the book prints "500 square feet (455 m2)", but 500 sq ft is 46.45
+      m2; both readings agree on what is printed, and the flag of 407.2.4 says the metric figure is misprinted (Chapter
+      4 part c, review round 2).'
   407.2.5:
     piece_sha256: 0bced79d837cf973c74e8779bff5b3f37ec3934edc58b712de89d1fa14762b5c
     numbers:
@@ -2954,8 +2958,8 @@ pieces:
     - none
     flags:
     - '''2/3 inch'' beside ''19.1 mm'': the book prints a stacked 2/3 (the page image; pdfplumber reads the 2 and the 3 at
-      5.6 points over and under the bar), but 19.1 mm is 3/4 inch, the model code''s figure. Both readings agree on what
-      is printed; the flag of 407.3.1.1 says the difference (Chapter 4 part c, review round 1).'
+      5.6 points over and under the bar), but 19.1 mm is 3/4 inch (2/3 inch is 16.9 mm). Both readings agree on what is
+      printed; the flag of 407.3.1.1 says the difference (Chapter 4 part c, review rounds 1 and 2).'
     - '''2/3 inch'' (<=): ''2/3 inch (19.1 mm) maximum''; the recorded words miss it (numbers.py reads comparison words only
       directly before a number or after its unit). The second reading is right. A flag''s figure (Chapter 4 part c), read
       by no rule.'
