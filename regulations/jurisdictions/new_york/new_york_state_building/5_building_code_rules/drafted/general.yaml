@@ -7023,10 +7023,10 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Group I has a manual fire alarm system activating occupant notification per 907.5, and automatic smoke detection
-      per 907.2.6.1, 907.2.6.2 and 907.2.6.3.3 (exception 1: Group I-1 and I-2 sleeping units'' boxes at constantly attended
-      staff locations, visible, with ready access, within 907.4.2.1''s travel distances; exception 2: private mode signaling
-      the fire code official approves, staff evacuation in the plan per Section 404 of the Fire Code of New York State): a
-      person''s check.'
+      per 907.2.6.1, 907.2.6.2 and 907.2.6.3.3 (exception 1: Group I-1 and I-2 sleeping units'' boxes not required at exits
+      where they are at all care providers'' control stations or other constantly attended staff locations, visible, with
+      ready access, within 907.4.2.1''s travel distances; exception 2: private mode signaling the fire code official approves,
+      staff evacuation in the plan per Section 404 of the Fire Code of New York State): a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -7116,8 +7116,9 @@ rules:
     expect: needs_review
     note: 'Group I-2 Condition 1 has automatic smoke detection in corridors and the spaces 407.2 lets open to them, activated
       per 907.4; Condition 2 as Section 407 requires (corridor detection not needed in smoke compartments whose sleeping units
-      have UL 268 detectors displaying in the corridor and alarming at the care providers'' station, or door-closers with
-      integral smoke detectors): a person''s check.'
+      have UL 268 detectors with a visual display on the corridor side and an audible and visual alarm at the care providers''
+      station, or door-closing devices with integral smoke detectors on the unit sides installed per their listing that perform
+      the required alerting function): a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -7684,10 +7685,10 @@ rules:
     note: 'New York places Group R-1''s smoke alarms in sleeping areas, in every room on the path of egress from them to the
       unit''s door, on each story within a unit (a split level''s upper alarm serving a lower level less than a full story
       below with no door between), at least 3 feet from a bath or shower room''s door unless that would prevent a required
-      alarm, in a hallway and the room open to it where that room''s ceiling is 24 inches or more above the hallway''s, by
-      a sleeping loft, in each common space shared by three or more units, and, on a level over 1000 square feet, within 30
-      feet of travel of every ceiling point or one per 500 square feet (upper-floor alarms may serve great rooms and vaulted
-      ceilings): a person''s check.'
+      alarm, in a hallway serving bedrooms and the room open to it where that room''s ceiling is 24 inches or more above the
+      hallway''s, by a sleeping loft, in each common space shared by three or more units, clearly audible there, and, on a
+      level of a unit over 1000 square feet of interior floor area, garages excluded, within 30 feet of travel of every ceiling
+      point or one per 500 square feet (upper-floor alarms may serve great rooms and vaulted ceilings): a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -7732,10 +7733,11 @@ rules:
     note: 'New York places smoke alarms in Groups R-2, R-3, R-4 and I-1 outside each separate sleeping area near the bedrooms,
       in each room used for sleeping, on each story within a unit including basements (not crawl spaces or uninhabitable attics)
       (a split level''s upper alarm serving a lower level less than a full story below with no door between), at least 3 feet
-      from a bath or shower room''s door unless that would prevent a required alarm, in a hallway and the room open to it
-      where that room''s ceiling is 24 inches or more above the hallway''s, by a sleeping loft, in each common space shared
-      by three or more units, and, on a level over 1000 square feet, within 30 feet of travel of every ceiling point or one
-      per 500 square feet (upper-floor alarms may serve great rooms and vaulted ceilings): a person''s check.'
+      from a bath or shower room''s door unless that would prevent a required alarm, in a hallway serving bedrooms and the
+      room open to it where that room''s ceiling is 24 inches or more above the hallway''s, by a sleeping loft, in each common
+      space shared by three or more units, clearly audible there, and, on a level of a unit over 1000 square feet of interior
+      floor area, garages excluded, within 30 feet of travel of every ceiling point or one per 500 square feet (upper-floor
+      alarms may serve great rooms and vaulted ceilings): a person''s check.'
   - given:
       occupancy_group: B
     expect: not_applicable
@@ -7931,7 +7933,8 @@ rules:
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
   notes: '907.2.11.8: hotels and motels are Group R-1 (transient) or R-2 (nontransient, more than five guest rooms: 310.3),
-    lodging houses Group R-3 (310.4); smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
+    nontransient ones with five or fewer guest rooms Group R-3 (310.4), lodging houses Group R-1 with more than five guest
+    rooms (310.2) or R-3 with five or fewer; smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
     Chapter 9 part d).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

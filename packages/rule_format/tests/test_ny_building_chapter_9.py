@@ -616,3 +616,17 @@ def test_part_ds_review_round_1(book, ctx):
     two = _shown_note(_rule(book, "general.bc_907_2_11_2_group_r_smoke_alarm_locations"))
     assert "crawl spaces" in two and "upper-floor" in two and "prevent a required alarm" in two
     assert "prevent a required alarm" in _shown_note(_rule(book, "general.bc_907_2_11_1_group_r1_smoke_alarm_locations"))
+
+
+def test_part_ds_review_round_2(book):
+    """Part d review round 2: Group I's notes keep their exceptions' conditions (boxes at exits only where at all care
+    providers' control stations or other constantly attended locations; door-closers' detectors on the unit sides,
+    installed per their listing, performing the alerting function), and the smoke alarm notes their reliefs (a hallway
+    serving bedrooms, garages excluded from a level's area)."""
+    i = _shown_note(_rule(book, "general.bc_907_2_6_group_i_fire_alarm"))
+    assert "all care providers' control stations" in i and "at exits" in i
+    i2 = _shown_note(_rule(book, "general.bc_907_2_6_2_group_i2_smoke_detection"))
+    assert "required alerting function" in i2 and "unit sides" in i2 and "audible and visual alarm" in i2
+    for rid in ("general.bc_907_2_11_1_group_r1_smoke_alarm_locations", "general.bc_907_2_11_2_group_r_smoke_alarm_locations"):
+        n = _shown_note(_rule(book, rid))
+        assert "serving bedrooms" in n and "garages excluded" in n and "clearly audible" in n, rid
