@@ -153,6 +153,8 @@ public static class BuildingFacts
                      (Marks.AmbulatoryCareFacility, "ambulatory_care_facility"),
                      (Marks.CorridorsWithinDwellingUnits, "corridors_within_dwelling_units"),
                      (Marks.EmergencyVoiceAlarm, "emergency_voice_alarm_system"),
+                     // the occupant loads' ceiling: a mezzanine adds its occupants to the room below (1004.2.2)
+                     (Marks.Mezzanines, "mezzanines"), (Marks.LoadsNotByArea, "loads_not_by_area"),
                      // Chapter 4 part b's: a high-rise (202, 403) and an underground building (405.1)
                      (Marks.HighRiseBuilding, "high_rise_building"), (Marks.UndergroundBuilding, "underground_building") })
         {

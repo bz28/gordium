@@ -40,6 +40,10 @@ def _rows(rule, kind, measures, given, ctx):
     # exit be and so need review where it isn't known (PR #181)
     if kind == "space":
         measures = {"space_is_exit": False, **measures}
+    # a day care's rooms, none seating people served by aisles (1030.7: the routes' story and space parts say so from
+    # the rooms' functions, design_checker/occupant_load.py), unless a test says otherwise
+    measures = {**{"story": {"story_assembly_seating_possible": False},
+                   "space": {"space_assembly_seating_possible": False}}.get(kind, {}), **measures}
     return [r["outcome"] for r in parts.rows(rule, {kind: [{"id": "p1", "measures": measures}]}, given, ctx.allowed())]
 
 

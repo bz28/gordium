@@ -69,6 +69,8 @@ FIELD_HEADLINES = {
     "building.high_rise_building": "Say whether the building is a high-rise (an occupied floor or occupiable roof more than 75 ft above the lowest level of fire department vehicle access, 202) or more than 420 ft in building height (403)",
     "building.underground_building": "Say whether any floor level used for human occupancy is more than 30 ft below the finished floor of the lowest level of exit discharge (405.1)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
+    "building.mezzanines": "Say whether the building has a mezzanine (505.2)",
+    "building.loads_not_by_area": "Say whether any area is counted by seats, lanes or actual load (fixed seats, bowling, call centers)",
     "doors[].leaves": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",

@@ -71,7 +71,13 @@ def rules():
     return {r["id"]: r for r in load(RULEBOOK)["rules"]}
 
 
+# a story or space part as the routes give one whose story's rooms all state non-assembly functions (no seating
+# served by aisles, 1030.7: design_checker/occupant_load.py), unless a test says otherwise
+NO_SEATING = {"story": {"story_assembly_seating_possible": False}, "space": {"space_assembly_seating_possible": False}}
+
+
 def _one(rule, kind, measures, given, ctx):
+    measures = {**NO_SEATING.get(kind, {}), **measures}
     [row] = parts.rows(rule, {kind: [{"id": "p1", "measures": measures}]}, given, ctx.allowed())
     return row["outcome"]
 
@@ -1031,4 +1037,63 @@ def test_1010_1_2_door_kind_is_never_a_fail(ctx, rules):
     for g in ("B", "H-1", "R-2", "I-3"):
         assert _one(r, "means_of_egress_door", {"moe_door_swinging": False}, {"occupancy_group": g}, ctx) ==             "needs_review", g
         assert _one(r, "means_of_egress_door", {"moe_door_swinging": True}, {"occupancy_group": g}, ctx) ==             "not_applicable", g
+
+
+
+
+def test_a_restaurant_story_with_no_fixed_seats_never_passes_a_travel_or_common_path_row(ctx, rules):
+    """BCNYS 1030.7 (p.354, lines 50-51): "Where aisles are provided for seating, the distance shall be measured along
+    the aisles and aisle accessways without travel over or on the seats", fixed seats or loose: every occupied portion
+    with seats, tables or displays has aisles (1030.9), and seating at tables has aisle accessways (1030.13.1). A Group
+    A-2 restaurant story (tables and chairs) with fixed seating stated no: 100 ft of travel and a one-exit dining room's
+    20 ft common path, both within their rows, need review where a room on the story may seat people served by aisles
+    (the routes' story and space parts, design_checker/occupant_load.py) and pass where none may. Every rule that
+    reviews on fixed seating for travel or a common path reviews on the story's seating too (1020.3's corridor capacity
+    aside: its fixed-seating review is the seating's capacity factors, not travel)."""
+    a2 = {"occupancy_group": "A-2", "occupancy_group_i4": False, "other_occupancy_present": True, **NONE, **STATED}
+    travel = rules["general.bc_table_1017_2_a_e_f1_m_r_s1"]
+    for seats, want in ((True, "needs_review"), (False, "pass")):
+        assert _one(travel, "story", {**_travel(100), "story_assembly_seating_possible": seats}, a2, ctx) == want
+    cp = rules["general.bc_table_1006_2_1_a_e_m"]
+    space = {"space_is_exit": False, "space_exit_count": 1, "space_occupant_load": 40, "space_common_path": 20}
+    for seats, want in ((True, "needs_review"), (False, "pass")):
+        assert _one(cp, "space", {**space, "space_assembly_seating_possible": seats}, a2, ctx) == want
+    for rid, r in rules.items():
+        fixed = [w["when"] for w in r.get("review_when") or [] if re.search(r"assembly_fixed_seating", w["when"])]
+        if not fixed or rid == "general.bc_1020_3_corridor_capacity":
+            continue
+        m = {"story": "story_assembly_seating_possible", "space": "space_assembly_seating_possible"}[r["for_each"]]
+        twins = [w["when"] for w in r["review_when"] if re.search(rf"{m}", w["when"])]
+        assert [re.sub(r"assembly_fixed_seating", m, f) for f in fixed] == twins, rid
+        assert all(_cites(r, 354, 50) or "1030.7" in w["reason"] for w in r["review_when"] if m in w["when"]), rid
+
+
+def test_each_seating_review_names_every_way_the_story_may_seat_people_and_when_it_is_settled(rules):
+    """Review round 1 (P3): the seating reviews said "Setting each room's function settles it", which a real restaurant
+    or a courtroom never does, and named neither a function none of the table's nor a room unread. Each names every
+    trigger the measuring has (design_checker/occupant_load.py assembly_seating) and says when it is settled."""
+    n = 0
+    for rid, r in rules.items():
+        for w in r.get("review_when") or []:
+            if "assembly_seating_possible" not in w["when"]:
+                continue
+            why = " ".join(w["reason"].split())
+            assert "settles it" not in why, rid
+            for must in ("Assembly function", "may be an assembly use", "none of the table's", "or none",
+                         "can't be read or placed", "stated Group A", "It is settled only where every room on the story",
+                         # review round 2: the rooms the Revit Function mark says to leave blank are said to be aside
+                         "closet or toilet with none", "exit stair or passageway", "but its corridors, closets, toilets and exits",
+                         # review round 4: an exit or a corridor stating a function is a trigger of its own
+                         "an exit or a corridor states a function", "which state none"):
+                assert must in why, (rid, must)
+            n += 1
+    assert n == 30
+
+
+def test_the_seating_measures_meaning_names_every_trigger():
+    """Review round 2 (P3): parts.yaml's meaning of the story's seating measure left out round 1's Group A trigger."""
+    meaning = parts.load_registry()["story"]["measures"]["story_assembly_seating_possible"]["meaning"]
+    for must in ("Assembly functions", "may be an assembly use", "none of the table's", "can't be read or placed",
+                 "no room drawn in it", "stated Group A", "an exit or a corridor states a function"):
+        assert must in meaning, must
 

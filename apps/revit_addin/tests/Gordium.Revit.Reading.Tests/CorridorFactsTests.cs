@@ -13,6 +13,7 @@ public sealed class CorridorFactsTests
     [
         (Marks.OtherLevelsReachCorridors, "other_level_egress_into_corridors"), (Marks.AmbulatoryCareFacility, "ambulatory_care_facility"),
         (Marks.CorridorsWithinDwellingUnits, "corridors_within_dwelling_units"), (Marks.EmergencyVoiceAlarm, "emergency_voice_alarm_system"),
+        (Marks.Mezzanines, "mezzanines"), (Marks.LoadsNotByArea, "loads_not_by_area"),   // the occupant loads' ceiling
     ];
 
     public static TheoryData<string> Keys => [.. Each.Select(e => e.Key)];
