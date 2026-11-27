@@ -166,17 +166,27 @@ def _resolves(flag: str, comparison: str) -> bool:
         or "one length" in flag
 
 
+def _without_list_numbers(quote: str) -> str:
+    """A quote with its list items' own numbers taken out ("Exceptions: 1. In open parking garages", "... dwellings.
+    2. In occupancies"): a list number starts the quote or follows a sentence's end or a colon, and is followed by
+    ". ", so it is never a figure the quote states, as statements_of_lines cuts it from a piece's lines (Chapter 4 part
+    c, review round 5: "1." backed a count of one). A number ending a sentence ("not more than 2. Where") follows a
+    word and is kept."""
+    return re.sub(r"(^|[.:]\s)\d+(?:\.\d+)*\.\s", r"\1", quote)
+
+
 def _worded_statements(quote: str) -> set[tuple]:
     """(the words before it, value, unit) of every number a quote states, as the reading's own words are matched."""
     from document_extraction.numbers import statements
-    return {(" ".join(s["before"].lower().split()), value_of(s["value"]), s["unit"]) for s in statements(quote)
-            if value_of(s["value"]) is not None}
+    return {(" ".join(s["before"].lower().split()), value_of(s["value"]), s["unit"])
+            for s in statements(_without_list_numbers(quote)) if value_of(s["value"]) is not None}
 
 
 def quote_statements(quote: str) -> set[tuple]:
     """(value, unit) of every number a quote states."""
     from document_extraction.numbers import statements
-    return {(value_of(s["value"]), s["unit"]) for s in statements(quote) if value_of(s["value"]) is not None}
+    return {(value_of(s["value"]), s["unit"]) for s in statements(_without_list_numbers(quote))
+            if value_of(s["value"]) is not None}
 
 
 def unverified_reading(entry: dict) -> dict:
