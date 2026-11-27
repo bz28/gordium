@@ -25,6 +25,9 @@ NO_MALL = {"special_egress_spaces": False}
 # Chapter 4 part b: neither a high-rise over 420 ft (403.5.2's additional stairway) nor an underground building
 # (405.7.1's two exits on each floor level), so neither can change the story rows
 NOT_TALL = {"high_rise_building": False, "underground_building": False}
+# Chapter 4 part e: no ambulatory care facility (422.2's fire partition between one and an adjacent corridor can't
+# change Table 1020.2's B row)
+NO_CARE = {"ambulatory_care_facility": False}
 
 # Table 1017.2, p.341: line -> (groups, without a sprinkler system (None: Not Permitted), with one, the rule)
 TABLE_1017_2 = {
@@ -810,7 +813,7 @@ def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ct
         many = (over or 0) + 0.5                                   # just past the row's load (any load for "All")
         for g in groups:
             for system, need in ((NFPA13, with_), (NONE, without)):
-                given = {"occupancy_group": g} | system | NO_UNITS | NO_MALL
+                given = {"occupancy_group": g} | system | NO_UNITS | NO_MALL | NO_CARE
                 if need is None:                                  # Not Permitted
                     assert _one(r, "corridor", _rating(many, 5), given, ctx) == "fail", (g, line)
                     continue
@@ -822,7 +825,7 @@ def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ct
                 else:
                     assert _one(r, "corridor", _rating(many), given, ctx) == "pass", (g, line)    # 0: none asked
             if over is not None:                                  # at the row's load: no rating asked
-                assert _one(r, "corridor", _rating(over), {"occupancy_group": g} | NONE | NO_UNITS | NO_MALL, ctx) == "pass", g
+                assert _one(r, "corridor", _rating(over), {"occupancy_group": g} | NONE | NO_UNITS | NO_MALL | NO_CARE, ctx) == "pass", g
     # note d (p.344 lines 17-18): Group R-3 and R-4 with 903.3.1.3 (NFPA 13D), 1 hour; R-1 and R-2 have no such cell
     r = rules["general.bc_table_1020_2_r"]
     d13 = {S1: False, S2: False, "sprinklered_903_3_1_3": True} | NO_UNITS | NO_MALL

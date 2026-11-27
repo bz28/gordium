@@ -359,7 +359,7 @@ def _said_not_brought_in(text):
     for sentence in re.split(r"(?<=\.)\s", text):
         clauses = list(re.finditer(r"[^;:]+(?:[;:]|$)", sentence))
         for n, clause in enumerate(clauses):
-            if re.search(r"(?:not|n't) brought in", clause.group()):
+            if re.search(r"(?:not|n't|neither|nor) brought in", clause.group()):
                 # a list the words open with a colon is theirs too ("not brought in: covered malls (402.8) and ...")
                 end = clauses[n + 1].end() if clause.group().endswith(":") and n + 1 < len(clauses) else clause.end()
                 yield sentence[:end]
@@ -378,21 +378,65 @@ def test_a_stretch_said_not_brought_in_runs_from_its_sentence_start_to_its_claus
 def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rules):
     """Review round 1 of part c: Chapter 10's words still said 407.4 "aren't brought in" (the shared stale-words test
     reads only "not brought in" in a narrow pattern). No sentence of any rule's title, notes, review reasons or
-    example notes names a Chapter 4 section sources.yaml brings in (or a part under one) and calls it not brought in."""
+    example notes, nor any label's reason, names a Chapter 4 section sources.yaml brings in (or a part under one, or
+    the whole section a part is brought in from: "Section 420" once 420.2 is in, review round 1 of part e) and calls
+    it not brought in."""
     brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]
     ours = [str(s) for s in brought["sections"] + brought["alone"] if re.fullmatch(r"4\d\d(\.\d+)*", str(s))]
     assert ours
-    bad = []
+    texts = []
     for r in rules.values():
-        texts = [r.get("title"), r.get("notes")] + [w.get("reason") for w in r.get("review_when") or []] +                 [e.get("note") for e in r.get("examples") or []]
-        for text in (x for x in texts if isinstance(x, str)):
-            # review rounds 2 to 5 of part c: a section named by its number or by its use ("a mall, a Group I-2
-            # occupancy ...: each has its own distance, not brought in"), anywhere in the stretch said not brought in
-            for stretch in _said_not_brought_in(text):
-                named = re.findall(r"\b(4\d\d(?:\.\d+)+)\b", stretch) + sorted(_named_uses(stretch))
-                bad += [(r["id"], n) for n in named if any(n == s or n.startswith(s + ".") for s in ours)]
+        texts += [(r["id"], x) for x in [r.get("title"), r.get("notes")] + [w.get("reason") for w in
+                  r.get("review_when") or []] + [e.get("note") for e in r.get("examples") or []] if isinstance(x, str)]
+    for path in sorted((NY / "3_section_labels").glob("*.yaml")):
+        labels = load(path)["labels"]
+        assert isinstance(labels, dict) and labels, path
+        texts += [(f"label {pid}", e["reason"]) for pid, e in labels.items()
+                  if isinstance(e, dict) and isinstance(e.get("reason"), str)]
+    bad = []
+    for where, text in texts:
+        # review rounds 2 to 5 of part c: a section named by its number or by its use ("a mall, a Group I-2
+        # occupancy ...: each has its own distance, not brought in"), anywhere in the stretch said not brought in
+        for stretch in _said_not_brought_in(text):
+            named = re.findall(r"\b(4\d\d(?:\.\d+)+)\b", stretch) + re.findall(r"\bSection (4\d\d)\b", stretch)
+            bad += [(where, n) for n in named + sorted(_named_uses(stretch))
+                    if any(n == s or n.startswith(s + ".") or s.startswith(n + ".") for s in ours)]
     assert not bad, bad
 
+
+def test_the_readmes_list_names_every_section_a_brought_in_piece_sends_to_that_isnt_in():
+    """Review round 1 of part e: 420.1 sends to "Sections 420.1 through 420.11" and 422.1 to 422.1 through 422.7, and
+    the README says which parts of Sections 420 and 422 part e leaves out; each section of those ranges that isn't
+    brought in (nor under one that is) is in that list. (The other parts' scope sections send to ranges whose
+    remaining sections no rule meets, and the README lists none of them.)"""
+    brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]
+    ours = [str(s) for s in brought["sections"] + brought["alone"]]
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    missing = []
+    for rid in _block_ids():
+        for src in _rules_by_id()[rid].get("sources") or []:
+            for a, b in re.findall(r"Sections (4\d\d\.\d+) through (4\d\d\.\d+)", " ".join(src["quote"].split())):
+                head = a.rsplit(".", 1)[0]
+                if head != b.rsplit(".", 1)[0] or f"the parts of Section {head} " not in readme:
+                    continue
+                for n in range(int(a.rsplit(".", 1)[1]), int(b.rsplit(".", 1)[1]) + 1):
+                    s = f"{head}.{n}"
+                    if not any(s == o or s.startswith(o + ".") for o in ours) and not _readme_names(readme, s):
+                        missing.append((rid, s))
+    assert not missing, sorted(set(missing))
+
+
+def _readme_names(readme, section):
+    """Whether the README names a section: by itself, or inside a range it prints ("422.4 to 422.7")."""
+    if re.search(r"(?<![\d.])" + re.escape(section) + r"(?![\d])", readme):
+        return True
+    head, n = section.rsplit(".", 1)
+    return any(int(lo) <= int(n) <= int(hi) for lo, hi in
+               re.findall(r"(?<![\d.])" + re.escape(head) + r"\.(\d+) to " + re.escape(head) + r"\.(\d+)(?![\d])", readme))
+
+
+def _rules_by_id():
+    return {r["id"]: r for r in load(RULEBOOK)["rules"]}
 
 
 def test_a_plural_term_is_the_definition_of_its_singular():
@@ -606,3 +650,26 @@ def test_the_plans_parts_list_names_each_parts_sections():
             assert not clash, (part, other, clash)
     assert _sections("407.1 to 407.4; 408.1") == {"407.1", "407.2", "407.3", "407.4", "408.1"}
     assert not _under("407.10", {"407.1"})
+
+
+def test_an_unrated_group_b_corridor_where_an_ambulatory_care_facility_may_be_needs_review(ctx, rules):
+    """Review round 1 of part e: 422.2 separates an ambulatory care facility (four or more care recipients who may be
+    incapable of self-preservation) from adjacent corridors with a fire partition (708), so Table 1020.2's B row no
+    longer passes an unrated corridor on its occupant load or NFPA 13 where one may be (stated, or not ruled out); a
+    sure fail stays a fail, and stated none, the table decides."""
+    r = rules["general.bc_table_1020_2_a_b_e_f_m_s_u"]
+    base = {"occupancy_group": "B", "special_egress_spaces": False, "sprinklered_903_3_1_2": False,
+            "sprinklered_903_3_1_3": False}
+
+    def one(given, load, hours):
+        [row] = parts.rows(r, {"corridor": [{"id": "c1", "measures": {"corridor_occupant_load": load,
+                                                                       "corridor_fire_rating_hours": hours}}]},
+                           {**base, **given}, ctx.allowed())
+        return row["outcome"]
+    for care in (True, None):
+        given = {} if care is None else {"ambulatory_care_facility": care}
+        assert one({**given, "sprinklered_903_3_1_1": True}, 100, 0) == "needs_review", care
+        assert one({**given, "sprinklered_903_3_1_1": False}, 20, 0) == "needs_review", care
+        assert one({**given, "sprinklered_903_3_1_1": False}, 100, 0) != "pass", care
+        assert one({**given, "sprinklered_903_3_1_1": True}, 100, 1) == "pass", care
+    assert one({"ambulatory_care_facility": False, "sprinklered_903_3_1_1": True}, 100, 0) == "pass"

@@ -5945,8 +5945,9 @@ labels:
   508.2.4:
     label: flag
     topic: fire_separation
-    reason: 'No separation is required between accessory occupancies and the main occupancy, except Group H-2 to H-5 (508.4)
-      and dwelling and sleeping units of I-1, R-1, R-2 and R-3 (Section 420), neither brought in: a person checks.'
+    reason: 'No separation is required between accessory occupancies and the main occupancy, except Group H-2 to H-5 (508.4,
+      not brought in); the dwelling and sleeping units of I-1, R-1, R-2 and R-3 are separated per 420.2 and 420.3 (flags
+      of Chapter 4 part e): a person checks.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 147

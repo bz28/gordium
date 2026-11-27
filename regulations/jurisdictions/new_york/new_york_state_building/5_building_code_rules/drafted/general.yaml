@@ -4308,7 +4308,7 @@ rules:
   - given: {}
     expect: needs_review
     note: Whether exception 1 (Group H-2 to H-5) or 2 (dwelling and sleeping units of I-1, R-1, R-2, R-3) applies is the architect's
-      statement; 508.4 and Section 420 are not brought in.
+      statement; 508.4 is not brought in; exception 2's separations (420.2, 420.3) are flags of Chapter 4 part e.
   notes: Hand-drafted in a Claude Code session (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -16388,6 +16388,12 @@ rules:
       may hold a covered or open mall (stated, or not ruled out: a space the code gives its own exits or travel limit): a
       mall''s occupants, and those of a corridor from it, come from 402.8.2.1''s formula on the gross leasable area and may
       be more (402.8 governs over Chapter 10): a person checks.'
+  - when: occupancy_group == "B" and ambulatory_care_facility and (corridor_occupant_load <= 30 or sprinklered_903_3_1_1 or
+      corridor_fire_rating_hours >= 1) and corridor_fire_rating_hours < 1
+    reason: 'Not rated, in a Group B building that may hold an ambulatory care facility (stated, or not ruled out): 422.2
+      separates one where four or more care recipients may be incapable of self-preservation from adjacent corridors with
+      a fire partition (Section 708), which the model doesn''t mark, so the table''s 0 hours may not be the rating this corridor''s
+      walls need: a person checks (Chapter 4 part e, review round 1).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -16442,6 +16448,14 @@ rules:
       Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally inde- pendent
       of the open mall of an open mall building or of a covered mall building shall not be considered as gross leasable area
       for determining the required means of egress for the mall building.'
+  - file: gov.ny.building.2025.pdf
+    page: 129
+    lines:
+    - 14
+    - 16
+    quote: 422.2 Separation. Ambulatory care facilities where the potential for four or more care recipients are to be incapable
+      of self-preserva- tion at any time shall be separated from adjacent spaces, corridors or tenants with a fire partition
+      installed in accordance with Section 708.
   examples:
   - given:
       occupancy_group: M
@@ -16449,6 +16463,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
       special_egress_spaces: false
+      ambulatory_care_facility: false
     parts:
       corridor:
       - id: p1
@@ -16467,6 +16482,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
       special_egress_spaces: false
+      ambulatory_care_facility: false
     parts:
       corridor:
       - id: p1
@@ -16485,6 +16501,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
       special_egress_spaces: false
+      ambulatory_care_facility: false
     parts:
       corridor:
       - id: p1
@@ -16503,6 +16520,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
       special_egress_spaces: false
+      ambulatory_care_facility: false
     parts:
       corridor:
       - id: p1
@@ -16520,6 +16538,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
       special_egress_spaces: false
+      ambulatory_care_facility: false
     parts:
       corridor:
       - id: p1
@@ -16538,6 +16557,7 @@ rules:
       sprinklered_903_3_1_2: true
       sprinklered_903_3_1_3: false
       special_egress_spaces: false
+      ambulatory_care_facility: false
     parts:
       corridor:
       - id: p1
@@ -16556,6 +16576,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
       special_egress_spaces: false
+      ambulatory_care_facility: false
     parts:
       corridor: []
     rows:
@@ -16568,6 +16589,7 @@ rules:
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
       special_egress_spaces: true
+      ambulatory_care_facility: false
     parts:
       corridor:
       - id: p1
@@ -16581,6 +16603,26 @@ rules:
     expect: needs_review
     note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
       ask more here, so a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+      special_egress_spaces: false
+      ambulatory_care_facility: true
+    parts:
+      corridor:
+      - id: p1
+        name: Store corridor, 30 occupants, unrated
+        measures:
+          corridor_occupant_load: 30
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A Group B corridor not rated, allowed by the table, in a building stated to hold an ambulatory care facility: 422.2''s
+      fire partition between the facility and an adjacent corridor isn''t in the model, so a person checks.'
   notes: 'Table 1020.2''s row for Groups A, B, E, F, M, S and U: more than 30 occupants, 1 hour without a sprinkler system
     and 0 with one; 30 or fewer, none. The row''s cell names no system: NFPA 13 (903.3.1.1) counts, an NFPA 13R or 13D system
     (not allowed for these groups by their own scope) needs review, never a pass. Exceptions 1, 3 and 4 need review where

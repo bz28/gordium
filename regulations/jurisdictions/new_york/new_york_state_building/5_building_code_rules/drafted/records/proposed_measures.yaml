@@ -500,6 +500,7 @@ ambulatory_care_facility:
   - general.bc_422_3_2_refuge_area
   - general.bc_422_3_3_independent_egress
   - general.bc_422_3_smoke_compartments
+  - general.bc_table_1020_2_a_b_e_f_m_s_u
   - general.bc_table_1020_3_corridor_width
 corridors_within_dwelling_units:
   meaning: 'The building has corridors within a dwelling unit or sleeping unit (2025 BCNYS 1020.2 exception 2: no rating
