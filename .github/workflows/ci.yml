@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:   # every PR, including PRs stacked on other PRs
 
+# The Windows jobs are in windows.yml (Ben, 2026-11-26): GitHub runs about one CI run at a time and Windows is half
+# of the jobs, so a push to a PR runs this file (Linux, and the Revit client on Ubuntu), and Windows runs once the
+# merge script labels the PR merge-ready, and every night on main. Two files, so the two never share a check name.
+
 # A newer push to the same PR replaces the older run, so the queue only holds
 # each branch's latest commit. Pushes to main are never cancelled.
 concurrency:
@@ -18,7 +22,7 @@ concurrency:
 # - the generated-file checks run in their own job beside the tests, and first prove the 4 parts add up to the
 #   whole suite with no test left out or run twice (tests/check_shards.py);
 # - `check` and `windows (<python>)` keep their old names: each passes only if every part and the checks passed.
-# Changing the number of parts: change `part` in both matrices and SHARDS below together.
+# Changing the number of parts: change `part` in the matrices and SHARDS in both ci.yml and windows.yml together.
 env:
   SHARDS: 4
 
@@ -82,82 +86,15 @@ jobs:
           echo "tests: ${{ needs.linux_tests.result }}, checks: ${{ needs.linux_checks.result }}"
           test "${{ needs.linux_tests.result }}" = success && test "${{ needs.linux_checks.result }}" = success
 
-  # The same tests on Windows, where Python reads files as cp1252 unless told UTF-8. PYTHONUTF8 is deliberately
-  # not set: the job proves the code names its encodings, as an architect's Windows PC runs it.
-  windows_tests:
-    name: windows tests (${{ matrix.python-version }}, part ${{ matrix.part }} of 4)
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # PRs: Windows on 3.14 only (Linux covers 3.12); main: both versions
-        python-version: ${{ fromJSON(github.event_name == 'pull_request' && '["3.14"]' || '["3.12", "3.14"]') }}
-        part: [1, 2, 3, 4]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
-      - run: pip install -e ".[dev]"
-      - name: Tests (this part, on every CPU)
-        run: pytest -n auto --dist worksteal --shard ${{ matrix.part }}/${{ env.SHARDS }}
-
-  windows_checks:
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ${{ fromJSON(github.event_name == 'pull_request' && '["3.14"]' || '["3.12", "3.14"]') }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
-      - run: pip install -e ".[dev]"
-      - name: The test parts add up to the whole suite (every test in exactly one part)
-        run: python tests/check_shards.py ${{ env.SHARDS }}
-      - name: Extracted text matches a fresh extraction (reproducible)
-        run: python -m document_extraction --check
-      - name: Rule files are valid (sources, quotes, worked examples, section labels)
-        run: python -m rule_format
-      - name: Every line of the law is in exactly one piece; coverage report is current (no AI)
-        run: python -m section_labeling coverage --check
-      - name: The residential coverage audit (every rule and flag piece x district) matches a fresh build (no AI)
-        run: python -m section_labeling audit --check
-      - name: The rules workbook matches a fresh build (generated, never hand-edited)
-        run: python -m rule_export --check
-      - name: The measured example models match a fresh measurement (Rhino files measured by code, no AI)
-        run: python -m model_measurement --check
-      - name: The example project reports match a fresh build (results from the rule checker only)
-        run: python -m project_report --check
-      - name: Every golden answer is the same (check and start on the test sites, scenarios and 200 stress designs)
-        run: python -m design_checker.goldens --check
-
-  # The old Windows job's names (`windows (3.14)`; on main also `windows (3.12)`): each passes only when every
-  # Windows test part and Windows check passed
-  windows:
-    if: always()
-    needs: [windows_tests, windows_checks]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ${{ fromJSON(github.event_name == 'pull_request' && '["3.14"]' || '["3.12", "3.14"]') }}
-    steps:
-      - name: Every Windows test part and check passed
-        run: |
-          echo "tests: ${{ needs.windows_tests.result }}, checks: ${{ needs.windows_checks.result }}"
-          test "${{ needs.windows_tests.result }}" = success && test "${{ needs.windows_checks.result }}" = success
-
   # The Revit add-in's worker client (apps/revit_addin: C#, no Revit needed) against the real Python worker,
-  # installed with the Windows job's install step (Python 3.12, the version the trial installs). Windows is where the add-in runs; Ubuntu is a cheap second.
+  # installed the way the trial installs it (Python 3.12). Here on Ubuntu on every push; the Windows leg, where the add-in runs, is in windows.yml.
   revit_worker_client:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        # Ubuntu here on every push; the Windows leg is in windows.yml, which runs where a merge is near
+        os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
