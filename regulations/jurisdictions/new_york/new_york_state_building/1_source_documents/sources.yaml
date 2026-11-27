@@ -91,15 +91,18 @@ documents:
       # additional stairway, stairway doors, smokeproof enclosures, luminous markings, pp.90-91) and 403.6 whole
       # (elevators: fire service access and occupant evacuation, p.91, with SECTION 404 after); 405.1 (underground
       # buildings, p.92, with 405.2 after), 405.4 whole (compartments, pp.92-93, with 405.5 after) and 405.7 whole (an
-      # underground building's means of egress, p.93, with 405.8 after): Chapter 4 part b.
-      pages: 32-68, 79, 84, 86-88, 90-93, 99, 147, 273-274, 311-318, 322-323, 340-345, 354-355
+      # underground building's means of egress, p.93, with 405.8 after): Chapter 4 part b. 407.1 (Group I-2, p.98),
+      # 407.2 whole (corridors continuous and separated, and the spaces open to them, pp.98-99), 407.3 whole (corridor
+      # walls and doors, p.99) and 407.4 whole (means of egress and care suites, pp.99-100, with 407.5 after; its 407.4.2
+      # was brought in alone in review round 1 of Chapter 10's plan): Chapter 4 part c.
+      pages: 32-68, 79, 84, 86-88, 90-93, 98-100, 147, 273-274, 311-318, 322-323, 340-345, 354-355
       sections: ['308.5', '508.2', '1004', Table 1004.5, '1005.1', '1005.2', '1005.3', '1005.4', '1005.5', '1005.6', '1005.7', '1006.2.1', Table 1006.2.1, '1006.2.2', '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(1),
                  Table 1006.3.4(2),
                  '402.1', '402.8', '403.1', '403.2.2', '403.5', '403.6', '404.1', '404.9', '404.10', '404.11', '405.1', '405.4',
-                 '405.7',
+                 '405.7', '407.1', '407.2', '407.3', '407.4',
                  '1007.1', '1010.1.1', '1010.1.2', '1016.2', '1017', Table 1017.2, '1018.4', '1020.1', '1020.2', Table 1020.2, '1020.3', Table 1020.3,
                  '1020.4', '1020.5', '1020.6', '1020.7']
-      alone: ['407.4.2', '903.3.1.1', '903.3.1.2', '1010.1', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
+      alone: ['903.3.1.1', '903.3.1.2', '1010.1', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
       definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
           the rule measures the story's floor area by both of the book's own measures of floor area (README).
