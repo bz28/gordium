@@ -4598,8 +4598,9 @@ labels:
   '713.4':
     label: flag
     topic: means_of_egress
-    reason: 'A shaft enclosure is rated 2 hours where it connects four stories or more, 1 hour where fewer, at least the floor
-      it passes through: its rating and the stories it connects aren''t in the model, a person''s check (general.bc_713_4_shaft_rating).'
+    reason: 'A shaft enclosure is rated at least 2 hours where it connects four stories or more, at least 1 hour where fewer,
+      and at least the floor it passes through, but need not exceed 2 hours (403.2.1.2''s high-rise reduction aside): its
+      rating and the stories it connects aren''t in the model, a person''s check (general.bc_713_4_shaft_rating).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 178
