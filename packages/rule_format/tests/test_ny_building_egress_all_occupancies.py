@@ -1958,6 +1958,7 @@ def test_no_notes_say_section_1030_isnt_brought_in_now_it_is_whole():
     brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]["sections"]
     assert "1030" in brought
     bad = [r["id"] for r in load(RULEBOOK)["rules"]
-           if re.search(r"(?<![\d.])1030(?![\d.])[^.;]*(?:aren't|isn't|not) brought in", r.get("notes") or "")]
+           if re.search(r"(?<![\d.])1030(?![\d.])(?:[^;.]|\.(?=\d))*?(?:aren't|isn't|not) brought in", r.get("notes") or "")]
+    # review round 2 of section group 9i: a period inside a section number ("ICC A117.1") doesn't end the sentence
     assert not bad, bad
 
