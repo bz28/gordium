@@ -163,11 +163,18 @@ def _outcome(r, kind, m, given, ctx):
 STORY_CASES = [dict(egress_travel_distance=t, egress_travel_in_sleeping_room=i, story_exit_count=x,
                     story_occupant_load=n, story_first_above_or_below_grade=f, story_second_above_grade_plane=False,
                     story_fourth_or_higher_above_grade_plane=False, story_rooms_exit_directly_outside=False,
-                    story_dwelling_units=2, exit_remoteness_ratio=0.9)
-               for t, i, x, n, f in itertools.product((51, 76, 126, 201), (51,), (1, 2), (5, 40), (True, False))]
+                    story_dwelling_units=2, exit_remoteness_ratio=0.9, story_assembly_seating_possible=s)
+               for t, i, x, n, f, s in itertools.product((51, 76, 126, 201), (51,), (1, 2), (5, 40), (True, False),
+                                                         (True, False))]
 SPACE_CASES = [dict(space_is_exit=False, space_exit_count=x, space_occupant_load=n, space_common_path=c,
-                    space_exit_remoteness_ratio=0.9)
-               for x, n, c in itertools.product((1, 2), (5, 40, 60), (31, 76, 126))]
+                    space_exit_remoteness_ratio=0.9, space_assembly_seating_possible=s)
+               for x, n, c, s in itertools.product((1, 2), (5, 40, 60), (31, 76, 126), (True, False))]
+# a room on the story may seat people served by aisles, fixed seats or not (the routes' story and space parts,
+# design_checker/occupant_load.py assembly_seating): 1030.7 (p.354, lines 50-51) measures travel "along the aisles and
+# aisle accessways without travel over or on the seats" wherever aisles are provided for seating, and the common path
+# is a portion of exit access travel (202), so neither figure can be trusted there
+SEATING = {"story": ("story_assembly_seating_possible", "egress_travel_distance"),
+           "space": ("space_assembly_seating_possible", "space_common_path")}
 
 
 WHERE = GROUPS + ["mixed", "unstated"]          # one test each, so the parts of the suite spread them
@@ -204,7 +211,11 @@ def _cases(r):
 
 
 def _limits(r, lim, m):
-    return lim if r["for_each"] == "story" else lim[m["space_occupant_load"]]
+    out = dict(lim if r["for_each"] == "story" else lim[m["space_occupant_load"]])
+    seating, measure = SEATING[r["for_each"]]
+    if m.get(seating):
+        out[measure] = 0
+    return out
 
 
 def test_the_walk_covers_every_walked_rule_and_each_applies_somewhere(ctx, rules):

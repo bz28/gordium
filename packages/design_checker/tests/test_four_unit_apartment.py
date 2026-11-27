@@ -13,7 +13,7 @@ import sys
 
 import pytest
 
-from design_checker import code_scope, egress, present
+from design_checker import code_scope, egress, occupant_load, present
 from rule_format.rulebook import REPO, Context, load
 
 sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
@@ -198,22 +198,26 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     hoistway doors (24); its per-corridor flag (a rated corridor's walls) is a corridor's row, not a building line.
     Section group 4c adds 1020.4's and 1020.6's (26); 1020.7's is a corridor's row. Section group 5a adds 1005.3.1's
     stairways and 1005.3.2's doors, ramps and passageways (28); section group 5b 1005.4, 1005.5 and 1005.6 (31); section group 5c 1005.7.1 to 1005.7.3 (34);
-    section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37). Chapter 7 part a (2026-11-26) adds its 28
-    fire-barrier and shaft-enclosure flags, each shown for every building (65); part b its 23 building-wide
-    opening-protective flags (88; Table 716.1(2)'s corridor doors are each corridor's row); part c 30 of its 31 fire
-    partition, smoke barrier and smoke partition flags (118; 710.5.3 is Group I-2's, not the stated R-2's); part d its 23 floor, vertical opening
-    and penetration flags (141). Chapter 9 part a (2026-11-27) adds 903.1.1's alternative systems and 903.2.5.3's
-    pyroxylin plastics (143); its other flags are Group H-5's or a 13R or 13D system's, not this building's. Part b
+    section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37); section group 6c 1010.1.3, 1010.1.4, 1010.1.5,
+    1010.1.6 and 1010.1.7 (42; 1010.1.3.2's is a door's row, not a building line); section group 6d 1010.2 to
+    1010.2.6 and Table 1010.2.4 (50; 1010.2.7's is for Groups E, B and I-4); section group 6e 1010.2.8.1 to
+    1010.2.12.1, 1010.2.14 and 1010.2.15 (61; 1010.2.13's is for Groups I-1 and I-2); section group 8a 1031.2's basements and public way and
+    1031.2.1 (64); section group 8c 1031.5.3's drainage and 1031.6's bars (66); section group 9a 1003.2 to 1003.7's nine and 1012's seventeen ramp flags (a building's ramps aren't a fact Gordium is given, so they show for every building) (92); section group 9b 1008's eight and 1013's nine lighting and exit-sign flags but 1008.2.2's (Group I-2) and 1013.2's (Group R-1) (107); section group 9c 1009's twenty-seven accessible-egress flags but 1009.3.3's (the building is Group R-2, exception 5) (133); section group 9d 1018.1's, 1018.5's and 1019.3's flags (1018.3's is for Groups B and M, 1019.4's for I-2 and I-3) (136); section group 9e 1021's four, 1022's three and 1023's nineteen flags, each shown for every building (162); section group 9f 1024's nine flags (1025's fifteen are for Groups A, B, E, I-1, M and R-1) (171). Chapter 7 (2026-11-26) adds 104 more: part a's 28
+    fire-barrier and shaft-enclosure flags, each shown for every building; part b its 23 building-wide
+    opening-protective flags (Table 716.1(2)'s corridor doors are each corridor's row); part c 30 of its 31 fire
+    partition, smoke barrier and smoke partition flags (710.5.3 is Group I-2's, not the stated R-2's); part d its 23
+    floor, vertical opening and penetration flags (275). Chapter 9 part a (2026-11-27) adds 903.1.1's alternative systems and 903.2.5.3's
+    pyroxylin plastics (277); its other flags are Group H-5's or a 13R or 13D system's, not this building's. Part b
     adds 903.2.1.6's occupiable roofs, 903.2.2.1's ambulatory care floors (neither fact stated), 903.2.9.2's bulk tire
-    storage and 903.2.10.1's and 903.2.10.2's vehicle storage, any group's (148); its other flags are other groups'.
+    storage and 903.2.10.1's and 903.2.10.2's vehicle storage, any group's (282); its other flags are other groups'.
     Part c adds 903.2.11's nine specific areas and 903.2.12's construction (no NFPA 13 system stated), 907.1.3's listed
-    equipment, 907.2's fire alarm system and 907.2.2.1's ambulatory care detection (161). Part d adds Group R-2's three
+    equipment, 907.2's fire alarm system and 907.2.2.1's ambulatory care detection (295). Part d adds Group R-2's three
     fire alarm and smoke alarm sections, 907.2.11 and its six for Groups R and I-1, 907.2.11.8's portable alarms (a
     nontransient hotel is Group R-2, 310.3), 907.2.10.2's battery storage and 907.5.2.2's five while the voice/alarm
-    system isn't stated (178). Part e adds the standpipe, smoke control, smokeproof enclosure and fire command center
-    flags but Group A's standpipes (205)."""
+    system isn't stated (312). Part e adds the standpipe, smoke control, smokeproof enclosure and fire command center
+    flags but Group A's standpipes (339)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 205 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 339 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -263,7 +267,7 @@ CH10_BUILDING_MARKS = ("assembly_fixed_seating", "special_egress_spaces", "merch
 
 @pytest.mark.parametrize("stated", [False, True])
 def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got, laws, stated):
-    """The apartment as built, with the five marks set: No moves exactly the ten rules that wait on them (travel's
+    """The apartment as built, with the five marks set: No moves exactly the eleven rules that wait on them (travel's
     54 ft within Table 1017.2's 200 ft now passes; each flag of a space the building states it hasn't is not
     applicable), and Yes leaves every rule as it was with them blank (needs review: a person checks those spaces),
     never a pass. Left blank they are not sent (the add-in's BuildingFacts), so `got` is the unset reading."""
@@ -277,6 +281,7 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
     assert moved == {"general.bc_table_1017_2_a_e_f1_m_r_s1": ("needs_review", "pass"),
                      **{f"general.{r}": ("needs_review", "not_applicable") for r in (
                          "bc_1006_2_2_1_boiler_rooms", "bc_1006_2_2_2_refrigeration_machinery_rooms",
+                         "bc_1010_2_8_1_refrigeration_machinery_rooms",
                          "bc_1006_2_2_3_refrigerated_rooms", "bc_1006_2_2_4_electrical_rooms",
                          "bc_1006_2_2_5_vehicular_ramps", "bc_table_1017_2_note_a", "bc_1017_2_1_balcony_increase",
                          "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")}}
@@ -349,6 +354,61 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
         for k in ("voice_alarm_design", "1_voice_alarm_override", "2_voice_alarm_live_messages", "3_voice_alarm_other_uses",
                   "5_voice_alarm_standby_power")}
     assert all(m == {} for m in moved.values()), moved
+
+
+# ---- the ceiling on an occupant load not worked out (occupant_load._bounds, 2026-11-26: the egress UI audit's 6) -------
+
+THREE = "general.bc_1006_2_1_1_three_or_more_exits"
+CEILING_FACTS = {"loads_not_by_area": False, "occupied_outdoor_areas": False}
+
+
+def _no_functions(**building):
+    desc = build.interior_of()
+    for r in desc["rooms"]:
+        r.pop("function", None)
+    desc["building"] = {**desc["building"], **building}
+    return desc
+
+
+@pytest.mark.parametrize("sprinkler, mezzanines, ceiling", [
+    ("none", False, 360),          # 1,800 sq ft / 5
+    ("nfpa_13r", False, 360),      # the sprinkler system changes nothing here
+    ("nfpa_13r", None, None),      # a mezzanine not ruled out (1004.2.2): no ceiling; the mezzanine fact is asked
+])
+def test_the_three_exit_rule_settles_on_the_floor_area_with_no_function_stated(routes, before, sprinkler, mezzanines,
+                                                                              ceiling):
+    """The audit's finding 6: with no room function stated, the four apartments' 1006.2.1.1 rows asked for each
+    room's function, though no function can put 501 people on a 1,800 sq ft story. With the building's facts the
+    ceiling needs stated (no area counted by seats, lanes or actual load, no outdoor areas the occupants use, no
+    mezzanine), each apartment's row complies on the ceiling; the rows that change are only rules reading an
+    occupant load, only from needs review, and never to a fail. Where one fact is missing it asks that fact (here
+    mezzanines), before the rooms' functions."""
+    building = {**CEILING_FACTS, "sprinkler_system": sprinkler, **({} if mezzanines is None else
+                                                                   {"mezzanines": mezzanines})}
+    now = _check(_no_functions(**building), routes)
+    rows = [r for r in now["rows"] if r["rule"] == THREE and r["name"].startswith("Apartment")]
+    assert len(rows) == 4
+    if ceiling is None:
+        assert {r["outcome"] for r in rows} == {present.REVIEW}
+        assert all(r["bound_facts"] == ["mezzanines"] for r in rows)
+        items = [i for i in now["items"] if i["rule"] == THREE and i["status"] == present.REVIEW]
+        assert len(items) == 4 and all(i["causes"][0]["field"] == "building.mezzanines" for i in items), items
+        return
+    assert {r["outcome"] for r in rows} == {"pass"}
+    assert all(f"can be at most {ceiling}" in r["reason"] for r in rows), rows[0]["reason"]
+    with pytest.MonkeyPatch.context() as m:          # the same building and facts with no ceiling: what it moves
+        m.setattr(occupant_load, "_bounds", lambda *a, **k: None)
+        base = _check(_no_functions(**building), routes)
+    rules = {r["id"]: r for r in load(REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+                                      / "5_building_code_rules/drafted/general.yaml")["rules"]}
+    moved = {k: (base["results"][k], now["results"][k]) for k in now["results"]
+             if now["results"][k] != base["results"].get(k)}
+    assert THREE in moved
+    for k, (was, is_) in moved.items():
+        r = rules.get(k.split(":")[0])
+        assert r is not None and re.search(r"(space|story)_occupant_load", str(
+            [r.get(f) for f in ("check", "review_when", "applies_when")])), k
+        assert was == present.REVIEW and is_ != "fail", (k, was, is_)
 
 
 # ---- section group 6a (2026-11-25): door size, 1010.1.1, from each door's maker's stated clear opening ----------------
@@ -499,3 +559,133 @@ def test_a_13r_system_above_four_stories_is_said_where_the_architect_reads(route
     assert got["results"]["general.bc_903_3_1_2_nfpa_13r_limits"] == present.REVIEW
     assert "more than four stories" in by_rule["general.bc_903_3_1_2_nfpa_13r_limits"]["reason"]
     assert "no sprinkler system stated" not in by_rule["general.bc_716_2_2_3_exit_enclosure_door_temperature_rise"]["reason"]
+
+
+# ---- section group 6e (2026-11-26): panic and fire exit hardware ------------------------------------------------------
+
+PANIC = "general.bc_1010_2_8_panic_hardware"
+
+
+def test_panic_hardware_as_sent_and_with_each_doors_hardware_stated(got):
+    """Before: 1010.2.8 complies on every door, its hardware not stated: it asks panic or fire exit hardware only in
+    Groups A, E and H, and the building is one group, R-2. After, every door stated latched by an ordinary latch:
+    still every door complies, and nothing else changes; 1010.2.8.1's refrigeration rooms need review (special egress
+    spaces not stated), and 1010.2.13's controlled egress (Groups I-1 and I-2) doesn't apply."""
+    assert got["results"][PANIC] == "pass"
+    rows = [r for r in got["rows"] if r["rule"] == PANIC]
+    assert len(rows) == 10 and {r["outcome"] for r in rows} == {"pass"}
+    assert got["results"]["general.bc_1010_2_8_1_refrigeration_machinery_rooms"] == present.REVIEW
+    assert got["results"]["general.bc_1010_2_13_controlled_egress"] == "not_applicable"
+    desc = build.interior_of()
+    for d in desc["doors"]:
+        d["hardware"] = "latch"
+    stated = _check(desc, egress.measure_routes(desc))
+    assert {r["outcome"] for r in stated["rows"] if r["rule"] == PANIC} == {"pass"}
+    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == set()
+
+
+# ---- section group 8a (2026-11-26): emergency escape and rescue openings, where required ------------------------------
+
+ESCAPE = "general.bc_1031_2_escape_opening_where_required"
+
+
+def test_escape_openings_as_sent_and_with_one_room_stated_a_sleeping_room(got):
+    """Before: each apartment is one room said not to be a sleeping room, so no sleeping room is read and 1031.2's rule
+    needs review (a dwelling's bedrooms aren't drawn), never a pass. After, one apartment stated a sleeping room (the
+    description gives no openings): it is read and linked to its story, Level 1 with two exits, which doesn't show that
+    the room's occupants reach two (review round 1: Group R-2 is asked where they have access to only one), so it still
+    needs review with no escape opening marked, never a pass; only that rule's rows change."""
+    assert got["results"][ESCAPE] == present.REVIEW
+    assert [r["outcome"] for r in got["rows"] if r["rule"] == ESCAPE] == [present.REVIEW]
+    desc = build.interior_of()
+    desc["rooms"][0]["sleeping"] = True
+    stated = _check(desc, egress.measure_routes(desc))
+    rows = [r for r in stated["rows"] if r["rule"] == ESCAPE]
+    assert [(r["id"], r["outcome"]) for r in rows] == [(desc["rooms"][0]["id"] + " (sleeping room)", present.REVIEW)]
+    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == set()
+
+
+SIZES = ("general.bc_1031_3_1_escape_opening_min_area", "general.bc_1031_3_2_escape_opening_min_height",
+         "general.bc_1031_3_2_escape_opening_min_width", "general.bc_1031_3_3_escape_opening_max_sill_height",
+         "general.bc_1031_4_escape_door_swinging_or_sliding",
+         # section group 8c: the area-well rules, per opening the same way
+         "general.bc_1031_5_area_well_required", "general.bc_1031_5_1_area_well_min_projection",
+         "general.bc_1031_5_1_area_well_min_width", "general.bc_1031_5_1_area_well_allows_full_opening",
+         "general.bc_1031_5_2_area_well_ladder_over_44", "general.bc_1031_5_2_1_area_well_ladder",
+         "general.bc_1031_5_2_2_area_well_steps")
+
+
+def test_escape_opening_sizes_as_sent_and_with_the_openings_stated_none(got):
+    """Section group 8b. Before: the description gives no openings, so they aren't read and each of the five rules
+    needs review, never a pass. After, the openings stated none: no opening to size, each not applicable (1031.2's own
+    rule asks for one), and only these five change."""
+    assert {got["results"][k] for k in SIZES} == {present.REVIEW}
+    desc = build.interior_of()
+    desc["openings"] = []
+    stated = _check(desc, egress.measure_routes(desc))
+    assert {stated["results"][k] for k in SIZES} == {"not_applicable"}
+    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == set(SIZES)
+
+
+def test_a_story_whose_room_may_seat_people_served_by_aisles_never_passes_on_travel(got, laws):
+    """BCNYS 1030.7 (p.354, lines 50-51): "Where aisles are provided for seating, the distance shall be measured along
+    the aisles and aisle accessways without travel over or on the seats", fixed seats or loose (1030.9, 1030.13.1). With
+    the five marks No, the apartment's travel passes Table 1017.2 (its rooms all state residential, its corridors and
+    exit stairs none: no seating). With one apartment's function left out, that room may be anything, a dining room or
+    a meeting room with chairs, so its story's travel, measured across where seats may be, needs review, and with it
+    stated a restaurant's (tables and chairs, assembly_unconcentrated) too; never a pass."""
+    def row(change):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], **{k: False for k in CH10_BUILDING_MARKS}}
+        change(interior)
+        return egress.check(laws, interior, VALUES, ALLOWED)["results"]["general.bc_table_1017_2_a_e_f1_m_r_s1"]
+    assert row(lambda d: None) == "pass"
+    assert row(lambda d: next(r for r in d["rooms"] if r["id"] == "L2N").pop("function")) == "needs_review"
+    assert row(lambda d: next(r for r in d["rooms"] if r["id"] == "L1S").update(
+        function="assembly_unconcentrated")) == "needs_review"
+    assert row(lambda d: next(r for r in d["rooms"] if r["id"] == "L1S").update(function="courtroom")) == "needs_review"
+
+    def group_a(d):                                  # review round 1: a Group A building whose assembly room isn't shown
+        d["building"]["occupancy_groups"] = ["A-2"]
+        for r in d["rooms"]:
+            if r.get("function") is not None:
+                r["function"] = "business"
+    assert row(group_a) == "needs_review"
+
+    # review round 3: the exit stairs stating a function (an assembly one here) are rooms whose use isn't known
+    def stairs(d):
+        for r in d["rooms"]:
+            if r["id"] in ("L1SW", "L1SE", "L2SW", "L2SE"):
+                r["function"] = "assembly_unconcentrated"
+    assert row(stairs) == "needs_review"
+
+    def group_a_stair(d):                            # an exit stating an assembly function shows no assembly room
+        group_a(d)
+        next(r for r in d["rooms"] if r["id"] == "L1SE")["function"] = "assembly_unconcentrated"
+    interior = build.interior_of()
+    interior["building"] = {**interior["building"], **{k: False for k in CH10_BUILDING_MARKS}}
+    group_a_stair(interior)
+    parts = egress.check(laws, interior, VALUES, ALLOWED)["interior"]["parts"]
+    assert {s["id"]: s["measures"]["story_assembly_seating_possible"] for s in parts["story"]} == {"L1": True, "L2": True}
+
+    # review round 4: a corridor stating a function is the same clash: it may seat people and shows no assembly room
+    for fn in ("assembly_unconcentrated", "business"):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], **{k: False for k in CH10_BUILDING_MARKS}}
+        group_a(interior)
+        next(r for r in interior["rooms"] if r["id"] == "L1C")["function"] = fn
+        parts = egress.check(laws, interior, VALUES, ALLOWED)["interior"]["parts"]
+        assert {s["id"]: s["measures"]["story_assembly_seating_possible"] for s in parts["story"]} ==             {"L1": True, "L2": True}, fn
+    def corridor(d):                                 # not Group A: the corridor's own story only
+        next(r for r in d["rooms"] if r["id"] == "L2C")["function"] = "business"
+    assert row(corridor) == "needs_review"
+
+    # review round 2: the groups sent in the check's values (which the rules read beside the building block) count too
+    interior = build.interior_of()
+    interior["building"] = {k: v for k, v in interior["building"].items() if k != "occupancy_groups"}
+    interior["building"].update({k: False for k in CH10_BUILDING_MARKS})
+    for r in interior["rooms"]:
+        if r.get("function") is not None:
+            r["function"] = "business"
+    sent = egress.check(laws, interior, {**VALUES, "occupancy_groups": ["A-2"]}, ALLOWED)["results"]
+    assert sent["general.bc_table_1017_2_a_e_f1_m_r_s1"] == "needs_review"

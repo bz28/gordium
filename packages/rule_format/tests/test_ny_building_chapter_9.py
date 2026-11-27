@@ -742,3 +742,26 @@ def test_part_ds_review_round_3(book):
     assert "equivalent protection" in i3 and "contiguous day rooms" in i3 and "normally open" in i3
     assert "four or fewer occupants" in i3   # round 4: what exception 3 counts
     assert "served from a commercial source" in _shown_note(rules["general.bc_907_2_11_6_smoke_alarm_power"])
+
+
+def test_no_line_is_set_aside_by_a_13r_system_outside_group_r(book, ctx):
+    """The merge of main (2026-11-27), part a's class carried to every rule and flag: 903.3.1.2 permits an NFPA 13R
+    system only in Group R occupancies, so a line whose exception reads "equipped throughout with an automatic
+    sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2" is set aside by a stated 13R system only in a
+    building stated Group R. Section group 9c's and 9b's flags (1009.3.2, 1009.3.3, 1009.4.2, 1009.7.2, 1009.7.4,
+    1013.2) read the 13R fact alone, so a Group B building with a 13R system lost them. Walked over every line whose
+    applies_when reads the 13R fact, every group but R and two buildings of two or more groups: stating a 13R system
+    never makes a line not applicable that shows with no system."""
+    allowed, wrong, walked = ctx.allowed(), [], 0
+    others = [[g] for g in GROUPS if not g.startswith("R-")] + [["M", "R-2"], ["B", "I-1"], ["B", "R-1"]]
+    for r in book:
+        if not r.get("applies_when") or "sprinklered_903_3_1_2" not in formula.names(r["applies_when"]):
+            continue
+        for groups in others:
+            def got(system):
+                return outcome(r, code_scope.building_measures({"occupancy_groups": groups, "sprinkler_system": system}),
+                               allowed)
+            walked += 1
+            if got("nfpa_13r") == "not_applicable" and got("none") != "not_applicable":
+                wrong.append((r["id"], groups))
+    assert walked > 100 and not wrong, wrong[:8]
