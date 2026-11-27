@@ -698,3 +698,28 @@ def test_the_ambulatory_care_fact_says_what_it_decides():
     assert "1020.2" in notes and "1020.3" in notes                    # part e review round 4
     for words in (name, meaning, mark, block, summary, comment, test_summary):
         assert "422" in words and "1020.2" in words and "1020.3" in words, words[:120]
+
+
+STORY_RULES = ["general.bc_1006_3_3_story_exits", "general.bc_table_1006_3_4_1__r2_dwelling_units",
+               "general.bc_table_1006_3_4_2__a_b_e_f_m_u", "general.bc_table_1006_3_4_2__h_i_r",
+               "general.bc_table_1006_3_4_2__s"]
+
+
+@pytest.mark.parametrize("rid", STORY_RULES)
+def test_each_story_band_example_is_decided_by_its_band(ctx, rules, rid):
+    """Merge review of main into Chapter 4's line: #265's seating twin read a measure these examples didn't state, so
+    it needed review on its own and no example showed the 402.8, 403.5.2 or 405.7.1 band. Each example a band was
+    written for needs review with the band and passes without it."""
+    import copy
+    rule = rules[rid]
+    allowed = ctx.allowed()
+    bare = copy.deepcopy(rule)
+    bare["review_when"] = [w for w in rule.get("review_when") or []
+                           if not re.search(r"402\.8|403\.5\.2|405\.7\.1", w.get("reason") or "")]
+    assert len(bare["review_when"]) < len(rule.get("review_when") or [])
+    shown = [ex for ex in rule["examples"] if re.search(r"402\.8|403\.5\.2|405\.7\.1", ex.get("note") or "")
+             and ex.get("expect") == "needs_review"]
+    assert shown, rid
+    for ex in shown:
+        assert parts.worked_example(rule, ex, allowed)[0] == "needs_review", (rid, ex["note"][:60])
+        assert parts.worked_example(bare, ex, allowed)[0] == "pass", (rid, ex["note"][:60])

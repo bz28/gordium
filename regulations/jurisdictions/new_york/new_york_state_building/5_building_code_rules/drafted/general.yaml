@@ -13015,6 +13015,7 @@ rules:
       - id: p1
         name: First floor, 120
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 2
           story_occupant_load: 120
           story_first_above_or_below_grade: true
@@ -13040,6 +13041,7 @@ rules:
       - id: p1
         name: First floor, 120
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 2
           story_occupant_load: 120
           story_first_above_or_below_grade: true
@@ -13065,6 +13067,7 @@ rules:
       - id: p3
         name: Small first floor, one exit
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 1
           story_occupant_load: 8
           story_first_above_or_below_grade: true
@@ -13617,6 +13620,7 @@ rules:
       - id: p1
         name: Office floor, two exits
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 2
           story_occupant_load: 120
@@ -13640,6 +13644,7 @@ rules:
       - id: p1
         name: Office floor, two exits
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 2
           story_occupant_load: 120
@@ -13663,6 +13668,7 @@ rules:
       - id: p1
         name: Small office, one exit, NFPA 13
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 49
@@ -14028,6 +14034,7 @@ rules:
       - id: p1
         name: Two exits for the story's load
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 2
           story_occupant_load: 40
@@ -14051,6 +14058,7 @@ rules:
       - id: p1
         name: Group R-3 floor, one exit
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 40
@@ -14074,6 +14082,7 @@ rules:
       - id: p1
         name: Group R-3 floor, one exit
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 40
@@ -14443,6 +14452,7 @@ rules:
       - id: p1
         name: Two exits for the story's load
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 2
           story_occupant_load: 29
@@ -14470,6 +14480,7 @@ rules:
       - id: p1
         name: Warehouse floor, one exit, NFPA 13
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 29
@@ -14497,6 +14508,7 @@ rules:
       - id: p1
         name: Warehouse floor, one exit, NFPA 13
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 29
@@ -14886,6 +14898,7 @@ rules:
       - id: p1
         name: Apartment floor, two exits
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 2
           story_occupant_load: 9
@@ -14909,6 +14922,7 @@ rules:
       - id: p1
         name: Four apartments, one exit, at the limits
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 18
