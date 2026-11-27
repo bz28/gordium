@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 250 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 275 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1603,6 +1603,31 @@
     "Egress · Exit discharge reaches a public way: A person checks this (Gordium doesn't decide it): The exit discharge gives direct and unobstructed access to a public way; where that can't be provided, a safe dispersal area of at least 5 square feet per person, on the same lot at least 50 feet from the building, permanently kept and identified as one, with a safe and unobstructed path from the building: the site outside the building isn't in the model, so a person's check.",
     "Egress · Egress courts at least 44 in wide: A person checks this (Gordium doesn't decide it): An egress court serving as an exit discharge component meets 1029 (1029.1): its capacity is as 1005.1 requires and its width at least 44 inches, or 36 inches serving Groups R-3 and U, and never less than the required capacity, the width and capacity unobstructed to a height of 7 feet but for encroachments complying with 1005.7: egress courts aren't in the model, so a person's check.",
     "Egress · Narrow egress courts' walls rated 1 hour: A person checks this (Gordium doesn't decide it): Where an egress court is less than 10 feet wide, its walls are rated at least 1 hour for 10 feet above its floor, openings in them protected at least 3/4 hour; but not for an egress court serving fewer than 10 occupants, one serving Group R-3, or one at grade giving direct and unobstructed access to a public way by two or more independent paths, each keeping the required width or capacity, whichever is greater: egress courts and their walls aren't in the model, so a person's check.",
+    "Egress · Bleachers and grandstands per ICC 300: A person checks this (Gordium doesn't decide it): Bleachers, grandstands and folding and telescopic seating that are not building elements comply with ICC 300: such seating isn't in the model, so a person's check.",
+    "Egress · Spaces under grandstands separated by 1-hour construction: A person checks this (Gordium doesn't decide it): Spaces under grandstands or bleachers are separated by fire barriers per 707 and horizontal assemblies per 711 of at least 1-hour fire-resistance-rated construction; but not ticket booths under 100 square feet, toilet rooms, or other accessory use areas of 1,000 square feet or less sprinklered per 903.3.1.1: grandstands, bleachers and the spaces under them aren't in the model, so a person's check.",
+    "Egress · An assembly main exit for at least half the occupants: A person checks this (Gordium doesn't decide it): A building, room or space used for assembly purposes with an occupant load over 300 and a main exit: the main exit has capacity for at least half the occupant load, and at least the total required capacity of all the means of egress leading to it; where the building is classified Group A, the main exit fronts at least one street, or an unoccupied space at least 10 feet wide adjoining a street or public way; where there is no well-defined main exit, or there are several, the exits may be distributed around the building's perimeter if their total capacity is at least 100 percent of the required capacity: which exit is the main exit, and its capacity, aren't worked out, so a person's check.",
+    "Egress · Assembly other exits for at least half of each level's occupants: A person checks this (Gordium doesn't decide it): Each level of a building used for assembly purposes with an occupant load over 300 and a main exit has, besides access to the main exit, more means of egress with capacity for at least half the total occupant load that level serves, complying with 1007.1; where there is no well-defined main exit, or there are several, each level's exits may be distributed around the building's perimeter if their total width is at least 100 percent of the required width: the main exit and the other exits' share aren't worked out, so a person's check.",
+    "Egress · Waiting lobbies in Group A-1 kept out of the egress width: A person checks this (Gordium doesn't decide it): In Group A-1, where people are let in while no seats are free, they may wait in a lobby or similar space that doesn't encroach on the minimum width or required capacity of the means of egress; such a foyer, unless every main entrance or exit connects it directly to a public street, has a straight and unobstructed corridor or path of travel to each of them: waiting spaces aren't in the model, so a person's check.",
+    "Egress · Two exits from balconies and galleries seating 50 or more: A person checks this (Gordium doesn't decide it): A balcony, gallery or press box seating 50 or more in a building, room or space used for assembly purposes has at least two means of egress, one from each side: balconies, galleries and press boxes aren't in the model, so a person's check.",
+    "Egress · Assembly aisle capacity without smoke protection: A person checks this (Gordium doesn't decide it): Aisles serving assembly seating have at least the capacity 1030.6.1 sets where the seating isn't smoke-protected (1030.6.2 sets it where it is, 1030.6.3 where it is open-air): at least 0.3 inch per occupant served on stepped aisles with risers of 7 inches or less and treads of 11 inches or more; at least 0.005 inch more per occupant for each 0.10 inch of riser above 7 inches; at least 0.075 inch more per occupant on the parts of a stepped aisle descent with no handrail within 30 inches horizontally; at least 0.22 inch per occupant on ramped aisles steeper than 1 in 12, and 0.20 inch on level aisles and ramped aisles not that steep: aisles and the occupants they serve aren't in the model, so a person's check.",
+    "Egress · Aisle capacity for smoke-protected assembly seating: A person checks this (Gordium doesn't decide it): An aisle for smoke-protected assembly seating has capacity of at least the occupant load it serves times Table 1030.6.2's factor for the total number of seats exposed to the same smoke-protected environment (interpolation between its values permitted), and a facility using the table's reduced widths has a life safety evaluation per NFPA 101: whether seating is smoke-protected, and its aisles, aren't in the model, so a person's check.",
+    "Egress · Smoke-protected aisle capacity per seat: A person checks this (Gordium doesn't decide it): Inches of aisle capacity per seat served in smoke-protected assembly seating, by the total number of seats in it: at 5,000 or fewer, 0.200 on stepped aisles with handrails within 30 inches, 0.250 on stepped aisles without, 0.150 on level aisles or ramped aisles not steeper than 1 in 10, and 0.165 on ramped aisles steeper than 1 in 10; at 10,000, 0.130, 0.163, 0.100 and 0.110; at 15,000, 0.096, 0.120, 0.070 and 0.077; at 20,000, 0.076, 0.095, 0.056 and 0.062; at 25,000 or more, 0.060, 0.075, 0.044 and 0.048: aisles and their seats aren't in the model, so a person's check.",
+    "Egress · Smoke control for smoke-protected assembly seating: A person checks this (Gordium doesn't decide it): Aisles and aisle accessways serving smoke-protected assembly seating have a smoke control system per 909, or natural ventilation designed to keep the smoke level at least 6 feet above the floor of the means of egress: smoke control isn't in the model, so a person's check.",
+    "Egress · A roof at least 15 ft above the highest aisle: A person checks this (Gordium doesn't decide it): Where smoke-protected assembly seating has a roof, the lowest portion of the roof deck is at least 15 feet above the highest aisle or aisle accessway; but an outdoor stadium's roof canopy may be lower where nothing is less than 80 inches above the highest aisle or aisle accessway: roofs over seating aren't in the model, so a person's check.",
+    "Egress · Sprinklers where there is smoke-protected seating: A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with smoke-protected assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, nor press boxes and storage facilities under 1,000 square feet: whether seating is smoke-protected isn't in the model, so a person's check.",
+    "Egress · Aisle capacity for open-air assembly seating: A person checks this (Gordium doesn't decide it): In open-air assembly seating, an aisle has capacity of at least the total occupant load it serves times 0.08 inch where egress is by stepped aisle, and 0.06 inch where it is by level or ramped aisles; or 1030.6.2's capacity for the number of seats where that is less: whether seating is open-air, and its aisles, aren't in the model, so a person's check.",
+    "Egress · Sprinklers where there is open-air seating: A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with open-air assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, press boxes and storage facilities under 1,000 square feet, or open-air seating facilities whose seating and means of egress in the seating area are essentially open to the outside: whether seating is open-air isn't in the model, so a person's check.",
+    "Egress · A path through an adjacent row: at most 24 seats between aisles: A person checks this (Gordium doesn't decide it): Where one of the two paths of travel crosses the aisle through a row of seats to another aisle, there are at most 24 seats between the two aisles, and the row between them is at least 12 inches clear plus 0.6 inch for each seat above seven; for smoke-protected or open-air seating, at most 40 seats, and 12 inches plus 0.3 inch for each additional seat: seats and rows aren't drawn, so a person's check.",
+    "Egress · Aisles to the exits from every occupied part of an assembly space: A person checks this (Gordium doesn't decide it): Every occupied portion of a building, room or space used for assembly purposes that contains seats, tables, displays, similar fixtures or equipment has aisles leading to exits or exit access doorways as 1030 requires (1030.1: a room or space used for assembly purposes containing seats, tables, displays, equipment or other material complies with 1030): aisles aren't in the model, so a person's check.",
+    "Egress · Assembly aisles' least clear widths: A person checks this (Gordium doesn't decide it): An aisle's clear width is at least: 48 inches for stepped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats; 36 inches for stepped aisles with seating on one side only, or 23 inches between a stepped aisle handrail and the seating where the aisle serves no more than five rows on one side; 23 inches between a stepped aisle handrail or guard and the seating where a mid-aisle handrail divides the stepped aisle; 42 inches for level or ramped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route; 36 inches for level or ramped aisles with seating on one side only, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route: aisles aren't in the model, so a person's check.",
+    "Egress · Aisle capacity for its catchment area: A person checks this (Gordium doesn't decide it): An aisle has capacity enough for the people in the catchment area it serves, the portion of the whole space that section of the aisle serves, worked out assuming a balanced use of all the means of egress, the number of people in proportion to egress capacity: aisles aren't in the model, so a person's check.",
+    "Egress · Converging aisles' combined capacity: A person checks this (Gordium doesn't decide it): Where aisles converge into a single path of egress travel, that path's required capacity is at least the combined required capacity of the converging aisles: aisles aren't in the model, so a person's check.",
+    "Egress · Uniform aisle width where egress may go either way: A person checks this (Gordium doesn't decide it): The portions of aisles where egress is possible in either of two directions are uniform in minimum width or required capacity: aisles aren't in the model, so a person's check.",
+    "Egress · Dead-end assembly aisles: A person checks this (Gordium doesn't decide it): Each end of an aisle continues to a cross aisle, foyer, doorway, vomitory, concourse or stairway per 1030.9.7 with access to an exit; but a dead-end aisle may be up to 20 feet long; longer where the seats beyond its first 20 feet are at most 24 seats from another aisle, along a row at least 12 inches clear plus 0.6 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't; one serving fewer than 50 seats and complying with 1030.8; and for smoke-protected or open-air seating, dead-end vertical aisles of 21 rows or fewer, or longer where the rows beyond are at most 40 seats from another aisle, along an aisle accessway at least 12 inches clear plus 0.3 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't: aisles aren't in the model, so a person's check.",
+    "Egress · Aisle width measured to walls: A person checks this (Gordium doesn't decide it): An aisle's clear width is measured to walls, edges of seating and tread edges, but for permitted projections; an aisle beside seating at tables may be measured per 1030.13.1 instead: aisles aren't in the model, so a person's check.",
+    "Egress · No obstructions in assembly aisles: A person checks this (Gordium doesn't decide it): Nothing obstructs an aisle's minimum width or required capacity; but handrails may project into the required width of stepped and ramped aisles per 1014.9: aisles aren't in the model, so a person's check.",
+    "Egress · Stairways from stepped aisles to cross aisles or concourses: A person checks this (Gordium doesn't decide it): A stairway connecting a stepped aisle to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: stepped aisles and their stairways aren't in the model, so a person's check.",
+    "Egress · Stairways from vomitories to cross aisles or concourses: A person checks this (Gordium doesn't decide it): A stairway connecting a vomitory to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: vomitories and their stairways aren't in the model, so a person's check.",
     "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
    ]
   },
@@ -81138,6 +81163,1772 @@
      }
     },
     {
+     "id": "egress.general.bc_1030_1_1_bleachers",
+     "rule": "general.bc_1030_1_1_bleachers",
+     "name": "Egress · Bleachers and grandstands per ICC 300 (BCNYS 1030.1.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Bleachers, grandstands and folding and telescopic seating that are not building elements comply with ICC 300: such seating isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Bleachers, grandstands and folding and telescopic seating that are not building elements comply with ICC 300: such seating isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.1.1 Bleachers. Bleachers, grandstands and folding and telescopic seating, that are not building elements, shall comply with ICC 300.",
+        "where": "1030.1.1, 2025 Building Code of New York State (BCNYS), PDF p.353"
+       }
+      ],
+      "citation": "1030.1.1, 2025 Building Code of New York State (BCNYS), PDF p.353",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.1.1",
+      "quote": "1030.1.1 Bleachers. Bleachers, grandstands and folding and telescopic seating, that are not building elements, shall comply with ICC 300."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_1_1_bleachers",
+       "words": "A person checks this (Gordium doesn't decide it): Bleachers, grandstands and folding and telescopic seating that are not building elements comply with ICC 300: such seating isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_1_1_bleachers",
+       "why": "A person checks this (Gordium doesn't decide it): Bleachers, grandstands and folding and telescopic seating that are not building elements comply with ICC 300: such seating isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Bleachers and grandstands per ICC 300",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.1.1",
+      "piece_title": "Bleachers"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_1_1_1_spaces_under_grandstands",
+     "rule": "general.bc_1030_1_1_1_spaces_under_grandstands",
+     "name": "Egress · Spaces under grandstands separated by 1-hour construction (BCNYS 1030.1.1.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Spaces under grandstands or bleachers are separated by fire barriers per 707 and horizontal assemblies per 711 of at least 1-hour fire-resistance-rated construction; but not ticket booths under 100 square feet, toilet rooms, or other accessory use areas of 1,000 square feet or less sprinklered per 903.3.1.1: grandstands, bleachers and the spaces under them aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Spaces under grandstands or bleachers are separated by fire barriers per 707 and horizontal assemblies per 711 of at least 1-hour fire-resistance-rated construction; but not ticket booths under 100 square feet, toilet rooms, or other accessory use areas of 1,000 square feet or less sprinklered per 903.3.1.1: grandstands, bleachers and the spaces under them aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.1.1.1 Spaces under grandstands and bleachers. Spaces under grandstands or bleachers shall be separated by fire barriers complying with Section 707 and horizontal assemblies complying with Section 711 with not less than 1-hour fire-resis- tance-rated construction. Exceptions: 1. Ticket booths less than 100 square feet (9.29 m[fn2]) in area. 2. Toilet rooms. 3. Other accessory use areas 1,000 square feet (92.9 m[fn2]) or less in area and equipped with an automatic sprinkler system in accordance with Section 903.3.1.1.",
+        "where": "1030.1.1.1, 2025 Building Code of New York State (BCNYS), PDF p.353"
+       }
+      ],
+      "citation": "1030.1.1.1, 2025 Building Code of New York State (BCNYS), PDF p.353",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.1.1.1",
+      "quote": "1030.1.1.1 Spaces under grandstands and bleachers. Spaces under grandstands or bleachers shall be separated by fire barriers complying with Section 707 and horizontal assemblies complying with Section 711 with not less than 1-hour fire-resis- tance-rated construction. Exceptions: 1. Ticket booths less than 100 square feet (9.29 m[fn2]) in area. 2. Toilet rooms. 3. Other accessory use areas 1,000 square feet (92.9 m[fn2]) or less in area and equipped with an automatic sprinkler system in accordance with Section 903.3.1.1."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_1_1_1_spaces_under_grandstands",
+       "words": "A person checks this (Gordium doesn't decide it): Spaces under grandstands or bleachers are separated by fire barriers per 707 and horizontal assemblies per 711 of at least 1-hour fire-resistance-rated construction; but not ticket booths under 100 square feet, toilet rooms, or other accessory use areas of 1,000 square feet or less sprinklered per 903.3.1.1: grandstands, bleachers and the spaces under them aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_1_1_1_spaces_under_grandstands",
+       "why": "A person checks this (Gordium doesn't decide it): Spaces under grandstands or bleachers are separated by fire barriers per 707 and horizontal assemblies per 711 of at least 1-hour fire-resistance-rated construction; but not ticket booths under 100 square feet, toilet rooms, or other accessory use areas of 1,000 square feet or less sprinklered per 903.3.1.1: grandstands, bleachers and the spaces under them aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Spaces under grandstands separated by 1-hour construction",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.1.1.1",
+      "piece_title": "Spaces under grandstands and bleachers"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_2_assembly_main_exit",
+     "rule": "general.bc_1030_2_assembly_main_exit",
+     "name": "Egress · An assembly main exit for at least half the occupants (BCNYS 1030.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A building, room or space used for assembly purposes with an occupant load over 300 and a main exit: the main exit has capacity for at least half the occupant load, and at least the total required capacity of all the means of egress leading to it; where the building is classified Group A, the main exit fronts at least one street, or an unoccupied space at least 10 feet wide adjoining a street or public way; where there is no well-defined main exit, or there are several, the exits may be distributed around the building's perimeter if their total capacity is at least 100 percent of the required capacity: which exit is the main exit, and its capacity, aren't worked out, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A building, room or space used for assembly purposes with an occupant load over 300 and a main exit: the main exit has capacity for at least half the occupant load, and at least the total required capacity of all the means of egress leading to it; where the building is classified Group A, the main exit fronts at least one street, or an unoccupied space at least 10 feet wide adjoining a street or public way; where there is no well-defined main exit, or there are several, the exits may be distributed around the building's perimeter if their total capacity is at least 100 percent of the required capacity: which exit is the main exit, and its capacity, aren't worked out, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.2 Assembly main exit. A building, room or space used for assembly purposes that has an occupant load of greater than 300 and is provided with a main exit, that main exit shall be of sufficient capacity to accommodate not less than one-half of the occupant load, but such capacity shall be not less than the total required capacity of all means of egress leading to the exit. Where the building is classified as a Group A occupancy, the main exit shall front on not less than one street or an unoccupied space of not less than 10 feet (3048 mm) in width that adjoins a street or public way. In a building, room or space used for assembly purposes where there is not a well-defined main exit or where multiple main exits are provided, exits shall be permitted to be distributed around the perime- ter of the building provided that the total capacity of egress is not less than 100 percent of the required capacity.",
+        "where": "1030.2, 2025 Building Code of New York State (BCNYS), PDF p.353"
+       }
+      ],
+      "citation": "1030.2, 2025 Building Code of New York State (BCNYS), PDF p.353",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.2",
+      "quote": "1030.2 Assembly main exit. A building, room or space used for assembly purposes that has an occupant load of greater than 300 and is provided with a main exit, that main exit shall be of sufficient capacity to accommodate not less than one-half of the occupant load, but such capacity shall be not less than the total required capacity of all means of egress leading to the exit. Where the building is classified as a Group A occupancy, the main exit shall front on not less than one street or an unoccupied space of not less than 10 feet (3048 mm) in width that adjoins a street or public way. In a building, room or space used for assembly purposes where there is not a well-defined main exit or where multiple main exits are provided, exits shall be permitted to be distributed around the perime- ter of the building provided that the total capacity of egress is not less than 100 percent of the required capacity."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_2_assembly_main_exit",
+       "words": "A person checks this (Gordium doesn't decide it): A building, room or space used for assembly purposes with an occupant load over 300 and a main exit: the main exit has capacity for at least half the occupant load, and at least the total required capacity of all the means of egress leading to it; where the building is classified Group A, the main exit fronts at least one street, or an unoccupied space at least 10 feet wide adjoining a street or public way; where there is no well-defined main exit, or there are several, the exits may be distributed around the building's perimeter if their total capacity is at least 100 percent of the required capacity: which exit is the main exit, and its capacity, aren't worked out, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_2_assembly_main_exit",
+       "why": "A person checks this (Gordium doesn't decide it): A building, room or space used for assembly purposes with an occupant load over 300 and a main exit: the main exit has capacity for at least half the occupant load, and at least the total required capacity of all the means of egress leading to it; where the building is classified Group A, the main exit fronts at least one street, or an unoccupied space at least 10 feet wide adjoining a street or public way; where there is no well-defined main exit, or there are several, the exits may be distributed around the building's perimeter if their total capacity is at least 100 percent of the required capacity: which exit is the main exit, and its capacity, aren't worked out, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "An assembly main exit for at least half the occupants",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.2",
+      "piece_title": "Assembly main exit"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_3_assembly_other_exits",
+     "rule": "general.bc_1030_3_assembly_other_exits",
+     "name": "Egress · Assembly other exits for at least half of each level's occupants (BCNYS 1030.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Each level of a building used for assembly purposes with an occupant load over 300 and a main exit has, besides access to the main exit, more means of egress with capacity for at least half the total occupant load that level serves, complying with 1007.1; where there is no well-defined main exit, or there are several, each level's exits may be distributed around the building's perimeter if their total width is at least 100 percent of the required width: the main exit and the other exits' share aren't worked out, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Each level of a building used for assembly purposes with an occupant load over 300 and a main exit has, besides access to the main exit, more means of egress with capacity for at least half the total occupant load that level serves, complying with 1007.1; where there is no well-defined main exit, or there are several, each level's exits may be distributed around the building's perimeter if their total width is at least 100 percent of the required width: the main exit and the other exits' share aren't worked out, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.3 Assembly other exits. In addition to having access to a main exit, each level in a building used for assembly purposes having an occupant load greater than 300 and provided with a main exit, shall be provided with additional means of egress that shall provide an egress capacity for not less than one-half of the total occupant load served by that level and shall comply with Section 1007.1. In a building used for assembly purposes where there is not a well-defined main exit or where multiple main exits are provided, exits for each level shall be permitted to be distributed around the perimeter of the building, provided that the total width of egress is not less than 100 percent of the required width.",
+        "where": "1030.3, 2025 Building Code of New York State (BCNYS), PDF p.353"
+       }
+      ],
+      "citation": "1030.3, 2025 Building Code of New York State (BCNYS), PDF p.353",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.3",
+      "quote": "1030.3 Assembly other exits. In addition to having access to a main exit, each level in a building used for assembly purposes having an occupant load greater than 300 and provided with a main exit, shall be provided with additional means of egress that shall provide an egress capacity for not less than one-half of the total occupant load served by that level and shall comply with Section 1007.1. In a building used for assembly purposes where there is not a well-defined main exit or where multiple main exits are provided, exits for each level shall be permitted to be distributed around the perimeter of the building, provided that the total width of egress is not less than 100 percent of the required width."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_3_assembly_other_exits",
+       "words": "A person checks this (Gordium doesn't decide it): Each level of a building used for assembly purposes with an occupant load over 300 and a main exit has, besides access to the main exit, more means of egress with capacity for at least half the total occupant load that level serves, complying with 1007.1; where there is no well-defined main exit, or there are several, each level's exits may be distributed around the building's perimeter if their total width is at least 100 percent of the required width: the main exit and the other exits' share aren't worked out, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_3_assembly_other_exits",
+       "why": "A person checks this (Gordium doesn't decide it): Each level of a building used for assembly purposes with an occupant load over 300 and a main exit has, besides access to the main exit, more means of egress with capacity for at least half the total occupant load that level serves, complying with 1007.1; where there is no well-defined main exit, or there are several, each level's exits may be distributed around the building's perimeter if their total width is at least 100 percent of the required width: the main exit and the other exits' share aren't worked out, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Assembly other exits for at least half of each level's occupants",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.3",
+      "piece_title": "Assembly other exits"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_4_foyers_and_lobbies",
+     "rule": "general.bc_1030_4_foyers_and_lobbies",
+     "name": "Egress · Waiting lobbies in Group A-1 kept out of the egress width (BCNYS 1030.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): In Group A-1, where people are let in while no seats are free, they may wait in a lobby or similar space that doesn't encroach on the minimum width or required capacity of the means of egress; such a foyer, unless every main entrance or exit connects it directly to a public street, has a straight and unobstructed corridor or path of travel to each of them: waiting spaces aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): In Group A-1, where people are let in while no seats are free, they may wait in a lobby or similar space that doesn't encroach on the minimum width or required capacity of the means of egress; such a foyer, unless every main entrance or exit connects it directly to a public street, has a straight and unobstructed corridor or path of travel to each of them: waiting spaces aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.4 Foyers and lobbies. In Group A-1 occupancies, where persons are admitted to the building at times when seats are not avail- able, such persons shall be allowed to wait in a lobby or similar space, provided that such lobby or similar space shall not encroach on the minimum width or required capacity of the means of egress. Such foyer, if not directly connected to a public street by all the main entrances or exits, shall have a straight and unobstructed corridor or path of travel to every such main entrance or exit.",
+        "where": "1030.4, 2025 Building Code of New York State (BCNYS), PDF p.353"
+       }
+      ],
+      "citation": "1030.4, 2025 Building Code of New York State (BCNYS), PDF p.353",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.4",
+      "quote": "1030.4 Foyers and lobbies. In Group A-1 occupancies, where persons are admitted to the building at times when seats are not avail- able, such persons shall be allowed to wait in a lobby or similar space, provided that such lobby or similar space shall not encroach on the minimum width or required capacity of the means of egress. Such foyer, if not directly connected to a public street by all the main entrances or exits, shall have a straight and unobstructed corridor or path of travel to every such main entrance or exit."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_4_foyers_and_lobbies",
+       "words": "A person checks this (Gordium doesn't decide it): In Group A-1, where people are let in while no seats are free, they may wait in a lobby or similar space that doesn't encroach on the minimum width or required capacity of the means of egress; such a foyer, unless every main entrance or exit connects it directly to a public street, has a straight and unobstructed corridor or path of travel to each of them: waiting spaces aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_4_foyers_and_lobbies",
+       "why": "A person checks this (Gordium doesn't decide it): In Group A-1, where people are let in while no seats are free, they may wait in a lobby or similar space that doesn't encroach on the minimum width or required capacity of the means of egress; such a foyer, unless every main entrance or exit connects it directly to a public street, has a straight and unobstructed corridor or path of travel to each of them: waiting spaces aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Waiting lobbies in Group A-1 kept out of the egress width",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.4",
+      "piece_title": "Foyers and lobbies"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_5_balcony_and_gallery_egress",
+     "rule": "general.bc_1030_5_balcony_and_gallery_egress",
+     "name": "Egress · Two exits from balconies and galleries seating 50 or more (BCNYS 1030.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A balcony, gallery or press box seating 50 or more in a building, room or space used for assembly purposes has at least two means of egress, one from each side: balconies, galleries and press boxes aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A balcony, gallery or press box seating 50 or more in a building, room or space used for assembly purposes has at least two means of egress, one from each side: balconies, galleries and press boxes aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.5 Interior balcony and gallery means of egress. For balconies, galleries or press boxes having a seating capacity of 50 or more located in a building, room or space used for assembly purposes, not less than two means of egress shall be provided, with one from each side of every balcony, gallery or press box.",
+        "where": "1030.5, 2025 Building Code of New York State (BCNYS), PDF p.353"
+       }
+      ],
+      "citation": "1030.5, 2025 Building Code of New York State (BCNYS), PDF p.353",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.5",
+      "quote": "1030.5 Interior balcony and gallery means of egress. For balconies, galleries or press boxes having a seating capacity of 50 or more located in a building, room or space used for assembly purposes, not less than two means of egress shall be provided, with one from each side of every balcony, gallery or press box."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_5_balcony_and_gallery_egress",
+       "words": "A person checks this (Gordium doesn't decide it): A balcony, gallery or press box seating 50 or more in a building, room or space used for assembly purposes has at least two means of egress, one from each side: balconies, galleries and press boxes aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_5_balcony_and_gallery_egress",
+       "why": "A person checks this (Gordium doesn't decide it): A balcony, gallery or press box seating 50 or more in a building, room or space used for assembly purposes has at least two means of egress, one from each side: balconies, galleries and press boxes aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Two exits from balconies and galleries seating 50 or more",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.5",
+      "piece_title": "Interior balcony and gallery means of egress"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_6_1_aisle_capacity_without_smoke_protection",
+     "rule": "general.bc_1030_6_1_aisle_capacity_without_smoke_protection",
+     "name": "Egress · Assembly aisle capacity without smoke protection (BCNYS 1030.6.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Aisles serving assembly seating have at least the capacity 1030.6.1 sets where the seating isn't smoke-protected (1030.6.2 sets it where it is, 1030.6.3 where it is open-air): at least 0.3 inch per occupant served on stepped aisles with risers of 7 inches or less and treads of 11 inches or more; at least 0.005 inch more per occupant for each 0.10 inch of riser above 7 inches; at least 0.075 inch more per occupant on the parts of a stepped aisle descent with no handrail within 30 inches horizontally; at least 0.22 inch per occupant on ramped aisles steeper than 1 in 12, and 0.20 inch on level aisles and ramped aisles not that steep: aisles and the occupants they serve aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Aisles serving assembly seating have at least the capacity 1030.6.1 sets where the seating isn't smoke-protected (1030.6.2 sets it where it is, 1030.6.3 where it is open-air): at least 0.3 inch per occupant served on stepped aisles with risers of 7 inches or less and treads of 11 inches or more; at least 0.005 inch more per occupant for each 0.10 inch of riser above 7 inches; at least 0.075 inch more per occupant on the parts of a stepped aisle descent with no handrail within 30 inches horizontally; at least 0.22 inch per occupant on ramped aisles steeper than 1 in 12, and 0.20 inch on level aisles and ramped aisles not that steep: aisles and the occupants they serve aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.6 Capacity of aisle for assembly. The required capacity of aisles shall be not less than that determined in accordance with Section 1030.6.1 where smoke-protected assembly seating is not provided, Section 1030.6.2 where smoke-protected assembly seating is provided and Section 1030.6.3 where open-air assembly seating is provided.",
+        "where": "1030.6, 2025 Building Code of New York State (BCNYS), PDF p.353"
+       },
+       {
+        "text": "1030.6.1 Without smoke protection. The required capacity in inches (mm) of the aisles for assembly seating without smoke protection shall be not less than the occupant load served by the egress element in accordance with all of the following, as applicable: 1. Not less than 0.3 inch (7.6 mm) of aisle capacity for each occupant served shall be provided on stepped aisles having riser heights 7 inches (178 mm) or less and tread depths 11 inches (279 mm) or greater, measured horizontally between tread nosings. 2. Not less than 0.005 inch (0.127 mm) of additional aisle capacity for each occupant shall be provided for each 0.10 inch (2.5 mm) of riser height above 7 inches (178 mm). 3. Where egress requires stepped aisle descent, not less than 0.075 inch (1.9 mm) of additional aisle capacity for each occu- pant shall be provided on those portions of aisle capacity that do not have a handrail within a horizontal distance of 30 inches (762 mm). 4. Ramped aisles, where slopes are steeper than one unit vertical in 12 units horizontal (8-percent slope), shall have not less than 0.22 inch (5.6 mm) of clear aisle capacity for each occupant served. Level or ramped aisles, where slopes are not",
+        "where": "1030.6.1, 2025 Building Code of New York State (BCNYS), PDF p.353"
+       },
+       {
+        "text": "steeper than one unit vertical in 12 units horizontal (8-percent slope), shall have not less than 0.20 inch (5.1 mm) of clear aisle capacity for each occupant served.",
+        "where": "1030.6.1, 2025 Building Code of New York State (BCNYS), PDF p.354"
+       }
+      ],
+      "citation": "1030.6, 2025 Building Code of New York State (BCNYS), PDF p.353",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.6",
+      "quote": "1030.6 Capacity of aisle for assembly. The required capacity of aisles shall be not less than that determined in accordance with Section 1030.6.1 where smoke-protected assembly seating is not provided, Section 1030.6.2 where smoke-protected assembly seating is provided and Section 1030.6.3 where open-air assembly seating is provided."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_6_1_aisle_capacity_without_smoke_protection",
+       "words": "A person checks this (Gordium doesn't decide it): Aisles serving assembly seating have at least the capacity 1030.6.1 sets where the seating isn't smoke-protected (1030.6.2 sets it where it is, 1030.6.3 where it is open-air): at least 0.3 inch per occupant served on stepped aisles with risers of 7 inches or less and treads of 11 inches or more; at least 0.005 inch more per occupant for each 0.10 inch of riser above 7 inches; at least 0.075 inch more per occupant on the parts of a stepped aisle descent with no handrail within 30 inches horizontally; at least 0.22 inch per occupant on ramped aisles steeper than 1 in 12, and 0.20 inch on level aisles and ramped aisles not that steep: aisles and the occupants they serve aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_6_1_aisle_capacity_without_smoke_protection",
+       "why": "A person checks this (Gordium doesn't decide it): Aisles serving assembly seating have at least the capacity 1030.6.1 sets where the seating isn't smoke-protected (1030.6.2 sets it where it is, 1030.6.3 where it is open-air): at least 0.3 inch per occupant served on stepped aisles with risers of 7 inches or less and treads of 11 inches or more; at least 0.005 inch more per occupant for each 0.10 inch of riser above 7 inches; at least 0.075 inch more per occupant on the parts of a stepped aisle descent with no handrail within 30 inches horizontally; at least 0.22 inch per occupant on ramped aisles steeper than 1 in 12, and 0.20 inch on level aisles and ramped aisles not that steep: aisles and the occupants they serve aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Assembly aisle capacity without smoke protection",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.6",
+      "piece_title": "Capacity of aisle for assembly"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_6_2_smoke_protected_aisle_capacity",
+     "rule": "general.bc_1030_6_2_smoke_protected_aisle_capacity",
+     "name": "Egress · Aisle capacity for smoke-protected assembly seating (BCNYS 1030.6.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An aisle for smoke-protected assembly seating has capacity of at least the occupant load it serves times Table 1030.6.2's factor for the total number of seats exposed to the same smoke-protected environment (interpolation between its values permitted), and a facility using the table's reduced widths has a life safety evaluation per NFPA 101: whether seating is smoke-protected, and its aisles, aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An aisle for smoke-protected assembly seating has capacity of at least the occupant load it serves times Table 1030.6.2's factor for the total number of seats exposed to the same smoke-protected environment (interpolation between its values permitted), and a facility using the table's reduced widths has a life safety evaluation per NFPA 101: whether seating is smoke-protected, and its aisles, aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.6.2 Smoke-protected assembly seating. The required capacity in inches (mm) of the aisle for smoke-protected assembly seating shall be not less than the occupant load served by the egress element multiplied by the appropriate factor in Table 1030.6.2. The total number of seats specified shall be those within the space exposed to the same smoke-protected environment. Interpolation is permitted between the specific values shown. A life safety evaluation, complying with NFPA 101, shall be done for a facility utilizing the reduced width requirements of Table 1030.6.2 for smoke-protected assembly seating.",
+        "where": "1030.6.2, 2025 Building Code of New York State (BCNYS), PDF p.354"
+       }
+      ],
+      "citation": "1030.6.2, 2025 Building Code of New York State (BCNYS), PDF p.354",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.6.2",
+      "quote": "1030.6.2 Smoke-protected assembly seating. The required capacity in inches (mm) of the aisle for smoke-protected assembly seating shall be not less than the occupant load served by the egress element multiplied by the appropriate factor in Table 1030.6.2. The total number of seats specified shall be those within the space exposed to the same smoke-protected environment. Interpolation is permitted between the specific values shown. A life safety evaluation, complying with NFPA 101, shall be done for a facility utilizing the reduced width requirements of Table 1030.6.2 for smoke-protected assembly seating."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_6_2_smoke_protected_aisle_capacity",
+       "words": "A person checks this (Gordium doesn't decide it): An aisle for smoke-protected assembly seating has capacity of at least the occupant load it serves times Table 1030.6.2's factor for the total number of seats exposed to the same smoke-protected environment (interpolation between its values permitted), and a facility using the table's reduced widths has a life safety evaluation per NFPA 101: whether seating is smoke-protected, and its aisles, aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_6_2_smoke_protected_aisle_capacity",
+       "why": "A person checks this (Gordium doesn't decide it): An aisle for smoke-protected assembly seating has capacity of at least the occupant load it serves times Table 1030.6.2's factor for the total number of seats exposed to the same smoke-protected environment (interpolation between its values permitted), and a facility using the table's reduced widths has a life safety evaluation per NFPA 101: whether seating is smoke-protected, and its aisles, aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Aisle capacity for smoke-protected assembly seating",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.6.2",
+      "piece_title": "Smoke-protected assembly seating"
+     }
+    },
+    {
+     "id": "egress.general.bc_table_1030_6_2_smoke_protected_aisle_factors",
+     "rule": "general.bc_table_1030_6_2_smoke_protected_aisle_factors",
+     "name": "Egress · Smoke-protected aisle capacity per seat (BCNYS Table 1030.6.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Inches of aisle capacity per seat served in smoke-protected assembly seating, by the total number of seats in it: at 5,000 or fewer, 0.200 on stepped aisles with handrails within 30 inches, 0.250 on stepped aisles without, 0.150 on level aisles or ramped aisles not steeper than 1 in 10, and 0.165 on ramped aisles steeper than 1 in 10; at 10,000, 0.130, 0.163, 0.100 and 0.110; at 15,000, 0.096, 0.120, 0.070 and 0.077; at 20,000, 0.076, 0.095, 0.056 and 0.062; at 25,000 or more, 0.060, 0.075, 0.044 and 0.048: aisles and their seats aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Inches of aisle capacity per seat served in smoke-protected assembly seating, by the total number of seats in it: at 5,000 or fewer, 0.200 on stepped aisles with handrails within 30 inches, 0.250 on stepped aisles without, 0.150 on level aisles or ramped aisles not steeper than 1 in 10, and 0.165 on ramped aisles steeper than 1 in 10; at 10,000, 0.130, 0.163, 0.100 and 0.110; at 15,000, 0.096, 0.120, 0.070 and 0.077; at 20,000, 0.076, 0.095, 0.056 and 0.062; at 25,000 or more, 0.060, 0.075, 0.044 and 0.048: aisles and their seats aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "TABLE 1030.6.2—CAPACITY FOR AISLES FOR SMOKE-PROTECTED ASSEMBLY TOTAL NUMBER INCHES OF CAPACITY PER SEAT SERVED OF SEATS IN THE SMOKE- Stepped aisles with Stepped aisles without Level aisles or ramped PROTECTED ASSEMBLY handrails within handrails within aisles not steeper than Ramped aisles steeper SEATING 30 inches 30 inches 1 in 10 in slope than 1 in 10 in slope Equal to or less than 5,000 0.200 0.250 0.150 0.165 10,000 0.130 0.163 0.100 0.110 15,000 0.096 0.120 0.070 0.077 20,000 0.076 0.095 0.056 0.062 Equal to or greater than 0.060 0.075 0.044 0.048 25,000 For SI: 1 inch = 25.4 mm.",
+        "where": "Table 1030.6.2, 2025 Building Code of New York State (BCNYS), PDF p.354"
+       }
+      ],
+      "citation": "Table 1030.6.2, 2025 Building Code of New York State (BCNYS), PDF p.354",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "Table 1030.6.2",
+      "quote": "TABLE 1030.6.2—CAPACITY FOR AISLES FOR SMOKE-PROTECTED ASSEMBLY TOTAL NUMBER INCHES OF CAPACITY PER SEAT SERVED OF SEATS IN THE SMOKE- Stepped aisles with Stepped aisles without Level aisles or ramped PROTECTED ASSEMBLY handrails within handrails within aisles not steeper than Ramped aisles steeper SEATING 30 inches 30 inches 1 in 10 in slope than 1 in 10 in slope Equal to or less than 5,000 0.200 0.250 0.150 0.165 10,000 0.130 0.163 0.100 0.110 15,000 0.096 0.120 0.070 0.077 20,000 0.076 0.095 0.056 0.062 Equal to or greater than 0.060 0.075 0.044 0.048 25,000 For SI: 1 inch = 25.4 mm."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_table_1030_6_2_smoke_protected_aisle_factors",
+       "words": "A person checks this (Gordium doesn't decide it): Inches of aisle capacity per seat served in smoke-protected assembly seating, by the total number of seats in it: at 5,000 or fewer, 0.200 on stepped aisles with handrails within 30 inches, 0.250 on stepped aisles without, 0.150 on level aisles or ramped aisles not steeper than 1 in 10, and 0.165 on ramped aisles steeper than 1 in 10; at 10,000, 0.130, 0.163, 0.100 and 0.110; at 15,000, 0.096, 0.120, 0.070 and 0.077; at 20,000, 0.076, 0.095, 0.056 and 0.062; at 25,000 or more, 0.060, 0.075, 0.044 and 0.048: aisles and their seats aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_table_1030_6_2_smoke_protected_aisle_factors",
+       "why": "A person checks this (Gordium doesn't decide it): Inches of aisle capacity per seat served in smoke-protected assembly seating, by the total number of seats in it: at 5,000 or fewer, 0.200 on stepped aisles with handrails within 30 inches, 0.250 on stepped aisles without, 0.150 on level aisles or ramped aisles not steeper than 1 in 10, and 0.165 on ramped aisles steeper than 1 in 10; at 10,000, 0.130, 0.163, 0.100 and 0.110; at 15,000, 0.096, 0.120, 0.070 and 0.077; at 20,000, 0.076, 0.095, 0.056 and 0.062; at 25,000 or more, 0.060, 0.075, 0.044 and 0.048: aisles and their seats aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Smoke-protected aisle capacity per seat",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "Table 1030.6.2",
+      "piece_title": "CAPACITY FOR AISLES FOR SMOKE-PROTECTED ASSEMBLY"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_6_2_1_smoke_control",
+     "rule": "general.bc_1030_6_2_1_smoke_control",
+     "name": "Egress · Smoke control for smoke-protected assembly seating (BCNYS 1030.6.2.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Aisles and aisle accessways serving smoke-protected assembly seating have a smoke control system per 909, or natural ventilation designed to keep the smoke level at least 6 feet above the floor of the means of egress: smoke control isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Aisles and aisle accessways serving smoke-protected assembly seating have a smoke control system per 909, or natural ventilation designed to keep the smoke level at least 6 feet above the floor of the means of egress: smoke control isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.6.2.1 Smoke control. Aisles and aisle accessways serving a smoke-protected assembly seating area shall be provided with a smoke control system complying with Section 909 or natural ventilation designed to maintain the smoke level not less than 6 feet (1829 mm) above the floor of the means of egress.",
+        "where": "1030.6.2.1, 2025 Building Code of New York State (BCNYS), PDF p.354"
+       }
+      ],
+      "citation": "1030.6.2.1, 2025 Building Code of New York State (BCNYS), PDF p.354",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.6.2.1",
+      "quote": "1030.6.2.1 Smoke control. Aisles and aisle accessways serving a smoke-protected assembly seating area shall be provided with a smoke control system complying with Section 909 or natural ventilation designed to maintain the smoke level not less than 6 feet (1829 mm) above the floor of the means of egress."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_6_2_1_smoke_control",
+       "words": "A person checks this (Gordium doesn't decide it): Aisles and aisle accessways serving smoke-protected assembly seating have a smoke control system per 909, or natural ventilation designed to keep the smoke level at least 6 feet above the floor of the means of egress: smoke control isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_6_2_1_smoke_control",
+       "why": "A person checks this (Gordium doesn't decide it): Aisles and aisle accessways serving smoke-protected assembly seating have a smoke control system per 909, or natural ventilation designed to keep the smoke level at least 6 feet above the floor of the means of egress: smoke control isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Smoke control for smoke-protected assembly seating",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.6.2.1",
+      "piece_title": "Smoke control"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_6_2_2_roof_height",
+     "rule": "general.bc_1030_6_2_2_roof_height",
+     "name": "Egress · A roof at least 15 ft above the highest aisle (BCNYS 1030.6.2.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Where smoke-protected assembly seating has a roof, the lowest portion of the roof deck is at least 15 feet above the highest aisle or aisle accessway; but an outdoor stadium's roof canopy may be lower where nothing is less than 80 inches above the highest aisle or aisle accessway: roofs over seating aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Where smoke-protected assembly seating has a roof, the lowest portion of the roof deck is at least 15 feet above the highest aisle or aisle accessway; but an outdoor stadium's roof canopy may be lower where nothing is less than 80 inches above the highest aisle or aisle accessway: roofs over seating aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.6.2.2 Roof height. A smoke-protected assembly seating area with a roof shall have the lowest portion of the roof deck not less than 15 feet (4572 mm) above the highest aisle or aisle accessway. Exception: A roof canopy in an outdoor stadium shall be permitted to be less than 15 feet (4572 mm) above the highest aisle or aisle accessway provided that there are no objects less than 80 inches (2032 mm) above the highest aisle or aisle accessway.",
+        "where": "1030.6.2.2, 2025 Building Code of New York State (BCNYS), PDF p.354"
+       }
+      ],
+      "citation": "1030.6.2.2, 2025 Building Code of New York State (BCNYS), PDF p.354",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.6.2.2",
+      "quote": "1030.6.2.2 Roof height. A smoke-protected assembly seating area with a roof shall have the lowest portion of the roof deck not less than 15 feet (4572 mm) above the highest aisle or aisle accessway. Exception: A roof canopy in an outdoor stadium shall be permitted to be less than 15 feet (4572 mm) above the highest aisle or aisle accessway provided that there are no objects less than 80 inches (2032 mm) above the highest aisle or aisle accessway."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_6_2_2_roof_height",
+       "words": "A person checks this (Gordium doesn't decide it): Where smoke-protected assembly seating has a roof, the lowest portion of the roof deck is at least 15 feet above the highest aisle or aisle accessway; but an outdoor stadium's roof canopy may be lower where nothing is less than 80 inches above the highest aisle or aisle accessway: roofs over seating aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_6_2_2_roof_height",
+       "why": "A person checks this (Gordium doesn't decide it): Where smoke-protected assembly seating has a roof, the lowest portion of the roof deck is at least 15 feet above the highest aisle or aisle accessway; but an outdoor stadium's roof canopy may be lower where nothing is less than 80 inches above the highest aisle or aisle accessway: roofs over seating aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "A roof at least 15 ft above the highest aisle",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.6.2.2",
+      "piece_title": "Roof height"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_6_2_3_smoke_protected_sprinklers",
+     "rule": "general.bc_1030_6_2_3_smoke_protected_sprinklers",
+     "name": "Egress · Sprinklers where there is smoke-protected seating (BCNYS 1030.6.2.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with smoke-protected assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, nor press boxes and storage facilities under 1,000 square feet: whether seating is smoke-protected isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with smoke-protected assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, nor press boxes and storage facilities under 1,000 square feet: whether seating is smoke-protected isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.6.2.3 Automatic sprinklers. Enclosed areas with walls and ceilings in buildings or structures containing smoke-protected assembly seating shall be protected with an approved automatic sprinkler system in accordance with Section 903.3.1.1. Exceptions: 1. The floor area used for contests, performances or entertainment provided that the roof construction is more than 50 feet (15 240 mm) above the floor level and the use is restricted to low fire hazard uses. 2. Press boxes and storage facilities less than 1,000 square feet (93 m[fn2]) in area.",
+        "where": "1030.6.2.3, 2025 Building Code of New York State (BCNYS), PDF p.354"
+       }
+      ],
+      "citation": "1030.6.2.3, 2025 Building Code of New York State (BCNYS), PDF p.354",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.6.2.3",
+      "quote": "1030.6.2.3 Automatic sprinklers. Enclosed areas with walls and ceilings in buildings or structures containing smoke-protected assembly seating shall be protected with an approved automatic sprinkler system in accordance with Section 903.3.1.1. Exceptions: 1. The floor area used for contests, performances or entertainment provided that the roof construction is more than 50 feet (15 240 mm) above the floor level and the use is restricted to low fire hazard uses. 2. Press boxes and storage facilities less than 1,000 square feet (93 m[fn2]) in area."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_6_2_3_smoke_protected_sprinklers",
+       "words": "A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with smoke-protected assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, nor press boxes and storage facilities under 1,000 square feet: whether seating is smoke-protected isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_6_2_3_smoke_protected_sprinklers",
+       "why": "A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with smoke-protected assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, nor press boxes and storage facilities under 1,000 square feet: whether seating is smoke-protected isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Sprinklers where there is smoke-protected seating",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.6.2.3",
+      "piece_title": "Automatic sprinklers"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_6_3_open_air_aisle_capacity",
+     "rule": "general.bc_1030_6_3_open_air_aisle_capacity",
+     "name": "Egress · Aisle capacity for open-air assembly seating (BCNYS 1030.6.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): In open-air assembly seating, an aisle has capacity of at least the total occupant load it serves times 0.08 inch where egress is by stepped aisle, and 0.06 inch where it is by level or ramped aisles; or 1030.6.2's capacity for the number of seats where that is less: whether seating is open-air, and its aisles, aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): In open-air assembly seating, an aisle has capacity of at least the total occupant load it serves times 0.08 inch where egress is by stepped aisle, and 0.06 inch where it is by level or ramped aisles; or 1030.6.2's capacity for the number of seats where that is less: whether seating is open-air, and its aisles, aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.6.3 Open-air assembly seating. In open-air assembly seating, the required capacity in inches (mm) of aisles shall be not less than the total occupant load served by the egress element multiplied by 0.08 (2.0 mm) where egress is by stepped aisle and multiplied by 0.06 (1.52 mm) where egress is by level aisles and ramped aisles. Exception: The required capacity in inches (mm) of aisles shall be permitted to comply with Section 1030.6.2 for the number of seats in the open-air assembly seating where Section 1030.6.2 permits less capacity.",
+        "where": "1030.6.3, 2025 Building Code of New York State (BCNYS), PDF p.354"
+       }
+      ],
+      "citation": "1030.6.3, 2025 Building Code of New York State (BCNYS), PDF p.354",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.6.3",
+      "quote": "1030.6.3 Open-air assembly seating. In open-air assembly seating, the required capacity in inches (mm) of aisles shall be not less than the total occupant load served by the egress element multiplied by 0.08 (2.0 mm) where egress is by stepped aisle and multiplied by 0.06 (1.52 mm) where egress is by level aisles and ramped aisles. Exception: The required capacity in inches (mm) of aisles shall be permitted to comply with Section 1030.6.2 for the number of seats in the open-air assembly seating where Section 1030.6.2 permits less capacity."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_6_3_open_air_aisle_capacity",
+       "words": "A person checks this (Gordium doesn't decide it): In open-air assembly seating, an aisle has capacity of at least the total occupant load it serves times 0.08 inch where egress is by stepped aisle, and 0.06 inch where it is by level or ramped aisles; or 1030.6.2's capacity for the number of seats where that is less: whether seating is open-air, and its aisles, aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_6_3_open_air_aisle_capacity",
+       "why": "A person checks this (Gordium doesn't decide it): In open-air assembly seating, an aisle has capacity of at least the total occupant load it serves times 0.08 inch where egress is by stepped aisle, and 0.06 inch where it is by level or ramped aisles; or 1030.6.2's capacity for the number of seats where that is less: whether seating is open-air, and its aisles, aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Aisle capacity for open-air assembly seating",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.6.3",
+      "piece_title": "Open-air assembly seating"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_6_3_1_open_air_sprinklers",
+     "rule": "general.bc_1030_6_3_1_open_air_sprinklers",
+     "name": "Egress · Sprinklers where there is open-air seating (BCNYS 1030.6.3.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with open-air assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, press boxes and storage facilities under 1,000 square feet, or open-air seating facilities whose seating and means of egress in the seating area are essentially open to the outside: whether seating is open-air isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with open-air assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, press boxes and storage facilities under 1,000 square feet, or open-air seating facilities whose seating and means of egress in the seating area are essentially open to the outside: whether seating is open-air isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.6.3.1 Automatic sprinklers. Enclosed areas with walls and ceilings in buildings or structures containing open-air assem- bly seating shall be protected with an approved automatic sprinkler system in accordance with Section 903.3.1.1. Exceptions: 1. The floor area used for contests, performances or entertainment, provided that the roof construction is more than 50 feet (15 240 mm) above the floor level and the use is restricted to low fire hazard uses. 2. Press boxes and storage facilities less than 1,000 square feet (93 m[fn2]) in area. 3. Open-air assembly seating facilities where seating and the means of egress in the seating area are essentially open to the outside.",
+        "where": "1030.6.3.1, 2025 Building Code of New York State (BCNYS), PDF p.354"
+       }
+      ],
+      "citation": "1030.6.3.1, 2025 Building Code of New York State (BCNYS), PDF p.354",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.6.3.1",
+      "quote": "1030.6.3.1 Automatic sprinklers. Enclosed areas with walls and ceilings in buildings or structures containing open-air assem- bly seating shall be protected with an approved automatic sprinkler system in accordance with Section 903.3.1.1. Exceptions: 1. The floor area used for contests, performances or entertainment, provided that the roof construction is more than 50 feet (15 240 mm) above the floor level and the use is restricted to low fire hazard uses. 2. Press boxes and storage facilities less than 1,000 square feet (93 m[fn2]) in area. 3. Open-air assembly seating facilities where seating and the means of egress in the seating area are essentially open to the outside."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_6_3_1_open_air_sprinklers",
+       "words": "A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with open-air assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, press boxes and storage facilities under 1,000 square feet, or open-air seating facilities whose seating and means of egress in the seating area are essentially open to the outside: whether seating is open-air isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_6_3_1_open_air_sprinklers",
+       "why": "A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with open-air assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, press boxes and storage facilities under 1,000 square feet, or open-air seating facilities whose seating and means of egress in the seating area are essentially open to the outside: whether seating is open-air isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Sprinklers where there is open-air seating",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.6.3.1",
+      "piece_title": "Automatic sprinklers"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_8_1_path_through_adjacent_row",
+     "rule": "general.bc_1030_8_1_path_through_adjacent_row",
+     "name": "Egress · A path through an adjacent row: at most 24 seats between aisles (BCNYS 1030.8.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Where one of the two paths of travel crosses the aisle through a row of seats to another aisle, there are at most 24 seats between the two aisles, and the row between them is at least 12 inches clear plus 0.6 inch for each seat above seven; for smoke-protected or open-air seating, at most 40 seats, and 12 inches plus 0.3 inch for each additional seat: seats and rows aren't drawn, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Where one of the two paths of travel crosses the aisle through a row of seats to another aisle, there are at most 24 seats between the two aisles, and the row between them is at least 12 inches clear plus 0.6 inch for each seat above seven; for smoke-protected or open-air seating, at most 40 seats, and 12 inches plus 0.3 inch for each additional seat: seats and rows aren't drawn, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.8.1 Path through adjacent row. Where one of the two paths of travel is across the aisle through a row of seats to another aisle, there shall be not more than 24 seats between the two aisles, and the minimum clear width between rows for the row between the two aisles shall be 12 inches (305 mm) plus 0.6 inch (15.2 mm) for each additional seat above seven in the row between aisles. Exception: For smoke-protected or open-air assembly seating there shall be not more than 40 seats between the two aisles and the minimum clear width shall be 12 inches (305 mm) plus 0.3 inch (7.6 mm) for each additional seat.",
+        "where": "1030.8.1, 2025 Building Code of New York State (BCNYS), PDF p.355"
+       }
+      ],
+      "citation": "1030.8.1, 2025 Building Code of New York State (BCNYS), PDF p.355",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.8.1",
+      "quote": "1030.8.1 Path through adjacent row. Where one of the two paths of travel is across the aisle through a row of seats to another aisle, there shall be not more than 24 seats between the two aisles, and the minimum clear width between rows for the row between the two aisles shall be 12 inches (305 mm) plus 0.6 inch (15.2 mm) for each additional seat above seven in the row between aisles. Exception: For smoke-protected or open-air assembly seating there shall be not more than 40 seats between the two aisles and the minimum clear width shall be 12 inches (305 mm) plus 0.3 inch (7.6 mm) for each additional seat."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_8_1_path_through_adjacent_row",
+       "words": "A person checks this (Gordium doesn't decide it): Where one of the two paths of travel crosses the aisle through a row of seats to another aisle, there are at most 24 seats between the two aisles, and the row between them is at least 12 inches clear plus 0.6 inch for each seat above seven; for smoke-protected or open-air seating, at most 40 seats, and 12 inches plus 0.3 inch for each additional seat: seats and rows aren't drawn, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_8_1_path_through_adjacent_row",
+       "why": "A person checks this (Gordium doesn't decide it): Where one of the two paths of travel crosses the aisle through a row of seats to another aisle, there are at most 24 seats between the two aisles, and the row between them is at least 12 inches clear plus 0.6 inch for each seat above seven; for smoke-protected or open-air seating, at most 40 seats, and 12 inches plus 0.3 inch for each additional seat: seats and rows aren't drawn, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "A path through an adjacent row: at most 24 seats between aisles",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.8.1",
+      "piece_title": "Path through adjacent row"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_9_assembly_aisles_required",
+     "rule": "general.bc_1030_9_assembly_aisles_required",
+     "name": "Egress · Aisles to the exits from every occupied part of an assembly space (BCNYS 1030.9)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Every occupied portion of a building, room or space used for assembly purposes that contains seats, tables, displays, similar fixtures or equipment has aisles leading to exits or exit access doorways as 1030 requires (1030.1: a room or space used for assembly purposes containing seats, tables, displays, equipment or other material complies with 1030): aisles aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Every occupied portion of a building, room or space used for assembly purposes that contains seats, tables, displays, similar fixtures or equipment has aisles leading to exits or exit access doorways as 1030 requires (1030.1: a room or space used for assembly purposes containing seats, tables, displays, equipment or other material complies with 1030): aisles aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.9 Assembly aisles are required. Every occupied portion of any building, room or space used for assembly purposes that contains seats, tables, displays, similar fixtures or equipment shall be provided with aisles leading to exits or exit access doorways in accordance with this section.",
+        "where": "1030.9, 2025 Building Code of New York State (BCNYS), PDF p.355"
+       },
+       {
+        "text": "1030.1 General. A room or space used for assembly purposes that contains seats, tables, displays, equipment or other material shall comply with this section.",
+        "where": "1030.1, 2025 Building Code of New York State (BCNYS), PDF p.353"
+       }
+      ],
+      "citation": "1030.9, 2025 Building Code of New York State (BCNYS), PDF p.355",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.9",
+      "quote": "1030.9 Assembly aisles are required. Every occupied portion of any building, room or space used for assembly purposes that contains seats, tables, displays, similar fixtures or equipment shall be provided with aisles leading to exits or exit access doorways in accordance with this section."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_9_assembly_aisles_required",
+       "words": "A person checks this (Gordium doesn't decide it): Every occupied portion of a building, room or space used for assembly purposes that contains seats, tables, displays, similar fixtures or equipment has aisles leading to exits or exit access doorways as 1030 requires (1030.1: a room or space used for assembly purposes containing seats, tables, displays, equipment or other material complies with 1030): aisles aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_9_assembly_aisles_required",
+       "why": "A person checks this (Gordium doesn't decide it): Every occupied portion of a building, room or space used for assembly purposes that contains seats, tables, displays, similar fixtures or equipment has aisles leading to exits or exit access doorways as 1030 requires (1030.1: a room or space used for assembly purposes containing seats, tables, displays, equipment or other material complies with 1030): aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Aisles to the exits from every occupied part of an assembly space",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.9",
+      "piece_title": "Assembly aisles are required"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_9_1_minimum_aisle_width",
+     "rule": "general.bc_1030_9_1_minimum_aisle_width",
+     "name": "Egress · Assembly aisles' least clear widths (BCNYS 1030.9.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An aisle's clear width is at least: 48 inches for stepped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats; 36 inches for stepped aisles with seating on one side only, or 23 inches between a stepped aisle handrail and the seating where the aisle serves no more than five rows on one side; 23 inches between a stepped aisle handrail or guard and the seating where a mid-aisle handrail divides the stepped aisle; 42 inches for level or ramped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route; 36 inches for level or ramped aisles with seating on one side only, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route: aisles aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An aisle's clear width is at least: 48 inches for stepped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats; 36 inches for stepped aisles with seating on one side only, or 23 inches between a stepped aisle handrail and the seating where the aisle serves no more than five rows on one side; 23 inches between a stepped aisle handrail or guard and the seating where a mid-aisle handrail divides the stepped aisle; 42 inches for level or ramped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route; 36 inches for level or ramped aisles with seating on one side only, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route: aisles aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.9.1 Minimum aisle width. The minimum clear width for aisles shall comply with one of the following: 1. Forty-eight inches (1219 mm) for stepped aisles having seating on both sides. Exception: Thirty-six inches (914 mm) where the stepped aisles serve less than 50 seats. 2. Thirty-six inches (914 mm) for stepped aisles having seating on only one side. Exception: Twenty-three inches (584 mm) between a stepped aisle handrail and seating where a stepped aisle does not serve more than five rows on one side. 3. Twenty-three inches (584 mm) between a stepped aisle handrail or guard and seating where the stepped aisle is subdi- vided by a mid-aisle handrail. 4. Forty-two inches (1067 mm) for level or ramped aisles having seating on both sides. Exceptions: 1. Thirty-six inches (914 mm) where the aisle serves less than 50 seats. 2. Thirty inches (762 mm) where the aisle serves less than 15 seats and does not serve as part of an accessible route. 5. Thirty-six inches (914 mm) for level or ramped aisles having seating on only one side. Exception: Thirty inches (762 mm) where the aisle serves fewer than 15 seats and does not serve as part of an accessible route.",
+        "where": "1030.9.1, 2025 Building Code of New York State (BCNYS), PDF p.355"
+       }
+      ],
+      "citation": "1030.9.1, 2025 Building Code of New York State (BCNYS), PDF p.355",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.9.1",
+      "quote": "1030.9.1 Minimum aisle width. The minimum clear width for aisles shall comply with one of the following: 1. Forty-eight inches (1219 mm) for stepped aisles having seating on both sides. Exception: Thirty-six inches (914 mm) where the stepped aisles serve less than 50 seats. 2. Thirty-six inches (914 mm) for stepped aisles having seating on only one side. Exception: Twenty-three inches (584 mm) between a stepped aisle handrail and seating where a stepped aisle does not serve more than five rows on one side. 3. Twenty-three inches (584 mm) between a stepped aisle handrail or guard and seating where the stepped aisle is subdi- vided by a mid-aisle handrail. 4. Forty-two inches (1067 mm) for level or ramped aisles having seating on both sides. Exceptions: 1. Thirty-six inches (914 mm) where the aisle serves less than 50 seats. 2. Thirty inches (762 mm) where the aisle serves less than 15 seats and does not serve as part of an accessible route. 5. Thirty-six inches (914 mm) for level or ramped aisles having seating on only one side. Exception: Thirty inches (762 mm) where the aisle serves fewer than 15 seats and does not serve as part of an accessible route."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_9_1_minimum_aisle_width",
+       "words": "A person checks this (Gordium doesn't decide it): An aisle's clear width is at least: 48 inches for stepped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats; 36 inches for stepped aisles with seating on one side only, or 23 inches between a stepped aisle handrail and the seating where the aisle serves no more than five rows on one side; 23 inches between a stepped aisle handrail or guard and the seating where a mid-aisle handrail divides the stepped aisle; 42 inches for level or ramped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route; 36 inches for level or ramped aisles with seating on one side only, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route: aisles aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_9_1_minimum_aisle_width",
+       "why": "A person checks this (Gordium doesn't decide it): An aisle's clear width is at least: 48 inches for stepped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats; 36 inches for stepped aisles with seating on one side only, or 23 inches between a stepped aisle handrail and the seating where the aisle serves no more than five rows on one side; 23 inches between a stepped aisle handrail or guard and the seating where a mid-aisle handrail divides the stepped aisle; 42 inches for level or ramped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route; 36 inches for level or ramped aisles with seating on one side only, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Assembly aisles' least clear widths",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.9.1",
+      "piece_title": "Minimum aisle width"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_9_2_aisle_catchment_area",
+     "rule": "general.bc_1030_9_2_aisle_catchment_area",
+     "name": "Egress · Aisle capacity for its catchment area (BCNYS 1030.9.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An aisle has capacity enough for the people in the catchment area it serves, the portion of the whole space that section of the aisle serves, worked out assuming a balanced use of all the means of egress, the number of people in proportion to egress capacity: aisles aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An aisle has capacity enough for the people in the catchment area it serves, the portion of the whole space that section of the aisle serves, worked out assuming a balanced use of all the means of egress, the number of people in proportion to egress capacity: aisles aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.9.2 Aisle catchment area. The aisle shall provide sufficient capacity for the number of persons accommodated by the catchment area served by the aisle. The catchment area served by an aisle is that portion of the total space served by that section of the aisle. In establishing catchment areas, the assumption shall be made that there is a balanced use of all means of egress, with the number of persons in proportion to egress capacity.",
+        "where": "1030.9.2, 2025 Building Code of New York State (BCNYS), PDF p.355"
+       }
+      ],
+      "citation": "1030.9.2, 2025 Building Code of New York State (BCNYS), PDF p.355",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.9.2",
+      "quote": "1030.9.2 Aisle catchment area. The aisle shall provide sufficient capacity for the number of persons accommodated by the catchment area served by the aisle. The catchment area served by an aisle is that portion of the total space served by that section of the aisle. In establishing catchment areas, the assumption shall be made that there is a balanced use of all means of egress, with the number of persons in proportion to egress capacity."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_9_2_aisle_catchment_area",
+       "words": "A person checks this (Gordium doesn't decide it): An aisle has capacity enough for the people in the catchment area it serves, the portion of the whole space that section of the aisle serves, worked out assuming a balanced use of all the means of egress, the number of people in proportion to egress capacity: aisles aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_9_2_aisle_catchment_area",
+       "why": "A person checks this (Gordium doesn't decide it): An aisle has capacity enough for the people in the catchment area it serves, the portion of the whole space that section of the aisle serves, worked out assuming a balanced use of all the means of egress, the number of people in proportion to egress capacity: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Aisle capacity for its catchment area",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.9.2",
+      "piece_title": "Aisle catchment area"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_9_3_converging_aisles",
+     "rule": "general.bc_1030_9_3_converging_aisles",
+     "name": "Egress · Converging aisles' combined capacity (BCNYS 1030.9.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Where aisles converge into a single path of egress travel, that path's required capacity is at least the combined required capacity of the converging aisles: aisles aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Where aisles converge into a single path of egress travel, that path's required capacity is at least the combined required capacity of the converging aisles: aisles aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.9.3 Converging aisles. Where aisles converge to form a single path of egress travel, the required capacity of that path shall be not less than the combined required capacity of the converging aisles.",
+        "where": "1030.9.3, 2025 Building Code of New York State (BCNYS), PDF p.355"
+       }
+      ],
+      "citation": "1030.9.3, 2025 Building Code of New York State (BCNYS), PDF p.355",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.9.3",
+      "quote": "1030.9.3 Converging aisles. Where aisles converge to form a single path of egress travel, the required capacity of that path shall be not less than the combined required capacity of the converging aisles."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_9_3_converging_aisles",
+       "words": "A person checks this (Gordium doesn't decide it): Where aisles converge into a single path of egress travel, that path's required capacity is at least the combined required capacity of the converging aisles: aisles aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_9_3_converging_aisles",
+       "why": "A person checks this (Gordium doesn't decide it): Where aisles converge into a single path of egress travel, that path's required capacity is at least the combined required capacity of the converging aisles: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Converging aisles' combined capacity",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.9.3",
+      "piece_title": "Converging aisles"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_9_4_uniform_width_and_capacity",
+     "rule": "general.bc_1030_9_4_uniform_width_and_capacity",
+     "name": "Egress · Uniform aisle width where egress may go either way (BCNYS 1030.9.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The portions of aisles where egress is possible in either of two directions are uniform in minimum width or required capacity: aisles aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The portions of aisles where egress is possible in either of two directions are uniform in minimum width or required capacity: aisles aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.9.4 Uniform width and capacity. Those portions of aisles, where egress is possible in either of two directions, shall be uniform in minimum width or required capacity.",
+        "where": "1030.9.4, 2025 Building Code of New York State (BCNYS), PDF p.355"
+       }
+      ],
+      "citation": "1030.9.4, 2025 Building Code of New York State (BCNYS), PDF p.355",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.9.4",
+      "quote": "1030.9.4 Uniform width and capacity. Those portions of aisles, where egress is possible in either of two directions, shall be uniform in minimum width or required capacity."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_9_4_uniform_width_and_capacity",
+       "words": "A person checks this (Gordium doesn't decide it): The portions of aisles where egress is possible in either of two directions are uniform in minimum width or required capacity: aisles aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_9_4_uniform_width_and_capacity",
+       "why": "A person checks this (Gordium doesn't decide it): The portions of aisles where egress is possible in either of two directions are uniform in minimum width or required capacity: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Uniform aisle width where egress may go either way",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.9.4",
+      "piece_title": "Uniform width and capacity"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_9_5_dead_end_aisles",
+     "rule": "general.bc_1030_9_5_dead_end_aisles",
+     "name": "Egress · Dead-end assembly aisles (BCNYS 1030.9.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Each end of an aisle continues to a cross aisle, foyer, doorway, vomitory, concourse or stairway per 1030.9.7 with access to an exit; but a dead-end aisle may be up to 20 feet long; longer where the seats beyond its first 20 feet are at most 24 seats from another aisle, along a row at least 12 inches clear plus 0.6 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't; one serving fewer than 50 seats and complying with 1030.8; and for smoke-protected or open-air seating, dead-end vertical aisles of 21 rows or fewer, or longer where the rows beyond are at most 40 seats from another aisle, along an aisle accessway at least 12 inches clear plus 0.3 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't: aisles aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Each end of an aisle continues to a cross aisle, foyer, doorway, vomitory, concourse or stairway per 1030.9.7 with access to an exit; but a dead-end aisle may be up to 20 feet long; longer where the seats beyond its first 20 feet are at most 24 seats from another aisle, along a row at least 12 inches clear plus 0.6 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't; one serving fewer than 50 seats and complying with 1030.8; and for smoke-protected or open-air seating, dead-end vertical aisles of 21 rows or fewer, or longer where the rows beyond are at most 40 seats from another aisle, along an aisle accessway at least 12 inches clear plus 0.3 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't: aisles aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.9.5 Dead-end aisles. Each end of an aisle shall be continuous to a cross aisle, foyer, doorway, vomitory, concourse or stair- way in accordance with Section 1030.9.7 having access to an exit. Exceptions: 1. Dead-end aisles not greater than 20 feet (6096 mm) in length. 2. Dead-end aisles longer than 20 feet (6096 mm) where seats beyond the 20-foot (6096 mm) dead-end aisle are not more than 24 seats from another aisle, measured along a row of seats having a minimum clear width of 12 inches (305",
+        "where": "1030.9.5, 2025 Building Code of New York State (BCNYS), PDF p.355"
+       },
+       {
+        "text": "mm) plus 0.6 inch (15.2 mm) for each additional seat above seven in the row where seats have backrests or beyond 10 where seats are without backrests in the row. 3. Dead-end aisles serving fewer than 50 seats and complying with Section 1030.8. 4. For smoke-protected or open-air assembly seating, dead-end vertical aisles of 21 or fewer rows. 5. For smoke-protected or open-air assembly seating, dead-end aisles beyond the 21-row dead-end aisle where such rows are not more than 40 seats from another aisle, measured along a row of seats having an aisle accessway with a minimum clear width of 12 inches (305 mm) plus 0.3 inch (7.6 mm) for each additional seat above seven in the row where seats have backrests or beyond 10 where seats are without backrests in the row.",
+        "where": "1030.9.5, 2025 Building Code of New York State (BCNYS), PDF p.356"
+       }
+      ],
+      "citation": "1030.9.5, 2025 Building Code of New York State (BCNYS), PDF p.355",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.9.5",
+      "quote": "1030.9.5 Dead-end aisles. Each end of an aisle shall be continuous to a cross aisle, foyer, doorway, vomitory, concourse or stair- way in accordance with Section 1030.9.7 having access to an exit. Exceptions: 1. Dead-end aisles not greater than 20 feet (6096 mm) in length. 2. Dead-end aisles longer than 20 feet (6096 mm) where seats beyond the 20-foot (6096 mm) dead-end aisle are not more than 24 seats from another aisle, measured along a row of seats having a minimum clear width of 12 inches (305"
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_9_5_dead_end_aisles",
+       "words": "A person checks this (Gordium doesn't decide it): Each end of an aisle continues to a cross aisle, foyer, doorway, vomitory, concourse or stairway per 1030.9.7 with access to an exit; but a dead-end aisle may be up to 20 feet long; longer where the seats beyond its first 20 feet are at most 24 seats from another aisle, along a row at least 12 inches clear plus 0.6 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't; one serving fewer than 50 seats and complying with 1030.8; and for smoke-protected or open-air seating, dead-end vertical aisles of 21 rows or fewer, or longer where the rows beyond are at most 40 seats from another aisle, along an aisle accessway at least 12 inches clear plus 0.3 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't: aisles aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_9_5_dead_end_aisles",
+       "why": "A person checks this (Gordium doesn't decide it): Each end of an aisle continues to a cross aisle, foyer, doorway, vomitory, concourse or stairway per 1030.9.7 with access to an exit; but a dead-end aisle may be up to 20 feet long; longer where the seats beyond its first 20 feet are at most 24 seats from another aisle, along a row at least 12 inches clear plus 0.6 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't; one serving fewer than 50 seats and complying with 1030.8; and for smoke-protected or open-air seating, dead-end vertical aisles of 21 rows or fewer, or longer where the rows beyond are at most 40 seats from another aisle, along an aisle accessway at least 12 inches clear plus 0.3 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Dead-end assembly aisles",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.9.5",
+      "piece_title": "Dead-end aisles"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_9_6_aisle_measurement",
+     "rule": "general.bc_1030_9_6_aisle_measurement",
+     "name": "Egress · Aisle width measured to walls, seat edges and tread edges (BCNYS 1030.9.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An aisle's clear width is measured to walls, edges of seating and tread edges, but for permitted projections; an aisle beside seating at tables may be measured per 1030.13.1 instead: aisles aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An aisle's clear width is measured to walls, edges of seating and tread edges, but for permitted projections; an aisle beside seating at tables may be measured per 1030.13.1 instead: aisles aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.9.6 Aisle measurement. The clear width for aisles shall be measured to walls, edges of seating and tread edges except for permitted projections. Exception: The clear width of aisles adjacent to seating at tables shall be permitted to be measured in accordance with Section 1030.13.1.",
+        "where": "1030.9.6, 2025 Building Code of New York State (BCNYS), PDF p.356"
+       }
+      ],
+      "citation": "1030.9.6, 2025 Building Code of New York State (BCNYS), PDF p.356",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.9.6",
+      "quote": "1030.9.6 Aisle measurement. The clear width for aisles shall be measured to walls, edges of seating and tread edges except for permitted projections. Exception: The clear width of aisles adjacent to seating at tables shall be permitted to be measured in accordance with Section 1030.13.1."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_9_6_aisle_measurement",
+       "words": "A person checks this (Gordium doesn't decide it): An aisle's clear width is measured to walls, edges of seating and tread edges, but for permitted projections; an aisle beside seating at tables may be measured per 1030.13.1 instead: aisles aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_9_6_aisle_measurement",
+       "why": "A person checks this (Gordium doesn't decide it): An aisle's clear width is measured to walls, edges of seating and tread edges, but for permitted projections; an aisle beside seating at tables may be measured per 1030.13.1 instead: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Aisle width measured to walls, seat edges and tread edges",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.9.6",
+      "piece_title": "Aisle measurement"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_9_6_1_assembly_aisle_obstructions",
+     "rule": "general.bc_1030_9_6_1_assembly_aisle_obstructions",
+     "name": "Egress · No obstructions in assembly aisles (BCNYS 1030.9.6.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Nothing obstructs an aisle's minimum width or required capacity; but handrails may project into the required width of stepped and ramped aisles per 1014.9: aisles aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Nothing obstructs an aisle's minimum width or required capacity; but handrails may project into the required width of stepped and ramped aisles per 1014.9: aisles aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.9.6.1 Assembly aisle obstructions. There shall not be obstructions in the minimum width or required capacity of aisles. Exception: Handrails are permitted to project into the required width of stepped aisles and ramped aisles in accordance with Section 1014.9.",
+        "where": "1030.9.6.1, 2025 Building Code of New York State (BCNYS), PDF p.356"
+       }
+      ],
+      "citation": "1030.9.6.1, 2025 Building Code of New York State (BCNYS), PDF p.356",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.9.6.1",
+      "quote": "1030.9.6.1 Assembly aisle obstructions. There shall not be obstructions in the minimum width or required capacity of aisles. Exception: Handrails are permitted to project into the required width of stepped aisles and ramped aisles in accordance with Section 1014.9."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_9_6_1_assembly_aisle_obstructions",
+       "words": "A person checks this (Gordium doesn't decide it): Nothing obstructs an aisle's minimum width or required capacity; but handrails may project into the required width of stepped and ramped aisles per 1014.9: aisles aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_9_6_1_assembly_aisle_obstructions",
+       "why": "A person checks this (Gordium doesn't decide it): Nothing obstructs an aisle's minimum width or required capacity; but handrails may project into the required width of stepped and ramped aisles per 1014.9: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "No obstructions in assembly aisles",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.9.6.1",
+      "piece_title": "Assembly aisle obstructions"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_9_7_stairways_connecting_to_stepped_aisles",
+     "rule": "general.bc_1030_9_7_stairways_connecting_to_stepped_aisles",
+     "name": "Egress · Stairways from stepped aisles to cross aisles or concourses (BCNYS 1030.9.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A stairway connecting a stepped aisle to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: stepped aisles and their stairways aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A stairway connecting a stepped aisle to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: stepped aisles and their stairways aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.9.7 Stairways connecting to stepped aisles. A stairway that connects a stepped aisle to a cross aisle or concourse shall be permitted to comply with the assembly aisle walking surface requirements of Section 1030.14. Transitions between stairways and stepped aisles shall comply with Section 1030.10.",
+        "where": "1030.9.7, 2025 Building Code of New York State (BCNYS), PDF p.356"
+       }
+      ],
+      "citation": "1030.9.7, 2025 Building Code of New York State (BCNYS), PDF p.356",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.9.7",
+      "quote": "1030.9.7 Stairways connecting to stepped aisles. A stairway that connects a stepped aisle to a cross aisle or concourse shall be permitted to comply with the assembly aisle walking surface requirements of Section 1030.14. Transitions between stairways and stepped aisles shall comply with Section 1030.10."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_9_7_stairways_connecting_to_stepped_aisles",
+       "words": "A person checks this (Gordium doesn't decide it): A stairway connecting a stepped aisle to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: stepped aisles and their stairways aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_9_7_stairways_connecting_to_stepped_aisles",
+       "why": "A person checks this (Gordium doesn't decide it): A stairway connecting a stepped aisle to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: stepped aisles and their stairways aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Stairways from stepped aisles to cross aisles or concourses",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.9.7",
+      "piece_title": "Stairways connecting to stepped aisles"
+     }
+    },
+    {
+     "id": "egress.general.bc_1030_9_8_stairways_connecting_to_vomitories",
+     "rule": "general.bc_1030_9_8_stairways_connecting_to_vomitories",
+     "name": "Egress · Stairways from vomitories to cross aisles or concourses (BCNYS 1030.9.8)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A stairway connecting a vomitory to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: vomitories and their stairways aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A stairway connecting a vomitory to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: vomitories and their stairways aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1030.9.8 Stairways connecting to vomitories. A stairway that connects a vomitory to a cross aisle or concourse shall be permit- ted to comply with the assembly aisle walking surface requirements of Section 1030.14. Transitions between stairways and stepped aisles shall comply with Section 1030.10.",
+        "where": "1030.9.8, 2025 Building Code of New York State (BCNYS), PDF p.356"
+       }
+      ],
+      "citation": "1030.9.8, 2025 Building Code of New York State (BCNYS), PDF p.356",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1030.9.8",
+      "quote": "1030.9.8 Stairways connecting to vomitories. A stairway that connects a vomitory to a cross aisle or concourse shall be permit- ted to comply with the assembly aisle walking surface requirements of Section 1030.14. Transitions between stairways and stepped aisles shall comply with Section 1030.10."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1030_9_8_stairways_connecting_to_vomitories",
+       "words": "A person checks this (Gordium doesn't decide it): A stairway connecting a vomitory to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: vomitories and their stairways aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1030_9_8_stairways_connecting_to_vomitories",
+       "why": "A person checks this (Gordium doesn't decide it): A stairway connecting a vomitory to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: vomitories and their stairways aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Stairways from vomitories to cross aisles or concourses",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1030",
+      "section_title": "Assembly",
+      "piece": "1030.9.8",
+      "piece_title": "Stairways connecting to vomitories"
+     }
+    },
+    {
      "id": "egress.interior#1",
      "rule": null,
      "name": "Interior drawing",
@@ -85574,7 +87365,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 250 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 275 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -86329,6 +88120,31 @@
       "egress.general.bc_1028_5_access_to_public_way",
       "egress.general.bc_1029_2_egress_court_width",
       "egress.general.bc_1029_3_egress_court_construction",
+      "egress.general.bc_1030_1_1_bleachers",
+      "egress.general.bc_1030_1_1_1_spaces_under_grandstands",
+      "egress.general.bc_1030_2_assembly_main_exit",
+      "egress.general.bc_1030_3_assembly_other_exits",
+      "egress.general.bc_1030_4_foyers_and_lobbies",
+      "egress.general.bc_1030_5_balcony_and_gallery_egress",
+      "egress.general.bc_1030_6_1_aisle_capacity_without_smoke_protection",
+      "egress.general.bc_1030_6_2_smoke_protected_aisle_capacity",
+      "egress.general.bc_table_1030_6_2_smoke_protected_aisle_factors",
+      "egress.general.bc_1030_6_2_1_smoke_control",
+      "egress.general.bc_1030_6_2_2_roof_height",
+      "egress.general.bc_1030_6_2_3_smoke_protected_sprinklers",
+      "egress.general.bc_1030_6_3_open_air_aisle_capacity",
+      "egress.general.bc_1030_6_3_1_open_air_sprinklers",
+      "egress.general.bc_1030_8_1_path_through_adjacent_row",
+      "egress.general.bc_1030_9_assembly_aisles_required",
+      "egress.general.bc_1030_9_1_minimum_aisle_width",
+      "egress.general.bc_1030_9_2_aisle_catchment_area",
+      "egress.general.bc_1030_9_3_converging_aisles",
+      "egress.general.bc_1030_9_4_uniform_width_and_capacity",
+      "egress.general.bc_1030_9_5_dead_end_aisles",
+      "egress.general.bc_1030_9_6_aisle_measurement",
+      "egress.general.bc_1030_9_6_1_assembly_aisle_obstructions",
+      "egress.general.bc_1030_9_7_stairways_connecting_to_stepped_aisles",
+      "egress.general.bc_1030_9_8_stairways_connecting_to_vomitories",
       "egress.interior#1"
      ],
      "lines": [
@@ -89779,6 +91595,331 @@
        "name": "Egress · Narrow egress courts' walls rated 1 hour (BCNYS 1029.3)"
       },
       {
+       "key": "review#00b21add1c",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_1_1_bleachers"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Bleachers and grandstands per ICC 300 (BCNYS 1030.1.1): A person checks this (Gordium doesn't decide it): Bleachers, grandstands and folding and telescopic seating that are not building elements comply with ICC 300: such seating isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Bleachers and grandstands per ICC 300 (BCNYS 1030.1.1)"
+      },
+      {
+       "key": "review#f93d32d480",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_1_1_1_spaces_under_grandstands"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Spaces under grandstands separated by 1-hour construction (BCNYS 1030.1.1.1): A person checks this (Gordium doesn't decide it): Spaces under grandstands or bleachers are separated by fire barriers per 707 and horizontal assemblies per 711 of at least 1-hour fire-resistance-rated construction; but not ticket booths under 100 square feet, toilet rooms, or other accessory use areas of 1,000 square feet or less sprinklered per 903.3.1.1: grandstands, bleachers and the spaces under them aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Spaces under grandstands separated by 1-hour construction (BCNYS 1030.1.1.1)"
+      },
+      {
+       "key": "review#ea2d79926e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_2_assembly_main_exit"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · An assembly main exit for at least half the occupants (BCNYS 1030.2): A person checks this (Gordium doesn't decide it): A building, room or space used for assembly purposes with an occupant load over 300 and a main exit: the main exit has capacity for at least half the occupant load, and at least the total required capacity of all the means of egress leading to it; where the building is classified Group A, the main exit fronts at least one street, or an unoccupied space at least 10 feet wide adjoining a street or public way; where there is no well-defined main exit, or there are several, the exits may be distributed around the building's perimeter if their total capacity is at least 100 percent of the required capacity: which exit is the main exit, and its capacity, aren't worked out, so a person's check.",
+       "mark": "?",
+       "name": "Egress · An assembly main exit for at least half the occupants (BCNYS 1030.2)"
+      },
+      {
+       "key": "review#f753e02e58",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_3_assembly_other_exits"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Assembly other exits for at least half of each level's occupants (BCNYS 1030.3): A person checks this (Gordium doesn't decide it): Each level of a building used for assembly purposes with an occupant load over 300 and a main exit has, besides access to the main exit, more means of egress with capacity for at least half the total occupant load that level serves, complying with 1007.1; where there is no well-defined main exit, or there are several, each level's exits may be distributed around the building's perimeter if their total width is at least 100 percent of the required width: the main exit and the other exits' share aren't worked out, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Assembly other exits for at least half of each level's occupants (BCNYS 1030.3)"
+      },
+      {
+       "key": "review#26e9b3993a",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_4_foyers_and_lobbies"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Waiting lobbies in Group A-1 kept out of the egress width (BCNYS 1030.4): A person checks this (Gordium doesn't decide it): In Group A-1, where people are let in while no seats are free, they may wait in a lobby or similar space that doesn't encroach on the minimum width or required capacity of the means of egress; such a foyer, unless every main entrance or exit connects it directly to a public street, has a straight and unobstructed corridor or path of travel to each of them: waiting spaces aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Waiting lobbies in Group A-1 kept out of the egress width (BCNYS 1030.4)"
+      },
+      {
+       "key": "review#9c14105d14",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_5_balcony_and_gallery_egress"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Two exits from balconies and galleries seating 50 or more (BCNYS 1030.5): A person checks this (Gordium doesn't decide it): A balcony, gallery or press box seating 50 or more in a building, room or space used for assembly purposes has at least two means of egress, one from each side: balconies, galleries and press boxes aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Two exits from balconies and galleries seating 50 or more (BCNYS 1030.5)"
+      },
+      {
+       "key": "review#4bccce574d",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_6_1_aisle_capacity_without_smoke_protection"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Assembly aisle capacity without smoke protection (BCNYS 1030.6.1): A person checks this (Gordium doesn't decide it): Aisles serving assembly seating have at least the capacity 1030.6.1 sets where the seating isn't smoke-protected (1030.6.2 sets it where it is, 1030.6.3 where it is open-air): at least 0.3 inch per occupant served on stepped aisles with risers of 7 inches or less and treads of 11 inches or more; at least 0.005 inch more per occupant for each 0.10 inch of riser above 7 inches; at least 0.075 inch more per occupant on the parts of a stepped aisle descent with no handrail within 30 inches horizontally; at least 0.22 inch per occupant on ramped aisles steeper than 1 in 12, and 0.20 inch on level aisles and ramped aisles not that steep: aisles and the occupants they serve aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Assembly aisle capacity without smoke protection (BCNYS 1030.6.1)"
+      },
+      {
+       "key": "review#7ee4ef5697",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_6_2_smoke_protected_aisle_capacity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Aisle capacity for smoke-protected assembly seating (BCNYS 1030.6.2): A person checks this (Gordium doesn't decide it): An aisle for smoke-protected assembly seating has capacity of at least the occupant load it serves times Table 1030.6.2's factor for the total number of seats exposed to the same smoke-protected environment (interpolation between its values permitted), and a facility using the table's reduced widths has a life safety evaluation per NFPA 101: whether seating is smoke-protected, and its aisles, aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Aisle capacity for smoke-protected assembly seating (BCNYS 1030.6.2)"
+      },
+      {
+       "key": "review#6733c49ddf",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_table_1030_6_2_smoke_protected_aisle_factors"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Smoke-protected aisle capacity per seat (BCNYS Table 1030.6.2): A person checks this (Gordium doesn't decide it): Inches of aisle capacity per seat served in smoke-protected assembly seating, by the total number of seats in it: at 5,000 or fewer, 0.200 on stepped aisles with handrails within 30 inches, 0.250 on stepped aisles without, 0.150 on level aisles or ramped aisles not steeper than 1 in 10, and 0.165 on ramped aisles steeper than 1 in 10; at 10,000, 0.130, 0.163, 0.100 and 0.110; at 15,000, 0.096, 0.120, 0.070 and 0.077; at 20,000, 0.076, 0.095, 0.056 and 0.062; at 25,000 or more, 0.060, 0.075, 0.044 and 0.048: aisles and their seats aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Smoke-protected aisle capacity per seat (BCNYS Table 1030.6.2)"
+      },
+      {
+       "key": "review#8f709ed95e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_6_2_1_smoke_control"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Smoke control for smoke-protected assembly seating (BCNYS 1030.6.2.1): A person checks this (Gordium doesn't decide it): Aisles and aisle accessways serving smoke-protected assembly seating have a smoke control system per 909, or natural ventilation designed to keep the smoke level at least 6 feet above the floor of the means of egress: smoke control isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Smoke control for smoke-protected assembly seating (BCNYS 1030.6.2.1)"
+      },
+      {
+       "key": "review#a99e56e386",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_6_2_2_roof_height"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · A roof at least 15 ft above the highest aisle (BCNYS 1030.6.2.2): A person checks this (Gordium doesn't decide it): Where smoke-protected assembly seating has a roof, the lowest portion of the roof deck is at least 15 feet above the highest aisle or aisle accessway; but an outdoor stadium's roof canopy may be lower where nothing is less than 80 inches above the highest aisle or aisle accessway: roofs over seating aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · A roof at least 15 ft above the highest aisle (BCNYS 1030.6.2.2)"
+      },
+      {
+       "key": "review#45e0e2ec33",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_6_2_3_smoke_protected_sprinklers"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Sprinklers where there is smoke-protected seating (BCNYS 1030.6.2.3): A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with smoke-protected assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, nor press boxes and storage facilities under 1,000 square feet: whether seating is smoke-protected isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Sprinklers where there is smoke-protected seating (BCNYS 1030.6.2.3)"
+      },
+      {
+       "key": "review#d474f85fdc",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_6_3_open_air_aisle_capacity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Aisle capacity for open-air assembly seating (BCNYS 1030.6.3): A person checks this (Gordium doesn't decide it): In open-air assembly seating, an aisle has capacity of at least the total occupant load it serves times 0.08 inch where egress is by stepped aisle, and 0.06 inch where it is by level or ramped aisles; or 1030.6.2's capacity for the number of seats where that is less: whether seating is open-air, and its aisles, aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Aisle capacity for open-air assembly seating (BCNYS 1030.6.3)"
+      },
+      {
+       "key": "review#0b142b0c9a",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_6_3_1_open_air_sprinklers"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Sprinklers where there is open-air seating (BCNYS 1030.6.3.1): A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with open-air assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, press boxes and storage facilities under 1,000 square feet, or open-air seating facilities whose seating and means of egress in the seating area are essentially open to the outside: whether seating is open-air isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Sprinklers where there is open-air seating (BCNYS 1030.6.3.1)"
+      },
+      {
+       "key": "review#9b3a8af0e3",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_8_1_path_through_adjacent_row"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · A path through an adjacent row: at most 24 seats between aisles (BCNYS 1030.8.1): A person checks this (Gordium doesn't decide it): Where one of the two paths of travel crosses the aisle through a row of seats to another aisle, there are at most 24 seats between the two aisles, and the row between them is at least 12 inches clear plus 0.6 inch for each seat above seven; for smoke-protected or open-air seating, at most 40 seats, and 12 inches plus 0.3 inch for each additional seat: seats and rows aren't drawn, so a person's check.",
+       "mark": "?",
+       "name": "Egress · A path through an adjacent row: at most 24 seats between aisles (BCNYS 1030.8.1)"
+      },
+      {
+       "key": "review#301a7e41bf",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_9_assembly_aisles_required"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Aisles to the exits from every occupied part of an assembly space (BCNYS 1030.9): A person checks this (Gordium doesn't decide it): Every occupied portion of a building, room or space used for assembly purposes that contains seats, tables, displays, similar fixtures or equipment has aisles leading to exits or exit access doorways as 1030 requires (1030.1: a room or space used for assembly purposes containing seats, tables, displays, equipment or other material complies with 1030): aisles aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Aisles to the exits from every occupied part of an assembly space (BCNYS 1030.9)"
+      },
+      {
+       "key": "review#49a07ff760",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_9_1_minimum_aisle_width"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Assembly aisles' least clear widths (BCNYS 1030.9.1): A person checks this (Gordium doesn't decide it): An aisle's clear width is at least: 48 inches for stepped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats; 36 inches for stepped aisles with seating on one side only, or 23 inches between a stepped aisle handrail and the seating where the aisle serves no more than five rows on one side; 23 inches between a stepped aisle handrail or guard and the seating where a mid-aisle handrail divides the stepped aisle; 42 inches for level or ramped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route; 36 inches for level or ramped aisles with seating on one side only, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route: aisles aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Assembly aisles' least clear widths (BCNYS 1030.9.1)"
+      },
+      {
+       "key": "review#71093cc884",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_9_2_aisle_catchment_area"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Aisle capacity for its catchment area (BCNYS 1030.9.2): A person checks this (Gordium doesn't decide it): An aisle has capacity enough for the people in the catchment area it serves, the portion of the whole space that section of the aisle serves, worked out assuming a balanced use of all the means of egress, the number of people in proportion to egress capacity: aisles aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Aisle capacity for its catchment area (BCNYS 1030.9.2)"
+      },
+      {
+       "key": "review#9ffbc78fa7",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_9_3_converging_aisles"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Converging aisles' combined capacity (BCNYS 1030.9.3): A person checks this (Gordium doesn't decide it): Where aisles converge into a single path of egress travel, that path's required capacity is at least the combined required capacity of the converging aisles: aisles aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Converging aisles' combined capacity (BCNYS 1030.9.3)"
+      },
+      {
+       "key": "review#3afffb2647",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_9_4_uniform_width_and_capacity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Uniform aisle width where egress may go either way (BCNYS 1030.9.4): A person checks this (Gordium doesn't decide it): The portions of aisles where egress is possible in either of two directions are uniform in minimum width or required capacity: aisles aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Uniform aisle width where egress may go either way (BCNYS 1030.9.4)"
+      },
+      {
+       "key": "review#8b1365576e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_9_5_dead_end_aisles"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Dead-end assembly aisles (BCNYS 1030.9.5): A person checks this (Gordium doesn't decide it): Each end of an aisle continues to a cross aisle, foyer, doorway, vomitory, concourse or stairway per 1030.9.7 with access to an exit; but a dead-end aisle may be up to 20 feet long; longer where the seats beyond its first 20 feet are at most 24 seats from another aisle, along a row at least 12 inches clear plus 0.6 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't; one serving fewer than 50 seats and complying with 1030.8; and for smoke-protected or open-air seating, dead-end vertical aisles of 21 rows or fewer, or longer where the rows beyond are at most 40 seats from another aisle, along an aisle accessway at least 12 inches clear plus 0.3 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't: aisles aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Dead-end assembly aisles (BCNYS 1030.9.5)"
+      },
+      {
+       "key": "review#74f9344891",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_9_6_aisle_measurement"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Aisle width measured to walls, seat edges and tread edges (BCNYS 1030.9.6): A person checks this (Gordium doesn't decide it): An aisle's clear width is measured to walls, edges of seating and tread edges, but for permitted projections; an aisle beside seating at tables may be measured per 1030.13.1 instead: aisles aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Aisle width measured to walls, seat edges and tread edges (BCNYS 1030.9.6)"
+      },
+      {
+       "key": "review#577e31fecd",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_9_6_1_assembly_aisle_obstructions"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · No obstructions in assembly aisles (BCNYS 1030.9.6.1): A person checks this (Gordium doesn't decide it): Nothing obstructs an aisle's minimum width or required capacity; but handrails may project into the required width of stepped and ramped aisles per 1014.9: aisles aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · No obstructions in assembly aisles (BCNYS 1030.9.6.1)"
+      },
+      {
+       "key": "review#a21ebecd7a",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_9_7_stairways_connecting_to_stepped_aisles"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Stairways from stepped aisles to cross aisles or concourses (BCNYS 1030.9.7): A person checks this (Gordium doesn't decide it): A stairway connecting a stepped aisle to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: stepped aisles and their stairways aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Stairways from stepped aisles to cross aisles or concourses (BCNYS 1030.9.7)"
+      },
+      {
+       "key": "review#a8af9f36b1",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1030_9_8_stairways_connecting_to_vomitories"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Stairways from vomitories to cross aisles or concourses (BCNYS 1030.9.8): A person checks this (Gordium doesn't decide it): A stairway connecting a vomitory to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: vomitories and their stairways aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Stairways from vomitories to cross aisles or concourses (BCNYS 1030.9.8)"
+      },
+      {
        "key": "review#3b8d16e054",
        "tier": "review",
        "items": [
@@ -89792,7 +91933,7 @@
        "name": "Interior drawing"
       }
      ],
-     "count": 250,
+     "count": 275,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -92419,6 +94560,256 @@
         "egress.general.bc_1029_3_egress_court_construction"
        ],
        "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_1_1_bleachers",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Bleachers, grandstands and folding and telescopic seating that are not building elements comply with ICC 300: such seating isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_1_1_bleachers"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_1_1_1_spaces_under_grandstands",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Spaces under grandstands or bleachers are separated by fire barriers per 707 and horizontal assemblies per 711 of at least 1-hour fire-resistance-rated construction; but not ticket booths under 100 square feet, toilet rooms, or other accessory use areas of 1,000 square feet or less sprinklered per 903.3.1.1: grandstands, bleachers and the spaces under them aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_1_1_1_spaces_under_grandstands"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_2_assembly_main_exit",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A building, room or space used for assembly purposes with an occupant load over 300 and a main exit: the main exit has capacity for at least half the occupant load, and at least the total required capacity of all the means of egress leading to it; where the building is classified Group A, the main exit fronts at least one street, or an unoccupied space at least 10 feet wide adjoining a street or public way; where there is no well-defined main exit, or there are several, the exits may be distributed around the building's perimeter if their total capacity is at least 100 percent of the required capacity: which exit is the main exit, and its capacity, aren't worked out, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_2_assembly_main_exit"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_3_assembly_other_exits",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Each level of a building used for assembly purposes with an occupant load over 300 and a main exit has, besides access to the main exit, more means of egress with capacity for at least half the total occupant load that level serves, complying with 1007.1; where there is no well-defined main exit, or there are several, each level's exits may be distributed around the building's perimeter if their total width is at least 100 percent of the required width: the main exit and the other exits' share aren't worked out, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_3_assembly_other_exits"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_4_foyers_and_lobbies",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): In Group A-1, where people are let in while no seats are free, they may wait in a lobby or similar space that doesn't encroach on the minimum width or required capacity of the means of egress; such a foyer, unless every main entrance or exit connects it directly to a public street, has a straight and unobstructed corridor or path of travel to each of them: waiting spaces aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_4_foyers_and_lobbies"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_5_balcony_and_gallery_egress",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A balcony, gallery or press box seating 50 or more in a building, room or space used for assembly purposes has at least two means of egress, one from each side: balconies, galleries and press boxes aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_5_balcony_and_gallery_egress"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_6_1_aisle_capacity_without_smoke_protection",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Aisles serving assembly seating have at least the capacity 1030.6.1 sets where the seating isn't smoke-protected (1030.6.2 sets it where it is, 1030.6.3 where it is open-air): at least 0.3 inch per occupant served on stepped aisles with risers of 7 inches or less and treads of 11 inches or more; at least 0.005 inch more per occupant for each 0.10 inch of riser above 7 inches; at least 0.075 inch more per occupant on the parts of a stepped aisle descent with no handrail within 30 inches horizontally; at least 0.22 inch per occupant on ramped aisles steeper than 1 in 12, and 0.20 inch on level aisles and ramped aisles not that steep: aisles and the occupants they serve aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_6_1_aisle_capacity_without_smoke_protection"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_6_2_smoke_protected_aisle_capacity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An aisle for smoke-protected assembly seating has capacity of at least the occupant load it serves times Table 1030.6.2's factor for the total number of seats exposed to the same smoke-protected environment (interpolation between its values permitted), and a facility using the table's reduced widths has a life safety evaluation per NFPA 101: whether seating is smoke-protected, and its aisles, aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_6_2_smoke_protected_aisle_capacity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_table_1030_6_2_smoke_protected_aisle_factors",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Inches of aisle capacity per seat served in smoke-protected assembly seating, by the total number of seats in it: at 5,000 or fewer, 0.200 on stepped aisles with handrails within 30 inches, 0.250 on stepped aisles without, 0.150 on level aisles or ramped aisles not steeper than 1 in 10, and 0.165 on ramped aisles steeper than 1 in 10; at 10,000, 0.130, 0.163, 0.100 and 0.110; at 15,000, 0.096, 0.120, 0.070 and 0.077; at 20,000, 0.076, 0.095, 0.056 and 0.062; at 25,000 or more, 0.060, 0.075, 0.044 and 0.048: aisles and their seats aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_table_1030_6_2_smoke_protected_aisle_factors"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_6_2_1_smoke_control",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Aisles and aisle accessways serving smoke-protected assembly seating have a smoke control system per 909, or natural ventilation designed to keep the smoke level at least 6 feet above the floor of the means of egress: smoke control isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_6_2_1_smoke_control"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_6_2_2_roof_height",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Where smoke-protected assembly seating has a roof, the lowest portion of the roof deck is at least 15 feet above the highest aisle or aisle accessway; but an outdoor stadium's roof canopy may be lower where nothing is less than 80 inches above the highest aisle or aisle accessway: roofs over seating aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_6_2_2_roof_height"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_6_2_3_smoke_protected_sprinklers",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with smoke-protected assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, nor press boxes and storage facilities under 1,000 square feet: whether seating is smoke-protected isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_6_2_3_smoke_protected_sprinklers"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_6_3_open_air_aisle_capacity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): In open-air assembly seating, an aisle has capacity of at least the total occupant load it serves times 0.08 inch where egress is by stepped aisle, and 0.06 inch where it is by level or ramped aisles; or 1030.6.2's capacity for the number of seats where that is less: whether seating is open-air, and its aisles, aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_6_3_open_air_aisle_capacity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_6_3_1_open_air_sprinklers",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Enclosed areas with walls and ceilings in buildings or structures with open-air assembly seating are protected by an approved automatic sprinkler system per 903.3.1.1; but not the floor area used for contests, performances or entertainment where the roof construction is more than 50 feet above the floor and the use is restricted to low fire hazard uses, press boxes and storage facilities under 1,000 square feet, or open-air seating facilities whose seating and means of egress in the seating area are essentially open to the outside: whether seating is open-air isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_6_3_1_open_air_sprinklers"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_8_1_path_through_adjacent_row",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Where one of the two paths of travel crosses the aisle through a row of seats to another aisle, there are at most 24 seats between the two aisles, and the row between them is at least 12 inches clear plus 0.6 inch for each seat above seven; for smoke-protected or open-air seating, at most 40 seats, and 12 inches plus 0.3 inch for each additional seat: seats and rows aren't drawn, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_8_1_path_through_adjacent_row"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_9_assembly_aisles_required",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Every occupied portion of a building, room or space used for assembly purposes that contains seats, tables, displays, similar fixtures or equipment has aisles leading to exits or exit access doorways as 1030 requires (1030.1: a room or space used for assembly purposes containing seats, tables, displays, equipment or other material complies with 1030): aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_9_assembly_aisles_required"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_9_1_minimum_aisle_width",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An aisle's clear width is at least: 48 inches for stepped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats; 36 inches for stepped aisles with seating on one side only, or 23 inches between a stepped aisle handrail and the seating where the aisle serves no more than five rows on one side; 23 inches between a stepped aisle handrail or guard and the seating where a mid-aisle handrail divides the stepped aisle; 42 inches for level or ramped aisles with seating on both sides, or 36 inches where they serve fewer than 50 seats, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route; 36 inches for level or ramped aisles with seating on one side only, or 30 inches where they serve fewer than 15 seats and aren't part of an accessible route: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_9_1_minimum_aisle_width"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_9_2_aisle_catchment_area",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An aisle has capacity enough for the people in the catchment area it serves, the portion of the whole space that section of the aisle serves, worked out assuming a balanced use of all the means of egress, the number of people in proportion to egress capacity: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_9_2_aisle_catchment_area"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_9_3_converging_aisles",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Where aisles converge into a single path of egress travel, that path's required capacity is at least the combined required capacity of the converging aisles: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_9_3_converging_aisles"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_9_4_uniform_width_and_capacity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The portions of aisles where egress is possible in either of two directions are uniform in minimum width or required capacity: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_9_4_uniform_width_and_capacity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_9_5_dead_end_aisles",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Each end of an aisle continues to a cross aisle, foyer, doorway, vomitory, concourse or stairway per 1030.9.7 with access to an exit; but a dead-end aisle may be up to 20 feet long; longer where the seats beyond its first 20 feet are at most 24 seats from another aisle, along a row at least 12 inches clear plus 0.6 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't; one serving fewer than 50 seats and complying with 1030.8; and for smoke-protected or open-air seating, dead-end vertical aisles of 21 rows or fewer, or longer where the rows beyond are at most 40 seats from another aisle, along an aisle accessway at least 12 inches clear plus 0.3 inch for each seat above seven where the seats have backrests, or beyond 10 where they don't: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_9_5_dead_end_aisles"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_9_6_aisle_measurement",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An aisle's clear width is measured to walls, edges of seating and tread edges, but for permitted projections; an aisle beside seating at tables may be measured per 1030.13.1 instead: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_9_6_aisle_measurement"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_9_6_1_assembly_aisle_obstructions",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Nothing obstructs an aisle's minimum width or required capacity; but handrails may project into the required width of stepped and ramped aisles per 1014.9: aisles aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_9_6_1_assembly_aisle_obstructions"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_9_7_stairways_connecting_to_stepped_aisles",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A stairway connecting a stepped aisle to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: stepped aisles and their stairways aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_9_7_stairways_connecting_to_stepped_aisles"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1030_9_8_stairways_connecting_to_vomitories",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A stairway connecting a vomitory to a cross aisle or concourse may meet 1030.14's assembly aisle walking surface requirements, and the transitions between such stairways and stepped aisles comply with 1030.10: vomitories and their stairways aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1030_9_8_stairways_connecting_to_vomitories"
+       ],
+       "rules": 1
       }
      ]
     },
@@ -92772,7 +95163,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "250 to review · 30 comply"
+     "summary": "275 to review · 30 comply"
     }
    ],
    "contents": [
@@ -105039,7 +107430,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 230
+          "not_for_checking": 234
          },
          "pieces": [
           {
@@ -105211,6 +107602,12 @@
            "rules": []
           },
           {
+           "id": "202:bleachers",
+           "title": "BLEACHERS",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:boiling_point",
            "title": "BOILING POINT",
            "coverage": "not_for_checking",
@@ -105249,6 +107646,12 @@
           {
            "id": "202:building_official",
            "title": "BUILDING OFFICIAL",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:canopy",
+           "title": "CANOPY",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -105649,6 +108052,12 @@
            "rules": []
           },
           {
+           "id": "202:folding_and_telescopic_seating",
+           "title": "FOLDING AND TELESCOPIC SEATING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:gaming",
            "title": "GAMING",
            "coverage": "not_for_checking",
@@ -105675,6 +108084,12 @@
           {
            "id": "202:grade_plane_story_above",
            "title": "GRADE PLANE, STORY ABOVE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:grandstand",
+           "title": "GRANDSTAND",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -110155,10 +112570,122 @@
          "coverage": "flag",
          "whole": false,
          "counts": {
-          "flag": 1,
-          "not_for_checking": 1
+          "flag": 26,
+          "not_for_checking": 3
          },
          "pieces": [
+          {
+           "id": "1030.1.1",
+           "title": "Bleachers",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_1_1_bleachers"
+           ]
+          },
+          {
+           "id": "1030.1.1.1",
+           "title": "Spaces under grandstands and bleachers",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_1_1_1_spaces_under_grandstands"
+           ]
+          },
+          {
+           "id": "1030.2",
+           "title": "Assembly main exit",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_2_assembly_main_exit"
+           ]
+          },
+          {
+           "id": "1030.3",
+           "title": "Assembly other exits",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_3_assembly_other_exits"
+           ]
+          },
+          {
+           "id": "1030.4",
+           "title": "Foyers and lobbies",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_4_foyers_and_lobbies"
+           ]
+          },
+          {
+           "id": "1030.5",
+           "title": "Interior balcony and gallery means of egress",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_5_balcony_and_gallery_egress"
+           ]
+          },
+          {
+           "id": "1030.6.1",
+           "title": "Without smoke protection",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_6_1_aisle_capacity_without_smoke_protection"
+           ]
+          },
+          {
+           "id": "1030.6.2",
+           "title": "Smoke-protected assembly seating",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_6_2_smoke_protected_aisle_capacity"
+           ]
+          },
+          {
+           "id": "Table 1030.6.2",
+           "title": "CAPACITY FOR AISLES FOR SMOKE-PROTECTED ASSEMBLY",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_table_1030_6_2_smoke_protected_aisle_factors"
+           ]
+          },
+          {
+           "id": "1030.6.2.1",
+           "title": "Smoke control",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_6_2_1_smoke_control"
+           ]
+          },
+          {
+           "id": "1030.6.2.2",
+           "title": "Roof height",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_6_2_2_roof_height"
+           ]
+          },
+          {
+           "id": "1030.6.2.3",
+           "title": "Automatic sprinklers",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_6_2_3_smoke_protected_sprinklers"
+           ]
+          },
+          {
+           "id": "1030.6.3",
+           "title": "Open-air assembly seating",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_6_3_open_air_aisle_capacity"
+           ]
+          },
+          {
+           "id": "1030.6.3.1",
+           "title": "Automatic sprinklers",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_6_3_1_open_air_sprinklers"
+           ]
+          },
           {
            "id": "1030.8",
            "title": "Common path of egress travel",
@@ -110166,6 +112693,106 @@
            "rules": [
             "general.bc_1030_8_fixed_seating_common_path"
            ]
+          },
+          {
+           "id": "1030.8.1",
+           "title": "Path through adjacent row",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_8_1_path_through_adjacent_row"
+           ]
+          },
+          {
+           "id": "1030.9",
+           "title": "Assembly aisles are required",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_9_assembly_aisles_required"
+           ]
+          },
+          {
+           "id": "1030.9.1",
+           "title": "Minimum aisle width",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_9_1_minimum_aisle_width"
+           ]
+          },
+          {
+           "id": "1030.9.2",
+           "title": "Aisle catchment area",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_9_2_aisle_catchment_area"
+           ]
+          },
+          {
+           "id": "1030.9.3",
+           "title": "Converging aisles",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_9_3_converging_aisles"
+           ]
+          },
+          {
+           "id": "1030.9.4",
+           "title": "Uniform width and capacity",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_9_4_uniform_width_and_capacity"
+           ]
+          },
+          {
+           "id": "1030.9.5",
+           "title": "Dead-end aisles",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_9_5_dead_end_aisles"
+           ]
+          },
+          {
+           "id": "1030.9.6",
+           "title": "Aisle measurement",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_9_6_aisle_measurement"
+           ]
+          },
+          {
+           "id": "1030.9.6.1",
+           "title": "Assembly aisle obstructions",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_9_6_1_assembly_aisle_obstructions"
+           ]
+          },
+          {
+           "id": "1030.9.7",
+           "title": "Stairways connecting to stepped aisles",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_9_7_stairways_connecting_to_stepped_aisles"
+           ]
+          },
+          {
+           "id": "1030.9.8",
+           "title": "Stairways connecting to vomitories",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1030_9_8_stairways_connecting_to_vomitories"
+           ]
+          },
+          {
+           "id": "1030.1",
+           "title": "General",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1030.6",
+           "title": "Capacity of aisle for assembly",
+           "coverage": "not_for_checking",
+           "rules": []
           },
           {
            "id": "1030.7",
@@ -114384,6 +117011,31 @@
    "egress.general.bc_1028_5_access_to_public_way": "needs_review",
    "egress.general.bc_1029_2_egress_court_width": "needs_review",
    "egress.general.bc_1029_3_egress_court_construction": "needs_review",
+   "egress.general.bc_1030_1_1_bleachers": "needs_review",
+   "egress.general.bc_1030_1_1_1_spaces_under_grandstands": "needs_review",
+   "egress.general.bc_1030_2_assembly_main_exit": "needs_review",
+   "egress.general.bc_1030_3_assembly_other_exits": "needs_review",
+   "egress.general.bc_1030_4_foyers_and_lobbies": "needs_review",
+   "egress.general.bc_1030_5_balcony_and_gallery_egress": "needs_review",
+   "egress.general.bc_1030_6_1_aisle_capacity_without_smoke_protection": "needs_review",
+   "egress.general.bc_1030_6_2_smoke_protected_aisle_capacity": "needs_review",
+   "egress.general.bc_table_1030_6_2_smoke_protected_aisle_factors": "needs_review",
+   "egress.general.bc_1030_6_2_1_smoke_control": "needs_review",
+   "egress.general.bc_1030_6_2_2_roof_height": "needs_review",
+   "egress.general.bc_1030_6_2_3_smoke_protected_sprinklers": "needs_review",
+   "egress.general.bc_1030_6_3_open_air_aisle_capacity": "needs_review",
+   "egress.general.bc_1030_6_3_1_open_air_sprinklers": "needs_review",
+   "egress.general.bc_1030_8_1_path_through_adjacent_row": "needs_review",
+   "egress.general.bc_1030_9_assembly_aisles_required": "needs_review",
+   "egress.general.bc_1030_9_1_minimum_aisle_width": "needs_review",
+   "egress.general.bc_1030_9_2_aisle_catchment_area": "needs_review",
+   "egress.general.bc_1030_9_3_converging_aisles": "needs_review",
+   "egress.general.bc_1030_9_4_uniform_width_and_capacity": "needs_review",
+   "egress.general.bc_1030_9_5_dead_end_aisles": "needs_review",
+   "egress.general.bc_1030_9_6_aisle_measurement": "needs_review",
+   "egress.general.bc_1030_9_6_1_assembly_aisle_obstructions": "needs_review",
+   "egress.general.bc_1030_9_7_stairways_connecting_to_stepped_aisles": "needs_review",
+   "egress.general.bc_1030_9_8_stairways_connecting_to_vomitories": "needs_review",
    "egress.interior#1": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
@@ -114429,7 +117081,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "250 to review · 30 comply"
+    "summary": "275 to review · 30 comply"
    }
   ],
   "egress": {
@@ -119915,7 +122567,32 @@
     "general.bc_1028_4_exit_discharge_components": "needs_review",
     "general.bc_1028_5_access_to_public_way": "needs_review",
     "general.bc_1029_2_egress_court_width": "needs_review",
-    "general.bc_1029_3_egress_court_construction": "needs_review"
+    "general.bc_1029_3_egress_court_construction": "needs_review",
+    "general.bc_1030_1_1_bleachers": "needs_review",
+    "general.bc_1030_1_1_1_spaces_under_grandstands": "needs_review",
+    "general.bc_1030_2_assembly_main_exit": "needs_review",
+    "general.bc_1030_3_assembly_other_exits": "needs_review",
+    "general.bc_1030_4_foyers_and_lobbies": "needs_review",
+    "general.bc_1030_5_balcony_and_gallery_egress": "needs_review",
+    "general.bc_1030_6_1_aisle_capacity_without_smoke_protection": "needs_review",
+    "general.bc_1030_6_2_smoke_protected_aisle_capacity": "needs_review",
+    "general.bc_table_1030_6_2_smoke_protected_aisle_factors": "needs_review",
+    "general.bc_1030_6_2_1_smoke_control": "needs_review",
+    "general.bc_1030_6_2_2_roof_height": "needs_review",
+    "general.bc_1030_6_2_3_smoke_protected_sprinklers": "needs_review",
+    "general.bc_1030_6_3_open_air_aisle_capacity": "needs_review",
+    "general.bc_1030_6_3_1_open_air_sprinklers": "needs_review",
+    "general.bc_1030_8_1_path_through_adjacent_row": "needs_review",
+    "general.bc_1030_9_assembly_aisles_required": "needs_review",
+    "general.bc_1030_9_1_minimum_aisle_width": "needs_review",
+    "general.bc_1030_9_2_aisle_catchment_area": "needs_review",
+    "general.bc_1030_9_3_converging_aisles": "needs_review",
+    "general.bc_1030_9_4_uniform_width_and_capacity": "needs_review",
+    "general.bc_1030_9_5_dead_end_aisles": "needs_review",
+    "general.bc_1030_9_6_aisle_measurement": "needs_review",
+    "general.bc_1030_9_6_1_assembly_aisle_obstructions": "needs_review",
+    "general.bc_1030_9_7_stairways_connecting_to_stepped_aisles": "needs_review",
+    "general.bc_1030_9_8_stairways_connecting_to_vomitories": "needs_review"
    },
    "interior": {
     "parts": {
@@ -123843,9 +126520,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "79eb2e999263caeb1567fa0535c4b222754aedc287b2c6234d868718819f29c4",
+  "worker_fingerprint": "b5a7405e762db58f376e3f9ab0e1229d5c3d40ceb909cdb59536205fc56139a9",
   "rulebook": {
-   "new_york/ithaca_city": "adaca86df42ffd12faf097f717efde8f218d61a697760933c88f00b36956c8dc"
+   "new_york/ithaca_city": "3aa50a21620b96424bc388a3b04a1bb06c8c51b3fa5a395301fcf3e3d522f772"
   }
  }
 }

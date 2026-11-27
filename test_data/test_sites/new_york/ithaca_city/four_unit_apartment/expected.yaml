@@ -347,6 +347,32 @@ results:
   general.bc_1028_5_access_to_public_way: needs_review
   general.bc_1029_2_egress_court_width: needs_review
   general.bc_1029_3_egress_court_construction: needs_review
+  # section group 9h: Section 1030's assembly flags (1030.1 to 1030.9 and Table 1030.6.2), each a person's check: the rooms are residential, but a description may hold only some floors, so a room used for assembly purposes isn't ruled out until the building states none (1030.4's is for Group A-1 only)
+  general.bc_1030_1_1_bleachers: needs_review
+  general.bc_1030_1_1_1_spaces_under_grandstands: needs_review
+  general.bc_1030_2_assembly_main_exit: needs_review
+  general.bc_1030_3_assembly_other_exits: needs_review
+  general.bc_1030_4_foyers_and_lobbies: not_applicable   # Group R-2, not A-1
+  general.bc_1030_5_balcony_and_gallery_egress: needs_review
+  general.bc_1030_6_1_aisle_capacity_without_smoke_protection: needs_review
+  general.bc_1030_6_2_smoke_protected_aisle_capacity: needs_review
+  general.bc_table_1030_6_2_smoke_protected_aisle_factors: needs_review
+  general.bc_1030_6_2_1_smoke_control: needs_review
+  general.bc_1030_6_2_2_roof_height: needs_review
+  general.bc_1030_6_2_3_smoke_protected_sprinklers: needs_review
+  general.bc_1030_6_3_open_air_aisle_capacity: needs_review
+  general.bc_1030_6_3_1_open_air_sprinklers: needs_review
+  general.bc_1030_8_1_path_through_adjacent_row: needs_review
+  general.bc_1030_9_assembly_aisles_required: needs_review
+  general.bc_1030_9_1_minimum_aisle_width: needs_review
+  general.bc_1030_9_2_aisle_catchment_area: needs_review
+  general.bc_1030_9_3_converging_aisles: needs_review
+  general.bc_1030_9_4_uniform_width_and_capacity: needs_review
+  general.bc_1030_9_5_dead_end_aisles: needs_review
+  general.bc_1030_9_6_aisle_measurement: needs_review
+  general.bc_1030_9_6_1_assembly_aisle_obstructions: needs_review
+  general.bc_1030_9_7_stairways_connecting_to_stepped_aisles: needs_review
+  general.bc_1030_9_8_stairways_connecting_to_vomitories: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

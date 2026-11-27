@@ -470,6 +470,7 @@ HANDLERS = {
     "420.6.1": ("general.bc_1026_4_1_refuge_area_capacity", "420.6.1"),
     "422.3.2": ("general.bc_1026_4_1_refuge_area_capacity", "422.3.2"),
     # section group 9h (707, 711, 903.3.1.1 and 1007.1 handled above or brought in; 1030.x within Section 1030)
+    "1007.1": ("general.bc_1030_3_assembly_other_exits", "1007.1"),
     "1030.6.1": ("general.bc_1030_6_1_aisle_capacity_without_smoke_protection", "1030.6.1"),
     "1030.6.2": ("general.bc_1030_6_2_smoke_protected_aisle_capacity", "1030.6.2"),
     "1030.6.3": ("general.bc_1030_6_3_open_air_aisle_capacity", "1030.6.3"),
