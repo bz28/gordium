@@ -549,3 +549,16 @@ def test_a_misspelled_fact_is_told_every_fact_gordium_reads_marked_or_not():
             continue
         why = code_scope.decide({"use": "one_family_detached"}, {key + "x": True})["why"]
         assert code_scope.fact_words(key) in why, (key, why)
+
+
+def test_a_room_with_fixed_seats_makes_fixed_seating_yes_whatever_is_stated():
+    """Review round 1 of section group 9h (P0): a room stating Table 1004.5's "Assembly with fixed seats" (p.312, line
+    22) has fixed seating; a stated no beside it hid 1030.8's and 1030.8.1's checks for that very room. The room's yes
+    wins; rooms of other functions leave the statement as it is."""
+    for stated in ({}, {"assembly_fixed_seating": False}, {"assembly_fixed_seating": True}):
+        assert code_scope.building_measures(stated, _rooms("residential", "assembly_fixed_seats"))[
+            "assembly_fixed_seating"] is True, stated
+    assert code_scope.building_measures({"assembly_fixed_seating": False}, _rooms("assembly_concentrated", "business"))[
+        "assembly_fixed_seating"] is False
+    assert "assembly_fixed_seating" not in code_scope.building_measures({}, _rooms("assembly_concentrated"))
+

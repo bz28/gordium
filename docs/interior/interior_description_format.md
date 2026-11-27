@@ -201,7 +201,8 @@ building:
   sprinkler_system: none               # none, nfpa_13 (903.3.1.1), nfpa_13r (903.3.1.2), nfpa_13d (903.3.1.3)
   egress_balcony_increase_taken: false # BCNYS 1017.2.1 (a fact the Building Code's flags read)
   building_has_atrium: false
-  assembly_fixed_seating: false        # rooms used for assembly with fixed seating (BCNYS Table 1006.2.1 note c)
+  assembly_fixed_seating: false        # rooms used for assembly with fixed seating (BCNYS Table 1006.2.1 note c);
+                                       # true whatever is stated where a room states assembly_fixed_seats
   r2_sleeping_units: false             # every Group R-2 unit a sleeping unit (true) or a dwelling unit (false); left out
                                        # for a building of both (Table 1006.3.4(1) note b: neither table fits every story)
   emergency_escape_openings_1031: true # emergency escape and rescue openings per BCNYS 1031 (Table 1006.3.4 note a)

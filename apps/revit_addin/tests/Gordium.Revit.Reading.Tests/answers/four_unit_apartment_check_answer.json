@@ -126520,9 +126520,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "b5a7405e762db58f376e3f9ab0e1229d5c3d40ceb909cdb59536205fc56139a9",
+  "worker_fingerprint": "e1037310590eb510b40372942d7e513b884c257b835b7a903e8298e3290a66e3",
   "rulebook": {
-   "new_york/ithaca_city": "3aa50a21620b96424bc388a3b04a1bb06c8c51b3fa5a395301fcf3e3d522f772"
+   "new_york/ithaca_city": "efedf2d8be80b6acb7e38ee8e2e31d7cf0d26f21954652b7a09dc047673dc7f4"
   }
  }
 }
