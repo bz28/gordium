@@ -331,6 +331,12 @@ public sealed class GroundTests
         var kept = read.Evidence[FakeHouse.Uid("d1")]!.AsObject();
         Assert.Equal(21, kept["ground"]!["samples"]!.AsArray().Count);
         Assert.NotNull(kept["placed"]);
+        // the ground not stated (nor shown) finished: the door says so first, never its clear height (review round 3)
+        house.FinishedGround(null);
+        read = InteriorReader.Read(house.Model());
+        Assert.StartsWith("Gordium: Toposolid is finished ground isn't Yes on Project Information", Why(read, "d2"));
+        Assert.StartsWith("Gordium: Toposolid is finished ground isn't Yes on Project Information", Why(read, "d1"));
+        Assert.Null(Opening(read, "d1")["clear_bottom_between"]);
         // no ground drawn: no bounds either (nothing changes)
         house.Grounds = null;
         Assert.Null(Opening(InteriorReader.Read(house.Model()), "d1")["clear_bottom_between"]);

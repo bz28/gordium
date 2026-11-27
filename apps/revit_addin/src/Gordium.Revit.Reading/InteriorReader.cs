@@ -817,9 +817,10 @@ public static class InteriorReader
         // (DoorBottom: its threshold isn't drawn); without them its ground could only unsettle its Below grade mark
         if (ground is { } g && rec is not null)
         {
-            string? why = null;
+            string? why = g.Set.Why;
             JsonArray? between = null;
-            if (o.Kind == MarkedKind.Door && (between = DoorBottom(model, e, rec, out why)) is null)
+            // the ground's own reason first (not stated, nor shown, finished: review round 3), then a door's bounds
+            if (why is not null || (o.Kind == MarkedKind.Door && (between = DoorBottom(model, e, rec, out why)) is null))
             {
                 if (o.Escape is true)
                     Out("ground_outside", why!);
