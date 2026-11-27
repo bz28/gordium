@@ -5400,7 +5400,7 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Vehicle ramps not exits without pedestrian facilities: not in the model, so a person''s check where the building
-      may be Group S-2, as public parking garages are (general.bc_406_4_3_vehicle_ramps).'
+      may be Group S-2 (public parking garages) or U (a private garage may follow 406.4) (general.bc_406_4_3_vehicle_ramps).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 95
@@ -5418,7 +5418,7 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'An open parking garage''s egress, or two exit stairways: not in the model, so a person''s check where the building
-      may be Group S-2, as public parking garages are (general.bc_406_5_7_open_parking_garage_egress).'
+      may be Group S-2 (public parking garages) or U (a private garage may follow 406.4) (general.bc_406_5_7_open_parking_garage_egress).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 96

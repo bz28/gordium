@@ -109,9 +109,10 @@ GROUP_GATED = {"407": ["I-2"], "408": ["I-3"],
                "420.1": ["I-1", "R-1", "R-2", "R-3", "R-4"], "420.2": ["I-1", "R-1", "R-2", "R-3", "R-4"],
                "420.3": ["I-1", "R-1", "R-2", "R-3", "R-4"], "420.6": ["I-1"], "420.7": ["I-1"], "420.8": ["I-1"],
                "420.9": ["I-1"],
-               # part f: public parking garages are Group S-2 (311.3); a service corridor is within a Group H-5
-               # occupancy (415.11.3); HPM rooms are H-2, H-3 or H-4 serving an H-5, liquid storage rooms H-3 (202)
-               "406.4.3": ["S-2"], "406.5.7": ["S-2"], "415.11.6": ["H-2", "H-3", "H-4", "H-5"]}
+               # part f: public parking garages are Group S-2 (311.3), and a private garage, Group U (406.3.1), may
+               # comply with 406.4 in place of 406.3, an open one then with 406.5 (406.3, p.94, lines 49-50; review
+               # round 1); HPM rooms are H-2, H-3 or H-4 serving an H-5, liquid storage rooms H-3 (202)
+               "406.4.3": ["S-2", "U"], "406.5.7": ["S-2", "U"], "415.11.6": ["H-2", "H-3", "H-4", "H-5"]}
 # pieces a rule outside the Chapter 4 block already checks (Chapter 10's review round 1 brought them in alone)
 CHECKED_BEFORE = {"407.4.2": "general.bc_407_4_2_sleeping_room_travel"}
 
@@ -902,6 +903,7 @@ def test_no_rule_passes_short_of_part_fs_limits_where_they_may_apply(ctx, rules,
 
 
 PART_F_BANDS = {"general.bc_table_1017_2_h5": "415.11.3.3", "general.bc_table_1006_3_4_2__h_i_r": "415.11.3.3",
+                "general.bc_1020_3_corridor_capacity": "415.11.3.4",
                 "general.bc_table_1020_3_corridor_width": "415.11.3.4",
                 "general.bc_1020_5_dead_end_other_groups": "415.11.3.3", "general.bc_table_1006_2_1_u": "412.4.2",
                 "general.bc_table_1006_2_1_r2": "410.5.3.3", "general.bc_table_1006_2_1_r3_r4": "410.5.3.3"}
@@ -923,3 +925,25 @@ def test_each_part_f_band_is_shown_by_an_example_it_decides_and_quotes_its_secti
         assert parts.worked_example(rule, ex, allowed)[0] == "needs_review", (rid, ex["note"][:60])
         assert parts.worked_example(bare, ex, allowed)[0] == "pass", (rid, ex["note"][:60])
     assert any(src["quote"].startswith(("[F] " + section + " ", "[BE] " + section + " ")) for src in rule["sources"]), rid
+
+
+def test_each_part_f_band_example_names_its_own_part():
+    """Review round 1 of part f: each band example was copied from another example of its rule and kept that one's part
+    name ("At 415.11.3.3's 75 ft" measuring 200 ft, "Apartment corridor at 44 in" measuring 72 in a Group H-5
+    building). Each part f band example's part has a name no other example of the rule uses."""
+    rules = _rules_by_id()
+    for rid, section in PART_F_BANDS.items():
+        names = [(e, p["name"]) for e in rules[rid]["examples"] for kind in (e.get("parts") or {})
+                 for p in e["parts"][kind] if p.get("name")]
+        for e, name in names:
+            if section in (e.get("note") or "") and e["expect"] == "needs_review":
+                assert sum(1 for _, n in names if n == name) == 1, (rid, name)
+
+
+def test_410_5_3_2s_note_gives_table_1017_2s_largest_cells():
+    """Review round 1 of part f: the note gave Table 1017.2 as "200 ft to 300 ft without a sprinkler system, 250 ft to
+    400 ft with one", but the table prints I-4's 150 ft and H-1's 75 ft (p.341, lines 32 and 38). Its largest cells,
+    typed from the page (line 31: F-2, S-2, U 300 and 400), are what 410.5.3.2's 300 ft and 400 ft never fall below."""
+    notes = " ".join(_rules_by_id()["general.bc_410_5_3_2_exit_access_travel_distance"]["notes"].split())
+    assert "largest cells are 300 ft without a sprinkler system and 400 ft with one, p.341, line 31" in notes
+    assert not re.search(r"\b(200|250) ft to", notes)
