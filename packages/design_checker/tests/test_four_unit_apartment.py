@@ -451,3 +451,13 @@ def test_a_story_whose_room_may_seat_people_served_by_aisles_never_passes_on_tra
             if r.get("function") is not None:
                 r["function"] = "business"
     assert row(group_a) == "needs_review"
+
+    # review round 2: the groups sent in the check's values (which the rules read beside the building block) count too
+    interior = build.interior_of()
+    interior["building"] = {k: v for k, v in interior["building"].items() if k != "occupancy_groups"}
+    interior["building"].update({k: False for k in CH10_BUILDING_MARKS})
+    for r in interior["rooms"]:
+        if r.get("function") is not None:
+            r["function"] = "business"
+    sent = egress.check(laws, interior, {**VALUES, "occupancy_groups": ["A-2"]}, ALLOWED)["results"]
+    assert sent["general.bc_table_1017_2_a_e_f1_m_r_s1"] == "needs_review"

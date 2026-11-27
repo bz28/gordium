@@ -248,7 +248,7 @@ def check(found: dict, interior, values: dict, allowed: dict, ground: dict | Non
     undecided = scope is not None and scope["code"] is None
     sections, items, rows, results, ids, readings = [], [], [], {}, set(), {}
     for law in run:
-        measured = None if waiting else _measured(law, interior, readings, ground)
+        measured = None if waiting else _measured(law, interior, readings, ground, values)
         law_values, law_allowed = _law_values(law, values, allowed, building)
         # rules that can't be used are said whether or not rooms are drawn: never hidden behind "waiting"
         mine = _law_items(law, measured, law_values, law_allowed, rows, results) if not waiting or law["problems"]             else [_waiting_item(law)]
@@ -327,11 +327,13 @@ def _stairs_and_guards(interior) -> dict:
     return {"parts": {k: got["parts"].get(k) for k in BUILDING_INTERIOR_KINDS}, "problems": got["problems"]}
 
 
-def _measured(law: dict, interior, readings: dict, ground: dict | None = None) -> dict:
+def _measured(law: dict, interior, readings: dict, ground: dict | None = None, values: dict | None = None) -> dict:
     """The parts a law's rules read, measured once per kind of reading: the house code's from the interior measuring
     (model_measurement.interior), the Building Code's from the routes (model_measurement.routes: story, space,
     corridor and every door) and, for its stairs and guards, the interior measuring's (_stairs_and_guards), in the
-    same shape."""
+    same shape. `values`: the check's own, whose building facts (code_scope.FACTS) the rules read beside the
+    description's `building` block (_law_values), so the assembly seating reads the same occupancy groups (review
+    round 2)."""
     kind = ROUTES if law.get("scope") == code_scope.BUILDING else "interior"
     if kind == ROUTES and _reads_interior(law):
         kind = ROUTES_AND_INTERIOR
@@ -340,8 +342,10 @@ def _measured(law: dict, interior, readings: dict, ground: dict | None = None) -
             got = measure_routes(interior, ground=ground)
             factors = Path(law["folder"]) / OCCUPANT_LOAD_FACTORS
             if factors.exists() and isinstance(interior, dict):      # 1004.5: each room's function's load
-                occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors),
-                                    interior.get("building"))
+                block = interior.get("building")
+                stated = {**{k: v for k, v in (values or {}).items() if k in code_scope.FACTS},
+                          **(block if isinstance(block, dict) else {})}       # as _law_values merges them
+                occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors), block, stated)
             inside = _stairs_and_guards(interior) if kind == ROUTES_AND_INTERIOR else {"parts": {}, "problems": []}
             problems = [str(p) for p in got["problems"]]
             problems += [str(p) for p in inside["problems"] if str(p) not in problems]

@@ -198,8 +198,10 @@ def _set(part: dict, name: str, value: bool) -> None:
         part["not_measured"].pop(name, None)
 
 
-def apply(parts: dict, description: dict, factors: dict, building: dict | None) -> dict:
-    assembly_seating(parts, description, factors, building)
+def apply(parts: dict, description: dict, factors: dict, building: dict | None, stated: dict | None = None) -> dict:
+    """`stated`: every building fact the rules read (the description's block over the check's values), for the
+    assembly seating's occupancy groups; `building` alone otherwise."""
+    assembly_seating(parts, description, factors, building if stated is None else stated)
     rooms, every = readable_rooms(description)
     increase_ruled_out = isinstance(building, dict) and building.get("occupant_load_increased") is False
     cap = factors["increase_cap"]
