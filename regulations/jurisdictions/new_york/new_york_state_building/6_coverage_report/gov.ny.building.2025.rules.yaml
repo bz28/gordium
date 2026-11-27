@@ -195,6 +195,114 @@ pieces:
     heading: Elevator, dumbwaiter and other hoistways
     rules:
     - general.bc_713_14_hoistways
+  '716.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_716_1_opening_protectives_general
+  Table 716.1(2):
+    label: flag
+    heading: Opening fire protection assemblies, ratings and markings
+    rules:
+    - general.bc_table_716_1_2__exit_enclosures
+    - general.bc_table_716_1_2__corridors
+    - general.bc_table_716_1_2__smoke_barriers
+    - general.bc_table_716_1_2__other_assemblies
+  Table 716.1(3):
+    label: flag
+    heading: Fire window assembly fire protection ratings
+    rules:
+    - general.bc_table_716_1_3__fire_windows
+  716.1.2.1:
+    label: flag
+    heading: Glazing › Safety glazing
+    rules:
+    - general.bc_716_1_2_1_safety_glazing
+  716.1.2.2:
+    label: flag
+    heading: Glazing › Marking fire-rated glazing assemblies
+    rules:
+    - general.bc_716_1_2_2_marking_glazing
+  716.1.2.2.1:
+    label: flag
+    heading: Marking fire-rated glazing assemblies › Fire-rated glazing identification
+    rules:
+    - general.bc_716_1_2_2_1_glazing_identification
+  716.1.2.2.2:
+    label: flag
+    heading: Marking fire-rated glazing assemblies › Fire-protection-rated glazing identification
+    rules:
+    - general.bc_716_1_2_2_2_fire_protection_glazing_identification
+  716.1.2.2.3:
+    label: flag
+    heading: Marking fire-rated glazing assemblies › Fire-resistance-rated glazing identification
+    rules:
+    - general.bc_716_1_2_2_3_fire_resistance_glazing_identification
+  716.2.1:
+    label: flag
+    heading: Fire door assemblies › Testing requirements
+    rules:
+    - general.bc_716_2_1_fire_door_testing
+  716.2.1.1:
+    label: flag
+    heading: Testing requirements › Side-hinged or pivoted swinging doors
+    rules:
+    - general.bc_716_2_1_1_swinging_door_tests
+  716.2.1.2:
+    label: flag
+    heading: Testing requirements › Other types of assemblies
+    rules:
+    - general.bc_716_2_1_2_other_door_tests
+  716.2.1.3:
+    label: flag
+    heading: Testing requirements › Glazing in transoms lights and sidelights in corridors and smoke barriers
+    rules:
+    - general.bc_716_2_1_3_transom_sidelight_glazing
+  716.2.1.4:
+    label: flag
+    heading: Testing requirements › Smoke and draft control
+    rules:
+    - general.bc_716_2_1_4_smoke_draft_control_test
+  716.2.2:
+    label: flag
+    heading: Fire door assemblies › Performance requirements
+    rules:
+    - general.bc_716_2_2_fire_door_performance
+  716.2.2.1:
+    label: flag
+    heading: Performance requirements › Door assemblies in corridors and smoke barriers
+    rules:
+    - general.bc_716_2_2_1_corridor_smoke_barrier_doors
+  716.2.2.1.1:
+    label: flag
+    heading: Door assemblies in corridors and smoke barriers › Smoke and draft control
+    rules:
+    - general.bc_716_2_2_1_1_smoke_draft_control
+  716.2.2.2:
+    label: flag
+    heading: Performance requirements › Door assemblies in other fire partitions
+    rules:
+    - general.bc_716_2_2_2_other_fire_partition_doors
+  716.2.2.3:
+    label: flag
+    heading: Performance requirements › Doors in interior exit stairways and ramps and exit passageways
+    rules:
+    - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
+  716.2.2.3.1:
+    label: flag
+    heading: Doors in interior exit stairways and ramps and exit passageways › Glazing in doors
+    rules:
+    - general.bc_716_2_2_3_1_glazing_in_exit_enclosure_doors
+  716.2.3:
+    label: flag
+    heading: Fire door assemblies › Fire doors
+    rules:
+    - general.bc_716_2_3_fire_doors
+  716.2.4:
+    label: flag
+    heading: Fire door assemblies › Fire door frames
+    rules:
+    - general.bc_716_2_4_fire_door_frames
   '1004.7':
     label: flag
     heading: Occupant load › Outdoor areas

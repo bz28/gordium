@@ -29,6 +29,7 @@ sprinklered_903_3_1_1:
   - general.bc_1017_2_travel_distance
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -72,6 +73,7 @@ sprinklered_903_3_1_2:
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1007_1_2_space_three_or_more
   - general.bc_1020_3_corridor_capacity
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -165,6 +167,7 @@ occupancy_group:
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_1020_5_other_occupancies
   - general.bc_407_4_2_sleeping_room_travel
+  - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f

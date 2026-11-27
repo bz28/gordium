@@ -16,9 +16,11 @@ NY = REPO / "regulations/jurisdictions/new_york/new_york_state_building"
 RULEBOOK = NY / "5_building_code_rules/drafted/general.yaml"
 SECTIONS = NY / "2_extracted_text/gov.ny.building.2025.sections.jsonl"
 LABELS = NY / "3_section_labels/gov.ny.building.2025.yaml"
-CHAPTER_7 = re.compile(r"7\d\d(\.\d+)*$")
-# lines inside a flagged piece that name no section and set nothing: each piece's 'Exceptions:' or 'Exception:' alone
-HEADINGS = re.compile(r"^Exceptions?:$")
+CHAPTER_7 = re.compile(r"(Table )?7\d\d(\.\d+)*(\(\d\))?$")       # 707.6, Table 716.1(2)
+# The only facts a Chapter 7 flag may be narrowed by, each one the architect states (never a fact the model could get
+# wrong): a corridor's stated rating (Table 716.1(2)'s corridor row), the sprinkler system and group (716.2.2.3's
+# exception)
+NARROWED_BY = {"corridor_fire_rating_hours", "sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "occupancy_group"}
 
 
 @pytest.fixture(scope="module")
@@ -43,11 +45,15 @@ def labels(pieces):
 
 
 def _rid(pid: str) -> str:
-    return "general.bc_" + pid.replace(".", "_") + "_"
+    """The id prefix the coverage report reads as naming a piece (section_labeling.coverage: the piece's slug, every
+    character not a letter or digit an underscore, then "_"): general.bc_716_1_ for 716.1, general.bc_table_716_1_2__
+    for Table 716.1(2) (its closing bracket an underscore too)."""
+    return "general.bc_" + "".join(c if c.isalnum() else "_" for c in pid.lower()) + "_"
 
 
 def _flags(book, pid):
-    return [r for r in book if r["id"].startswith(_rid(pid))]
+    """The rules naming the piece itself: 716.1's, never 716.1.2.1's (the next word after the number is a word)."""
+    return [r for r in book if re.match(re.escape(_rid(pid)) + "[a-z]", r["id"])]
 
 
 def test_every_chapter_7_piece_brought_in_is_labeled_and_every_flag_has_its_own(pieces, labels, book):
@@ -62,7 +68,7 @@ def test_every_chapter_7_piece_brought_in_is_labeled_and_every_flag_has_its_own(
 
 def test_every_chapter_7_flag_quotes_every_line_of_its_piece(pieces, labels, book):
     """The flag quotes its whole piece, every exception with it (an exception that tightens, or a section named only
-    there, can't go unseen), but a line that is only the word 'Exceptions:'."""
+    there, can't go unseen); a table's flags, its every row, heading and note between them."""
     for pid, v in labels.items():
         if v["label"] not in ("flag", "rule"):
             continue
@@ -121,17 +127,47 @@ def test_a_note_naming_only_a_longer_section_doesnt_name_the_shorter():
 
 def test_every_chapter_7_flag_is_a_persons_check_for_every_building(labels, book, ctx):
     """Nothing these sections ask is in the model (an enclosure's rating, the stories it connects, its construction,
-    its penetrations): each flag needs review for every building, whatever its group or sprinkler system, and never
-    passes; none is narrowed to a fact the model could get wrong."""
+    its penetrations, a door's rating): each flag needs review for every building, whatever its group or sprinkler
+    system, and never passes; a flag narrowed at all is narrowed only by a fact the architect states (NARROWED_BY),
+    and needs review while that fact isn't stated."""
+    from rule_format import formula, parts
     allowed = ctx.allowed()
+    narrowed = []
     for pid, v in labels.items():
         if v["label"] != "flag":
             continue
         for r in _flags(book, pid):
-            assert r["kind"] == "flag" and "check" not in r and "applies_when" not in r, r["id"]
-            for given in ({}, {"occupancy_group": "R-2", "sprinklered_903_3_1_1": False},
-                          {"occupancy_group": "mixed", "sprinklered_903_3_1_1": True}):
-                assert outcome(r, given, allowed) == "needs_review", (r["id"], given)
+            assert r["kind"] == "flag" and "check" not in r, r["id"]
+            if "applies_when" not in r:
+                for given in ({}, {"occupancy_group": "R-2", "sprinklered_903_3_1_1": False},
+                              {"occupancy_group": "mixed", "sprinklered_903_3_1_1": True}):
+                    assert outcome(r, given, allowed) == "needs_review", (r["id"], given)
+                continue
+            narrowed.append(r["id"])
+            assert formula.names(r["applies_when"]) <= NARROWED_BY, r["id"]
+            if "for_each" in r:
+                [row] = parts.rows(r, {r["for_each"]: [{"id": "p1", "name": "Not stated", "measures": {}}]}, {}, allowed)
+                assert row["outcome"] == "needs_review", r["id"]
+            else:
+                assert outcome(r, {}, allowed) == "needs_review", r["id"]
+    assert sorted(narrowed) == ["general.bc_716_2_2_3_exit_enclosure_door_temperature_rise",
+                                "general.bc_table_716_1_2__corridors"]
+
+
+def test_716_2_2_3s_exception_needs_a_sprinkler_system_903_3_1_2_allows(book, ctx):
+    """716.2.2.3's temperature rise is lifted only in a building stated sprinklered throughout per 903.3.1.1, or per
+    903.3.1.2 in Group R (where 903.3.1.2 allows an NFPA 13R system): a 13R system stated for another group, or for a
+    building of two or more groups, leaves it a person's check, never not applicable."""
+    [r] = [r for r in book if r["id"] == "general.bc_716_2_2_3_exit_enclosure_door_temperature_rise"]
+    allowed = ctx.allowed()
+    for group in ("R-1", "R-2", "R-3", "R-4"):
+        assert outcome(r, {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True, "occupancy_group": group},
+                       allowed) == "not_applicable", group
+    for group in ("B", "A-2", "E", "I-2", "mixed"):
+        assert outcome(r, {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True, "occupancy_group": group},
+                       allowed) == "needs_review", group
+        assert outcome(r, {"sprinklered_903_3_1_1": True, "occupancy_group": group}, allowed) == "not_applicable"
+    assert outcome(r, {"sprinklered_903_3_1_2": True}, allowed) == "needs_review"   # 903.3.1.1 and the group unstated
 
 
 def test_chapter_7_rules_sit_in_book_order_before_chapter_10(book):
@@ -139,7 +175,7 @@ def test_chapter_7_rules_sit_in_book_order_before_chapter_10(book):
     rulebook per law folder (rulebook.building_code_rulebook), each chapter a block in book order. Chapter 7's flags
     sit together after 508's and before Chapter 10's first rule (1004.7)."""
     ids = [r["id"] for r in book]
-    seven = [i for i, rid in enumerate(ids) if re.match(r"general\.bc_7\d\d_", rid)]
+    seven = [i for i, rid in enumerate(ids) if re.match(r"general\.bc_(table_)?7\d\d_", rid)]
     assert seven == list(range(seven[0], seven[-1] + 1))
     assert ids[seven[-1] + 1] == "general.bc_1004_7_outdoor_areas"
     assert ids[seven[0] - 1].startswith("general.bc_508_")

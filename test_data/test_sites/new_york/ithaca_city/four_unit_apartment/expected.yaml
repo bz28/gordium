@@ -168,6 +168,33 @@ results:
   general.bc_713_11_shaft_bottom: needs_review
   general.bc_713_12_shaft_top: needs_review
   general.bc_713_14_hoistways: needs_review
+  # Chapter 7 part b (2026-11-26, 24 flags): opening protectives (716.1, Tables 716.1(1) to (3), 716.2 to 716.2.4):
+  # nothing in the model gives a door's or a wall's rating; the corridor doors' row is per corridor (rating not
+  # stated: needs review), and 716.2.2.3's temperature rise applies (no sprinkler system)
+  general.bc_716_1_opening_protectives_general: needs_review
+  general.bc_table_716_1_2__exit_enclosures: needs_review
+  general.bc_table_716_1_2__corridors: needs_review
+  general.bc_table_716_1_2__smoke_barriers: needs_review
+  general.bc_table_716_1_2__other_assemblies: needs_review
+  general.bc_table_716_1_3__fire_windows: needs_review
+  general.bc_716_1_2_1_safety_glazing: needs_review
+  general.bc_716_1_2_2_marking_glazing: needs_review
+  general.bc_716_1_2_2_1_glazing_identification: needs_review
+  general.bc_716_1_2_2_2_fire_protection_glazing_identification: needs_review
+  general.bc_716_1_2_2_3_fire_resistance_glazing_identification: needs_review
+  general.bc_716_2_1_fire_door_testing: needs_review
+  general.bc_716_2_1_1_swinging_door_tests: needs_review
+  general.bc_716_2_1_2_other_door_tests: needs_review
+  general.bc_716_2_1_3_transom_sidelight_glazing: needs_review
+  general.bc_716_2_1_4_smoke_draft_control_test: needs_review
+  general.bc_716_2_2_fire_door_performance: needs_review
+  general.bc_716_2_2_1_corridor_smoke_barrier_doors: needs_review
+  general.bc_716_2_2_1_1_smoke_draft_control: needs_review
+  general.bc_716_2_2_2_other_fire_partition_doors: needs_review
+  general.bc_716_2_2_3_exit_enclosure_door_temperature_rise: needs_review
+  general.bc_716_2_2_3_1_glazing_in_exit_enclosure_doors: needs_review
+  general.bc_716_2_3_fire_doors: needs_review
+  general.bc_716_2_4_fire_door_frames: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review
