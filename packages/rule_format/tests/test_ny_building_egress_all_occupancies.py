@@ -1619,3 +1619,67 @@ def test_the_readme_names_each_section_group_9e_flag_that_reads_icc_a117_1():
         if r.get("kind") == "flag" and sid in GROUP_9E_ON and "ICC A117.1 isn't brought in" in (r.get("notes") or ""):
             piece = ".".join(p for p in r["id"].removeprefix("general.bc_").split("_") if p.isdigit())
             assert f"{piece}'s flag" in entry, r["id"]
+
+
+def test_the_readme_names_each_flag_reading_a_reference_outside_chapter_10_not_brought_in(rules):
+    """Review round 1 of section group 9f (P3): the README's list names, for each reference not brought in, the flags
+    that read it; 1024's flags read 705, 707, 711, 714, 716, 905.3 and 905.4 but weren't named there. From section
+    group 9e on, each reference outside Chapter 10 a flag's notes say isn't brought in is in the README's list, with
+    that flag ('1024.3's flag') or its section ('1024's flags') in the bracket after it."""
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    labels = load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"]
+    part = readme.split("## References in the brought-in sections that are not brought in", 1)[1].split("\n## ", 1)[0]
+    ref = r"(?:UL|NFPA|ASTM) [A-Z]?\d+|ICC A117\.1|(?<![\d.])\d{3,4}(?:\.\d+)*(?![\d])"
+    missing = []
+    for rid, r in rules.items():
+        sid = rid.removeprefix("general.bc_").split("_")[0]
+        if r.get("kind") != "flag" or sid not in GROUP_9E_ON:
+            continue
+        piece = ".".join(p for p in rid.removeprefix("general.bc_").split("_") if p.isdigit())
+        for sentence in re.split(r"(?<=\.) ", r.get("notes") or ""):
+            m = re.search(r"\b(?:is|are)n't(?: yet)? brought in", sentence)
+            if not m:
+                continue
+            head = sentence[:m.start()]
+            if head.count("(") > head.count(")"):          # said inside a bracket: the bracket's own list
+                head = head[head.rindex("(") + 1:]
+            for x in re.findall(ref, re.sub(r"\([^()]*\)", "", head)):
+                # A117.1 is tested above; a Chapter 10 section is skipped only where it is brought in (review round 2 of
+                # section group 9f: 1028.2, not yet brought in, was never checked)
+                if x == "ICC A117.1" or (re.fullmatch(r"10\d\d(?:\.\d+)*", x) and x in labels):
+                    continue
+                spots = [part[k.end():part.find(")", k.end())] for k in
+                         re.finditer(rf"(?<![\w.]){re.escape(x)}(?![\d]|\.\d)", part)]
+                if not any(f"{piece}'s" in s or f"{sid}'s" in s for s in spots):
+                    missing.append((rid, x))
+    assert not missing, missing
+
+
+def test_each_luminous_marking_reason_says_where_the_markings_are_required(rules):
+    """Review round 1 of section group 9f (P2): the 1025 flags show for any building of the six groups, a low-rise one
+    too, and 1025.2.1's to 1025.5's reasons stated each marking as if every such building needed it; 1025.1 asks them
+    only in a high-rise building (202: more than 75 feet above fire department vehicle access), in its exit
+    stairways, ramps and passageways (1025.2). Each reason now says so; and the exceptions' conditions in full (P3)."""
+    flags = {rid: " ".join(r["examples"][0]["note"].split()) for rid, r in rules.items()
+             if rid.startswith("general.bc_1025_") and r.get("kind") == "flag"}
+    assert len(flags) == 15
+    for rid, note in flags.items():
+        assert "high-rise building" in note, rid
+        if rid != "general.bc_1025_1_luminous_markings_where_required":
+            assert note.startswith("In the interior exit stairways, interior exit ramps and exit passageways of a "
+                                   "high-rise building of Group A, B, E, I-1, M or R-1"), rid
+    assert "more than 75 feet above the lowest level of fire department vehicle access" in \
+        flags["general.bc_1025_1_luminous_markings_where_required"]
+    for rid in ("general.bc_1025_2_4_1_floor_mounted_lines", "general.bc_1025_2_4_2_wall_mounted_lines"):
+        assert "that occupants must pass through to complete the exit path" in flags[rid], rid
+    assert "alternating equal bands" in flags["general.bc_1025_2_5_obstacles"]
+    # 1025.2.1's printed double negative is read as its evident meaning, and says so in the flag and the verification
+    assert "Gordium's reading" in rules["general.bc_1025_2_1_steps"]["notes"]
+    assert "Gordium's reading of the printed double negative" in flags["general.bc_1025_2_1_steps"]   # round 2
+    # review round 2: the door markings are for the doors on the exit path (1025.2.6), each flag quoting it
+    for rid in ("general.bc_1025_2_6_1_emergency_exit_symbol", "general.bc_1025_2_6_2_door_hardware_markings",
+                "general.bc_1025_2_6_3_door_frame_markings"):
+        assert "occupants pass through to complete the exit path" in flags[rid], rid
+        assert any(s["quote"].startswith("1025.2.6 Doors within the exit path") for s in rules[rid]["sources"]), rid
+    tv = load(NY / "text_verification.yaml")["pieces"]["1025.2.1"]["flags"]
+    assert any("double negative" in f for f in tv)

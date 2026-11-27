@@ -7534,6 +7534,11 @@ pieces:
     - '''1 inch'' (>=), the exception''s: ''The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed
       in accordance with UL 1994'', the minimum it lifts; the recorded words miss the ''minimum width of''. The second reading
       is right.'
+    - '''not more than 1/2 inch'' (<=), the second: the book prints ''the stripe shall not overlap the leading edge of the
+      step by not more than 1/2 inch (12.7 mm) down the vertical face of the step'', a double negative that read word for
+      word would forbid any overlap of 1/2 inch or less; both readings take it as its evident meaning, an overlap of at
+      most 1/2 inch. That is Gordium''s reading, recorded in 1025.2.1''s flag for a person to confirm (review round 1 of
+      section group 9f).'
   1025.2.2:
     piece_sha256: f3ef11046af46ed0153c8dad8b34199eb692e95e30909422978bd8205ca732fd
     numbers: []
