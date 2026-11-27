@@ -112442,9 +112442,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "2e4cdd3997c3d85cf5798f6948856f9f1669cc48da03e9f56bb5efcb71cebd2d",
+  "worker_fingerprint": "312d6d418113f590ff0a7e3940714aa5e4e6c13e924953591eec655a2003e165",
   "rulebook": {
-   "new_york/ithaca_city": "9accb5885c8e4ca485b4c3139f0667d0c1f7a5c3b9c1ccf6f7cd2aa3012c0bd6"
+   "new_york/ithaca_city": "138ca85b63c3ceff6c2875d2e8274187682a1c784d2cfcda15d669be1b51bf6c"
   }
  }
 }
