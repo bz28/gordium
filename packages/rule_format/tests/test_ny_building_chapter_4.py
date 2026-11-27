@@ -4,6 +4,7 @@ and atriums (404.1, 404.9 to 404.11), each piece a flag shown only where the bui
 402.8 governs over Chapter 10 (402.8: "the requirements of Sections 402.8.1 through 402.8.8 shall apply"), no
 Chapter 10 rule passes on a figure 402.8 changes in a building that may hold a mall. Needs no code cache."""
 
+import ast
 import json
 import random
 import re
@@ -210,9 +211,15 @@ def test_no_story_passes_short_of_403_5_2_or_405_7_1_where_they_may_apply(ctx, r
     building of two or more and one not stated, every sprinkler setting, every other fact yes, no or not stated, the
     story's measures from a grid: where a high-rise isn't ruled out and the building isn't stated Group R-2, a pass has
     one exit more than Table 1006.3.3 asks; where an underground building isn't ruled out, a pass has two exits."""
+    # the rules that hold a story to a number of exits: their check compares its exit count with Table 1006.3.3's
+    # (1007.1.1's separation reads the count only to know whether two are required, and asks nothing of it)
     walked = sorted(rid for rid, r in rules.items() if r.get("kind") == "rule" and r.get("for_each") == "story"
-                    and "story_exit_count" in parts.formula_names(r))
-    assert len(walked) >= 5, walked
+                    and any(isinstance(n, ast.Compare) and "story_exit_count" in ast.unparse(n.left)
+                            and isinstance(n.ops[0], (ast.GtE, ast.Gt))
+                            for n in ast.walk(formula.parse(r["check"]))))
+    assert walked == sorted(["general.bc_1006_3_3_story_exits", "general.bc_table_1006_3_4_1__r2_dwelling_units",
+                             "general.bc_table_1006_3_4_2__a_b_e_f_m_u", "general.bc_table_1006_3_4_2__h_i_r",
+                             "general.bc_table_1006_3_4_2__s"]), walked
     allowed = ctx.allowed()
     rng = random.Random(seed)
     own = parts.measure_kinds("story")

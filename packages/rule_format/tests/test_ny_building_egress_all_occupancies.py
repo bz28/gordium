@@ -22,6 +22,9 @@ STATED = {"egress_balcony_increase_taken": False, "assembly_fixed_seating": Fals
 # Chapter 4 part a: the building holds no covered or open mall (no space with its own exits or travel limit), so
 # 402.8, which governs over Chapter 10 there, can't change these rows (test_ny_building_chapter_4.py walks it)
 NO_MALL = {"special_egress_spaces": False}
+# Chapter 4 part b: neither a high-rise over 420 ft (403.5.2's additional stairway) nor an underground building
+# (405.7.1's two exits on each floor level), so neither can change the story rows
+NOT_TALL = {"high_rise_building": False, "underground_building": False}
 
 # Table 1017.2, p.341: line -> (groups, without a sprinkler system (None: Not Permitted), with one, the rule)
 TABLE_1017_2 = {
@@ -448,7 +451,7 @@ TABLE_1006_3_4_2 = [
     (A + ["E", "M", "U"], FIRST, 49, 75, 75), (["B", "F-1", "F-2"], FIRST, 49, 75, 100),
     (["H-2", "H-3"], FIRST, 3, 25, 25), (["H-4", "H-5", "I-1", "I-2", "I-3", "R-1"], FIRST, 10, 75, 75),
     (["S-1"], FIRST, 29, 75, 100), (["M"], SECOND, 29, 75, 75), (["B", "F-1", "F-2", "S-1"], SECOND, 29, 75, 75)]
-STORY_FACTS = {"emergency_escape_openings_1031": True, "r2_sleeping_units": False} | STATED
+STORY_FACTS = {"emergency_escape_openings_1031": True, "r2_sleeping_units": False} | STATED | NOT_TALL
 
 
 def _story_rule(rules, g):
@@ -497,13 +500,13 @@ def test_group_i3_allowed_one_exit_by_its_travel_needs_review_and_a_measured_fai
 
 def test_two_exits_by_table_1006_3_3_and_r3_r4_with_one(ctx, rules):
     r = _story_rule(rules, "B")
-    b = {"occupancy_group": "B"} | NFPA13 | NO_MALL
+    b = {"occupancy_group": "B"} | NFPA13 | NO_MALL | NOT_TALL
     assert _one(r, "story", _story(FIRST, 500, 300, exits=2), b, ctx) == "pass"
     assert _one(r, "story", _story(FIRST, 500.5, 300, exits=2), b, ctx) == "fail"           # 501-1,000: three
     assert _one(r, "story", _story(FIRST, 1000, 300, exits=3), b, ctx) == "pass"
     assert _one(r, "story", _story(FIRST, 1000.5, 300, exits=3), b, ctx) == "fail"          # more: four
     h = rules["general.bc_table_1006_3_4_2__h_i_r"]
-    assert _one(h, "story", _story(SECOND, 40, 200), {"occupancy_group": "R-3"} | NFPA13 | STATED, ctx) == "pass"
+    assert _one(h, "story", _story(SECOND, 40, 200), {"occupancy_group": "R-3"} | NFPA13 | STATED | NOT_TALL, ctx) == "pass"
     assert _one(h, "story", _story(FIRST, 2, 10), {"occupancy_group": "H-1"} | NFPA13, ctx) == "fail"  # no H-1 row
 
 
@@ -511,7 +514,7 @@ def test_table_1006_3_4_1_group_r2_of_dwelling_units(ctx, rules):
     """p.317 lines 21-24: a basement or first to third story, 4 dwelling units, 125 ft, only with note a's system
     and escape openings; the fourth story and higher NP. Sleeping units are Table 1006.3.4(2)'s (note b)."""
     r = rules["general.bc_table_1006_3_4_1__r2_dwelling_units"]
-    du = {"occupancy_group": "R-2", "r2_sleeping_units": False, "emergency_escape_openings_1031": True} | STATED
+    du = {"occupancy_group": "R-2", "r2_sleeping_units": False, "emergency_escape_openings_1031": True} | STATED |         NOT_TALL
     one = {"story_exit_count": 1, "story_occupant_load": 16, "egress_travel_distance": 125, FOURTH: False,
            "story_dwelling_units": 4, "story_rooms_exit_directly_outside": False}
     assert _one(r, "story", one, du | NFPA13, ctx) == "pass"
