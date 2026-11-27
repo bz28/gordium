@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 155 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 171 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1448,6 +1448,22 @@
     "Egress · Penetrations of smoke partitions filled against smoke: A person checks this (Gordium doesn't decide it): The space around anything passing through a smoke partition is filled with an approved material to limit the free passage of smoke: a person's check.",
     "Egress · Joints in smoke partitions filled against smoke: A person checks this (Gordium doesn't decide it): Joints in a smoke partition are filled with an approved material to limit the free passage of smoke: a person's check.",
     "Egress · Ducts and air transfer openings through smoke partitions: A person checks this (Gordium doesn't decide it): The space around a duct through a smoke partition is filled with an approved material against smoke, and an air transfer opening in it has a smoke damper per 717.3.2.2, or, where a damper would interfere with a required smoke control system per 909, approved other protection: a person's check.",
+    "Egress · Rated floors and roofs continuous: A person checks this (Gordium doesn't decide it): A horizontal assembly (a rated floor or roof, the top or bottom of an exit enclosure among them) is continuous, with no vertical openings but those this section and Section 712 permit: the floors' openings aren't in the model, so a person's check.",
+    "Egress · What holds up a rated floor or roof has its rating: A person checks this (Gordium doesn't decide it): The construction supporting a horizontal assembly is protected to its required rating; except, in Types IIB, IIIB and VB, at incidental use separations rated at most 1 hour (Table 509.1), dwelling and sleeping unit separations (420.3), and smoke barriers per 709: the structure isn't in the model, so a person's check.",
+    "Egress · Rating of rated floors and roofs: A person checks this (Gordium doesn't decide it): A horizontal assembly is rated as 711.2.4.1 to 711.2.4.6 ask, and at least as the building's type of construction asks (Table 601): the floors' ratings and the type of construction aren't in the model, so a person's check.",
+    "Egress · Floors that separate smoke compartments are smoke barriers: A person checks this (Gordium doesn't decide it): Where a horizontal assembly must be a smoke barrier (between smoke compartments), it meets Section 709: a person's check.",
+    "Egress · Floors other sections require: A person checks this (Gordium doesn't decide it): Where another section requires a horizontal assembly (an exit stairway's or passageway's enclosure top or bottom, 1023.2 and 1024.3; a shaft's, 713), it is rated at least as that section asks: a person's check.",
+    "Egress · Unrated floors and roofs continuous: A person checks this (Gordium doesn't decide it): A floor or roof not required to be rated is continuous, with no vertical openings but those Section 712 permits (an exit access stairway per 1019, 712.1.12; a two-story opening, 712.1.9): the floors' openings aren't in the model, so a person's check.",
+    "Egress · Each vertical opening protected one of the ways 712 allows: A person checks this (Gordium doesn't decide it): Each vertical opening (a stair, ramp, elevator, duct or other opening through a floor) is protected by one of the methods of 712.1.1 to 712.1.16: in a shaft enclosure per 713 (712.1.1), a two-story opening (712.1.9), an exit access stairway or ramp per 1019 (712.1.12), or another the section lists (escalators, atriums, parking garages, mezzanines, and the like, 712.1.2 to 712.1.8, 712.1.10, 712.1.11, 712.1.13 to 712.1.16): which openings the floors have, and how each is protected, aren't in the model, so a person's check.",
+    "Egress · Two-story openings: A person checks this (Gordium doesn't decide it): In other than Groups I-2 and I-3, a vertical opening that is none of 712.1's other cases (an exit access stairway may use it, 1019.3) is permitted only where it connects at most two stories, penetrates no horizontal assembly separating fire areas and no smoke barrier separating smoke compartments, isn't concealed in a wall or floor/ceiling, isn't open to a corridor in Group I or R, isn't open to a corridor on an unsprinklered floor, and is separated from floor and air transfer openings serving other floors by construction as for the required shaft enclosures: a person's check.",
+    "Egress · Listed penetration firestop systems installed per their listing: A person checks this (Gordium doesn't decide it): A listed penetration firestop system is installed per the manufacturer's instructions and its listing: the penetrations aren't in the model, so a person's check.",
+    "Egress · Sleeves through rated assemblies fastened and protected: A person checks this (Gordium doesn't decide it): A sleeve through a rated assembly is securely fastened and installed per its maker's instructions (and the listing, for a listed system); the space inside and around it is protected per Section 714, and insulation or a covering on the item passes through only where tested as part of the assembly: a person's check.",
+    "Egress · Penetrations of rated walls and smoke barriers: A person checks this (Gordium doesn't decide it): Penetrations into or through fire walls, fire barriers, smoke barrier walls and fire partitions (the walls of exit enclosures and rated corridors among them) meet 714.4.1 to 714.4.3, and those in smoke barrier walls also 714.5.4 (air leakage): a person's check.",
+    "Egress · Through penetrations of rated walls: A person checks this (Gordium doesn't decide it): A through penetration of a rated wall meets 714.4.1.1 or 714.4.1.2; except a steel, ferrous or copper pipe, tube or conduit, whose annular space may be filled with concrete, grout or mortar the full thickness of a concrete or masonry wall (an item at most 6 inches nominal diameter through an opening at most 144 square inches), or with a material that stops flame and hot gases for the wall's rating under ASTM E119 or UL 263 fire conditions at a pressure differential of at least 0.01 inch of water: a person's check.",
+    "Egress · Through penetrations protected as tested in the assembly: A person checks this (Gordium doesn't decide it): Through penetrations are protected by systems installed as tested in the approved rated assembly: a person's check.",
+    "Egress · Through-penetration firestop systems: A person checks this (Gordium doesn't decide it): Or by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential of at least 0.01 inch of water, with an F rating at least the wall's required rating: a person's check.",
+    "Egress · Membrane penetrations of rated walls: A person checks this (Gordium doesn't decide it): A membrane penetration of a rated wall meets 714.4.1, and recessed fixtures don't reduce the wall's rating; except steel electrical boxes in walls rated at most 2 hours, each at most 16 square inches, at most 100 square inches of openings in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches apart where the stud cavities don't communicate (or the wall cavity's depth where filled with cellulose, rockwool or slag wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes per their listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); boxes listed with a wall opening protective system; other boxes in a membrane firestop system per ASTM E814 or UL 1479 with F and T ratings of the wall; sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or listed means: a person's check (1023.5 allows membrane penetrations on the outside of an exit stairway enclosure only so protected).",
+    "Egress · Noncombustible penetrations not joined to combustible ones: A person checks this (Gordium doesn't decide it): A noncombustible penetrating item doesn't connect to combustible items beyond the firestopping unless the wall's fire resistance is shown to be kept: a person's check.",
     "Egress · Outdoor areas: means of egress and occupant load: A person checks this (Gordium doesn't decide it): Yards, patios, occupiable roofs or courts the occupants use: their means of egress and the occupant load the building official assigns are a person's check.",
     "Egress · An assembly room's occupant load posted: A person checks this (Gordium doesn't decide it): A sign near the main exit of each assembly room giving its occupant load: a person's check.",
     "Egress · Table 1006.2.1 in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy isn't marked yet, so a person checks.",
@@ -67866,6 +67882,1130 @@
      }
     },
     {
+     "id": "egress.general.bc_711_2_2_horizontal_assembly_continuity",
+     "rule": "general.bc_711_2_2_horizontal_assembly_continuity",
+     "name": "Egress · Rated floors and roofs continuous, no vertical openings (BCNYS 711.2.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A horizontal assembly (a rated floor or roof, the top or bottom of an exit enclosure among them) is continuous, with no vertical openings but those this section and Section 712 permit: the floors' openings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A horizontal assembly (a rated floor or roof, the top or bottom of an exit enclosure among them) is continuous, with no vertical openings but those this section and Section 712 permit: the floors' openings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "711.2.2 Continuity. Assemblies shall be continuous without vertical openings, except as permitted by this section and Section 712.",
+        "where": "711.2.2, 2025 Building Code of New York State (BCNYS), PDF p.176"
+       }
+      ],
+      "citation": "711.2.2, 2025 Building Code of New York State (BCNYS), PDF p.176",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "711.2.2",
+      "quote": "711.2.2 Continuity. Assemblies shall be continuous without vertical openings, except as permitted by this section and Section 712."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_711_2_2_horizontal_assembly_continuity",
+       "words": "A person checks this (Gordium doesn't decide it): A horizontal assembly (a rated floor or roof, the top or bottom of an exit enclosure among them) is continuous, with no vertical openings but those this section and Section 712 permit: the floors' openings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_711_2_2_horizontal_assembly_continuity",
+       "why": "A person checks this (Gordium doesn't decide it): A horizontal assembly (a rated floor or roof, the top or bottom of an exit enclosure among them) is continuous, with no vertical openings but those this section and Section 712 permit: the floors' openings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Rated floors and roofs continuous, no vertical openings",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "711",
+      "section_title": "Floor and Roof Assemblies",
+      "piece": "711.2.2",
+      "piece_title": "Continuity"
+     }
+    },
+    {
+     "id": "egress.general.bc_711_2_3_horizontal_assembly_support",
+     "rule": "general.bc_711_2_3_horizontal_assembly_support",
+     "name": "Egress · What holds up a rated floor or roof has its rating (BCNYS 711.2.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The construction supporting a horizontal assembly is protected to its required rating; except, in Types IIB, IIIB and VB, at incidental use separations rated at most 1 hour (Table 509.1), dwelling and sleeping unit separations (420.3), and smoke barriers per 709: the structure isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The construction supporting a horizontal assembly is protected to its required rating; except, in Types IIB, IIIB and VB, at incidental use separations rated at most 1 hour (Table 509.1), dwelling and sleeping unit separations (420.3), and smoke barriers per 709: the structure isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "711.2.3 Supporting construction. The supporting construction shall be protected to afford the required fire-resistance rating of the horizontal assembly supported. Exception: In buildings of Type IIB, IIIB or VB construction, the construction supporting the horizontal assembly is not required to be fire-resistance rated at the following: 1. Horizontal assemblies at the separations of incidental uses as specified by Table 509.1 provided that the required fire- resistance rating does not exceed 1 hour. 2. Horizontal assemblies at the separations of dwelling units and sleeping units as required by Section 420.3. 3. Horizontal assemblies at smoke barriers constructed in accordance with Section 709.",
+        "where": "711.2.3, 2025 Building Code of New York State (BCNYS), PDF p.176"
+       }
+      ],
+      "citation": "711.2.3, 2025 Building Code of New York State (BCNYS), PDF p.176",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "711.2.3",
+      "quote": "711.2.3 Supporting construction. The supporting construction shall be protected to afford the required fire-resistance rating of the horizontal assembly supported. Exception: In buildings of Type IIB, IIIB or VB construction, the construction supporting the horizontal assembly is not required to be fire-resistance rated at the following: 1. Horizontal assemblies at the separations of incidental uses as specified by Table 509.1 provided that the required fire- resistance rating does not exceed 1 hour. 2. Horizontal assemblies at the separations of dwelling units and sleeping units as required by Section 420.3. 3. Horizontal assemblies at smoke barriers constructed in accordance with Section 709."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_711_2_3_horizontal_assembly_support",
+       "words": "A person checks this (Gordium doesn't decide it): The construction supporting a horizontal assembly is protected to its required rating; except, in Types IIB, IIIB and VB, at incidental use separations rated at most 1 hour (Table 509.1), dwelling and sleeping unit separations (420.3), and smoke barriers per 709: the structure isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_711_2_3_horizontal_assembly_support",
+       "why": "A person checks this (Gordium doesn't decide it): The construction supporting a horizontal assembly is protected to its required rating; except, in Types IIB, IIIB and VB, at incidental use separations rated at most 1 hour (Table 509.1), dwelling and sleeping unit separations (420.3), and smoke barriers per 709: the structure isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "What holds up a rated floor or roof has its rating",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "711",
+      "section_title": "Floor and Roof Assemblies",
+      "piece": "711.2.3",
+      "piece_title": "Supporting construction"
+     }
+    },
+    {
+     "id": "egress.general.bc_711_2_4_horizontal_assembly_rating",
+     "rule": "general.bc_711_2_4_horizontal_assembly_rating",
+     "name": "Egress · Rating of rated floors and roofs (BCNYS 711.2.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A horizontal assembly is rated as 711.2.4.1 to 711.2.4.6 ask, and at least as the building's type of construction asks (Table 601): the floors' ratings and the type of construction aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A horizontal assembly is rated as 711.2.4.1 to 711.2.4.6 ask, and at least as the building's type of construction asks (Table 601): the floors' ratings and the type of construction aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "711.2.4 Fire-resistance rating. The fire-resistance rating of horizontal assemblies shall comply with Sections 711.2.4.1 through 711.2.4.6 but shall be not less than that required by the building type of construction.",
+        "where": "711.2.4, 2025 Building Code of New York State (BCNYS), PDF p.176"
+       }
+      ],
+      "citation": "711.2.4, 2025 Building Code of New York State (BCNYS), PDF p.176",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "711.2.4",
+      "quote": "711.2.4 Fire-resistance rating. The fire-resistance rating of horizontal assemblies shall comply with Sections 711.2.4.1 through 711.2.4.6 but shall be not less than that required by the building type of construction."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_711_2_4_horizontal_assembly_rating",
+       "words": "A person checks this (Gordium doesn't decide it): A horizontal assembly is rated as 711.2.4.1 to 711.2.4.6 ask, and at least as the building's type of construction asks (Table 601): the floors' ratings and the type of construction aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_711_2_4_horizontal_assembly_rating",
+       "why": "A person checks this (Gordium doesn't decide it): A horizontal assembly is rated as 711.2.4.1 to 711.2.4.6 ask, and at least as the building's type of construction asks (Table 601): the floors' ratings and the type of construction aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Rating of rated floors and roofs",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "711",
+      "section_title": "Floor and Roof Assemblies",
+      "piece": "711.2.4",
+      "piece_title": "Fire-resistance rating"
+     }
+    },
+    {
+     "id": "egress.general.bc_711_2_4_4_smoke_compartment_floors",
+     "rule": "general.bc_711_2_4_4_smoke_compartment_floors",
+     "name": "Egress · Floors that separate smoke compartments are smoke barriers (BCNYS 711.2.4.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Where a horizontal assembly must be a smoke barrier (between smoke compartments), it meets Section 709: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Where a horizontal assembly must be a smoke barrier (between smoke compartments), it meets Section 709: a person's check.",
+      "quotes": [
+       {
+        "text": "711.2.4.4 Separating smoke compartments. Where the horizontal assembly is required to be a smoke barrier, the assembly shall comply with Section 709.",
+        "where": "711.2.4.4, 2025 Building Code of New York State (BCNYS), PDF p.176"
+       }
+      ],
+      "citation": "711.2.4.4, 2025 Building Code of New York State (BCNYS), PDF p.176",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "711.2.4.4",
+      "quote": "711.2.4.4 Separating smoke compartments. Where the horizontal assembly is required to be a smoke barrier, the assembly shall comply with Section 709."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_711_2_4_4_smoke_compartment_floors",
+       "words": "A person checks this (Gordium doesn't decide it): Where a horizontal assembly must be a smoke barrier (between smoke compartments), it meets Section 709: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_711_2_4_4_smoke_compartment_floors",
+       "why": "A person checks this (Gordium doesn't decide it): Where a horizontal assembly must be a smoke barrier (between smoke compartments), it meets Section 709: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Floors that separate smoke compartments are smoke barriers",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "711",
+      "section_title": "Floor and Roof Assemblies",
+      "piece": "711.2.4.4",
+      "piece_title": "Separating smoke compartments"
+     }
+    },
+    {
+     "id": "egress.general.bc_711_2_4_6_other_horizontal_separations",
+     "rule": "general.bc_711_2_4_6_other_horizontal_separations",
+     "name": "Egress · Floors other sections require, at those sections' ratings (BCNYS 711.2.4.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Where another section requires a horizontal assembly (an exit stairway's or passageway's enclosure top or bottom, 1023.2 and 1024.3; a shaft's, 713), it is rated at least as that section asks: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Where another section requires a horizontal assembly (an exit stairway's or passageway's enclosure top or bottom, 1023.2 and 1024.3; a shaft's, 713), it is rated at least as that section asks: a person's check.",
+      "quotes": [
+       {
+        "text": "711.2.4.6 Other separations. Where a horizontal assembly is required by other sections of this code, the assembly shall have a fire-resistance rating of not less than that required by that section.",
+        "where": "711.2.4.6, 2025 Building Code of New York State (BCNYS), PDF p.176"
+       }
+      ],
+      "citation": "711.2.4.6, 2025 Building Code of New York State (BCNYS), PDF p.176",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "711.2.4.6",
+      "quote": "711.2.4.6 Other separations. Where a horizontal assembly is required by other sections of this code, the assembly shall have a fire-resistance rating of not less than that required by that section."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_711_2_4_6_other_horizontal_separations",
+       "words": "A person checks this (Gordium doesn't decide it): Where another section requires a horizontal assembly (an exit stairway's or passageway's enclosure top or bottom, 1023.2 and 1024.3; a shaft's, 713), it is rated at least as that section asks: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_711_2_4_6_other_horizontal_separations",
+       "why": "A person checks this (Gordium doesn't decide it): Where another section requires a horizontal assembly (an exit stairway's or passageway's enclosure top or bottom, 1023.2 and 1024.3; a shaft's, 713), it is rated at least as that section asks: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Floors other sections require, at those sections' ratings",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "711",
+      "section_title": "Floor and Roof Assemblies",
+      "piece": "711.2.4.6",
+      "piece_title": "Other separations"
+     }
+    },
+    {
+     "id": "egress.general.bc_711_3_2_unrated_floor_continuity",
+     "rule": "general.bc_711_3_2_unrated_floor_continuity",
+     "name": "Egress · Unrated floors and roofs continuous, no vertical openings (BCNYS 711.3.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A floor or roof not required to be rated is continuous, with no vertical openings but those Section 712 permits (an exit access stairway per 1019, 712.1.12; a two-story opening, 712.1.9): the floors' openings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A floor or roof not required to be rated is continuous, with no vertical openings but those Section 712 permits (an exit access stairway per 1019, 712.1.12; a two-story opening, 712.1.9): the floors' openings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "711.3.2 Continuity. Assemblies shall be continuous without vertical openings, except as permitted by Section 712.",
+        "where": "711.3.2, 2025 Building Code of New York State (BCNYS), PDF p.176"
+       }
+      ],
+      "citation": "711.3.2, 2025 Building Code of New York State (BCNYS), PDF p.176",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "711.3.2",
+      "quote": "711.3.2 Continuity. Assemblies shall be continuous without vertical openings, except as permitted by Section 712."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_711_3_2_unrated_floor_continuity",
+       "words": "A person checks this (Gordium doesn't decide it): A floor or roof not required to be rated is continuous, with no vertical openings but those Section 712 permits (an exit access stairway per 1019, 712.1.12; a two-story opening, 712.1.9): the floors' openings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_711_3_2_unrated_floor_continuity",
+       "why": "A person checks this (Gordium doesn't decide it): A floor or roof not required to be rated is continuous, with no vertical openings but those Section 712 permits (an exit access stairway per 1019, 712.1.12; a two-story opening, 712.1.9): the floors' openings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Unrated floors and roofs continuous, no vertical openings",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "711",
+      "section_title": "Floor and Roof Assemblies",
+      "piece": "711.3.2",
+      "piece_title": "Continuity"
+     }
+    },
+    {
+     "id": "egress.general.bc_712_1_vertical_openings",
+     "rule": "general.bc_712_1_vertical_openings",
+     "name": "Egress · Each vertical opening protected one of the ways 712 allows (BCNYS 712.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Each vertical opening (a stair, ramp, elevator, duct or other opening through a floor) is protected by one of the methods of 712.1.1 to 712.1.16: in a shaft enclosure per 713 (712.1.1), a two-story opening (712.1.9), an exit access stairway or ramp per 1019 (712.1.12), or another the section lists (escalators, atriums, parking garages, mezzanines, and the like, 712.1.2 to 712.1.8, 712.1.10, 712.1.11, 712.1.13 to 712.1.16): which openings the floors have, and how each is protected, aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Each vertical opening (a stair, ramp, elevator, duct or other opening through a floor) is protected by one of the methods of 712.1.1 to 712.1.16: in a shaft enclosure per 713 (712.1.1), a two-story opening (712.1.9), an exit access stairway or ramp per 1019 (712.1.12), or another the section lists (escalators, atriums, parking garages, mezzanines, and the like, 712.1.2 to 712.1.8, 712.1.10, 712.1.11, 712.1.13 to 712.1.16): which openings the floors have, and how each is protected, aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "712.1 General. Each vertical opening shall comply in accordance with one of the protection methods in Sections 712.1.1 through 712.1.16.",
+        "where": "712.1, 2025 Building Code of New York State (BCNYS), PDF p.176"
+       }
+      ],
+      "citation": "712.1, 2025 Building Code of New York State (BCNYS), PDF p.176",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "712.1",
+      "quote": "712.1 General. Each vertical opening shall comply in accordance with one of the protection methods in Sections 712.1.1 through 712.1.16."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_712_1_vertical_openings",
+       "words": "A person checks this (Gordium doesn't decide it): Each vertical opening (a stair, ramp, elevator, duct or other opening through a floor) is protected by one of the methods of 712.1.1 to 712.1.16: in a shaft enclosure per 713 (712.1.1), a two-story opening (712.1.9), an exit access stairway or ramp per 1019 (712.1.12), or another the section lists (escalators, atriums, parking garages, mezzanines, and the like, 712.1.2 to 712.1.8, 712.1.10, 712.1.11, 712.1.13 to 712.1.16): which openings the floors have, and how each is protected, aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_712_1_vertical_openings",
+       "why": "A person checks this (Gordium doesn't decide it): Each vertical opening (a stair, ramp, elevator, duct or other opening through a floor) is protected by one of the methods of 712.1.1 to 712.1.16: in a shaft enclosure per 713 (712.1.1), a two-story opening (712.1.9), an exit access stairway or ramp per 1019 (712.1.12), or another the section lists (escalators, atriums, parking garages, mezzanines, and the like, 712.1.2 to 712.1.8, 712.1.10, 712.1.11, 712.1.13 to 712.1.16): which openings the floors have, and how each is protected, aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Each vertical opening protected one of the ways 712 allows",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "712",
+      "section_title": "Vertical Openings",
+      "piece": "712.1",
+      "piece_title": "General"
+     }
+    },
+    {
+     "id": "egress.general.bc_712_1_9_two_story_openings",
+     "rule": "general.bc_712_1_9_two_story_openings",
+     "name": "Egress · Two-story openings, six conditions (BCNYS 712.1.9)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): In other than Groups I-2 and I-3, a vertical opening that is none of 712.1's other cases (an exit access stairway may use it, 1019.3) is permitted only where it connects at most two stories, penetrates no horizontal assembly separating fire areas and no smoke barrier separating smoke compartments, isn't concealed in a wall or floor/ceiling, isn't open to a corridor in Group I or R, isn't open to a corridor on an unsprinklered floor, and is separated from floor and air transfer openings serving other floors by construction as for the required shaft enclosures: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): In other than Groups I-2 and I-3, a vertical opening that is none of 712.1's other cases (an exit access stairway may use it, 1019.3) is permitted only where it connects at most two stories, penetrates no horizontal assembly separating fire areas and no smoke barrier separating smoke compartments, isn't concealed in a wall or floor/ceiling, isn't open to a corridor in Group I or R, isn't open to a corridor on an unsprinklered floor, and is separated from floor and air transfer openings serving other floors by construction as for the required shaft enclosures: a person's check.",
+      "quotes": [
+       {
+        "text": "712.1.9 Two-story openings. In other than Groups I-2 and I-3, a vertical opening that is not used as one of the applications spec- ified in this section shall be permitted if the opening complies with all of the following items: 1. Does not connect more than two stories. 2. Does not penetrate a horizontal assembly that separates fire areas or smoke barriers that separate smoke compartments. 3. Is not concealed within the construction of a wall or a floor/ceiling assembly. 4. Is not open to a corridor in Group I and R occupancies. 5. Is not open to a corridor on nonsprinklered floors. 6. Is separated from floor openings and air transfer openings serving other floors by construction conforming to required shaft enclosures.",
+        "where": "712.1.9, 2025 Building Code of New York State (BCNYS), PDF p.177"
+       }
+      ],
+      "citation": "712.1.9, 2025 Building Code of New York State (BCNYS), PDF p.177",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "712.1.9",
+      "quote": "712.1.9 Two-story openings. In other than Groups I-2 and I-3, a vertical opening that is not used as one of the applications spec- ified in this section shall be permitted if the opening complies with all of the following items: 1. Does not connect more than two stories. 2. Does not penetrate a horizontal assembly that separates fire areas or smoke barriers that separate smoke compartments. 3. Is not concealed within the construction of a wall or a floor/ceiling assembly. 4. Is not open to a corridor in Group I and R occupancies. 5. Is not open to a corridor on nonsprinklered floors. 6. Is separated from floor openings and air transfer openings serving other floors by construction conforming to required shaft enclosures."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_712_1_9_two_story_openings",
+       "words": "A person checks this (Gordium doesn't decide it): In other than Groups I-2 and I-3, a vertical opening that is none of 712.1's other cases (an exit access stairway may use it, 1019.3) is permitted only where it connects at most two stories, penetrates no horizontal assembly separating fire areas and no smoke barrier separating smoke compartments, isn't concealed in a wall or floor/ceiling, isn't open to a corridor in Group I or R, isn't open to a corridor on an unsprinklered floor, and is separated from floor and air transfer openings serving other floors by construction as for the required shaft enclosures: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_712_1_9_two_story_openings",
+       "why": "A person checks this (Gordium doesn't decide it): In other than Groups I-2 and I-3, a vertical opening that is none of 712.1's other cases (an exit access stairway may use it, 1019.3) is permitted only where it connects at most two stories, penetrates no horizontal assembly separating fire areas and no smoke barrier separating smoke compartments, isn't concealed in a wall or floor/ceiling, isn't open to a corridor in Group I or R, isn't open to a corridor on an unsprinklered floor, and is separated from floor and air transfer openings serving other floors by construction as for the required shaft enclosures: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Two-story openings, six conditions",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "712",
+      "section_title": "Vertical Openings",
+      "piece": "712.1.9",
+      "piece_title": "Two-story openings"
+     }
+    },
+    {
+     "id": "egress.general.bc_714_2_penetration_firestop_installation",
+     "rule": "general.bc_714_2_penetration_firestop_installation",
+     "name": "Egress · Listed penetration firestop systems installed per their listing (BCNYS 714.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A listed penetration firestop system is installed per the manufacturer's instructions and its listing: the penetrations aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A listed penetration firestop system is installed per the manufacturer's instructions and its listing: the penetrations aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "714.2 Installation. A listed penetration firestop system shall be installed in accordance with the manufacturer’s installation instruc- tions and the listing criteria.",
+        "where": "714.2, 2025 Building Code of New York State (BCNYS), PDF p.180"
+       }
+      ],
+      "citation": "714.2, 2025 Building Code of New York State (BCNYS), PDF p.180",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "714.2",
+      "quote": "714.2 Installation. A listed penetration firestop system shall be installed in accordance with the manufacturer’s installation instruc- tions and the listing criteria."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_714_2_penetration_firestop_installation",
+       "words": "A person checks this (Gordium doesn't decide it): A listed penetration firestop system is installed per the manufacturer's instructions and its listing: the penetrations aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_714_2_penetration_firestop_installation",
+       "why": "A person checks this (Gordium doesn't decide it): A listed penetration firestop system is installed per the manufacturer's instructions and its listing: the penetrations aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Listed penetration firestop systems installed per their listing",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "714",
+      "section_title": "Penetrations",
+      "piece": "714.2",
+      "piece_title": "Installation"
+     }
+    },
+    {
+     "id": "egress.general.bc_714_3_sleeves",
+     "rule": "general.bc_714_3_sleeves",
+     "name": "Egress · Sleeves through rated assemblies fastened and protected (BCNYS 714.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A sleeve through a rated assembly is securely fastened and installed per its maker's instructions (and the listing, for a listed system); the space inside and around it is protected per Section 714, and insulation or a covering on the item passes through only where tested as part of the assembly: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A sleeve through a rated assembly is securely fastened and installed per its maker's instructions (and the listing, for a listed system); the space inside and around it is protected per Section 714, and insulation or a covering on the item passes through only where tested as part of the assembly: a person's check.",
+      "quotes": [
+       {
+        "text": "714.3 Sleeves. Where sleeves are used, they shall be securely fastened to the assembly penetrated and installed in accordance with the sleeve manufacturer’s installation instructions. Where listed systems are used, the sleeve shall be installed in accordance with the listing criteria for the system. The space between the item contained in the sleeve and the sleeve itself and any space between the sleeve and the assembly penetrated shall be protected in accordance with this section. Insulation and coverings on or in the penetrating item shall not penetrate the assembly unless the specific material used has been tested as part of the assembly in accor- dance with this section.",
+        "where": "714.3, 2025 Building Code of New York State (BCNYS), PDF p.180"
+       }
+      ],
+      "citation": "714.3, 2025 Building Code of New York State (BCNYS), PDF p.180",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "714.3",
+      "quote": "714.3 Sleeves. Where sleeves are used, they shall be securely fastened to the assembly penetrated and installed in accordance with the sleeve manufacturer’s installation instructions. Where listed systems are used, the sleeve shall be installed in accordance with the listing criteria for the system. The space between the item contained in the sleeve and the sleeve itself and any space between the sleeve and the assembly penetrated shall be protected in accordance with this section. Insulation and coverings on or in the penetrating item shall not penetrate the assembly unless the specific material used has been tested as part of the assembly in accor- dance with this section."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_714_3_sleeves",
+       "words": "A person checks this (Gordium doesn't decide it): A sleeve through a rated assembly is securely fastened and installed per its maker's instructions (and the listing, for a listed system); the space inside and around it is protected per Section 714, and insulation or a covering on the item passes through only where tested as part of the assembly: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_714_3_sleeves",
+       "why": "A person checks this (Gordium doesn't decide it): A sleeve through a rated assembly is securely fastened and installed per its maker's instructions (and the listing, for a listed system); the space inside and around it is protected per Section 714, and insulation or a covering on the item passes through only where tested as part of the assembly: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Sleeves through rated assemblies fastened and protected",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "714",
+      "section_title": "Penetrations",
+      "piece": "714.3",
+      "piece_title": "Sleeves"
+     }
+    },
+    {
+     "id": "egress.general.bc_714_4_rated_wall_penetrations",
+     "rule": "general.bc_714_4_rated_wall_penetrations",
+     "name": "Egress · Penetrations of rated walls and smoke barriers (BCNYS 714.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Penetrations into or through fire walls, fire barriers, smoke barrier walls and fire partitions (the walls of exit enclosures and rated corridors among them) meet 714.4.1 to 714.4.3, and those in smoke barrier walls also 714.5.4 (air leakage): a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Penetrations into or through fire walls, fire barriers, smoke barrier walls and fire partitions (the walls of exit enclosures and rated corridors among them) meet 714.4.1 to 714.4.3, and those in smoke barrier walls also 714.5.4 (air leakage): a person's check.",
+      "quotes": [
+       {
+        "text": "714.4 Fire-resistance-rated walls. Penetrations into or through fire walls, fire barriers, smoke barrier walls and fire partitions shall comply with Sections 714.4.1 through 714.4.3. Penetrations in smoke barrier walls shall also comply with Section 714.5.4.",
+        "where": "714.4, 2025 Building Code of New York State (BCNYS), PDF p.180"
+       }
+      ],
+      "citation": "714.4, 2025 Building Code of New York State (BCNYS), PDF p.180",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "714.4",
+      "quote": "714.4 Fire-resistance-rated walls. Penetrations into or through fire walls, fire barriers, smoke barrier walls and fire partitions shall comply with Sections 714.4.1 through 714.4.3. Penetrations in smoke barrier walls shall also comply with Section 714.5.4."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_714_4_rated_wall_penetrations",
+       "words": "A person checks this (Gordium doesn't decide it): Penetrations into or through fire walls, fire barriers, smoke barrier walls and fire partitions (the walls of exit enclosures and rated corridors among them) meet 714.4.1 to 714.4.3, and those in smoke barrier walls also 714.5.4 (air leakage): a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_714_4_rated_wall_penetrations",
+       "why": "A person checks this (Gordium doesn't decide it): Penetrations into or through fire walls, fire barriers, smoke barrier walls and fire partitions (the walls of exit enclosures and rated corridors among them) meet 714.4.1 to 714.4.3, and those in smoke barrier walls also 714.5.4 (air leakage): a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Penetrations of rated walls and smoke barriers",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "714",
+      "section_title": "Penetrations",
+      "piece": "714.4",
+      "piece_title": "Fire-resistance-rated walls"
+     }
+    },
+    {
+     "id": "egress.general.bc_714_4_1_through_penetrations",
+     "rule": "general.bc_714_4_1_through_penetrations",
+     "name": "Egress · Through penetrations of rated walls (BCNYS 714.4.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A through penetration of a rated wall meets 714.4.1.1 or 714.4.1.2; except a steel, ferrous or copper pipe, tube or conduit, whose annular space may be filled with concrete, grout or mortar the full thickness of a concrete or masonry wall (an item at most 6 inches nominal diameter through an opening at most 144 square inches), or with a material that stops flame and hot gases for the wall's rating under ASTM E119 or UL 263 fire conditions at a pressure differential of at least 0.01 inch of water: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A through penetration of a rated wall meets 714.4.1.1 or 714.4.1.2; except a steel, ferrous or copper pipe, tube or conduit, whose annular space may be filled with concrete, grout or mortar the full thickness of a concrete or masonry wall (an item at most 6 inches nominal diameter through an opening at most 144 square inches), or with a material that stops flame and hot gases for the wall's rating under ASTM E119 or UL 263 fire conditions at a pressure differential of at least 0.01 inch of water: a person's check.",
+      "quotes": [
+       {
+        "text": "714.4.1 Through penetrations. Through penetrations of fire-resistance-rated walls shall comply with Section 714.4.1.1 or 714.4.1.2. Exception: Where the penetrating items are steel, ferrous or copper pipes, tubes or conduits, the annular space between the penetrating item and the fire-resistance-rated wall is permitted to be protected by either of the following measures: 1. In concrete or masonry walls where the penetrating item is a maximum 6-inch (152 mm) nominal diameter and the area of the opening through the wall does not exceed 144 square inches (0.0929 m[fn2]), concrete, grout or mortar is permitted where installed the full thickness of the wall or the thickness required to maintain the fire-resistance rating. 2. The material used to fill the annular space shall prevent the passage of flame and hot gases sufficient to ignite cotton waste when subjected to ASTM E119 or UL 263 time-temperature fire conditions under a minimum positive pressure differential of 0.01 inch of water (2.49 Pa) at the location of the penetration for the time period equivalent to the fire- resistance rating of the construction penetrated.",
+        "where": "714.4.1, 2025 Building Code of New York State (BCNYS), PDF p.180"
+       }
+      ],
+      "citation": "714.4.1, 2025 Building Code of New York State (BCNYS), PDF p.180",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "714.4.1",
+      "quote": "714.4.1 Through penetrations. Through penetrations of fire-resistance-rated walls shall comply with Section 714.4.1.1 or 714.4.1.2. Exception: Where the penetrating items are steel, ferrous or copper pipes, tubes or conduits, the annular space between the penetrating item and the fire-resistance-rated wall is permitted to be protected by either of the following measures: 1. In concrete or masonry walls where the penetrating item is a maximum 6-inch (152 mm) nominal diameter and the area of the opening through the wall does not exceed 144 square inches (0.0929 m[fn2]), concrete, grout or mortar is permitted where installed the full thickness of the wall or the thickness required to maintain the fire-resistance rating. 2. The material used to fill the annular space shall prevent the passage of flame and hot gases sufficient to ignite cotton waste when subjected to ASTM E119 or UL 263 time-temperature fire conditions under a minimum positive pressure differential of 0.01 inch of water (2.49 Pa) at the location of the penetration for the time period equivalent to the fire- resistance rating of the construction penetrated."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_714_4_1_through_penetrations",
+       "words": "A person checks this (Gordium doesn't decide it): A through penetration of a rated wall meets 714.4.1.1 or 714.4.1.2; except a steel, ferrous or copper pipe, tube or conduit, whose annular space may be filled with concrete, grout or mortar the full thickness of a concrete or masonry wall (an item at most 6 inches nominal diameter through an opening at most 144 square inches), or with a material that stops flame and hot gases for the wall's rating under ASTM E119 or UL 263 fire conditions at a pressure differential of at least 0.01 inch of water: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_714_4_1_through_penetrations",
+       "why": "A person checks this (Gordium doesn't decide it): A through penetration of a rated wall meets 714.4.1.1 or 714.4.1.2; except a steel, ferrous or copper pipe, tube or conduit, whose annular space may be filled with concrete, grout or mortar the full thickness of a concrete or masonry wall (an item at most 6 inches nominal diameter through an opening at most 144 square inches), or with a material that stops flame and hot gases for the wall's rating under ASTM E119 or UL 263 fire conditions at a pressure differential of at least 0.01 inch of water: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Through penetrations of rated walls",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "714",
+      "section_title": "Penetrations",
+      "piece": "714.4.1",
+      "piece_title": "Through penetrations"
+     }
+    },
+    {
+     "id": "egress.general.bc_714_4_1_1_tested_assembly_penetrations",
+     "rule": "general.bc_714_4_1_1_tested_assembly_penetrations",
+     "name": "Egress · Through penetrations protected as tested in the assembly (BCNYS 714.4.1.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Through penetrations are protected by systems installed as tested in the approved rated assembly: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Through penetrations are protected by systems installed as tested in the approved rated assembly: a person's check.",
+      "quotes": [
+       {
+        "text": "714.4.1.1 Fire-resistance-rated assemblies. Through penetrations shall be protected using systems installed as tested in the approved fire-resistance-rated assembly.",
+        "where": "714.4.1.1, 2025 Building Code of New York State (BCNYS), PDF p.180"
+       }
+      ],
+      "citation": "714.4.1.1, 2025 Building Code of New York State (BCNYS), PDF p.180",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "714.4.1.1",
+      "quote": "714.4.1.1 Fire-resistance-rated assemblies. Through penetrations shall be protected using systems installed as tested in the approved fire-resistance-rated assembly."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_714_4_1_1_tested_assembly_penetrations",
+       "words": "A person checks this (Gordium doesn't decide it): Through penetrations are protected by systems installed as tested in the approved rated assembly: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_714_4_1_1_tested_assembly_penetrations",
+       "why": "A person checks this (Gordium doesn't decide it): Through penetrations are protected by systems installed as tested in the approved rated assembly: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Through penetrations protected as tested in the assembly",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "714",
+      "section_title": "Penetrations",
+      "piece": "714.4.1.1",
+      "piece_title": "Fire-resistance-rated assemblies"
+     }
+    },
+    {
+     "id": "egress.general.bc_714_4_1_2_through_penetration_firestop",
+     "rule": "general.bc_714_4_1_2_through_penetration_firestop",
+     "name": "Egress · Through-penetration firestop systems, F rating of the wall (BCNYS 714.4.1.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Or by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential of at least 0.01 inch of water, with an F rating at least the wall's required rating: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Or by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential of at least 0.01 inch of water, with an F rating at least the wall's required rating: a person's check.",
+      "quotes": [
+       {
+        "text": "714.4.1.2 Through-penetration firestop system. Through penetrations shall be protected by an approved penetration firestop system installed as tested in accordance with ASTM E814 or UL 1479, with a minimum positive pressure differential of 0.01 inch of water (2.49 Pa) and shall have an F rating of not less than the required fire-resistance rating of the wall penetrated.",
+        "where": "714.4.1.2, 2025 Building Code of New York State (BCNYS), PDF p.180"
+       }
+      ],
+      "citation": "714.4.1.2, 2025 Building Code of New York State (BCNYS), PDF p.180",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "714.4.1.2",
+      "quote": "714.4.1.2 Through-penetration firestop system. Through penetrations shall be protected by an approved penetration firestop system installed as tested in accordance with ASTM E814 or UL 1479, with a minimum positive pressure differential of 0.01 inch of water (2.49 Pa) and shall have an F rating of not less than the required fire-resistance rating of the wall penetrated."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_714_4_1_2_through_penetration_firestop",
+       "words": "A person checks this (Gordium doesn't decide it): Or by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential of at least 0.01 inch of water, with an F rating at least the wall's required rating: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_714_4_1_2_through_penetration_firestop",
+       "why": "A person checks this (Gordium doesn't decide it): Or by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential of at least 0.01 inch of water, with an F rating at least the wall's required rating: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Through-penetration firestop systems, F rating of the wall",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "714",
+      "section_title": "Penetrations",
+      "piece": "714.4.1.2",
+      "piece_title": "Through-penetration firestop system"
+     }
+    },
+    {
+     "id": "egress.general.bc_714_4_2_membrane_penetrations",
+     "rule": "general.bc_714_4_2_membrane_penetrations",
+     "name": "Egress · Membrane penetrations of rated walls (BCNYS 714.4.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A membrane penetration of a rated wall meets 714.4.1, and recessed fixtures don't reduce the wall's rating; except steel electrical boxes in walls rated at most 2 hours, each at most 16 square inches, at most 100 square inches of openings in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches apart where the stud cavities don't communicate (or the wall cavity's depth where filled with cellulose, rockwool or slag wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes per their listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); boxes listed with a wall opening protective system; other boxes in a membrane firestop system per ASTM E814 or UL 1479 with F and T ratings of the wall; sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or listed means: a person's check (1023.5 allows membrane penetrations on the outside of an exit stairway enclosure only so protected).",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A membrane penetration of a rated wall meets 714.4.1, and recessed fixtures don't reduce the wall's rating; except steel electrical boxes in walls rated at most 2 hours, each at most 16 square inches, at most 100 square inches of openings in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches apart where the stud cavities don't communicate (or the wall cavity's depth where filled with cellulose, rockwool or slag wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes per their listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); boxes listed with a wall opening protective system; other boxes in a membrane firestop system per ASTM E814 or UL 1479 with F and T ratings of the wall; sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or listed means: a person's check (1023.5 allows membrane penetrations on the outside of an exit stairway enclosure only so protected).",
+      "quotes": [
+       {
+        "text": "714.4.2 Membrane penetrations. Membrane penetrations shall comply with Section 714.4.1. Where walls or partitions are required to have a fire-resistance rating, recessed fixtures shall be installed such that the required fire resistance will not be reduced. Exceptions: 1. Membrane penetrations of maximum 2-hour fire-resistance-rated walls and partitions by steel electrical boxes that do not exceed 16 square inches (0.0 103 m[fn2]) in area, provided that the aggregate area of the openings through the membrane does not exceed 100 square inches (0.0645 m[fn2]) in any 100 square feet (9.29 m[fn2]) of wall area. The annular space between the wall membrane and the box shall not exceed 1/8 inch (3.2 mm). Such boxes on opposite sides of the wall or partition shall be separated by one of the following: 1.1. By a horizontal distance of not less than 24 inches (610 mm) where the wall or partition is constructed with individual noncommunicating stud cavities. 1.2. By a horizontal distance of not less than the depth of the wall cavity where the wall cavity is filled with cellu- lose loose-fill, rockwool or slag mineral wool insulation. 1.3. By solid fireblocking in accordance with Section 718.2.1. 1.4. By protecting both outlet boxes with listed putty pads. 1.5. By other listed materials and methods. 2. Membrane penetrations by listed electrical boxes of any material, provided that such boxes have been tested for use in fire-resistance-rated assemblies and are installed in accordance with the instructions included in the listing. The annular space between the wall membrane and the box shall not exceed 1/8 inch (3.2 mm) unless listed otherwise. Such boxes on opposite sides of the wall or partition shall be separated by one of the following: 2.1. By the horizontal distance specified in the listing of the electrical boxes. 2.2. By solid fireblocking in accordance with Section 718.2.1. 2.3. By protecting both boxes with listed putty pads. 2.4. By other listed materials and methods.",
+        "where": "714.4.2, 2025 Building Code of New York State (BCNYS), PDF p.180"
+       },
+       {
+        "text": "3. Membrane penetrations by electrical boxes of any size or type, that have been listed as part of a wall opening protec- tive material system for use in fire-resistance-rated assemblies and are installed in accordance with the instructions included in the listing. 4. Membrane penetrations by boxes other than electrical boxes, provided that such penetrating items and the annular space between the wall membrane and the box, are protected by an approved membrane penetration firestop system installed as tested in accordance with ASTM E814 or UL 1479, with a minimum positive pressure differential of 0.01 inch of water (2.49 Pa), and shall have an F and T rating of not less than the required fire-resistance rating of the wall penetrated and be installed in accordance with their listing. 5. The annular space created by the penetration of an automatic sprinkler, provided that it is covered by a metal escutcheon plate. 6. Membrane penetrations of maximum 2-hour fire-resistance-rated walls and partitions by steel electrical boxes that exceed 16 square inches (0.0 103 m[fn2]) in area, or steel electrical boxes of any size having an aggregate area through the membrane exceeding 100 square inches (0.0645 m[fn2]) in any 100 square feet (9.29 m[fn2]) of wall area, provided that such penetrating items are protected by listed putty pads or other listed materials and methods, and installed in accor- dance with the listing.",
+        "where": "714.4.2, 2025 Building Code of New York State (BCNYS), PDF p.181"
+       }
+      ],
+      "citation": "714.4.2, 2025 Building Code of New York State (BCNYS), PDF p.180",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "714.4.2",
+      "quote": "714.4.2 Membrane penetrations. Membrane penetrations shall comply with Section 714.4.1. Where walls or partitions are required to have a fire-resistance rating, recessed fixtures shall be installed such that the required fire resistance will not be reduced. Exceptions: 1. Membrane penetrations of maximum 2-hour fire-resistance-rated walls and partitions by steel electrical boxes that do not exceed 16 square inches (0.0 103 m[fn2]) in area, provided that the aggregate area of the openings through the membrane does not exceed 100 square inches (0.0645 m[fn2]) in any 100 square feet (9.29 m[fn2]) of wall area. The annular space between the wall membrane and the box shall not exceed 1/8 inch (3.2 mm). Such boxes on opposite sides of the wall or partition shall be separated by one of the following: 1.1. By a horizontal distance of not less than 24 inches (610 mm) where the wall or partition is constructed with individual noncommunicating stud cavities. 1.2. By a horizontal distance of not less than the depth of the wall cavity where the wall cavity is filled with cellu- lose loose-fill, rockwool or slag mineral wool insulation. 1.3. By solid fireblocking in accordance with Section 718.2.1. 1.4. By protecting both outlet boxes with listed putty pads. 1.5. By other listed materials and methods. 2. Membrane penetrations by listed electrical boxes of any material, provided that such boxes have been tested for use in fire-resistance-rated assemblies and are installed in accordance with the instructions included in the listing. The annular space between the wall membrane and the box shall not exceed 1/8 inch (3.2 mm) unless listed otherwise. Such boxes on opposite sides of the wall or partition shall be separated by one of the following: 2.1. By the horizontal distance specified in the listing of the electrical boxes. 2.2. By solid fireblocking in accordance with Section 718.2.1. 2.3. By protecting both boxes with listed putty pads. 2.4. By other listed materials and methods."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_714_4_2_membrane_penetrations",
+       "words": "A person checks this (Gordium doesn't decide it): A membrane penetration of a rated wall meets 714.4.1, and recessed fixtures don't reduce the wall's rating; except steel electrical boxes in walls rated at most 2 hours, each at most 16 square inches, at most 100 square inches of openings in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches apart where the stud cavities don't communicate (or the wall cavity's depth where filled with cellulose, rockwool or slag wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes per their listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); boxes listed with a wall opening protective system; other boxes in a membrane firestop system per ASTM E814 or UL 1479 with F and T ratings of the wall; sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or listed means: a person's check (1023.5 allows membrane penetrations on the outside of an exit stairway enclosure only so protected).",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_714_4_2_membrane_penetrations",
+       "why": "A person checks this (Gordium doesn't decide it): A membrane penetration of a rated wall meets 714.4.1, and recessed fixtures don't reduce the wall's rating; except steel electrical boxes in walls rated at most 2 hours, each at most 16 square inches, at most 100 square inches of openings in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches apart where the stud cavities don't communicate (or the wall cavity's depth where filled with cellulose, rockwool or slag wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes per their listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); boxes listed with a wall opening protective system; other boxes in a membrane firestop system per ASTM E814 or UL 1479 with F and T ratings of the wall; sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or listed means: a person's check (1023.5 allows membrane penetrations on the outside of an exit stairway enclosure only so protected).",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Membrane penetrations of rated walls",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "714",
+      "section_title": "Penetrations",
+      "piece": "714.4.2",
+      "piece_title": "Membrane penetrations"
+     }
+    },
+    {
+     "id": "egress.general.bc_714_4_3_dissimilar_materials",
+     "rule": "general.bc_714_4_3_dissimilar_materials",
+     "name": "Egress · Noncombustible penetrations not joined to combustible ones (BCNYS 714.4.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A noncombustible penetrating item doesn't connect to combustible items beyond the firestopping unless the wall's fire resistance is shown to be kept: a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A noncombustible penetrating item doesn't connect to combustible items beyond the firestopping unless the wall's fire resistance is shown to be kept: a person's check.",
+      "quotes": [
+       {
+        "text": "714.4.3 Dissimilar materials. Noncombustible penetrating items shall not connect to combustible items beyond the point of firestopping unless it can be demonstrated that the fire-resistance integrity of the wall is maintained.",
+        "where": "714.4.3, 2025 Building Code of New York State (BCNYS), PDF p.181"
+       }
+      ],
+      "citation": "714.4.3, 2025 Building Code of New York State (BCNYS), PDF p.181",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "714.4.3",
+      "quote": "714.4.3 Dissimilar materials. Noncombustible penetrating items shall not connect to combustible items beyond the point of firestopping unless it can be demonstrated that the fire-resistance integrity of the wall is maintained."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_714_4_3_dissimilar_materials",
+       "words": "A person checks this (Gordium doesn't decide it): A noncombustible penetrating item doesn't connect to combustible items beyond the firestopping unless the wall's fire resistance is shown to be kept: a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_714_4_3_dissimilar_materials",
+       "why": "A person checks this (Gordium doesn't decide it): A noncombustible penetrating item doesn't connect to combustible items beyond the firestopping unless the wall's fire resistance is shown to be kept: a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Noncombustible penetrations not joined to combustible ones",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "714",
+      "section_title": "Penetrations",
+      "piece": "714.4.3",
+      "piece_title": "Dissimilar materials"
+     }
+    },
+    {
      "id": "egress.general.bc_1004_7_outdoor_areas",
      "rule": "general.bc_1004_7_outdoor_areas",
      "name": "Egress · Outdoor areas: means of egress and occupant load (BCNYS 1004.7)",
@@ -75257,7 +76397,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 155 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 171 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -75857,6 +76997,22 @@
       "egress.general.bc_710_6_smoke_partition_penetrations",
       "egress.general.bc_710_7_smoke_partition_joints",
       "egress.general.bc_710_8_smoke_partition_ducts",
+      "egress.general.bc_711_2_2_horizontal_assembly_continuity",
+      "egress.general.bc_711_2_3_horizontal_assembly_support",
+      "egress.general.bc_711_2_4_horizontal_assembly_rating",
+      "egress.general.bc_711_2_4_4_smoke_compartment_floors",
+      "egress.general.bc_711_2_4_6_other_horizontal_separations",
+      "egress.general.bc_711_3_2_unrated_floor_continuity",
+      "egress.general.bc_712_1_vertical_openings",
+      "egress.general.bc_712_1_9_two_story_openings",
+      "egress.general.bc_714_2_penetration_firestop_installation",
+      "egress.general.bc_714_3_sleeves",
+      "egress.general.bc_714_4_rated_wall_penetrations",
+      "egress.general.bc_714_4_1_through_penetrations",
+      "egress.general.bc_714_4_1_1_tested_assembly_penetrations",
+      "egress.general.bc_714_4_1_2_through_penetration_firestop",
+      "egress.general.bc_714_4_2_membrane_penetrations",
+      "egress.general.bc_714_4_3_dissimilar_materials",
       "egress.general.bc_1004_7_outdoor_areas",
       "egress.general.bc_1004_9_posting",
       "egress.general.bc_table_1006_2_1_other_occupancies",
@@ -77561,6 +78717,214 @@
        "name": "Egress · Ducts and air transfer openings through smoke partitions (BCNYS 710.8)"
       },
       {
+       "key": "review#efee91c83a",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_711_2_2_horizontal_assembly_continuity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Rated floors and roofs continuous, no vertical openings (BCNYS 711.2.2): A person checks this (Gordium doesn't decide it): A horizontal assembly (a rated floor or roof, the top or bottom of an exit enclosure among them) is continuous, with no vertical openings but those this section and Section 712 permit: the floors' openings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Rated floors and roofs continuous, no vertical openings (BCNYS 711.2.2)"
+      },
+      {
+       "key": "review#d6ffbecdb5",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_711_2_3_horizontal_assembly_support"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · What holds up a rated floor or roof has its rating (BCNYS 711.2.3): A person checks this (Gordium doesn't decide it): The construction supporting a horizontal assembly is protected to its required rating; except, in Types IIB, IIIB and VB, at incidental use separations rated at most 1 hour (Table 509.1), dwelling and sleeping unit separations (420.3), and smoke barriers per 709: the structure isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · What holds up a rated floor or roof has its rating (BCNYS 711.2.3)"
+      },
+      {
+       "key": "review#207623a18e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_711_2_4_horizontal_assembly_rating"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Rating of rated floors and roofs (BCNYS 711.2.4): A person checks this (Gordium doesn't decide it): A horizontal assembly is rated as 711.2.4.1 to 711.2.4.6 ask, and at least as the building's type of construction asks (Table 601): the floors' ratings and the type of construction aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Rating of rated floors and roofs (BCNYS 711.2.4)"
+      },
+      {
+       "key": "review#5e7827435b",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_711_2_4_4_smoke_compartment_floors"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Floors that separate smoke compartments are smoke barriers (BCNYS 711.2.4.4): A person checks this (Gordium doesn't decide it): Where a horizontal assembly must be a smoke barrier (between smoke compartments), it meets Section 709: a person's check.",
+       "mark": "?",
+       "name": "Egress · Floors that separate smoke compartments are smoke barriers (BCNYS 711.2.4.4)"
+      },
+      {
+       "key": "review#9e39e97d0e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_711_2_4_6_other_horizontal_separations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Floors other sections require, at those sections' ratings (BCNYS 711.2.4.6): A person checks this (Gordium doesn't decide it): Where another section requires a horizontal assembly (an exit stairway's or passageway's enclosure top or bottom, 1023.2 and 1024.3; a shaft's, 713), it is rated at least as that section asks: a person's check.",
+       "mark": "?",
+       "name": "Egress · Floors other sections require, at those sections' ratings (BCNYS 711.2.4.6)"
+      },
+      {
+       "key": "review#91fc060558",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_711_3_2_unrated_floor_continuity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Unrated floors and roofs continuous, no vertical openings (BCNYS 711.3.2): A person checks this (Gordium doesn't decide it): A floor or roof not required to be rated is continuous, with no vertical openings but those Section 712 permits (an exit access stairway per 1019, 712.1.12; a two-story opening, 712.1.9): the floors' openings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Unrated floors and roofs continuous, no vertical openings (BCNYS 711.3.2)"
+      },
+      {
+       "key": "review#0004301a0c",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_712_1_vertical_openings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Each vertical opening protected one of the ways 712 allows (BCNYS 712.1): A person checks this (Gordium doesn't decide it): Each vertical opening (a stair, ramp, elevator, duct or other opening through a floor) is protected by one of the methods of 712.1.1 to 712.1.16: in a shaft enclosure per 713 (712.1.1), a two-story opening (712.1.9), an exit access stairway or ramp per 1019 (712.1.12), or another the section lists (escalators, atriums, parking garages, mezzanines, and the like, 712.1.2 to 712.1.8, 712.1.10, 712.1.11, 712.1.13 to 712.1.16): which openings the floors have, and how each is protected, aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Each vertical opening protected one of the ways 712 allows (BCNYS 712.1)"
+      },
+      {
+       "key": "review#e87f21aa30",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_712_1_9_two_story_openings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Two-story openings, six conditions (BCNYS 712.1.9): A person checks this (Gordium doesn't decide it): In other than Groups I-2 and I-3, a vertical opening that is none of 712.1's other cases (an exit access stairway may use it, 1019.3) is permitted only where it connects at most two stories, penetrates no horizontal assembly separating fire areas and no smoke barrier separating smoke compartments, isn't concealed in a wall or floor/ceiling, isn't open to a corridor in Group I or R, isn't open to a corridor on an unsprinklered floor, and is separated from floor and air transfer openings serving other floors by construction as for the required shaft enclosures: a person's check.",
+       "mark": "?",
+       "name": "Egress · Two-story openings, six conditions (BCNYS 712.1.9)"
+      },
+      {
+       "key": "review#c7d2b24c58",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_714_2_penetration_firestop_installation"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Listed penetration firestop systems installed per their listing (BCNYS 714.2): A person checks this (Gordium doesn't decide it): A listed penetration firestop system is installed per the manufacturer's instructions and its listing: the penetrations aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Listed penetration firestop systems installed per their listing (BCNYS 714.2)"
+      },
+      {
+       "key": "review#3399381ec2",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_714_3_sleeves"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Sleeves through rated assemblies fastened and protected (BCNYS 714.3): A person checks this (Gordium doesn't decide it): A sleeve through a rated assembly is securely fastened and installed per its maker's instructions (and the listing, for a listed system); the space inside and around it is protected per Section 714, and insulation or a covering on the item passes through only where tested as part of the assembly: a person's check.",
+       "mark": "?",
+       "name": "Egress · Sleeves through rated assemblies fastened and protected (BCNYS 714.3)"
+      },
+      {
+       "key": "review#8b0318d1dc",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_714_4_rated_wall_penetrations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Penetrations of rated walls and smoke barriers (BCNYS 714.4): A person checks this (Gordium doesn't decide it): Penetrations into or through fire walls, fire barriers, smoke barrier walls and fire partitions (the walls of exit enclosures and rated corridors among them) meet 714.4.1 to 714.4.3, and those in smoke barrier walls also 714.5.4 (air leakage): a person's check.",
+       "mark": "?",
+       "name": "Egress · Penetrations of rated walls and smoke barriers (BCNYS 714.4)"
+      },
+      {
+       "key": "review#0b2688f3c8",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_714_4_1_through_penetrations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Through penetrations of rated walls (BCNYS 714.4.1): A person checks this (Gordium doesn't decide it): A through penetration of a rated wall meets 714.4.1.1 or 714.4.1.2; except a steel, ferrous or copper pipe, tube or conduit, whose annular space may be filled with concrete, grout or mortar the full thickness of a concrete or masonry wall (an item at most 6 inches nominal diameter through an opening at most 144 square inches), or with a material that stops flame and hot gases for the wall's rating under ASTM E119 or UL 263 fire conditions at a pressure differential of at least 0.01 inch of water: a person's check.",
+       "mark": "?",
+       "name": "Egress · Through penetrations of rated walls (BCNYS 714.4.1)"
+      },
+      {
+       "key": "review#0e660bf76c",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_714_4_1_1_tested_assembly_penetrations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Through penetrations protected as tested in the assembly (BCNYS 714.4.1.1): A person checks this (Gordium doesn't decide it): Through penetrations are protected by systems installed as tested in the approved rated assembly: a person's check.",
+       "mark": "?",
+       "name": "Egress · Through penetrations protected as tested in the assembly (BCNYS 714.4.1.1)"
+      },
+      {
+       "key": "review#433fbe0913",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_714_4_1_2_through_penetration_firestop"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Through-penetration firestop systems, F rating of the wall (BCNYS 714.4.1.2): A person checks this (Gordium doesn't decide it): Or by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential of at least 0.01 inch of water, with an F rating at least the wall's required rating: a person's check.",
+       "mark": "?",
+       "name": "Egress · Through-penetration firestop systems, F rating of the wall (BCNYS 714.4.1.2)"
+      },
+      {
+       "key": "review#3a1a94f6b7",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_714_4_2_membrane_penetrations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Membrane penetrations of rated walls (BCNYS 714.4.2): A person checks this (Gordium doesn't decide it): A membrane penetration of a rated wall meets 714.4.1, and recessed fixtures don't reduce the wall's rating; except steel electrical boxes in walls rated at most 2 hours, each at most 16 square inches, at most 100 square inches of openings in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches apart where the stud cavities don't communicate (or the wall cavity's depth where filled with cellulose, rockwool or slag wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes per their listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); boxes listed with a wall opening protective system; other boxes in a membrane firestop system per ASTM E814 or UL 1479 with F and T ratings of the wall; sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or listed means: a person's check (1023.5 allows membrane penetrations on the outside of an exit stairway enclosure only so protected).",
+       "mark": "?",
+       "name": "Egress · Membrane penetrations of rated walls (BCNYS 714.4.2)"
+      },
+      {
+       "key": "review#7a3506fe36",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_714_4_3_dissimilar_materials"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Noncombustible penetrations not joined to combustible ones (BCNYS 714.4.3): A person checks this (Gordium doesn't decide it): A noncombustible penetrating item doesn't connect to combustible items beyond the firestopping unless the wall's fire resistance is shown to be kept: a person's check.",
+       "mark": "?",
+       "name": "Egress · Noncombustible penetrations not joined to combustible ones (BCNYS 714.4.3)"
+      },
+      {
        "key": "review#0c7dd9ebb8",
        "tier": "review",
        "items": [
@@ -78107,7 +79471,7 @@
        "name": "Egress · Nothing projects into a door's clear opening (BCNYS 1010.1.1.1)"
       }
      ],
-     "count": 155,
+     "count": 171,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -79344,6 +80708,166 @@
        "rules": 1
       },
       {
+       "key": "reason:egress.general.bc_711_2_2_horizontal_assembly_continuity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A horizontal assembly (a rated floor or roof, the top or bottom of an exit enclosure among them) is continuous, with no vertical openings but those this section and Section 712 permit: the floors' openings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_711_2_2_horizontal_assembly_continuity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_711_2_3_horizontal_assembly_support",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The construction supporting a horizontal assembly is protected to its required rating; except, in Types IIB, IIIB and VB, at incidental use separations rated at most 1 hour (Table 509.1), dwelling and sleeping unit separations (420.3), and smoke barriers per 709: the structure isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_711_2_3_horizontal_assembly_support"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_711_2_4_horizontal_assembly_rating",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A horizontal assembly is rated as 711.2.4.1 to 711.2.4.6 ask, and at least as the building's type of construction asks (Table 601): the floors' ratings and the type of construction aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_711_2_4_horizontal_assembly_rating"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_711_2_4_4_smoke_compartment_floors",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Where a horizontal assembly must be a smoke barrier (between smoke compartments), it meets Section 709: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_711_2_4_4_smoke_compartment_floors"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_711_2_4_6_other_horizontal_separations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Where another section requires a horizontal assembly (an exit stairway's or passageway's enclosure top or bottom, 1023.2 and 1024.3; a shaft's, 713), it is rated at least as that section asks: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_711_2_4_6_other_horizontal_separations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_711_3_2_unrated_floor_continuity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A floor or roof not required to be rated is continuous, with no vertical openings but those Section 712 permits (an exit access stairway per 1019, 712.1.12; a two-story opening, 712.1.9): the floors' openings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_711_3_2_unrated_floor_continuity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_712_1_vertical_openings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Each vertical opening (a stair, ramp, elevator, duct or other opening through a floor) is protected by one of the methods of 712.1.1 to 712.1.16: in a shaft enclosure per 713 (712.1.1), a two-story opening (712.1.9), an exit access stairway or ramp per 1019 (712.1.12), or another the section lists (escalators, atriums, parking garages, mezzanines, and the like, 712.1.2 to 712.1.8, 712.1.10, 712.1.11, 712.1.13 to 712.1.16): which openings the floors have, and how each is protected, aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_712_1_vertical_openings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_712_1_9_two_story_openings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): In other than Groups I-2 and I-3, a vertical opening that is none of 712.1's other cases (an exit access stairway may use it, 1019.3) is permitted only where it connects at most two stories, penetrates no horizontal assembly separating fire areas and no smoke barrier separating smoke compartments, isn't concealed in a wall or floor/ceiling, isn't open to a corridor in Group I or R, isn't open to a corridor on an unsprinklered floor, and is separated from floor and air transfer openings serving other floors by construction as for the required shaft enclosures: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_712_1_9_two_story_openings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_714_2_penetration_firestop_installation",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A listed penetration firestop system is installed per the manufacturer's instructions and its listing: the penetrations aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_714_2_penetration_firestop_installation"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_714_3_sleeves",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A sleeve through a rated assembly is securely fastened and installed per its maker's instructions (and the listing, for a listed system); the space inside and around it is protected per Section 714, and insulation or a covering on the item passes through only where tested as part of the assembly: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_714_3_sleeves"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_714_4_rated_wall_penetrations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Penetrations into or through fire walls, fire barriers, smoke barrier walls and fire partitions (the walls of exit enclosures and rated corridors among them) meet 714.4.1 to 714.4.3, and those in smoke barrier walls also 714.5.4 (air leakage): a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_714_4_rated_wall_penetrations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_714_4_1_through_penetrations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A through penetration of a rated wall meets 714.4.1.1 or 714.4.1.2; except a steel, ferrous or copper pipe, tube or conduit, whose annular space may be filled with concrete, grout or mortar the full thickness of a concrete or masonry wall (an item at most 6 inches nominal diameter through an opening at most 144 square inches), or with a material that stops flame and hot gases for the wall's rating under ASTM E119 or UL 263 fire conditions at a pressure differential of at least 0.01 inch of water: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_714_4_1_through_penetrations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_714_4_1_1_tested_assembly_penetrations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Through penetrations are protected by systems installed as tested in the approved rated assembly: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_714_4_1_1_tested_assembly_penetrations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_714_4_1_2_through_penetration_firestop",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Or by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential of at least 0.01 inch of water, with an F rating at least the wall's required rating: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_714_4_1_2_through_penetration_firestop"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_714_4_2_membrane_penetrations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A membrane penetration of a rated wall meets 714.4.1, and recessed fixtures don't reduce the wall's rating; except steel electrical boxes in walls rated at most 2 hours, each at most 16 square inches, at most 100 square inches of openings in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches apart where the stud cavities don't communicate (or the wall cavity's depth where filled with cellulose, rockwool or slag wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes per their listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); boxes listed with a wall opening protective system; other boxes in a membrane firestop system per ASTM E814 or UL 1479 with F and T ratings of the wall; sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed putty pads or listed means: a person's check (1023.5 allows membrane penetrations on the outside of an exit stairway enclosure only so protected).",
+       "elements": [],
+       "items": [
+        "egress.general.bc_714_4_2_membrane_penetrations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_714_4_3_dissimilar_materials",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A noncombustible penetrating item doesn't connect to combustible items beyond the firestopping unless the wall's fire resistance is shown to be kept: a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_714_4_3_dissimilar_materials"
+       ],
+       "rules": 1
+      },
+      {
        "key": "reason:egress.general.bc_1004_7_outdoor_areas",
        "kind": "decide",
        "words": "A person checks this (Gordium doesn't decide it): Yards, patios, occupiable roofs or courts the occupants use: their means of egress and the occupant load the building official assigns are a person's check.",
@@ -80115,7 +81639,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "155 to review · 30 comply"
+     "summary": "171 to review · 30 comply"
     }
    ],
    "contents": [
@@ -92382,7 +93906,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 204
+          "not_for_checking": 219
          },
          "pieces": [
           {
@@ -92448,6 +93972,12 @@
           {
            "id": "202:ambulatory_care_facility",
            "title": "AMBULATORY CARE FACILITY",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:annular_space",
+           "title": "ANNULAR SPACE",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -92604,6 +94134,18 @@
           {
            "id": "202:compressed_gas",
            "title": "COMPRESSED GAS",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:concrete",
+           "title": "CONCRETE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:continuity_head_of_wall_system",
+           "title": "CONTINUITY HEAD-OF-WALL SYSTEM",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -92800,6 +94342,12 @@
            "rules": []
           },
           {
+           "id": "202:f_rating",
+           "title": "F RATING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:fabrication_area",
            "title": "FABRICATION AREA",
            "coverage": "not_for_checking",
@@ -92808,6 +94356,12 @@
           {
            "id": "202:facility",
            "title": "FACILITY",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_area",
+           "title": "FIRE AREA",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -92904,6 +94458,24 @@
           {
            "id": "202:fire_resistance_rating",
            "title": "FIRE-RESISTANCE RATING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:firestop_membrane_penetration",
+           "title": "FIRESTOP, MEMBRANE-PENETRATION",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:firestop_penetration",
+           "title": "FIRESTOP, PENETRATION",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:firestop_system_through_penetration",
+           "title": "FIRESTOP SYSTEM, THROUGH-PENETRATION",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -93166,6 +94738,18 @@
            "rules": []
           },
           {
+           "id": "202:membrane_penetration_firestop",
+           "title": "MEMBRANE-PENETRATION FIRESTOP",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:membrane_penetration_firestop_system",
+           "title": "MEMBRANE-PENETRATION FIRESTOP SYSTEM",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:merchandise_pad",
            "title": "MERCHANDISE PAD",
            "coverage": "not_for_checking",
@@ -93174,6 +94758,12 @@
           {
            "id": "202:mezzanine",
            "title": "MEZZANINE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:mineral_wool",
+           "title": "MINERAL WOOL",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -93246,6 +94836,12 @@
           {
            "id": "202:panic_hardware",
            "title": "PANIC HARDWARE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:penetration_firestop",
+           "title": "PENETRATION FIRESTOP",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -93526,6 +95122,12 @@
            "rules": []
           },
           {
+           "id": "202:t_rating",
+           "title": "T RATING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:temporary_structure",
            "title": "TEMPORARY STRUCTURE",
            "coverage": "not_for_checking",
@@ -93534,6 +95136,18 @@
           {
            "id": "202:terminated_stops",
            "title": "TERMINATED STOPS",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:through_penetration",
+           "title": "THROUGH PENETRATION",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:through_penetration_firestop_system",
+           "title": "THROUGH-PENETRATION FIRESTOP SYSTEM",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -94794,19 +96408,121 @@
          "number": "711",
          "title": "Floor and Roof Assemblies",
          "book_page": 155,
-         "coverage": "not_brought_in",
+         "coverage": "flag",
          "whole": false,
-         "counts": {},
-         "pieces": []
+         "counts": {
+          "flag": 6,
+          "not_for_checking": 3
+         },
+         "pieces": [
+          {
+           "id": "711.2.2",
+           "title": "Continuity",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_711_2_2_horizontal_assembly_continuity"
+           ]
+          },
+          {
+           "id": "711.2.3",
+           "title": "Supporting construction",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_711_2_3_horizontal_assembly_support"
+           ]
+          },
+          {
+           "id": "711.2.4",
+           "title": "Fire-resistance rating",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_711_2_4_horizontal_assembly_rating"
+           ]
+          },
+          {
+           "id": "711.2.4.4",
+           "title": "Separating smoke compartments",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_711_2_4_4_smoke_compartment_floors"
+           ]
+          },
+          {
+           "id": "711.2.4.6",
+           "title": "Other separations",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_711_2_4_6_other_horizontal_separations"
+           ]
+          },
+          {
+           "id": "711.3.2",
+           "title": "Continuity",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_711_3_2_unrated_floor_continuity"
+           ]
+          },
+          {
+           "id": "711.1",
+           "title": "General",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "711.2",
+           "title": "Horizontal assemblies",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "711.3",
+           "title": "Nonfire-resistance-rated floor and roof assemblies",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "712",
          "title": "Vertical Openings",
          "book_page": 155,
-         "coverage": "not_brought_in",
+         "coverage": "flag",
          "whole": false,
-         "counts": {},
-         "pieces": []
+         "counts": {
+          "flag": 2,
+          "not_for_checking": 2
+         },
+         "pieces": [
+          {
+           "id": "712.1",
+           "title": "General",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_712_1_vertical_openings"
+           ]
+          },
+          {
+           "id": "712.1.9",
+           "title": "Two-story openings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_712_1_9_two_story_openings"
+           ]
+          },
+          {
+           "id": "712.1.1",
+           "title": "Shaft enclosures",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "712.1.12",
+           "title": "Exit access stairways and ramps",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "713",
@@ -94936,10 +96652,90 @@
          "number": "714",
          "title": "Penetrations",
          "book_page": 159,
-         "coverage": "not_brought_in",
+         "coverage": "flag",
          "whole": false,
-         "counts": {},
-         "pieces": []
+         "counts": {
+          "flag": 8,
+          "not_for_checking": 2
+         },
+         "pieces": [
+          {
+           "id": "714.2",
+           "title": "Installation",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_714_2_penetration_firestop_installation"
+           ]
+          },
+          {
+           "id": "714.3",
+           "title": "Sleeves",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_714_3_sleeves"
+           ]
+          },
+          {
+           "id": "714.4",
+           "title": "Fire-resistance-rated walls",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_714_4_rated_wall_penetrations"
+           ]
+          },
+          {
+           "id": "714.4.1",
+           "title": "Through penetrations",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_714_4_1_through_penetrations"
+           ]
+          },
+          {
+           "id": "714.4.1.1",
+           "title": "Fire-resistance-rated assemblies",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_714_4_1_1_tested_assembly_penetrations"
+           ]
+          },
+          {
+           "id": "714.4.1.2",
+           "title": "Through-penetration firestop system",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_714_4_1_2_through_penetration_firestop"
+           ]
+          },
+          {
+           "id": "714.4.2",
+           "title": "Membrane penetrations",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_714_4_2_membrane_penetrations"
+           ]
+          },
+          {
+           "id": "714.4.3",
+           "title": "Dissimilar materials",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_714_4_3_dissimilar_materials"
+           ]
+          },
+          {
+           "id": "714.1",
+           "title": "Scope",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "714.1.1",
+           "title": "Ducts and air transfer openings",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "715",
@@ -95233,8 +97029,8 @@
        ],
        "coverage": "flag",
        "counts": {
-        "flag": 7,
-        "not_brought_in": 15
+        "flag": 10,
+        "not_brought_in": 12
        }
       },
       {
@@ -100403,6 +102199,22 @@
    "egress.general.bc_710_6_smoke_partition_penetrations": "needs_review",
    "egress.general.bc_710_7_smoke_partition_joints": "needs_review",
    "egress.general.bc_710_8_smoke_partition_ducts": "needs_review",
+   "egress.general.bc_711_2_2_horizontal_assembly_continuity": "needs_review",
+   "egress.general.bc_711_2_3_horizontal_assembly_support": "needs_review",
+   "egress.general.bc_711_2_4_horizontal_assembly_rating": "needs_review",
+   "egress.general.bc_711_2_4_4_smoke_compartment_floors": "needs_review",
+   "egress.general.bc_711_2_4_6_other_horizontal_separations": "needs_review",
+   "egress.general.bc_711_3_2_unrated_floor_continuity": "needs_review",
+   "egress.general.bc_712_1_vertical_openings": "needs_review",
+   "egress.general.bc_712_1_9_two_story_openings": "needs_review",
+   "egress.general.bc_714_2_penetration_firestop_installation": "needs_review",
+   "egress.general.bc_714_3_sleeves": "needs_review",
+   "egress.general.bc_714_4_rated_wall_penetrations": "needs_review",
+   "egress.general.bc_714_4_1_through_penetrations": "needs_review",
+   "egress.general.bc_714_4_1_1_tested_assembly_penetrations": "needs_review",
+   "egress.general.bc_714_4_1_2_through_penetration_firestop": "needs_review",
+   "egress.general.bc_714_4_2_membrane_penetrations": "needs_review",
+   "egress.general.bc_714_4_3_dissimilar_materials": "needs_review",
    "egress.general.bc_1004_7_outdoor_areas": "needs_review",
    "egress.general.bc_1004_9_posting": "needs_review",
    "egress.general.bc_table_1006_2_1_other_occupancies": "needs_review",
@@ -100489,7 +102301,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "155 to review · 30 comply"
+    "summary": "171 to review · 30 comply"
    }
   ],
   "egress": {
@@ -105321,6 +107133,22 @@
     "general.bc_710_6_smoke_partition_penetrations": "needs_review",
     "general.bc_710_7_smoke_partition_joints": "needs_review",
     "general.bc_710_8_smoke_partition_ducts": "needs_review",
+    "general.bc_711_2_2_horizontal_assembly_continuity": "needs_review",
+    "general.bc_711_2_3_horizontal_assembly_support": "needs_review",
+    "general.bc_711_2_4_horizontal_assembly_rating": "needs_review",
+    "general.bc_711_2_4_4_smoke_compartment_floors": "needs_review",
+    "general.bc_711_2_4_6_other_horizontal_separations": "needs_review",
+    "general.bc_711_3_2_unrated_floor_continuity": "needs_review",
+    "general.bc_712_1_vertical_openings": "needs_review",
+    "general.bc_712_1_9_two_story_openings": "needs_review",
+    "general.bc_714_2_penetration_firestop_installation": "needs_review",
+    "general.bc_714_3_sleeves": "needs_review",
+    "general.bc_714_4_rated_wall_penetrations": "needs_review",
+    "general.bc_714_4_1_through_penetrations": "needs_review",
+    "general.bc_714_4_1_1_tested_assembly_penetrations": "needs_review",
+    "general.bc_714_4_1_2_through_penetration_firestop": "needs_review",
+    "general.bc_714_4_2_membrane_penetrations": "needs_review",
+    "general.bc_714_4_3_dissimilar_materials": "needs_review",
     "general.bc_1004_7_outdoor_areas": "needs_review",
     "general.bc_1004_9_posting": "needs_review",
     "general.bc_table_1006_2_1_other_occupancies": "needs_review",
@@ -109278,7 +111106,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "8d2321657d8408ab261707daa58643ef65049c5193114ac2f8cc5f0b31bc1d3f",
   "rulebook": {
-   "new_york/ithaca_city": "e98543dc55c1a47302e1252a89666ce51aeeefac3131675ebe200e326f5eafde"
+   "new_york/ithaca_city": "5a0bb2dc4d64e3662320bec480a190ce559927139052e3ca8816040f129f31da"
   }
  }
 }

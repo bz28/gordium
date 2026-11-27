@@ -280,6 +280,46 @@ pieces:
     heading: Ducts and air transfer openings
     rules:
     - general.bc_710_8_smoke_partition_ducts
+  711.2.2:
+    label: flag
+    heading: Horizontal assemblies › Continuity
+    rules:
+    - general.bc_711_2_2_horizontal_assembly_continuity
+  711.2.3:
+    label: flag
+    heading: Horizontal assemblies › Supporting construction
+    rules:
+    - general.bc_711_2_3_horizontal_assembly_support
+  711.2.4:
+    label: flag
+    heading: Horizontal assemblies › Fire-resistance rating
+    rules:
+    - general.bc_711_2_4_horizontal_assembly_rating
+  711.2.4.4:
+    label: flag
+    heading: Fire-resistance rating › Separating smoke compartments
+    rules:
+    - general.bc_711_2_4_4_smoke_compartment_floors
+  711.2.4.6:
+    label: flag
+    heading: Fire-resistance rating › Other separations
+    rules:
+    - general.bc_711_2_4_6_other_horizontal_separations
+  711.3.2:
+    label: flag
+    heading: Nonfire-resistance-rated floor and roof assemblies › Continuity
+    rules:
+    - general.bc_711_3_2_unrated_floor_continuity
+  '712.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_712_1_vertical_openings
+  712.1.9:
+    label: flag
+    heading: General › Two-story openings
+    rules:
+    - general.bc_712_1_9_two_story_openings
   '713.1':
     label: flag
     heading: General
@@ -350,6 +390,46 @@ pieces:
     heading: Elevator, dumbwaiter and other hoistways
     rules:
     - general.bc_713_14_hoistways
+  '714.2':
+    label: flag
+    heading: Installation
+    rules:
+    - general.bc_714_2_penetration_firestop_installation
+  '714.3':
+    label: flag
+    heading: Sleeves
+    rules:
+    - general.bc_714_3_sleeves
+  '714.4':
+    label: flag
+    heading: Fire-resistance-rated walls
+    rules:
+    - general.bc_714_4_rated_wall_penetrations
+  714.4.1:
+    label: flag
+    heading: Fire-resistance-rated walls › Through penetrations
+    rules:
+    - general.bc_714_4_1_through_penetrations
+  714.4.1.1:
+    label: flag
+    heading: Through penetrations › Fire-resistance-rated assemblies
+    rules:
+    - general.bc_714_4_1_1_tested_assembly_penetrations
+  714.4.1.2:
+    label: flag
+    heading: Through penetrations › Through-penetration firestop system
+    rules:
+    - general.bc_714_4_1_2_through_penetration_firestop
+  714.4.2:
+    label: flag
+    heading: Fire-resistance-rated walls › Membrane penetrations
+    rules:
+    - general.bc_714_4_2_membrane_penetrations
+  714.4.3:
+    label: flag
+    heading: Fire-resistance-rated walls › Dissimilar materials
+    rules:
+    - general.bc_714_4_3_dissimilar_materials
   '716.1':
     label: flag
     heading: General

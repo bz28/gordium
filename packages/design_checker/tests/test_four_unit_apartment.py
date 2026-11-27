@@ -201,9 +201,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37). Chapter 7 part a (2026-11-26) adds its 28
     fire-barrier and shaft-enclosure flags, each shown for every building (65); part b its 23 building-wide
     opening-protective flags (88; Table 716.1(2)'s corridor doors are each corridor's row); part c 30 of its 31 fire
-    partition, smoke barrier and smoke partition flags (118; 710.5.3 is Group I-2's, not the stated R-2's)."""
+    partition, smoke barrier and smoke partition flags (118; 710.5.3 is Group I-2's, not the stated R-2's); part d its 16 floor, vertical opening
+    and penetration flags (134)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 118 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 134 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):

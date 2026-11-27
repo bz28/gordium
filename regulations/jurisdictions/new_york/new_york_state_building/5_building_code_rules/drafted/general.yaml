@@ -2539,6 +2539,413 @@ rules:
     for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_711_2_2_horizontal_assembly_continuity
+  kind: flag
+  topic: means_of_egress
+  title: Rated floors and roofs continuous, no vertical openings (BCNYS 711.2.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 176
+    lines:
+    - 13
+    - 14
+    quote: 711.2.2 Continuity. Assemblies shall be continuous without vertical openings, except as permitted by this section
+      and Section 712.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A horizontal assembly (a rated floor or roof, the top or bottom of an exit enclosure among them) is continuous,
+      with no vertical openings but those this section and Section 712 permit: the floors'' openings aren''t in the model,
+      so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 712's vertical openings that egress uses are
+    brought in (712.1, 712.1.1, 712.1.9, 712.1.12). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_711_2_3_horizontal_assembly_support
+  kind: flag
+  topic: means_of_egress
+  title: What holds up a rated floor or roof has its rating (BCNYS 711.2.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 176
+    lines:
+    - 15
+    - 22
+    quote: '711.2.3 Supporting construction. The supporting construction shall be protected to afford the required fire-resistance
+      rating of the horizontal assembly supported. Exception: In buildings of Type IIB, IIIB or VB construction, the construction
+      supporting the horizontal assembly is not required to be fire-resistance rated at the following: 1. Horizontal assemblies
+      at the separations of incidental uses as specified by Table 509.1 provided that the required fire- resistance rating
+      does not exceed 1 hour. 2. Horizontal assemblies at the separations of dwelling units and sleeping units as required
+      by Section 420.3. 3. Horizontal assemblies at smoke barriers constructed in accordance with Section 709.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The construction supporting a horizontal assembly is protected to its required rating; except, in Types IIB, IIIB
+      and VB, at incidental use separations rated at most 1 hour (Table 509.1), dwelling and sleeping unit separations (420.3),
+      and smoke barriers per 709: the structure isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Table 509.1 and 420.3 aren't brought in; 709
+    is (Chapter 7 part c's flags). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_711_2_4_horizontal_assembly_rating
+  kind: flag
+  topic: means_of_egress
+  title: Rating of rated floors and roofs (BCNYS 711.2.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 176
+    lines:
+    - 23
+    - 24
+    quote: 711.2.4 Fire-resistance rating. The fire-resistance rating of horizontal assemblies shall comply with Sections
+      711.2.4.1 through 711.2.4.6 but shall be not less than that required by the building type of construction.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A horizontal assembly is rated as 711.2.4.1 to 711.2.4.6 ask, and at least as the building''s type of construction
+      asks (Table 601): the floors'' ratings and the type of construction aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 711.2.4.1, 711.2.4.2, 711.2.4.3 and 711.2.4.5
+    (mixed occupancies, fire areas, unit separations, incidental uses) aren't brought in, nor Table 601; 711.2.4.4 and 711.2.4.6
+    are (their own flags). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_711_2_4_4_smoke_compartment_floors
+  kind: flag
+  topic: means_of_egress
+  title: Floors that separate smoke compartments are smoke barriers (BCNYS 711.2.4.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 176
+    lines:
+    - 34
+    - 35
+    quote: 711.2.4.4 Separating smoke compartments. Where the horizontal assembly is required to be a smoke barrier, the assembly
+      shall comply with Section 709.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where a horizontal assembly must be a smoke barrier (between smoke compartments), it meets Section 709: a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 709 is Chapter 7 part c's flags. Shown for
+    every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_711_2_4_6_other_horizontal_separations
+  kind: flag
+  topic: means_of_egress
+  title: Floors other sections require, at those sections' ratings (BCNYS 711.2.4.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 176
+    lines:
+    - 38
+    - 39
+    quote: 711.2.4.6 Other separations. Where a horizontal assembly is required by other sections of this code, the assembly
+      shall have a fire-resistance rating of not less than that required by that section.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where another section requires a horizontal assembly (an exit stairway''s or passageway''s enclosure top or bottom,
+      1023.2 and 1024.3; a shaft''s, 713), it is rated at least as that section asks: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 1023.2 and 1024.3 aren't brought in; 713 is
+    (Chapter 7 part a's flags). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_711_3_2_unrated_floor_continuity
+  kind: flag
+  topic: means_of_egress
+  title: Unrated floors and roofs continuous, no vertical openings (BCNYS 711.3.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 176
+    lines:
+    - 49
+    - 49
+    quote: 711.3.2 Continuity. Assemblies shall be continuous without vertical openings, except as permitted by Section 712.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A floor or roof not required to be rated is continuous, with no vertical openings but those Section 712 permits
+      (an exit access stairway per 1019, 712.1.12; a two-story opening, 712.1.9): the floors'' openings aren''t in the model,
+      so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 1019 isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_712_1_vertical_openings
+  kind: flag
+  topic: means_of_egress
+  title: Each vertical opening protected one of the ways 712 allows (BCNYS 712.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 176
+    lines:
+    - 51
+    - 52
+    quote: 712.1 General. Each vertical opening shall comply in accordance with one of the protection methods in Sections
+      712.1.1 through 712.1.16.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Each vertical opening (a stair, ramp, elevator, duct or other opening through a floor) is protected by one of the
+      methods of 712.1.1 to 712.1.16: in a shaft enclosure per 713 (712.1.1), a two-story opening (712.1.9), an exit access
+      stairway or ramp per 1019 (712.1.12), or another the section lists (escalators, atriums, parking garages, mezzanines,
+      and the like, 712.1.2 to 712.1.8, 712.1.10, 712.1.11, 712.1.13 to 712.1.16): which openings the floors have, and how
+      each is protected, aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 712.1.2 to 712.1.8, 712.1.10, 712.1.11 and
+    712.1.13 to 712.1.16 and 1019 aren't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_712_1_9_two_story_openings
+  kind: flag
+  topic: means_of_egress
+  title: Two-story openings, six conditions (BCNYS 712.1.9)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 177
+    lines:
+    - 43
+    - 51
+    quote: '712.1.9 Two-story openings. In other than Groups I-2 and I-3, a vertical opening that is not used as one of the
+      applications spec- ified in this section shall be permitted if the opening complies with all of the following items:
+      1. Does not connect more than two stories. 2. Does not penetrate a horizontal assembly that separates fire areas or
+      smoke barriers that separate smoke compartments. 3. Is not concealed within the construction of a wall or a floor/ceiling
+      assembly. 4. Is not open to a corridor in Group I and R occupancies. 5. Is not open to a corridor on nonsprinklered
+      floors. 6. Is separated from floor openings and air transfer openings serving other floors by construction conforming
+      to required shaft enclosures.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In other than Groups I-2 and I-3, a vertical opening that is none of 712.1''s other cases (an exit access stairway
+      may use it, 1019.3) is permitted only where it connects at most two stories, penetrates no horizontal assembly separating
+      fire areas and no smoke barrier separating smoke compartments, isn''t concealed in a wall or floor/ceiling, isn''t open
+      to a corridor in Group I or R, isn''t open to a corridor on an unsprinklered floor, and is separated from floor and
+      air transfer openings serving other floors by construction as for the required shaft enclosures: a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 1019.3 isn''t brought in. Shown for every
+    building: whether an opening relies on it isn''t in the model.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_714_2_penetration_firestop_installation
+  kind: flag
+  topic: means_of_egress
+  title: Listed penetration firestop systems installed per their listing (BCNYS 714.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 180
+    lines:
+    - 10
+    - 11
+    quote: 714.2 Installation. A listed penetration firestop system shall be installed in accordance with the manufacturer’s
+      installation instruc- tions and the listing criteria.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A listed penetration firestop system is installed per the manufacturer''s instructions and its listing: the penetrations
+      aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Penetrations of exit stairway and passageway
+    enclosures are limited by 1023.5 and 1024.6 and protected per 714 (707.7.1's flag). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_714_3_sleeves
+  kind: flag
+  topic: means_of_egress
+  title: Sleeves through rated assemblies fastened and protected (BCNYS 714.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 180
+    lines:
+    - 12
+    - 17
+    quote: 714.3 Sleeves. Where sleeves are used, they shall be securely fastened to the assembly penetrated and installed
+      in accordance with the sleeve manufacturer’s installation instructions. Where listed systems are used, the sleeve shall
+      be installed in accordance with the listing criteria for the system. The space between the item contained in the sleeve
+      and the sleeve itself and any space between the sleeve and the assembly penetrated shall be protected in accordance
+      with this section. Insulation and coverings on or in the penetrating item shall not penetrate the assembly unless the
+      specific material used has been tested as part of the assembly in accor- dance with this section.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A sleeve through a rated assembly is securely fastened and installed per its maker''s instructions (and the listing,
+      for a listed system); the space inside and around it is protected per Section 714, and insulation or a covering on the
+      item passes through only where tested as part of the assembly: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_714_4_rated_wall_penetrations
+  kind: flag
+  topic: means_of_egress
+  title: Penetrations of rated walls and smoke barriers (BCNYS 714.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 180
+    lines:
+    - 18
+    - 19
+    quote: 714.4 Fire-resistance-rated walls. Penetrations into or through fire walls, fire barriers, smoke barrier walls
+      and fire partitions shall comply with Sections 714.4.1 through 714.4.3. Penetrations in smoke barrier walls shall also
+      comply with Section 714.5.4.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Penetrations into or through fire walls, fire barriers, smoke barrier walls and fire partitions (the walls of exit
+      enclosures and rated corridors among them) meet 714.4.1 to 714.4.3, and those in smoke barrier walls also 714.5.4 (air
+      leakage): a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 714.5.4 isn't brought in; 714.4.1 to 714.4.3
+    are (their own flags). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_714_4_1_through_penetrations
+  kind: flag
+  topic: means_of_egress
+  title: Through penetrations of rated walls (BCNYS 714.4.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 180
+    lines:
+    - 20
+    - 30
+    quote: '714.4.1 Through penetrations. Through penetrations of fire-resistance-rated walls shall comply with Section 714.4.1.1
+      or 714.4.1.2. Exception: Where the penetrating items are steel, ferrous or copper pipes, tubes or conduits, the annular
+      space between the penetrating item and the fire-resistance-rated wall is permitted to be protected by either of the
+      following measures: 1. In concrete or masonry walls where the penetrating item is a maximum 6-inch (152 mm) nominal
+      diameter and the area of the opening through the wall does not exceed 144 square inches (0.0929 m[fn2]), concrete, grout
+      or mortar is permitted where installed the full thickness of the wall or the thickness required to maintain the fire-resistance
+      rating. 2. The material used to fill the annular space shall prevent the passage of flame and hot gases sufficient to
+      ignite cotton waste when subjected to ASTM E119 or UL 263 time-temperature fire conditions under a minimum positive
+      pressure differential of 0.01 inch of water (2.49 Pa) at the location of the penetration for the time period equivalent
+      to the fire- resistance rating of the construction penetrated.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A through penetration of a rated wall meets 714.4.1.1 or 714.4.1.2; except a steel, ferrous or copper pipe, tube
+      or conduit, whose annular space may be filled with concrete, grout or mortar the full thickness of a concrete or masonry
+      wall (an item at most 6 inches nominal diameter through an opening at most 144 square inches), or with a material that
+      stops flame and hot gases for the wall''s rating under ASTM E119 or UL 263 fire conditions at a pressure differential
+      of at least 0.01 inch of water: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_714_4_1_1_tested_assembly_penetrations
+  kind: flag
+  topic: means_of_egress
+  title: Through penetrations protected as tested in the assembly (BCNYS 714.4.1.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 180
+    lines:
+    - 31
+    - 32
+    quote: 714.4.1.1 Fire-resistance-rated assemblies. Through penetrations shall be protected using systems installed as
+      tested in the approved fire-resistance-rated assembly.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Through penetrations are protected by systems installed as tested in the approved rated assembly: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_714_4_1_2_through_penetration_firestop
+  kind: flag
+  topic: means_of_egress
+  title: Through-penetration firestop systems, F rating of the wall (BCNYS 714.4.1.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 180
+    lines:
+    - 33
+    - 35
+    quote: 714.4.1.2 Through-penetration firestop system. Through penetrations shall be protected by an approved penetration
+      firestop system installed as tested in accordance with ASTM E814 or UL 1479, with a minimum positive pressure differential
+      of 0.01 inch of water (2.49 Pa) and shall have an F rating of not less than the required fire-resistance rating of the
+      wall penetrated.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Or by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential
+      of at least 0.01 inch of water, with an F rating at least the wall''s required rating: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_714_4_2_membrane_penetrations
+  kind: flag
+  topic: means_of_egress
+  title: Membrane penetrations of rated walls (BCNYS 714.4.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 180
+    lines:
+    - 36
+    - 59
+    quote: '714.4.2 Membrane penetrations. Membrane penetrations shall comply with Section 714.4.1. Where walls or partitions
+      are required to have a fire-resistance rating, recessed fixtures shall be installed such that the required fire resistance
+      will not be reduced. Exceptions: 1. Membrane penetrations of maximum 2-hour fire-resistance-rated walls and partitions
+      by steel electrical boxes that do not exceed 16 square inches (0.0 103 m[fn2]) in area, provided that the aggregate
+      area of the openings through the membrane does not exceed 100 square inches (0.0645 m[fn2]) in any 100 square feet (9.29
+      m[fn2]) of wall area. The annular space between the wall membrane and the box shall not exceed 1/8 inch (3.2 mm). Such
+      boxes on opposite sides of the wall or partition shall be separated by one of the following: 1.1. By a horizontal distance
+      of not less than 24 inches (610 mm) where the wall or partition is constructed with individual noncommunicating stud
+      cavities. 1.2. By a horizontal distance of not less than the depth of the wall cavity where the wall cavity is filled
+      with cellu- lose loose-fill, rockwool or slag mineral wool insulation. 1.3. By solid fireblocking in accordance with
+      Section 718.2.1. 1.4. By protecting both outlet boxes with listed putty pads. 1.5. By other listed materials and methods.
+      2. Membrane penetrations by listed electrical boxes of any material, provided that such boxes have been tested for use
+      in fire-resistance-rated assemblies and are installed in accordance with the instructions included in the listing. The
+      annular space between the wall membrane and the box shall not exceed 1/8 inch (3.2 mm) unless listed otherwise. Such
+      boxes on opposite sides of the wall or partition shall be separated by one of the following: 2.1. By the horizontal
+      distance specified in the listing of the electrical boxes. 2.2. By solid fireblocking in accordance with Section 718.2.1.
+      2.3. By protecting both boxes with listed putty pads. 2.4. By other listed materials and methods.'
+  - file: gov.ny.building.2025.pdf
+    page: 181
+    lines:
+    - 3
+    - 17
+    quote: 3. Membrane penetrations by electrical boxes of any size or type, that have been listed as part of a wall opening
+      protec- tive material system for use in fire-resistance-rated assemblies and are installed in accordance with the instructions
+      included in the listing. 4. Membrane penetrations by boxes other than electrical boxes, provided that such penetrating
+      items and the annular space between the wall membrane and the box, are protected by an approved membrane penetration
+      firestop system installed as tested in accordance with ASTM E814 or UL 1479, with a minimum positive pressure differential
+      of 0.01 inch of water (2.49 Pa), and shall have an F and T rating of not less than the required fire-resistance rating
+      of the wall penetrated and be installed in accordance with their listing. 5. The annular space created by the penetration
+      of an automatic sprinkler, provided that it is covered by a metal escutcheon plate. 6. Membrane penetrations of maximum
+      2-hour fire-resistance-rated walls and partitions by steel electrical boxes that exceed 16 square inches (0.0 103 m[fn2])
+      in area, or steel electrical boxes of any size having an aggregate area through the membrane exceeding 100 square inches
+      (0.0645 m[fn2]) in any 100 square feet (9.29 m[fn2]) of wall area, provided that such penetrating items are protected
+      by listed putty pads or other listed materials and methods, and installed in accor- dance with the listing.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A membrane penetration of a rated wall meets 714.4.1, and recessed fixtures don''t reduce the wall''s rating; except
+      steel electrical boxes in walls rated at most 2 hours, each at most 16 square inches, at most 100 square inches of openings
+      in any 100 square feet of wall, an annular space at most 1/8 inch, boxes on opposite sides at least 24 inches apart
+      where the stud cavities don''t communicate (or the wall cavity''s depth where filled with cellulose, rockwool or slag
+      wool, or fireblocked per 718.2.1, or with listed putty pads, or other listed means); listed electrical boxes per their
+      listing (1/8 inch, their listed separation, fireblocking per 718.2.1, putty pads or listed means); boxes listed with
+      a wall opening protective system; other boxes in a membrane firestop system per ASTM E814 or UL 1479 with F and T ratings
+      of the wall; sprinkler escutcheons; and larger or more steel boxes in walls rated at most 2 hours with listed putty
+      pads or listed means: a person''s check (1023.5 allows membrane penetrations on the outside of an exit stairway enclosure
+      only so protected).'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. 718.2.1 and 1023.5 aren't brought in. Shown
+    for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_714_4_3_dissimilar_materials
+  kind: flag
+  topic: means_of_egress
+  title: Noncombustible penetrations not joined to combustible ones (BCNYS 714.4.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 181
+    lines:
+    - 18
+    - 19
+    quote: 714.4.3 Dissimilar materials. Noncombustible penetrating items shall not connect to combustible items beyond the
+      point of firestopping unless it can be demonstrated that the fire-resistance integrity of the wall is maintained.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A noncombustible penetrating item doesn''t connect to combustible items beyond the firestopping unless the wall''s
+      fire resistance is shown to be kept: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part d. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_1004_7_outdoor_areas
   kind: flag
   topic: means_of_egress
