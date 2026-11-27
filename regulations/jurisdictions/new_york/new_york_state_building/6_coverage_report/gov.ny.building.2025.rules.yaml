@@ -399,6 +399,131 @@ pieces:
     heading: Care suites not containing sleeping rooms › Exit access
     rules:
     - general.bc_407_4_4_7_2_treatment_care_suite_exit_access
+  '407.5':
+    label: flag
+    heading: Smoke barriers
+    rules:
+    - general.bc_407_5_smoke_barriers
+  407.5.1:
+    label: flag
+    heading: Smoke barriers › Smoke compartment size
+    rules:
+    - general.bc_407_5_1_smoke_compartment_size
+  407.5.2:
+    label: flag
+    heading: Smoke barriers › Exit access travel distance
+    rules:
+    - general.bc_407_5_2_travel_to_a_smoke_barrier_door
+  407.5.3:
+    label: flag
+    heading: Smoke barriers › Refuge area
+    rules:
+    - general.bc_407_5_3_refuge_area
+  407.5.4:
+    label: flag
+    heading: Smoke barriers › Independent egress
+    rules:
+    - general.bc_407_5_4_independent_egress
+  407.5.5:
+    label: flag
+    heading: Smoke barriers › Horizontal assemblies
+    rules:
+    - general.bc_407_5_5_horizontal_assemblies
+  '407.6':
+    label: flag
+    heading: Automatic-closing doors
+    rules:
+    - general.bc_407_6_automatic_closing_doors
+  407.6.1:
+    label: flag
+    heading: Automatic-closing doors › Activation of automatic-closing doors
+    rules:
+    - general.bc_407_6_1_activation_of_automatic_closing_doors
+  '407.10':
+    label: flag
+    heading: Secured yards
+    rules:
+    - general.bc_407_10_secured_yards
+  '408.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_408_1_group_i3
+  '408.2':
+    label: flag
+    heading: Other occupancies
+    rules:
+    - general.bc_408_2_other_occupancies
+  '408.3':
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_408_3_means_of_egress
+  408.3.1:
+    label: flag
+    heading: Means of egress › Door width
+    rules:
+    - general.bc_408_3_1_door_width
+  408.3.2:
+    label: flag
+    heading: Means of egress › Sliding doors
+    rules:
+    - general.bc_408_3_2_sliding_doors
+  408.3.3:
+    label: flag
+    heading: Means of egress › Guard tower doors
+    rules:
+    - general.bc_408_3_3_guard_tower_doors
+  408.3.4:
+    label: flag
+    heading: Means of egress › Spiral stairways
+    rules:
+    - general.bc_408_3_4_spiral_stairways
+  408.3.5:
+    label: flag
+    heading: Means of egress › Ship’s ladders
+    rules:
+    - general.bc_408_3_5_ships_ladders
+  408.3.6:
+    label: flag
+    heading: Means of egress › Exit discharge
+    rules:
+    - general.bc_408_3_6_exit_discharge_to_a_courtyard
+  408.3.7:
+    label: flag
+    heading: Means of egress › Sallyports
+    rules:
+    - general.bc_408_3_7_sallyports
+  408.3.8:
+    label: flag
+    heading: Means of egress › Interior exit stairway and ramp construction
+    rules:
+    - general.bc_408_3_8_glazed_exit_stairway
+  '408.4':
+    label: flag
+    heading: Locks
+    rules:
+    - general.bc_408_4_locks
+  408.4.1:
+    label: flag
+    heading: Locks › Remote release
+    rules:
+    - general.bc_408_4_1_remote_release
+  408.4.2:
+    label: flag
+    heading: Locks › Power-operated doors and locks
+    rules:
+    - general.bc_408_4_2_power_operated_doors_and_locks
+  408.4.3:
+    label: flag
+    heading: Locks › Redundant operation
+    rules:
+    - general.bc_408_4_3_redundant_operation
+  408.4.4:
+    label: flag
+    heading: Locks › Relock capability
+    rules:
+    - general.bc_408_4_4_relock_capability
   508.2.1:
     label: flag
     heading: Accessory occupancies › Occupancy classification

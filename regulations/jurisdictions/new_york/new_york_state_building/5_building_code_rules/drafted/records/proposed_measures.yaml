@@ -165,6 +165,7 @@ occupancy_group:
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_1020_5_other_occupancies
   - general.bc_404_1_atriums
+  - general.bc_407_10_secured_yards
   - general.bc_407_1_group_i2
   - general.bc_407_2_1_waiting_areas_open_to_a_corridor
   - general.bc_407_2_2_care_providers_stations
@@ -194,6 +195,30 @@ occupancy_group:
   - general.bc_407_4_4_7_care_suites_without_sleeping_rooms
   - general.bc_407_4_4_care_suites
   - general.bc_407_4_means_of_egress
+  - general.bc_407_5_1_smoke_compartment_size
+  - general.bc_407_5_2_travel_to_a_smoke_barrier_door
+  - general.bc_407_5_3_refuge_area
+  - general.bc_407_5_4_independent_egress
+  - general.bc_407_5_5_horizontal_assemblies
+  - general.bc_407_5_smoke_barriers
+  - general.bc_407_6_1_activation_of_automatic_closing_doors
+  - general.bc_407_6_automatic_closing_doors
+  - general.bc_408_1_group_i3
+  - general.bc_408_2_other_occupancies
+  - general.bc_408_3_1_door_width
+  - general.bc_408_3_2_sliding_doors
+  - general.bc_408_3_3_guard_tower_doors
+  - general.bc_408_3_4_spiral_stairways
+  - general.bc_408_3_5_ships_ladders
+  - general.bc_408_3_6_exit_discharge_to_a_courtyard
+  - general.bc_408_3_7_sallyports
+  - general.bc_408_3_8_glazed_exit_stairway
+  - general.bc_408_3_means_of_egress
+  - general.bc_408_4_1_remote_release
+  - general.bc_408_4_2_power_operated_doors_and_locks
+  - general.bc_408_4_3_redundant_operation
+  - general.bc_408_4_4_relock_capability
+  - general.bc_408_4_locks
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f

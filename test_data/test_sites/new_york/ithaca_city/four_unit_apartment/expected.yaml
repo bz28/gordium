@@ -125,6 +125,33 @@ results:
   general.bc_407_4_4_7_care_suites_without_sleeping_rooms: not_applicable
   general.bc_407_4_4_7_1_treatment_care_suite_area: not_applicable
   general.bc_407_4_4_7_2_treatment_care_suite_exit_access: not_applicable
+  # Chapter 4 part d: one flag per piece of 407.5, 407.6 and 407.10 (Group I-2) and 408.1 to 408.4 (Group I-3), not
+  # applicable to a building stated Group R-2
+  general.bc_407_5_smoke_barriers: not_applicable
+  general.bc_407_5_1_smoke_compartment_size: not_applicable
+  general.bc_407_5_2_travel_to_a_smoke_barrier_door: not_applicable
+  general.bc_407_5_3_refuge_area: not_applicable
+  general.bc_407_5_4_independent_egress: not_applicable
+  general.bc_407_5_5_horizontal_assemblies: not_applicable
+  general.bc_407_6_automatic_closing_doors: not_applicable
+  general.bc_407_6_1_activation_of_automatic_closing_doors: not_applicable
+  general.bc_407_10_secured_yards: not_applicable
+  general.bc_408_1_group_i3: not_applicable
+  general.bc_408_2_other_occupancies: not_applicable
+  general.bc_408_3_means_of_egress: not_applicable
+  general.bc_408_3_1_door_width: not_applicable
+  general.bc_408_3_2_sliding_doors: not_applicable
+  general.bc_408_3_3_guard_tower_doors: not_applicable
+  general.bc_408_3_4_spiral_stairways: not_applicable
+  general.bc_408_3_5_ships_ladders: not_applicable
+  general.bc_408_3_6_exit_discharge_to_a_courtyard: not_applicable
+  general.bc_408_3_7_sallyports: not_applicable
+  general.bc_408_3_8_glazed_exit_stairway: not_applicable
+  general.bc_408_4_locks: not_applicable
+  general.bc_408_4_1_remote_release: not_applicable
+  general.bc_408_4_2_power_operated_doors_and_locks: not_applicable
+  general.bc_408_4_3_redundant_operation: not_applicable
+  general.bc_408_4_4_relock_capability: not_applicable
   general.bc_1007_1_1_remoteness: pass                 # 0.5992 >= 1/2 on both stories (above)
   general.bc_1007_1_1_space_remoteness: pass           # "space_exit_count < 2 or ...": every space has one doorway
   general.bc_1007_1_2_space_three_or_more: pass        # "space_exit_count < 3 or ...": none has three

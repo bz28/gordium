@@ -91,7 +91,7 @@ def test_each_piece_has_its_flag_shown_only_where_the_building_may_be_that_use(c
 
 # part c: a section for one occupancy group, its flags shown where the building is stated that group, two or more
 # groups, or none (a building stated one other group: not applicable)
-GROUP_GATED = {"407": ["I-2"]}
+GROUP_GATED = {"407": ["I-2"], "408": ["I-3"]}
 # pieces a rule outside the Chapter 4 block already checks (Chapter 10's review round 1 brought them in alone)
 CHECKED_BEFORE = {"407.4.2": "general.bc_407_4_2_sleeping_room_travel"}
 
