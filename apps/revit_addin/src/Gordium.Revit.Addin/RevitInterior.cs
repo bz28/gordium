@@ -304,7 +304,7 @@ internal static class RevitInterior
         var phase = doc.Phases.Cast<Phase>().LastOrDefault();
         var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
         var doors = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Doors).WhereElementIsNotElementType()
-            .OfType<FamilyInstance>().Select(fi => OpeningOf(doc, fi, phase)).ToList();
+            .OfType<FamilyInstance>().Select(fi => OpeningOf(doc, fi, phase, false)).ToList();   // swings only: no ground read
         var swings = SwingsOf(doc, []);
         return new RevitModel
         {
