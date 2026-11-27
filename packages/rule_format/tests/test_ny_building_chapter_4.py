@@ -118,6 +118,23 @@ def test_each_piece_of_a_groups_section_has_its_flag_shown_only_for_that_group(c
             assert outcome(rule, given, ctx.allowed()) == want, (pid, group)
 
 
+def test_each_flags_shown_words_hold_wherever_it_needs_review(rules):
+    """Review round 2: a flag's needs-review line shows its first needs-review example's note (design_checker egress
+    _flag_item), whatever the building states; so that note never says the architect stated something (404.1's once
+    said "The building states it has an atrium" where it showed for a Group H building stating none)."""
+    for rid in _block_ids():
+        shown = next(e["note"] for e in rules[rid]["examples"] if e.get("expect") == "needs_review" and e.get("note"))
+        assert not re.search(r"states (it|the|that)|is stated(?! or not)", shown), (rid, shown)
+
+
+def test_what_404_1_shows_by_is_said_where_people_read_it():
+    """Review round 3: 404.1's flag shows by the group as well as the atrium fact; its label's reason and the README
+    say so, not the atrium fact alone."""
+    reason = load(LABELS)["labels"]["404.1"]["reason"]
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    assert "Group H (H-1 to H-5" in reason and "404.1's also in any building that may be Group H" in readme
+
+
 def test_the_block_holds_chapter_4_only_in_book_order(rules):
     block = _block_ids()
     assert block and all(re.match(r"general\.bc_4\d\d_", r) for r in block)
