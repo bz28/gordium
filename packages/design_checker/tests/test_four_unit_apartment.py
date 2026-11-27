@@ -468,6 +468,18 @@ def test_a_story_whose_room_may_seat_people_served_by_aisles_never_passes_on_tra
     parts = egress.check(laws, interior, VALUES, ALLOWED)["interior"]["parts"]
     assert {s["id"]: s["measures"]["story_assembly_seating_possible"] for s in parts["story"]} == {"L1": True, "L2": True}
 
+    # review round 4: a corridor stating a function is the same clash: it may seat people and shows no assembly room
+    for fn in ("assembly_unconcentrated", "business"):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], **{k: False for k in CH10_BUILDING_MARKS}}
+        group_a(interior)
+        next(r for r in interior["rooms"] if r["id"] == "L1C")["function"] = fn
+        parts = egress.check(laws, interior, VALUES, ALLOWED)["interior"]["parts"]
+        assert {s["id"]: s["measures"]["story_assembly_seating_possible"] for s in parts["story"]} ==             {"L1": True, "L2": True}, fn
+    def corridor(d):                                 # not Group A: the corridor's own story only
+        next(r for r in d["rooms"] if r["id"] == "L2C")["function"] = "business"
+    assert row(corridor) == "needs_review"
+
     # review round 2: the groups sent in the check's values (which the rules read beside the building block) count too
     interior = build.interior_of()
     interior["building"] = {k: v for k, v in interior["building"].items() if k != "occupancy_groups"}

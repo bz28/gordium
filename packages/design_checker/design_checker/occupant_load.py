@@ -158,12 +158,14 @@ def assembly_seating(parts: dict, description: dict, factors: dict, building: di
     """story_assembly_seating_possible on each story, and space_assembly_seating_possible (its story's) on each of the
     story's spaces: true where a room on the story may hold seating served by aisles (_may_seat), so the travel and
     common-path rows need review there (1030.7: measured along the aisles, never over the seats the routes measure
-    across); false only where every room on the story states one of Table 1004.5's other functions (or is an exit, or a
-    corridor, closet or toilet with none). True on every story where a room can't be read or placed on a story, or the
-    description lists an enclosed space with no room drawn in it (its use isn't known): never false on a room unseen.
-    True on every story, too, where the building is stated Group A (an assembly use, 303.1 to 303.6) and no room states
-    an Assembly function or one that may be an assembly use: its assembly room isn't shown, so any room may be it
-    (review round 1). The story knows its rooms (it is in the model), so a floor the model leaves out doesn't matter
+    across); false only where every room on the story states one of Table 1004.5's other functions, but its exits and
+    its corridors, closets and toilets, which state none. True where an exit or a corridor on the story states a
+    function: its use and its function clash, so which it is isn't known (EXIT_FUNCTION, CORRIDOR_FUNCTION; review
+    rounds 3 and 4). True on every story where a room can't be read or placed on a story, or the description lists an
+    enclosed space with no room drawn in it (its use isn't known): never false on a room unseen. True on every story,
+    too, where the building is stated Group A (an assembly use, 303.1 to 303.6) and no room but such a clashing one
+    states an Assembly function or one that may be an assembly use: its assembly room isn't shown, so any room may be
+    it (review round 1). The story knows its rooms (it is in the model), so a floor the model leaves out doesn't matter
     here."""
     rooms, every = readable_rooms(description)
     unknown = description.get("unknown_spaces") if isinstance(description, dict) else None
@@ -171,18 +173,21 @@ def assembly_seating(parts: dict, description: dict, factors: dict, building: di
     corridors = [c for c in parts.get("corridor") or [] if isinstance(c, dict)]
     placed = {p.get("id") for p in spaces + corridors}
     unseen = not every or bool(unknown) or any(r not in placed for r in rooms)
+    # an exit or a corridor stating a function: its use isn't known, and it shows no assembly room
+    aside = ({p.get("id") for p in spaces if p["measures"].get("space_is_exit") is True}
+             | {c.get("id") for c in corridors})
+    clash = {i for i in aside if (rooms.get(i) or {}).get("function") is not None}
     groups = building.get("occupancy_groups") if isinstance(building, dict) else None
-    exits = {p.get("id") for p in spaces if p["measures"].get("space_is_exit") is True}
     shown = any(r.get("function") in ASSEMBLY_FUNCTIONS + ASSEMBLY_LIKE_FUNCTIONS for i, r in rooms.items()
-                if isinstance(r.get("function"), str) and i not in exits)   # an exit is no assembly room shown (round 3)
+                if isinstance(r.get("function"), str) and i not in clash)
     if isinstance(groups, list) and any(isinstance(g, str) and g.startswith("A-") for g in groups) and not shown:
         unseen = True
     functions = factors["functions"]
     for story in parts.get("story") or []:
         mine = [p for p in spaces if p.get("within") == story["id"]]
-        possible = unseen or any(_may_seat(rooms.get(p.get("id")) or {}, functions, p["measures"].get("space_is_exit"))
-                                 for p in mine) or             any((rooms.get(c.get("id")) or {}).get("function") is not None and
-                _may_seat(rooms.get(c.get("id")) or {}, functions) for c in corridors if c.get("within") == story["id"])
+        here = {p.get("id") for p in mine} | {c.get("id") for c in corridors if c.get("within") == story["id"]}
+        possible = unseen or bool(here & clash) or any(
+            _may_seat(rooms.get(p.get("id")) or {}, functions, p["measures"].get("space_is_exit")) for p in mine)
         _set(story, SEATING_STORY, possible)
         for p in mine:
             _set(p, SEATING_SPACE, possible)

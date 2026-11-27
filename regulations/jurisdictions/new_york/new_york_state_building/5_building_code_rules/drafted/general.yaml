@@ -515,15 +515,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -866,15 +867,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -1404,15 +1406,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -1778,15 +1781,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -2140,15 +2144,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -2464,15 +2469,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -2802,15 +2808,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -3176,15 +3183,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -3514,15 +3522,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -3845,15 +3854,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -4202,15 +4212,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -4566,15 +4577,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -4927,15 +4939,16 @@ rules:
     reason: 'A room on this space''s story may seat people served by aisles, fixed seats or not (a room on it states a Table
       1004.5 Assembly function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink
       or pool, a stage, an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with
-      none, and an exit stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model
-      can''t be read or placed; or the building is stated Group A and no room is shown to be its assembly room): the common
-      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
-      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
-      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
-      the routes measure across them: a person checks. It is settled only where every room on the story but its corridors, closets,
-      toilets and exits states another of the table''s functions (residential, business, mercantile and the like), every room
-      and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only
-      where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
+      none, and an exit stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a
+      function (which it is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building
+      is stated Group A and no room is shown to be its assembly room): the common path is a portion of exit access travel (202
+      COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and aisle accessways wherever aisles are provided
+      for seating, never over the seats, and every occupied portion with seats, tables or displays has aisles (1030.9; aisle
+      accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
+      It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
+      another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
+      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -5610,14 +5623,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
@@ -5783,15 +5797,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only
-      be longer.)'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or (story_exit_count
       > 0 and occupancy_group_i4 and not other_occupancy_present and story_first_above_or_below_grade and story_occupant_load
@@ -6126,15 +6140,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only
-      be longer.)'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
       > 0 and (story_first_above_or_below_grade and story_occupant_load <= 49 and egress_travel_distance <= (100 if occupancy_group
@@ -6497,15 +6511,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only
-      be longer.)'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
       > 0 and (occupancy_group in ["R-3", "R-4"] or story_first_above_or_below_grade and (occupancy_group in ["H-2", "H-3"]
@@ -6745,15 +6759,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only
-      be longer.)'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
       > 0 and ((story_first_above_or_below_grade and egress_travel_distance <= (100 if sprinklered_903_3_1_1 else 75) or story_second_above_grade_plane
@@ -7002,15 +7016,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only
-      be longer.)'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
       > 0 and not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance <= 125
@@ -8637,14 +8651,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
@@ -8734,14 +8749,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -9209,14 +9225,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -9439,14 +9456,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -9701,14 +9719,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -9943,14 +9962,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -10151,14 +10171,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -10359,14 +10380,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -10567,14 +10589,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -10778,14 +10801,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -11017,14 +11041,15 @@ rules:
     reason: 'A room on this story may seat people served by aisles, fixed seats or not (a room on it states a Table 1004.5 Assembly
       function, a function that may be an assembly use (a courtroom, a reading room, an exercise room, a rink or pool, a stage,
       an airport waiting area), a function none of the table''s, or none (a corridor, closet or toilet with none, and an exit
-      stair or passageway, aside: leave their function blank); or a room or an enclosed space in the model can''t be read or
-      placed; or the building is stated Group A and no room is shown to be its assembly room): wherever aisles are provided
-      for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats, and every
-      occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1);
-      the seats aren''t drawn, so the routes measure across them: a person checks. It is settled only where every room on the
-      story but its corridors, closets, toilets and exits states another of the table''s functions (residential, business, mercantile
-      and the like), every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to
-      be its assembly room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+      stair or passageway with none, aside: leave their function blank); or an exit or a corridor states a function (which it
+      is isn''t known); or a room or an enclosed space in the model can''t be read or placed; or the building is stated Group
+      A and no room is shown to be its assembly room): wherever aisles are provided for seating, 1030.7 measures travel along
+      the aisles and aisle accessways without travel over or on the seats, and every occupied portion with seats, tables or
+      displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
+      measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
+      and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
+      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:

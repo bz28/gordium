@@ -1067,7 +1067,9 @@ def test_each_seating_review_names_every_way_the_story_may_seat_people_and_when_
             for must in ("Assembly function", "may be an assembly use", "none of the table's", "or none",
                          "can't be read or placed", "stated Group A", "It is settled only where every room on the story",
                          # review round 2: the rooms the Revit Function mark says to leave blank are said to be aside
-                         "closet or toilet with none", "exit stair or passageway", "but its corridors, closets, toilets and exits"):
+                         "closet or toilet with none", "exit stair or passageway", "but its corridors, closets, toilets and exits",
+                         # review round 4: an exit or a corridor stating a function is a trigger of its own
+                         "an exit or a corridor states a function", "which state none"):
                 assert must in why, (rid, must)
             n += 1
     assert n == 30
@@ -1077,6 +1079,6 @@ def test_the_seating_measures_meaning_names_every_trigger():
     """Review round 2 (P3): parts.yaml's meaning of the story's seating measure left out round 1's Group A trigger."""
     meaning = parts.load_registry()["story"]["measures"]["story_assembly_seating_possible"]["meaning"]
     for must in ("Assembly functions", "may be an assembly use", "none of the table's", "can't be read or placed",
-                 "no room drawn in it", "stated Group A"):
+                 "no room drawn in it", "stated Group A", "an exit or a corridor states a function"):
         assert must in meaning, must
 
