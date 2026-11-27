@@ -60,7 +60,7 @@ internal static class Audit
             for (var i = 0; i < placed.Count; i++)
             {
                 var p = placed[i];
-                var cards = ResultViews.CardsOf(views, p.Row.Id);
+                var cards = ResultViews.CardsOf(views, p.Row.Id, fields);
                 var detail = Details.Of(p, i, placed.Count, elementLabels, null);
                 var page = DetailPages.Of(detail, p, cards);
                 text.AppendLine($"=== [{p.Section} / {p.Status}] {p.Row.Name}");
@@ -81,11 +81,22 @@ internal static class Audit
                 pn.UseView(ResultsViewKind.ByCode);
             });
             if (answerGroup is not null)
+            {
                 step(new Pane(PanelTheme.Light, []), $"{name}_c_questions", 1400, pn =>
                 {
-                    pn.Show(title, when, rows, labels, fields);
-                    pn.Toggle(ResultViewList.GroupKey(answerGroup));
+                    pn.Show(title, when, rows, labels, fields);       // the questions card opens at first
+                    pn.Toggle(ResultViewList.MoreQuestionsKey);
                 });
+                // "Is there an ADU?" answered in the card: Yes brings in its follow-ups, No leaves them out
+                if (answerGroup.Cards.Any(c => c.DependsOn?.Field == "facts.accessory_dwelling_unit"))
+                    foreach (var (tag, value) in new[] { ("adu_yes", "Yes"), ("adu_no", "No") })
+                        step(new Pane(PanelTheme.Light, []), $"{name}_c_questions_{tag}", 1400, pn =>
+                        {
+                            pn.Show(title, when, rows, labels, fields);
+                            pn.Toggle(ResultViewList.MoreQuestionsKey);
+                            pn.Answer(Marks.AccessoryDwellingUnit, value);
+                        });
+            }
             foreach (var kind in new[] { FixKind.Decide, FixKind.Measure })
                 if (views.Fix.FirstOrDefault(g => g.Kind == kind) is { } open)
                     step(new Pane(PanelTheme.Light, []), $"{name}_c_{kind.ToString().ToLowerInvariant()}_open", 1400, pn =>

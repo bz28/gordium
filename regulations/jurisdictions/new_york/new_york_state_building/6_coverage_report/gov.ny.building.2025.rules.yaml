@@ -1318,6 +1318,51 @@ pieces:
     heading: Fire door assemblies › Fire door frames
     rules:
     - general.bc_716_2_4_fire_door_frames
+  '1003.2':
+    label: flag
+    heading: General means of egress › Ceiling height
+    rules:
+    - general.bc_1003_2_ceiling_height
+  1003.3.1:
+    label: flag
+    heading: Protruding objects › Headroom
+    rules:
+    - general.bc_1003_3_1_headroom
+  1003.3.2:
+    label: flag
+    heading: Protruding objects › Post-mounted objects
+    rules:
+    - general.bc_1003_3_2_post_mounted_objects
+  1003.3.3:
+    label: flag
+    heading: Protruding objects › Horizontal projections
+    rules:
+    - general.bc_1003_3_3_horizontal_projections
+  1003.3.4:
+    label: flag
+    heading: Protruding objects › Clear width
+    rules:
+    - general.bc_1003_3_4_clear_width
+  '1003.4':
+    label: flag
+    heading: General means of egress › Slip-resistant surface
+    rules:
+    - general.bc_1003_4_slip_resistant_surface
+  '1003.5':
+    label: flag
+    heading: General means of egress › Elevation change
+    rules:
+    - general.bc_1003_5_elevation_change
+  '1003.6':
+    label: flag
+    heading: General means of egress › Means of egress continuity
+    rules:
+    - general.bc_1003_6_means_of_egress_continuity
+  '1003.7':
+    label: flag
+    heading: General means of egress › Elevators, escalators and moving walks
+    rules:
+    - general.bc_1003_7_elevators_escalators_moving_walks
   '1004.7':
     label: flag
     heading: Occupant load › Outdoor areas
@@ -1471,6 +1516,181 @@ pieces:
     heading: Remoteness of exit access stairways or ramps › Three or more exit access stairways or ramps
     rules:
     - general.bc_1007_1_3_1_three_or_more_stairways
+  '1008.2':
+    label: flag
+    heading: Means of egress illumination › Illumination required
+    rules:
+    - general.bc_1008_2_illumination_required
+  1008.2.1:
+    label: flag
+    heading: Illumination required › Illumination level under normal power
+    rules:
+    - general.bc_1008_2_1_illumination_level
+  1008.2.2:
+    label: flag
+    heading: Illumination required › Group I-2
+    rules:
+    - general.bc_1008_2_2_group_i2_exterior_landings
+  1008.2.3:
+    label: flag
+    heading: Illumination required › Exit discharge
+    rules:
+    - general.bc_1008_2_3_exit_discharge_illumination
+  1008.2.4:
+    label: flag
+    heading: Illumination required › Power for illumination
+    rules:
+    - general.bc_1008_2_4_power_for_illumination
+  '1008.3':
+    label: flag
+    heading: Means of egress illumination › Illumination required by an emergency electrical system
+    rules:
+    - general.bc_1008_3_emergency_illumination
+  1008.3.1:
+    label: flag
+    heading: Illumination required by an emergency electrical system › Duration
+    rules:
+    - general.bc_1008_3_1_emergency_power_duration
+  1008.3.2:
+    label: flag
+    heading: Illumination required by an emergency electrical system › Illumination level under emergency power
+    rules:
+    - general.bc_1008_3_2_emergency_illumination_level
+  '1009.1':
+    label: flag
+    heading: Accessible means of egress › Accessible means of egress required
+    rules:
+    - general.bc_1009_1_accessible_means_of_egress_required
+  '1009.2':
+    label: flag
+    heading: Accessible means of egress › Continuity and components
+    rules:
+    - general.bc_1009_2_continuity_and_components
+  1009.2.1:
+    label: flag
+    heading: Continuity and components › Elevators required
+    rules:
+    - general.bc_1009_2_1_elevators_required
+  1009.2.2:
+    label: flag
+    heading: Continuity and components › Doors
+    rules:
+    - general.bc_1009_2_2_doors
+  1009.3.1:
+    label: flag
+    heading: Stairways › Exit access stairways
+    rules:
+    - general.bc_1009_3_1_exit_access_stairways
+  1009.3.2:
+    label: flag
+    heading: Stairways › Stairway width
+    rules:
+    - general.bc_1009_3_2_stairway_width
+  1009.3.3:
+    label: flag
+    heading: Stairways › Area of refuge
+    rules:
+    - general.bc_1009_3_3_area_of_refuge_at_stairways
+  1009.4.1:
+    label: flag
+    heading: Elevators › Standby power
+    rules:
+    - general.bc_1009_4_1_elevator_standby_power
+  1009.4.2:
+    label: flag
+    heading: Elevators › Area of refuge
+    rules:
+    - general.bc_1009_4_2_elevator_area_of_refuge
+  '1009.5':
+    label: flag
+    heading: Accessible means of egress › Platform lifts
+    rules:
+    - general.bc_1009_5_platform_lifts
+  '1009.6':
+    label: flag
+    heading: Accessible means of egress › Areas of refuge
+    rules:
+    - general.bc_1009_6_areas_of_refuge
+  1009.6.1:
+    label: flag
+    heading: Areas of refuge › Travel distance
+    rules:
+    - general.bc_1009_6_1_area_of_refuge_travel_distance
+  1009.6.2:
+    label: flag
+    heading: Areas of refuge › Stairway or elevator access
+    rules:
+    - general.bc_1009_6_2_area_of_refuge_stairway_or_elevator_access
+  1009.6.3:
+    label: flag
+    heading: Areas of refuge › Size
+    rules:
+    - general.bc_1009_6_3_area_of_refuge_size
+  1009.6.4:
+    label: flag
+    heading: Areas of refuge › Separation
+    rules:
+    - general.bc_1009_6_4_area_of_refuge_separation
+  1009.6.5:
+    label: flag
+    heading: Areas of refuge › Two-way communication
+    rules:
+    - general.bc_1009_6_5_area_of_refuge_two_way_communication
+  '1009.7':
+    label: flag
+    heading: Accessible means of egress › Exterior areas for assisted rescue
+    rules:
+    - general.bc_1009_7_exterior_areas_for_assisted_rescue
+  1009.7.1:
+    label: flag
+    heading: Exterior areas for assisted rescue › Size
+    rules:
+    - general.bc_1009_7_1_assisted_rescue_size
+  1009.7.2:
+    label: flag
+    heading: Exterior areas for assisted rescue › Separation
+    rules:
+    - general.bc_1009_7_2_assisted_rescue_separation
+  1009.7.3:
+    label: flag
+    heading: Exterior areas for assisted rescue › Openness
+    rules:
+    - general.bc_1009_7_3_assisted_rescue_openness
+  1009.7.4:
+    label: flag
+    heading: Exterior areas for assisted rescue › Stairways
+    rules:
+    - general.bc_1009_7_4_assisted_rescue_stairways
+  '1009.8':
+    label: flag
+    heading: Accessible means of egress › Two-way communication
+    rules:
+    - general.bc_1009_8_two_way_communication
+  1009.8.1:
+    label: flag
+    heading: Two-way communication › System requirements
+    rules:
+    - general.bc_1009_8_1_two_way_communication_system
+  1009.8.2:
+    label: flag
+    heading: Two-way communication › Directions
+    rules:
+    - general.bc_1009_8_2_two_way_communication_directions
+  '1009.9':
+    label: flag
+    heading: Accessible means of egress › Signage
+    rules:
+    - general.bc_1009_9_accessibility_signage
+  '1009.10':
+    label: flag
+    heading: Accessible means of egress › Directional signage
+    rules:
+    - general.bc_1009_10_directional_signage
+  '1009.11':
+    label: flag
+    heading: Accessible means of egress › Instructions
+    rules:
+    - general.bc_1009_11_instructions
   '1010.1':
     label: flag
     heading: General
@@ -1498,6 +1718,276 @@ pieces:
     heading: Egress door types › Direction of swing
     rules:
     - general.bc_1010_1_2_1_direction_of_swing
+  1010.1.3:
+    label: flag
+    heading: General › Forces to unlatch and open doors
+    rules:
+    - general.bc_1010_1_3_door_forces
+  1010.1.3.2:
+    label: flag
+    heading: Forces to unlatch and open doors › Manual horizontal sliding doors
+    rules:
+    - general.bc_1010_1_3_2_sliding_door_latch
+  1010.1.4:
+    label: flag
+    heading: General › Floor elevation
+    rules:
+    - general.bc_1010_1_4_floor_elevation
+  1010.1.5:
+    label: flag
+    heading: General › Landings at doors
+    rules:
+    - general.bc_1010_1_5_landings
+  1010.1.6:
+    label: flag
+    heading: General › Thresholds
+    rules:
+    - general.bc_1010_1_6_thresholds
+  1010.1.7:
+    label: flag
+    heading: General › Door arrangement
+    rules:
+    - general.bc_1010_1_7_door_arrangement
+  '1010.2':
+    label: flag
+    heading: Door operations
+    rules:
+    - general.bc_1010_2_door_operations
+  1010.2.1:
+    label: flag
+    heading: Door operations › Unlatching
+    rules:
+    - general.bc_1010_2_1_unlatching
+  1010.2.2:
+    label: flag
+    heading: Door operations › Hardware
+    rules:
+    - general.bc_1010_2_2_hardware
+  1010.2.3:
+    label: flag
+    heading: Door operations › Hardware height
+    rules:
+    - general.bc_1010_2_3_hardware_height
+  1010.2.4:
+    label: flag
+    heading: Door operations › Locks and latches
+    rules:
+    - general.bc_1010_2_4_locks_and_latches
+  Table 1010.2.4:
+    label: flag
+    heading: Manual bolts, automatic flush bolts and constant latching bolts on the inactive leaf of a pair of doors
+    rules:
+    - general.bc_table_1010_2_4_inactive_leaf_bolts
+  1010.2.5:
+    label: flag
+    heading: Door operations › Closet doors
+    rules:
+    - general.bc_1010_2_5_closet_doors
+  1010.2.6:
+    label: flag
+    heading: Door operations › Stairway doors
+    rules:
+    - general.bc_1010_2_6_stairway_doors
+  1010.2.7:
+    label: flag
+    heading: Door operations › Locking arrangements in educational occupancies
+    rules:
+    - general.bc_1010_2_7_educational_locking
+  1010.2.8:
+    label: rule
+    heading: Door operations › Panic and fire exit hardware
+    rules:
+    - general.bc_1010_2_8_panic_hardware
+  1010.2.8.1:
+    label: flag
+    heading: Panic and fire exit hardware › Refrigeration machinery room
+    rules:
+    - general.bc_1010_2_8_1_refrigeration_machinery_rooms
+  1010.2.8.2:
+    label: flag
+    heading: Panic and fire exit hardware › Rooms with electrical equipment
+    rules:
+    - general.bc_1010_2_8_2_electrical_rooms
+  1010.2.8.3:
+    label: flag
+    heading: Panic and fire exit hardware › Installation
+    rules:
+    - general.bc_1010_2_8_3_panic_hardware_installation
+  1010.2.8.4:
+    label: flag
+    heading: Panic and fire exit hardware › Balanced doors
+    rules:
+    - general.bc_1010_2_8_4_balanced_doors
+  1010.2.9:
+    label: flag
+    heading: Door operations › Monitored or recorded egress, and access control systems
+    rules:
+    - general.bc_1010_2_9_access_control
+  1010.2.10:
+    label: flag
+    heading: Door operations › Door hardware release of electrically locked egress doors
+    rules:
+    - general.bc_1010_2_10_door_hardware_release
+  1010.2.11:
+    label: flag
+    heading: Door operations › Sensor release of electrically locked egress doors
+    rules:
+    - general.bc_1010_2_11_sensor_release
+  1010.2.12:
+    label: flag
+    heading: Door operations › Delayed egress
+    rules:
+    - general.bc_1010_2_12_delayed_egress
+  1010.2.12.1:
+    label: flag
+    heading: Delayed egress › Delayed egress locking system
+    rules:
+    - general.bc_1010_2_12_1_delayed_egress_locking_system
+  1010.2.13:
+    label: flag
+    heading: Door operations › Controlled egress doors in Groups I-1 and I-2
+    rules:
+    - general.bc_1010_2_13_controlled_egress
+  1010.2.14:
+    label: flag
+    heading: Door operations › Elevator lobby exit access doors
+    rules:
+    - general.bc_1010_2_14_elevator_lobby_doors
+  1010.2.15:
+    label: flag
+    heading: Door operations › Locking arrangements in buildings within correctional facilities
+    rules:
+    - general.bc_1010_2_15_correctional_facilities
+  '1012.2':
+    label: flag
+    heading: Ramps › Slope
+    rules:
+    - general.bc_1012_2_slope
+  '1012.3':
+    label: flag
+    heading: Ramps › Cross slope
+    rules:
+    - general.bc_1012_3_cross_slope
+  '1012.4':
+    label: flag
+    heading: Ramps › Vertical rise
+    rules:
+    - general.bc_1012_4_vertical_rise
+  1012.5.1:
+    label: flag
+    heading: Minimum dimensions › Width and capacity
+    rules:
+    - general.bc_1012_5_1_width_and_capacity
+  1012.5.2:
+    label: flag
+    heading: Minimum dimensions › Headroom
+    rules:
+    - general.bc_1012_5_2_headroom
+  1012.5.3:
+    label: flag
+    heading: Minimum dimensions › Restrictions
+    rules:
+    - general.bc_1012_5_3_restrictions
+  '1012.6':
+    label: flag
+    heading: Ramps › Landings
+    rules:
+    - general.bc_1012_6_landings
+  1012.6.1:
+    label: flag
+    heading: Landings › Slope
+    rules:
+    - general.bc_1012_6_1_landing_slope
+  1012.6.2:
+    label: flag
+    heading: Landings › Width
+    rules:
+    - general.bc_1012_6_2_landing_width
+  1012.6.3:
+    label: flag
+    heading: Landings › Length
+    rules:
+    - general.bc_1012_6_3_landing_length
+  1012.6.4:
+    label: flag
+    heading: Landings › Change in direction
+    rules:
+    - general.bc_1012_6_4_change_in_direction
+  '1012.7':
+    label: flag
+    heading: Ramps › Ramp construction
+    rules:
+    - general.bc_1012_7_ramp_construction
+  1012.7.1:
+    label: flag
+    heading: Ramp construction › Ramp surface
+    rules:
+    - general.bc_1012_7_1_ramp_surface
+  1012.7.2:
+    label: flag
+    heading: Ramp construction › Outdoor conditions
+    rules:
+    - general.bc_1012_7_2_outdoor_conditions
+  '1012.8':
+    label: flag
+    heading: Ramps › Handrails
+    rules:
+    - general.bc_1012_8_handrails
+  '1012.9':
+    label: flag
+    heading: Ramps › Guards
+    rules:
+    - general.bc_1012_9_guards
+  '1012.10':
+    label: flag
+    heading: Ramps › Edge protection
+    rules:
+    - general.bc_1012_10_edge_protection
+  '1013.1':
+    label: flag
+    heading: Exit signs › Where required
+    rules:
+    - general.bc_1013_1_exit_signs_where_required
+  '1013.2':
+    label: flag
+    heading: Exit signs › Low-level exit signs in Group R-1
+    rules:
+    - general.bc_1013_2_low_level_exit_signs_group_r1
+  '1013.3':
+    label: flag
+    heading: Exit signs › Illumination
+    rules:
+    - general.bc_1013_3_exit_sign_illumination
+  '1013.4':
+    label: flag
+    heading: Exit signs › Raised character and braille exit signs
+    rules:
+    - general.bc_1013_4_raised_character_braille_exit_signs
+  '1013.5':
+    label: flag
+    heading: Exit signs › Internally illuminated exit signs
+    rules:
+    - general.bc_1013_5_internally_illuminated_exit_signs
+  1013.5.1:
+    label: flag
+    heading: Internally illuminated exit signs › Photoluminescent exit signs
+    rules:
+    - general.bc_1013_5_1_photoluminescent_exit_signs
+  1013.6.1:
+    label: flag
+    heading: Externally illuminated exit signs › Graphics
+    rules:
+    - general.bc_1013_6_1_exit_sign_graphics
+  1013.6.2:
+    label: flag
+    heading: Externally illuminated exit signs › Exit sign illumination
+    rules:
+    - general.bc_1013_6_2_exit_sign_illumination_intensity
+  1013.6.3:
+    label: flag
+    heading: Externally illuminated exit signs › Power source
+    rules:
+    - general.bc_1013_6_3_exit_sign_power_source
   '1016.2':
     label: rule
     heading: Egress through intervening spaces
@@ -1552,11 +2042,36 @@ pieces:
     heading: Atriums › Exit access travel distance at other than the level of exit discharge
     rules:
     - general.bc_1017_3_2_3_atrium
+  '1018.1':
+    label: flag
+    heading: Aisles › General
+    rules:
+    - general.bc_1018_1_aisles_general
+  '1018.3':
+    label: flag
+    heading: Aisles › Aisles in Groups B and M
+    rules:
+    - general.bc_1018_3_aisles_groups_b_m
   '1018.4':
     label: flag
-    heading: Aisle accessways in Group M
+    heading: Aisles › Aisle accessways in Group M
     rules:
     - general.bc_1018_4_merchandise_pads
+  '1018.5':
+    label: flag
+    heading: Aisles › Aisles in other than assembly spaces and Groups B and M
+    rules:
+    - general.bc_1018_5_aisles_other_occupancies
+  '1019.3':
+    label: flag
+    heading: Exit access stairways and ramps › Occupancies other than Groups I-2 and I-3
+    rules:
+    - general.bc_1019_3_exit_access_stairway_enclosure
+  '1019.4':
+    label: flag
+    heading: Exit access stairways and ramps › Group I-2 and I-3 occupancies
+    rules:
+    - general.bc_1019_4_exit_access_stairways_groups_i2_i3
   '1020.2':
     label: rule
     heading: Construction
@@ -1613,9 +2128,329 @@ pieces:
     heading: Corridor continuity
     rules:
     - general.bc_1020_7_continuity
+  '1021.1':
+    label: flag
+    heading: Egress balconies › General
+    rules:
+    - general.bc_1021_1_egress_balconies_as_corridors
+  '1021.2':
+    label: flag
+    heading: Egress balconies › Wall separation
+    rules:
+    - general.bc_1021_2_egress_balcony_separation
+  '1021.3':
+    label: flag
+    heading: Egress balconies › Openness
+    rules:
+    - general.bc_1021_3_egress_balcony_openness
+  '1021.4':
+    label: flag
+    heading: Egress balconies › Location
+    rules:
+    - general.bc_1021_4_egress_balcony_location
+  '1022.1':
+    label: flag
+    heading: Exits › General
+    rules:
+    - general.bc_1022_1_exits_general
+  '1022.2':
+    label: flag
+    heading: Exits › Exterior exit doors
+    rules:
+    - general.bc_1022_2_exterior_exit_door
+  1022.2.2:
+    label: flag
+    heading: Exterior exit doors › Arrangement
+    rules:
+    - general.bc_1022_2_2_exterior_exit_door_arrangement
+  '1023.1':
+    label: flag
+    heading: Interior exit stairways and ramps › General
+    rules:
+    - general.bc_1023_1_interior_exit_stairways_general
+  '1023.2':
+    label: flag
+    heading: Interior exit stairways and ramps › Construction
+    rules:
+    - general.bc_1023_2_enclosure_construction
+  '1023.3':
+    label: flag
+    heading: Interior exit stairways and ramps › Termination
+    rules:
+    - general.bc_1023_3_termination
+  1023.3.1:
+    label: flag
+    heading: Termination › Extension
+    rules:
+    - general.bc_1023_3_1_extension
+  '1023.4':
+    label: flag
+    heading: Interior exit stairways and ramps › Openings
+    rules:
+    - general.bc_1023_4_openings
+  '1023.5':
+    label: flag
+    heading: Interior exit stairways and ramps › Penetrations
+    rules:
+    - general.bc_1023_5_penetrations
+  '1023.6':
+    label: flag
+    heading: Interior exit stairways and ramps › Ventilation
+    rules:
+    - general.bc_1023_6_ventilation
+  '1023.7':
+    label: flag
+    heading: Interior exit stairways and ramps › Interior exit stairway and ramp exterior walls
+    rules:
+    - general.bc_1023_7_exterior_walls
+  1023.7.1:
+    label: flag
+    heading: Interior exit stairway and ramp exterior walls › Building exterior walls
+    rules:
+    - general.bc_1023_7_1_building_exterior_walls
+  1023.7.2:
+    label: flag
+    heading: Interior exit stairway and ramp exterior walls › Roof assemblies
+    rules:
+    - general.bc_1023_7_2_roof_assemblies
+  '1023.8':
+    label: flag
+    heading: Interior exit stairways and ramps › Barrier at level of exit discharge
+    rules:
+    - general.bc_1023_8_barrier_at_exit_discharge
+  '1023.9':
+    label: flag
+    heading: Interior exit stairways and ramps › Stairway identification signs
+    rules:
+    - general.bc_1023_9_stairway_identification_signs
+  1023.9.1:
+    label: flag
+    heading: Stairway identification signs › Signage requirements
+    rules:
+    - general.bc_1023_9_1_stairway_sign_requirements
+  '1023.10':
+    label: flag
+    heading: Interior exit stairways and ramps › Elevator lobby identification signs
+    rules:
+    - general.bc_1023_10_elevator_lobby_signs
+  '1023.11':
+    label: flag
+    heading: Interior exit stairways and ramps › Tactile floor-level signs
+    rules:
+    - general.bc_1023_11_tactile_floor_level_signs
+  '1023.12':
+    label: flag
+    heading: Interior exit stairways and ramps › Smokeproof enclosures
+    rules:
+    - general.bc_1023_12_smokeproof_enclosures
+  1023.12.1:
+    label: flag
+    heading: Smokeproof enclosures › Termination and extension
+    rules:
+    - general.bc_1023_12_1_smokeproof_termination
+  1023.12.2:
+    label: flag
+    heading: Smokeproof enclosures › Enclosure access
+    rules:
+    - general.bc_1023_12_2_smokeproof_access
+  '1023.13':
+    label: flag
+    heading: Interior exit stairways and ramps › Standpipes
+    rules:
+    - general.bc_1023_13_standpipes
+  '1024.1':
+    label: flag
+    heading: Exit passageways › General
+    rules:
+    - general.bc_1024_1_exit_passageways_general
+  '1024.2':
+    label: flag
+    heading: Exit passageways › Width and capacity
+    rules:
+    - general.bc_1024_2_exit_passageway_width
+  '1024.3':
+    label: flag
+    heading: Exit passageways › Construction
+    rules:
+    - general.bc_1024_3_exit_passageway_construction
+  '1024.4':
+    label: flag
+    heading: Exit passageways › Termination
+    rules:
+    - general.bc_1024_4_exit_passageway_termination
+  '1024.5':
+    label: flag
+    heading: Exit passageways › Openings
+    rules:
+    - general.bc_1024_5_exit_passageway_openings
+  '1024.6':
+    label: flag
+    heading: Exit passageways › Penetrations
+    rules:
+    - general.bc_1024_6_exit_passageway_penetrations
+  '1024.7':
+    label: flag
+    heading: Exit passageways › Ventilation
+    rules:
+    - general.bc_1024_7_exit_passageway_ventilation
+  '1024.8':
+    label: flag
+    heading: Exit passageways › Exit passageway exterior walls
+    rules:
+    - general.bc_1024_8_exit_passageway_exterior_walls
+  '1024.9':
+    label: flag
+    heading: Exit passageways › Standpipes
+    rules:
+    - general.bc_1024_9_exit_passageway_standpipes
+  '1025.1':
+    label: flag
+    heading: Luminous egress path markings › General
+    rules:
+    - general.bc_1025_1_luminous_markings_where_required
+  1025.2.1:
+    label: flag
+    heading: Markings within exit components › Steps
+    rules:
+    - general.bc_1025_2_1_steps
+  1025.2.2:
+    label: flag
+    heading: Markings within exit components › Landings
+    rules:
+    - general.bc_1025_2_2_landings
+  1025.2.3:
+    label: flag
+    heading: Markings within exit components › Handrails
+    rules:
+    - general.bc_1025_2_3_handrails
+  1025.2.4:
+    label: flag
+    heading: Markings within exit components › Perimeter demarcation lines
+    rules:
+    - general.bc_1025_2_4_perimeter_demarcation_lines
+  1025.2.4.1:
+    label: flag
+    heading: Perimeter demarcation lines › Floor-mounted demarcation lines
+    rules:
+    - general.bc_1025_2_4_1_floor_mounted_lines
+  1025.2.4.2:
+    label: flag
+    heading: Perimeter demarcation lines › Wall-mounted demarcation lines
+    rules:
+    - general.bc_1025_2_4_2_wall_mounted_lines
+  1025.2.4.3:
+    label: flag
+    heading: Perimeter demarcation lines › Transition
+    rules:
+    - general.bc_1025_2_4_3_transition
+  1025.2.5:
+    label: flag
+    heading: Markings within exit components › Obstacles
+    rules:
+    - general.bc_1025_2_5_obstacles
+  1025.2.6.1:
+    label: flag
+    heading: Doors within the exit path › Emergency exit symbol
+    rules:
+    - general.bc_1025_2_6_1_emergency_exit_symbol
+  1025.2.6.2:
+    label: flag
+    heading: Doors within the exit path › Door hardware markings
+    rules:
+    - general.bc_1025_2_6_2_door_hardware_markings
+  1025.2.6.3:
+    label: flag
+    heading: Doors within the exit path › Door frame markings
+    rules:
+    - general.bc_1025_2_6_3_door_frame_markings
+  '1025.3':
+    label: flag
+    heading: Luminous egress path markings › Uniformity
+    rules:
+    - general.bc_1025_3_uniformity
+  '1025.4':
+    label: flag
+    heading: Luminous egress path markings › Self-luminous and photoluminescent
+    rules:
+    - general.bc_1025_4_self_luminous_photoluminescent
+  '1025.5':
+    label: flag
+    heading: Luminous egress path markings › Illumination
+    rules:
+    - general.bc_1025_5_illumination
   '1030.8':
     label: flag
     heading: Common path of egress travel
     rules:
     - general.bc_1030_8_fixed_seating_common_path
+  '1031.2':
+    label: rule
+    heading: Where required
+    rules:
+    - general.bc_1031_2_escape_opening_where_required
+    - general.bc_1031_2_basements
+    - general.bc_1031_2_openings_to_public_way
+  1031.2.1:
+    label: flag
+    heading: Where required › Operational constraints and opening control devices
+    rules:
+    - general.bc_1031_2_1_operational_constraints
+  1031.3.1:
+    label: rule
+    heading: Emergency escape and rescue openings › Minimum size
+    rules:
+    - general.bc_1031_3_1_escape_opening_min_area
+  1031.3.2:
+    label: rule
+    heading: Emergency escape and rescue openings › Minimum dimensions
+    rules:
+    - general.bc_1031_3_2_escape_opening_min_height
+    - general.bc_1031_3_2_escape_opening_min_width
+  1031.3.3:
+    label: rule
+    heading: Emergency escape and rescue openings › Maximum height from floor
+    rules:
+    - general.bc_1031_3_3_escape_opening_max_sill_height
+  '1031.4':
+    label: rule
+    heading: Emergency escape and rescue doors
+    rules:
+    - general.bc_1031_4_escape_door_swinging_or_sliding
+  '1031.5':
+    label: rule
+    heading: Area wells
+    rules:
+    - general.bc_1031_5_area_well_required
+  1031.5.1:
+    label: rule
+    heading: Area wells › Minimum size
+    rules:
+    - general.bc_1031_5_1_area_well_min_projection
+    - general.bc_1031_5_1_area_well_min_width
+    - general.bc_1031_5_1_area_well_allows_full_opening
+  1031.5.2:
+    label: rule
+    heading: Area wells › Ladders or steps
+    rules:
+    - general.bc_1031_5_2_area_well_ladder_over_44
+  1031.5.2.1:
+    label: rule
+    heading: Ladders or steps › Ladders
+    rules:
+    - general.bc_1031_5_2_1_area_well_ladder
+  1031.5.2.2:
+    label: rule
+    heading: Ladders or steps › Steps
+    rules:
+    - general.bc_1031_5_2_2_area_well_steps
+  1031.5.3:
+    label: flag
+    heading: Area wells › Drainage
+    rules:
+    - general.bc_1031_5_3_area_well_drainage
+  '1031.6':
+    label: flag
+    heading: Bars, grilles, covers and screens
+    rules:
+    - general.bc_1031_6_bars_grilles_covers_screens
 not_checked_yet: []

@@ -339,3 +339,134 @@ def test_no_door_swing_passes_short_of_the_law_or_fails_within_it(rules, ctx):
                             bad.append((g, outdoor, swinging, swings, exterior, exit_, load, out, why))
     assert not bad, (len(bad), bad[:5])
     assert {"pass", "fail", "needs_review"} <= seen
+
+
+# ---- section group 6e (2026-11-26): panic and fire exit hardware, 1010.2.8 (p.326 lines 31-39) ----------------------
+# Strict (a pass allowed only here): the door isn't swinging, or has no latch or lock, or its only latch or lock is
+# panic or fire exit hardware (no electric lock: review round 1, an electric lock the panic hardware releases is a lock
+# other than panic hardware), or the building is one stated group other than A, E and H, or one stated Group A or E
+# and the door serves under 50 at the most it can serve.
+# Loosest (a fail allowed only here): a swinging door, latched, in a building stated Group H without panic or fire
+# exit hardware as its only latch or lock (an electric lock released by it included: exception 2 is for Groups A and E,
+# 1010.2.10 excludes H), or Group E serving 50 or more at the least it can serve without panic hardware (with it and
+# an electric lock, exception 2 may apply); never Group A (exception 1: a main exit's key-operated lock, 1010.2.4 item
+# 3, isn't shown), and never a door without panic hardware that may be to outside where the building's outdoor areas
+# may be occupied (exception 3: an exit access door serving an occupied exterior area, 1010.2.4 item 8, a key-operated
+# lock).
+PANIC_RULE = "general.bc_1010_2_8_panic_hardware"
+A_GROUPS = ("A-1", "A-2", "A-3", "A-4", "A-5")
+
+
+def _panic_part(swinging, latched, panic, exterior, load, electric=U):
+    m = {k: v for k, v in (("moe_door_swinging", swinging), ("moe_door_latched", latched),
+                           ("moe_door_panic_hardware", panic), ("moe_door_exterior", exterior),
+                           ("moe_door_electric_lock", electric)) if v is not U}
+    part = {"id": "p", "measures": m}
+    if isinstance(load, tuple):
+        part["readings"] = {"moe_door_occupant_load": [{"value": v, "named": {"door_occupants_served": n}}
+                                                        for v, n in zip(load, ("none", "whole_building"))]}
+    elif load is not U:
+        m["moe_door_occupant_load"] = load
+    return part
+
+
+def _panic_wrong(out, group, swinging, latched, panic, exterior, load, outdoor, electric=U):
+    low = high = None
+    if isinstance(load, tuple):
+        low, high = load
+    elif load is not U:
+        low = high = load
+    if out == "pass":
+        ok = swinging is False or latched is False or (panic is True and electric is False) or (
+            group is not U and group != "mixed" and group not in A_GROUPS + H_GROUPS + ("E",)) or (
+            group in A_GROUPS + ("E",) and high is not None and high < 50)
+        return None if ok else "passes short of the strict reading"
+    if out == "fail":
+        # an electric lock is never exception 3's key-operated lock (1010.2.4 item 8.3), and in Group H it is a lock
+        # other than panic hardware whatever else the door has
+        exception_3 = electric is not True and exterior is not False and outdoor is not False
+        h = group in H_GROUPS and (panic is False or electric is True)
+        e = group == "E" and low is not None and low >= 50 and panic is False
+        ok = swinging is True and latched is True and not exception_3 and (h or e)
+        return None if ok else "fails within the loosest reading"
+    if out == "not_applicable":
+        return "set aside: it applies to every door"
+    return None
+
+
+@pytest.mark.parametrize("electric", TRI, ids=("electric_yes", "electric_no", "electric_unstated"))
+@pytest.mark.parametrize("outdoor", TRI, ids=("outdoor_yes", "outdoor_no", "outdoor_unstated"))
+def test_no_panic_hardware_row_passes_short_of_the_law_or_fails_within_it(rules, ctx, outdoor, electric):
+    rule = {r["id"]: r for r in rules}[PANIC_RULE]
+    classes = group_classes(rule)
+    assert len(classes) >= 5                                 # A, E, H, mixed, unstated, the rest kept apart
+    bad, seen = [], set()
+    for rep, members in classes.items():
+        if True:
+            given = _given(rep, U) | ({} if outdoor is U else {"occupied_outdoor_areas": outdoor})
+            for swinging, latched, panic, exterior in itertools.product(TRI, TRI, TRI, TRI):
+                for load in LOADS:
+                    part = _panic_part(swinging, latched, panic, exterior, load, electric)
+                    out = parts.rows(rule, {"means_of_egress_door": [part]}, given, ctx.allowed())[0]["outcome"]
+                    seen.add(out)
+                    for g in members:
+                        if why := _panic_wrong(out, g, swinging, latched, panic, exterior, load, outdoor, electric):
+                            bad.append((g, outdoor, swinging, latched, panic, exterior, electric, load, out, why))
+    assert not bad, (len(bad), bad[:5])
+    assert {"pass", "fail", "needs_review"} <= seen
+
+
+def test_the_panic_hardware_walks_collapse_keeps_the_groups_the_law_tells_apart(rules):
+    classes = group_classes({r["id"]: r for r in rules}[PANIC_RULE])
+    where = {g: rep for rep, members in classes.items() for g in members}
+    for a, b in (("A-3", "B"), ("E", "B"), ("H-2", "B"), ("A-3", "E"), ("E", "H-2"), ("A-3", "H-2"), ("mixed", "B"),
+                 (U, "B"), ("mixed", "H-2")):
+        assert where[a] is not where[b], (a, b)
+    assert where["A-1"] == where["A-5"] and where["H-1"] == where["H-5"] and where["B"] == where["R-2"]
+
+
+def test_a_door_whose_hardware_isnt_stated_never_passes_where_1010_2_8_may_ask_it(rules, ctx):
+    """The new fact: a swinging door whose hardware isn't stated (no Revit mark yet) needs review, never a pass, in
+    every building that may be Group H, or Group A or E unless its load is stated under 50 (two or more groups, or
+    none stated, included)."""
+    rule = {r["id"]: r for r in rules}[PANIC_RULE]
+    for g in A_GROUPS + H_GROUPS + ("E", "mixed", U):
+        for load in (U, 50, 120):
+            for outdoor in TRI:
+                given = _given(g, U) | ({} if outdoor is U else {"occupied_outdoor_areas": outdoor})
+                part = _panic_part(True, U, U, False, load)
+                assert _row(rule, part, given, ctx) == "needs_review", (g, load, outdoor)
+    # review round 4: under 50 as stated, Groups A and E aren't asked (p.326 lines 31-33), so it complies whatever
+    # its hardware, as the interior format now says; Group H, two or more groups and an unstated one still need review
+    for g, want in (("A-3", "pass"), ("E", "pass"), ("H-2", "needs_review"), ("mixed", "needs_review"),
+                    (U, "needs_review")):
+        assert _row(rule, _panic_part(True, U, U, False, 30), _given(g, U) | {"occupied_outdoor_areas": False},
+                    ctx) == want, g
+    doc = (REPO / "docs/interior/interior_description_format.md").read_text(encoding="utf-8")
+    assert "or Group A or E unless the door's load is stated under 50" in doc
+
+
+def test_an_electric_lock_on_panic_hardware_never_passes_where_group_h_may_be_served(rules, ctx):
+    """Review round 1 of group 6e (P0): an electric lock the panic hardware releases is a lock other than panic
+    hardware (1010.2.8, p.326 lines 31-33); exception 2 allows it only for Groups A and E (lines 36-37), and 1010.2.10
+    is "any occupancy except Group H" (p.327 lines 5-6). In Group H it fails; two or more groups, or not stated, need
+    review; Groups A and E at 50 or more need review (1010.2.10's conditions aren't shown); any other one group passes."""
+    rule = {r["id"]: r for r in rules}[PANIC_RULE]
+    part = _panic_part(True, True, True, False, 120, electric=True)
+    for g, want in [(h, "fail") for h in H_GROUPS] + [("mixed", "needs_review"), (U, "needs_review"),
+                                                       ("E", "needs_review"), ("A-3", "needs_review"), ("B", "pass")]:
+        assert _row(rule, part, _given(g, U) | {"occupied_outdoor_areas": False}, ctx) == want, g
+    assert _row(rule, _panic_part(True, True, True, False, 30, electric=True), _given("E", U), ctx) == "pass"
+
+
+def test_a_doors_load_counts_every_story_it_serves_and_exception_3_spares_no_electric_lock(rules):
+    """Review round 2 of group 6e: a door's load is stated by hand, so its meaning must not let a stair's discharge door
+    be typed with its own story only (it serves every story above: 1005.4, p.314; stories not added, 1004.2.3, p.311
+    lines 50-51, except where egress from above and below converges, 1005.6); and the rule's notes say exception 3's
+    review spares only a door without panic hardware (1010.2.4 item 8.3's lock is key-operated, p.325 line 24)."""
+    meaning = " ".join(parts.load_registry()["means_of_egress_door"]["measures"]["moe_door_occupant_load"]["meaning"].split())
+    assert "at least the largest of those stories' loads, no story left out (1005.4" in meaning
+    assert "converges at it, where the two adjacent stories' loads are added (1005.6)" in meaning
+    notes = " ".join({r["id"]: r for r in rules}[PANIC_RULE]["notes"].split())
+    assert "a door without panic hardware to outside" in notes and "unless it is a door to outside" not in notes
+    assert "no story left out (1005.4)" in notes and "separate stories not added" not in notes
