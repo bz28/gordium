@@ -344,6 +344,83 @@ public sealed class GroundTests
         Assert.DoesNotContain("sidelight", why, StringComparison.Ordinal);
     }
 
+    // ---- review round 2 ---------------------------------------------------------------------------------------------
+
+    /// <summary>A hole or a cliff cut into the Toposolid between the places read (a 4 in strip of cells across the line
+    /// 1 in out from house 1's window, x 5 to 5.33, between its end and its middle): its rim is the highest at every edge
+    /// the line crosses, so each stretch between is read too. A hole: no ground there, nothing sent; a cliff 4 ft deep:
+    /// its floor is sent, and the window, more than 44 in over it, is no grade-floor opening.</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void A_hole_or_a_cliff_between_the_edges_the_face_line_crosses_is_read(bool cliff)
+    {
+        var house = FakeHouse.Draw("1_ranch_compliant");
+        var whole = house.Toposolid((_, _) => 0, xs: [5.0, 5.33], ys: [-0.6, -0.5]);
+        bool InCell(GroundTriangle t)
+        {
+            double x = (t.A.X + t.B.X + t.C.X) / 3, y = (t.A.Y + t.B.Y + t.C.Y) / 3;
+            return x > 5.0 && x < 5.33 && y > -0.6 && y < -0.5;
+        }
+        var kept = whole.Triangles!.Where(t => !InCell(t)).ToList();
+        if (cliff)                                                       // the cell's floor 4 ft down, its sides sheer
+            kept.AddRange(whole.Triangles!.Where(InCell).Select(t => new GroundTriangle(t.A with { Z = -4 }, t.B with { Z = -4 }, t.C with { Z = -4 })));
+        house.Grounds = [whole with { Triangles = kept }];
+        house.FinishedGround(true);
+        var read = InteriorReader.Read(house.Model());
+        if (!cliff)
+        {
+            Assert.Null(Ground(read, "w1"));
+            Assert.StartsWith("no finished ground is drawn just outside it", Why(read, "w1"));
+            return;
+        }
+        Assert.Contains(Ground(read, "w1")!, z => Math.Abs(z + 4) < 1e-9);
+        var m = Measured(read, "w1");
+        Assert.False(m["m"]!["opening_below_grade"]!.GetValue<bool>());
+        Assert.Null(m["m"]!["opening_at_grade"]);                       // within 44 in of 0, not of -4 ft
+    }
+
+    /// <summary>A subregion level with its host (an older topography's lies on its host's surface), listed after or
+    /// before it: the ground is read, never "two grounds".</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void A_subregion_level_with_its_host_is_read_on_it(bool subFirst)
+    {
+        var house = FakeHouse.Draw("5_basement_window_well");
+        var host = house.Toposolid((_, _) => 0);
+        var sub = house.Toposolid((_, _) => 0, "topo-2", "Walk", host: "topo-1");
+        house.Grounds = subFirst ? [sub, host] : [host, sub];
+        house.FinishedGround(true);
+        var read = InteriorReader.Read(house.Model());
+        Assert.Equal([0.0, 0.0, 0.0], Ground(read, "we1"));
+        Assert.Null(Why(read, "we1"));
+        // a host standing above its own subdivision is two grounds still
+        house.Grounds = [host with { Triangles = house.Toposolid((_, _) => 0.5).Triangles }, sub];
+        Assert.Contains("two grounds are drawn", Why(InteriorReader.Read(house.Model()), "we1"));
+    }
+
+    /// <summary>A window whose type has no width (an instance-width family): said as such, never "(0 in)".</summary>
+    [Fact]
+    public void A_window_with_no_type_width_says_so()
+    {
+        var house = Drawn("5_basement_window_well", (_, _) => 0);
+        var i = house.OpeningIndex("we1");
+        house.Openings[i] = house.Openings[i] with { TypeWidth = null };
+        var why = Why(InteriorReader.Read(house.Model()), "we1")!;
+        Assert.Equal("its type's width isn't read, so whether the opening it takes in its wall holds more than the window isn't known", why);
+    }
+
+    /// <summary>The marks' words say a window's ground is read, a door's not (its clear bottom isn't sent).</summary>
+    [Fact]
+    public void The_marks_say_the_ground_is_read_at_windows_only()
+    {
+        Assert.DoesNotContain("window and door", Marks.ToposolidFinished.Description, StringComparison.Ordinal);
+        Assert.Contains("a door's isn't read yet", Marks.ToposolidFinished.Description, StringComparison.Ordinal);
+        Assert.Contains("Blank: for a window, read from the Toposolid", Marks.BelowGrade.Description, StringComparison.Ordinal);
+        Assert.Contains("Blank: for a window, where Gordium: Toposolid is finished ground is Yes", Marks.WellDepth.Description, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void Only_an_escape_opening_says_why_its_ground_isnt_read()
     {

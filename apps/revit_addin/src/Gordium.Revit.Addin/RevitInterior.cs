@@ -52,7 +52,7 @@ internal static class RevitInterior
         using (IndexKept.Open())
         {
             // each step timed and counted for the log's read_steps (never part of the records)
-            // the grounds first: what stands outside each window and door is looked for only where one is drawn
+            // the grounds first: what stands round each window and door is looked for only where one is drawn (the reader reads a window's ground)
             grounds = ReadSteps.Time("inside.grounds", () => GroundsOf(doc, diagnostics));
             ReadSteps.Count("inside.grounds", grounds?.Count ?? 0);
             var anyGround = grounds is not { Count: 0 };

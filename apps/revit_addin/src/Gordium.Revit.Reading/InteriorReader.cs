@@ -145,7 +145,7 @@ public static class InteriorReader
         if (openingsNotRead.Count == 0 && records is not null)
         {
             var marked = MarkReading.InDesign(model).ToDictionary(e => e.UniqueId, StringComparer.Ordinal);
-            // the ground outside each window and door, only where a ground is drawn in the design checked (GroundReader)
+            // the ground outside each window, only where a ground is drawn in the design checked (GroundReader)
             var ground = GroundReader.Of(model) is { } grounds ? (grounds, UnknownSpaceList(model)) : ((GroundReader.Grounds, List<(EnclosedArea, string, List<P2>?)>)?)null;
             foreach (var o in MarkReading.Openings(model))
                 openings.Add(ReadOpening(model, records, marked[o.Id], o, notes, evidence, plans, ground));

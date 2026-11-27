@@ -61,7 +61,7 @@ public sealed record InteriorRecords
 
     /// <summary>Every ground the model draws (<see cref="GroundRecord"/>): each <c>Toposolid</c> and each older
     /// <c>TopographySurface</c>, in any phase or design option (the reader keeps the design checked's). The ground at
-    /// each window and door is read from them (<see cref="GroundReader"/>). Null when the Revit layer didn't read them:
+    /// each window is read from them (<see cref="GroundReader"/>). Null when the Revit layer didn't read them:
     /// then no ground is read, as with none drawn.</summary>
     public IReadOnlyList<GroundRecord>? Grounds { get; init; }
 

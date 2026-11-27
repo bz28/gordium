@@ -227,8 +227,9 @@ public static class GroundReader
         new HashSet<string>(SiteReader.NotLookedAt.Append("OST_RoomSeparationLines"), StringComparer.Ordinal);
 
     /// <summary>The lowest and highest finished ground along the plan segment <paramref name="a"/> to
-    /// <paramref name="b"/>, exactly: at its ends and wherever it crosses a triangle's edge (the ground is planar
-    /// between); null, with why, where any of those has no one ground (<see cref="Ground"/>).</summary>
+    /// <paramref name="b"/>, exactly: at its ends and wherever it crosses a triangle's edge, and each stretch between
+    /// read at its middle, the plane there taken at the stretch's ends (the ground is planar within a stretch: a hole or
+    /// a cliff cut into it is seen); null, with why, where any of those has no one ground (<see cref="Ground"/>).</summary>
     internal static (double Low, double High)? Extremes(Grounds set, P2 a, P2 b, string where, out string? why)
     {
         var d = b - a;
@@ -239,11 +240,25 @@ public static class GroundReader
                     if (Crossing(a, d, u, v) is { } x)
                         at.Add(x);
         double low = double.PositiveInfinity, high = double.NegativeInfinity;
-        foreach (var x in at.Distinct())
+        P2 On(double x) => new(a.X + x * d.X, a.Y + x * d.Y);
+        var xs = at.Distinct().Order().ToList();
+        foreach (var x in xs)
         {
-            if (Ground(set, new P2(a.X + x * d.X, a.Y + x * d.Y), where, out _, out why) is not { } z)
+            if (Ground(set, On(x), where, out _, out why) is not { } z)
                 return null;
             (low, high) = (Math.Min(low, z), Math.Max(high, z));
+        }
+        // between two crossings the ground is one triangle's plane, which may not be the one read at the crossings (a
+        // hole or a cliff cut into the Toposolid there: its rim is the highest at the crossings, review round 2): the
+        // stretch's middle is read, no ground there refusing, and that plane taken at both its ends
+        for (var i = 0; i + 1 < xs.Count; i++)
+        {
+            if (xs[i + 1] - xs[i] < 1e-12)
+                continue;
+            if (Top(set, On((xs[i] + xs[i + 1]) / 2), where, out _, out why) is not { } top)
+                return null;
+            foreach (var z in new[] { Plane(top.Triangle, On(xs[i])), Plane(top.Triangle, On(xs[i + 1])) })
+                (low, high) = (Math.Min(low, z), Math.Max(high, z));
         }
         why = null;
         return (low, high);
@@ -268,18 +283,22 @@ public static class GroundReader
 
     /// <summary>The finished ground's top at a plan point (shared): the highest triangle over it; null, with why, where
     /// no ground is drawn there, or two grounds are (a subdivision over its own host excepted: its top counts).</summary>
-    internal static double? Ground(Grounds set, P2 at, string where, out string? by, out string? why)
+    internal static double? Ground(Grounds set, P2 at, string where, out string? by, out string? why) =>
+        Top(set, at, where, out by, out why)?.Z;
+
+    /// <summary><see cref="Ground"/>, with the triangle the ground is read from.</summary>
+    private static (double Z, (Xyz A, Xyz B, Xyz C) Triangle)? Top(Grounds set, P2 at, string where, out string? by, out string? why)
     {
         by = why = null;
-        var hits = new List<(GroundRecord G, double Z)>();
+        var hits = new List<(GroundRecord G, double Z, (Xyz, Xyz, Xyz) T)>();
         foreach (var (g, triangles) in set.Each)
         {
-            double? best = null;
-            foreach (var (a, b, c) in triangles)
-                if (Height(a, b, c, at) is { } z && (best is null || z > best))
-                    best = z;
+            (double Z, (Xyz, Xyz, Xyz) T)? best = null;
+            foreach (var tr in triangles)
+                if (Height(tr.A, tr.B, tr.C, at) is { } z && (best is null || z > best.Value.Z))
+                    best = (z, tr);
             if (best is { } found)
-                hits.Add((g, found));
+                hits.Add((g, found.Z, found.T));
         }
         if (hits.Count == 0)
         {
@@ -287,15 +306,17 @@ public static class GroundReader
             return null;
         }
         var highest = hits.MaxBy(h => h.Z);
-        foreach (var (g, z) in hits.Where(h => h.G != highest.G))
+        foreach (var (g, z, _) in hits.Where(h => h.G != highest.G))
         {
-            if (Hosts(set, g, highest.G))
-                continue;                                    // a subdivision on its host: its top is the ground
+            // a subdivision on its host: its top is the ground; one level with it (an older topography's subregion lies
+            // on its host's surface, review round 2) may come out the lower by drawing noise
+            if (Hosts(set, g, highest.G) || (Hosts(set, highest.G, g) && highest.Z - z <= S))
+                continue;
             why = $"two grounds are drawn {where} ({Named(highest.G)} at {Feet(highest.Z)}, {Named(g)} at {Feet(z)}), so which is the ground isn't known";
             return null;
         }
         by = highest.G.UniqueId;
-        return highest.Z;
+        return (highest.Z, highest.T);
     }
 
     /// <summary>Whether <paramref name="host"/> is <paramref name="sub"/>'s host, or its host's, and so on.</summary>
@@ -311,7 +332,12 @@ public static class GroundReader
     /// <summary>The height of the triangle over a plan point, or null where the point isn't over it (its edges
     /// included) or it stands on edge. Worked out about the point, so survey-scale coordinates keep their
     /// precision.</summary>
-    internal static double? Height(Xyz a, Xyz b, Xyz c, P2 at)
+    internal static double? Height(Xyz a, Xyz b, Xyz c, P2 at) => Weights(a, b, c, at, bounded: true);
+
+    /// <summary>The triangle's plane's height over a plan point, anywhere (its stretch's ends, on its edges).</summary>
+    private static double Plane((Xyz A, Xyz B, Xyz C) t, P2 at) => Weights(t.A, t.B, t.C, at, bounded: false) ?? double.NaN;
+
+    private static double? Weights(Xyz a, Xyz b, Xyz c, P2 at, bool bounded)
     {
         double ax = a.X - at.X, ay = a.Y - at.Y, bx = b.X - at.X, by = b.Y - at.Y, cx = c.X - at.X, cy = c.Y - at.Y;
         var area = (bx - ax) * (cy - ay) - (cx - ax) * (by - ay);
@@ -322,7 +348,7 @@ public static class GroundReader
         var wb = (cx * ay - ax * cy) / area;
         var wc = (ax * by - bx * ay) / area;
         const double Edge = -1e-9;
-        if (wa < Edge || wb < Edge || wc < Edge)
+        if (bounded && (wa < Edge || wb < Edge || wc < Edge))
             return null;
         return wa * a.Z + wb * b.Z + wc * c.Z;
     }

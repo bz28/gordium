@@ -592,6 +592,12 @@ public static class RouteReader
         // an opening wider than the door itself (its type's width, or its clear width) and a frame (FrameAllowance) holds
         // a sidelight or a pocket even when the unit is centred: where its clear opening is isn't told (round 2)
         var door = Math.Max(rec.TypeWidth ?? 0, clearWidth ?? 0);
+        if (door <= 0)
+        {
+            // nothing to hold the opening against (review round 2: never "more than the window (0 in)")
+            why = $"its type's width isn't read, so whether the opening it takes in its wall holds more than the {what} isn't known";
+            return null;
+        }
         if (inWall.Max() - inWall.Min() > door + FrameAllowance)
         {
             why = I($"the opening it takes in its wall is {(inWall.Max() - inWall.Min()) * 12:0.##} in wide, more than the {what} ({door * 12:0.##} in) and a frame ({FrameAllowance * 12:0} in)") + (what == "door" ? ": a sidelight or a pocket?" : "") + ", so where its clear opening is isn't told";
