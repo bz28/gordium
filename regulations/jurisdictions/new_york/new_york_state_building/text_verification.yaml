@@ -2852,8 +2852,9 @@ pieces:
     - none
     flags:
     - '''less than 500 square foot'' beside ''455 m'': the book prints "500 square feet (455 m2)", but 500 sq ft is 46.45
-      m2; both readings agree on what is printed, and the flag of 407.2.4 says the metric figure is misprinted (Chapter
-      4 part c, review round 2).'
+      m2; both readings agree on what is printed. The flag of 407.2.4 gives Gordium''s reading (the metric figure
+      misprinted, as the book prints 500 square feet as 46.5 m2 elsewhere, p.123 line 20) and leaves which the State
+      means to a person''s check (Chapter 4 part c, review rounds 2 and 4).'
   407.2.5:
     piece_sha256: 0bced79d837cf973c74e8779bff5b3f37ec3934edc58b712de89d1fa14762b5c
     numbers:
@@ -3507,8 +3508,9 @@ pieces:
     - none
     flags:
     - '''not less than 16 square foot'' beside ''610 m'': the book prints "16 square feet (610 m2)", but 16 sq ft is 1.49
-      m2; both readings agree on what is printed, and the flag of 408.3.3 says the metric figure is likely misprinted
-      (Chapter 4 part d).'
+      m2; both readings agree on what is printed. The flag of 408.3.3 gives Gordium''s reading (the metric figure
+      misprinted, as the book prints 16 square feet as 1.5 m2 elsewhere, p.302 line 18) and leaves which the State means
+      to a person''s check (Chapter 4 part d, review rounds 1 and 2).'
   408.3.4:
     piece_sha256: be896cab60ae7877e6af8786cac01b5c0e7b102dea31938803d7812c180e3adb
     numbers:
