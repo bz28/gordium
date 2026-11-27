@@ -3498,6 +3498,10 @@ pieces:
     - none
     - '>='
     - none
+    flags:
+    - '''not less than 16 square foot'' beside ''610 m'': the book prints "16 square feet (610 m2)", but 16 sq ft is 1.49
+      m2; both readings agree on what is printed, and the flag of 408.3.3 says the metric figure is likely misprinted
+      (Chapter 4 part d).'
   408.3.4:
     piece_sha256: be896cab60ae7877e6af8786cac01b5c0e7b102dea31938803d7812c180e3adb
     numbers:

@@ -386,7 +386,7 @@ def test_a_plural_term_is_the_definition_of_its_singular():
 
 def _figure(recorded):
     """(value, unit) of a recorded number ("less than 500 square foot", "19.1 mm", "2/3 inch", "1588 kg"), or None."""
-    m = re.search(r"(\d+/\d+|[\d,]+(?:\.\d+)?)\s+(square foot|foot|inch|pound|mm|m|kg)\b", recorded)
+    m = re.search(r"(\d+/\d+|[\d,]+(?:\.\d+)?)\s+(square foot|foot|inch|pound|mm|m|kg|N)\b", recorded)
     if not m:
         return None
     a, _, b = m.group(1).replace(",", "").partition("/")
@@ -395,7 +395,14 @@ def _figure(recorded):
 
 # each imperial unit and the conversions it is printed with (square metres are recorded as "m")
 CONVERSION = {"inch": {"mm": 25.4}, "foot": {"mm": 304.8, "m": 0.3048}, "square foot": {"m": 0.092903},
-              "pound": {"kg": 0.45359}}
+              "pound": {"kg": 0.45359, "N": 4.448}}
+# pieces whose metric figure the number reader records without its unit, and that unit (408.3.2: "50 pounds (220 N)")
+UNIT_NOT_RECORDED = {"408.3.2": "N"}
+
+
+def _numbers(pid, entry):
+    unit = UNIT_NOT_RECORDED.get(str(pid))
+    return [n + " " + unit if unit and re.fullmatch(r"[\d,.]+", n) else n for n in entry["numbers"]]
 
 
 def _compared(numbers):
@@ -428,7 +435,7 @@ def test_the_conversion_walk_compares_every_imperial_figure():
     for pid, entry in pieces.items():
         if re.fullmatch(r"4\d\d(\.\d+)*", str(pid)):
             imperial += sum(1 for n in entry["numbers"] if (_figure(n) or (0, ""))[1] in CONVERSION)
-            compared += len(_compared(entry["numbers"]))
+            compared += len(_compared(_numbers(pid, entry)))
     assert imperial and compared == imperial, (compared, imperial)
 
 
@@ -442,7 +449,7 @@ def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
     found = {}
     for pid, entry in pieces.items():
         if re.fullmatch(r"4\d\d(\.\d+)+", str(pid)):
-            for here, after in _misprinted(entry["numbers"]):
+            for here, after in _misprinted(_numbers(pid, entry)):
                 found.setdefault(str(pid), []).append((here, after))
     assert set(found) >= {"407.2.4", "407.3.1.1"}, found          # the walk finds the two it was written for
     block = _block_ids()

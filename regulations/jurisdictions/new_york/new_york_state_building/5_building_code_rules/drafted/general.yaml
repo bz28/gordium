@@ -3020,7 +3020,11 @@ rules:
       occupancy_group: R-2
     expect: not_applicable
     note: 'The building is stated one group, not Group I-3: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  notes: 'The book prints "16 square feet (610 m2)" (p.101, line 55), but 16 sq ft is 1.49 m2 (610 is the 2 ft''s
+    610 mm). Gordium''s reading is that the metric figure is misprinted and 16 sq ft is the hatch''s least area, as the
+    same book prints 16 square feet as 1.5 m2 elsewhere (p.302, line 18; p.334, line 39); which the State means is a
+    person''s check (part c''s conversion walk, review round 3). Hand-drafted in a Claude Code session (2026-11-26,
+    Chapter 4 part d).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_408_3_4_spiral_stairways
