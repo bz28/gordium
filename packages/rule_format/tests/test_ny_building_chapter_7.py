@@ -488,3 +488,35 @@ def test_part_c_review_round_2s_wording(book):
         assert "OH-45" in " ".join(labels[pid]["reason"].split()), pid
     assert "windows' ratings" in _shown_note(rules["general.bc_709_5_smoke_barrier_openings"])
     assert "1/3 hour (D-H-20) in a 1/2-hour one" in " ".join(_shown_note(rules["general.bc_708_6_fire_partition_openings"]).split())
+
+
+def test_no_chapter_7_note_calls_a_brought_in_section_not_brought_in(book):
+    """Part d review round 1's class: a Chapter 7 rule's notes never say a section "isn't" or "aren't brought in" once
+    the folder brings it in (or brings in parts of it: "711 isn't brought in" after 711.2.2 is), so the record a person
+    reads stays true as later parts land."""
+    rows = [json.loads(line) for line in SECTIONS.read_text(encoding="utf-8").splitlines()]
+    pieces_all = {p["id"] for p in rows[1:]}
+    bad = []
+    for r in book:
+        if not re.match(r"general\.bc_(table_)?7\d\d_", r["id"]):
+            continue
+        for clause in re.split(r"[;.] ", " ".join(str(r.get("notes", "")).split())):
+            if re.search(r"\b(?:isn't|aren't) brought in", clause):
+                said = clause.split(" brought in")[0]
+                bad += [(r["id"], t) for t in _named(said) if _brought_in(t, pieces_all)]
+    assert not bad, bad
+
+
+def test_part_d_review_round_1s_notes(book, labels):
+    """Part d review round 1: 714.4.1's concrete fill may be the thickness that keeps the rating; 714.4.2 exception 4
+    keeps its 0.01 inch of water and its listing; 714.4.1.1 and 714.4.1.2 each name the other, two ways to comply; rated
+    floors' penetrations (714.5 to 714.5.4) are brought in as flags, since rated floors top and bottom exit enclosures."""
+    rules = {r["id"]: r for r in book}
+    assert "thickness that keeps its rating" in _shown_note(rules["general.bc_714_4_1_through_penetrations"])
+    membrane = " ".join(_shown_note(rules["general.bc_714_4_2_membrane_penetrations"]).split())
+    assert membrane.count("0.01 inch") == 2 and "installed per their listing" in membrane
+    one, two = (_shown_note(rules[i]) for i in ("general.bc_714_4_1_1_tested_assembly_penetrations",
+                                                 "general.bc_714_4_1_2_through_penetration_firestop"))
+    assert "714.4.1.2" in one and "714.4.1.1" in two and not two.startswith("Or")
+    for pid in ("714.5", "714.5.1", "714.5.1.1", "714.5.1.2", "714.5.2", "714.5.3", "714.5.4"):
+        assert labels[pid]["label"] == "flag" and _flags(book, pid), pid

@@ -19,15 +19,15 @@ second_reading:
     the 4 pieces of section group 5a (1005.1, 1005.2, 1005.3, 1005.3.1, 2026-11-25), a thirteenth for the 3 of section
     group 5b (1005.4, 1005.5, 1005.6), a fourteenth for the 6 of section group 5c (1005.7 to 1005.7.3 and 2
     definitions), a fifteenth for the 9 of section group 6a (1010.1, 1010.1.1, 1010.1.1.1 and 6 definitions,
-    2026-11-25), a sixteenth for the 11 of section group 6b (1010.1.2, 1010.1.2.1 and 9 definitions), one for the 52 of Chapter 7 part a (703.2.1.1, 703.5, 707, 713 and 20 definitions, 2026-11-26), one for the 42 of Chapter 7 part b (716.1, Tables 716.1(1) to 716.1(3), 716.2 to 716.2.4 and 14 definitions), one for the 39 of Chapter 7 part c (708, 709, 710 and 3 definitions), one for the 38 of Chapter 7 part d (711, 712, 714 and 15 definitions), and a helper for the comparison words)
+    2026-11-25), a sixteenth for the 11 of section group 6b (1010.1.2, 1010.1.2.1 and 9 definitions), one for the 52 of Chapter 7 part a (703.2.1.1, 703.5, 707, 713 and 20 definitions, 2026-11-26), one for the 42 of Chapter 7 part b (716.1, Tables 716.1(1) to 716.1(3), 716.2 to 716.2.4 and 14 definitions), one for the 39 of Chapter 7 part c (708, 709, 710 and 3 definitions), one for the 38 of Chapter 7 part d (711, 712, 714.1 to 714.4 and 15 definitions) and one for its 12 more (714.5 and 5 definitions), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 18 pages, 53 boxes as step_ch07a (Chapter 7 part a), 13 pages, 44 boxes as step_ch07b (Chapter 7 part b), 7 pages, 40 boxes as step_ch07c (Chapter 7 part c), and 14 pages, 39 boxes as step_ch07d (Chapter 7 part d); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 18 pages, 53 boxes as step_ch07a (Chapter 7 part a), 13 pages, 44 boxes as step_ch07b (Chapter 7 part b), 7 pages, 40 boxes as step_ch07c (Chapter 7 part c), 14 pages, 39 boxes as step_ch07d and 6 pages, 13 boxes as step_ch07d2 (Chapter 7 part d); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 434 pieces, 1155 numbers, every piece agrees but Table 716.1(2), whose extracted text loses its stacked fractions (its flag says the second reading is right). The tables were also read
+    through document_extraction/numbers.py: 446 pieces, 1218 numbers, every piece agrees but Table 716.1(2), whose extracted text loses its stacked fractions (its flag says the second reading is right). The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -949,6 +949,33 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:gypsum_board:
+    piece_sha256: 34568285c21762eaa66c262af6342055d7d59a05da709542afbf26f09297d6b2
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:gypsum_panel_product:
+    piece_sha256: 9dd67733bf203159c1efad5dce5ced897bcb7ceeb499f0288f8b6b81330a0eb3
+    numbers:
+    - '2506.2'
+    - '2507.2'
+    - '35'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2506.2'
+    - '2507.2'
+    - '35'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  202:gypsum_wallboard:
+    piece_sha256: da312c049ff9ef383c20daa48ba6a3aead7a5c5e4a8fe6827e90bafc823d7229
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:handling:
     piece_sha256: a14796dfd3d49bf8d4c89810fc19623624e0505548e9f046bb2781ab94097890
     numbers: []
@@ -1052,6 +1079,18 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:l_rating:
+    piece_sha256: d61f24c212451a15c66438c06ad3314e349322f9f0d0348e4c0cdc5a1a8bb9c3
+    numbers:
+    - '1479'
+    - '2079'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1479'
+    - '2079'
+    second_reading_comparisons:
+    - none
+    - none
   202:label:
     piece_sha256: 1ab05d6d0a43a84d44d8d5a341c99b09f49044c057250d0b85e96aa096891305
     numbers:
@@ -1823,6 +1862,15 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:type_x:
+    piece_sha256: b3f09483fc3890b1baa9b939c9ee4e250edd44080092d236899c892e03195a8d
+    numbers:
+    - '2506.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2506.2'
+    second_reading_comparisons:
+    - none
   202:underlayment:
     piece_sha256: 7e463705ab56e892161d1acfe3e92a1f3cd5e96759854afa8695eb38eb405eb5
     numbers:
@@ -3418,6 +3466,223 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  '714.5':
+    piece_sha256: 40635a1b0fb952635b730e34eb91de2e1330e44de3773baf2e5e5a4272f1a0fe
+    numbers:
+    - '714.5'
+    - '712.1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '714.5'
+    - '712.1'
+    second_reading_comparisons:
+    - none
+    - none
+  714.5.1:
+    piece_sha256: f25f848dc659b797e7968d1cbf86f25fab22a06bf7ccc033c25d658bdb168e3e
+    numbers:
+    - '263'
+    - 0.01 inch
+    - '2.49'
+    - maximum 6 inch
+    - 152 mm
+    - not exceed 144 square inch
+    - 92 mm
+    - 900 mm
+    - 100 square foot
+    - 9.3 m
+    - maximum 6 inch
+    - 152 mm
+    - not exceed 144 square inch
+    - 92 mm
+    - 900 mm
+    - '406.5'
+    - and 406.6
+    second_reading: agrees
+    second_reading_numbers:
+    - '263'
+    - 0.01 inch
+    - '2.49'
+    - maximum 6 inch
+    - 152 mm
+    - not exceed 144 square inch
+    - 92 mm
+    - 900 mm
+    - 100 square foot
+    - 9.3 m
+    - maximum 6 inch
+    - 152 mm
+    - not exceed 144 square inch
+    - 92 mm
+    - 900 mm
+    - '406.5'
+    - and 406.6
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - none
+    - none
+    - none
+  714.5.1.1:
+    piece_sha256: 67b6b480e4a69d5d6385b2a868ead33a6fe1de944bd96a3c81338b6e6ecd49f6
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  714.5.1.2:
+    piece_sha256: b4c29ca46b544da1d315ed55455a4a2afcdfdc2d2a5e93646c821686f795342a
+    numbers:
+    - '1479'
+    - 0.01 inch
+    - '2.49'
+    - not less than 1
+    - maximum 4 inch
+    - 102 mm
+    - maximum 6 inch
+    - 152 mm
+    - not exceed 144 square inch
+    - 92,900 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1479'
+    - 0.01 inch
+    - '2.49'
+    - not less than 1
+    - maximum 4 inch
+    - 102 mm
+    - maximum 6 inch
+    - 152 mm
+    - not exceed 144 square inch
+    - 92,900 mm
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - '>='
+    - <=
+    - none
+    - <=
+    - none
+    - <=
+    - none
+  714.5.2:
+    piece_sha256: 07ea69df348209ec534d4e868ee633a974d267585fcd1b7475d14d01d8e1b2b0
+    numbers:
+    - not exceed 100 square inch
+    - 64 mm
+    - 500 mm
+    - 100 square foot
+    - 9.3 m
+    - maximum 2
+    - not exceed 16 square inch
+    - 10 mm
+    - 323 mm
+    - not exceed 100 square inch
+    - 44 mm
+    - 500 mm
+    - 100 square foot
+    - 9.29 m
+    - not exceed 1/8 inch
+    - 3.2 mm
+    - not exceed 1/8 inch
+    - 3.2 mm
+    - maximum 2
+    second_reading: agrees
+    second_reading_numbers:
+    - not exceed 100 square inch
+    - 64 mm
+    - 500 mm
+    - 100 square foot
+    - 9.3 m
+    - maximum 2
+    - not exceed 16 square inch
+    - 10 mm
+    - 323 mm
+    - not exceed 100 square inch
+    - 44 mm
+    - 500 mm
+    - 100 square foot
+    - 9.29 m
+    - not exceed 1/8 inch
+    - 3.2 mm
+    - not exceed 1/8 inch
+    - 3.2 mm
+    - maximum 2
+    second_reading_comparisons:
+    - <=
+    - none
+    - none
+    - none
+    - none
+    - <=
+    - <=
+    - none
+    - none
+    - <=
+    - none
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - <=
+  714.5.3:
+    piece_sha256: 558d346ca9bac8e9b7fb5b6df690f16a8b98a548f042863bf373c8719dec6ac1
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  714.5.4:
+    piece_sha256: 0f61fdefb654b5c47677b3af1eac2ab3e4dad2f246ed3c4f464d40563d36f7d5
+    numbers:
+    - '1479'
+    - 0.30 inch
+    - '74.7'
+    - '5.0'
+    - 0.025 m
+    - '50'
+    - 0.024 m
+    - 100 square foot
+    - 9.3 m
+    second_reading: agrees
+    second_reading_numbers:
+    - '1479'
+    - 0.30 inch
+    - '74.7'
+    - '5.0'
+    - 0.025 m
+    - '50'
+    - 0.024 m
+    - 100 square foot
+    - 9.3 m
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - none
+    - none
+    flags:
+    - '''5.0'' and ''50'' (<=): ''shall not exceed either of the following: 1. 5.0 cfm per square foot ... 2. A total cumulative
+      leakage of 50 cfm''; the recorded words miss them (the comparison sits in the sentence before the list). The second
+      reading is right. A flag, used by no rule.'
   '716.1':
     piece_sha256: 69b7a92a21e7f2ae8a2685e816594a047b46eff3d669bb2f4136379cc03d32f5
     numbers:

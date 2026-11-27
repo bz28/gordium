@@ -430,6 +430,41 @@ pieces:
     heading: Fire-resistance-rated walls › Dissimilar materials
     rules:
     - general.bc_714_4_3_dissimilar_materials
+  '714.5':
+    label: flag
+    heading: Horizontal assemblies
+    rules:
+    - general.bc_714_5_horizontal_assembly_penetrations
+  714.5.1:
+    label: flag
+    heading: Horizontal assemblies › Through penetrations
+    rules:
+    - general.bc_714_5_1_floor_through_penetrations
+  714.5.1.1:
+    label: flag
+    heading: Through penetrations › Fire-resistance-rated assemblies
+    rules:
+    - general.bc_714_5_1_1_floor_tested_assembly_penetrations
+  714.5.1.2:
+    label: flag
+    heading: Through penetrations › Through-penetration firestop system
+    rules:
+    - general.bc_714_5_1_2_floor_firestop_systems
+  714.5.2:
+    label: flag
+    heading: Horizontal assemblies › Membrane penetrations
+    rules:
+    - general.bc_714_5_2_floor_membrane_penetrations
+  714.5.3:
+    label: flag
+    heading: Horizontal assemblies › Dissimilar materials
+    rules:
+    - general.bc_714_5_3_floor_dissimilar_materials
+  714.5.4:
+    label: flag
+    heading: Horizontal assemblies › Penetrations in smoke barriers
+    rules:
+    - general.bc_714_5_4_smoke_barrier_penetrations
   '716.1':
     label: flag
     heading: General

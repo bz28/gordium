@@ -1707,6 +1707,53 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:gypsum_board:
+    label: reference
+    topic: definitions
+    reason: 'Defines GYPSUM BOARD, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 48
+      lines:
+      - 58
+      - 58
+      quote: '[BS] GYPSUM BOARD. A type of gypsum panel product consisting of a noncombustible core primarily of gypsum with
+        paper surfacing.'
+    piece_sha256: 34568285c21762eaa66c262af6342055d7d59a05da709542afbf26f09297d6b2
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:gypsum_panel_product:
+    label: reference
+    topic: definitions
+    reason: 'Defines GYPSUM PANEL PRODUCT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 48
+      lines:
+      - 59
+      - 60
+      quote: '[BS] GYPSUM PANEL PRODUCT. The general name for a family of sheet products consisting essentially of gypsum
+        complying with the standards specified in Table 2506.2, Table 2507.2 and Chapter 35.'
+    piece_sha256: 9dd67733bf203159c1efad5dce5ced897bcb7ceeb499f0288f8b6b81330a0eb3
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:gypsum_wallboard:
+    label: reference
+    topic: definitions
+    reason: 'Defines GYPSUM WALLBOARD, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 9
+      - 9
+      quote: '[BS] GYPSUM WALLBOARD. A gypsum board used primarily as an interior surfacing for building structures.'
+    piece_sha256: da312c049ff9ef383c20daa48ba6a3aead7a5c5e4a8fe6827e90bafc823d7229
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:handling:
     label: reference
     topic: definitions
@@ -1932,6 +1979,22 @@ labels:
         designed to allow inde-'
     piece_sha256: a690bdf6ce7fa7db83da15e50daf3893ae2cbbb5b1f9665c6a1fbeb99f2529af
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:l_rating:
+    label: reference
+    topic: definitions
+    reason: 'Defines L RATING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 37
+      - 38
+      quote: '[BF] L RATING. The air leakage rating of a through penetration firestop system or a fire-resistant joint system
+        when tested in accor- dance with UL 1479 or UL 2079, respectively.'
+    piece_sha256: d61f24c212451a15c66438c06ad3314e349322f9f0d0348e4c0cdc5a1a8bb9c3
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:label:
@@ -3420,6 +3483,22 @@ labels:
         of the federal Fair Housing Act.'
     piece_sha256: e6ba8254a2a98fee8232a0fb07f252b60f7a7bf0e547c6040d18f22af1b99cda
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:type_x:
+    label: reference
+    topic: definitions
+    reason: 'Defines TYPE X, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 65
+      lines:
+      - 38
+      - 39
+      quote: '[BS] TYPE X. A type of gypsum panel product with special core additives to increase the fire resistance as specified
+        by the applicable standards listed in Table 2506.2 (see the definition of “Gypsum panel product”).'
+    piece_sha256: b3f09483fc3890b1baa9b939c9ee4e250edd44080092d236899c892e03195a8d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:underlayment:
@@ -5550,6 +5629,207 @@ labels:
       quote: 714.4.3 Dissimilar materials. Noncombustible penetrating items shall not connect to combustible items beyond
         the point of firestopping unless it can be demonstrated that the fire-resistance integrity of the wall is maintained.
     piece_sha256: 8aacc5e924639536c7d809056987ae436edfe6a13ab8171f364ffa782209ed21
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '714.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'Penetrations of a rated floor, floor/ceiling assembly or a roof/ceiling assembly''s ceiling membrane (the top
+      or bottom of an exit stairway or passageway enclosure among them, 1023.5, 1024.6) that 712.1 doesn''t require in a shaft
+      meet 714.5.1 to 714.5.4: a person''s check (general.bc_714_5_horizontal_assembly_penetrations).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 181
+      lines:
+      - 20
+      - 22
+      quote: 714.5 Horizontal assemblies. Penetrations of a fire-resistance-rated floor, floor/ceiling assembly or the ceiling
+        membrane of a roof/ceiling assembly not required to be enclosed in a shaft by Section 712.1 shall be protected in
+        accordance with Sections 714.5.1 through 714.5.4.
+    piece_sha256: 40635a1b0fb952635b730e34eb91de2e1330e44de3773baf2e5e5a4272f1a0fe
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  714.5.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A through penetration of a rated floor meets 714.5.1.1 or 714.5.1.2; except steel, ferrous or copper conduits,
+      pipes, tubes or vents or concrete or masonry items through a single rated floor with the annular space stopping flame
+      and hot gases for the floor''s rating under ASTM E119 or UL 263 fire conditions at a positive pressure differential
+      of at least 0.01 inch of water (items at most 6 inches nominal diameter may pass more than one floor where the openings
+      total at most 144 square inches in any 100 square feet of floor); such items at most 6 inches through a single concrete
+      floor with concrete, grout or mortar the full thickness or the thickness that keeps its rating (more than one floor
+      where each opening is at most 144 square inches); listed electrical boxes tested for rated assemblies per their listing;
+      and concrete floors or ramps of parking garages per 406.5 and 406.6 with parking above and below: a person''s check
+      (general.bc_714_5_1_floor_through_penetrations).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 181
+      lines:
+      - 23
+      - 41
+      quote: '714.5.1 Through penetrations. Through penetrations of horizontal assemblies shall comply with Section 714.5.1.1
+        or 714.5.1.2. Exceptions: 1. Penetrations by steel, ferrous or copper conduits, pipes, tubes or vents or concrete
+        or masonry items through a single fire-resistance-rated floor assembly where the annular space is protected with materials
+        that prevent the passage of flame and hot gases sufficient to ignite cotton waste when subjected to ASTM E119 or UL
+        263 time-temperature fire conditions under a minimum positive pressure differential of 0.01 inch of water (2.49 Pa)
+        at the location of the pene- tration for the time period equivalent to the fire-resistance rating of the construction
+        penetrated. Penetrating items with a maximum 6-inch (152 mm) nominal diameter shall not be limited to the penetration
+        of a single fire-resistance- rated floor assembly, provided that the aggregate area of the openings through the assembly
+        does not exceed 144 square inches (92 900 mm [fn2]) in any 100 square feet (9.3 m[fn2]) of floor area. 2. Penetrations
+        in a single concrete floor by steel, ferrous or copper conduits, pipes, tubes or vents with a maximum 6- inch (152
+        mm) nominal diameter, provided that the concrete, grout or mortar is installed the full thickness of the floor or
+        the thickness required to maintain the fire-resistance rating. The penetrating items shall not be limited to the pene-
+        tration of a single concrete floor, provided that the area of the opening through each floor does not exceed 144 square
+        inches (92 900 mm[fn2]). 3. Penetrations by listed electrical boxes of any material, provided that such boxes have
+        been tested for use in fire-resis- tance-rated assemblies and installed in accordance with the instructions included
+        in the listing. 4. Penetrations of concrete floors or ramps within parking garages or structures constructed in accordance
+        with Sections 406.5 and 406.6 where the areas above and below the penetrations are parking areas.'
+    piece_sha256: f25f848dc659b797e7968d1cbf86f25fab22a06bf7ccc033c25d658bdb168e3e
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  714.5.1.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Through penetrations of a rated floor, where not protected per 714.5.1.2 (a firestop system), are protected by
+      systems installed as tested in the approved rated assembly: a person''s check (general.bc_714_5_1_1_floor_tested_assembly_penetrations).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 181
+      lines:
+      - 42
+      - 43
+      quote: 714.5.1.1 Fire-resistance-rated assemblies. Through penetrations shall be protected using systems installed as
+        tested in the approved fire-resistance-rated assembly.
+    piece_sha256: 67b6b480e4a69d5d6385b2a868ead33a6fe1de944bd96a3c81338b6e6ecd49f6
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  714.5.1.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Through penetrations of a rated floor, where not protected as tested in the assembly per 714.5.1.1, are protected
+      by an approved through-penetration firestop system tested per ASTM E814 or UL 1479 at a positive pressure differential
+      of at least 0.01 inch of water, with an F rating and a T rating of at least 1 hour and at least the floor''s required
+      rating; no T rating is needed for floor penetrations within a wall cavity above or below, floor, tub or shower drains
+      within a horizontal assembly''s concealed space, metal conduit or tubing at most 4 inches nominal diameter into metal-enclosed
+      electrical switchgear, or steel, ferrous or copper items at most 6 inches through a single concrete floor (more than
+      one floor where each opening is at most 144 square inches): a person''s check (general.bc_714_5_1_2_floor_firestop_systems).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 181
+      lines:
+      - 44
+      - 58
+      quote: '714.5.1.2 Through-penetration firestop system. Through penetrations shall be protected by an approved through-penetra-
+        tion firestop system installed and tested in accordance with ASTM E814 or UL 1479, with a minimum positive pressure
+        differential of 0.01 inch of water (2.49 Pa). The system shall have an F rating/T rating of not less than 1 hour but
+        not less than the required rating of the floor penetrated. Exceptions: 1. Floor penetrations contained and located
+        within the cavity of a wall above the floor or below the floor do not require a T rating. 2. Floor penetrations by
+        floor drains, tub drains or shower drains contained and located within the concealed space of a horizontal assembly
+        do not require a T rating. 3. Floor penetrations of maximum 4-inch (102 mm) nominal diameter metal conduit or tubing
+        penetrating directly into metal-enclosed electrical power switchgear do not require a T rating. 4. Penetrations in
+        a single concrete floor by steel, ferrous or copper conduits, pipes, tubes or vents with a maximum 6-inch (152 mm)
+        nominal diameter do not require a T rating. These penetrating items shall not be limited to the penetration of a single
+        concrete floor, provided that the area of the opening through each floor does not exceed 144 square inches (92,900
+        mm[fn2]).'
+    piece_sha256: b4c29ca46b544da1d315ed55455a4a2afcdfdc2d2a5e93646c821686f795342a
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  714.5.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A membrane penetration of a horizontal assembly meets 714.5.1.1 or 714.5.1.2, and recessed fixtures don''t reduce
+      a rated floor/ceiling''s rating; except steel, ferrous or copper conduits, pipes, tubes or vents or concrete or masonry
+      items with the annular space protected per 714.5.1 or against flame and the products of combustion, at most 100 square
+      inches of openings in any 100 square feet of ceiling (in assemblies tested without penetrations); steel electrical boxes
+      in ceilings of assemblies rated at most 2 hours, each at most 16 square inches, at most 100 square inches in any 100
+      square feet, an annular space at most 1/8 inch; boxes listed with an opening protective system; listed electrical boxes
+      tested for rated assemblies per their listing (1/8 inch unless listed otherwise); sprinkler escutcheons; noncombustible
+      items cast into concrete that don''t pass both faces; the double wood top plate of a wall sheathed with Type X gypsum
+      board interrupting the ceiling of an assembly rated at most 2 hours, its penetrations protected per 714.5.1.1 or 714.5.1.2
+      and the ceiling tight to the plates; and listed or protected luminaires tested for rated assemblies: a person''s check
+      (general.bc_714_5_2_floor_membrane_penetrations).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 181
+      lines:
+      - 59
+      - 61
+      quote: 714.5.2 Membrane penetrations. Penetrations of membranes that are part of a horizontal assembly shall comply
+        with Section 714.5.1.1 or 714.5.1.2. Where floor/ceiling assemblies are required to have a fire-resistance rating,
+        recessed fixtures shall be installed such that the required fire resistance will not be reduced.
+    - file: gov.ny.building.2025.pdf
+      page: 182
+      lines:
+      - 3
+      - 29
+      quote: 'Exceptions: 1. Membrane penetrations by steel, ferrous or copper conduits, pipes, tubes or vents, or concrete
+        or masonry items where the annular space is protected either in accordance with Section 714.5.1 or to prevent the
+        free passage of flame and the products of combustion. The aggregate area of the openings through the membrane shall
+        not exceed 100 square inches (64 500 mm[fn2]) in any 100 square feet (9.3 m[fn2]) of ceiling area in assemblies tested
+        without penetrations. 2. Ceiling membrane penetrations of maximum 2-hour horizontal assemblies by steel electrical
+        boxes that do not exceed 16 square inches (10 323 mm [fn2]) in area, provided that the aggregate area of such penetrations
+        does not exceed 100 square inches (44 500 mm[fn2]) in any 100 square feet (9.29 m[fn2]) of ceiling area, and the annular
+        space between the ceiling membrane and the box does not exceed 1/8 inch (3.2 mm). 3. Membrane penetrations by
+        electrical boxes of any size or type, that have been listed as part of an opening protective material system for use
+        in horizontal assemblies and are installed in accordance with the instructions included in the listing. 4. Membrane
+        penetrations by listed electrical boxes of any material, provided that such boxes have been tested for use in fire-resistance-rated
+        assemblies and are installed in accordance with the instructions included in the listing. The annular space between
+        the ceiling membrane and the box shall not exceed 1/8 inch (3.2 mm) unless listed otherwise. 5. The annular space
+        created by the penetration of a fire sprinkler, provided that it is covered by a metal escutcheon plate. 6. Noncombustible
+        items that are cast into concrete building elements and that do not penetrate both top and bottom surfaces of the
+        element. 7. The ceiling membrane of a maximum 2-hour fire-resistance-rated horizontal assembly is permitted to be
+        interrupted with the double wood top plate of a wall assembly that is sheathed with Type X gypsum wallboard, provided
+        that all penetrating items through the double top plates are protected in accordance with Section 714.5.1.1 or 714.5.1.2
+        and the ceiling membrane is tight to the top plates. 8. Ceiling membrane penetrations by listed luminaires (light
+        fixtures) or by luminaires protected with listed materials, which have been tested for use in fire-resistance-rated
+        assemblies and are installed in accordance with the instruc- tions included in the listing.'
+    piece_sha256: 07ea69df348209ec534d4e868ee633a974d267585fcd1b7475d14d01d8e1b2b0
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  714.5.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'A noncombustible penetrating item doesn''t connect to combustible materials beyond the firestopping unless the
+      horizontal assembly''s fire resistance is shown to be kept: a person''s check (general.bc_714_5_3_floor_dissimilar_materials).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 182
+      lines:
+      - 30
+      - 31
+      quote: 714.5.3 Dissimilar materials. Noncombustible penetrating items shall not connect to combustible materials beyond
+        the point of firestopping unless it can be demonstrated that the fire-resistance integrity of the horizontal assembly
+        is maintained.
+    piece_sha256: 558d346ca9bac8e9b7fb5b6df690f16a8b98a548f042863bf373c8719dec6ac1
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  714.5.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Penetrations in smoke barriers are protected by an approved through-penetration firestop system tested per UL
+      1479 for air leakage, its L rating at 0.30 inch of water in both the ambient and elevated temperature tests at most
+      5.0 cfm per square foot of penetration opening for each system, and at most 50 cfm in all for any 100 square feet of
+      wall or floor area: a person''s check (general.bc_714_5_4_smoke_barrier_penetrations).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 182
+      lines:
+      - 32
+      - 37
+      quote: '714.5.4 Penetrations in smoke barriers. Penetrations in smoke barriers shall be protected by an approved through-penetration
+        firestop system installed and tested in accordance with the requirements of UL 1479 for air leakage. The L rating
+        of the system measured at 0.30 inch of water (74.7 Pa) in both the ambient temperature and elevated temperature tests
+        shall not exceed either of the following: 1. 5.0 cfm per square foot (0.025 m[fn3]/ s × m [fn2]) of penetration opening
+        for each through-penetration firestop system. 2. A total cumulative leakage of 50 cfm (0.024 m [fn3]/s) for any 100
+        square feet (9.3 m[fn2]) of wall area, or floor area.'
+    piece_sha256: 0f61fdefb654b5c47677b3af1eac2ab3e4dad2f246ed3c4f464d40563d36f7d5
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
