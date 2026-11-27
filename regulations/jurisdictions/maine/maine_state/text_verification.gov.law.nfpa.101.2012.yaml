@@ -1945,14 +1945,14 @@ pieces:
     numbers:
     - no dead-end corridor shall exceed 20
     - 6100 mm
-    - 9.7 inch
+    - '9.7'
     - not exceed 50
     - 15 m
     second_reading: agrees
     second_reading_numbers:
     - no dead-end corridor shall exceed 20
     - 6100 mm
-    - 9.7 inch
+    - '9.7'
     - not exceed 50
     - 15 m
     second_reading_comparisons:
@@ -2199,14 +2199,14 @@ pieces:
     numbers:
     - no dead-end corridor shall exceed 20
     - 6100 mm
-    - 9.7 inch
+    - '9.7'
     - not exceed 50
     - 15 m
     second_reading: agrees
     second_reading_numbers:
     - no dead-end corridor shall exceed 20
     - 6100 mm
-    - 9.7 inch
+    - '9.7'
     - not exceed 50
     - 15 m
     second_reading_comparisons:
