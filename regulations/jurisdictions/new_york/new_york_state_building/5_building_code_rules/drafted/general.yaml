@@ -3331,6 +3331,753 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_408_6_smoke_barrier
+  kind: flag
+  topic: means_of_egress
+  title: Group I-3 stories divided into two smoke compartments (BCNYS 408.6)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 103
+    lines:
+    - 3
+    - 12
+    quote: '[BE] 408.6 Smoke barrier. Occupancies in Group I-3 shall have smoke barriers complying with Sections 408.6 and
+      709 to divide every story occupied by residents for sleeping, or any other story having an occupant load of 50 or more
+      persons, into not fewer than two smoke compartments. Exception: Spaces having a direct exit to one of the following,
+      provided that the locking arrangement of the doors involved complies with the requirements for doors at the smoke barrier
+      for the use condition involved: 1. A public way. 2. A building separated from the resident housing area by a 2-hour
+      fire-resistance-rated assembly or 50 feet (15 240 mm) of open space. 3. A secured yard or court having a holding space
+      50 feet (15 240 mm) from the housing area that provides 6 square feet (0.56 m[fn2]) or more of refuge area per occupant,
+      including residents, staff and visitors.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Every story residents sleep on, and any other of 50 or more occupants, is divided by smoke barriers (709) into
+      at least two smoke compartments, but spaces with a direct exit to a public way, to a building 2-hour separated or 50
+      ft away, or to a secured yard with a holding space 50 ft from the housing area (6 sq ft a person): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Smoke barriers aren't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_6_1_smoke_compartments
+  kind: flag
+  topic: means_of_egress
+  title: At most 200 residents a compartment, 150 ft and 200 ft to its door (BCNYS 408.6.1)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 103
+    lines:
+    - 13
+    - 15
+    quote: '[BE] 408.6.1 Smoke compartments. The number of residents in any smoke compartment shall be not more than 200.
+      The distance of travel to a door in a smoke barrier from any room door required as exit access shall be not greater
+      than 150 feet (45 720 mm). The distance of travel to a door in a smoke barrier from any point in a room shall be not
+      greater than 200 feet (60 960 mm).'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'At most 200 residents in a smoke compartment; at most 150 ft of travel from a room door required as exit access,
+      and 200 ft from any point in a room, to a door in a smoke barrier: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Distances to smoke barrier doors, not to exits; Table 1017.2's Group I-3 row never passes for them (Chapter 10's
+    review round 1). Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_6_2_refuge_area
+  kind: flag
+  topic: means_of_egress
+  title: At least 6 net sq ft of refuge a person each side (BCNYS 408.6.2)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 103
+    lines:
+    - 16
+    - 18
+    quote: '[BE] 408.6.2 Refuge area. Not less than 6 net square feet (0.56 m[fn2]) per occupant shall be provided on each
+      side of each smoke barrier for the total number of occupants in adjoining smoke compartments. This space shall be readily
+      available wherever the occupants are moved across the smoke barrier in a fire emergency.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'At least 6 net sq ft per occupant on each side of each smoke barrier for everyone in the adjoining compartments,
+      readily available wherever they cross it: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_6_3_independent_egress
+  kind: flag
+  topic: means_of_egress
+  title: Egress from each Group I-3 smoke compartment without going back (BCNYS 408.6.3)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 103
+    lines:
+    - 19
+    - 20
+    quote: '[BE] 408.6.3 Independent egress. A means of egress shall be provided from each smoke compartment created by smoke
+      barriers without having to return through the smoke compartment from which means of egress originates.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Each smoke compartment has a means of egress that never returns through the compartment it started in: a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: 1016.2's rule already needs review in Group I-3 for it. Hand-drafted in a Claude Code session (2026-11-26, Chapter
+    4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_8_subdivision_of_resident_housing_areas
+  kind: flag
+  topic: means_of_egress
+  title: Resident housing areas separated per 408.8.1 to 408.8.4 (BCNYS 408.8)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 103
+    lines:
+    - 31
+    - 32
+    quote: 408.8 Subdivision of resident housing areas. Sleeping areas and any contiguous day room, group activity space or
+      other common spaces where residents are housed shall be separated from other spaces in accordance with Sections 408.8.1
+      through 408.8.4.
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Sleeping areas and the day rooms and common spaces with them are separated from other spaces per 408.8.1 to 408.8.4:
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_8_1_occupancy_conditions_3_and_4
+  kind: flag
+  topic: means_of_egress
+  title: Sleeping areas over 50 ft through a common space (BCNYS 408.8.1)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 103
+    lines:
+    - 33
+    - 35
+    quote: 408.8.1 Occupancy Conditions 3 and 4. Each sleeping area in Occupancy Conditions 3 and 4 shall be separated from
+      the adja- cent common spaces by a smoke-tight partition where the distance of travel from the sleeping area through
+      the common space to the corridor exceeds 50 feet (15 240 mm).
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'In Occupancy Conditions 3 and 4, a sleeping area is separated from its common spaces by a smoke-tight partition
+      where the travel from it through the common space to the corridor is over 50 ft: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: The occupancy condition and which rooms are sleeping areas or common spaces aren't in the model. Hand-drafted in
+    a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_8_2_occupancy_condition_5
+  kind: flag
+  topic: means_of_egress
+  title: Smoke-tight partitions in Occupancy Condition 5 (BCNYS 408.8.2)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 103
+    lines:
+    - 36
+    - 38
+    quote: 408.8.2 Occupancy Condition 5. Each sleeping area in Occupancy Condition 5 shall be separated from adjacent sleeping
+      areas, corridors and common spaces by a smoke-tight partition. Additionally, common spaces shall be separated from the
+      corridor by a smoke-tight partition.
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'In Occupancy Condition 5, each sleeping area is separated from other sleeping areas, corridors and common spaces,
+      and common spaces from the corridor, by smoke-tight partitions: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_8_3_openings_in_room_face
+  kind: flag
+  topic: means_of_egress
+  title: At most 120 sq in of openings in a sleeping room's face (BCNYS 408.8.3)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 103
+    lines:
+    - 39
+    - 42
+    quote: 408.8.3 Openings in room face. The aggregate area of openings in a solid sleeping room face in Occupancy Conditions
+      2, 3, 4 and 5 shall not exceed 120 square inches (0.77 m[fn2]). The aggregate area shall include all openings including
+      door undercuts, food passes and grilles. Openings shall be not more than 36 inches (914 mm) above the floor. In Occupancy
+      Condition 5, the openings shall be closeable from the room side.
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'In Occupancy Conditions 2 to 5, openings in a solid sleeping room face (undercuts, food passes, grilles) total
+      at most 120 sq in, none more than 36 in above the floor, closeable from the room in Condition 5: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_8_4_smoke_tight_doors
+  kind: flag
+  topic: means_of_egress
+  title: Doors in smoke-tight partitions (BCNYS 408.8.4)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 103
+    lines:
+    - 43
+    - 44
+    quote: 408.8.4 Smoke-tight doors. Doors in openings in partitions required to be smoke tight by Section 408.8 shall be
+      substantial doors, of construction that will resist the passage of smoke. Latches and door closers are not required
+      on cell doors.
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Doors in the smoke-tight partitions are substantial doors that resist smoke; cell doors need no latch or closer:
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_420_1_groups_i1_and_r
+  kind: flag
+  topic: means_of_egress
+  title: Groups I-1, R-1, R-2, R-3 and R-4, Sections 420.1 to 420.11 (BCNYS 420.1)
+  applies_when: occupancy_group in ["I-1", "R-1", "R-2", "R-3", "R-4", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 127
+    lines:
+    - 20
+    - 21
+    quote: 420.1 General. Occupancies in Groups I-1, R-1, R-2, R-3 and R-4 shall comply with the provisions of Sections 420.1
+      through 420.11 and other applicable provisions of this code.
+  examples:
+  - given:
+      occupancy_group: R-2
+    expect: needs_review
+    note: 'The building may be Group I-1 or Group R: Sections 420.1 to 420.11 apply besides the rest of the code: a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'The building is stated one group, neither Group I-1 nor Group R: not applicable.'
+  notes: Of Section 420, its separations (420.2, 420.3) and Group I-1's smoke barriers, housing units and cooking (420.6 to
+    420.9) are brought in; its sprinkler and alarm sections (420.4, 420.5) and Group R's cooking (420.10, 420.11) are not
+    about egress. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_420_2_separation_walls
+  kind: flag
+  topic: means_of_egress
+  title: Walls between dwelling and sleeping units as fire partitions (BCNYS 420.2)
+  applies_when: occupancy_group in ["I-1", "R-1", "R-2", "R-3", "R-4", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 127
+    lines:
+    - 22
+    - 24
+    quote: 420.2 Separation walls. Walls separating dwelling units in the same building, walls separating sleeping units in
+      the same building, walls separating dwelling units from sleeping units in the same building and walls separating dwelling
+      or sleeping units from other occupancies contiguous to them in the same building shall be constructed as fire partitions
+      in accordance with Section 708.
+  examples:
+  - given:
+      occupancy_group: R-2
+    expect: needs_review
+    note: 'Walls separating dwelling units, sleeping units, or either from other occupancies beside them are fire partitions
+      (708): a person''s check, walls'' ratings not being in the model.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'The building is stated one group, neither Group I-1 nor Group R: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_420_3_horizontal_separation
+  kind: flag
+  topic: means_of_egress
+  title: Floors between dwelling and sleeping units as horizontal assemblies (BCNYS 420.3)
+  applies_when: occupancy_group in ["I-1", "R-1", "R-2", "R-3", "R-4", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 127
+    lines:
+    - 25
+    - 28
+    quote: 420.3 Horizontal separation. Floor assemblies separating dwelling units in the same buildings, floor assemblies
+      separating sleeping units in the same building, floor assemblies separating dwelling units from sleeping units in the
+      same building and floor assemblies separating dwelling or sleeping units from other occupancies contiguous to them in
+      the same building shall be constructed as hori- zontal assemblies in accordance with Section 711.
+  examples:
+  - given:
+      occupancy_group: R-2
+    expect: needs_review
+    note: 'Floor assemblies separating dwelling units, sleeping units, or either from other occupancies beside them are horizontal
+      assemblies (711): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'The building is stated one group, neither Group I-1 nor Group R: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_420_6_smoke_barriers_in_group_i1_condition_2
+  kind: flag
+  topic: means_of_egress
+  title: Group I-1, Condition 2 smoke compartments (BCNYS 420.6)
+  applies_when: occupancy_group in ["I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 127
+    lines:
+    - 35
+    - 39
+    quote: 420.6 Smoke barriers in Group I-1, Condition 2. Smoke barriers shall be provided in Group I-1, Condition 2 to subdivide
+      every story used by persons receiving care, treatment or sleeping and to provide other stories with an occupant load
+      of 50 or more persons, into not fewer than two smoke compartments. Such stories shall be divided into smoke compartments
+      with an area of not more than 22,500 square feet (2092 m[fn2]) and the distance of travel from any point in a smoke
+      compartment to a smoke barrier door shall not exceed 200 feet (60 960 mm). The smoke barrier shall be in accordance
+      with Section 709.
+  examples:
+  - given:
+      occupancy_group: I-1
+    expect: needs_review
+    note: 'In Group I-1, Condition 2, each story used for care, treatment or sleeping, and any other of 50 or more, is divided
+      into at least two smoke compartments of at most 22,500 sq ft, at most 200 ft from any point to a smoke barrier door
+      (709): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-1: not applicable.'
+  notes: The Condition isn't stated, and smoke barriers aren't in the model. Hand-drafted in a Claude Code session (2026-11-26,
+    Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_420_6_1_refuge_area
+  kind: flag
+  topic: means_of_egress
+  title: A refuge area in each Group I-1 smoke compartment (BCNYS 420.6.1)
+  applies_when: occupancy_group in ["I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 127
+    lines:
+    - 40
+    - 47
+    quote: '420.6.1 Refuge area. Refuge areas shall be provided within each smoke compartment. The size of the refuge area
+      shall accommo- date the occupants and care recipients from the adjoining smoke compartment. Where a smoke compartment
+      is adjoined by two or more smoke compartments, the minimum area of the refuge area shall accommodate the largest occupant
+      load of the adjoining compartments. The size of the refuge area shall provide the following: 1. Not less than 15 net
+      square feet (1.4 m[fn2]) for each care recipient. 2. Not less than 6 net square feet (0.56 m[fn2]) for other occupants.
+      Areas or spaces permitted to be included in the calculation of the refuge area are corridors, lounge or dining areas
+      and other low-hazard areas.'
+  examples:
+  - given:
+      occupancy_group: I-1
+    expect: needs_review
+    note: 'Each smoke compartment holds a refuge area for the adjoining compartment''s occupants and care recipients (the
+      largest, where two or more adjoin): at least 15 net sq ft a care recipient and 6 net sq ft each other occupant: a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-1: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_420_7_assisted_living_housing_units
+  kind: flag
+  topic: means_of_egress
+  title: Shared spaces open to a Group I-1 corridor (BCNYS 420.7)
+  applies_when: occupancy_group in ["I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 127
+    lines:
+    - 48
+    - 57
+    quote: '420.7 Group I-1 assisted living housing units. In Group I-1 occupancies, where a fire-resistance corridor is provided
+      in areas where assisted living residents are housed, shared living spaces, group meeting or multipurpose therapeutic
+      spaces open to the corridor shall be in accordance with all of the following criteria: 1. The walls and ceilings of
+      the space are constructed as required for corridors. 2. The spaces are not occupied as resident sleeping rooms, treatment
+      rooms, incidental uses in accordance with Section 509, or hazardous uses. 3. The open space is protected by an automatic
+      fire detection system installed in accordance with Section 907. 4. In Group I-1, Condition 1, the corridors onto which
+      the spaces open are protected by an automatic fire detection system installed in accordance with Section 907, or the
+      spaces are equipped throughout with quick-response sprinklers in accor- dance with Section 903.3.2.'
+  - file: gov.ny.building.2025.pdf
+    page: 128
+    lines:
+    - 3
+    - 6
+    quote: 5. In Group I-1, Condition 2, the corridors onto which the spaces open, in the same smoke compartment, are protected
+      by an automatic fire detection system installed in accordance with Section 907, or the smoke compartment in which the
+      spaces are located is equipped throughout with quick-response sprinklers in accordance with Section 903.3.2. 6. The
+      space is arranged so as not to obstruct access to the required exits.
+  examples:
+  - given:
+      occupancy_group: I-1
+    expect: needs_review
+    note: 'Where a rated corridor serves assisted living residents, shared living, meeting or therapy spaces may open to it
+      only if built as a corridor, not sleeping, treatment, incidental or hazardous, with fire detection, their corridors
+      detected or sprinklered with quick response (by Condition), and not obstructing access to the exits: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-1: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_420_8_group_i1_cooking_facilities
+  kind: flag
+  topic: means_of_egress
+  title: Group I-1 cooking facilities open to the corridor (BCNYS 420.8)
+  applies_when: occupancy_group in ["I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 128
+    lines:
+    - 7
+    - 14
+    quote: '420.8 Group I-1 cooking facilities. In Group I-1 occupancies, rooms or spaces that contain a cooking facility
+      with domestic cooking appliances shall be permitted to be open to the corridor where all of the following criteria are
+      met: 1. In Group I-1, Condition 1 occupancies, the number of care recipients served by one cooking facility shall not
+      be greater than 30. 2. In Group I-1, Condition 2 occupancies, the number of care recipients served by one cooking facility
+      and within the same smoke compartment shall not be greater than 30. 3. The space containing the cooking facilities shall
+      be arranged so as not to obstruct access to the required exit. 4. The cooking appliances shall comply with Section 420.9.'
+  examples:
+  - given:
+      occupancy_group: I-1
+    expect: needs_review
+    note: 'A space with domestic cooking may be open to the corridor for at most 30 care recipients a facility (in Condition
+      2, within the smoke compartment), not obstructing access to the exit, its appliances per 420.9: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-1: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_420_9_domestic_cooking_appliances
+  kind: flag
+  topic: means_of_egress
+  title: Domestic cooking appliances in Group I-1 (BCNYS 420.9)
+  applies_when: occupancy_group in ["I-1", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 128
+    lines:
+    - 15
+    - 30
+    quote: '420.9 Domestic cooking appliances. In Group I-1 occupancies, installation of cooking appliance used in domestic
+      cooking facilities shall comply with all of the following: 1. The types of cooking appliances permitted shall be limited
+      to ovens, cooktops, ranges, warmers and microwaves. 2. Domestic cooking hoods installed and constructed in accordance
+      with Section 505 of the Mechanical Code of New York State shall be provided over cooktops or ranges. 3. Cooktops and
+      ranges shall be protected in accordance with Section 904.15. 4. A shutoff for the fuel and electrical supply to the
+      cooking equipment shall be provided in a location to which only staff has access. 5. A timer shall be provided that
+      automatically deactivates the cooking appliances within a period of not more than 120 minutes. 6. A portable fire extinguisher
+      shall be provided. Installation shall be in accordance with Section 906 and the extinguisher shall be located within
+      a 30-foot (9144 mm) distance of travel from each domestic cooking appliance. Exceptions: 1. Cooking facilities provided
+      within care recipients’ individual dwelling units are not required to comply with this section. 2. Cooktops and ranges
+      used for care-recipient training or nutritional counseling are not required to comply with Item 3 of this section.'
+  examples:
+  - given:
+      occupancy_group: I-1
+    expect: needs_review
+    note: 'Domestic cooking appliances limited to ovens, cooktops, ranges, warmers and microwaves, with hoods, protection,
+      a staff-only shut-off, a timer of at most 120 minutes and a fire extinguisher within 30 ft (not in the care recipients''
+      own dwelling units): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-1: not applicable.'
+  notes: Brought in with 420.8, which sends to it; appliances aren't in the model. Hand-drafted in a Claude Code session (2026-11-26,
+    Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_422_1_ambulatory_care_facilities
+  kind: flag
+  topic: means_of_egress
+  title: Ambulatory care facilities, Sections 422.1 to 422.7 (BCNYS 422.1)
+  applies_when: ambulatory_care_facility
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 129
+    lines:
+    - 12
+    - 13
+    quote: 422.1 General. Occupancies classified as ambulatory care facilities shall comply with the provisions of Sections
+      422.1 through 422.7 and other applicable provisions of this code.
+  examples:
+  - given:
+      ambulatory_care_facility: true
+    expect: needs_review
+    note: 'The building may be or hold an ambulatory care facility: Sections 422.1 to 422.7 apply besides the rest of the
+      code: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      ambulatory_care_facility: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an ambulatory care facility: not applicable.'
+  notes: Shown where the building states, or doesn't rule out, an ambulatory care facility (the fact Table 1020.3's width
+    rule already reads). Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_422_2_separation
+  kind: flag
+  topic: means_of_egress
+  title: An ambulatory care facility separated by a fire partition (BCNYS 422.2)
+  applies_when: ambulatory_care_facility
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 129
+    lines:
+    - 14
+    - 16
+    quote: 422.2 Separation. Ambulatory care facilities where the potential for four or more care recipients are to be incapable
+      of self-preserva- tion at any time shall be separated from adjacent spaces, corridors or tenants with a fire partition
+      installed in accordance with Section 708.
+  examples:
+  - given:
+      ambulatory_care_facility: true
+    expect: needs_review
+    note: 'Where four or more care recipients may be incapable of self-preservation at any time, the facility is separated
+      from adjacent spaces, corridors or tenants by a fire partition (708): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      ambulatory_care_facility: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an ambulatory care facility: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_422_3_smoke_compartments
+  kind: flag
+  topic: means_of_egress
+  title: Smoke compartments for over 10,000 sq ft of ambulatory care on a story (BCNYS 422.3)
+  applies_when: ambulatory_care_facility
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 129
+    lines:
+    - 17
+    - 22
+    quote: 422.3 Smoke compartments. Where the aggregate area of one or more ambulatory care facilities is greater than 10,000
+      square feet (929 m[fn2]) on one story, the story shall be provided with a smoke barrier to subdivide the story into
+      not fewer than two smoke compart- ments. The area of any one such smoke compartment shall be not greater than 22,500
+      square feet (2092 m[fn2]). The distance of travel from any point in a smoke compartment to a smoke barrier door shall
+      be not greater than 200 feet (60 960 mm). The smoke barrier shall be installed in accordance with Section 709 with the
+      exception that smoke barriers shall be continuous from outside wall to an outside wall, a floor to a floor, or from
+      a smoke barrier to a smoke barrier or a combination thereof.
+  examples:
+  - given:
+      ambulatory_care_facility: true
+    expect: needs_review
+    note: 'Over 10,000 sq ft of ambulatory care facilities on one story: at least two smoke compartments of at most 22,500
+      sq ft, at most 200 ft from any point to a smoke barrier door, the barrier continuous wall to wall and floor to floor:
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      ambulatory_care_facility: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an ambulatory care facility: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_422_3_1_means_of_egress
+  kind: flag
+  topic: means_of_egress
+  title: The defend-in-place plan where compartments are required (BCNYS 422.3.1)
+  applies_when: ambulatory_care_facility
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 129
+    lines:
+    - 23
+    - 25
+    quote: 422.3.1 Means of egress. Where ambulatory care facilities require smoke compartmentation in accordance with Section
+      422.3, the fire safety evacuation plans provided in accordance with Section 1002.2 shall identify the building components
+      necessary to support a defend-in-place emergency response in accordance with Sections 403 and 404 of the Fire Code of
+      New York State.
+  examples:
+  - given:
+      ambulatory_care_facility: true
+    expect: needs_review
+    note: 'Where 422.3 asks smoke compartments, the fire safety and evacuation plans (1002.2) name the building components
+      a defend-in-place response needs: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      ambulatory_care_facility: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an ambulatory care facility: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_422_3_2_refuge_area
+  kind: flag
+  topic: means_of_egress
+  title: Refuge of 30 net sq ft a nonambulatory care recipient (BCNYS 422.3.2)
+  applies_when: ambulatory_care_facility
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 129
+    lines:
+    - 26
+    - 29
+    quote: 422.3.2 Refuge area. Not less than 30 net square feet (2.8 m[fn2]) for each nonambulatory care recipient shall
+      be provided within the aggregate area of corridors, care recipient rooms, treatment rooms, lounge or dining areas and
+      other low-hazard areas within each smoke compartment. Each occupant of an ambulatory care facility shall be provided
+      with access to a refuge area without passing through or utilizing adjacent tenant spaces.
+  examples:
+  - given:
+      ambulatory_care_facility: true
+    expect: needs_review
+    note: 'At least 30 net sq ft for each nonambulatory care recipient within each smoke compartment''s corridors, rooms and
+      low-hazard areas, reached without passing through other tenants'' spaces: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      ambulatory_care_facility: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an ambulatory care facility: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_422_3_3_independent_egress
+  kind: flag
+  topic: means_of_egress
+  title: Egress from each ambulatory care smoke compartment without going back (BCNYS 422.3.3)
+  applies_when: ambulatory_care_facility
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 129
+    lines:
+    - 30
+    - 31
+    quote: 422.3.3 Independent egress. A means of egress shall be provided from each smoke compartment created by smoke barriers
+      with- out having to return through the smoke compartment from which means of egress originated.
+  examples:
+  - given:
+      ambulatory_care_facility: true
+    expect: needs_review
+    note: 'Each smoke compartment has a means of egress that never returns through the compartment it started in: a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      ambulatory_care_facility: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an ambulatory care facility: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 # ---- end of Chapter 4 ----
 - id: general.bc_508_2_1_classification
   kind: flag
