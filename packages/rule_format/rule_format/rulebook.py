@@ -450,8 +450,10 @@ class Context:
                 ctx._problem(name, f"its extracted text isn't in the code cache for this extractor version "
                                    f"({_shown_cache(extracted)}): run python -m document_extraction (it needs "
                                    "pdfplumber; the version is book_text.extractor_key)")
-            # Text is only trusted for a document whose own checks all passed.
-            if extracted.exists() and name not in ctx.file_problems:
+            # Text is only trusted for a document whose own checks all passed. With use_cache=False (a design's
+            # check) a kept-outside book's text is never read from the code cache, even where the cache has it, so
+            # the check gives the same answer on every machine (docs/decisions/2026-11-23_laws_validation_speed.md)
+            if extracted.exists() and name not in ctx.file_problems and not (outside and not use_cache):
                 ctx._load_extracted(name, sha, extracted, brought_in_pages(entry) if outside else None,
                                     _misreads(entry) if outside else None)
                 # (an outside book with no brought_in.pages has a problem, so is never loaded whole)
@@ -1191,11 +1193,13 @@ def _research_source_problems(sources, ctx: Context, where: str) -> tuple[list[s
 
 
 def _report_problems(item: dict, where: str) -> list[str]:
-    """`report`: the research report it came from, "docs/research/<file>.md §<section>"; the file must exist."""
+    """`report`: the research report it came from, "docs/research/<file>.md §<section>"; the file must exist, and be
+    under docs/research/ (a law's certificate lists that folder: rule_format/published.py, so a report that appears or
+    goes there is seen; one anywhere else would not be)."""
     if "report" not in item:
         return []
     path, _, section = item["report"].partition(" §") if isinstance(item["report"], str) else (None, "", "")
-    if not path or not (REPO / path).is_file():
+    if not path or not path.startswith("docs/research/") or ".." in Path(path).parts or not (REPO / path).is_file():
         return [f"{where}: 'report' must name a research report in the repository, like "
                 "'docs/research/2026-10-20_architect_questions.md §2.1'"]
     if section and not re.search(rf"^#+ {re.escape(section)}[ .]", (REPO / path).read_text(encoding="utf-8"), re.M):
@@ -1524,17 +1528,34 @@ _TOP_FOLDERS = ("apps", "docs", "packages", "regulations", "test_data")
 _PATHLIKE = re.compile(rf"https?://\S+|\b(?:{'|'.join(_TOP_FOLDERS)})(?:/[\w.-]+)+/?")
 _FILE_NAME = re.compile(r"\b[\w-]+\.(?:py|yaml|md|json|jsonl)\b")
 _repo_file_names: set[str] | None = None
+# Names that are no file of the repo's own: made by tools as they run (Python's caches, pip's egg-info, the add-in's
+# build and test folders, hidden files such as a publish's lock), and what `python -m rule_format publish` writes (the
+# 7_published_rulebooks folders while rules are draft, their certificates). The walk below skips them, and so do the
+# folder listings a published law's certificate keeps (rule_format/published.py): one rule for both, so a certificate
+# never leaves out a name this walk could see, and publishing never changes what it sees.
+# Every name the repo's .gitignore files ignore is one (test_published pins it): Rhino's lock and backup files beside
+# an open model (review round 2) are no more the repo's than a Python cache. Except a name Python can import: a
+# compiled module (.pyd, .pyc) beside a validator's .py is imported in its place, so it must change the listing
+# (review round 3); Python's own caches are in __pycache__, left out whole.
+GENERATED_NAMES = ("__pycache__", "bin", "obj", "TestResults", "7_published_rulebooks", "venv", "dist", "build")
+PUBLISHED_SUFFIX = ".published.json"
+GENERATED_SUFFIXES = (".egg-info", PUBLISHED_SUFFIX, ".rhl", ".3dmbak")
+
+
+def generated_name(name: str) -> bool:
+    return name.startswith(".") or name in GENERATED_NAMES or name.endswith(GENERATED_SUFFIXES)
 
 
 def _in_repo(name: str) -> bool:
-    """Whether a file of this name is in the repo's top folders (read once, skipping build and hidden folders)."""
+    """Whether a file of this name is in the repo's top folders (read once, skipping generated names:
+    generated_name)."""
     global _repo_file_names
     if _repo_file_names is None:
         names = set()
         for top in _TOP_FOLDERS:
             for _, dirs, files in os.walk(REPO / top):
-                dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("bin", "obj", "__pycache__")]
-                names.update(files)
+                dirs[:] = [d for d in dirs if not generated_name(d)]
+                names.update(f for f in files if not generated_name(f))
         _repo_file_names = names
     return name in _repo_file_names
 

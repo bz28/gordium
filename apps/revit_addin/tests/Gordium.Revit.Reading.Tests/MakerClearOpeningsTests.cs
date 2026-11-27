@@ -1,3 +1,4 @@
+using Gordium.Worker;
 using System.Globalization;
 using System.Text.Json.Nodes;
 using Xunit;
@@ -400,8 +401,48 @@ public sealed class MakerClearOpeningsTests
         var view = Src("ResultsView.cs");
         Assert.Contains("ClearPrefills.PanelStatus(content.MarksAdded, content.ClearWords, stale: content.Model?.Stale is not null)", view);
         // review round 7: a check that fails after the drafts were written still says so, in the panel and the dialog
-        Assert.Contains("ResultsPane.Failed(clear + $\"Nothing was checked", check);
-        Assert.Contains("TaskDialog.Show(Title, clear + $\"Nothing was checked", check);
+        // (UI polish PR 5: the failure is one card in the pane, no dialog; the words written before it are on screen,
+        // under the card's words, for a read that fails, a check that fails, and a checker that stops)
+        Assert.Contains("ResultsPane.Failed(CheckFailures.OfRead(e, clear + $\"Nothing was checked", check);
+        // each failure: its own statement says what was written and whether anything was, and brings the pane up first
+        var calls = check.Split("ResultsPane.Failed(")[1..];
+        Assert.Equal(3, calls.Length);
+        foreach (var call in calls)
+            Assert.Contains(".After(ClearPrefills.StatusLine(", call[..call.IndexOf(';')], StringComparison.Ordinal);
+        Assert.Equal(3, check.Split("ResultsPane.Reveal(ui);").Length - 1);
+        var reveal = Src("ResultsPane.cs");
+        reveal = reveal[reveal.IndexOf("internal static void Reveal(UIApplication ui)", StringComparison.Ordinal)..];
+        reveal = reveal[..reveal.IndexOf("\n    }\n", StringComparison.Ordinal)];
+        Assert.Contains("ui.GetDockablePane(Id).Show();", reveal, StringComparison.Ordinal);     // best effort: never stops the card
+        Assert.Contains("catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)", reveal, StringComparison.Ordinal);
+        // the fourth failure card, Revit not taking the next step after the read, says what the read wrote too
+        Assert.Contains(".After(ClearPrefills.StatusLine(MarksAdded, Clear), Wrote));", Src("CheckRun.cs"), StringComparison.Ordinal);
+        Assert.Contains("CheckFailures.NotStarted($\"Revit didn't take {what}: nothing was checked.\", afterRead: Prepared is not null)", Src("CheckRun.cs"), StringComparison.Ordinal);
+        foreach (var wrote in new[] { "check.Wrote = added.Count > 0;", "check.Wrote |= filled.Count > 0;", "check.Wrote = true;" })
+            Assert.Contains(wrote, check);
+        Assert.Equal(2, check.Split("check.Wrote = true;").Length - 1);                 // each street pick
+        var failedView = view[view.IndexOf("    internal void Failed(CheckFailure? failure)", StringComparison.Ordinal)..];
+        Assert.Contains("if (failure.Done is { } done)                           // what was already written to the project, on screen\n            card.Children.Add(Small(done, top: 4));",
+                        failedView.Replace("\r\n", "\n"), StringComparison.Ordinal);
+        // what was written, said on screen; nothing written: nothing said, and the model's claim kept
+        var read = CheckFailures.OfRead(new InvalidOperationException("x"), "d");
+        var after = read.After(ClearPrefills.StatusLine(3, ClearPrefills.Head(2, null)), wrote: true);
+        Assert.Equal("Added 3 Gordium marks to this project. " + ClearPrefills.Head(2, null).Trim(), after.Done);
+        Assert.DoesNotContain("wasn't changed", after.Words, StringComparison.Ordinal);
+        Assert.Contains("nothing was checked", after.Words, StringComparison.OrdinalIgnoreCase);
+        var none = read.After(ClearPrefills.StatusLine(0, ""), wrote: false);
+        Assert.Null(none.Done);
+        Assert.Equal(read.Words, none.Words);
+        Assert.Contains("wasn't changed", none.Words, StringComparison.Ordinal);
+        // every failure card's claim is dropped once something was written
+        foreach (var e in new Exception[] { new InvalidOperationException("x"), new WorkerUnavailableException("x", new InvalidOperationException("y")),
+                                            new WorkerExitedException("x", 1, ""), new WorkerTimeoutException("x"), new WorkerStoppedException("x") })
+            Assert.DoesNotContain("wasn't changed", CheckFailures.Of(e, "d").After(null, wrote: true).Words, StringComparison.Ordinal);
+        // a write that failed: Revit's words never on screen, only in the details
+        var raw = ClearPrefills.Head(0, "Autodesk.Revit.Exceptions.ModificationForbiddenException: boom; nothing was written");
+        var onScreen = read.After(ClearPrefills.StatusLine(0, raw), wrote: false).Done!;
+        Assert.DoesNotContain("boom", onScreen, StringComparison.Ordinal);
+        Assert.StartsWith("Gordium couldn't write the makers' clear openings: fill them by hand", onScreen, StringComparison.Ordinal);
         Assert.True(check.IndexOf("var clear = \"\";", StringComparison.Ordinal) < check.IndexOf("        try", StringComparison.Ordinal));
     }
 

@@ -456,22 +456,23 @@ public sealed class PaneTests
 
     // ---- changes 10 and 11: error and stale in plain words ---------------------------------------------------------
 
-    /// <summary>The error says nothing passed and nothing changed, with Try again and Copy details; the exception and
-    /// the log's path go to the clipboard and the tooltip, never the pane's words. Stale says so with its own Check again.</summary>
+    /// <summary>The error card (UI polish changes 13, 14): one message per failure, the technical words (the exception,
+    /// the log's path) only on the clipboard through Copy details, never on screen nor in any tooltip. The stale banner
+    /// (change 39): slim, without its own Check again (the header's is the one action).</summary>
     [Fact]
     public void Error_and_stale_are_in_plain_words()
     {
-        Assert.Contains("nothing here passes", PaneWords.ErrorWords, StringComparison.Ordinal);
-        Assert.Equal("The model changed after this check (14:32)", PaneWords.StaleTitle(StaleReason.ModelChanged, new DateTime(2026, 11, 22, 14, 32, 0)));
+        Assert.Equal("The model changed after this check", PaneWords.StaleTitle(StaleReason.ModelChanged, new DateTime(2026, 11, 22, 14, 32, 0)));
         var view = Read("ResultsView.cs");
-        var failed = Between(view, "    internal void Failed(string words)", "\n    }\n");
-        Assert.Contains("ToolTip = words", failed, StringComparison.Ordinal);
+        var failed = Between(view, "    internal void Failed(CheckFailure? failure)", "\n    }\n");
+        Assert.DoesNotContain("ToolTip", failed, StringComparison.Ordinal);                    // change 14
         Assert.Contains("W.Clipboard.SetText(words)", failed, StringComparison.Ordinal);
-        Assert.DoesNotContain("Say(_checkAgainState.Status(words))", failed, StringComparison.Ordinal);   // never the words on screen
         Assert.DoesNotContain("Text = words", failed, StringComparison.Ordinal);
+        Assert.Contains("Text = failure.Title", failed, StringComparison.Ordinal);
         var stale = Between(view, "                case PanelPart.Stale:", "break;");
         Assert.Contains("PaneWords.StaleTitle(", stale, StringComparison.Ordinal);
-        Assert.Contains("CauseCardsView.Primary(\"Check again\"", stale, StringComparison.Ordinal);
+        Assert.DoesNotContain("Check again", stale, StringComparison.Ordinal);                 // change 39
+        Assert.DoesNotContain("ToolTip", stale, StringComparison.Ordinal);
     }
 
     // ---- helpers -------------------------------------------------------------------------------------------------

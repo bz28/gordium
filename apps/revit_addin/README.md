@@ -780,8 +780,9 @@ GORDIUM_PYTHON=/path/to/.venv/bin/python dotnet test                       # bot
 GORDIUM_PYTHON=/path/to/.venv/bin/python dotnet test --framework net8.0    # or one at a time
 ```
 
-`GORDIUM_PYTHON` defaults to `python` on the PATH. CI runs it on Windows and Ubuntu (`.github/workflows/ci.yml`,
-job `revit_worker_client`). The test packages are pinned to exact versions, with lock files (`packages.lock.json`);
+`GORDIUM_PYTHON` defaults to `python` on the PATH. CI runs it on Ubuntu on every push (`.github/workflows/ci.yml`, job `revit_worker_client`) and on Windows
+once a PR is labelled merge-ready and every night on main (`.github/workflows/windows.yml`, job
+`revit_worker_client_windows`). The test packages are pinned to exact versions, with lock files (`packages.lock.json`);
 CI restores in locked mode.
 
 ## The add-in in Revit (Windows only)

@@ -363,7 +363,15 @@ public static class PaneWords
     };
 
     /// <summary>The state line's words once stale: "Does not comply (before the model changed)".</summary>
-    public static string StaleState(string state, StaleReason reason) => $"{state} ({StaleBefore(reason)})";
+    public static string StaleState(string state, DateTime checkedAt) =>
+        $"{state} (at {checkedAt.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture)})";
+
+    /// <summary>The header's second line once stale (UI polish change 39): "Checked 14:32 · model changed since".</summary>
+    public static string StaleSub(StaleReason reason, DateTime checkedAt) => reason switch
+    {
+        StaleReason.Cancelled => $"Checked {checkedAt.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture)} · a later check was cancelled",
+        _ => $"Checked {checkedAt.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture)} · model changed since",
+    };
 
     /// <summary>A copied row once stale: "... (checked 14:32, before the check you cancelled)".</summary>
     public static string StaleCopy(string line, DateTime checkedAt, StaleReason reason) =>
@@ -408,15 +416,15 @@ public static class PaneWords
     /// check "These results are from 14:32, before the check you cancelled".</summary>
     public static string StaleTitle(StaleReason reason, DateTime when) => reason switch
     {
-        StaleReason.Cancelled => $"These results are from {when:HH:mm}, {StaleBefore(reason)}",
-        _ => $"The model changed after this check ({when:HH:mm})",
+        StaleReason.Cancelled => "Check cancelled",
+        _ => "The model changed after this check",
     };
 
     /// <summary>What stale means for the results below, from why.</summary>
-    public static string StaleWords(StaleReason reason) => reason switch
+    public static string StaleWords(StaleReason reason, DateTime when) => reason switch
     {
-        StaleReason.Cancelled => "The model may have changed since: they are greyed until you check again.",
-        _ => "Any result below may have changed: they are greyed until you check again.",
+        StaleReason.Cancelled => $"These results are from {when.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture)}, before the check you cancelled, and may be out of date. They stay greyed until you check again.",
+        _ => $"These results are from {when.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture)} and may be out of date. They stay greyed until you check again.",
     };
 
     /// <summary>The check's progress card's title.</summary>

@@ -64,7 +64,8 @@ public sealed class CheckProjectCommand : IExternalCommand
     /// <summary>The check's read, on Revit's thread (the read action <see cref="CheckRun.Start"/> queues): Gordium's
     /// marks added, the makers' clear openings filled as drafts, the street edge asked for, the model read; then the
     /// request sent off Revit's thread (<see cref="CheckRun.Send"/>), or, with nothing to send, the panel says what to
-    /// fill in. A failure is the panel's error state (no row of this check), and said in a dialog.</summary>
+    /// fill in. A failure is the panel's error state (no row of this check): one card in the pane, brought into view,
+    /// with what was already written under its words (UI polish PR 5).</summary>
     internal static void ReadAndSend(UIApplication ui, Document doc, CheckRun check)
     {
         var log = check.Log;
@@ -75,6 +76,7 @@ public sealed class CheckProjectCommand : IExternalCommand
         // the makers' clear openings' words, kept outside the try: a check that fails after the drafts were written
         // still says they were (review round 7)
         var clear = "";
+        var marksAdded = 0;
         if (!CheckRun.Flow.IsCurrent(check.Ticket) || !doc.IsValidObject)
         {
             check.End("cancelled");                       // cancelled (or the project closed) before the read began
@@ -83,12 +85,15 @@ public sealed class CheckProjectCommand : IExternalCommand
         try
         {
             var added = RevitMarks.AddMarks(doc, ui.Application, MarkSetup.Plan(RevitMarks.Bindings(doc)));
+            marksAdded = added.Count;
+            check.Wrote = added.Count > 0;
             log["marks_added"] = added.Select(s => $"{s.Action}: {s.Mark.Name}").ToList();
             // each window type a maker's formula covers, its three Clear marks empty: filled as a draft the architect
             // confirms (never the stamp, so this check sends no clear opening for it)
             // (a failure is shown and the check goes on: the types stay empty, so their clear opening needs review)
             var (filled, failed) = RevitMarks.TryPrefill(doc, RevitMarks.Model(doc), log);
             clear = ClearPrefills.Head(filled.Count, failed);
+            check.Wrote |= filled.Count > 0;
             // the street edge asked for only when it is the one fact left and the view shows a property line to click,
             // and only in the project being checked while it is the active one (the read is queued after the click: the
             // architect may have switched projects since; a pick, and the mark it writes, would land in another one)
@@ -126,8 +131,8 @@ public sealed class CheckProjectCommand : IExternalCommand
             // checked anyway: never a pick first (the form's Pick on plan is the way to give it)
             var ask = anyway ? StreetAsk.NotNeeded : StreetEdges.Ask(read, read.StreetEdges is null, view, Active());
             log["street_ask"] = ask.ToString();
-            if (ask == StreetAsk.Pick && Active())
-                check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log));
+            if (ask == StreetAsk.Pick && Active() && check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log)))
+                check.Wrote = true;                       // the edge picked is written to its mark
             if (!CheckRun.Flow.IsCurrent(check.Ticket))
             {
                 Blocked();
@@ -142,9 +147,12 @@ public sealed class CheckProjectCommand : IExternalCommand
                 ask = StreetEdges.Ask(ProjectFacts.Read(RevitMarks.Model(doc)), needed: true, view && Active(), Active());
                 log["street_ask_again"] = ask.ToString();
                 // (not read again once cancelled during that pick: Send then sends nothing)
-                if (ask == StreetAsk.Pick && Active() && check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log))
-                    && CheckRun.Flow.IsCurrent(check.Ticket))
-                    prepared = ReadModel(doc, ui.Application, log, check.Worker, anyway);
+                if (ask == StreetAsk.Pick && Active() && check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log)))
+                {
+                    check.Wrote = true;                   // the edge picked is written to its mark
+                    if (CheckRun.Flow.IsCurrent(check.Ticket))
+                        prepared = ReadModel(doc, ui.Application, log, check.Worker, anyway);
+                }
             }
             check.Read(prepared, added.Count, ask, clear);
             if (prepared.Request is not { } request)
@@ -184,9 +192,11 @@ public sealed class CheckProjectCommand : IExternalCommand
                 return;
             }
             check.End("failed");
-            // the last check's rows taken down: never left showing as if they were this one's
-            ResultsPane.Failed(clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})");
-            TaskDialog.Show(Title, clear + $"Nothing was checked: {e.GetType().Name}\n{e.Message}\n\nLogged to {Trial.LogPath()}");
+            // the last check's rows taken down: never left showing as if they were this one's; in the pane, never a
+            // dialog that blocks Revit (UI polish change 16), the technical words only behind Copy details
+            ResultsPane.Reveal(ui);                       // the old dialog always showed: a hidden pane is brought up
+            ResultsPane.Failed(CheckFailures.OfRead(e, clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})")
+                                            .After(ClearPrefills.StatusLine(marksAdded, clear), check.Wrote));
         }
     }
 
@@ -221,7 +231,11 @@ public sealed class CheckProjectCommand : IExternalCommand
             if (use == AnswerUse.ShowError)
             {
                 End("failed");
-                ResultsPane.Failed(CheckWords.CheckerStopped((string)log["error"]!) + $" (logged to {Trial.LogPath()})");
+                // one message per failure (UI polish change 13), from what the wait ended with
+                var why = sent.Exception is { } failed ? CheckFailures.Unwrap(failed) : new OperationCanceledException("the check was cancelled");
+                ResultsPane.Reveal(ui);
+                ResultsPane.Failed(CheckFailures.Of(why, CheckWords.CheckerStopped((string)log["error"]!) + $" (logged to {Trial.LogPath()})")
+                                                .After(ClearPrefills.StatusLine(check.MarksAdded, check.Clear), check.Wrote));
                 return;
             }
             var run = Answer(doc, check.Prepared!, sent.Result, log);
@@ -234,7 +248,9 @@ public sealed class CheckProjectCommand : IExternalCommand
             log["error"] = $"{e.GetType().Name}: {e.Message}";
             log["where"] = e.StackTrace?.Split('\n').Take(8).Select(l => l.Trim()).ToList();
             End("failed");
-            ResultsPane.Failed(check.Clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})");
+            ResultsPane.Reveal(ui);
+            ResultsPane.Failed(CheckFailures.Of(e, check.Clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})")
+                                            .After(ClearPrefills.StatusLine(check.MarksAdded, check.Clear), check.Wrote));
         }
     }
 
@@ -317,9 +333,21 @@ public sealed class CheckProjectCommand : IExternalCommand
     private sealed class StartedLeftOut(Task<WorkerClient> worker) : ILeftOutAsker
     {
         public Task<IReadOnlyList<LeftOutDecision>> AskAsync(JsonObject? lot, JsonArray objects, JsonArray buildings,
-                                                             JsonObject definitions, CancellationToken cancel) =>
-            new WorkerLeftOut(ReadSteps.Time("worker_wait", () => worker.GetAwaiter().GetResult()))
-                .AskAsync(lot, objects, buildings, definitions, cancel);
+                                                             JsonObject definitions, CancellationToken cancel)
+        {
+            WorkerClient client;
+            try
+            {
+                client = ReadSteps.Time("worker_wait", () => worker.GetAwaiter().GetResult());
+            }
+            catch (Exception e) when (e is not WorkerException and not OperationCanceledException)
+            {
+                // the worker couldn't be started (no Gordium folder, Revit closing): the checker's failure, said as such
+                // in the pane, never as Revit's read (UI polish PR 5 review round 6)
+                throw new WorkerUnavailableException($"The Gordium checker couldn't be started: {e.Message}", e);
+            }
+            return new WorkerLeftOut(client).AskAsync(lot, objects, buildings, definitions, cancel);
+        }
     }
 
     /// <summary>The answer in words and rows (each element's label and the phase read here, on Revit's thread), and

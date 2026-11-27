@@ -260,6 +260,15 @@ public static class ClearPrefills
         : $"Gordium filled the maker's clear opening of {(filled == 1 ? "1 window type" : $"{filled} window types")} " +
           "as a draft: confirm each (Set up lists them); none is sent before.\n\n";
 
+    /// <summary><see cref="Head"/>'s words (or a status line holding them) as a failure card shows them: the reason a
+    /// write failed, which can be Revit's own exception text, left to the log and Copy details (UI polish change 14).</summary>
+    public static string OnScreen(string words)
+    {
+        ArgumentNullException.ThrowIfNull(words);
+        return Regex.Replace(words, @"(Gordium couldn't write the makers' clear openings) \(.*\)(: fill them by hand)", "$1$2",
+                             RegexOptions.Singleline | RegexOptions.CultureInvariant);
+    }
+
     /// <summary>The results panel's status line: the marks added, then the makers' clear openings' words
     /// (<see cref="Head"/>, which a failed write must reach: review round 3), "" when neither.</summary>
     public static string StatusLine(int marksAdded, string clearWords) =>

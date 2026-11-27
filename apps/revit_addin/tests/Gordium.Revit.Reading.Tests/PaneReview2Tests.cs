@@ -66,18 +66,23 @@ public sealed class PaneReview2Tests
         var at = new DateTime(2026, 11, 22, 14, 32, 0);
         var cancelled = ResultRows.Stale(House(), at, CheckWords.CancelledStale(at), StaleReason.Cancelled);
         var reason = cancelled.StaleKind!.Value;
-        Assert.Equal("Does not comply (before the check you cancelled)", PaneWords.StaleState("Does not comply", reason));
+        // UI polish change 39: the state says when ("at 14:32"); the slim banner says it was cancelled
+        Assert.Equal("Does not comply (at 14:32)", PaneWords.StaleState("Does not comply", at));
+        Assert.Equal("Check cancelled", PaneWords.StaleTitle(reason, at));
+        Assert.Contains("before the check you cancelled", PaneWords.StaleWords(reason, at), StringComparison.Ordinal);
         var row = ResultList.Place(cancelled).First();
         Assert.EndsWith("(checked 14:32, before the check you cancelled)", ResultList.CopyText(row.Row, null, at, reason), StringComparison.Ordinal);
         var detail = Details.Of(row, 0, 1, null, at, null, reason);
         Assert.StartsWith("These results are from 14:32, before the check you cancelled", detail.Stale, StringComparison.Ordinal);
         Assert.Contains("before the check you cancelled", CheckWords.CancelledStale(at), StringComparison.Ordinal);
         // the model changed: its own words
-        Assert.Equal("Does not comply (before the model changed)", PaneWords.StaleState("Does not comply", StaleReason.ModelChanged));
+        Assert.Equal("Checked 14:32 · model changed since", PaneWords.StaleSub(StaleReason.ModelChanged, at));
+        Assert.Equal("Checked 14:32 · a later check was cancelled", PaneWords.StaleSub(StaleReason.Cancelled, at));
         Assert.EndsWith("(checked 14:32, before the model changed)", ResultList.CopyText(row.Row, null, at), StringComparison.Ordinal);
         // the pane passes the model's reason to each
         var view = File.ReadAllText(Path.Combine(Src, "Gordium.Revit.Addin", "ResultsView.cs")).Replace("\r\n", "\n", StringComparison.Ordinal);
-        Assert.Contains("PaneWords.StaleState(ResultText.StateWords(model.State), model.StaleKind ?? StaleReason.ModelChanged)", view, StringComparison.Ordinal);
+        Assert.Contains("PaneWords.StaleState(ResultText.StateWords(model.State), _content?.When ?? DateTime.Now)", view, StringComparison.Ordinal);
+        Assert.Contains("PaneWords.StaleSub(content.Model.StaleKind ?? StaleReason.ModelChanged, content.When)", view, StringComparison.Ordinal);
         Assert.Contains("_content?.Model?.StaleKind ?? StaleReason.ModelChanged);", view, StringComparison.Ordinal);
         Assert.Contains("_content?.Ids, _content?.Model?.StaleKind ?? StaleReason.ModelChanged);", view, StringComparison.Ordinal);
     }

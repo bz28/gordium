@@ -820,10 +820,10 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
         var objects = new JsonArray(new JsonObject { ["id"] = "a" });
         JsonElement E(string json) => JsonDocument.Parse(json).RootElement;
         Assert.Single(WorkerLeftOut.Read(objects, E("""[{"id":"a","left_out":true,"why":"on_lot"}]"""), E("""[{"id":"a","touching":null}]""")));
-        Assert.Throws<InvalidOperationException>(() => WorkerLeftOut.Read(objects, E("[]"), E("""[{"id":"a","touching":null}]""")));
-        Assert.Throws<InvalidOperationException>(() => WorkerLeftOut.Read(objects, E("""[{"id":"b","left_out":true}]"""), E("""[{"id":"a","touching":true}]""")));
-        Assert.Throws<InvalidOperationException>(() => WorkerLeftOut.Read(objects, E("""[{"id":"a","left_out":1}]"""), E("""[{"id":"a","touching":true}]""")));
-        Assert.Throws<InvalidOperationException>(() => WorkerLeftOut.Read(objects, E("""[{"id":"a","left_out":true}]"""), E("""[{"id":"a"}]""")));
+        Assert.Throws<Gordium.Worker.WorkerProtocolException>(() => WorkerLeftOut.Read(objects, E("[]"), E("""[{"id":"a","touching":null}]""")));
+        Assert.Throws<Gordium.Worker.WorkerProtocolException>(() => WorkerLeftOut.Read(objects, E("""[{"id":"b","left_out":true}]"""), E("""[{"id":"a","touching":true}]""")));
+        Assert.Throws<Gordium.Worker.WorkerProtocolException>(() => WorkerLeftOut.Read(objects, E("""[{"id":"a","left_out":1}]"""), E("""[{"id":"a","touching":true}]""")));
+        Assert.Throws<Gordium.Worker.WorkerProtocolException>(() => WorkerLeftOut.Read(objects, E("""[{"id":"a","left_out":true}]"""), E("""[{"id":"a"}]""")));
     }
 
     [Fact]

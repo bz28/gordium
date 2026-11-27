@@ -540,7 +540,7 @@ def answer_for(lines, request_id, limit, on_step=None, clock=time.monotonic):
             raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
                                    "nothing from it is shown")
         if "step" in answer and "ok" not in answer:      # a progress line: what it is doing now
-            if on_step is not None:
+            if on_step is not None and not answer.get("again"):   # a repeat says only that it is still working
                 on_step(str(answer["step"]))
             continue
         return answer

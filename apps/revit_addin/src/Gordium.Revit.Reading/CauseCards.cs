@@ -199,7 +199,7 @@ public static class CauseCards
         return card.Kind switch
         {
             CauseKind.Mark when action == CardAction.ProjectInformation => $"Set {names} on Project Information.",
-            CauseKind.Mark when marks.Count > 0 => $"Set {names} in Properties" +
+            CauseKind.Mark when marks.Count > 0 => $"Set {names} in Properties" + OnType(marks) +
                 (action == CardAction.ShowAndProperties ? "." : ", on the element the card names (the card has none to select)."),
             CauseKind.Mark => "No Gordium mark is named for this: do what the card says, or decide it by hand.",
             CauseKind.MeasureByHand => "Gordium doesn't read or measure this yet: check each row by hand against the law's words.",
@@ -212,9 +212,20 @@ public static class CauseCards
     public static string AfterProperties(CauseCard card, int selected)
     {
         ArgumentNullException.ThrowIfNull(card);
-        var names = string.Join(" and ", MarksOf(card).Select(m => m.Name));
-        return $"Selected {selected} element{(selected == 1 ? "" : "s")}; Properties is open: set {names} there, then Check again.";
+        var marks = MarksOf(card);
+        var names = string.Join(" and ", marks.Select(m => m.Name));
+        return $"Selected {selected} element{(selected == 1 ? "" : "s")}; Properties is open: set {names} there{OnType(marks)}, then Check again.";
     }
+
+    /// <summary>Where a type's mark is set: the instance Properties palette doesn't show it, Edit Type does, once for each
+    /// type (door leaves review round 1: the card said "set Gordium: Leaves there", which Properties alone doesn't
+    /// hold). Edit Type is greyed with several types selected (round 2), and picking a type in Properties' Type Selector
+    /// would retype every selected element (round 3), so the words name one element of a type, or the type's own
+    /// Type Properties in the Project Browser; "" when every mark is the element's own.</summary>
+    internal static string OnType(IReadOnlyList<MarkDefinition> marks) =>
+        marks.Any(m => m.Binding == MarkBinding.Type)
+            ? " (a type's mark: select one element of a type and click Edit Type, or right-click the type in the Project " +
+              "Browser and choose Type Properties; once for each type)" : "";
 
     /// <summary>The Gordium marks the card names, each once, in Gordium's list order. When the worker names the
     /// fields the card needs (<see cref="CauseCard.Fields"/>): the mark that feeds each one exactly (doors[].exit:

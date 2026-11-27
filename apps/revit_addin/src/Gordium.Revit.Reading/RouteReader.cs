@@ -186,6 +186,14 @@ public static class RouteReader
                 interior["story_outlines"] = outlines;
         }
 
+        // every level of the model, a level with nothing drawn on it too (an open parking story, a roof, a datum): which
+        // story is the first above grade plane can't be told while one may be missing (story_place.py: every place
+        // needs review without them)
+        if (levels is not null && used.Count > 0)
+            interior["all_levels"] = new JsonArray(levels.Values.Select(l => (JsonNode)new JsonObject
+            {
+                ["id"] = l.UniqueId, ["name"] = l.Name, ["elevation"] = model.InternalToShared.Apply(new Xyz(0, 0, l.Elevation)).Z,
+            }).ToArray());
         if (levels is not null && used.Count > 0)
             interior["levels"] = new JsonArray(records.Levels!.Where(l => used.Remove(l.UniqueId)).Select(l => (JsonNode)new JsonObject
             {

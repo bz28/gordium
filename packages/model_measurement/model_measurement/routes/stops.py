@@ -115,14 +115,59 @@ STOPS = {
     "area_unknown_space": "the story has an enclosed space with no room drawn in it ({name}): which area it counts in "
                           "isn't known",
     "area_rooms_overlap": "the rooms {a} and {b} overlap: an area counted twice",
+    # where each story sits against the grade plane (story_place.py)
+    "no_ground": "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so "
+                 "which story is above or below it, isn't known",
+    "ground_existing": "the ground given is the existing ground, not the finished ground the grade plane is "
+                       "measured from (the Building Code's grade plane, 202)",
+    "ground_assumed": "the ground is assumed flat, not stated ({why}): where the grade plane is isn't known",
+    "ground_spots_not_finished": "the spot grades aren't stated as finished ground (Revit's Ground from mark set to "
+                                 "Finished spot grades, or no regrading near the house): the grade plane is measured "
+                                 "from the finished ground",
+    "ground_disagrees": "the ground is stated flat at {flat} but finished ground at an opening is stated higher "
+                        "({high}): which is right isn't known",
+    "ground_disagrees_spots": "the highest finished spot grade is {high} but finished ground at an opening is "
+                              "stated higher ({stated}): the spots don't bound the grade plane",
+    "ground_openings_not_read": "the finished ground stated at an opening or an area well's floor can't be read",
+    "ground_spots_not_read": "the spot grades can't be read (each is a point with an elevation)",
+    "ground_no_outline": "the stories' outlines aren't all given, so which spot grades are at the building's walls "
+                         "isn't known",
+    "ground_wall_bare": "{count} wall(s) of the building have no spot grade within 2 ft: the ground there, and so the "
+                        "grade plane, isn't known",
+    "place_no_rooms": "no story has rooms with a floor elevation",
+    "place_description": "the model isn't read whole ({reasons}): a story may be missing",
+    "place_levels_not_all": "the model doesn't list every one of its levels (one with nothing drawn on it, an open "
+                            "parking story, may be a story): which story is the first above grade plane isn't known",
+    "place_story_no_rooms": "the level {name} has no rooms: it isn't placed as a story",
+    "place_floor_not_read": "the floor elevation of the room {name} isn't read: {reason}",
+    "place_level_not_read": "the elevation of the level {name} isn't read",
+    "place_levels_disagree": "the model gives the level {name} two heights (its levels and its list of every level "
+                             "disagree): which is right isn't known",
+    "place_under_lowest": "the lowest level is {gap} above the lowest ground stated: a story with no level of its own "
+                          "(an undercroft drawn from the level above) may stand under it",
+    "place_story_spread": "the rooms of {name} have floors {spread} apart: they may be two stories (a room drawn on a "
+                          "lower level with an offset)",
+    "place_level_inside_story": "the level {name} lies within a story's floors: a story may be drawn on another level",
+    "place_split_level": "the floors of {a} and {b} overlap in height (a split level): which story is above which "
+                         "isn't clear",
+    "place_either": "{name} could be {could}, depending on where the grade plane lies within what the ground stated "
+                    "allows",
+    "place_either_levels": "{name} could be {could}, depending on where the grade plane lies within what the ground "
+                           "stated allows and on whether the levels {levels} are stories (a level with no rooms drawn, "
+                           "or a small one that may be a mezzanine)",
+    "place_too_many_levels": "{count} levels have no rooms: whether each is a story nobody drew rooms on is tried both "
+                             "ways only up to 8",
+    "ground_buildings_apart": "the stories' outlines come apart in {count} pieces (separate buildings?): which spot "
+                              "grades are each building's ground isn't known",
     # each door's own part (doors.py, section group 6a): its sizes only from the maker's stated clear opening
     "door_no_stated_clear": "the door {name} has no maker's stated clear opening (its type's clear width and height, "
                             "confirmed): its size is never taken from the door's own size or its leaf",
     "door_clear_not_read": "the door {name}'s clear opening isn't read: {reason}",
     "door_clear_disagree": "the door {name}'s {where} gives a clear {size} of {other} in and its maker's stated "
                            "clear opening {stated} in: which is the door's isn't clear",
-    "door_leaves_not_given": "the door {name} doesn't say how many leaves it has (one, or a pair with no mullion), and "
-                             "Gordium has no mark for it in the model yet",
+    "door_leaves_not_given": "the door {name} doesn't say how many leaves it has (one; or a pair with no mullion, or a "
+                             "mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door "
+                             "type's leaves mark)",
     "door_leaves_not_read": "the door {name} gives its leaves as {got}, not 1 or 2",
     "door_exit_kind_not_read": "the door {name} gives its kind of exit as {got}, not one Gordium reads",
     "door_sides_not_read": "the door {name}'s sides (the two rooms, or a room and outside, it joins) aren't read",

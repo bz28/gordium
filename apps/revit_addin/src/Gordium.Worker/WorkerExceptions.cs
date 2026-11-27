@@ -7,6 +7,13 @@ public class WorkerException : Exception
     public WorkerException(string message, Exception? inner = null) : base(message, inner) { }
 }
 
+/// <summary>The worker couldn't be started at all (no Gordium folder found, Revit closing): the checker's failure,
+/// never the model read's, though the read is what was waiting for it.</summary>
+public sealed class WorkerUnavailableException : WorkerException
+{
+    public WorkerUnavailableException(string message, Exception? inner = null) : base(message, inner) { }
+}
+
 /// <summary>The worker answered <c>"ok": false</c>: it refused the request (a bad field, an unknown command, facts
 /// it can't read) and gave its words. The worker is still in step and keeps serving.</summary>
 public sealed class WorkerRefusedException : WorkerException
@@ -60,6 +67,15 @@ public sealed class WorkerExitedException : WorkerException
 /// request's).</summary>
 public sealed class WorkerTimeoutException : WorkerException
 {
+    /// <summary>The time limit that ran out (what "The check took too long" says), or null when not known.</summary>
+    public TimeSpan? Limit { get; init; }
+
+    /// <summary>The command it was waiting for ("hello" while the worker starts, "check_site" for a check), or null.</summary>
+    public string? Command { get; init; }
+
+    /// <summary>Whether the limit was on silence (no line from the worker for that long), not on the whole answer.</summary>
+    public bool Silent { get; init; }
+
     public WorkerTimeoutException(string message) : base(message) { }
 }
 

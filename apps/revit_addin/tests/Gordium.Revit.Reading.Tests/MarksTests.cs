@@ -125,6 +125,8 @@ public sealed class MarksTests
             ("Gordium: ADU bedrooms", "019161da-e9c1-4219-8cfc-01dbd1071761", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: ADU floor area", "41c8f63d-368d-4ea9-b371-85828b769d6a", MarkValueKind.Area, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Main building floor area", "f237131b-5e7e-4c8e-94df-a8538de16954", MarkValueKind.Area, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // a door type's leaves (BCNYS 1010.1.1: one leaf of a pair with no mullion gives the 32 in)
+            ("Gordium: Leaves", "f23ad40b-e048-4b61-a92a-b7963e64d4cf", MarkValueKind.Integer, MarkBinding.Type, ["OST_Doors"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))

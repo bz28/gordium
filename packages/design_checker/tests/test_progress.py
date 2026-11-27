@@ -150,6 +150,47 @@ def test_serve_sends_progress_lines_only_when_asked(monkeypatch):
     assert got[2]["result"]["told"] and not got[3]["result"]["told"]
 
 
+def test_a_long_stage_says_itself_again_until_the_answer_which_is_always_last(monkeypatch):
+    """UI polish change 15: the Revit add-in stops a check only when the worker says nothing for 60 s, so a request that
+    asked for progress hears its current stage again every HEARTBEAT seconds while the stage runs; the beat stops before
+    the answer, which stays the request's last line."""
+    import design_checker.__main__ as main_module
+
+    monkeypatch.setattr(main_module, "HEARTBEAT", 0.02)
+
+    def slow_check(model, facts, report=None, problems=None, extras=None, step=None, today=None):
+        step("Measuring the building…")
+        time.sleep(0.2)                 # one long stage: ten beats or so
+        return {"fine": True}
+
+    monkeypatch.setattr(main_module, "check", slow_check)
+    out = io.StringIO()
+    serve(io.StringIO('{"id": 7, "cmd": "check", "model": "m.3dm", "facts": {}, "progress": true}\n'), out)
+    got = [json.loads(line) for line in out.getvalue().splitlines()]
+    assert got[-1]["id"] == 7 and got[-1]["ok"]                      # the answer, last
+    beats = got[:-1]
+    assert len(beats) >= 3                                           # the first line, then the stage again
+    assert beats[0] == {"id": 7, "step": "Measuring the building…"}
+    assert all(b == {"id": 7, "step": "Measuring the building…", "again": True} for b in beats[1:])
+    assert not main_module._Steps({"id": 1}, io.StringIO())._beat.is_alive()   # a beat runs only inside a request
+    # review round 2: a repeat is always the newest stage (read under the lock), never an older one after a newer
+    out = io.StringIO()
+    steps = main_module._Steps({"id": 8}, out)
+    steps("Reading the model…")
+    steps("Measuring the building…")
+    steps.repeat()
+    assert json.loads(out.getvalue().splitlines()[-1]) == {"id": 8, "step": "Measuring the building…", "again": True}
+
+
+def test_a_host_that_shows_or_records_stages_skips_the_repeats(monkeypatch):
+    """Review round 2: Rhino and the recorded sessions show and record each stage once; a repeat (marked "again")
+    only says the worker is still working, so a session recorded on a long check replays the same."""
+    import design_checker.host_core.worker_client as client
+
+    src = Path(client.__file__).read_text(encoding="utf-8")
+    assert 'if on_step is not None and not answer.get("again"):' in src
+
+
 def test_a_check_and_a_start_say_each_stage_in_order(tmp_path):
     facts = load_facts(SITE / "spreadsheet_design_model_facts.yaml")
     said = []

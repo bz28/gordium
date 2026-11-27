@@ -36,8 +36,28 @@ public sealed class ResultViewsTests
     public void The_top_says_the_checker_s_counts_and_what_they_mean()
     {
         var m = ResultViews.Build(Apartment());
-        Assert.Equal("286 need review · 8 not checked yet · 31 comply · 1 doesn't apply", m.Summary);   // group 2's story exits: +8; group 3's 1004.7 and 1004.9 flags: +2; group 4a's corridor width and capacity (2 corridors each) and the mixed-building flag: +5; group 4b's seven Table 1020.2 rows and the fire-partition flag (2 corridors each), and its mixed, Group I-2 and hoistway flags: +19; group 4c's obstruction and air-movement flags and the continuity flag (2 corridors): +4; group 5a's stairway and other-component capacity flags: +2; group 5b's continuity, distribution and convergence flags: +3; group 5c's three encroachment flags: +3; group 6a's door width (10 doors, needs review: leaves not stated) and its three flags: +13, its door height (10 doors) complies: +10; group 6b's door swing (10 doors, needs review: the side each swings into isn't stated): +10, its door-kind flag (10 doors, side-hinged) doesn't apply
-        Assert.Equal("Nothing fails yet. 286 results can't be decided until the questions below are answered.", m.Headline);
+        Assert.Equal("393 need review · 8 not checked yet · 31 comply · 1 doesn't apply", m.Summary);   // group 2's story exits: +8; group 3's 1004.7 and 1004.9 flags: +2; group 4a's corridor width and capacity (2 corridors each) and the mixed-building flag: +5; group 4b's seven Table 1020.2 rows and the fire-partition flag (2 corridors each), and its mixed, Group I-2 and hoistway flags: +19; group 4c's obstruction and air-movement flags and the continuity flag (2 corridors): +4; group 5a's stairway and other-component capacity flags: +2; group 5b's continuity, distribution and convergence flags: +3; group 5c's three encroachment flags: +3; group 6a's door width (10 doors, needs review: leaves not stated) and its three flags: +13, its door height (10 doors) complies: +10; group 6b's door swing (10 doors, needs review: the side each swings into isn't stated): +10, its door-kind flag (10 doors, side-hinged) doesn't apply; Chapter 7 part a's 28 fire-barrier and shaft-enclosure flags: +28; part b's 23 opening-protective flags and its corridor-door row (2 corridors): +25; part c's 31 fire partition, smoke barrier and smoke partition flags: +31; part d's 23 floor, vertical opening and penetration flags: +23
+        // only the results that wait on a question are said to (egress UI audit): their count is the questions card's
+        var review = m.Fix.SelectMany(g => g.Rows).Where(r => r.Verdict == Verdict.NeedsReview).Select(r => r.Id).Distinct().Count();
+        var asked = m.Fix.Single(g => g.Kind == FixKind.Answer).Rows.Where(r => r.Verdict == Verdict.NeedsReview).Select(r => r.Id).Distinct().Count();
+        Assert.InRange(asked, 1, review - 1);                                    // the apartment: some wait on marks and hand checks
+        var cards = m.Fix.Single(g => g.Kind == FixKind.Answer).Cards.Count;
+        Assert.True(cards > 1);
+        Assert.Equal($"Nothing fails yet. {review} results need review; {asked} of them wait on the questions below.", m.Headline);
+        Assert.Equal("Nothing fails yet. 2 results can't be decided until the questions below are answered.",
+                     ResultViews.Headline([(Verdict.NeedsReview, "a"), (Verdict.NeedsReview, "b")], onQuestions: 2));
+        Assert.Equal("Nothing fails yet. 2 results need review: each says below what it needs.",
+                     ResultViews.Headline([(Verdict.NeedsReview, "a"), (Verdict.NeedsReview, "b")], onQuestions: 0));
+        Assert.Equal("Nothing fails yet. 1 result needs review: it says below what it needs.",
+                     ResultViews.Headline([(Verdict.NeedsReview, "a")], onQuestions: 0));
+        // review round 1: one result waits, and one question asked, said so
+        var eighty = Enumerable.Range(0, 80).Select(i => (Verdict.NeedsReview, $"r{i}")).ToList();
+        Assert.Equal("Nothing fails yet. 80 results need review; 2 of them wait on the question below.",
+                     ResultViews.Headline(eighty, onQuestions: 2, questions: 1));
+        Assert.Equal("Nothing fails yet. 80 results need review; 1 of them waits on the questions below.",
+                     ResultViews.Headline(eighty, onQuestions: 1, questions: 3));
+        Assert.Equal("Nothing fails yet. 2 results can't be decided until the question below is answered.",
+                     ResultViews.Headline([(Verdict.NeedsReview, "a"), (Verdict.NeedsReview, "b")], onQuestions: 2, questions: 1));
         Assert.Equal("1 fails · 2 need review", ResultViews.Summary([Verdict.NeedsReview, Verdict.DoesNotComply, Verdict.NeedsReview]));
         Assert.Equal("1 rule fails. Fix it first; 2 results also need review.",
                      ResultViews.Headline([(Verdict.NeedsReview, "a"), (Verdict.DoesNotComply, "b"), (Verdict.NeedsReview, "c")]));

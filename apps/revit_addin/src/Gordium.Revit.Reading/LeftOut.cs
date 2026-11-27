@@ -33,12 +33,13 @@ public sealed class WorkerLeftOut(WorkerClient worker) : ILeftOutAsker
 
     /// <summary>The two answers read strictly: one entry per object sent, each with that object's id in the same
     /// place, <c>left_out</c> true or false, <c>touching</c> true, false or null. Anything else is an error, never
-    /// read as "nothing left out" or "not touching".</summary>
+    /// read as "nothing left out" or "not touching": the checker's answer can't be trusted (WorkerProtocolException, so
+    /// the pane says so, never that Revit's read failed: UI polish PR 5 review round 6).</summary>
     internal static IReadOnlyList<LeftOutDecision> Read(JsonArray objects, JsonElement leftOut, JsonElement touching)
     {
         if (leftOut.ValueKind != JsonValueKind.Array || touching.ValueKind != JsonValueKind.Array
             || leftOut.GetArrayLength() != objects.Count || touching.GetArrayLength() != objects.Count)
-            throw new InvalidOperationException(
+            throw new WorkerProtocolException(
                 $"objects.left_out answered for a different number of objects than the {objects.Count} sent");
         var out_ = new List<LeftOutDecision>(objects.Count);
         for (var i = 0; i < objects.Count; i++)
@@ -48,11 +49,11 @@ public sealed class WorkerLeftOut(WorkerClient worker) : ILeftOutAsker
             if (a.ValueKind != JsonValueKind.Object || t.ValueKind != JsonValueKind.Object
                 || !a.TryGetProperty("id", out var aid) || aid.ValueKind != JsonValueKind.String || aid.GetString() != id
                 || !t.TryGetProperty("id", out var tid) || tid.ValueKind != JsonValueKind.String || tid.GetString() != id)
-                throw new InvalidOperationException($"objects.left_out's answer {i + 1} isn't for {id}");
+                throw new WorkerProtocolException($"objects.left_out's answer {i + 1} isn't for {id}");
             if (!a.TryGetProperty("left_out", out var lo) || lo.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
-                throw new InvalidOperationException($"objects.left_out gave no left_out (true or false) for {id}");
+                throw new WorkerProtocolException($"objects.left_out gave no left_out (true or false) for {id}");
             if (!t.TryGetProperty("touching", out var to) || to.ValueKind is not (JsonValueKind.True or JsonValueKind.False or JsonValueKind.Null))
-                throw new InvalidOperationException($"objects.left_out gave no touching (true, false or null) for {id}");
+                throw new WorkerProtocolException($"objects.left_out gave no touching (true, false or null) for {id}");
             out_.Add(new LeftOutDecision(id, lo.GetBoolean(), to.ValueKind == JsonValueKind.Null ? null : to.GetBoolean()));
         }
         return out_;
