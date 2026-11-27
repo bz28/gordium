@@ -46,8 +46,8 @@ from rule_format import parts as part_rules
 from rule_format.formula import names as formula_names
 from rule_format.labels import load_pieces
 from rule_format.place import place as place_of
-from rule_format.rulebook import REPO, STATE_SETTINGS, Context, load, rulebook_file_problems
-from rule_format.state_law import state_settings_problems
+from rule_format.published import frozen, unreadable as _unreadable   # the validation, frozen (published.py)
+from rule_format.rulebook import REPO, STATE_SETTINGS, load, load_bytes
 
 from design_checker import code_scope, each_part, occupant_load, present
 
@@ -58,6 +58,10 @@ WAITING_WHY = ("Escape windows (size and sill), stairs (risers, treads, headroom
                "once the rooms are drawn; handrails, guards and sleeping lofts aren't read from the drawing yet, so "
                "their rules will need review. Until then this is not a pass")
 BAD_RULES = "The {title} rules don't pass the rule checks (python -m rule_format), so none of them was used: {why}"
+# the law's rules are checked once and frozen (rule_format/published.py): a certificate that is missing or no longer
+# matches the files gives no rules, never a check against rules no one validated
+UNPUBLISHED = ("None of the {title} rules was used: they are validated once and frozen, and the frozen copy can't be "
+               "used ({why}). Check this law by hand")
 NO_RULES = "No rulebook in {folder}/5_building_code_rules/: nothing of this law was checked"
 INTERIOR_PROBLEM = "The interior drawing: {why}"
 SKIPPED = ("{name} is marked as an escape opening but isn't checked: {why}. An escape opening may also be required in a "
@@ -111,30 +115,31 @@ def _folder(jurisdiction) -> Path:
 def laws(jurisdiction) -> dict:
     """The place and every state law it inherits, ready to check: {"place": its name, "folder": its folder (the code
     choice reads its uses.yaml names), "laws": [{key, title, short, folder, rulebook, rules, problems, section_of,
-    documents}]}. A rulebook that doesn't pass the rule checks gives
-    no rules and its problems (needs review, never a row)."""
+    documents, kinds, unpublished}]}. The validation is read frozen (rule_format/published.frozen: the certificate
+    `python -m rule_format publish` wrote, checked against every file it was worked out from); a certificate that is
+    missing or stale gives no rules and says so (`unpublished`), as a rulebook that doesn't pass the rule checks gives
+    no rules and its problems (needs review, never a row). There is no live validation to fall back on."""
     refuse_state_alone(jurisdiction)
     p = place_of(_folder(jurisdiction))
     out = []
     for folder, book in p.inherited_rulebooks():
         law = {"key": f"{folder.parent.name}/{folder.name}", "title": _title(folder), "folder": folder,
                "rulebook": book, "rules": [], "problems": [], "section_of": None, "documents": {},
-               "not_checked_yet": [], "coverage_problem": None, "kinds": {}, **_scope_settings(folder)}
+               "not_checked_yet": [], "coverage_problem": None, "kinds": {}, "unpublished": False,
+               **_scope_settings(folder)}
         law["short"] = law["title"].split(" (")[0]
         if book is None:
             law["problems"] = [NO_RULES.format(folder=law["key"])]
         else:
-            try:          # never a crash (zoning's answer goes with it), never a rule used unchecked
-                ctx = Context.for_jurisdiction(folder, use_cache=False)   # the same answer on every machine
-                law["problems"] = ctx.problems + state_settings_problems(folder, ctx) + rulebook_file_problems(book, ctx)
-                law["documents"] = ctx.sources
-                law["kinds"] = {k: v for k, v in ctx.allowed().items() if k not in ("use", "district")}
-                if not law["problems"]:
-                    law["rules"] = load(book)["rules"]
+            got = frozen(folder, book)
+            law.update(problems=got["problems"], documents=got["documents"], kinds=got["kinds"],
+                       unpublished=bool(got["problems"]))
+            if not law["problems"]:
+                try:      # never a crash (zoning's answer goes with it); the very bytes the certificate's sha256 is of
+                    law["rules"] = load_bytes(got["book"])["rules"]
                     law["section_of"] = _sections(folder)
-            except Exception as e:
-                law["problems"], law["rules"], law["section_of"] = \
-                    [f"its sources can't be read ({type(e).__name__}: {e})"], [], None
+                except Exception as e:
+                    law["problems"], law["rules"], law["section_of"] = [_unreadable(e)], [], None
         law["not_checked_yet"], law["coverage_problem"] = _not_checked_yet(folder, law["rules"])
         out.append(law)
     return {"place": p.name, "folder": p.folder, "laws": out}
@@ -423,8 +428,9 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
     if law["problems"]:
         why = "; ".join(law["problems"][:3]) + (f" (and {len(law['problems']) - 3} more)" if len(law["problems"]) > 3
                                                  else "")
+        words = UNPUBLISHED if law.get("unpublished") else BAD_RULES
         return [_own_item(law, f"{law['short'].lower()}.rules", f"{law['short']} rules", present.REVIEW,
-                          BAD_RULES.format(title=law["title"], why=why))]
+                          words.format(title=law["title"], why=why))]
     claims = measured.get("has_none") or {}
     got = each_part.check_parts(law["rules"], measured["parts"], values, allowed, claims)
     rows += got["rows"]

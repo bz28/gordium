@@ -31,6 +31,6 @@ python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"   # once: set up and 
 .venv/bin/python -m rule_format                              # check every rule file
 ```
 
-The full list of automatic checks that run on every change is in [.github/workflows/ci.yml](.github/workflows/ci.yml); the same checks on Windows ([.github/workflows/windows.yml](.github/workflows/windows.yml)) run on main and when a PR is about to merge.
+The full list of automatic checks that run on every change is in [.github/workflows/ci.yml](.github/workflows/ci.yml); the same checks on Windows ([.github/workflows/windows.yml](.github/workflows/windows.yml)) run nightly on main and when a PR is about to merge.
 CI splits the tests into 4 parts that run at once (`pytest --shard K/4`, conftest.py) and first proves the parts add
 up to the whole suite (`python tests/check_shards.py 4`).

@@ -20,6 +20,7 @@ from pathlib import Path
 import yaml
 
 from model_measurement.project import load_facts
+from rule_format import published
 from rule_format.rulebook import utf8_console
 
 from . import goldens
@@ -72,6 +73,15 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--check", action="store_true", help="compare the golden sheets with fresh builds")
     parser.add_argument("--write", action="store_true", help="record the golden sheets again")
     args = parser.parse_args(argv)
+    # a missing law certificate is published first (rule_format/published.py); before writing goldens a stale one too,
+    # since a check reads no stale law (every row of it needs review) and those rows would be written as the goldens.
+    # A law that can't be published stops a write: its rows would be written as needs review
+    notes = published.ensure(missing_only=not args.write)
+    for note in notes:
+        print(f"– {note}")
+    if args.write and notes:
+        print("✗ not written: a law can't be published (above), so its rows would be written as needs review")
+        return 1
     if args.check or args.write:
         if args.house or args.check == args.write:
             parser.error("--check or --write, alone")
