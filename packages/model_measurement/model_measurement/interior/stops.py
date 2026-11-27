@@ -179,6 +179,26 @@ STOPS = {
                              "to the rules yet, and it isn't stated ({mark})",
     "well_below_disagree": "the opening {name} is stated not to be below the adjacent grade, yet the model shows {shown}: "
                            "which is right isn't clear ({mark})",
+    # what the ground given outside the opening (`ground_outside`: in Revit, a Toposolid marked as the finished ground,
+    # sampled at the wall's outer face) shows against its clear opening's bottom (openings.ground_shows)
+    "well_above_disagree": "the opening {name} is stated to be below the adjacent grade, yet the model shows the ground "
+                           "outside it at {ground} in, {gap} in below its clear opening's bottom: which is right isn't "
+                           "clear ({mark})",
+    "grade_floor_well_unknown": "it isn't settled that its clear opening's bottom is above the ground outside it, so it "
+                                "may stand in an area well whose floor isn't drawn, and whether the ground adjacent to "
+                                "it is the well's floor or the ground around the well is an open question (4.6)",
+    "well_ground_near": "the opening {name} doesn't state {what}, and the ground outside it (at {ground} in) is within "
+                        "1/16 in of its clear opening's bottom, so the model doesn't settle it ({mark})",
+    "well_ground_no_bottom": "the opening {name} doesn't state {what}, and its clear opening's bottom isn't known, to "
+                             "compare with the ground outside it ({mark})",
+    "well_ground_unread": "the opening {name} doesn't state {what}, and the ground outside it can't be read ({reason}) "
+                          "({mark})",
+    "well_depth_least": "the opening {name} doesn't state {what}; the model shows the ground outside it {least} in above "
+                        "its clear opening's bottom, so the well is at least that deep, but its floor isn't drawn, so "
+                        "whether it is more than 44 in deep isn't known ({mark})",
+    "well_depth_disagree": "the opening {name} states {what} as {stated} in, yet the model shows the ground outside it "
+                           "{least} in above its clear opening's bottom, so the well, its floor at or below that bottom "
+                           "(Gordium's reading), is at least that deep: which is right isn't clear ({mark})",
     "well_stated_unread": "the opening {name}'s stated area well isn't read: {what}",
 }
 

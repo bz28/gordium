@@ -1,8 +1,8 @@
 """What the architect states of an escape opening and its area well (`openings[].stated_well`; in Revit the window's
-or door's own marks: a well isn't in Revit's vocabulary and the ground at a window isn't read yet). Each value given
-is handed to the rules as the architect's statement; one left out is not stated, its reason naming the field and the
-mark (so the pane's card opens it), never 0 or no; a statement that can't be read, or disagrees with a drawn well,
-gives no value."""
+or door's own marks: a well isn't in Revit's vocabulary). Each value given is handed to the rules as the architect's
+statement; one left out is not stated, its reason naming the field and the mark (so the pane's card opens it), never 0
+or no; a statement that can't be read, or disagrees with a drawn well, gives no value. What the ground given outside
+the opening measures, and its disagreements with a statement: test_interior_ground_well.py."""
 
 import copy
 import functools
@@ -21,8 +21,12 @@ FULL = {"below_grade": True, "area": 1512, "width": 40, "projection": 38, "depth
 
 
 def stated(well, **kw):
+    """base()'s opening stating `well`. Stated below grade, its ground is 1 in over its clear bottom (20 in), so the
+    two agree (base()'s ground, 0, would show it 20 in above grade: a disagreement, test_interior_ground_well.py)."""
     d = base()
     d["openings"][0]["stated_well"] = well
+    if isinstance(well, dict) and well.get("below_grade") is True:
+        d["openings"][0]["ground_outside"] = 21
     d["openings"][0].update(kw)
     return d
 
@@ -39,7 +43,7 @@ def test_every_statement_given_is_handed_to_the_rules_as_given():
 
 
 def test_a_statement_left_out_is_not_stated_naming_its_field_and_mark_never_0_or_no():
-    m, stopped, _ = opening_measures(stated({}))
+    m, stopped, _ = opening_measures(stated({}, ground_outside=None))      # no ground: the model gives none of them
     for key, (measure, _, _, mark) in STATED_WELL.items():
         for got in [measure] if measure else ["area_well_ladder", "area_well_steps"]:
             assert got not in m, got
@@ -192,12 +196,12 @@ def _book():
             Context.for_jurisdiction(ny).allowed())
 
 
-def _outcomes(well):
+def _outcomes(well, **kw):
     """Each area well rule's outcome for the base bedroom's window stated so, in a Group R-3 building with no sprinkler
     system, the room below the fourth story, with one exit and no door to outside or other opening (1031.2 asks it)."""
     from rule_format import parts
     rules, allowed = _book()
-    part = measure(stated(well))["parts"]["emergency_escape_opening"][0]
+    part = measure(stated(well, **kw))["parts"]["emergency_escape_opening"][0]
     room = {"opening_room_fourth_or_higher": False, "opening_room_one_exit": True,
             "opening_room_door_to_outside": False, "opening_room_has_other_openings": False}
     given = {"occupancy_group": "R-3", **{k: False for k in ("sprinklered_903_3_1_1", "sprinklered_903_3_1_2",
@@ -244,7 +248,9 @@ def test_a_ladder_the_open_window_blocks_fails_1031_5_2_and_a_blank_ladder_needs
 
 
 def test_nothing_stated_never_passes_and_not_below_grade_needs_no_well():
-    assert "pass" not in _outcomes({}).values()
+    # nothing stated and no ground given (base()'s ground, under the clear bottom, measures it not below grade:
+    # test_interior_ground_well.py)
+    assert "pass" not in _outcomes({}, ground_outside=None).values()
     assert set(_outcomes({"below_grade": False}).values()) == {"pass"}
 
 

@@ -192,7 +192,11 @@ def measure(description) -> dict:
                 out["not_checked"].append({"kind": "emergency_escape_opening", "id": o.get("id"),
                                            "name": name_of(o), "why": "in a room that isn't a sleeping room"})
                 continue
-            parts["emergency_escape_opening"].append(_part(o, measure_opening(o, reader, floor_of), o.get("room")))
+            measured = measure_opening(o, reader, floor_of)
+            part = _part(o, measured, o.get("room"))
+            if measured[3]:                                   # measures standing on Gordium's reading, to confirm
+                part["confirm"] = {m: words for m, words in measured[3].items() if m in part["measures"]}
+            parts["emergency_escape_opening"].append(part)
 
     stairs = _given(description, "stair", problems)
     flights = {}
