@@ -65,13 +65,15 @@ def statements(text: str) -> list[dict]:
             continue
         before_text = text[:m.start()].lower().split()[-5:]
         after_words = re.findall(r"[a-z]+|\(|\)", text[m.end():].lower())
+        if re.match(r"[.;:]", text[m.end():]):         # a sentence's end: "... Section 907. 4. In Group I-1" has no unit
+            after_words = []
         unit = next((UNITS[w] for w in after_words[:1] if w in UNITS), "")
         used = 1 if unit else 0
         if after_words[:1] and after_words[0] in TWO_WORD_UNITS and after_words[1:2] and after_words[1] in UNITS:
             unit, used = f"{after_words[0]} {UNITS[after_words[1]]}", 2
-        elif after_words[:1] == ["gross"] and after_words[1:2] and after_words[1] in TWO_WORD_UNITS \
+        elif after_words[:1] in (["gross"], ["net"]) and after_words[1:2] and after_words[1] in TWO_WORD_UNITS \
                 and after_words[2:3] and after_words[2] in UNITS:
-            unit, used = f"gross {after_words[1]} {UNITS[after_words[2]]}", 3     # "200 gross square feet"
+            unit, used = f"{after_words[0]} {after_words[1]} {UNITS[after_words[2]]}", 3   # "200 gross square feet"
         if unit == "unit" and after_words[1:2] and after_words[1] in DIRECTIONS:
             unit, used = f"unit {after_words[1]}", 2
         # What follows, with numbers and stops kept, so a comparison word is never taken across them ("4 inches

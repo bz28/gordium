@@ -4416,14 +4416,14 @@ pieces:
     piece_sha256: 580a41a3d1f1bbe500ce51da960d1605fa761c200d2bdadcc4eadab7ee52f9db
     numbers:
     - one
-    - 1004.1 inch
+    - '1004.1'
     - not exceed one
     - four
     - not exceed one
     second_reading: agrees
     second_reading_numbers:
     - one
-    - 1004.1 inch
+    - '1004.1'
     - not exceed one
     - four
     - not exceed one
