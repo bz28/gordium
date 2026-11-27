@@ -514,7 +514,7 @@ def test_part_d_review_round_1s_notes(book, labels):
     rules = {r["id"]: r for r in book}
     assert "thickness that keeps its rating" in _shown_note(rules["general.bc_714_4_1_through_penetrations"])
     membrane = " ".join(_shown_note(rules["general.bc_714_4_2_membrane_penetrations"]).split())
-    assert membrane.count("0.01 inch") == 2 and "installed per their listing" in membrane
+    assert "positive pressure differential of at least 0.01 inch of water" in membrane and "installed per their listing" in membrane
     one, two = (_shown_note(rules[i]) for i in ("general.bc_714_4_1_1_tested_assembly_penetrations",
                                                  "general.bc_714_4_1_2_through_penetration_firestop"))
     assert "714.4.1.2" in one and "714.4.1.1" in two and not two.startswith("Or")
