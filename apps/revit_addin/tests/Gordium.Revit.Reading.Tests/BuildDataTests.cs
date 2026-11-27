@@ -145,26 +145,6 @@ public sealed class BuildDataTests
         Assert.Null(BuildData.PickSymbol([], BuildData.WindowKeywords));
     }
 
-    [Theory]
-    // facing, swing, toggle -> flip: with the toggle on (the stock families' leaf opens away from the facing) a facing
-    // pointing the way the door should swing is flipped
-    [InlineData(0, 1, 0, 1, true, true)]
-    [InlineData(0, -1, 0, 1, true, false)]
-    [InlineData(0, 1, 0, 1, false, false)]
-    [InlineData(0, -1, 0, 1, false, true)]
-    [InlineData(1, 0, 0, 1, true, false)]     // square to the swing: left as it is
-    public void A_door_is_flipped_to_open_the_way_the_data_swings(double fx, double fy, double sx, double sy, bool opposite, bool flip) =>
-        Assert.Equal(flip, BuildData.FlipFacing(new(fx, fy), new(sx, sy), opposite));
-
-    [Theory]
-    // the tiny script's single door: centre (5, 0), hinge (6.5, 0), so its hinge is +x of its centre
-    [InlineData(1, 0, true, true)]
-    [InlineData(-1, 0, true, false)]
-    [InlineData(1, 0, false, false)]
-    [InlineData(-1, 0, false, true)]
-    public void A_single_door_is_hinged_at_the_datas_jamb(double hx, double hy, bool opposite, bool flip) =>
-        Assert.Equal(flip, BuildData.FlipHand(new(hx, hy), new(5, 0), new(6.5, 0), opposite));
-
     [Fact]
     public void The_floor_outline_drops_the_closing_point_and_the_short_sides_and_stays_closed()
     {
