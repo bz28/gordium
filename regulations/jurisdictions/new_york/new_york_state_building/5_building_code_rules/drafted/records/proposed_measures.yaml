@@ -81,8 +81,10 @@ sprinklered_903_3_1_1:
   - general.bc_table_1020_2_i4
   - general.bc_table_1020_2_r
 sprinklered_903_3_1_2:
-  meaning: The building is equipped throughout with an automatic sprinkler system in accordance with 2025 BCNYS Section 903.3.1.2
-    (NFPA 13R, permitted in some Group R occupancies), as the architect states it
+  meaning: 'The building is equipped throughout with an automatic sprinkler system in accordance with 2025 BCNYS Section 903.3.1.2
+    (NFPA 13R, permitted in some Group R occupancies), as the architect states it; no where the building is stated Group R
+    alone and states more than four stories above grade plane (903.3.1.2 item 1: "Four stories or fewer above grade plane"),
+    its heights above fire department vehicle access taken on the architect''s statement'
   unit: yes_no
   needed_by:
   - general.bc_1006_2_1_two_exits
@@ -94,8 +96,6 @@ sprinklered_903_3_1_2:
   - general.bc_903_2_5_1_group_h_sprinklers
   - general.bc_903_2_6_group_i_sprinklers
   - general.bc_903_2_8_group_r_sprinklers
-  - general.bc_903_3_1_2_2_corridors_balconies_13r
-  - general.bc_903_3_1_2_nfpa_13r_limits
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -198,8 +198,6 @@ occupancy_group:
   - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_710_5_3_i2_pass_through_openings
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
-  - general.bc_903_2_10_1_commercial_parking
-  - general.bc_903_2_10_2_mechanical_access_garages
   - general.bc_903_2_10_parking_garages
   - general.bc_903_2_11_1_1_opening_dimensions
   - general.bc_903_2_11_1_2_openings_on_one_side
@@ -277,7 +275,12 @@ occupancy_group:
   - general.bc_907_2_9_1_group_r2_fire_alarm
   - general.bc_907_2_9_2_group_r2_smoke_alarms
   - general.bc_907_2_9_3_group_r2_college_detection
+  - general.bc_907_5_2_2_1_voice_alarm_override
+  - general.bc_907_5_2_2_2_voice_alarm_live_messages
+  - general.bc_907_5_2_2_3_voice_alarm_other_uses
   - general.bc_907_5_2_2_4_voice_alarm_captions
+  - general.bc_907_5_2_2_5_voice_alarm_standby_power
+  - general.bc_907_5_2_2_voice_alarm_design
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -527,3 +530,11 @@ townhouse_units:
   unit: yes_no
   needed_by:
   - general.bc_903_2_8_group_r_sprinklers
+nfpa_13r_stated:
+  meaning: 'The architect states an NFPA 13R sprinkler system, whether or not it counts as one per 2025 BCNYS 903.3.1.2
+    (sprinklered_903_3_1_2 is no in a building stated Group R alone above four stories): 903.3.1.2''s own flags show wherever
+    one is stated'
+  unit: yes_no
+  needed_by:
+  - general.bc_903_3_1_2_2_corridors_balconies_13r
+  - general.bc_903_3_1_2_nfpa_13r_limits

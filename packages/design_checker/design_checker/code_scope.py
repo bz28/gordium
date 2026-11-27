@@ -297,9 +297,23 @@ def building_measures(building: dict | None) -> dict:
     states: occupancy_group_i4, other_occupancy_present, occupancy_group (the one group, or "mixed") and whether a
     Group R, H or I-1 to I-3 occupancy is among them (903.2's) from the groups, the three sprinkler systems the limits
     name from the system, the stories above grade plane, and the twelve stated yes/no facts. A fact not stated is
-    left out (its rules need review)."""
+    left out (its rules need review). In a building stated as Group R alone (one or more of R-1 to R-4), a stated NFPA
+    13R system counts as one per 903.3.1.2 only where the stated stories above grade plane don't exceed its four
+    (903.3.1.2 item 1: the Group R occupancy's stories, here the building's): stated more, sprinklered_903_3_1_2 is no,
+    so no allowance counts it and 903.2.8 fails it (Chapter 9 part a's review round 3); not stated, it is the
+    architect's statement, as the Chapter 10 plan decided for 13R's limits (group 4b). In a building with another group
+    the Group R portion's stories aren't the building's, so the stories decide nothing there."""
     facts, _ = _given(building)
-    return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
+    out = {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
+    groups = facts.get("occupancy_groups") or []
+    all_r = bool(groups) and all(g.startswith("R-") for g in groups)
+    if out.get("sprinklered_903_3_1_2") and all_r and facts.get("stories_above_grade_plane", 0) > NFPA_13R_STORIES:
+        out["sprinklered_903_3_1_2"] = False
+    return out
+
+
+# 903.3.1.2 item 1 (p.274 line 17): "Four stories or fewer above grade plane"
+NFPA_13R_STORIES = 4
 
 
 # Each building measure the BCNYS rulebook reads: the `building` fact it is worked out from, and how
@@ -314,6 +328,9 @@ DERIVED = {
     "sprinklered_903_3_1_1": ("sprinkler_system", lambda system: system == "nfpa_13"),
     "sprinklered_903_3_1_2": ("sprinkler_system", lambda system: system == "nfpa_13r"),
     "sprinklered_903_3_1_3": ("sprinkler_system", lambda system: system == "nfpa_13d"),
+    # the system as stated, whether it counts or not (903.3.1.2's flags show wherever a 13R system is stated, above
+    # its four stories too, where sprinklered_903_3_1_2 is no: Chapter 9 part a's review round 4)
+    "nfpa_13r_stated": ("sprinkler_system", lambda system: system == "nfpa_13r"),
     "egress_balcony_increase_taken": ("egress_balcony_increase_taken", lambda v: v),
     "building_has_atrium": ("building_has_atrium", lambda v: v),
     "assembly_fixed_seating": ("assembly_fixed_seating", lambda v: v),
