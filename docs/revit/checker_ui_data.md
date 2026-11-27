@@ -27,6 +27,7 @@ Only on a row in review (`status: "needs_review"`). One entry per thing it asks,
 | `elements` | The element ids it names: on a zoning row, the row's own `objects` (as its cause has them), narrowed only where a better set is known (the walls that aren't closed solids); on an egress row, its cause's (the rooms with no route, the part the row is about). Never fewer than the row's cause names |
 | `field` | On a `mark`: the description field that answers it, so the host names its own mark. A field starting `facts.` or `building.` is a project question (Revit: Project Information): `building.occupancy_groups` (Gordium: Occupancy groups), `building.sprinkler_system`, `facts.corner_lot`, `facts.dwelling_units` … Others name a mark on an element: `doors[].exit`, `openings[].escape`, `rooms[].sleeping`, `stairs` |
 | `fields`, `measure`, `rooms`, `questions` | As on the cause it came from (`causes[]`, panel_data.py) |
+| `depends_on` | Only on a follow-up question: `{field, moot_if?}`. `field` is the question it hangs on ("Is the ADU detached?" on "Is there an ADU?": `facts.accessory_dwelling_unit`), the same fact the setup waits on before asking it (`host_core/facts.py` `ROW_ONLY_FACTS`). `moot_if` lists that question's answers that make this one moot (`false` for "Is there an ADU?"). The pane can hold the follow-up back until its parent is answered, and drop it when the answer is in `moot_if`, or when its parent is itself dropped ("In an existing building?" hangs on "Is the ADU detached?", which hangs on "Is there an ADU?") |
 
 How each is found:
 

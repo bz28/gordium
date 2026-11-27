@@ -152,7 +152,9 @@ public static class BuildingFacts
                      (Marks.OtherLevelsReachCorridors, "other_level_egress_into_corridors"),
                      (Marks.AmbulatoryCareFacility, "ambulatory_care_facility"),
                      (Marks.CorridorsWithinDwellingUnits, "corridors_within_dwelling_units"),
-                     (Marks.EmergencyVoiceAlarm, "emergency_voice_alarm_system") })
+                     (Marks.EmergencyVoiceAlarm, "emergency_voice_alarm_system"),
+                     // the occupant loads' ceiling: a mezzanine adds its occupants to the room below (1004.2.2)
+                     (Marks.Mezzanines, "mezzanines"), (Marks.LoadsNotByArea, "loads_not_by_area") })
         {
             var v = Get(mark);
             if (Marks.YesNo(v) is { } yes)

@@ -67,6 +67,13 @@ STATED = {"story_occupant_load": "the story's design occupant load", "space_occu
 QUESTIONS = {areas.STORY_AREA_QUESTION: "3", areas.ACCESSORY_AREA_QUESTION: "3", dead_ends.QUESTION: "7"}
 
 
+def _listed(description, key) -> list:
+    """A description's list under `key`, or none where it isn't a list (what isn't read is the floor reading's to
+    say: never a crash)."""
+    got = description.get(key) if isinstance(description, dict) else None
+    return got if isinstance(got, list) else []
+
+
 def measure(description, clearance: float = CLEARANCE, ground: dict | None = None) -> dict:
     """`ground`: the ground the architect stated, story_place.ground_of's (None: none stated), for where each story
     sits against the grade plane (story_place.py)."""
@@ -79,8 +86,8 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
     placed = story_place.places(description, Reader(description["units"]),
                                 {lid: s.name for lid, s in floor.stories.items()}, floor.stories, ground,
                                 floor.stops)
-    items = {r["id"]: r for r in description.get("rooms") or [] if isinstance(r, dict) and isinstance(r.get("id"), str)}
-    unknown = [u for u in description.get("unknown_spaces") or [] if isinstance(u, dict)]
+    items = {r["id"]: r for r in _listed(description, "rooms") if isinstance(r, dict) and isinstance(r.get("id"), str)}
+    unknown = [u for u in _listed(description, "unknown_spaces") if isinstance(u, dict)]
     parts = {k: [] for k in KINDS}
     toward = {}                                     # door id -> the side egress travel goes into, or why not known
     for level, story in floor.stories.items():
@@ -96,7 +103,7 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
     parts["means_of_egress_door"] = door_parts(description, floor, toward)   # every door given (section group 6a)
     if floor.stops:                                      # a part that can't be placed on a story: none is "none"
         for u in unknown:
-            if u.get("level") not in floor.stories:
+            if not isinstance(u.get("level"), str) or u.get("level") not in floor.stories:
                 _maybe_parts(u, None, parts)
     _not_measured_yet(parts)
     out["parts"] = parts

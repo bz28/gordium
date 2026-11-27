@@ -49,6 +49,14 @@ WHY = {
                       "isn't known",
 }
 NEW_MEASURES = ("sleeping_room_escape_openings", *LINKED, "sleeping_room_door_to_outside")
+# section group 8b: each escape opening carries its room's facts that decide whether 1031.2 requires it, so the size
+# rules (1031.3, 1031.4) fail only an opening the law asks for (a rule reads only its own part's measures)
+FROM_ROOM = {"opening_room_fourth_or_higher": "sleeping_room_fourth_or_higher",
+             "opening_room_one_exit": "sleeping_room_story_one_exit",
+             "opening_room_door_to_outside": "sleeping_room_door_to_outside",
+             # review round 1 of 8b: 1031.2 asks one opening per room; another marked one may be the one relied on
+             "opening_room_has_other_openings": "sleeping_room_escape_openings"}
+WORKED = {"opening_room_has_other_openings": lambda count: count > 1}
 
 
 def _stray(parts, openings) -> bool:
@@ -180,6 +188,45 @@ def link(parts: dict, description) -> None:
                 why["sleeping_room_door_to_outside"] = WHY["door_sides_not_read"].format(name=name)
             continue
         m["sleeping_room_door_to_outside"] = any(rid in s and OUTSIDE in s for s in sides)
+    _to_openings(rooms, openings)
+
+
+def _to_openings(rooms: list, openings) -> None:
+    """Copy each sleeping room's four facts onto the escape openings within it (FROM_ROOM): its value, or its reason
+    for having none; an opening within no sleeping room read (or a `maybe` one) gets neither, so its rows need review."""
+    if not isinstance(openings, list):
+        return
+    by_id = {}
+    for r in rooms:
+        if isinstance(r, dict) and isinstance(r.get("id"), str):
+            by_id.setdefault(r["id"], []).append(r)
+    for o in openings:
+        if not isinstance(o, dict):
+            continue
+        if isinstance(o.get("measures"), dict):            # the room's facts are only ever the room's: none given
+            for mine in FROM_ROOM:                         # by the opening itself stands (review of 4d2cd872)
+                o["measures"].pop(mine, None)
+        if not isinstance(o.setdefault("measures", {}), dict) or not isinstance(o.setdefault("not_measured", {}), dict):
+            continue                              # an unreadable opening: its rows say so (rule_format.parts)
+        m, why = o["measures"], o["not_measured"]
+        where = o.get("within")
+        same = by_id.get(where, []) if isinstance(where, str) else []
+        room = same[0] if len(same) == 1 and not same[0].get("maybe") else None
+        if room is not None and not (isinstance(room.get("measures"), dict)
+                                     and isinstance(room.get("not_measured", {}), dict)):
+            room = None                                    # a room that can't be read gives its openings nothing
+        for mine, theirs in FROM_ROOM.items():
+            why.pop(mine, None)
+            given, said = (room["measures"], room.get("not_measured") or {}) if room is not None else ({}, {})
+            if room is not None and theirs in given and theirs not in said:     # its own value, no reason beside it
+                try:
+                    m[mine] = WORKED.get(mine, lambda v: v)(given[theirs])
+                except TypeError:                          # a value that isn't one (a count that isn't a number)
+                    why[mine] = "its room's isn't known"
+            elif room is not None:
+                why[mine] = said.get(theirs, "its room's isn't known")
+            else:
+                why[mine] = "the room it is in isn't one sleeping room read"
 
 
 def _map(x) -> dict:

@@ -66,11 +66,13 @@ def door_parts(description, floor, toward=None) -> list | None:
         reader = _reader(description)
     except Stop:
         return None
-    rooms = {r["id"]: r for r in description.get("rooms") or [] if isinstance(r, dict) and isinstance(r.get("id"), str)}
+    rooms = {r["id"]: r for r in (description.get("rooms") if isinstance(description.get("rooms"), list) else [])
+             if isinstance(r, dict) and isinstance(r.get("id"), str)}
     read = {}                                         # room id -> Room (None: known, not read), across every story
     for story in floor.stories.values():
         read.update(story.rooms)
-    unknown = {u.get("id") for u in description.get("unknown_spaces") or [] if isinstance(u, dict)}
+    unknown = {u.get("id") for u in (description.get("unknown_spaces") if isinstance(description.get(
+        "unknown_spaces"), list) else []) if isinstance(u, dict) and isinstance(u.get("id"), str)}
     levels = set(floor.stories)
     out, seen = [], set()
     for n, item in enumerate(doors, 1):

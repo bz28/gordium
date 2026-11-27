@@ -43,7 +43,8 @@ def test_a_building_code_law_reading_sleeping_rooms_gets_them_and_their_openings
     assert {p["id"] for p in got["parts"]["sleeping_room"]} == {f"{i} (sleeping room)" for i in
                                                                _rid(house["parts"]["sleeping_room"])}
     for mine, theirs in zip(got["parts"]["emergency_escape_opening"], house["parts"]["emergency_escape_opening"]):
-        assert mine["measures"] == theirs["measures"] and mine["within"] == f"{theirs['within']} (sleeping room)"
+        own = {k: v for k, v in mine["measures"].items() if k not in escape_openings.FROM_ROOM}   # 8b: its room's facts
+        assert own == theirs["measures"] and mine["within"] == f"{theirs['within']} (sleeping room)"
         assert mine["more"]["described_id"] == theirs["id"]
     assert got["has_none"] == {}
     # a law with no rule over them measures none of them
@@ -221,6 +222,41 @@ def test_the_rooms_reach_decides_the_one_exit_question_only():
     assert "sleeping_room_fourth_or_higher" not in p["measures"] and p["not_measured"]["sleeping_room_fourth_or_higher"]
 
 
+def test_each_escape_opening_carries_its_rooms_four_facts():
+    """Section group 8b: an opening's size rules fail only where 1031.2 requires it, which is its room's to say (its
+    story's place, one exit, a door to outside, another marked opening): each is copied from the room, or its reason
+    why not; an opening in no one sleeping room read gets none of them, so its rows need review."""
+    one = {"id": "L1", "measures": {"story_exit_count": 1, "story_fourth_or_higher_above_grade_plane": False}}
+    parts, desc = _parts(story=one)
+    parts["emergency_escape_opening"][0]["not_measured"] = {k: "Gordium doesn't measure this yet"
+                                                           for k in escape_openings.FROM_ROOM}
+    parts["emergency_escape_opening"].append({"id": "x", "within": "nowhere", "measures": {}})
+    escape_openings.link(parts, desc)
+    w, x = parts["emergency_escape_opening"]
+    # x may be w's room's too (it is within no sleeping room read: 8a's stray opening), so whether w's room has
+    # another isn't known; the other three facts are its room's
+    assert w["measures"] == {"opening_room_fourth_or_higher": False, "opening_room_one_exit": True,
+                             "opening_room_door_to_outside": False}
+    assert "may be this room's" in w["not_measured"]["opening_room_has_other_openings"]
+    assert not set(w["measures"]) & set(w["not_measured"])
+    parts, desc = _parts(story=one)
+    escape_openings.link(parts, desc)
+    assert parts["emergency_escape_opening"][0]["measures"]["opening_room_has_other_openings"] is False
+    assert not set(escape_openings.FROM_ROOM) & set(x["measures"])
+    assert set(escape_openings.FROM_ROOM) <= set(x["not_measured"])
+    parts, desc = _parts()                                   # two exits: not measured on the room, nor on its opening
+    escape_openings.link(parts, desc)
+    assert parts["emergency_escape_opening"][0]["not_measured"]["opening_room_one_exit"].endswith("isn't worked out")
+
+
+def test_an_opening_knows_its_room_has_another_marked_one():
+    """Review round 1 of group 8b: 1031.2 asks each sleeping room for not fewer than one opening, so a room with two
+    marked tells each that another may be the one relied on (its size rules then need review, never fail)."""
+    parts, desc = _parts(openings=[{"id": "w", "within": "b", "measures": {}}, {"id": "v", "within": "b", "measures": {}}])
+    escape_openings.link(parts, desc)
+    assert [o["measures"]["opening_room_has_other_openings"] for o in parts["emergency_escape_opening"]] == [True, True]
+
+
 def test_an_opening_within_no_sleeping_room_read_leaves_every_rooms_count_unknown():
     """An escape opening whose room isn't a sleeping room read (none named, a mistyped room), or that can't be read,
     may be this room's: its count isn't known, never 0 (a wrong fail on 1031.2 once the room's story is placed, as
@@ -253,11 +289,21 @@ def test_a_huge_whole_exit_count_is_two_or_more_never_a_crash():
     assert "sleeping_room_story_one_exit" not in p["measures"]
 
 
-
 @pytest.mark.parametrize("measures", [["x"], "text"])
 def test_a_storys_measures_that_arent_a_mapping_are_never_a_crash(measures):
     p = _linked(story={"id": "L1", "measures": measures})
     assert "sleeping_room_story_one_exit" not in p["measures"]
+
+
+def test_an_opening_never_keeps_a_room_fact_of_its_own():
+    """Review of the unreadable-opening skip (a false pass): an opening that carries a room fact itself (here, that its
+    room is on the fourth story or higher) and can't be read keeps none of it: the room's facts are only the room's."""
+    one = {"id": "L1", "measures": {"story_exit_count": 1, "story_fourth_or_higher_above_grade_plane": False}}
+    for why in (None, [], {}):
+        parts, desc = _parts(story=one, openings=[{"id": "v", "within": "b", "not_measured": why, "measures": {
+            "opening_net_clear_area": 4.0, "opening_room_fourth_or_higher": True}}])
+        escape_openings.link(parts, desc)
+        assert parts["emergency_escape_opening"][0]["measures"].get("opening_room_fourth_or_higher") is not True, why
 
 
 def test_a_value_a_room_arrives_with_never_stands_beside_its_reason():
@@ -306,6 +352,23 @@ def test_hand_built_story_and_space_facts_are_never_a_crash(story, space):
         assert room["measures"].get("sleeping_room_story_one_exit") is not False
 
 
+def test_an_opening_takes_only_its_rooms_own_facts():
+    """Review (8b): an opening copies a room fact only where the room has it and no reason beside it, and a room that
+    can't be read gives its openings none (never a crash): a stale room value never sets an opening's rule aside."""
+    one = {"id": "L1", "measures": {"story_exit_count": 1, "story_fourth_or_higher_above_grade_plane": False}}
+    for bad in (["sleeping_room_fourth_or_higher"], "text"):
+        parts, desc = _parts(story=one, openings=[{"id": "w", "within": "b", "measures": {}}, {"id": "v"}])
+        parts["sleeping_room"][0]["measures"] = bad
+        escape_openings.link(parts, desc)
+        assert not set(escape_openings.FROM_ROOM) & set(parts["emergency_escape_opening"][0]["measures"]), bad
+    rooms = [{"id": "b", "measures": {"sleeping_room_fourth_or_higher": True},
+              "not_measured": {"sleeping_room_fourth_or_higher": "not known"}}]
+    openings = [{"id": "w", "within": "b", "measures": {}, "not_measured": {}}]
+    escape_openings._to_openings(rooms, openings)
+    assert "opening_room_fourth_or_higher" not in openings[0]["measures"]
+    assert openings[0]["not_measured"]["opening_room_fourth_or_higher"] == "not known"
+
+
 def test_a_room_whose_reasons_cant_be_read_keeps_no_value_it_arrives_with():
     """Confirming round on 4f56db51: a room arriving with a value and reasons that aren't a mapping (null, text)
     keeps none of the value; a room's or door's `more` that isn't a mapping is never a crash."""
@@ -349,3 +412,19 @@ def test_an_opening_in_a_room_whose_id_another_part_shares_leaves_the_count_unkn
     escape_openings.link(parts, desc)
     assert "sleeping_room_escape_openings" not in parts["sleeping_room"][0]["measures"]
 
+
+def test_a_room_that_cant_be_read_or_a_count_that_isnt_one_gives_its_openings_nothing():
+    """Confirming round on 82651de3: a room holding all four facts but reasons that can't be read gives its openings
+    none of them; a room count that isn't a number is "its room's isn't known" on each opening, never a crash."""
+    full = {"sleeping_room_fourth_or_higher": True, "sleeping_room_story_one_exit": True,
+            "sleeping_room_door_to_outside": False, "sleeping_room_escape_openings": 1}
+    for why in ("text", ["sleeping_room_fourth_or_higher"], None):
+        openings = [{"id": "w", "within": "b", "measures": {}, "not_measured": {}}]
+        escape_openings._to_openings([{"id": "b", "measures": dict(full), "not_measured": why}], openings)
+        assert not set(escape_openings.FROM_ROOM) & set(openings[0]["measures"]), why
+    for count in ("2", None):
+        openings = [{"id": "w", "within": "b", "measures": {}, "not_measured": {}}]
+        escape_openings._to_openings([{"id": "b", "measures": {"sleeping_room_escape_openings": count},
+                                       "not_measured": {}}], openings)
+        assert "opening_room_has_other_openings" not in openings[0]["measures"], count
+        assert openings[0]["not_measured"]["opening_room_has_other_openings"] == "its room's isn't known"
