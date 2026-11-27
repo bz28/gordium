@@ -789,3 +789,15 @@ def test_part_es_review_round_2(book, ctx):
     assert "connected to the enclosure directly or by ductwork enclosed by 2-hour" in n
     assert "its intake or exhaust directly from and to the outside" in n and "other mechanical equipment included" in n
     assert "sprinklered throughout with a 903.3.1.1" in _shown_note(_rule(book, "general.bc_905_3_1_class_iii_by_height"))
+
+
+def test_the_townhouse_unit_is_quoted_as_the_book_prints_it():
+    """The merge review of Chapter 9 part e (round 3, P3): BCNYS 202 TOWNHOUSE UNIT reads "a yard or public way on not
+    fewer than two sides, and has a separate means of egress" (p.65, lines 5-6); the townhouse fact's meaning and the
+    definition's second-reading flag had "not less than", the house code's (R202) words."""
+    import yaml
+    measures = yaml.safe_load((NY / "5_building_code_rules/drafted/records/proposed_measures.yaml").read_text(encoding="utf-8"))
+    meaning = " ".join(measures["townhouse_units"]["meaning"].split())
+    assert "not fewer than two sides" in meaning and "separate means of egress" in meaning
+    tv = yaml.safe_load((NY / "text_verification.yaml").read_text(encoding="utf-8"))["pieces"]["202:townhouse_unit"]
+    assert "not fewer than two sides" in " ".join(tv["flags"]) and "not less than" not in " ".join(tv["flags"])
