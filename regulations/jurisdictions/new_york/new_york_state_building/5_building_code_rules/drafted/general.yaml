@@ -2116,7 +2116,7 @@ rules:
 - id: general.bc_407_4_1_1_locking_devices
   kind: flag
   topic: means_of_egress
-  title: Locks on a care recipient's room not restricting egress from it (BCNYS 407.4.1.1)
+  title: Locks on a care recipient's room never restricting egress (BCNYS 407.4.1.1)
   applies_when: occupancy_group in ["I-2", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
@@ -2427,7 +2427,7 @@ rules:
 - id: general.bc_407_4_4_6_2_sleeping_care_suite_exit_access
   kind: flag
   topic: means_of_egress
-  title: Two exit access doors from a sleeping care suite over 1,000 sq ft (BCNYS 407.4.4.6.2)
+  title: Two doors from a sleeping care suite over 1,000 sq ft (BCNYS 407.4.4.6.2)
   applies_when: occupancy_group in ["I-2", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
@@ -2518,7 +2518,7 @@ rules:
 - id: general.bc_407_4_4_7_2_treatment_care_suite_exit_access
   kind: flag
   topic: means_of_egress
-  title: Two exit access doors from a treatment care suite over 2,500 sq ft (BCNYS 407.4.4.7.2)
+  title: Two doors from a treatment care suite over 2,500 sq ft (BCNYS 407.4.4.7.2)
   applies_when: occupancy_group in ["I-2", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
