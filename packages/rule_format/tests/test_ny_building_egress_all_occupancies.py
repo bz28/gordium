@@ -62,7 +62,13 @@ def rules():
     return {r["id"]: r for r in load(RULEBOOK)["rules"]}
 
 
+# a story or space part as the routes give one whose story's rooms all state non-assembly functions (no seating
+# served by aisles, 1030.7: design_checker/occupant_load.py), unless a test says otherwise
+NO_SEATING = {"story": {"story_assembly_seating_possible": False}, "space": {"space_assembly_seating_possible": False}}
+
+
 def _one(rule, kind, measures, given, ctx):
+    measures = {**NO_SEATING.get(kind, {}), **measures}
     [row] = parts.rows(rule, {kind: [{"id": "p1", "measures": measures}]}, given, ctx.allowed())
     return row["outcome"]
 
@@ -387,7 +393,7 @@ HANDLERS = {
     "903.2.8": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "1006.2.2.6"),
     # Table 1006.2.1's notes, and 1006.2.1's own
     "903.2.5": ("general.bc_table_1017_2_note_d_group_h", "903.2.5"),
-    "1030.8": ("general.bc_table_1006_2_1_a_e_m", "1030.8"), "1006.2.2.1": ("general.bc_table_1006_2_1_b", "1006.2.2"), "1006.2.2.6": ("general.bc_table_1006_2_1_r3_r4", "1006.2.2.6"),
+    "1006.2.2.1": ("general.bc_table_1006_2_1_b", "1006.2.2"), "1006.2.2.6": ("general.bc_table_1006_2_1_r3_r4", "1006.2.2.6"),
     "1004.2": ("general.bc_1006_2_1_two_exits", "1004.2"),
     # section group 4: 1020.2, Table 1020.2's notes, 1020.3
     "708": ("general.bc_1020_2_fire_partitions", "708"), "705.5": ("general.bc_1020_2_fire_partitions", "705.5"),
@@ -402,10 +408,9 @@ HANDLERS = {
     "1005.7": ("general.bc_1020_4_obstruction", "1005.7"), "1016.2": ("general.bc_1020_7_continuity", "1016.2"),
     # section group 5a: 1005.3.1 and 1005.3.2's exceptions
     "907.5.2.2": ("general.bc_1020_3_corridor_capacity", "907.5.2.2"),
-    "1030.6.2": ("general.bc_1020_3_corridor_capacity", "1030.6.2"),
-    "1030.6.3": ("general.bc_1020_3_corridor_capacity", "1030.6.3"), "909": ("general.bc_1020_3_corridor_capacity", "909"),
+    # (1030.6.2, 1030.6.3 and 909: with section group 9h's, below)
     # section group 5c: 1005.7's
-    "1014.9": ("general.bc_1005_7_2_projections", "1014.9"), "407.4.3": ("general.bc_1005_7_2_projections", "407.4.3"),
+    "407.4.3": ("general.bc_1005_7_2_projections", "407.4.3"),
     "1003.3": ("general.bc_1005_7_3_protruding_objects", "1003.3"),
     # section group 6a: 1010.1's and 1010.1.1's (the rest of 1010, gates, turnstiles, exterior exit doors: flagged;
     # a shower compartment's door per the Plumbing Code: the width rule's compartment review)
@@ -431,7 +436,6 @@ HANDLERS = {
     "1011.3": ("general.bc_1003_2_ceiling_height", "1011.3"), "1208.2": ("general.bc_1003_2_ceiling_height", "1208.2"),
     "406.2.2": ("general.bc_1003_2_ceiling_height", "406.2.2"), "505.2": ("general.bc_1003_2_ceiling_height", "505.2"),
     "1011.5": ("general.bc_1003_5_elevation_change", "1011.5"),
-    "1030.14": ("general.bc_1003_5_elevation_change", "1030.14"),
     "1030.16": ("general.bc_1003_5_elevation_change", "1030.16"),
     "1009.4": ("general.bc_1003_7_elevators_escalators_moving_walks", "1009.4"),
     # section group 9b: 1008.2.1's self-luminous markings, 1008.2.3's dispersal area, 1008.3's discharge areas
@@ -485,14 +489,16 @@ HANDLERS = {
     # section group 9h (707, 711, 903.3.1.1 and 1007.1 handled above or brought in; 1030.x within Section 1030)
     "1007.1": ("general.bc_1030_3_assembly_other_exits", "1007.1"),
     "1030.6.1": ("general.bc_1030_6_1_aisle_capacity_without_smoke_protection", "1030.6.1"),
-    "1030.6.2": ("general.bc_1030_6_2_smoke_protected_aisle_capacity", "1030.6.2"),
-    "1030.6.3": ("general.bc_1030_6_3_open_air_aisle_capacity", "1030.6.3"),
-    "909": ("general.bc_1030_6_2_1_smoke_control", "909"),
-    "1030.8": ("general.bc_1030_8_fixed_seating_common_path", "1030.8"),
+    # each reference written once: its 5a, 5c, 9a and Table 1006.2.1 handlers with 9h's (a key written twice kept only
+    # the last, so the earlier rule's word went unchecked; found merging main into section group 9i)
+    "1030.6.2": (["general.bc_1020_3_corridor_capacity", "general.bc_1030_6_2_smoke_protected_aisle_capacity"], "1030.6.2"),
+    "1030.6.3": (["general.bc_1020_3_corridor_capacity", "general.bc_1030_6_3_open_air_aisle_capacity"], "1030.6.3"),
+    "909": (["general.bc_1020_3_corridor_capacity", "general.bc_1030_6_2_1_smoke_control"], "909"),
+    "1030.8": (["general.bc_table_1006_2_1_a_e_m", "general.bc_1030_8_fixed_seating_common_path"], "1030.8"),
     "1030.9.7": ("general.bc_1030_9_5_dead_end_aisles", "1030.9.7"),
     "1030.13.1": ("general.bc_1030_9_6_aisle_measurement", "1030.13.1"),
-    "1014.9": ("general.bc_1030_9_6_1_assembly_aisle_obstructions", "1014.9"),
-    "1030.14": (["general.bc_1030_9_7_stairways_connecting_to_stepped_aisles",
+    "1014.9": (["general.bc_1005_7_2_projections", "general.bc_1030_9_6_1_assembly_aisle_obstructions"], "1014.9"),
+    "1030.14": (["general.bc_1003_5_elevation_change", "general.bc_1030_9_7_stairways_connecting_to_stepped_aisles",
                  "general.bc_1030_9_8_stairways_connecting_to_vomitories"], "1030.14"),
     "1030.10": (["general.bc_1030_9_7_stairways_connecting_to_stepped_aisles",
                  "general.bc_1030_9_8_stairways_connecting_to_vomitories"], "1030.10"),
@@ -768,11 +774,17 @@ def test_a_close_pair_on_a_story_follows_each_table_row_exactly_where_one_exit_c
 
 def test_the_readme_counts_the_pieces_and_numbers_the_second_reading_holds():
     """Review round 2 (P3): the folder's README states how many pieces are brought in and how many numbers were
-    read twice; both must be the second reading's own counts, so a piece brought in can't leave them stale."""
+    read twice; both must be the second reading's own counts, so a piece brought in can't leave them stale. Where a
+    piece's two readings differ (its flag says which is right: Chapter 7 part b's Table 716.1(2), whose extracted text
+    loses its stacked fractions), the README says how many, never "all agree"."""
     pieces = load(NY / "text_verification.yaml")["pieces"]
     numbers = sum(len(e["numbers"]) for e in pieces.values())
+    differ = [p for p, e in pieces.items() if e["second_reading"] == "differs"]
     readme = (NY / "README.md").read_text(encoding="utf-8")
-    assert f"{len(pieces)} pieces." in readme and f"(all {len(pieces)} pieces, {numbers} numbers, agree)" in readme
+    said = (f"(all {len(pieces)} pieces, {numbers} numbers, agree)" if not differ else
+            f"({len(pieces)} pieces, {numbers} numbers; all agree but {len(differ)}, whose flag says which reading is "
+            f"right: {', '.join(differ)})")
+    assert f"{len(pieces)} pieces." in readme and said in readme
 
 
 def test_needed_by_is_checked_against_the_rules_that_read_each_fact(tmp_path):
@@ -1961,4 +1973,61 @@ def test_no_notes_say_section_1030_isnt_brought_in_now_it_is_whole():
            if re.search(r"(?<![\d.])1030(?![\d.])(?:[^;.]|\.(?=\d))*?(?:aren't|isn't|not) brought in", r.get("notes") or "")]
     # review round 2 of section group 9i: a period inside a section number ("ICC A117.1") doesn't end the sentence
     assert not bad, bad
+
+
+def test_a_restaurant_story_with_no_fixed_seats_never_passes_a_travel_or_common_path_row(ctx, rules):
+    """BCNYS 1030.7 (p.354, lines 50-51): "Where aisles are provided for seating, the distance shall be measured along
+    the aisles and aisle accessways without travel over or on the seats", fixed seats or loose: every occupied portion
+    with seats, tables or displays has aisles (1030.9), and seating at tables has aisle accessways (1030.13.1). A Group
+    A-2 restaurant story (tables and chairs) with fixed seating stated no: 100 ft of travel and a one-exit dining room's
+    20 ft common path, both within their rows, need review where a room on the story may seat people served by aisles
+    (the routes' story and space parts, design_checker/occupant_load.py) and pass where none may. Every rule that
+    reviews on fixed seating for travel or a common path reviews on the story's seating too (1020.3's corridor capacity
+    aside: its fixed-seating review is the seating's capacity factors, not travel)."""
+    a2 = {"occupancy_group": "A-2", "occupancy_group_i4": False, "other_occupancy_present": True, **NONE, **STATED}
+    travel = rules["general.bc_table_1017_2_a_e_f1_m_r_s1"]
+    for seats, want in ((True, "needs_review"), (False, "pass")):
+        assert _one(travel, "story", {**_travel(100), "story_assembly_seating_possible": seats}, a2, ctx) == want
+    cp = rules["general.bc_table_1006_2_1_a_e_m"]
+    space = {"space_is_exit": False, "space_exit_count": 1, "space_occupant_load": 40, "space_common_path": 20}
+    for seats, want in ((True, "needs_review"), (False, "pass")):
+        assert _one(cp, "space", {**space, "space_assembly_seating_possible": seats}, a2, ctx) == want
+    for rid, r in rules.items():
+        fixed = [w["when"] for w in r.get("review_when") or [] if re.search(r"\bassembly_fixed_seating\b", w["when"])]
+        if not fixed or rid == "general.bc_1020_3_corridor_capacity":
+            continue
+        m = {"story": "story_assembly_seating_possible", "space": "space_assembly_seating_possible"}[r["for_each"]]
+        twins = [w["when"] for w in r["review_when"] if re.search(rf"\b{m}\b", w["when"])]
+        assert [re.sub(r"\bassembly_fixed_seating\b", m, f) for f in fixed] == twins, rid
+        assert all(_cites(r, 354, 50) or "1030.7" in w["reason"] for w in r["review_when"] if m in w["when"]), rid
+
+
+def test_each_seating_review_names_every_way_the_story_may_seat_people_and_when_it_is_settled(rules):
+    """Review round 1 (P3): the seating reviews said "Setting each room's function settles it", which a real restaurant
+    or a courtroom never does, and named neither a function none of the table's nor a room unread. Each names every
+    trigger the measuring has (design_checker/occupant_load.py assembly_seating) and says when it is settled."""
+    n = 0
+    for rid, r in rules.items():
+        for w in r.get("review_when") or []:
+            if "assembly_seating_possible" not in w["when"]:
+                continue
+            why = " ".join(w["reason"].split())
+            assert "settles it" not in why, rid
+            for must in ("Assembly function", "may be an assembly use", "none of the table's", "or none",
+                         "can't be read or placed", "stated Group A", "It is settled only where every room on the story",
+                         # review round 2: the rooms the Revit Function mark says to leave blank are said to be aside
+                         "closet or toilet with none", "exit stair or passageway", "but its corridors, closets, toilets and exits",
+                         # review round 4: an exit or a corridor stating a function is a trigger of its own
+                         "an exit or a corridor states a function", "which state none"):
+                assert must in why, (rid, must)
+            n += 1
+    assert n == 30
+
+
+def test_the_seating_measures_meaning_names_every_trigger():
+    """Review round 2 (P3): parts.yaml's meaning of the story's seating measure left out round 1's Group A trigger."""
+    meaning = parts.load_registry()["story"]["measures"]["story_assembly_seating_possible"]["meaning"]
+    for must in ("Assembly functions", "may be an assembly use", "none of the table's", "can't be read or placed",
+                 "no room drawn in it", "stated Group A", "an exit or a corridor states a function"):
+        assert must in meaning, must
 

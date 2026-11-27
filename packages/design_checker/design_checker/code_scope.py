@@ -53,6 +53,12 @@ FACTS = {
     "merchandise_pads": "yes_no",             # Group M merchandise pads (1018.4: their own common path)
     "occupied_outdoor_areas": "yes_no",       # outdoor areas the occupants use (1004.7)
     "occupant_load_increased": "yes_no",      # the design takes 1004.5.1's increased occupant load (up to 1 per 7 sq ft)
+    # the building has a mezzanine (505.2: an intermediate level within a story): its occupants add to the room below
+    # (1004.2.2), so only where it states none is a story's floor area / 5 the most its spaces can hold (occupant_load)
+    "mezzanines": "yes_no",
+    # an area whose load Table 1004.5 counts by seats, lanes or actual load, not floor area (fixed seats in any use,
+    # bowling lanes, concentrated business use, a mall)
+    "loads_not_by_area": "yes_no",
     # section group 4 (corridors): another level's occupants reach a corridor (an unenclosed stairway or ramp, a
     # mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's load doesn't
     # bound the corridor's; and the building is (or holds) an ambulatory care facility (Table 1020.3's 72 in)
@@ -154,7 +160,9 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         "other_level_egress_into_corridors": "Gordium: Other levels reach corridors",
         "ambulatory_care_facility": "Gordium: Ambulatory care facility",
         "corridors_within_dwelling_units": "Gordium: Corridors within dwelling units",
-        "emergency_voice_alarm_system": "Gordium: Emergency voice/alarm system"}
+        "emergency_voice_alarm_system": "Gordium: Emergency voice/alarm system",
+        # the occupant loads' ceiling (occupant_load._bounds): a mezzanine's occupants add to the room below
+        "mezzanines": "Gordium: Mezzanines", "loads_not_by_area": "Gordium: Loads not by area"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise
@@ -321,7 +329,8 @@ def building_measures(building: dict | None, interior=None) -> dict:
 
 # Table 1004.5's rows under its "Assembly" heading (p.312, lines 19-27, to "Business areas" on line 28), by their
 # function ids (docs/interior/interior_description_format.md, rooms[].function): a room stating one is used for
-# assembly purposes (1030.1), whatever the building's group, so the building has assembly spaces
+# assembly purposes (1030.1), whatever the building's group, so the building has assembly spaces. The one list:
+# occupant_load's assembly seating (1030.7) imports this and ASSEMBLY_LIKE_FUNCTIONS
 ASSEMBLY_FUNCTIONS = ("gaming_floor", "exhibit_gallery_museum", "assembly_fixed_seats", "assembly_concentrated",
                       "assembly_standing", "assembly_unconcentrated", "bowling_center")
 # the table's other rows a room used for assembly purposes may state (Table 1004.5's courtrooms, library reading rooms,

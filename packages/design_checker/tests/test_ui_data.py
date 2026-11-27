@@ -581,10 +581,13 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # and this branch's own: corridors_within_dwelling_units (their marks follow in the Revit-fields work)
     # and this branch's own: emergency_voice_alarm_system (their marks follow in the Revit-fields work)
     # (groups 4 and 5's four have theirs too, the Revit-fields PR for them)
+    # (the occupant-load ceiling's mezzanines and loads not by area, 2026-11-26, came with their own)
     # section group 9h's assembly_spaces has none yet (asked for by name, never by a mark: the Section 1030 flags
     # that read it are a person's check whatever it is; its Project Information Yes/No follows in the Revit-fields work)
     assert keys - set(revit) == {"assembly_spaces"}
     assert "assembly_spaces" not in code_scope.MARK and code_scope.field_of("assembly_spaces") == "building.assembly_spaces"
+    assert code_scope.MARK["mezzanines"] == revit["mezzanines"] == "Gordium: Mezzanines"
+    assert code_scope.MARK["loads_not_by_area"] == revit["loads_not_by_area"] == "Gordium: Loads not by area"
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased",
               "other_level_egress_into_corridors", "ambulatory_care_facility", "corridors_within_dwelling_units",
               "emergency_voice_alarm_system"):
@@ -679,6 +682,80 @@ def test_a_door_whose_leaves_arent_given_is_asked_for_by_the_field_its_type_mark
     assert (got["kind"], got["field"], got["key"]) == ("mark", "doors[].leaves", "field:doors[].leaves")
     assert got["headline"] == "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
     assert "no mark for it" not in STOPS["door_leaves_not_given"]
+
+
+# ---- follow-up questions name the question they hang on (egress UI audit finding 8, 2026-11-26) -----------------
+
+def test_every_follow_up_names_its_parent_and_the_walk_up_ends():
+    """Each fact the setup asks only once another is answered (host_core.facts.ROW_ONLY_FACTS) names that one as its
+    depends_on; every parent and child is a fact the setup knows; walking up from any follow-up ends (no cycle); and
+    every follow-up of a yes/no question says which answer makes it moot (MOOT_WHEN), only follow-ups have one."""
+    from design_checker.host_core.facts import ROW_ONLY_FACTS, STATED_FACTS
+    assert set(ui_data.MOOT_WHEN) <= set(ROW_ONLY_FACTS)
+    for child, parent in ROW_ONLY_FACTS.items():
+        assert child in STATED_FACTS and parent in STATED_FACTS, (child, parent)
+        got = ui_data.depends_on(f"facts.{child}")
+        assert got["field"] == f"facts.{parent}", child
+        if STATED_FACTS[parent][1] == "yes_no":
+            assert child in ui_data.MOOT_WHEN and got["moot_if"] == ui_data.MOOT_WHEN[child], child
+        else:
+            assert "moot_if" not in got, child
+        seen, at = {child}, parent
+        while at in ROW_ONLY_FACTS:
+            assert at not in seen, (child, at)
+            seen.add(at)
+            at = ROW_ONLY_FACTS[at]
+    for field in ("facts.accessory_dwelling_unit", "facts.corner_lot", "building.occupancy_groups", None, 3):
+        assert ui_data.depends_on(field) is None, field
+
+
+def test_a_moot_answer_makes_every_rule_reading_the_follow_up_not_apply():
+    """MOOT_WHEN is the law's, never a guess: for every Ithaca zoning rule that reads a follow-up fact (in its check,
+    applies_when or review_when), the parent's moot answer makes the rule's applies_when false whatever else is
+    unknown (three-valued: false and unknown is false). An ADU's size limit (§325-28) reads the attached ADU's floor
+    area, so it is moot once the ADU is detached, not once it isn't."""
+    import glob
+    from rule_format import formula
+    from rule_format.rulebook import Context, _kinds, load
+    from design_checker.host_core.facts import ROW_ONLY_FACTS
+    place = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+    kinds = _kinds(Context.for_jurisdiction(place).allowed())
+    read = {}
+    for f in glob.glob(str(place / "5_zoning_rules" / "*.yaml")):
+        for r in load(f).get("rules") or []:
+            texts = [r.get("check"), r.get("applies_when")] + [w.get("when") for w in r.get("review_when") or []]
+            names = set().union(*(formula.names(t) for t in texts if isinstance(t, str)))
+            for child in ui_data.MOOT_WHEN:
+                if child in names:
+                    read.setdefault(child, []).append(r)
+    assert set(read) == set(ui_data.MOOT_WHEN), set(ui_data.MOOT_WHEN) ^ set(read)
+    for child, rules in read.items():
+        parent = ROW_ONLY_FACTS[child]
+        for answer in ui_data.MOOT_WHEN[child]:
+            for r in rules:
+                assert isinstance(r.get("applies_when"), str), (child, r["id"])
+                got = formula.evaluate(r["applies_when"], {parent: answer}, kinds)
+                assert got is False, (child, answer, r["id"], r["applies_when"])
+
+
+def test_the_trial_requests_adu_follow_ups_hang_on_is_there_an_adu(apartment):
+    """Ben's trial request (the four-unit apartment, nothing answered): the questions card listed "Is the ADU
+    detached?" and "In an existing building?" before "Is there an ADU?" was answered (the audit's finding 8). Each
+    ask for them now names the question it hangs on, and the moot answer."""
+    asks = [a for i in apartment["view"]["items"] for a in i.get("asks") or []]
+    by_field = {}
+    for a in asks:
+        by_field.setdefault(a.get("field"), []).append(a)
+    assert by_field.get("facts.adu_detached") and by_field.get("facts.adu_existing_building"), sorted(
+        f for f in by_field if f)
+    for a in by_field["facts.adu_detached"]:
+        assert a["depends_on"] == {"field": "facts.accessory_dwelling_unit", "moot_if": [False]}
+    for a in by_field["facts.adu_existing_building"]:
+        assert a["depends_on"] == {"field": "facts.adu_detached", "moot_if": [False]}
+    assert all("depends_on" not in a for a in by_field.get("facts.accessory_dwelling_unit") or [])
+    from design_checker.host_core.facts import ROW_ONLY_FACTS
+    follow = {f"facts.{k}" for k in ROW_ONLY_FACTS}
+    assert all(("depends_on" in a) == (a.get("field") in follow) for a in asks)
 
 
 def test_every_restatement_of_the_leaves_rule_carries_the_mullioned_pair():
