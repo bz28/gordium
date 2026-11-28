@@ -74,8 +74,9 @@ public sealed record InteriorRecords
 public sealed record GrossArea(IReadOnlyList<IReadOnlyList<BoundarySegmentRecord>>? Loops, IReadOnlyDictionary<string, double> WallWidths,
                                string? Why = null, IReadOnlyList<WallFootprint>? Walls = null);
 
-/// <summary>A wall on a level, for the story's outlines: its <c>UniqueId</c>, its Mark, whether Revit counts it
-/// room-bounding (<c>WALL_ATTR_ROOM_BOUNDING</c>), and the corners of its plan footprint (its solid's edges, internal).</summary>
+/// <summary>A wall on a level, for the story's outlines: its <c>UniqueId</c>, its Mark, whether Revit's rooms on the level
+/// stop at it (set Room Bounding, <c>WALL_ATTR_ROOM_BOUNDING</c>, and standing at the level's room computation height),
+/// and the corners of its plan footprint (its solid's edges, internal).</summary>
 public sealed record WallFootprint(string UniqueId, string? Mark, bool RoomBounding, IReadOnlyList<Xyz> Corners);
 
 /// <summary>A level (<c>Level</c>): its <c>UniqueId</c>, <c>Name</c> and <c>ProjectElevation</c> (internal).</summary>
