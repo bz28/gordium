@@ -2377,6 +2377,14 @@ def test_no_stairs_beside_a_floor_sunk_below_the_ground_or_sloped_ground_a_landi
         assert measure(bare(*fine))["parts"]["stair"] == [], fine
     for odd in ((0, "x"), ("x",), (0, [0, None])):          # round 2 (skeptic A): unreadable with no floor refuses
         assert "the ground outside an opening can't be read" in _refused(measure(bare(*odd))), odd
+    # round 2 (skeptic B): under the Building Code the bounds are BCNYS 1010.1.4's and 1010.1.6's 1/2 in either way
+    from model_measurement.interior import BUILDING_LANDING
+    assert measure(at(0, -0.5), landing=BUILDING_LANDING)["parts"]["stair"] == []
+    assert "more than 1/2 in above the ground outside an opening (at -7.2 in)" in \
+        _refused(measure(at(0, -7.2), landing=BUILDING_LANDING))
+    assert "more than 1/2 in below the ground outside an opening (at 1 in)" in \
+        _refused(measure(at(0, 1), landing=BUILDING_LANDING))
+    assert measure(at(0, -7.2))["parts"]["stair"] == []                     # the house code's 8 1/4 in
     # round 2: the floor above the ground is each floor's, the highest's (rooms within 1/2 in are one floor)
     d = at(8.0, 0)
     d["rooms"].append({"id": "k", "name": "Kitchen", "sleeping": False, "floor_elevation": 8.5})

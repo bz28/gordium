@@ -43,6 +43,7 @@ from pathlib import Path
 from model_measurement.interior import measure as measure_interior
 from model_measurement.interior.read import FORMAT as INTERIOR_FORMAT
 from model_measurement.interior.stops import Stop as InteriorStop
+import model_measurement.interior as interior_landing
 from model_measurement.routes import measure as measure_routes
 from model_measurement.routes import stair_rooms
 from rule_format import parts as part_rules
@@ -349,7 +350,8 @@ def _stairs_and_guards(interior, stated_stories=None) -> dict:
     if isinstance(interior, dict):
         keep = {k: interior[k] for k in ("format", "units", "stairs", "guards") if k in interior}
         interior = {**keep, "rooms": [], "openings": [], "doors": []}
-    got = measure_interior(interior, whole=whole, stated_stories=stated_stories)
+    got = measure_interior(interior, whole=whole, stated_stories=stated_stories,
+                           landing=interior_landing.BUILDING_LANDING)   # BCNYS 1010.1.4 and 1010.1.6
     return {"parts": {k: got["parts"].get(k) for k in BUILDING_INTERIOR_KINDS}, "problems": got["problems"],
             "refused": got.get("refused") or {}}
 

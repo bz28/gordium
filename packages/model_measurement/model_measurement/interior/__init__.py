@@ -95,6 +95,8 @@ SAME_FLOOR = 0.5      # in: rooms' floors this close are one floor (a threshold'
 LANDING_STEP = 8.25   # in: RCNYS R318.3.1's exception and R318.3.2, the most a door's outside landing may be below
 #                       it; a floor farther above any ground given is reached by a stair or a ramp (or its own way
 #                       out at grade, not shown)
+# the house code's (RCNYS) landing bounds, (most below the floor, most above): the Building Code's are tighter
+# (BUILDING_LANDING), and a check under it passes those (egress._stairs_and_guards)
 GROUND_ABOVE = 1.5    # in: R318.3.1, the inside floor at most 1 1/2 in below the threshold, and no landing above it
 #                       (a landing over the threshold is a riser, R202 STAIR): ground higher above the floor than this
 #                       puts the landing below grade, so a ramp or a stairway to grade (R318.3.1's last sentence)
@@ -105,7 +107,19 @@ def _level_id(value):
     return value if isinstance(value, str) and value.strip() or type(value) is int else None
 
 
-def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
+HOUSE_LANDING = (LANDING_STEP, GROUND_ABOVE)
+# BCNYS 1010.1.4: a door's floor or landing at the same elevation on each side, within 1/2 in (exception 4); its
+# exceptions 2 and 3 allow 7 in and 7 3/4 in in some groups only, which the check doesn't know, so the strict
+# 1/2 in; 1010.1.6: thresholds at most 1/2 in. Gordium's reading: within 1/2 in either way, a floor meets the ground
+BUILDING_LANDING = (0.5, 0.5)
+_INCHES = {8.25: "8 1/4", 1.5: "1 1/2", 0.5: "1/2"}
+
+
+def _inches(v: float) -> str:
+    return _INCHES.get(v, f"{v:g}")
+
+
+def _stairs_against_floors(whole, reader, stated_stories=None, landing=HOUSE_LANDING) -> str | None:
     """Why "no stairs" (an empty list of stairs) can't be taken beside what the description shows, or None. A stair
     or a ramp joins floors, or each floor has its own way out at grade, which the model doesn't show, so where the
     building may have more than one floor the claim needs review, never a stair rule set aside:
@@ -187,28 +201,29 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
             return Stop("stairs_none_several_floors", what=f"its rooms' floors are at different heights ({low_name}'s "
                                                            f"at {tidy(low):g} in, {high_name}'s at {tidy(high):g} "
                                                            "in)").reason
+        below, above = landing
         grounds = _grounds(whole, reader)
         if grounds is None:
             return Stop("stairs_none_several_floors", what="the ground outside an opening can't be read, so it may "
-                                                           "be more than 8 1/4 in from the floor").reason
-        if grounds and high - min(grounds) > LANDING_STEP:      # the highest floor's way out, as any floor's
+                                                           "be farther from the floor than a landing can meet").reason
+        if grounds and high - min(grounds) > below:            # the highest floor's way out, as any floor's
             return Stop("stairs_none_several_floors", what=f"its floor ({high_name}'s, at {tidy(high):g} in) is "
-                                                           f"more than 8 1/4 in above the ground outside an opening "
-                                                           f"(at {tidy(min(grounds)):g} in)").reason
-        if grounds and max(grounds) - low > GROUND_ABOVE:
+                                                           f"more than {_inches(below)} in above the ground outside "
+                                                           f"an opening (at {tidy(min(grounds)):g} in)").reason
+        if grounds and max(grounds) - low > above:
             return Stop("stairs_none_several_floors", what=f"its lowest floor ({low_name}'s, at {tidy(low):g} in) is "
-                                                           f"more than 1 1/2 in below the ground outside an opening "
-                                                           f"(at {tidy(max(grounds)):g} in)").reason
+                                                           f"more than {_inches(above)} in below the ground outside "
+                                                           f"an opening (at {tidy(max(grounds)):g} in)").reason
         return None
     grounds = _grounds(whole, reader)          # no floor height given: ground farther apart than any one floor can
     if grounds is None:                        # meet needs a stair or a ramp; one that can't be read may be any
         return Stop("stairs_none_several_floors", what="the ground outside an opening can't be read, so it may "
                                                        "be farther from the floor than a landing can meet").reason
-    if grounds and max(grounds) - min(grounds) > LANDING_STEP + GROUND_ABOVE:
+    if grounds and max(grounds) - min(grounds) > sum(landing):
         return Stop("stairs_none_several_floors", what=f"the ground outside its openings is {tidy(min(grounds)):g} "
                                                        f"in at one and {tidy(max(grounds)):g} in at another, more "
-                                                       "than any one floor can meet (8 1/4 in above, 1 1/2 in "
-                                                       "below)").reason
+                                                       f"than any one floor can meet ({_inches(landing[0])} in "
+                                                       f"above, {_inches(landing[1])} in below)").reason
     return None
 
 
@@ -275,12 +290,13 @@ def _door(item: dict, measured) -> dict:
     return part
 
 
-def measure(description, whole=None, stated_stories=None) -> dict:
+def measure(description, whole=None, stated_stories=None, landing=HOUSE_LANDING) -> dict:
     """The description measured (the module's account). An empty list of stairs is read against the floors
     (_stairs_against_floors): those of `whole`, where the description given isn't the whole one (the Building
     Code's stairs and guards are measured on a description with its rooms left out; None: the description itself),
-    and `stated_stories`, the stories the check gives (a count, or (count, whose words with {n}); None: none).
-    """
+    and `stated_stories`, the stories the check gives (a count, or (count, whose words with {n}); None: none);
+    `landing`: how far (in) the ground may be below and above a floor with no stair (HOUSE_LANDING, the Residential
+    Code's; BUILDING_LANDING for the Building Code's)."""
     out = {"format": MEASURED_FORMAT, "units": {"length": "in", "area": "sf"},
            "parts": {k: None for k in KINDS}, "problems": [], "not_checked": [], "has_none": {}}
     problems = out["problems"]
@@ -342,7 +358,8 @@ def measure(description, whole=None, stated_stories=None) -> dict:
     stairs = _given(description, "stair", problems)
     against = None
     if stairs == []:                                  # "no stairs": never beside rooms on more than one floor
-        against = _stairs_against_floors(description if whole is None else whole, reader, stated_stories)
+        against = _stairs_against_floors(description if whole is None else whole, reader, stated_stories,
+                                         landing)
         if against:
             problems.append(against)
             out.setdefault("refused", {})["stair"] = against     # the rows say "no stairs" wasn't taken, and why
