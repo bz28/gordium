@@ -903,3 +903,20 @@ def test_no_stairs_on_its_upper_storys_walls_with_no_rooms_yet_never_sets_the_st
     one = dict(desc, story_outlines=[o for o in desc["story_outlines"] if o["level"] == "L1"])
     got = egress.check(laws, one, VALUES, ALLOWED)
     assert {v for k, v in got["results"].items() if k.startswith("general.bc_1011_")} == {"not_applicable"}
+
+
+def test_the_escape_openings_reading_never_says_no_stairs_and_the_stairs_reading_still_does(got, laws):
+    """The escape openings' reading (egress._escape_openings) measured the drawing with "stairs: []" forced in, which
+    since #279 is checked against the floors: the apartment (two levels, its stairs not described) got a needs-review
+    line "the model says there are no stairs, yet its rooms are on 2 levels", noise from a reading that gives no
+    stairs. It now leaves the stairs and guards out: the apartment as sent has no such line, nor the stairs and
+    guards' "weren't read" twice; stated "no stairs", the stairs' own reading still says it, once."""
+    said = lambda answer: [i for i in answer["items"] if "the model says there are no stairs" in (i.get("reason") or "")]
+    assert not said(got)
+    escape = egress._escape_openings(build.interior_of())
+    assert not any("stairs" in p or "guards" in p for p in escape["problems"]), escape["problems"]
+    desc = build.interior_of()
+    desc["stairs"] = []
+    stated = egress.check(laws, desc, VALUES, ALLOWED)
+    assert len(said(stated)) == 1, [i["reason"] for i in said(stated)]
+    assert {v for k, v in stated["results"].items() if k.startswith("general.bc_1011_")} == {present.REVIEW}
