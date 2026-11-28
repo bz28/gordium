@@ -8,6 +8,13 @@ one happen. Values read through the interior reader (`interior/read.py`) stop wi
 design: docs/decisions/2026-11-20_route_measurement.md.
 """
 
+# what settles a stair that may be anywhere (routes._stair_points), said with the story facts it stops
+STAIRS_TO_DO = ("To settle it, draw every stair and tick the mark \"These are all the stairs\", or tick \"This house "
+                "has no stairs\", and tick the marks saying there are no ramps, alternating tread devices or ship's "
+                "ladders. \"No stairs\" isn't taken where the building may have another story: a second level not "
+                "marked \"Not a story\", a floor drawn a story's height above or below the ground stated, rooms on "
+                "two floors, or a story count of two or more, or one that can't be read")
+
 STOPS = {
     # the room a flight of stairs stands in (stair_rooms.py: the Building Code's stair rules, section group 7c)
     "stair_no_nosings": "the flight gives no nosings, so where it stands isn't known",
@@ -182,10 +189,8 @@ STOPS = {
     "outside_into_exit": "the space of {name} has a way out besides the shared corridor ({door}): whether it exits "
                          "directly outside isn't known",
     "outside_stair": "the space of {name} may have a stair, ramp or ladder within it besides the shared corridor (to "
-                     "another story, maybe to its own door out). Draw the building's stairs, or mark it as having "
-                     "none; where it says none but may have another story (a second level not marked Gordium: Not a "
-                     "story, a floor far above the ground, or two or more stories given), a stair may still be "
-                     "anywhere: whether it exits directly outside isn't known",
+                     "another story, maybe to its own door out): whether it exits directly outside isn't known. " +
+                     STAIRS_TO_DO,
     "outside_link_elsewhere": "a door or opening of the room {name} isn't read on this story (drawn on another "
                               "level, or listed only among the openings?): whether it exits directly outside isn't "
                               "known",
@@ -201,9 +206,7 @@ STOPS = {
                               "on Table 1004.5's list, or a sleeping use; Revit's room mark for it): whether it is a "
                               "dwelling unit, or a room shared between units, isn't known",
     "units_stair": "the space of {name} may have a stair, ramp or ladder within it: it may hold the upper part of a "
-                   "dwelling unit whose door is downstairs. Draw the building's stairs, or mark it as having none; "
-                   "where it says none but may have another story (a second level not marked Gordium: Not a story, a "
-                   "floor far above the ground, or two or more stories given), a stair may still be anywhere",
+                   "dwelling unit whose door is downstairs. " + STAIRS_TO_DO,
     "units_link_elsewhere": "a door or opening of the room {name} isn't read on this story (drawn on another level, "
                             "or listed only among the openings?): it may be a dwelling unit's own way out, so the "
                             "units aren't counted",

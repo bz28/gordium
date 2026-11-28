@@ -139,27 +139,32 @@ def _stories_of(description, stated_stories):
     """The stories the check gives the building (egress._stated_stories' count or (count, words)), else the
     description's own building block's stories above grade plane where it is a whole number or a finite one, else
     None."""
-    if stated_stories is not None:
-        return stated_stories
     block = description.get("building") if isinstance(description, dict) else None
     n = block.get("stories_above_grade_plane") if isinstance(block, dict) else None
-    if type(n) is int or type(n) is float and math.isfinite(n):
-        return n, "the architect states {n} stories above grade plane"
-    return None
+    own = (n, "the architect states {n} stories above grade plane") \
+        if type(n) is int or type(n) is float and math.isfinite(n) else None
+    given = stated_stories if isinstance(stated_stories, tuple) and len(stated_stories) == 2 else \
+        (stated_stories, "the check gives the building {n} stories") if stated_stories is not None else None
+    if own is None or given is None:
+        return given or own
+    return given if given[0] >= own[0] else own          # the larger: either may be the building's
 
 
 def _levels_listed(description) -> list:
     """Every level the description lists (`levels` and `all_levels`), by id, but those the architect marks not a
-    story (`all_levels[].not_a_story` true): each may be a story of its own. A level whose id can't be read is one
-    more (it may be another floor, as #279 reads it)."""
+    story (`all_levels[].not_a_story` true) with no rooms on them (a mark the rooms contradict doesn't count): each
+    may be a story of its own. A level whose id can't be read is one more (it may be another floor, as #279 reads
+    it)."""
     out, marked, unread = set(), set(), 0
+    rooms = description.get("rooms") if isinstance(description, dict) else None
+    occupied = {r.get("level") for r in rooms if isinstance(r, dict)} if isinstance(rooms, list) else set()
     for key in ("levels", "all_levels"):
         given = description.get(key) if isinstance(description, dict) else None
         for item in given if isinstance(given, list) else []:
             lid = item.get("id") if isinstance(item, dict) else None
             if isinstance(lid, str) and lid.strip() or type(lid) is int:
                 out.add(lid)
-                if key == "all_levels" and item.get("not_a_story") is True:
+                if key == "all_levels" and item.get("not_a_story") is True and lid not in occupied:
                     marked.add(lid)
             else:
                 unread += 1
@@ -167,10 +172,12 @@ def _levels_listed(description) -> list:
 
 
 def _above_the_ground(description, reader, ground) -> bool:
-    """Whether the lowest floor drawn stands more than a story's height (story_place's 6 ft, under which a story with
-    no level of its own may stand) above the lowest ground the architect stated (`ground`: story_place.ground_of's,
-    feet): an upper floor drawn alone, reached by a stair the model doesn't show. Each room's floor is its
-    `floor_elevation`, else its level's elevation (as #279 reads it); no ground stated, or no floor: not shown."""
+    """Whether the floors drawn stand a story's height (story_place's 6 ft, under which a story with no level of its
+    own may stand) away from the ground the architect stated (`ground`: story_place.ground_of's, feet): the lowest
+    floor more than that above the lowest ground (an upper floor drawn alone), or the highest floor more than that
+    below the highest ground (a basement drawn alone), each reached by a stair the model doesn't show. Each room's
+    floor is its `floor_elevation`, else its level's elevation (as #279 reads it); no ground stated, or no floor: not
+    shown."""
     if not isinstance(ground, dict):
         return False
     lows = [ground["flat"]] if "flat" in ground else [p[2] for p in ground.get("spots") or []]
@@ -183,7 +190,9 @@ def _above_the_ground(description, reader, ground) -> bool:
         if isinstance(description.get("rooms"), list) else []
     floors = [reader.length(r["floor_elevation"] if "floor_elevation" in r else heights[r["level"]], "a room's floor")
               for r in rooms]
-    return bool(floors) and min(floors) > min(lows) * story_place.FT + 6 * story_place.FT + story_place.SAME
+    gap = 6 * story_place.FT + story_place.SAME
+    return bool(floors) and (min(floors) > min(lows) * story_place.FT + gap or
+                             max(floors) < max(lows) * story_place.FT - gap)
 
 
 def _stair_points(description, stated_stories=None, ground=None) -> list:
@@ -191,8 +200,9 @@ def _stair_points(description, stated_stories=None, ground=None) -> list:
     nosings' ends in inches}, or ANYWHERE: the stairs (`stairs`, house egress) read entry by entry, one that can't be
     read anywhere; no `stairs` list at all (not read, the format's silence) one anywhere, and so an empty list ("no
     stairs") wherever the building may have more than one story: two or more levels listed (any not marked not a
-    story may be one, with nothing drawn on it), every floor more than a step above the ground stated (`ground`),
-    a stated story count that isn't a number, or what interior._stairs_against_floors refuses it beside (rooms on
+    story may be one, with nothing drawn on it), the floors drawn a story's height above or below the ground stated
+    (`ground`: _above_the_ground), a stated story count that isn't a number, or what
+    interior._stairs_against_floors refuses it beside (rooms on
     two floors, an upper floor alone, two or more stories the check gives: `stated_stories`, else the description's
     own `building.stories_above_grade_plane`; #279); a ramp, alternating tread device or ship's ladder anywhere unless
     the description gives its list empty or says it has none (`has_none` with a source), since none is said, never

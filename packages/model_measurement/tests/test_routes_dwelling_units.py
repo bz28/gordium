@@ -295,6 +295,16 @@ def test_no_stairs_beside_another_floor_is_never_taken():
         nameless = fresh()                               # a level whose id can't be read may be another floor
         nameless["all_levels"] = [*nameless["levels"], odd]
         assert _stair_points(nameless) == [{"points": []}], odd
+    deep = fresh()                                       # a basement drawn alone, 10 ft below the ground stated
+    for r in deep["rooms"]:
+        r["floor_elevation"] = -10
+    assert _stair_points(deep, ground={"flat": 0.0}) == [{"points": []}]
+    assert _stair_points(deep, ground={"flat": -8.0}) == []
+    contradicted = fresh()                               # a level marked not a story with rooms on it: still a level
+    contradicted["all_levels"] = [{**contradicted["levels"][0], "not_a_story": True},
+                                  {"id": "L2", "name": "Level 2", "elevation": 10}]
+    assert _stair_points(contradicted) == [{"points": []}]
+    assert "draw every stair" in Stop("units_stair", name="x").reason      # the reason says how to settle it
     text = fresh()                                       # a count that can't be read, whatever the check gives
     text["building"] = {"stories_above_grade_plane": "2"}
     assert _stair_points(text, stated_stories=(1, "the check gives {n}")) == [{"points": []}]
