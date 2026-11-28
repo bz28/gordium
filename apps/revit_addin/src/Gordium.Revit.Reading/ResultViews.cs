@@ -29,7 +29,25 @@ public enum FixKind { Fails, Answer, Mark, FixModel, Survey, Measure, Decide, Op
 /// <param name="Elements">The elements it names (UniqueIds), each once.</param>
 /// <param name="Rows">The rows waiting on it, each once, in the answer's order.</param>
 public sealed record FixCard(string Key, FixKind Kind, string Headline, string? Why, string? Field,
-                             IReadOnlyList<string> Elements, IReadOnlyList<ResultRow> Rows);
+                             IReadOnlyList<string> Elements, IReadOnlyList<ResultRow> Rows)
+{
+    private readonly string? _title;
+
+    /// <summary>The card's one line in the list: its <see cref="Headline"/>, or, where the same words head other cards
+    /// of its group, the rule its results are about ("Corridor width kept clear (BCNYS 1020.4)"), so the cards can be
+    /// told apart (egress UI audit, finding 3: 29 cards read "Check this by hand: a person decides it"). The checker's
+    /// words stay the headline: the detail page's steps and the card's tooltip say them.</summary>
+    public string Title { get => _title ?? Headline; init => _title = value; }
+
+    /// <summary>On a follow-up question, the question it hangs on (the ask's <c>depends_on</c>), else null.</summary>
+    public DependsOn? DependsOn { get; init; }
+}
+
+/// <summary>A follow-up question's parent (an ask's <c>depends_on</c>, docs/revit/checker_ui_data.md): the fact of the
+/// question it hangs on ("facts.accessory_dwelling_unit" for "Is the ADU detached?"), and that question's answers that
+/// make the follow-up moot, in the form's words ("No" for the checker's <c>false</c>, "Yes" for <c>true</c>, a word
+/// as it is).</summary>
+public sealed record DependsOn(string Field, IReadOnlyList<string> MootIf);
 
 /// <summary>One group of "What to fix": its kind, title, the cards in it and every row it holds (each once).</summary>
 public sealed record FixGroup(FixKind Kind, string Title, string? Sub, IReadOnlyList<FixCard> Cards, IReadOnlyList<ResultRow> Rows)
@@ -87,6 +105,13 @@ public sealed record ResultViewsModel(string Summary, string Headline, IReadOnly
     /// sent, the code choice would otherwise be shown nowhere).</summary>
     public bool ShowsWhichCode => Code.Any(d => d.Note is not null);
 
+    /// <summary>What the headline is said of: each row's verdict and rule, and how many in review wait on the
+    /// questions card (<see cref="ResultViews.HeadlineOf"/> says it again as the card's questions change).</summary>
+    public IReadOnlyList<(Verdict Verdict, string Rule)> HeadlineRows { get; init; } = [];
+
+    /// <summary>How many results in review wait on a question of the questions card.</summary>
+    public int OnQuestions { get; init; }
+
     /// <summary>The ids of the rows the scope note is said of (<see cref="ResultViews.DraftedForOneGroup"/>).</summary>
     public IReadOnlySet<string> Scoped { get; init; } = new HashSet<string>(StringComparer.Ordinal);
 
@@ -109,13 +134,34 @@ public static class ResultViews
         ArgumentNullException.ThrowIfNull(result);
         var rows = result.Items.Select(i => (Item: i, Row: ResultRows.Row(i))).ToList();
         var scoped = rows.Where(r => DraftedForOneGroup(r.Item.Raw)).ToList();
+        var fix = FixGroups(rows);
+        // the results in review that wait on a question of the questions card (never more than there are)
+        var answers = fix.Where(g => g.Kind == FixKind.Answer).ToList();
+        // a follow-up held back until its parent is answered still waits on the questions (on its parent): its rows
+        // are the group's; only the questions shown are "the question(s) below"
+        var onQuestions = answers.SelectMany(g => g.Rows)
+                                 .Where(r => r.Verdict == Verdict.NeedsReview).Select(r => r.Id).Distinct(StringComparer.Ordinal).Count();
+        var said = rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id)).ToList();
         return new ResultViewsModel(Summary(rows.Select(r => r.Row.Verdict)),
-                                    Headline(rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id))),
-                                    FixGroups(rows), CodeTree(result, rows, scoped.Select(r => r.Row).ToHashSet()))
+                                    Headline(said, onQuestions, answers.Sum(g => ProjectQuestions.Of(g, null).Count)),
+                                    fix, CodeTree(result, rows, scoped.Select(r => r.Row).ToHashSet()))
         {
             Scope = scoped.Count == 0 ? null : ScopeWords(scoped.Count),
             Scoped = scoped.Select(r => r.Row.Id).ToHashSet(StringComparer.Ordinal),
+            HeadlineRows = said,
+            OnQuestions = onQuestions,
         };
+    }
+
+    /// <summary>The headline as the questions card stands (<paramref name="fields"/>, <paramref name="draft"/>): "the
+    /// question below" or "the questions below" counts the questions the card shows now (review round 1: a follow-up
+    /// brought in by an answer chosen in the card made two, with the sentence still saying one). The results waiting
+    /// on the questions are counted as at the check: a choice saves nothing until Save and check again.</summary>
+    public static string HeadlineOf(ResultViewsModel model, IReadOnlyList<SetupField>? fields, SetupDraft? draft)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        return Headline(model.HeadlineRows, model.OnQuestions,
+                        model.Fix.Where(g => g.Kind == FixKind.Answer).Sum(g => ProjectQuestions.Of(g, fields, draft).Count));
     }
 
     // ---- the scope note (change 24) ---------------------------------------------------------------------------
@@ -184,8 +230,11 @@ public static class ResultViews
 
     /// <summary>The headline sentence (change 19): what fails first; else that nothing fails yet and how many results
     /// wait on the architect; never that the design complies (a check where everything Gordium checked complies still
-    /// says Gordium doesn't check everything).</summary>
-    public static string Headline(IEnumerable<(Verdict Verdict, string Rule)> rows)
+    /// says Gordium doesn't check everything). <paramref name="onQuestions"/>: how many of the results in review wait on
+    /// a question of the questions card (null: all of them, as the approved words say). Only those are said to wait on
+    /// the questions (egress UI audit: "80 results can't be decided until the questions below are answered" with 2
+    /// waiting on the one question left, the rest on marks and checks by hand).</summary>
+    public static string Headline(IEnumerable<(Verdict Verdict, string Rule)> rows, int? onQuestions = null, int? questions = null)
     {
         var list = rows.ToList();
         var all = list.Select(r => r.Verdict).ToList();
@@ -196,7 +245,14 @@ public static class ResultViews
             return (fails == 1 ? "1 rule fails. Fix it first" : $"{fails} rules fail. Fix them first")
                    + (review == 0 ? "." : $"; {Results(review)} also need{(review == 1 ? "s" : "")} review.");
         if (review > 0)
-            return $"Nothing fails yet. {Results(review)} can't be decided until the questions below are answered.";
+        {
+            var asked = Math.Min(onQuestions ?? review, review);
+            // the card's own count: "the question below" when it asks one (review round 1)
+            var below = questions == 1 ? "the question below" : "the questions below";
+            return asked == review ? $"Nothing fails yet. {Results(review)} can't be decided until {below} {(questions == 1 ? "is" : "are")} answered."
+                : asked == 0 ? $"Nothing fails yet. {Results(review)} need{(review == 1 ? "s" : "")} review: {(review == 1 ? "it" : "each")} says below what it needs."
+                : $"Nothing fails yet. {Results(review)} need{(review == 1 ? "s" : "")} review; {asked} of them wait{(asked == 1 ? "s" : "")} on {below}.";
+        }
         if (notChecked > 0)
             return $"Nothing fails and nothing needs review, but {Results(notChecked)} {(notChecked == 1 ? "is" : "are")} not checked yet by Gordium: check {(notChecked == 1 ? "it" : "them")} by hand.";
         return all.Count == 0
@@ -227,7 +283,9 @@ public static class ResultViews
         // card key -> (kind, headline, why, field, elements, rows), in the order first asked
         var cards = new Dictionary<(FixKind, string), (string Headline, string? Why, string? Field, List<string> Elements, List<ResultRow> Rows)>();
         var order = new List<(FixKind, string)>();
-        void Add(FixKind kind, string key, string headline, string? why, string? field, IEnumerable<string> elements, ResultRow row)
+        var parents = new Dictionary<(FixKind, string), DependsOn>();
+        void Add(FixKind kind, string key, string headline, string? why, string? field, IEnumerable<string> elements, ResultRow row,
+                 DependsOn? dependsOn = null)
         {
             if (!cards.TryGetValue((kind, key), out var c))
             {
@@ -235,6 +293,8 @@ public static class ResultViews
                 cards[(kind, key)] = c;
                 order.Add((kind, key));
             }
+            if (dependsOn is not null)
+                parents.TryAdd((kind, key), dependsOn);              // the first ask with the key that names one
             foreach (var e in elements)
                 if (!c.Elements.Contains(e))
                     c.Elements.Add(e);
@@ -263,17 +323,49 @@ public static class ResultViews
                 continue;
             }
             foreach (var a in asks)
-                Add(KindOf(a.Kind, a.Field), a.Key, a.Headline, a.Why, a.Field, a.Elements, row);
+                Add(KindOf(a.Kind, a.Field), a.Key, a.Headline, a.Why, a.Field, a.Elements, row, a.DependsOn);
         }
         return order.GroupBy(k => k.Item1).OrderBy(g => g.Key).Select(g =>
         {
             var list = g.Select(k => (k, c: cards[k]))
-                        .Select(x => new FixCard(x.k.Item2, x.k.Item1, x.c.Headline, x.c.Why, x.c.Field, x.c.Elements, x.c.Rows))
+                        .Select(x => new FixCard(x.k.Item2, x.k.Item1, x.c.Headline, x.c.Why, x.c.Field, x.c.Elements, x.c.Rows)
+                        {
+                            DependsOn = parents.GetValueOrDefault(x.k),
+                        })
                         .OrderByDescending(c => c.Rows.Count).ToList();   // stable: ties keep the answer's order
+            // cards of the group headed by the same words: each named by the rule its results are about, or, where two
+            // would share that name (one rule on two elements), by its one result's whole name; else the words stay
+            list = Named(list);
             var all = rows.Select(r => r.Row).Where(r => list.Any(c => c.Rows.Contains(r))).ToList();
-            var (title, sub) = GroupWords(g.Key, list, all.Count);
+            // the questions card counts the questions it shows: a follow-up held back until its parent is answered isn't one yet
+            var (title, sub) = GroupWords(g.Key, g.Key == FixKind.Answer ? ProjectQuestions.Arrange(list, _ => null) : list, all.Count);
             return new FixGroup(g.Key, title, sub, list, all);
         }).ToList();
+    }
+
+    /// <summary>The cards of one group, those headed by the same words named apart (<see cref="FixCard.Title"/>): by
+    /// the rule their results are about; where that still leaves two alike, a one-result card by its result's whole name
+    /// ("Level 1 › CORRIDOR L1 (3) · …"); a card that can't be told apart so keeps the checker's words (review round 1).</summary>
+    public static List<FixCard> Named(IReadOnlyList<FixCard> cards)
+    {
+        ArgumentNullException.ThrowIfNull(cards);
+        var repeated = cards.GroupBy(c => c.Headline, StringComparer.Ordinal).Where(x => x.Count() > 1).Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+        var byRule = cards.Select(c => repeated.Contains(c.Headline) ? RuleOf(c.Rows) : null).ToList();
+        var twice = byRule.OfType<string>().GroupBy(t => t, StringComparer.Ordinal).Where(x => x.Count() > 1).Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+        var titles = cards.Select((c, i) => byRule[i] is not { } t ? null : !twice.Contains(t) ? t : c.Rows.Count == 1 ? c.Rows[0].Name : null).ToList();
+        // a whole name shared too (or a card left with its words beside one renamed alike): those keep the checker's words
+        var shared = titles.OfType<string>().GroupBy(t => t, StringComparer.Ordinal).Where(x => x.Count() > 1).Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+        return [.. cards.Select((c, i) => titles[i] is { } t && !shared.Contains(t) ? c with { Title = t } : c)];
+    }
+
+    /// <summary>The rule a card's results are about, as their names end ("Egress · Corridor width kept clear (BCNYS
+    /// 1020.4)" → "Corridor width kept clear (BCNYS 1020.4)"), when they are all about one; else null.</summary>
+    public static string? RuleOf(IReadOnlyList<ResultRow> rows)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+        var rules = rows.Select(r => r.Name[(r.Name.LastIndexOf(" \u00B7 ", StringComparison.Ordinal) is var i and >= 0 ? i + 3 : 0)..].Trim())
+                        .Distinct(StringComparer.Ordinal).ToList();
+        return rules.Count == 1 && rules[0].Length > 0 ? rules[0] : null;
     }
 
     /// <summary>A group's title and its one sub line (strings.md, "What to fix": action groups).</summary>
@@ -297,15 +389,21 @@ public static class ResultViews
     }
 
     /// <summary>The cards of What to fix that list row <paramref name="rowId"/>, in their groups' order: the checker's
-    /// asks for it (a row in no card of asks, such as what fails, gives the group's own row card).</summary>
-    public static IReadOnlyList<FixCard> CardsOf(ResultViewsModel model, string rowId)
+    /// asks for it (a row in no card of asks, such as what fails, gives the group's own row card). The questions are
+    /// the ones the questions card shows (<see cref="ProjectQuestions.Of"/>, from <paramref name="fields"/> and
+    /// <paramref name="draft"/>): a follow-up held back or moot is not offered, its row on the question shown above it.</summary>
+    public static IReadOnlyList<FixCard> CardsOf(ResultViewsModel model, string rowId, IReadOnlyList<SetupField>? fields = null,
+                                                 SetupDraft? draft = null)
     {
         ArgumentNullException.ThrowIfNull(model);
-        return [.. model.Fix.SelectMany(g => g.Cards).Where(c => c.Rows.Any(r => r.Id == rowId))];
+        return [.. model.Fix.SelectMany(g => g.Kind == FixKind.Answer ? ProjectQuestions.Of(g, fields, draft).Select(q => q.Card) : g.Cards)
+                            .Where(c => c.Rows.Any(r => r.Id == rowId))];
     }
 
-    /// <summary>One ask as the checker sent it (<c>asks[]</c>).</summary>
-    public sealed record Ask(string Kind, string Key, string Headline, string? Why, string? Field, IReadOnlyList<string> Elements);
+    /// <summary>One ask as the checker sent it (<c>asks[]</c>): its kind, key, headline, why, field and elements, and
+    /// on a follow-up question the question it hangs on (<c>depends_on</c>), else null.</summary>
+    public sealed record Ask(string Kind, string Key, string Headline, string? Why, string? Field, IReadOnlyList<string> Elements,
+                             DependsOn? DependsOn = null);
 
     /// <summary>A row's asks; an ask without a key or a headline is not one the pane can show, so it is left out here
     /// and the row, if that leaves it none, is shown for a person to decide (never dropped).</summary>
@@ -321,9 +419,28 @@ public static class ResultViews
             var elements = a.TryGetProperty("elements", out var es) && es.ValueKind == JsonValueKind.Array
                 ? es.EnumerateArray().Where(e => e.ValueKind == JsonValueKind.String).Select(e => e.GetString()!).Distinct().ToList()
                 : [];
-            list.Add(new Ask(Str(a, "kind") ?? "decide", key, headline, Str(a, "why"), Str(a, "field"), elements));
+            list.Add(new Ask(Str(a, "kind") ?? "decide", key, headline, Str(a, "why"), Str(a, "field"), elements, DependsOnOf(a)));
         }
         return list;
+    }
+
+    /// <summary>An ask's <c>depends_on</c> ({field, moot_if?}), its moot answers in the form's words (true "Yes", false
+    /// "No", a word or a number as written); null when it has none or names no field (then it is asked as any other).</summary>
+    public static DependsOn? DependsOnOf(JsonElement ask)
+    {
+        if (ask.ValueKind != JsonValueKind.Object || !ask.TryGetProperty("depends_on", out var d) || Str(d, "field") is not { Length: > 0 } field)
+            return null;
+        var moot = new List<string>();
+        if (d.TryGetProperty("moot_if", out var m) && m.ValueKind == JsonValueKind.Array)
+            foreach (var v in m.EnumerateArray())
+                switch (v.ValueKind)
+                {
+                    case JsonValueKind.True: moot.Add("Yes"); break;
+                    case JsonValueKind.False: moot.Add("No"); break;
+                    case JsonValueKind.String: moot.Add(v.GetString()!); break;
+                    case JsonValueKind.Number: moot.Add(v.GetRawText()); break;
+                }
+        return new DependsOn(field, moot);
     }
 
     private static string? Str(JsonElement o, string name) =>

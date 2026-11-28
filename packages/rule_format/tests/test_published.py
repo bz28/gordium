@@ -252,8 +252,16 @@ def test_every_name_the_repos_gitignore_files_ignore_is_a_generated_name():
             assert rulebook.generated_name(name), (ignore.name, pattern)
             checked += 1
     assert checked >= 10
-    for path_pattern in ("regulations/jurisdictions/*/*/7_published_rulebooks/*.published.json", ".claude/worktrees"):
-        assert any(rulebook.generated_name(part.replace("*", "x")) for part in path_pattern.split("/")), path_pattern
+    # a path (under one folder): some part of it is a generated name, so the listings and the walk leave it out
+    # (merge of #228 into PR #266: the pane's apartment answer, a path, was ignored but listed in Maine's certificate)
+    paths = 0
+    for ignore in [REPO / ".gitignore", *REPO.glob("apps/*/.gitignore")]:
+        for line in ignore.read_text(encoding="utf-8").splitlines():
+            pattern = line.strip().rstrip("/")
+            if pattern and not pattern.startswith("#") and "/" in pattern:
+                assert any(rulebook.generated_name(part.replace("*", "x")) for part in pattern.split("/")), pattern
+                paths += 1
+    assert paths >= 5
 
 
 def test_a_rhino_lock_beside_a_model_leaves_mains_certificate_current(copy):

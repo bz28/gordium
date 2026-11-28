@@ -217,7 +217,7 @@ def split(rows: list[dict], brought_in: dict, style: str | None = None) -> dict:
             tid = in_table[(r["page"], r["line"])]
             table = next((u for u in units if u["id"] == tid and u["kind"] == "table"), None)
             if table is None:                  # (a table's lines named in two runs are one piece)
-                table = {"id": tid, "title": _table_title(r["text"]), "kind": "table", "members": []}
+                table = {"id": tid, "title": "", "kind": "table", "members": []}   # titled once read
                 units.append(table)
             table["members"].append(r)
             continue
@@ -387,6 +387,9 @@ def split(rows: list[dict], brought_in: dict, style: str | None = None) -> dict:
     problems += [f"brought_in.italic_not_defined names {w!r} under {pid}, which has no such italic word"
                  for pid, words in known.items() for w in (words or {})
                  if pid not in keep or w not in undefined.get(pid, ())]
+    for u in units:
+        if u["kind"] == "table":         # its title, from all the lines it is printed on
+            u["title"] = _table_title(u["members"])
     pieces, outside = [], []
     for u in units:
         if u["id"] in keep:
@@ -575,11 +578,86 @@ def _lookup(words: list[str], by_slug: dict[str, list[str]]) -> list[str] | None
     return None
 
 
-def _table_title(text: str) -> str:
-    """A table's title from its first line: "TABLE 1017.2—EXIT ACCESS TRAVEL DISTANCE[fna]" -> "EXIT ACCESS TRAVEL
-    DISTANCE" (its footnote marker left out); a first line that is no title gives no title."""
-    m = re.match(r"^(?:\[[A-Z]{1,2}\] )?TABLE \d{3,4}(?:\.\d+)+(?:\(\d+\))?\s*[—–-]\s*(.*?)(?:\[fn[^\]]*\])*$", text)
-    return m[1].strip() if m else ""
+ICC_TABLE_TITLE = re.compile(r"^(?:\[[A-Z]{1,2}\] )?TABLE \d{3,4}(?:\.\d+)+(?:\(\d+\))?\s*[—–-]\s*(.*)$")
+CHANGE_BAR = re.compile(r"^[Il|] (?=\S)")    # a change bar in the margin the OCR reads as "I" and joins to the line
+TITLE_SIZE = 0.45       # points: a title's next line is in the same type (a column heading is 0.6 smaller or more)
+TITLE_CENTRE = 5        # points: and centred under it, as the book centres a title over its table
+TITLE_GAP = (-1, 3)     # points between one line's bottom and the next's top: a title's lines are set close
+TITLE_MARKS = re.compile(r"(?:\s*\[fn[^\]]*\])+\s*$")     # raised note letters ending a title's line
+TITLE_MARK_RISE = 1.2   # points: what raised note letters add to a line's height (0.8 on p.165's Table 705.5)
+
+
+def table_title_lines(members: list[dict], starts: re.Pattern) -> list[dict]:
+    """The lines a table's title is printed on, from the table's lines: its first line `starts` matches (else its
+    first line), then each next line set as the same title (_continues_title): "TABLE 1010.2.4—MANUAL BOLTS,
+    AUTOMATIC FLUSH BOLTS AND" goes on to "CONSTANT LATCHING BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS" (the
+    Building Code of New York State, p.325). A first line that is only the table's number ("TABLE 508.2.5": the 2009
+    IBC prints the name under it) always goes on to the next line, past a footnote letter printed on a line of its
+    own ("a" of Table 1016.1). Plain code: by the lines' positions and type, never by their words."""
+    if not members:
+        return []
+    k = next((i for i, r in enumerate(members) if starts.match(r["text"])), 0)
+    out = [members[k]]
+    first = last = members[k]
+    number_only = re.fullmatch(r"(?:\[[A-Z]{1,2}\] )?TABLE \S+", first["text"].strip(), re.IGNORECASE)
+    for r in members[k + 1:]:
+        if r["page"] != last["page"] or r["line"] != last["line"] + 1:
+            break                                # the title is printed on lines one after another
+        last = r
+        if number_only and len(out) == 1:
+            if re.fullmatch(r"[a-z]", r["text"].strip()):
+                continue                         # the title's raised footnote letter, a line of its own
+            out.append(r)
+            first = r                            # the name sets the type the rest of the title is in
+            continue
+        if not _continues_title(first, out[-1], r):
+            break
+        out.append(r)
+    return out
+
+
+def _continues_title(first: dict, prev: dict, r: dict) -> bool:
+    """r is printed as the next line of the title `first` starts: the same size of type, centred on it, set close
+    below the line before, and (in a book whose text says which type is bold) bold from end to end."""
+    keys = ("x0", "x1", "top", "bottom")
+    if not all(isinstance(x.get(k), (int, float)) for x in (first, prev, r) for k in keys):
+        return False
+    size = lambda x: x["bottom"] - x["top"]
+    centre = lambda x: (x["x0"] + x["x1"]) / 2
+    # A title line ending in its raised note letters ("... DISTANCE [fna,] [fnd,] [fng]": Table 705.5, p.165) is
+    # that much taller, the letters set above it, and they are roman: its own words are measured, never the marks
+    # (review round 1 of Chapter 7 part e1: its title had stopped at its first line)
+    marks = TITLE_MARKS.search(r["text"])
+    words = r["text"][:marks.start()] if marks else r["text"]
+    taller = TITLE_MARK_RISE if marks else 0
+    if not -TITLE_SIZE <= size(r) - size(first) <= TITLE_SIZE + taller or abs(centre(r) - centre(first)) > TITLE_CENTRE:
+        return False
+    if not TITLE_GAP[0] <= r["top"] - prev["bottom"] <= TITLE_GAP[1]:
+        return False
+    if "bold" in first and _bold_start(r) != words:
+        return False
+    return True
+
+
+def joined_title(lines: list[dict]) -> str:
+    """A title's lines as one line: a line ending in a hyphen runs on into the next ("SMOKE-" "PROTECTED"), a change
+    bar the OCR joined to a line is left out."""
+    out = ""
+    for r in lines:
+        text = CHANGE_BAR.sub("", r["text"].strip())
+        out = out + text if out.endswith("-") or not out else f"{out} {text}"
+    return out
+
+
+def _table_title(lines: list[dict]) -> str:
+    """A table's title from the lines it is printed on (table_title_lines): "TABLE 1017.2—EXIT ACCESS TRAVEL
+    DISTANCE[fna]" -> "EXIT ACCESS TRAVEL DISTANCE" (its footnote markers left out); a first line that is no title
+    gives no title."""
+    title_lines = table_title_lines(lines, ICC_TABLE_TITLE)
+    m = ICC_TABLE_TITLE.match(title_lines[0]["text"]) if title_lines else None
+    if not m:
+        return ""
+    return re.sub(r"\s+", " ", re.sub(r"\[fn[^\]]*\]", "", ICC_TABLE_TITLE.match(joined_title(title_lines))[1])).strip()
 
 
 def _numbers_only(text: str) -> str:

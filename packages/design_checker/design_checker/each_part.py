@@ -29,7 +29,8 @@ def part_rules(rules: list[dict]) -> list[dict]:
     return [r for r in rules if parts.is_part_rule(r)]
 
 
-def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none: dict | None = None) -> dict:
+def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none: dict | None = None,
+                refused: dict | None = None) -> dict:
     """Every per-part rule's rows, each rule's one answer, and the panel items.
 
     given: the parts read, {kind: [part, …]} (parts.rows), or None when the interior isn't being checked at all
@@ -37,7 +38,8 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none:
     shown as complying with rules nobody checked (needs review: principle 4). values: the building's measures.
     has_none: what the interior description says the house has none of ({kind: {"source", "words", "parts"}},
     model_measurement.interior's): each row it makes not applicable says so, with its source, and `set_aside` lists
-    them by claim ({kind: [rule key, …]}) for the panel to show (egress.py)."""
+    them by claim ({kind: [rule key, …]}) for the panel to show (egress.py). refused: the kinds whose "none" the
+    measuring refused ({kind: why}): their rows say so, never that the kind wasn't sent."""
     rules = part_rules(rules)
     if given is None:
         items = [_item(INTERIOR_NOT_STARTED, None, "Interior", present.REVIEW, INTERIOR_NOT_STARTED_WHY)] \
@@ -71,7 +73,7 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none:
                     set_aside[claim].append(_key(rule, n))
             row["line"] = line(row, rule, values, allowed, why_not.get((row["part"], row["id"])))
             open_[id(row)] = unsettled(row, rule, given, values, allowed, why_not.get((row["part"], row["id"])),
-                                       more.get((row["part"], row["id"])))
+                                       more.get((row["part"], row["id"])), refused)
             panel[id(row)] = _panel(rule, row, open_[id(row)], given, values, allowed, more, why_not)
         out += got
         key = _key(rule, n)          # two rules with one id (never validated so): one answer from both, never kinder
@@ -256,6 +258,13 @@ def _more(given) -> dict:
 
 
 NOT_SENT = "weren't sent from the model"
+NOT_TAKEN = "isn't taken: the interior drawing says why"
+
+
+def not_taken_words(kind: str) -> str:
+    """A part kind the description says it has none of, refused beside what it shows (model_measurement.interior's
+    `refused`: "no stairs" beside rooms on two floors), in an architect's words: never "weren't sent"."""
+    return f"the model's \"no {parts._plural(kind).replace('_', ' ')}\" {NOT_TAKEN}"
 
 
 def not_sent_words(kind: str) -> str:
@@ -265,7 +274,7 @@ def not_sent_words(kind: str) -> str:
 
 
 def unsettled(row: dict, rule: dict, given, values: dict, allowed: dict, why_not: dict | None,
-              more: dict | None = None) -> dict | None:
+              more: dict | None = None, refused: dict | None = None) -> dict | None:
     """Why a needs-review row isn't settled, for grouping the results (docs/decisions/2026-11-16_results_grouping.md);
     None for any other row. Words only: the row's status is parts.rows', never changed here.
 
@@ -292,7 +301,8 @@ def unsettled(row: dict, rule: dict, given, values: dict, allowed: dict, why_not
                 return {"gordium": NOT_READ, "kinds": unread}
             # a kind the description can give but left out (no `stairs` list): the drawing's to give, never a gap
             return {"gordium": None, "measures": [], "gaps": [], "notes": [],
-                    "inputs": [not_sent_words(k) for k in drawn], "decide": False}
+                    "inputs": [not_taken_words(k) if k in (refused if isinstance(refused, dict) else {})
+                               else not_sent_words(k) for k in drawn], "decide": False}
         return {"gordium": None, "measures": [], "gaps": [], "inputs": [], "notes": [row["reason"]],
                 "decide": False}
     why_not = why_not or {}
@@ -410,9 +420,10 @@ def line(row: dict, rule: dict, values: dict, allowed: dict, why_not: dict | Non
     `why_not`: the part's measuring's reason for each measure it has no value for (its `not_measured`), said
     wherever the line names that measure as not measured. A row whose measures stand on a reading to confirm
     (`confirm`, parts.rows) says it after the line, never in place of its comparison; so does one whose figure stands
-    on the architect's statement (`architect_stated`: the rooms marked not occupied a travel figure leaves out)."""
+    on the architect's statement (`architect_stated`: the rooms marked not occupied a travel figure leaves out), and
+    one whose figure rests on a reading and another requirement (`rests_on`: the dwelling units on a story, 1016.2.1)."""
     text = _line(row, rule, values, allowed, why_not)
-    said = [str(c) for c in row.get("confirm") or []] + [str(c) for c in row.get("architect_stated") or []]
+    said = [str(c) for key in ("confirm", "architect_stated", "rests_on") for c in row.get(key) or []]
     return f"{text} ({'; '.join(said)})" if said else text
 
 
@@ -485,10 +496,27 @@ MEASURE_NAMES = {
     "r2_sleeping_units": "R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit)",
     "emergency_escape_openings_1031": "emergency escape openings (whether every sleeping room has one, per 1031)",
     "occupied_outdoor_areas": "occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7)",
-    "ambulatory_care_facility": "ambulatory care facility (whether the building is or holds one, per Table 1020.3)",
+    "ambulatory_care_facility": "ambulatory care facility (whether the building is or holds one, per Section 422 and Tables 1020.2 and 1020.3)",
     "corridors_within_dwelling_units": "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit)",
     "emergency_voice_alarm_system": "emergency voice/alarm system (whether the whole building has one per 907.5.2.2)",
+    "nfpa_13r_stated": "sprinkler system (whether NFPA 13R is stated, counted or not)",
+    "group_r_present": "occupancy group (whether any group is R-1 to R-4)",
+    "group_h_present": "occupancy group (whether any group is H-1 to H-5)",
+    "group_i1_i2_i3_present": "occupancy group (whether any group is I-1, I-2 or I-3)",
+    "stories_above_grade_plane": "stories above grade plane (the building's, as the architect counts them)",
+    "townhouse_units": "townhouse units (whether every unit is a townhouse unit)",
+    "separate_means_of_egress": "separate means of egress (whether every unit has its own)",
+    "assembly_spaces": "assembly spaces (whether any room or space is used for assembly purposes, whatever its group)",
+    "mezzanines": "mezzanines (whether the building has any, per 505.2)",
+    "loads_not_by_area": "loads not by area (whether any area is counted by its seats, lanes or actual load)",
+    "high_rise_building": "high-rise (whether the building is one, or more than 420 ft high, per 403)",
+    "underground_building": "underground building (whether a floor used for human occupancy is more than 30 ft below the lowest level of exit discharge, per 405.1)",
+    "stages_or_platforms": "stages or platforms (whether the building has a stage, a platform or a technical production area, per 410)",
+    "aircraft_related_occupancy": "aircraft-related occupancy (whether the building is or holds one, per 412)",
+    "service_corridors": "service corridors (whether the building has a passage for transporting HPM, per 415.11.3)",
     "space_is_exit": "exit status (whether the space is itself an exit)",
+    "story_assembly_seating_possible": "assembly seating on the story (whether a room on it may seat people served by aisles)",
+    "space_assembly_seating_possible": "assembly seating on the space's story (whether a room on it may seat people served by aisles)",
     "space_occupant_load": "occupant load",
     "story_first_above_or_below_grade": "whether the story is the first above or below grade",
     "story_second_above_grade_plane": "story's place (whether it is the second story above grade plane)",
@@ -496,6 +524,10 @@ MEASURE_NAMES = {
     "story_dwelling_units": "dwelling units on the story",
     "space_exit_remoteness_ratio": "exit remoteness (the exits' distance apart over the diagonal)",
     "exit_remoteness_ratio": "exit remoteness (the exits' distance apart over the diagonal)",
+    # section group 7c: the Building Code's own values of a flight of stairs
+    "stair_in_exit_enclosure": "flight's room (whether it is an exit stair enclosure)",
+    "stair_headroom_past_bottom": "headroom past the bottom riser",
+    "stair_handrail_each_side": "handrail on each side",
 }
 # a key's leading word for its part kind, in words ("moe_door_latched": "door latched", never "moe latched")
 PREFIX_WORDS = (("moe_door_", "door "), ("atd_", "alternating tread device "), ("ladder_", "ship's ladder "),

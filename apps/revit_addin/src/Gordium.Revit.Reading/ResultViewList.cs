@@ -101,7 +101,7 @@ public static class ResultViewList
     public static IReadOnlyList<ListEntry> Layout(ResultViewsModel model, IReadOnlyList<ListRow> placed, ResultsViewKind view,
                                                   IReadOnlySet<string> open, string? query,
                                                   IReadOnlyDictionary<string, string>? labels, bool stale,
-                                                  IReadOnlyList<SetupField>? fields = null)
+                                                  IReadOnlyList<SetupField>? fields = null, SetupDraft? draft = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         ArgumentNullException.ThrowIfNull(placed);
@@ -118,10 +118,16 @@ public static class ResultViewList
         }
         if (view == ResultsViewKind.WhatToFix)
         {
-            foreach (var g in model.Fix)
+            foreach (var fixGroup in model.Fix)
             {
+                var g = fixGroup;
                 var key = GroupKey(g);
                 var isOpen = open.Contains(key);
+                // the questions the card shows (a follow-up waits for its parent's answer, chosen here or held), and
+                // its title says how many
+                var questions = g.Kind == FixKind.Answer && fields is not null ? ProjectQuestions.Of(g, fields, draft) : null;
+                if (questions is not null)
+                    g = g with { Title = ResultViews.GroupWords(g.Kind, [.. questions.Select(q => q.Card)], g.Rows.Count).Title };
                 entries.Add(new FixGroupEntry(g, key, isOpen, StatusOf(g.Kind, g.Rows, stale)));
                 if (!isOpen)
                     continue;
@@ -132,9 +138,8 @@ public static class ResultViewList
                     continue;
                 }
                 // the questions asked in the card (changes 22, 23), once the project's fields are known
-                if (g.Kind == FixKind.Answer && fields is not null)
+                if (questions is not null)
                 {
-                    var questions = ProjectQuestions.Of(g, fields);
                     var more = open.Contains(MoreQuestionsKey);
                     foreach (var q in more ? questions : questions.Take(ProjectQuestions.ShownAtFirst))
                     {
@@ -152,7 +157,8 @@ public static class ResultViewList
                     entries.Add(new AnswerFootEntry(g, questions, scopedHere == 0 ? null : ResultViews.ScopeWords(scopedHere)));
                     continue;
                 }
-                foreach (var c in g.Cards)
+                // without the fields (not read), the questions as cards: a follow-up still held back on its parent's
+                foreach (var c in g.Kind == FixKind.Answer ? Shown(g, null, null) : g.Cards)
                 {
                     var ck = CardKey(c);
                     var cardOpen = open.Contains(ck);
@@ -221,16 +227,39 @@ public static class ResultViewList
     /// questions": review round 1, a result's question past the first few was left behind "+ N more questions"): the
     /// "Answer" group, and "+ N more" when any of the result's questions is past the first few; empty when the result
     /// asks no question.</summary>
-    public static IReadOnlyList<string> AnswerKeys(ResultViewsModel model, string rowId)
+    public static IReadOnlyList<string> AnswerKeys(ResultViewsModel model, string rowId, IReadOnlyList<SetupField>? fields = null,
+                                                   SetupDraft? draft = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         if (model.Fix.FirstOrDefault(g => g.Kind == FixKind.Answer) is not { } group)
             return [];
-        var at = group.Cards.Select((c, i) => (c, i)).Where(x => x.c.Rows.Any(r => r.Id == rowId)).Select(x => x.i).ToList();
+        // where the card shows the result's questions (a follow-up held back: its results are on its parent's)
+        var at = Shown(group, fields, draft).Select((c, i) => (c, i)).Where(x => x.c.Rows.Any(r => r.Id == rowId)).Select(x => x.i).ToList();
         if (at.Count == 0)
             return [];
         return at.Any(i => i >= ProjectQuestions.ShownAtFirst) ? [GroupKey(group), MoreQuestionsKey] : [GroupKey(group)];
     }
+
+    /// <summary>Whether an answer chosen in the card changed what the questions card shows (a follow-up brought in or
+    /// hidden, so its title's count, its questions or its "+ N more"): only then is the list drawn again, so a box
+    /// being typed in keeps its keyboard.</summary>
+    public static bool QuestionsDiffer(IReadOnlyList<ListEntry> before, IReadOnlyList<ListEntry> after)
+    {
+        ArgumentNullException.ThrowIfNull(before);
+        ArgumentNullException.ThrowIfNull(after);
+        static IEnumerable<string> Shape(IReadOnlyList<ListEntry> entries) => entries.Select(e => e switch
+        {
+            FixGroupEntry g => "group:" + g.Key + ":" + g.Group.Title,
+            QuestionEntry q => "question:" + q.Key + ":" + q.Question.Affects,
+            MoreQuestionsEntry m => "more:" + m.Hidden,
+            _ => null,
+        }).OfType<string>();
+        return !Shape(before).SequenceEqual(Shape(after), StringComparer.Ordinal);
+    }
+
+    /// <summary>The cards of the questions card as it shows them (<see cref="ProjectQuestions.Of"/>).</summary>
+    private static IReadOnlyList<FixCard> Shown(FixGroup group, IReadOnlyList<SetupField>? fields, SetupDraft? draft) =>
+        [.. ProjectQuestions.Of(group, fields, draft).Select(q => q.Card)];
 
     /// <summary>The questions card's foot, for a screen reader (review round 2: its scope note said first, and nothing
     /// promised that isn't chosen).</summary>
@@ -241,7 +270,7 @@ public static class ResultViewList
     public static string? Spoken(ListEntry e) => e switch
     {
         FixGroupEntry g => $"{g.Group.Title}, {StatusLook.Word(g.Status)}, {g.Group.SeeWords}" + (g.Open ? ", open" : ", folded"),
-        FixCardEntry c => $"{c.Card.Headline}, {(c.Card.Rows.Count == 1 ? "1 result" : $"{c.Card.Rows.Count} results")}" + (c.Open ? ", open" : ", folded"),
+        FixCardEntry c => $"{c.Card.Title}, {(c.Card.Rows.Count == 1 ? "1 result" : $"{c.Card.Rows.Count} results")}" + (c.Open ? ", open" : ", folded"),
         CodeNodeEntry n => string.Join(", ", new[] { Title(n.Node), n.Node.Note, StatusLook.Word(n.Status), n.Node.Line, n.Node.Scope }.OfType<string>())
                            + (n.CanOpen ? n.Open ? ", open" : ", folded" : ""),
         QuestionEntry q => $"{q.Question.Card.Headline}, {ProjectQuestions.Affects(q.Question.Affects)}"
@@ -256,7 +285,9 @@ public static class ResultViewList
     /// the rest.</summary>
     public static string? Tip(ListEntry e) => e switch
     {
-        FixCardEntry c => c.Card.Why is { } why ? $"{c.Card.Headline}\n\nWhy: {why}" : c.Card.Headline,
+        // the checker's words under a card named by its rule (egress UI audit, finding 3)
+        FixCardEntry c => (c.Card.Title == c.Card.Headline ? c.Card.Headline : $"{c.Card.Title}\n{c.Card.Headline}")
+                          + (c.Card.Why is { } why ? $"\n\nWhy: {why}" : ""),
         CodeNodeEntry { Node.Note: { } note } n => n.Node.NoteTooltip is { } quotes ? $"{note}\n\n{quotes}" : note,
         _ => null,
     };
@@ -266,7 +297,8 @@ public static class ResultViewList
 
     /// <summary>The keys to open so a row shows in a view (its group and card, or its document, chapter, section
     /// and rule): what "show this result" opens, so no row is ever out of reach.</summary>
-    public static IReadOnlyList<string> PathTo(ResultViewsModel model, ResultsViewKind view, string rowId)
+    public static IReadOnlyList<string> PathTo(ResultViewsModel model, ResultsViewKind view, string rowId,
+                                               IReadOnlyList<SetupField>? fields = null, SetupDraft? draft = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         if (view == ResultsViewKind.WhatToFix)
@@ -277,11 +309,13 @@ public static class ResultViewList
                     continue;
                 if (g.Kind is FixKind.Fails or FixKind.NotChecked or FixKind.Done)
                     return [GroupKey(g)];
-                var at = g.Cards.ToList().FindIndex(c => c.Rows.Any(r => r.Id == rowId));
+                // the questions as the card shows them (a follow-up held back: its results are on its parent's)
+                var cards = g.Kind == FixKind.Answer ? Shown(g, fields, draft) : g.Cards;
+                var at = cards.ToList().FindIndex(c => c.Rows.Any(r => r.Id == rowId));
                 // a question past the first few is behind "+ N more questions" (the key is harmless elsewhere)
                 return g.Kind == FixKind.Answer && at >= ProjectQuestions.ShownAtFirst
-                    ? [GroupKey(g), MoreQuestionsKey, CardKey(g.Cards[at])]
-                    : [GroupKey(g), CardKey(g.Cards[at])];
+                    ? [GroupKey(g), MoreQuestionsKey, CardKey(cards[at])]
+                    : [GroupKey(g), CardKey(cards[at])];
             }
             return [];
         }

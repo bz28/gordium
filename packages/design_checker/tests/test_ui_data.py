@@ -30,7 +30,15 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "occupied_outdoor_areas": False,                   # group 3's
                                           "ambulatory_care_facility": False,                 # group 4's
                                           "corridors_within_dwelling_units": False,
-                                          "emergency_voice_alarm_system": False})            # group 5a's
+                                          "emergency_voice_alarm_system": False,             # group 5a's
+                                          "stories_above_grade_plane": 3, "townhouse_units": False,  # Chapter 9's
+                                          "separate_means_of_egress": True,                  # part e's
+                                          "high_rise_building": False,                       # Chapter 4 part b's
+                                          "underground_building": False,
+                                          "stages_or_platforms": False,                      # Chapter 4 part f's
+                                          "aircraft_related_occupancy": False,
+                                          "service_corridors": False,
+                                          "assembly_spaces": False})                         # group 9h's
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False
@@ -147,7 +155,7 @@ def test_a_row_not_in_review_has_no_asks():
     ({"kind": "mark", "key": "mark:space:space_occupant_load", "measure": "space_occupant_load",
       "words": "occupant load: stated by the architect (the space's occupant load), and Gordium has no mark for it "
                "in the model yet"}, ui_data.MEASURE,
-     "Work out the occupant load by hand: Gordium has no field for it yet"),
+     "Work out the occupant load by hand (a person's check)"),
     ({"kind": "measure_by_hand", "key": "gap:space:space_egress_through_locked_room",
       "words": "egress through locked room: Gordium doesn't measure this yet: measure it by hand"}, ui_data.MEASURE,
      "Check by hand: does the path pass through a room that can be locked?"),
@@ -290,10 +298,13 @@ def test_the_contents_list_every_chapter_and_never_hide_a_rows_section(apartment
     chapters = [c for c in bc["chapters"] if c["kind"] == "chapter"]
     assert [c["number"] for c in chapters] == [str(n) for n in range(1, 36)]
     egress = next(c for c in chapters if c["number"] == "10")
-    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] >= 20
+    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 4   # section group 7c: 1011 (in parts); 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009; 9d: 1019 (1018 left the count with 1018.4, round 1 of 2026-11-23); 9e: 1021, 1022 and 1023; 9f: 1024 and 1025; 9g: 1026 to 1029
     sections = {s["number"]: s for s in egress["sections"]}
+    assert sections["1018"]["whole"] is True and sections["1019"]["whole"] is True   # group 9d review round 1
+    assert all(sections[s]["whole"] is True for s in ("1021", "1022", "1023", "1024", "1025", "1026", "1027", "1028", "1029"))   # groups 9e to 9g
     assert sections["1006"]["coverage"] == "rules" and sections["1006"]["whole"] is False
-    assert sections["1017"]["whole"] is True and sections["1011"]["coverage"] == "not_brought_in"
+    assert sections["1017"]["whole"] is True and sections["1014"]["coverage"] == "not_brought_in"   # handrails (1011: 7c's; 1012: 9a's)
+    assert sections["1011"]["coverage"] == "rules" and sections["1011"]["whole"] is False          # group 7c's stairs
     assert sections["1010"]["coverage"] == "rules" and sections["1010"]["whole"] is False   # group 6a: 1010.1, 1010.1.1
     # every row's section is in its book's contents, never as not brought in
     listed = {(b["key"], s["number"]): s for b in apartment["view"]["contents"] for c in b["chapters"]
@@ -399,9 +410,10 @@ _FIELDS = []
 
 def _known_fields() -> set:
     """Every field a host's description has, read from where it is defined, never copied: the Revit add-in's own
-    fields (every "building.…", "facts.…" and "kind[].flag" its C# names), the stated facts the start box and the
-    rows' Enter… ask for (host_core.facts.STATED_FACTS), the building block's facts (code_scope.FACTS) and the
-    site's own questions (ui_data.SITE_STOPS)."""
+    fields (every "building.…", "facts.…" and "kind[].flag" its C# names, and every whole list a mark's Feeds names
+    as the pane matches it: stairs, guards, buildings, unknown_spaces), the stated facts the start box and the rows'
+    Enter… ask for (host_core.facts.STATED_FACTS), the building block's facts (code_scope.FACTS) and the site's own
+    questions (ui_data.SITE_STOPS)."""
     if not _FIELDS:
         import re
         from design_checker.host_core.facts import STATED_FACTS
@@ -410,6 +422,10 @@ def _known_fields() -> set:
             if "obj" not in cs.parts:
                 found |= set(re.findall(r'"((?:building|facts)\.[a-z0-9_]+|[a-z]+\[\]\.[a-z0-9_]+)"',
                                         cs.read_text(encoding="utf-8")))
+                # a whole list a mark feeds, the first word of a part of its Feeds as CauseCards.Fields reads it
+                # ("stairs (sent only when Yes)": stairs, Gordium: These are all the stairs)
+                for feeds in re.findall(r'MarkBinding\.\w+,\s*\[[^\]]*\],\s*"([^"]+)"', cs.read_text(encoding="utf-8")):
+                    found |= {w for w in (p.split(" ")[0] for p in feeds.split(", ")) if re.fullmatch(r"[a-z_]+", w)}
         found |= {f"facts.{k}" for k in STATED_FACTS} | {f"building.{k}" for k in code_scope.FACTS}
         found |= {f"facts.{f}" for facts in ui_data.SITE_STOPS.values() for f in facts}
         _FIELDS.append(found)
@@ -577,11 +593,21 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # Revit-fields work. Groups 2 and 3's facts have theirs (PR #194).
     # and this branch's own: corridors_within_dwelling_units (their marks follow in the Revit-fields work)
     # and this branch's own: emergency_voice_alarm_system (their marks follow in the Revit-fields work)
-    # (groups 4 and 5's four have theirs too, the Revit-fields PR for them: the set is empty)
-    assert keys - set(revit) == set()
+    # (groups 4 and 5's four have theirs too, the Revit-fields PR for them)
+    # (the occupant-load ceiling's mezzanines and loads not by area, 2026-11-26, came with their own)
+    # Chapter 4 part b's two (a high-rise, an underground building) have theirs too (the Chapter 4 marks PR)
+    # Chapter 4 part f's three (a stage or platform, an aircraft-related occupancy, a service corridor) and section
+    # group 9h's assembly_spaces have no Revit mark yet: read only by flags' applies_when, by bands placed last in their
+    # chains and (assembly_spaces) by the seating reviews, each asked for by name; their marks follow in the
+    # Revit-fields work
+    assert keys - set(revit) == {"stages_or_platforms", "aircraft_related_occupancy", "service_corridors",
+                                 "assembly_spaces"}
+    assert "assembly_spaces" not in code_scope.MARK and code_scope.field_of("assembly_spaces") == "building.assembly_spaces"
+    assert code_scope.MARK["mezzanines"] == revit["mezzanines"] == "Gordium: Mezzanines"
+    assert code_scope.MARK["loads_not_by_area"] == revit["loads_not_by_area"] == "Gordium: Loads not by area"
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased",
               "other_level_egress_into_corridors", "ambulatory_care_facility", "corridors_within_dwelling_units",
-              "emergency_voice_alarm_system"):
+              "emergency_voice_alarm_system", "high_rise_building", "underground_building"):
         # a fact a rule reads as a measure is answered by its field (field_of); occupant_load_increased is read by the
         # occupant loads themselves, not as a measure
         assert code_scope.field_of(k) == (f"building.{k}" if k in code_scope.DERIVED else None), k
@@ -663,6 +689,18 @@ def test_the_plan_never_says_a_marked_facts_revit_mark_is_still_to_come():
             assert not named, (named, sentence[:200])
 
 
+def test_the_corridor_rating_card_names_the_unit_its_revit_mark_takes():
+    # corridor asks review round 1 (P2): the card said "in hours" while the Revit mark it opens takes minutes, so an
+    # architect typing 1 for one hour sent 1/60 hour; the card and the mark both say minutes
+    import re
+    text = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
+    m = re.search(r'new\(\s*"(Gordium: [^"]+)", new\("[^"]+"\), MarkValueKind\.(\w+),\s*MarkBinding\.\w+, \[Rooms\], '
+                  r'"rooms\[\]\.fire_rating_hours"', text)
+    assert m and m.group(2) == "Integer" and "minutes" in m.group(1), m
+    headline = ui_data.FIELD_HEADLINES["rooms[].fire_rating_hours"]
+    assert "minutes" in headline and "in hours" not in headline
+
+
 def test_a_door_whose_leaves_arent_given_is_asked_for_by_the_field_its_type_mark_answers():
     # the door-type mark (Revit's Gordium: Leaves, doors[].leaves): before it, "Mark the door leaves in the model", a
     # mark Revit didn't have; now the ask names the field, so the host's card opens its mark
@@ -675,6 +713,80 @@ def test_a_door_whose_leaves_arent_given_is_asked_for_by_the_field_its_type_mark
     assert "no mark for it" not in STOPS["door_leaves_not_given"]
 
 
+# ---- follow-up questions name the question they hang on (egress UI audit finding 8, 2026-11-26) -----------------
+
+def test_every_follow_up_names_its_parent_and_the_walk_up_ends():
+    """Each fact the setup asks only once another is answered (host_core.facts.ROW_ONLY_FACTS) names that one as its
+    depends_on; every parent and child is a fact the setup knows; walking up from any follow-up ends (no cycle); and
+    every follow-up of a yes/no question says which answer makes it moot (MOOT_WHEN), only follow-ups have one."""
+    from design_checker.host_core.facts import ROW_ONLY_FACTS, STATED_FACTS
+    assert set(ui_data.MOOT_WHEN) <= set(ROW_ONLY_FACTS)
+    for child, parent in ROW_ONLY_FACTS.items():
+        assert child in STATED_FACTS and parent in STATED_FACTS, (child, parent)
+        got = ui_data.depends_on(f"facts.{child}")
+        assert got["field"] == f"facts.{parent}", child
+        if STATED_FACTS[parent][1] == "yes_no":
+            assert child in ui_data.MOOT_WHEN and got["moot_if"] == ui_data.MOOT_WHEN[child], child
+        else:
+            assert "moot_if" not in got, child
+        seen, at = {child}, parent
+        while at in ROW_ONLY_FACTS:
+            assert at not in seen, (child, at)
+            seen.add(at)
+            at = ROW_ONLY_FACTS[at]
+    for field in ("facts.accessory_dwelling_unit", "facts.corner_lot", "building.occupancy_groups", None, 3):
+        assert ui_data.depends_on(field) is None, field
+
+
+def test_a_moot_answer_makes_every_rule_reading_the_follow_up_not_apply():
+    """MOOT_WHEN is the law's, never a guess: for every Ithaca zoning rule that reads a follow-up fact (in its check,
+    applies_when or review_when), the parent's moot answer makes the rule's applies_when false whatever else is
+    unknown (three-valued: false and unknown is false). An ADU's size limit (§325-28) reads the attached ADU's floor
+    area, so it is moot once the ADU is detached, not once it isn't."""
+    import glob
+    from rule_format import formula
+    from rule_format.rulebook import Context, _kinds, load
+    from design_checker.host_core.facts import ROW_ONLY_FACTS
+    place = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+    kinds = _kinds(Context.for_jurisdiction(place).allowed())
+    read = {}
+    for f in glob.glob(str(place / "5_zoning_rules" / "*.yaml")):
+        for r in load(f).get("rules") or []:
+            texts = [r.get("check"), r.get("applies_when")] + [w.get("when") for w in r.get("review_when") or []]
+            names = set().union(*(formula.names(t) for t in texts if isinstance(t, str)))
+            for child in ui_data.MOOT_WHEN:
+                if child in names:
+                    read.setdefault(child, []).append(r)
+    assert set(read) == set(ui_data.MOOT_WHEN), set(ui_data.MOOT_WHEN) ^ set(read)
+    for child, rules in read.items():
+        parent = ROW_ONLY_FACTS[child]
+        for answer in ui_data.MOOT_WHEN[child]:
+            for r in rules:
+                assert isinstance(r.get("applies_when"), str), (child, r["id"])
+                got = formula.evaluate(r["applies_when"], {parent: answer}, kinds)
+                assert got is False, (child, answer, r["id"], r["applies_when"])
+
+
+def test_the_trial_requests_adu_follow_ups_hang_on_is_there_an_adu(apartment):
+    """Ben's trial request (the four-unit apartment, nothing answered): the questions card listed "Is the ADU
+    detached?" and "In an existing building?" before "Is there an ADU?" was answered (the audit's finding 8). Each
+    ask for them now names the question it hangs on, and the moot answer."""
+    asks = [a for i in apartment["view"]["items"] for a in i.get("asks") or []]
+    by_field = {}
+    for a in asks:
+        by_field.setdefault(a.get("field"), []).append(a)
+    assert by_field.get("facts.adu_detached") and by_field.get("facts.adu_existing_building"), sorted(
+        f for f in by_field if f)
+    for a in by_field["facts.adu_detached"]:
+        assert a["depends_on"] == {"field": "facts.accessory_dwelling_unit", "moot_if": [False]}
+    for a in by_field["facts.adu_existing_building"]:
+        assert a["depends_on"] == {"field": "facts.adu_detached", "moot_if": [False]}
+    assert all("depends_on" not in a for a in by_field.get("facts.accessory_dwelling_unit") or [])
+    from design_checker.host_core.facts import ROW_ONLY_FACTS
+    follow = {f"facts.{k}" for k in ROW_ONLY_FACTS}
+    assert all(("depends_on" in a) == (a.get("field") in follow) for a in asks)
+
+
 def test_every_restatement_of_the_leaves_rule_carries_the_mullioned_pair():
     # door leaves review round 3: the card headline and the check's reason restated the rule as "1, or 2 for a pair
     # with no mullion", which read as 1 for a mullioned pair whose clear width is the wider leaf's (a false pass)
@@ -683,3 +795,45 @@ def test_every_restatement_of_the_leaves_rule_carries_the_mullioned_pair():
     assert "narrower leaf" in STOPS["door_leaves_not_given"]
     fmt = (REPO / "docs/interior/interior_description_format.md").read_text(encoding="utf-8")
     assert "narrower leaf" in next(line for line in fmt.splitlines() if line.startswith("| `leaves`"))
+
+
+def test_a_door_whose_hardware_isnt_given_is_asked_for_by_the_field_its_mark_answers():
+    # the door mark (Revit's Gordium: Hardware, doors[].hardware): before it, "Mark the ... in the model" with no mark
+    # named; now the ask names the field, so the host's card opens its mark. A latch's electric lock not asked is
+    # no mark's to give: it keeps the drawing's words
+    from model_measurement.routes.stops import STOPS
+    for stop in ("door_hardware_not_given", "door_hardware_not_read"):
+        why = "hardware: " + STOPS[stop].format(name="D01", got="the text 'bar'")
+        for m in ("moe_door_latched", "moe_door_panic_hardware", "moe_door_electric_lock"):
+            got = ui_data._from_cause({"kind": "mark", "key": f"mark:means_of_egress_door:{m}", "words": why,
+                                       "measure": m}, "means_of_egress_door")
+            assert (got["kind"], got["field"], got["key"]) == ("mark", "doors[].hardware", "field:doors[].hardware"), m
+            assert got["headline"] == ui_data.FIELD_HEADLINES["doors[].hardware"]
+        assert "no mark for it" not in STOPS[stop]
+    assert panel_data.field_of_why("moe_door_electric_lock", STOPS["door_electric_lock_not_asked"].format(name="D")) is None
+
+
+def test_an_escape_openings_well_not_stated_is_asked_for_by_the_field_its_mark_answers_and_a_drawn_wells_isnt():
+    from model_measurement.interior.openings import STATED_WELL, WELL_FIELDS
+    from model_measurement.interior.stops import STOPS
+    for measure, (field, mark) in WELL_FIELDS.items():
+        why = STOPS["well_not_stated"].format(name="W1", what="it", mark=mark)
+        got = ui_data._from_cause({"kind": "mark", "key": f"mark:emergency_escape_opening:{measure}", "words": why,
+                                   "measure": measure}, "emergency_escape_opening")
+        assert (got["kind"], got["field"]) == ("mark", field), measure
+        assert got["headline"] == ui_data.FIELD_HEADLINES[field] and len(got["headline"]) <= 100
+    assert set(WELL_FIELDS) >= {m for m, _, _, _ in STATED_WELL.values() if m}
+    # a drawn well's own reason (a host that draws one) names no mark: never sent to a mark that isn't there
+    drawn = STOPS["missing"].format(what="the area well's floor elevation")
+    assert panel_data.field_of_why("area_well_depth", drawn) is None
+
+def test_the_high_rise_question_asks_the_whole_definition():
+    """Review round 1 of Chapter 4 part b: the question once left out 202's occupiable roof, so a building whose roof
+    deck is the high part could be answered No and lose every Section 403 flag."""
+    words = ui_data.FIELD_HEADLINES["building.high_rise_building"]
+    assert "occupiable roof" in words and "lowest level of fire department vehicle access" in words
+    assert "420 ft in building height" in words
+    # the class: the underground question, too, in 405.1's own words
+    words = ui_data.FIELD_HEADLINES["building.underground_building"]
+    assert "floor level used for human occupancy" in words and "finished floor of the lowest level of exit discharge" in words
+
