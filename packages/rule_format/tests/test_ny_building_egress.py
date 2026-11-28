@@ -97,7 +97,9 @@ def test_the_limits_are_new_yorks(rules):
     assert "space_common_path <= 75" in has["general.bc_1006_2_1_two_exits"]
     assert has["general.bc_1020_5_dead_end"] == ("corridor_dead_end_length <= 20 or corridor_dead_end_length < 2.5 * "
                                                  "corridor_dead_end_least_width")
-    assert "1 / 3 if" in has["general.bc_1007_1_1_remoteness"] and "else 1 / 2" in has["general.bc_1007_1_1_remoteness"]
+    # one-half, or one-third with a system that counts (written so three-valued logic decides it: Chapter 9 part a's
+    # review round 2)
+    assert "exit_remoteness_ratio >= 1 / 2 or exit_remoteness_ratio >= 1 / 3 and" in has["general.bc_1007_1_1_remoteness"]
     assert has["general.bc_508_2_3_accessory_area"] == ("story_accessory_area <= 0.10 * story_net_floor_area and "
                                                         "story_accessory_area <= 0.10 * story_gross_floor_area")
 

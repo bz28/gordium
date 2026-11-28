@@ -190,11 +190,13 @@ def test_716_2_2_3s_exception_needs_a_sprinkler_system_903_3_1_2_allows(book, ct
 def test_chapter_7_rules_sit_in_book_order_before_chapter_10(book):
     """The convention that keeps parallel chapters' rules from colliding when merged (PR notes, 2026-11-26): one
     rulebook per law folder (rulebook.building_code_rulebook), each chapter a block in book order. Chapter 7's flags
-    sit together after 508's and before Chapter 10's first rule (1004.7)."""
+    sit together after 508's and before Chapter 10's first rule (1004.7), Chapter 9's block between them
+    (test_ny_building_chapter_9.py, 2026-11-27)."""
     ids = [r["id"] for r in book]
     seven = [i for i, rid in enumerate(ids) if re.match(r"general\.bc_(table_)?7\d\d_", rid)]
     assert seven == list(range(seven[0], seven[-1] + 1))
-    assert ids[seven[-1] + 1] == "general.bc_1004_7_outdoor_areas"
+    after = ids[seven[-1] + 1]
+    assert after == "general.bc_1004_7_outdoor_areas" or re.match(r"general\.bc_(table_)?9\d\d_", after)
     assert ids[seven[0] - 1].startswith("general.bc_508_")
 
 
