@@ -638,6 +638,12 @@ public sealed class RouteTests
         floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [inside, west, veneer] } };
         Assert.Contains("lies outside the building's outline", OutlineNote(InteriorReader.Read(floor.Model())));
         Assert.Contains("Mark V1", OutlineNote(InteriorReader.Read(floor.Model())));
+        // a partition that isn't room-bounding whose studs run half an inch into the exterior wall's lining: fine
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-t", "P2", false, (10, -0.04), (10.3, -0.04), (10.3, 5), (10, 5))] } };
+        Assert.Null(OutlineNote(InteriorReader.Read(floor.Model())));
+        // a garden wall that isn't room-bounding standing 10 ft off: not the building's, fine
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-gd", null, false, (55, 0), (70, 0), (70, 0.5), (55, 0.5))] } };
+        Assert.Null(OutlineNote(InteriorReader.Read(floor.Model())));
         // a bounding wall beyond it too (a garden wall on the level): never guessed which is the building's face
         floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-g", null, true, (45, 0), (60, 0), (60, 0.5), (45, 0.5))] } };
         Assert.Contains("lies outside the building's outline", OutlineNote(InteriorReader.Read(floor.Model())));

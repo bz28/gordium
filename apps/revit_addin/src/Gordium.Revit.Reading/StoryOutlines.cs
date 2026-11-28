@@ -115,16 +115,33 @@ public static class StoryOutlines
             var named = w.Mark is { Length: > 0 } mark ? $" (Mark {mark})" : "";
             if (corners.Count == 0)
                 return new(null, null, $"a wall on the level{named} couldn't be read, so the outline can't be shown to hold it");
-            if (corners.Any(c => !Within(c, o)))
+            // beyond the outline: any room-bounding wall (a second building is two pieces, refused above); a wall that
+            // isn't room-bounding only near it (a veneer, cladding), not a garden wall standing apart
+            var beyond = corners.Where(c => !Within(c, o) && (w.RoomBounding || Distance(c, o) <= Apart)).ToList();
+            if (beyond.Count > 0)
                 return new(null, null, $"a wall on the level{named} lies outside the building's outline at " +
-                                       $"{Xy(corners.First(c => !Within(c, o)))} (a veneer or cladding not set Room Bounding?), " +
+                                       $"{Xy(beyond[0])} (a veneer or cladding not set Room Bounding?), " +
                                        "so the outline isn't the exterior walls' outside face");
-            if (!w.RoomBounding && corners.Any(c => !Within(c, n2)))
+            // in the exterior walls' band and not room-bounding (more than a finish's thickness past their inside face:
+            // a partition's studs run into the exterior wall's lining at a T-join)
+            if (!w.RoomBounding && corners.Any(c => Within(c, o) && !Within(c, n2) && Distance(c, n2) > Lining))
                 return new(null, null, $"a wall in the building's exterior walls{named} isn't set Room Bounding, so the " +
                                        "building's outline may stop short of it");
         }
         return new(o, n2, null);
     }
+
+    /// <summary>How far beyond the outline a wall that isn't room-bounding is still the building's (a veneer, cladding,
+    /// an air gap), ft; one farther out stands apart (a garden wall).</summary>
+    public const double Apart = 3.0;
+
+    /// <summary>How far past the exterior walls' inside face a wall that isn't room-bounding may run without being one
+    /// of them (a partition's studs into the wall's lining at a T-join), ft: an inch.</summary>
+    public const double Lining = 1.0 / 12;
+
+    /// <summary>How far p is from the polygon's edge.</summary>
+    private static double Distance(P2 p, IReadOnlyList<P2> poly) =>
+        Enumerable.Range(0, poly.Count).Min(i => DistanceToSegment(p, poly[i], poly[(i + 1) % poly.Count]));
 
     /// <summary>Whether p is inside the polygon or within 1/16 in of its edge.</summary>
     private static bool Within(P2 p, IReadOnlyList<P2> poly)

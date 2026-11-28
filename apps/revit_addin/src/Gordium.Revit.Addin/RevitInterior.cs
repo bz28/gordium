@@ -157,7 +157,8 @@ internal static class RevitInterior
             try
             {
                 result[level.UniqueId] = ReadSteps.Time("inside.gross_areas.ring",
-                    () => RingOf(doc, phase, level, walls.Where(w => w.LevelId == level.Id).ToList(), planType, diagnostics));
+                    () => RingOf(doc, phase, level, walls.Where(w => w.LevelId == level.Id).ToList(),
+                                 walls.Where(w => Stands(w, level, phase)).ToList(), planType, diagnostics));
             }
             finally
             {
@@ -327,12 +328,6 @@ internal static class RevitInterior
         }
     }
 
-    /// <summary>The level's exterior walls' outer faces by Revit's own room logic: room separation lines drawn as a
-    /// rectangle 20 ft beyond the level's walls, a Room placed in the ring between it and the building, its boundary at
-    /// the finished faces read (doors and windows don't break a room's boundary; interior walls never touch this one),
-    /// the rectangle's loop dropped. The lines and the Room are each made in a committed transaction (Revit works a
-    /// plan's enclosed areas out again only on a commit) inside the transaction group <see cref="GrossAreasOf"/> rolls
-    /// back. Each loop's corners and area, and each side with what bounds it, are logged.</summary>
     /// <summary>A wall's plan footprint (<see cref="WallFootprint"/>): the end points of its solids' edges, tessellated,
     /// so a wall's true extent whatever its location line; its bounding box where it has no solid; no corners where
     /// neither can be read (StoryOutlines then sends no outline: it can't show the wall is inside it). Never a crash.</summary>
@@ -370,7 +365,39 @@ internal static class RevitInterior
                     yield return inner;
     }
 
-    private static GrossArea RingOf(Document doc, Phase phase, Level level, List<Wall> walls, ViewFamilyType? planType, List<string> diagnostics)
+    /// <summary>Whether the wall stands on the level where its rooms are computed (4 ft above it, Revit's default room
+    /// computation height), whichever level it is based on (a veneer from the foundation to the roof stands on every
+    /// story), in the phase read (new or existing in it) and in the main model or a primary design option. Stacked
+    /// walls' parents and curtain walls are left out (their member walls, or their grid, are what bounds).</summary>
+    private static bool Stands(Wall w, Level level, Phase phase)
+    {
+        try
+        {
+            if (w.IsStackedWall || w.WallType?.Kind == WallKind.Curtain)
+                return false;
+            if (w.DesignOption is { IsPrimary: false })
+                return false;
+            var status = w.GetPhaseStatus(phase.Id);
+            if (status is not (ElementOnPhaseStatus.New or ElementOnPhaseStatus.Existing))
+                return false;
+            var z = level.ProjectElevation + 4.0;
+            return w.get_BoundingBox(null) is { } box && box.Min.Z <= z && box.Max.Z >= z;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return true;                                 // unread: kept, and its footprint says so if it can't be read
+        }
+    }
+
+    /// <summary>The level's exterior walls' outer faces by Revit's own room logic: room separation lines drawn as a
+    /// rectangle 20 ft beyond the level's walls, a Room placed in the ring between it and the building, its boundary at
+    /// the finished faces read (doors and windows don't break a room's boundary; interior walls never touch this one),
+    /// the rectangle's loop dropped. The lines and the Room are each made in a committed transaction (Revit works a
+    /// plan's enclosed areas out again only on a commit) inside the transaction group <see cref="GrossAreasOf"/> rolls
+    /// back. Each loop's corners and area, and each side with what bounds it, are logged.</summary>
+    private static GrossArea RingOf(Document doc, Phase phase, Level level, List<Wall> walls, List<Wall> standing, ViewFamilyType? planType,
+                                    List<string> diagnostics)
     {
         GrossArea No(string why) => new(null, new Dictionary<string, double>(), why);
         var boxes = walls.Select(w => w.get_BoundingBox(null)).OfType<BoundingBoxXYZ>().ToList();
@@ -452,9 +479,10 @@ internal static class RevitInterior
                     return $"({c.GetEndPoint(0).X:0.###},{c.GetEndPoint(0).Y:0.###})-({c.GetEndPoint(1).X:0.###},{c.GetEndPoint(1).Y:0.###}) " +
                            $"{by?.Category?.BuiltInCategory.ToString().Replace("OST_", "") ?? "none"} {by?.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString()};";
                 })));
-            // every wall on the level with its footprint: one beyond the outline (a veneer not set Room Bounding) or one
-            // in the exterior walls that isn't room-bounding keeps the outline from being sent (StoryOutlines.Of)
-            var footprints = ReadSteps.Time("inside.gross_areas.walls", () => walls.Select(FootprintOf).ToList());
+            // every wall standing on the level (based on it or not) with its footprint: one beyond the outline (a veneer
+            // not set Room Bounding) or one in the exterior walls that isn't room-bounding keeps the outline from being
+            // sent (StoryOutlines.Of)
+            var footprints = ReadSteps.Time("inside.gross_areas.walls", () => standing.Select(FootprintOf).ToList());
             return new GrossArea(building, widths, null, footprints);
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
