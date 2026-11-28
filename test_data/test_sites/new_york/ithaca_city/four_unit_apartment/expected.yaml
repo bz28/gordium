@@ -586,9 +586,15 @@ results:
   # connects, its walls' construction, penetrations, joints), so each is a person's check for every building
   general.bc_703_2_1_1_nonsymmetrical_walls: needs_review
   general.bc_703_5_marking: needs_review
-  # Chapter 7 part e1 (2026-11-28, 19 flags): exterior walls (705), which an exit stairway's and passageway's exterior
-  # walls meet (1023.7, 1024.8): no wall's rating, fire separation distance or openings are in the model; 705.9.5's
+  # Chapter 7 part e1 (2026-11-28, 25 flags): exterior walls (705), which an exit stairway's and passageway's exterior
+  # walls meet (1023.7, 1024.8), and projections (egress balconies, exterior exit stairways): no wall's rating, fire separation distance or openings are in the model; 705.9.5's
   # vertical separation needs review too (no sprinkler system: its exception 2 isn't taken)
+  general.bc_705_2_projections: needs_review
+  general.bc_table_705_2_projection_distances: needs_review
+  general.bc_705_2_1_type_i_ii_projections: needs_review
+  general.bc_705_2_2_type_iii_iv_v_projections: needs_review
+  general.bc_705_2_3_projection_protection: needs_review
+  general.bc_705_2_3_1_balconies: needs_review
   general.bc_705_3_buildings_on_the_same_lot: needs_review
   general.bc_705_5_exterior_wall_ratings: needs_review
   general.bc_table_705_5_exterior_wall_ratings: needs_review

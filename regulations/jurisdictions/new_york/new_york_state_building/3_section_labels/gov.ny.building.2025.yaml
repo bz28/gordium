@@ -1021,6 +1021,21 @@ labels:
       uses.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:cornice:
+    label: reference
+    topic: definitions
+    reason: 'Defines CORNICE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 16
+      - 16
+      quote: '[BG] CORNICE. A projecting horizontal molded element located at or near the top of an architectural feature.'
+    piece_sha256: 6fffaefb70851920a3c6d5a84d713d63b16791749ff20bae97120f5fe4593589
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:corridor:
     label: reference
     topic: definitions
@@ -4488,6 +4503,38 @@ labels:
       quote: PLACE OF RELIGIOUS WORSHIP. See “Religious worship, place of.”
     piece_sha256: 6563679c6b68f1f9611222d63ac30e3594fa21111365261ee999cf206647b446
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:plastic_composite:
+    label: reference
+    topic: definitions
+    reason: 'Defines PLASTIC COMPOSITE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 57
+      lines:
+      - 27
+      - 27
+      quote: '[BF] PLASTIC COMPOSITE. A generic designation that refers to wood/plastic composites, plastic lumber and similar
+        materials.'
+    piece_sha256: af7b06aaa38d5898dabc7310d3fa7b9b473cb1fc06662edd38d28655eccc5812
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:plastic_lumber:
+    label: reference
+    topic: definitions
+    reason: 'Defines PLASTIC LUMBER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 57
+      lines:
+      - 29
+      - 30
+      quote: '[BF] PLASTIC LUMBER. A manufactured product made primarily of plastic materials (filled or unfilled) which is
+        generally rectangular in cross section.'
+    piece_sha256: 21fa19730837833f0bd3a2c085b7c75992f375dd0b60583ca7d436ff8d8c7c47
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:platform:
@@ -9244,6 +9291,142 @@ labels:
       - 31
       quote: 705.1 General. Exterior walls shall comply with this section.
     piece_sha256: 74fa2061e7787e39a49d98b70a88dbb24f81dfab9646a8d803b4ed46e613aaf1
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '705.2':
+    label: flag
+    topic: means_of_egress
+    reason: 'Cornices, eave overhangs, exterior balconies and similar projections beyond the exterior wall conform to 705.2
+      and Section 1405, exterior egress balconies and exterior exit stairways and ramps also to 1021 and 1027; no projection
+      comes closer to the line used to determine the fire separation distance than Table 705.2 allows; but buildings on the
+      same lot considered portions of one building per 705.3 need not comply for projections between them: a person''s check
+      (general.bc_705_2_projections).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 163
+      lines:
+      - 32
+      - 37
+      quote: '705.2 Projections. Cornices, eave overhangs, exterior balconies and similar projections extending beyond the
+        exterior wall shall conform to the requirements of this section and Section 1405. Exterior egress balconies and exterior
+        exit stairways and ramps shall comply with Sections 1021 and 1027, respectively. Projections shall not extend any
+        closer to the line used to determine the fire sepa- ration distance than shown in Table 705.2. Exception: Buildings
+        on the same lot and considered as portions of one building in accordance with Section 705.3 are not required to comply
+        with this section for projections between the buildings.'
+    piece_sha256: b070ccabb555353b052e3a0869150913ee86925de7c3a52af2df4c10da2f6079
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 705.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Table 705.2 gives the least distance a projection keeps from the line used to determine the fire separation distance,
+      typed row by row in its flag: a person''s check (general.bc_table_705_2_projection_distances).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 163
+      lines:
+      - 38
+      - 44
+      quote: 'TABLE 705.2—MINIMUM DISTANCE OF PROJECTION FIRE SEPARATION DISTANCE (FSD) (feet) MINIMUM DISTANCE FROM LINE
+        USED TO DETERMINE FSD 0 to less than 2 Projections not permitted 2 to less than 3 24 inches 3 to less than 5 Two-thirds
+        of FSD 5 or greater 40 inches For SI: 1 foot = 304.8 mm; 1 inch = 25.4 mm.'
+    piece_sha256: cc686d3cc9cf22bc1e68652857af1828aa14745c964eb7ce6d789453607bfe4b
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  705.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Projections from walls of Type I or II construction are of noncombustible materials, or of combustible materials
+      as 705.2.3.1 (balconies and similar projections) and 705.2.4 (bay and oriel windows) allow: a person''s check (general.bc_705_2_1_type_i_ii_projections).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 163
+      lines:
+      - 45
+      - 46
+      quote: 705.2.1 Types I and II construction. Projections from walls of Type I or II construction shall be of noncombustible
+        materials or combustible materials as allowed by Sections 705.2.3.1 and 705.2.4.
+    piece_sha256: 27c74b70d9c39de5070022e277cb3e928b04e321e41f067cf846652a42d55018
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  705.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Projections from walls of Type III, IV or V construction are of any approved material: a person''s check (general.bc_705_2_2_type_iii_iv_v_projections).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 163
+      lines:
+      - 47
+      - 47
+      quote: 705.2.2 Type III, IV or V construction. Projections from walls of Type III, IV or V construction shall be of
+        any approved material.
+    piece_sha256: bd4a0a26f3fae3a90d0749ed2fc8cd5820d721c48fbb77413cc390c7ba399186
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  705.2.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Projections extending to 5 feet or less from the line used to determine the fire separation distance are of noncombustible
+      materials, combustible materials of at least 1-hour fire-resistance-rated construction, heavy timber construction per
+      2304.11, fire-retardant-treated wood, or as 705.2.3.1 permits; but Type VB construction is allowed for combustible projections
+      in Group R-3 and U occupancies with a fire separation distance of 5 feet or more: a person''s check (general.bc_705_2_3_projection_protection).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 163
+      lines:
+      - 48
+      - 54
+      quote: '705.2.3 Projection protection. Projections extending to 5 feet (1524 mm) or less from the line used to determine
+        the fire separa- tion distance shall be one of the following: 1. Noncombustible materials. 2. Combustible materials
+        of not less than 1-hour fire-resistance-rated construction. 3. Heavy timber construction complying with Section 2304.11.
+        4. Fire-retardant-treated wood. 5. As permitted by Section 705.2.3.1.'
+    - file: gov.ny.building.2025.pdf
+      page: 164
+      lines:
+      - 3
+      - 4
+      quote: 'Exception: Type VB construction shall be allowed for combustible projections in Group R-3 and U occupancies
+        with a fire sepa- ration distance greater than or equal to 5 feet (1524 mm).'
+    piece_sha256: b46a8bd5f37c6256ed76b085b199ca8b49fb7f100c6095c37a76deff0b5dcc00
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  705.2.3.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Balconies and similar projections of combustible construction other than fire-retardant-treated wood are fire-resistance
+      rated where Table 601 requires it for floor construction, or of heavy timber construction per 2304.11, and their aggregate
+      length is at most 50 percent of the building''s perimeter on each floor; but on buildings of Types I and II construction,
+      three stories or less above grade plane, fire-retardant-treated wood is permitted for balconies, porches, decks and
+      exterior stairways not used as required exits; untreated wood and plastic composites complying with ASTM D7032 and Section
+      2612 are permitted for pickets, rails and similar guard components at most 42 inches high; balconies and similar projections
+      on buildings of Types III, IV-HT and V construction may be of Type V construction with no fire-resistance rating where
+      sprinkler protection is extended to these areas; and where sprinkler protection is extended to the balcony areas, the
+      aggregate length of balconies on each floor is not limited: a person''s check (general.bc_705_2_3_1_balconies).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 164
+      lines:
+      - 5
+      - 18
+      quote: '705.2.3.1 Balconies and similar projections. Balconies and similar projections of combustible construction other
+        than fire- retardant-treated wood shall be fire-resistance rated where required by Table 601 for floor construction
+        or shall be of heavy timber construction in accordance with Section 2304.11. The aggregate length of the projections
+        shall not exceed 50 percent of the building’s perimeter on each floor. Exceptions: 1. On buildings of Types I and
+        II construction, three stories or less above grade plane, fire-retardant-treated wood shall be permitted for balconies,
+        porches, decks and exterior stairways not used as required exits. 2. Untreated wood and plastic composites that comply
+        with ASTM D7032 and Section 2612 are permitted for pickets, rails and similar guard components that are limited to
+        42 inches (1067 mm) in height. 3. Balconies and similar projections on buildings of Types III, IV-HT and V construction
+        shall be permitted to be of Type V construction and shall not be required to have a fire-resistance rating where sprinkler
+        protection is extended to these areas. 4. Where sprinkler protection is extended to the balcony areas, the aggregate
+        length of the balcony on each floor shall not be limited.'
+    piece_sha256: 1b791abfaff74ab0c63d4dfab4428386c5dbeb9ce80202778a23985168bc552f
     notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
     drafted_by: claude_code/claude-opus-5-5
     status: draft

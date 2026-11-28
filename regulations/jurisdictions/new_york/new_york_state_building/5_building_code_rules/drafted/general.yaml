@@ -5306,6 +5306,171 @@ rules:
     enclosures' and rated corridors' among them; shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_705_2_projections
+  kind: flag
+  topic: means_of_egress
+  title: Projections, egress balconies and exterior exit stairs among them (BCNYS 705.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 163
+    lines:
+    - 32
+    - 37
+    quote: '705.2 Projections. Cornices, eave overhangs, exterior balconies and similar projections extending beyond the exterior
+      wall shall conform to the requirements of this section and Section 1405. Exterior egress balconies and exterior exit
+      stairways and ramps shall comply with Sections 1021 and 1027, respectively. Projections shall not extend any closer
+      to the line used to determine the fire sepa- ration distance than shown in Table 705.2. Exception: Buildings on the
+      same lot and considered as portions of one building in accordance with Section 705.3 are not required to comply with
+      this section for projections between the buildings.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Cornices, eave overhangs, exterior balconies and similar projections beyond the exterior wall conform to 705.2
+      and Section 1405, exterior egress balconies and exterior exit stairways and ramps also to 1021 and 1027; no projection
+      comes closer to the line used to determine the fire separation distance than Table 705.2 allows; but buildings on the
+      same lot considered portions of one building per 705.3 need not comply for projections between them: the projections
+      and their distances aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 1405 isn't brought in; 1021, 1027 and 705.3
+    are (section groups 9e and 9g, Chapter 7 part e1). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_705_2_projection_distances
+  kind: flag
+  topic: means_of_egress
+  title: Projections' least distance from the line (BCNYS Table 705.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 163
+    lines:
+    - 38
+    - 44
+    quote: 'TABLE 705.2—MINIMUM DISTANCE OF PROJECTION FIRE SEPARATION DISTANCE (FSD) (feet) MINIMUM DISTANCE FROM LINE USED
+      TO DETERMINE FSD 0 to less than 2 Projections not permitted 2 to less than 3 24 inches 3 to less than 5 Two-thirds of
+      FSD 5 or greater 40 inches For SI: 1 foot = 304.8 mm; 1 inch = 25.4 mm.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Table 705.2 gives the least distance a projection keeps from the line used to determine the fire separation distance
+      (FSD), by the FSD in feet: 0 to less than 2, projections not permitted; 2 to less than 3, 24 inches; 3 to less than
+      5, two-thirds of the FSD; 5 or greater, 40 inches: the projections and their distances aren''t in the model, so a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Typed row by row from the page image (p.163);
+    used by no rule. 1021.4 and 1027.5 keep egress balconies and exterior exit stairways at least 10 feet (5 feet for Group
+    R-3's) from the lot line, more than this table asks. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_2_1_type_i_ii_projections
+  kind: flag
+  topic: means_of_egress
+  title: Projections from Type I and II walls noncombustible (BCNYS 705.2.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 163
+    lines:
+    - 45
+    - 46
+    quote: 705.2.1 Types I and II construction. Projections from walls of Type I or II construction shall be of noncombustible
+      materials or combustible materials as allowed by Sections 705.2.3.1 and 705.2.4.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Projections from walls of Type I or II construction are of noncombustible materials, or of combustible materials
+      as 705.2.3.1 (balconies and similar projections) and 705.2.4 (bay and oriel windows) allow: the type of construction
+      and the projections aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 705.2.4 isn't brought in (bay and oriel windows
+    aren't means of egress); 705.2.3.1 is. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_2_2_type_iii_iv_v_projections
+  kind: flag
+  topic: means_of_egress
+  title: Projections from Type III, IV and V walls of approved material (BCNYS 705.2.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 163
+    lines:
+    - 47
+    - 47
+    quote: 705.2.2 Type III, IV or V construction. Projections from walls of Type III, IV or V construction shall be of any
+      approved material.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Projections from walls of Type III, IV or V construction are of any approved material: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_2_3_projection_protection
+  kind: flag
+  topic: means_of_egress
+  title: Projections within 5 feet of the line protected (BCNYS 705.2.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 163
+    lines:
+    - 48
+    - 54
+    quote: '705.2.3 Projection protection. Projections extending to 5 feet (1524 mm) or less from the line used to determine
+      the fire separa- tion distance shall be one of the following: 1. Noncombustible materials. 2. Combustible materials
+      of not less than 1-hour fire-resistance-rated construction. 3. Heavy timber construction complying with Section 2304.11.
+      4. Fire-retardant-treated wood. 5. As permitted by Section 705.2.3.1.'
+  - file: gov.ny.building.2025.pdf
+    page: 164
+    lines:
+    - 3
+    - 4
+    quote: 'Exception: Type VB construction shall be allowed for combustible projections in Group R-3 and U occupancies with
+      a fire sepa- ration distance greater than or equal to 5 feet (1524 mm).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Projections extending to 5 feet or less from the line used to determine the fire separation distance are of noncombustible
+      materials, combustible materials of at least 1-hour fire-resistance-rated construction, heavy timber construction per
+      2304.11, fire-retardant-treated wood, or as 705.2.3.1 permits; but Type VB construction is allowed for combustible projections
+      in Group R-3 and U occupancies with a fire separation distance of 5 feet or more: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 2304.11 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_2_3_1_balconies
+  kind: flag
+  topic: means_of_egress
+  title: Combustible balconies' rating and length (BCNYS 705.2.3.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 164
+    lines:
+    - 5
+    - 18
+    quote: '705.2.3.1 Balconies and similar projections. Balconies and similar projections of combustible construction other
+      than fire- retardant-treated wood shall be fire-resistance rated where required by Table 601 for floor construction
+      or shall be of heavy timber construction in accordance with Section 2304.11. The aggregate length of the projections
+      shall not exceed 50 percent of the building’s perimeter on each floor. Exceptions: 1. On buildings of Types I and II
+      construction, three stories or less above grade plane, fire-retardant-treated wood shall be permitted for balconies,
+      porches, decks and exterior stairways not used as required exits. 2. Untreated wood and plastic composites that comply
+      with ASTM D7032 and Section 2612 are permitted for pickets, rails and similar guard components that are limited to 42
+      inches (1067 mm) in height. 3. Balconies and similar projections on buildings of Types III, IV-HT and V construction
+      shall be permitted to be of Type V construction and shall not be required to have a fire-resistance rating where sprinkler
+      protection is extended to these areas. 4. Where sprinkler protection is extended to the balcony areas, the aggregate
+      length of the balcony on each floor shall not be limited.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Balconies and similar projections of combustible construction other than fire-retardant-treated wood are fire-resistance
+      rated where Table 601 requires it for floor construction, or of heavy timber construction per 2304.11, and their aggregate
+      length is at most 50 percent of the building''s perimeter on each floor; but on buildings of Types I and II construction,
+      three stories or less above grade plane, fire-retardant-treated wood is permitted for balconies, porches, decks and
+      exterior stairways not used as required exits; untreated wood and plastic composites complying with ASTM D7032 and Section
+      2612 are permitted for pickets, rails and similar guard components at most 42 inches high; balconies and similar projections
+      on buildings of Types III, IV-HT and V construction may be of Type V construction with no fire-resistance rating where
+      sprinkler protection is extended to these areas; and where sprinkler protection is extended to the balcony areas, the
+      aggregate length of balconies on each floor is not limited: the balconies, the type of construction and the sprinklers''
+      extent aren''t in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 601, 2304.11, 2612 and ASTM D7032 aren''t
+    brought in. Shown for every building: a required exit''s exterior stairway never takes exception 1, and exceptions 3 and
+    4 turn on sprinkler protection extended to the balconies, not a stated fact.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_705_3_buildings_on_the_same_lot
   kind: flag
   topic: means_of_egress

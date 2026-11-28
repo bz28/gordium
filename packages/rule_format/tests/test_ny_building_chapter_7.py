@@ -583,6 +583,11 @@ def test_part_d_review_round_4s_notes(book):
 # text): each row's own words in the flag's note (an anchor that starts the row's clause) and what the page prints for
 # that row, each looked for only inside the row's own clause, as CHART_716
 CHART_705 = {
+    "general.bc_table_705_2_projection_distances": [
+        ("0 to less than 2", ["projections not permitted"]),
+        ("2 to less than 3", ["24 inches"]),
+        ("3 to less than 5", ["two-thirds of the FSD"]),
+        ("5 or greater", ["40 inches"])],
     "general.bc_table_705_5_exterior_wall_ratings": [
         ("in three columns", ["Group H (note e)", "Groups F-1, M and S-1 (note f)",
                               "Groups A, B, E, F-2, I, R (note i), S-2 and U (note h)"]),
@@ -654,7 +659,9 @@ def test_the_705_chart_catches_a_row_changed(book):
                (openings, "UP, NS 70%", "UP, NS 45%"),
                (openings, "UP, NS not permitted, UP, S 15%", "UP, NS 15%, UP, S 15%"),
                (openings, "UP, S 75%", "UP, S no limit"),
-               (openings, "an NFPA 13R or 13D system is not 903.3.1.1's", "an NFPA 13D system is not 903.3.1.1's")]
+               (openings, "an NFPA 13R or 13D system is not 903.3.1.1's", "an NFPA 13D system is not 903.3.1.1's"),
+               ("general.bc_table_705_2_projection_distances", "5 or greater, 40 inches", "5 or greater, 24 inches"),
+               ("general.bc_table_705_2_projection_distances", "2 to less than 3, 24 inches", "2 to less than 3, 40 inches")]
     for rid, a, b in changes:
         assert a in notes[rid], a
         assert _chart_705_misses({**notes, rid: notes[rid].replace(a, b, 1)}), (rid, a)
@@ -680,3 +687,25 @@ def test_705_9_5s_exceptions_need_a_stated_fact(book, ctx):
         assert outcome(r, given, allowed) == "needs_review", given
     note = " ".join(_shown_note(r).split())
     assert "three stories or less above grade plane" in note and "open parking garages" in note
+
+
+def test_705_2s_projections_reach_egress_balconies_and_exterior_exit_stairways(book, labels):
+    """Review round 1 of part e1: exterior egress balconies and exterior exit stairways are projections (705.2 adds 1021
+    and 1027 to its own requirements, never replaces them), so 705.2 to 705.2.3.1 and Table 705.2 are brought in as
+    flags; 705.2.3.1's note keeps the balconies' 50 percent of the perimeter and the fire-retardant-treated wood
+    allowance only for exterior stairways "not used as required exits"."""
+    rules = {r["id"]: r for r in book}
+    for pid in ("705.2", "Table 705.2", "705.2.1", "705.2.2", "705.2.3", "705.2.3.1"):
+        assert labels[pid]["label"] == "flag" and _flags(book, pid), pid
+    balconies = " ".join(_shown_note(rules["general.bc_705_2_3_1_balconies"]).split())
+    assert "50 percent of the building's perimeter on each floor" in balconies
+    assert "exterior stairways not used as required exits" in balconies
+    assert "1021 and 1027" in _shown_note(rules["general.bc_705_2_projections"])
+
+
+def test_the_readmes_rule_count_is_the_rulebooks():
+    """Review round 1 of part e1: the README's count of hand-drafted rules and flags is the rulebook's own."""
+    rules = load(RULEBOOK)["rules"]
+    flags = sum(r["kind"] == "flag" for r in rules)
+    readme = " ".join((NY / "README.md").read_text(encoding="utf-8").split())
+    assert f"{len(rules)} hand-drafted (drafts: approval is deferred): {len(rules) - flags} rules and {flags} flags" in readme

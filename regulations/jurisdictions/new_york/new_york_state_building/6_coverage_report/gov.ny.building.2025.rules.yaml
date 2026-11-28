@@ -810,6 +810,36 @@ pieces:
     heading: Marking and identification
     rules:
     - general.bc_703_5_marking
+  '705.2':
+    label: flag
+    heading: Projections
+    rules:
+    - general.bc_705_2_projections
+  Table 705.2:
+    label: flag
+    heading: Minimum distance of projection
+    rules:
+    - general.bc_table_705_2_projection_distances
+  705.2.1:
+    label: flag
+    heading: Projections › Types I and II construction
+    rules:
+    - general.bc_705_2_1_type_i_ii_projections
+  705.2.2:
+    label: flag
+    heading: Projections › Type III, IV or V construction
+    rules:
+    - general.bc_705_2_2_type_iii_iv_v_projections
+  705.2.3:
+    label: flag
+    heading: Projections › Projection protection
+    rules:
+    - general.bc_705_2_3_projection_protection
+  705.2.3.1:
+    label: flag
+    heading: Projection protection › Balconies and similar projections
+    rules:
+    - general.bc_705_2_3_1_balconies
   '705.3':
     label: flag
     heading: Buildings on the same lot
@@ -822,7 +852,7 @@ pieces:
     - general.bc_705_5_exterior_wall_ratings
   Table 705.5:
     label: flag
-    heading: Fire-resistance rating requirements for
+    heading: Fire-resistance rating requirements for exterior walls based on fire separation distance
     rules:
     - general.bc_table_705_5_exterior_wall_ratings
   '705.6':
