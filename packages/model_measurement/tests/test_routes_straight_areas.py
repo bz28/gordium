@@ -161,6 +161,21 @@ def test_an_outline_at_the_walls_inside_faces_gives_no_ratio():
     with pytest.raises(Stop) as stop:
         straight.ratio(story(d))
     assert stop.value.key == "outline_needed", stop.value.reason
+    # whichever way the inner outline runs (clockwise here), and with its sides given in short pieces (cold review)
+    import math as _m
+    def pieces(poly, step=2):
+        out = []
+        for i in range(len(poly)):
+            a, b = poly[i], poly[(i + 1) % len(poly)]
+            k = _m.ceil(_m.dist(a, b) / step)
+            out += [[a[0] + (b[0] - a[0]) * j / k, a[1] + (b[1] - a[1]) * j / k] for j in range(k)]
+        return out
+    for inner in ([list(p) for p in reversed(rect(0, 0, 60, 28))], pieces(rect(0, 0, 60, 28))):
+        d = upper_story(rect(0, 0, 60, 28))
+        d["story_outlines"][0]["inner"] = inner
+        with pytest.raises(Stop) as stop:
+            straight.ratio(story(d))
+        assert stop.value.key == "outline_not_outer", stop.value.reason
     # one long side only drawn at its inside face: refused too
     d = upper_story(rect(-0.5, -0.5, 60.5, 28.5))
     d["story_outlines"][0]["outer"] = [list(p) for p in rect(-0.5, -0.5, 60.5, 28)]

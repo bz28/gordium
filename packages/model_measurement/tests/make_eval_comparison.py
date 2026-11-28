@@ -158,7 +158,7 @@ def main(path, out_path=OUT, co=CO):
     try:
         far, across, ratio = straight.ratio(story)
     except Stop as s:
-        if s.key not in ("outline_short", "outline_not_outer"):
+        if s.key not in ("outline_short", "outline_not_outer", "outline_needed"):
             raise
         far, across, refused = straight.remoteness(story), straight.diagonal(story), s.reason
         ratio = far.length / across.length
