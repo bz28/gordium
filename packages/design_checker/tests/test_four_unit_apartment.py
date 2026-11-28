@@ -904,3 +904,44 @@ def test_no_stairs_on_its_upper_storys_walls_with_no_rooms_yet_never_sets_the_st
     one = dict(desc, story_outlines=[o for o in desc["story_outlines"] if o["level"] == "L1"])
     got = egress.check(laws, one, VALUES, ALLOWED)
     assert {v for k, v in got["results"].items() if k.startswith("general.bc_1011_")} == {"not_applicable"}
+
+
+def test_the_escape_openings_reading_never_says_no_stairs_and_the_stairs_reading_still_does(got, laws):
+    """The escape openings' reading (egress._escape_openings) measured the drawing with "stairs: []" forced in, which
+    since #279 is checked against the floors: the apartment (two levels, its stairs not described) got a needs-review
+    line "the model says there are no stairs, yet its rooms are on 2 levels", noise from a reading that gives no
+    stairs. It now leaves the stairs and guards out: the apartment as sent has no such line, nor the stairs and
+    guards' "weren't read" twice; stated "no stairs", the stairs' own reading still says it, once."""
+    said = lambda answer: [i for i in answer["items"] if "the model says there are no stairs" in (i.get("reason") or "")]
+    assert not said(got)
+    escape = egress._escape_openings(build.interior_of())
+    assert not any("stairs" in p or "guards" in p for p in escape["problems"]), escape["problems"]
+    desc = build.interior_of()
+    desc["stairs"] = []
+    stated = egress.check(laws, desc, VALUES, ALLOWED)
+    assert len(said(stated)) == 1, [i["reason"] for i in said(stated)]
+    assert {v for k, v in stated["results"].items() if k.startswith("general.bc_1011_")} == {present.REVIEW}
+
+
+def test_the_building_codes_stairs_reading_reads_no_stairs_against_the_ground_within_its_own_half_inch(laws):
+    """Ground-fix review round 3 (skeptic A): the Building Code's stairs are read with BCNYS 1010.1.4's and 1010.1.6's
+    1/2 in either way (egress._stairs_and_guards passes BUILDING_LANDING), never the house code's 8 1/4 in. The
+    apartment cut to Level 1 with "no stairs" and one opening whose ground is 4.8 in below the floor: every 1011
+    rule needs review (with the house bounds it was set aside); the ground 0.4 in below, the claim stands."""
+    desc = build.interior_of()
+    desc["stairs"] = []
+    desc["rooms"] = [r for r in desc["rooms"] if r["level"] == "L1"]
+    ids = {r["id"] for r in desc["rooms"]}
+    desc["doors"] = [d for d in desc["doors"] if all(v in ids or v is None for v in (d.get("from_room"), d.get("to_room")))]
+    desc["story_outlines"] = [o for o in desc["story_outlines"] if o["level"] == "L1"]
+    per_in = {"ft": 1 / 12, "in": 1, "mm": 25.4, "m": 0.0254}[desc["units"]]
+    floor = next(lv["elevation"] for lv in desc["levels"] if lv["id"] == "L1")
+
+    def stair_results(ground_in):
+        d = copy.deepcopy(desc)
+        d["openings"] = [{"id": "probe_w", "name": "Probe", "escape": False, "ground_outside": floor + ground_in * per_in}]
+        got = egress.check(laws, d, VALUES, ALLOWED)
+        return {v for k, v in got["results"].items() if k.startswith("general.bc_1011_")}, got["interior"]["problems"]
+    results, problems = stair_results(-4.8)
+    assert results == {present.REVIEW} and any("more than 1/2 in above the ground" in p for p in problems), problems
+    assert stair_results(-0.4)[0] == {"not_applicable"}
