@@ -1621,7 +1621,7 @@ def test_drawn_and_stated_the_same():
     assert {v["used"] for v in came.values()} == {"both"}
 
 
-def test_the_makers_opening_alone():
+def test_the_makers_door_opening_alone():
     d = stated_door(width=34, height=81)
     for k in ("stops", "hinge_pin", "leaf_closed", "threshold_top", "head_stop_bottom"):
         del d["doors"][0][k]
