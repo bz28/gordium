@@ -747,7 +747,12 @@ def test_part_e2s_notes_keep_the_laws_limits(book, labels):
         assert labels[pid]["label"] == "flag" and _flags(book, pid), pid
     readme = (NY / "README.md").read_text(encoding="utf-8")
     left_out = readme.split("## References in the brought-in sections that are not brought in", 1)[1]
-    assert "716.2.5.4.1, 716.2.6.3, 716.2.7, 716.2.8 and 716.3.2.1.1.1" in left_out
+    assert "716.2.5.4.1, 716.2.6.3 and 716.3.2.1.1.1" in left_out
+    # review round 1: fire shutters are opening protectives 705.9.2 and Table 716.1(2) reach, so 716.2.7 and 716.2.8 are
+    # flags; 716.2.6's pointer names the one hardware piece left out
+    for pid, words in (("716.2.7", "readily opened from the outside"), ("716.2.8", "approved automatic-closing devices")):
+        assert labels[pid]["label"] == "flag" and words in " ".join(_shown_note(_flags(book, pid)[0]).split()), pid
+    assert "716.2.6.3, chute intake doors, isn't brought in" in labels["716.2.6"]["reason"]
 
 
 # the definitions part e1 brought in by the italics of its pieces (sources.yaml names none by hand)

@@ -1517,6 +1517,16 @@ pieces:
     heading: Fire door hardware and closers › Doors in pedestrian ways
     rules:
     - general.bc_716_2_6_7_pedestrian_way_doors
+  716.2.7:
+    label: flag
+    heading: Fire door assemblies › Swinging fire shutters
+    rules:
+    - general.bc_716_2_7_swinging_fire_shutters
+  716.2.8:
+    label: flag
+    heading: Fire door assemblies › Rolling fire shutters
+    rules:
+    - general.bc_716_2_8_rolling_fire_shutters
   716.2.9:
     label: flag
     heading: Fire door assemblies › Labeled protective assemblies

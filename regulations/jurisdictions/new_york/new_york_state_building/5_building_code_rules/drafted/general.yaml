@@ -7887,6 +7887,52 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_716_2_7_swinging_fire_shutters
+  kind: flag
+  topic: means_of_egress
+  title: Swinging fire shutters openable from outside (BCNYS 716.2.7)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 30
+    - 32
+    quote: 716.2.7 Swinging fire shutters. Where fire shutters of the swinging type are installed in exterior openings, not
+      less than one row in every three vertical rows shall be arranged to be readily opened from the outside, and shall be
+      identified by distinguishing marks or letters not less than 6 inches (152 mm) high.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where swinging fire shutters are installed in exterior openings (an exit stairway''s exterior wall among them,
+      1023.7 and 705.9.2), at least one row in every three vertical rows is arranged to be readily opened from the outside
+      and is identified by distinguishing marks or letters at least 6 inches high: shutters aren''t in the model, so a person''s
+      check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Brought in by part e2''s review round 1:
+    a fire shutter is an opening protective 705.9.2 sends to 716. Shown for every building.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_8_rolling_fire_shutters
+  kind: flag
+  topic: means_of_egress
+  title: Rolling fire shutters with automatic-closing devices (BCNYS 716.2.8)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 33
+    - 34
+    quote: 716.2.8 Rolling fire shutters. Where fire shutters of the rolling type are installed, such shutters shall include
+      approved auto- matic-closing devices.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where rolling fire shutters are installed (as opening protectives in a rated corridor wall or an exterior wall,
+      Table 716.1(2) and 705.9.2), they include approved automatic-closing devices: shutters aren''t in the model, so a person''s
+      check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Brought in by part e2''s review round 1:
+    a fire shutter is an opening protective Table 716.1(2) rates and 705.9.2 sends to 716. Shown for every building.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_716_2_9_labeled_assemblies
   kind: flag
   topic: means_of_egress

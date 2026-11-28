@@ -668,8 +668,8 @@ results:
   general.bc_716_2_2_3_1_glazing_in_exit_enclosure_doors: needs_review
   general.bc_716_2_3_fire_doors: needs_review
   general.bc_716_2_4_fire_door_frames: needs_review
-  # Chapter 7 part e2 (2026-11-28, 40 flags): the rest of Section 716 (glazing in fire doors, hardware and closers,
-  # labels, fire windows, fire protective curtains): no door's or window's construction is in the model
+  # Chapter 7 part e2 (2026-11-28, 42 flags): the rest of Section 716 (glazing in fire doors, hardware and closers,
+  # fire shutters, labels, fire windows, fire protective curtains): no door's or window's construction is in the model
   general.bc_716_2_5_1_glazing_size_limitations: needs_review
   general.bc_716_2_5_1_1_fire_resistance_rated_door_glazing: needs_review
   general.bc_716_2_5_1_2_fire_protection_rated_door_glazing: needs_review
@@ -683,6 +683,8 @@ results:
   general.bc_716_2_6_4_automatic_closing_assemblies: needs_review
   general.bc_716_2_6_6_smoke_activated_doors: needs_review
   general.bc_716_2_6_7_pedestrian_way_doors: needs_review
+  general.bc_716_2_7_swinging_fire_shutters: needs_review
+  general.bc_716_2_8_rolling_fire_shutters: needs_review
   general.bc_716_2_9_labeled_assemblies: needs_review
   general.bc_716_2_9_1_fire_door_labels: needs_review
   general.bc_716_2_9_2_oversized_doors: needs_review

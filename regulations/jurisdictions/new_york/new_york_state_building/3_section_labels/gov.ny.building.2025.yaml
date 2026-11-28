@@ -12715,8 +12715,8 @@ labels:
   716.2.6:
     label: reference
     topic: means_of_egress
-    reason: 'A pointer: fire door hardware and closers are installed as 716.2.6.1 to 716.2.6.7 say, those egress doors use
-      each labeled on its own.'
+    reason: 'A pointer: fire door hardware and closers are installed as 716.2.6.1, 716.2.6.2 and 716.2.6.4 to 716.2.6.7 say, each
+      labeled on its own (716.2.6.3, chute intake doors, isn''t brought in: not means of egress).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 188
@@ -12852,6 +12852,42 @@ labels:
       quote: 716.2.6.7 Doors in pedestrian ways. Vertical sliding or vertical rolling steel fire doors in openings through
         which pedestrians travel shall be heat activated or activated by smoke detectors with alarm verification.
     piece_sha256: 39398407112d4ca927d8f939949b4624a0fe0b5148c2588eef16f78742b74b30
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e2.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  716.2.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where swinging fire shutters are installed in exterior openings (an exit stairway''s exterior wall among them,
+      1023.7 and 705.9.2), at least one row in every three vertical rows is arranged to be readily opened from the outside
+      and is identified by distinguishing marks or letters at least 6 inches high: a person''s check (general.bc_716_2_7_swinging_fire_shutters).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 189
+      lines:
+      - 30
+      - 32
+      quote: 716.2.7 Swinging fire shutters. Where fire shutters of the swinging type are installed in exterior openings,
+        not less than one row in every three vertical rows shall be arranged to be readily opened from the outside, and shall
+        be identified by distinguishing marks or letters not less than 6 inches (152 mm) high.
+    piece_sha256: a374933ba707a419682afa64550e17cec356edbf443c924f625edbf81b506714
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e2.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  716.2.8:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where rolling fire shutters are installed (as opening protectives in a rated corridor wall or an exterior wall,
+      Table 716.1(2) and 705.9.2), they include approved automatic-closing devices: a person''s check (general.bc_716_2_8_rolling_fire_shutters).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 189
+      lines:
+      - 33
+      - 34
+      quote: 716.2.8 Rolling fire shutters. Where fire shutters of the rolling type are installed, such shutters shall include
+        approved auto- matic-closing devices.
+    piece_sha256: ac0017b449b51cabf6c04bd1dc8d1dc9918437e075996ce6813f58dfceb1411f
     notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e2.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
