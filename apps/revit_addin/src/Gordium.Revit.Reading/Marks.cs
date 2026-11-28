@@ -91,6 +91,151 @@ public static class Marks
         "BCNYS 1010.1.1: \"Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm).\" " +
         "1: the door's clear width is checked against 32 in. 2: one leaf of the pair must give the 32 in, which the maker's clear opening of the whole pair doesn't show, so a person checks. Blank or any other number: the door width needs review.");
 
+    /// <summary>What latches or locks a door (<c>doors[].hardware</c>, BCNYS 1010.2.8), one of <see cref="HardwareWords"/>,
+    /// set on each door: no Revit door family or type parameter says it (Revit has no built-in hardware parameter, and a
+    /// firm's own "Hardware Set" names a set in its specification, not what the set holds). Blank or a word not in the
+    /// list: not sent, so the panic hardware rule needs review for the door (never a pass).</summary>
+    public static readonly MarkDefinition DoorHardware = new(
+        "Gordium: Hardware", new("9900f8fa-52dd-4654-bda2-1e1a4b9cb959"), MarkValueKind.Text, MarkBinding.Instance,
+        [Doors], "doors[].hardware",
+        "What latches or locks this door, one of: " + HardwareWords.Table.Listed + ". Panic or fire exit hardware: its only latch or lock is panic hardware or fire exit hardware. " +
+        "With an electric lock: that, and an electric lock the hardware releases (1010.2.8 exception 2 allows it only in Groups A and E). Other latch or lock: any other (a lever latch, a deadbolt, a thumb turn). No latch or lock: none at all. " +
+        "BCNYS 1010.2.8: \"Swinging doors serving a Group H occupancy and swinging doors serving rooms or spaces with an occupant load of 50 or more in a Group A or E occupancy shall not be provided with a latch or lock other than panic hardware or fire exit hardware.\" " +
+        "Blank: the panic hardware rule needs review for a swinging door in a building that may be Group H, A or E.");
+
+    /// <summary>Whether the Toposolids (and older topography surfaces) in the design checked show the finished ground
+    /// (<c>openings[].ground_outside</c>, GroundReader): the code measures from the finished ground (RCNYS R202 GRADE,
+    /// "The finished ground level adjoining the building at all exterior walls"), and a Toposolid may be the survey's
+    /// existing ground, which nothing in Revit tells apart (Rhino's picked terrain isn't taken as finished either). On
+    /// Project Information, as <see cref="GroundFrom"/> is. Yes: the ground at each window is read from them, and at each door
+    /// whose type's clear height is confirmed (GroundReader, InteriorReader.DoorBottom). Blank: it is where the phases show it (GroundReader.PhasesShow), else not;
+    /// No: it isn't (the Gordium: Below grade and Well marks, or a review; one the phases contradict is noted).</summary>
+    public static readonly MarkDefinition ToposolidFinished = new(
+        "Gordium: Toposolid is finished ground", new("bbb69f1e-d644-4830-8ba0-cd958c04bbb8"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "openings[].ground_outside",
+        "Yes when the Toposolids (or older topography surfaces) in this design show the finished ground, as it will be built after any regrading, not the existing ground of a survey. " +
+        "RCNYS R202: \"GRADE. The finished ground level adjoining the building at all exterior walls.\" " +
+        "Yes: Gordium reads the ground just outside each window from them (a door's only where its type's clear height is confirmed, its clear bottom then bounded), so whether an escape window is below grade, and how deep its area well is at least, are measured (a Gordium: Below grade or Well depth mark set on the opening wins, and one that disagrees with the ground needs review). " +
+        "Blank: read where the project's phases show it (its existing ground drawn in an earlier phase and demolished in a later one, under the ground at the window, and every Toposolid of the design made in the last phase), else not read. " +
+        "No: not read (where the phases point to it being the finished ground, Read inside notes that the two disagree). Not read, the Gordium: Below grade and Well marks are what the area well rules use, and blank ones need review.");
+
+    // ---- an escape opening's place below the ground and its area well (BCNYS 1031.5; RCNYS R319.4 for a house): set on
+    // each window or door, sent as openings[].stated_well. A well isn't in Revit's vocabulary (firms draw it as a generic
+    // model, an in-place family or a maker's family, each its own way, or not at all), so its size, ladder and what
+    // reaches into it can't be read from the model for certain. Below grade and the depth are measured from the ground
+    // where a Toposolid shows the finished ground (ToposolidFinished, GroundReader); a mark set wins, and one the ground
+    // contradicts needs review. Each is read only on an opening marked Gordium: Escape opening; blank is not stated,
+    // never 0 or No, and its rule needs review.
+
+    private const string Projected = " (Manage > Project Units: 3 typed is 3 ft in a feet project, 3 mm in a millimeter one): ";
+
+    public static readonly MarkDefinition BelowGrade = new(
+        "Gordium: Below grade", new("250e27a5-d58b-4ddf-8ece-b35235ccc1f2"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.below_grade",
+        "Yes when the bottom of this escape opening's clear opening is below the ground outside it (the adjacent grade). " +
+        "BCNYS 1031.5: \"An emergency escape and rescue opening with the bottom of the clear opening below the adjacent grade shall be provided with an area well in accordance with Sections 1031.5.1 through 1031.5.3.\" " +
+        "Yes: its area well is checked from its Gordium: Well marks. No: it needs no area well. Blank: read from the Toposolid where Gordium: Toposolid is finished ground is Yes, or blank and the phases show the finished ground (see that mark; for a door, only with its type's clear height confirmed), else the area well rules need review. Set, it wins over the Toposolid; the two disagreeing needs review.");
+
+    public static readonly MarkDefinition WellArea = new(
+        "Gordium: Well area", new("6e368439-8dd1-48c8-99bf-eff9afd45b39"), MarkValueKind.Area, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.area",
+        AreaWords + " (Manage > Project Units: 9 typed is 9 sq ft in a square-feet project, 9 m² in a square-meters one): the horizontal area inside this escape opening's area well, as built (a curved well's own area, never its width times its projection; at least 9 sq ft, BCNYS 1031.5.1). " +
+        "Blank: the well's area needs review. It is checked with Gordium: Well other encroachment and Gordium: Well ladder encroachment: anything else in the well's required dimensions, or a ladder or steps reaching in more than the law allows, fails it; a ladder or steps the open window blocks, reaching in 6 in or less in a well over 44 in deep, needs review.");
+
+    public static readonly MarkDefinition WellWidth = new(
+        "Gordium: Well width", new("6305ccee-e00f-4870-868f-e58241f9a0ef"), MarkValueKind.Length, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.width",
+        LengthWords + Projected + "the inside width of this escape opening's area well, measured along the wall (at least 36 in, BCNYS 1031.5.1). Blank: the well's width needs review. It is checked with Gordium: Well other encroachment and Gordium: Well ladder encroachment: anything else in the well's required dimensions, or a ladder or steps reaching in more than the law allows, fails it; a ladder or steps the open window blocks, reaching in 6 in or less in a well over 44 in deep, needs review.");
+
+    public static readonly MarkDefinition WellProjection = new(
+        "Gordium: Well projection", new("8814e090-d06c-467c-ae0f-c0518835997f"), MarkValueKind.Length, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.projection",
+        LengthWords + Projected + "how far the inside of this escape opening's area well projects out from the wall (at least 36 in, BCNYS 1031.5.1). Blank: the well's projection needs review. It is checked with Gordium: Well other encroachment and Gordium: Well ladder encroachment: anything else in the well's required dimensions, or a ladder or steps reaching in more than the law allows, fails it; a ladder or steps the open window blocks, reaching in 6 in or less in a well over 44 in deep, needs review.");
+
+    public static readonly MarkDefinition WellDepth = new(
+        "Gordium: Well depth", new("8aba2fba-b56c-4825-ab0f-86247ec221c8"), MarkValueKind.Length, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.depth",
+        LengthWords + Projected + "the vertical depth of this escape opening's area well, from the ground around it down to the well's floor. " +
+        "BCNYS 1031.5.2: \"Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped with an approved permanently affixed ladder or steps.\" " +
+        "Blank: where Gordium: Toposolid is finished ground is Yes, or blank and the phases show the finished ground (a door with its type's clear height confirmed), the ground over the opening's bottom is the least the well can be deep (its floor isn't drawn), used only past 44 in and as a reading to confirm; else whether it needs a ladder or steps needs review. Set less than that least depth: review.");
+
+    public static readonly MarkDefinition WellLadder = new(
+        "Gordium: Well ladder or steps", new("a9a70071-4f69-40e0-9db5-a713f65b7e6a"), MarkValueKind.Text, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.ladder",
+        "What this escape opening's area well has, permanently affixed, to climb out by, one of: " + WellLadderWords.Listed + ". Blocked when open: the window or door, fully open, obstructs it. " +
+        "BCNYS 1031.5.2: \"The ladder or steps shall not be obstructed by the emergency escape and rescue opening when the window or door is in the open position.\" " +
+        "None: nothing reaches into the well's dimensions from a ladder or steps. Blank: the ladder rules need review.");
+
+    public static readonly MarkDefinition WellLadderWidth = new(
+        "Gordium: Well ladder width", new("2cfc1b61-245d-4783-afab-6eefd4fae35a"), MarkValueKind.Length, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.ladder_width",
+        LengthWords + Projected + "the least inside width of the area well's ladder (between its rails) or steps (at least 12 in, BCNYS 1031.5.2.1 and 1031.5.2.2). Blank: the ladder's or steps' width needs review.");
+
+    public static readonly MarkDefinition WellRungProjection = new(
+        "Gordium: Well rung projection", new("18694498-b560-4e59-95ac-a555e05d71ec"), MarkValueKind.Length, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.ladder_projection",
+        LengthWords + Projected + "the least distance the area well ladder's rungs stand out from the wall they are fixed to (at least 3 in, BCNYS 1031.5.2.1). Blank: the ladder's projection needs review.");
+
+    public static readonly MarkDefinition WellRungSpacing = new(
+        "Gordium: Well rung spacing", new("a380f476-72bc-4ee8-9720-296d49313a30"), MarkValueKind.Length, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.rung_spacing",
+        LengthWords + Projected + "the greatest vertical spacing of the area well ladder's rungs, center to center. " +
+        "BCNYS 1031.5.2.1: \"Ladders or rungs shall have an inside width of at least 12 inches (305 mm), shall project at least 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center (o.c.) vertically for the full height of the area well.\" Blank: the rung spacing needs review.");
+
+    public static readonly MarkDefinition WellStepTread = new(
+        "Gordium: Well step tread", new("8b6628e2-2ee7-434e-ad15-b563fa95ccca"), MarkValueKind.Length, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.step_tread",
+        LengthWords + Projected + "the least tread depth of the area well's steps. " +
+        "BCNYS 1031.5.2.2: \"Steps shall have an inside width of not less than 12 inches (305 mm), shall have treads greater than 5 inches (127 mm) in depth and a riser height not greater than 18 inches (457 mm) for the full height of the area well.\" Blank: the steps' treads need review.");
+
+    public static readonly MarkDefinition WellStepRiser = new(
+        "Gordium: Well step riser", new("444f0f5a-3046-4ce6-91b7-570b5cf3e23c"), MarkValueKind.Length, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.step_riser",
+        LengthWords + Projected + "the greatest riser height of the area well's steps, the top and bottom steps included (at most 18 in, BCNYS 1031.5.2.2). Blank: the steps' risers need review.");
+
+    public static readonly MarkDefinition WellLadderFullHeight = new(
+        "Gordium: Well ladder full height", new("f982cb20-0562-4a16-9cd8-40f8642b9ddb"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.full_height",
+        "Yes when the area well's ladder or steps run its full height, from its floor to the top (BCNYS 1031.5.2.1 and 1031.5.2.2: for the full height of the area well). No: they stop short. Blank: the ladder rules need review.");
+
+    public static readonly MarkDefinition WellLadderEncroachment = new(
+        "Gordium: Well ladder encroachment", new("f9c44848-4643-4aca-a1c2-e073d03694d8"), MarkValueKind.Length, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.ladder_encroachment",
+        LengthWords + Projected + "how far the area well's ladder or steps (blocked or not) reach into the well's required dimensions (the 36 in by 36 in clear zone); 0 where they reach into none. " +
+        "BCNYS 1031.5.1 exception: \"The ladder or steps required by Section 1031.5.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well.\" (RCNYS R319.4.1 has the same words.) " +
+        "Only a ladder or steps a well over 44 in deep requires, clear of the open window, may reach in, 6 in at most; any other reach fails the well's size (one the open window blocks, within 6 in, needs review). " +
+        "Blank, with a ladder or steps: the well's size rules need review (with Gordium: Well ladder or steps None, it is 0).");
+
+    public static readonly MarkDefinition WellOtherEncroachment = new(
+        "Gordium: Well other encroachment", new("961cebf6-451f-4b59-8151-f10eedcf1db5"), MarkValueKind.Length, MarkBinding.Instance,
+        [Windows, Doors], "openings[].stated_well.other_encroachment",
+        LengthWords + Projected + "how far anything in the area well other than its ladder or steps (a meter, a downspout, a bracket) reaches into the well's required dimensions (the 36 in by 36 in clear zone); 0 where nothing does. " +
+        "No exception allows it (BCNYS 1031.5.1, RCNYS R319.4.1): anything over 0 fails the well's size. Blank: the well's size rules need review.");
+
+    /// <summary>The area well marks, in the order the reader sends them, each with the <c>stated_well</c> key it fills.</summary>
+    public static IReadOnlyList<(MarkDefinition Mark, string Key)> WellMarks { get; } =
+    [
+        (BelowGrade, "below_grade"), (WellArea, "area"), (WellWidth, "width"), (WellProjection, "projection"), (WellDepth, "depth"),
+        (WellLadder, "ladder"), (WellLadderWidth, "ladder_width"), (WellRungProjection, "ladder_projection"),
+        (WellRungSpacing, "rung_spacing"), (WellStepTread, "step_tread"), (WellStepRiser, "step_riser"),
+        (WellLadderFullHeight, "full_height"), (WellLadderEncroachment, "ladder_encroachment"),
+        (WellOtherEncroachment, "other_encroachment"),
+    ];
+
+    /// <summary>A corridor's walls' fire-resistance rating, in minutes (<c>rooms[].fire_rating_hours</c>, sent in hours):
+    /// the architect's statement of the assemblies (BCNYS Table 1020.2), never read from the walls' geometry.</summary>
+    public static readonly MarkDefinition CorridorFireRating = new(
+        "Gordium: Corridor rating minutes", new("3e9778e1-4f8d-40cc-a224-58933cb06a45"), MarkValueKind.Integer,
+        MarkBinding.Instance, [Rooms], "rooms[].fire_rating_hours",
+        "A count: on a room whose Gordium: Use is Corridor, the minutes of fire-resistance rating of its walls (0 where they aren't rated; 30 for 1/2 hour, 60 for 1 hour; the least, where its walls differ), as the wall assemblies are rated. " +
+        "BCNYS 1020.2: \"Corridors shall be fire-resistance rated in accordance with Table 1020.2.\" Blank: the corridor rating rules need review.");
+
+    /// <summary>Whether a corridor's walls are smoke partitions (<c>rooms[].walls_smoke_partitions</c>, NFPA 101 2012 8.4).</summary>
+    public static readonly MarkDefinition SmokePartitionWalls = new(
+        "Gordium: Smoke partition walls", new("6a953c28-38f7-49d7-8e3c-5f38cc3aa78c"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [Rooms], "rooms[].walls_smoke_partitions",
+        "On a room whose Gordium: Use is Corridor: Yes when its walls form smoke partitions (NFPA 101 2012 8.4, a continuous membrane that restricts smoke). No: they don't. Blank: the rules that turn on it need review.");
+
     public static readonly MarkDefinition ClearConfirmed = new(
         "Gordium: Clear confirmed", new("66ced3f6-2dd7-4aa7-a0ce-89d086652103"), MarkValueKind.Text, MarkBinding.Type,
         [Windows, Doors], "openings[].stated_clear, doors[].stated_clear (the confirmation stamp)",
@@ -181,6 +326,19 @@ public static class Marks
         RoomFunctions.Listed + ". Leave it blank on an exit stair enclosure or exit passageway and on a room whose Gordium: Use is Corridor, Closet or Toilet. " +
         "Blank on any other room, or a word not in the list (sent as typed, and said): the room's occupant load and its story's need review.");
 
+    /// <summary>The dwelling unit a room belongs to (<c>rooms[].unit</c>), the architect's name for it ("1A", "Apt 2"):
+    /// where any room of a story has one, the story's dwelling units (BCNYS Table 1006.3.4(1)) are counted from the
+    /// marks, one unit per name, instead of grouped from the drawing (model_measurement/routes/dwelling_units.py). Sent
+    /// as typed, trimmed; blank is not stated. A mark naming two units, or a name the drawing disagrees with, leaves the
+    /// count at needs review (the checker says which).</summary>
+    public static readonly MarkDefinition RoomUnit = new(
+        "Gordium: Unit", new("631bdd26-d64d-4d89-b192-04321c4bc82e"), MarkValueKind.Text, MarkBinding.Instance,
+        [Rooms], "rooms[].unit",
+        "The name of the dwelling unit this room belongs to (1A, Apt 2), the same on every room of that unit, its halls, baths and closets included. " +
+        "Where any room on a level has one, Gordium counts that story's dwelling units (BCNYS Table 1006.3.4(1)) from these names, one unit per name, instead of working them out from the drawing. " +
+        "Leave it blank on a room shared between units (mark that room's Gordium: Use Corridor or Lobby) and on a room of no unit. One name per room: a room with two names, " +
+        "a unit's rooms not joined to each other, or a room left blank that may be a unit's, and the count needs review.");
+
     public static readonly MarkDefinition LotSurveyed = new(
         "Gordium: Lot surveyed", new("133d30e3-832f-4956-88c3-6b48989ac3f7"), MarkValueKind.YesNo, MarkBinding.Instance,
         [ProjectInformation], "facts.lot_surveyed",
@@ -202,7 +360,7 @@ public static class Marks
         "Gordium: Ground from", new("aa4ea7e3-5a41-48da-b6a8-979f3dfb3e5c"), MarkValueKind.Text, MarkBinding.Instance,
         [ProjectInformation], "facts.grade_from",
         "Which of Gordium's spot-grade markers give the ground: " + string.Join(" or ", GroundWords.Select(w => w.Word)) +
-        ". Blank: no ground is sent, so building height and stories need review (a Toposolid isn't read yet).");
+        ". Blank: no ground is sent, so building height and stories need review (a Toposolid isn't read for zoning yet).");
 
     /// <summary>The number of stories the architect states for the whole building (<c>facts.stories</c>): optional,
     /// never required, a whole number 1 or more, sent as the architect's statement. The measuring keeps it only within
@@ -354,12 +512,12 @@ public static class Marks
         "Yes: a corridor's occupant load is worked out by hand (the story's doesn't bound it). No: none does, so each corridor's load lies between none and its whole story's. Blank: worked out by hand, as for Yes.");
 
     /// <summary>Whether the building is or holds an ambulatory care facility (<c>building.ambulatory_care_facility</c>,
-    /// BCNYS 202, Section 422, Table 1020.3).</summary>
+    /// BCNYS 202, Section 422, Tables 1020.2 and 1020.3).</summary>
     public static readonly MarkDefinition AmbulatoryCareFacility = new(
         "Gordium: Ambulatory care facility", new("2a31e2c4-cf29-4ac4-9c57-a41ca85748b3"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "building.ambulatory_care_facility",
         "Yes when the building is or holds an ambulatory care facility (BCNYS 202 AMBULATORY CARE FACILITY, Section 422: outpatient care where patients may be rendered incapable of self-preservation, Group B). " +
-        "Table 1020.3 asks 72 in for its corridors and areas serving stretcher traffic, which the model doesn't show. Yes: a Group B corridor under 72 in is a person's check. No: none. Blank: that check needs review.");
+        "Table 1020.3 asks 72 in for its corridors and areas serving stretcher traffic, which the model doesn't show; Section 422 asks its fire partition from adjacent corridors (422.2) and its smoke compartments (422.3). Yes: Section 422's flags, a Group B corridor under 72 in and an unrated Group B corridor (Table 1020.2) are a person's check. No: none of them. Blank: those checks need review.");
 
     /// <summary>Whether any corridor is inside a dwelling or sleeping unit (<c>building.corridors_within_dwelling_units</c>,
     /// BCNYS 1020.2 exception 2, Table 1020.3).</summary>
@@ -377,6 +535,40 @@ public static class Marks
         "Yes only when the building is equipped throughout with an emergency voice/alarm communication system in accordance with BCNYS Section 907.5.2.2. A system in only part of the building: No. " +
         "With an automatic sprinkler system throughout too (NFPA 13; NFPA 13R in Group R only, elsewhere a person checks), BCNYS 1005.3.1 and 1005.3.2 exception 1 lower the egress capacity factors (other than Groups H and I-2): 0.15 in per occupant for corridors and other components, 0.2 in for stairways. " +
         "No: the full factors (0.2 in and 0.3 in). Blank: a capacity met only at the lower factor needs review.");
+
+    /// <summary>Whether the building has a mezzanine (<c>building.mezzanines</c>, BCNYS 505.2): read by the occupant
+    /// loads' ceiling (occupant_load.py), never a rule's own measure.</summary>
+    public static readonly MarkDefinition Mezzanines = new(
+        "Gordium: Mezzanines", new("c2f4615d-5335-49cc-a997-311bac414fbd"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.mezzanines",
+        "Yes when the building has a mezzanine: BCNYS 202 MEZZANINE: \"An intermediate level or levels between the floor and ceiling of any story and in accordance with Section 505.\" " +
+        "Its occupants add to a room on an adjacent level (1004.2.2), so with no room function set Gordium bounds a story's occupant load by its floor area alone only where the building has none. " +
+        "No: there is none (with the other facts that bound stated, a story holds at most one occupant per 5 sq ft of it). Yes: no such bound. Blank: no such bound, and asked where No would settle a rule.");
+
+    /// <summary>Whether any area's occupant load is counted by something other than its floor area
+    /// (<c>building.loads_not_by_area</c>, BCNYS Table 1004.5's rows with no factor): read by the occupant loads'
+    /// ceiling (occupant_load.py), never a rule's own measure.</summary>
+    public static readonly MarkDefinition LoadsNotByArea = new(
+        "Gordium: Loads not by area", new("501f87dd-fbc9-4ab6-8478-301feeb6d0a8"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.loads_not_by_area",
+        "Yes when any room or area of the building has an occupant load Table 1004.5 counts by something other than its floor area, whatever its use or group: fixed seats or benches, bowling lanes (Table 1004.5: 5 persons for each lane), a concentrated business use such as a call center or trading floor (1004.8: the actual occupant load as approved), or a covered or open mall (402.8.2). BCNYS 1004.6: \"For areas having fixed seats and aisles, the occupant load shall be determined by the number of fixed seats installed therein.\" " +
+        "No: there is none (with the other facts that bound stated, a story holds at most one occupant per 5 sq ft of it). Yes: no such bound. Blank: no such bound, and asked where No would settle a rule.");
+    /// <summary>Whether the building is a high-rise or more than 420 ft in building height (<c>building.high_rise_building</c>,
+    /// BCNYS 202 HIGH-RISE BUILDING, Section 403: 403.2.2, 403.5.2).</summary>
+    public static readonly MarkDefinition HighRiseBuilding = new(
+        "Gordium: High-rise building", new("50749eaa-b331-40c1-af60-c1bf02acbc28"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.high_rise_building",
+        "Yes when the building is a high-rise, or more than 420 ft in building height. BCNYS 202: \"A building with an occupied floor or occupiable roof located more than 75 feet (22 860 mm) above the lowest level of fire department vehicle access.\" " +
+        "The model can't show where fire trucks reach the building, so Gordium never decides it; its question may give the model's height over the lowest finished ground as a hint. " +
+        "Yes: Section 403's requirements are a person's check, and outside Group R-2 a story with no more exits than 1006.3 asks needs review (403.5.2: one more interior exit stairway over 420 ft). No: neither. Blank: as for Yes.");
+
+    /// <summary>Whether a floor level used for human occupancy is more than 30 ft below the lowest level of exit
+    /// discharge (<c>building.underground_building</c>, BCNYS 405.1, 405.7.1).</summary>
+    public static readonly MarkDefinition UndergroundBuilding = new(
+        "Gordium: Underground building", new("0b116213-0d7e-4e3c-b03b-e71a9f387d05"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.underground_building",
+        "Yes when a floor level used for human occupancy is more than 30 ft below the finished floor of the lowest level of exit discharge. BCNYS 405.1: \"The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level used for human occupancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge.\" " +
+        "Yes: Section 405's requirements are a person's check, and a story with one exit needs review (405.7.1: two exits on each floor level). No: none. Blank: as for Yes.");
 
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
     public static readonly MarkDefinition Atrium = new(
@@ -572,6 +764,18 @@ public static class Marks
         [Levels], "unknown_spaces (an enclosed area with no Room on a level ticked Yes isn't one)",
         "Yes for a level with no rooms at all (a roof, the top of a turret). Its enclosed areas with no Room are then not treated as rooms nobody drew; a Room drawn on it is listed as a conflict. Blank or No: each enclosed area with no Room on it keeps every sleeping-room rule needing review.");
 
+    /// <summary>A level the architect says is no story (<c>all_levels[].not_a_story</c>): a reference or datum level, a
+    /// roof level. The Building Code's story places (model_measurement/routes/story_place.py) then never try it as a
+    /// story nobody drew rooms on, so a datum under a slab no longer unsettles which story is the first above grade
+    /// plane. Yes only: blank or No, the level is tried both ways as before. Rooms, or an enclosed area with no Room,
+    /// on a level ticked Yes disagree with it, and no story is placed.</summary>
+    public static readonly MarkDefinition NotAStory = new(
+        "Gordium: Not a story", new("0938c91d-d646-49f7-b072-465fecbb9325"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [Levels], "all_levels[].not_a_story",
+        "Yes for a level that is no story of the building: a reference or datum level (top of foundation, a sill height), or a roof level. " +
+        "Gordium then never counts it as a story nobody drew rooms on when it works out which story is the first, second or fourth above grade plane (BCNYS Tables 1006.3.4(1) and (2)). " +
+        "Blank or No: such a level with no rooms is tried both as a story and not, and the stories' places it could change need review. Rooms, or an enclosed area with no Room, on a level ticked Yes disagree with it: no story's place is measured (for a roof whose walls close off an area, tick Gordium: No rooms on this level too).");
+
     // ---- step 6: what the house has none of (design note, sections 2 and 4; HasNone) ------------------------------
     // One Yes/No on Project Information per kind: the three kinds the description lists itself (an empty list says
     // none) and every kind of the format's has_none (model_measurement.interior.has_none.KINDS). Yes is sent only when
@@ -672,18 +876,21 @@ public static class Marks
         SleepingRoom, EscapeOpening, ExitDoor, Operation, ClearWidth, ClearHeight, ClearOffset, ClearSource,
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards, Zone, Use, LotSurveyed, CornerLot, StreetEdge, GroundFrom,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
-        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
-        CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction,
+        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStory, NotAStair, SiteSlab, SiteObject,
+        CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction, RoomUnit,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
         EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased, OtherLevelsReachCorridors,
-        AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm,
+        AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm, Mezzanines, LoadsNotByArea, HighRiseBuilding, UndergroundBuilding,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
         AbutsR1, Conversion, PrimaryBuildings, PrimaryBuildingsSameUse, HomeOccupationArea, HomeOccupationUnitArea,
         AduExistingBuilding, AduBedrooms, AduFloorArea, MainBuildingFloorArea,
-        DoorLeaves,
+        DoorLeaves, DoorHardware,
+        ToposolidFinished, BelowGrade, WellArea, WellWidth, WellProjection, WellDepth, WellLadder, WellLadderWidth, WellRungProjection,
+        WellRungSpacing, WellStepTread, WellStepRiser, WellLadderFullHeight, WellLadderEncroachment, WellOtherEncroachment,
+        CorridorFireRating, SmokePartitionWalls,
     ];
 
     /// <summary>What a number typed in a mark means, said before it is typed, true wherever it is read: "count" for a
@@ -869,6 +1076,26 @@ public static class R2UnitWords
 
     public static WordTable Table { get; } = new(
         ("All sleeping units", "true"), ("All dwelling units", "false"), ("Both", Both));
+}
+
+/// <summary>What latches or locks a door (<c>Gordium: Hardware</c>) → <c>doors[].hardware</c>
+/// (model_measurement/routes/doors.py HARDWARE).</summary>
+public static class HardwareWords
+{
+    public static WordTable Table { get; } = new(
+        ("Panic or fire exit hardware", "panic"), ("Panic or fire exit hardware with an electric lock", "panic_electric"),
+        ("Other latch or lock", "latch"), ("No latch or lock", "none"));
+}
+
+/// <summary>What an area well has to climb out by (<c>Gordium: Well ladder or steps</c>) →
+/// <c>openings[].stated_well.ladder</c> (model_measurement/interior/openings.py LADDER_WORDS).</summary>
+public static class WellLadderWords
+{
+    public static WordTable Table { get; } = new(
+        ("Ladder", "ladder"), ("Steps", "steps"), ("Ladder blocked when open", "ladder_blocked"),
+        ("Steps blocked when open", "steps_blocked"), ("None", "none"));
+
+    public static string Listed => Table.Listed;
 }
 
 /// <summary>The sprinkler systems <c>Gordium: Sprinkler system</c> takes → <c>building.sprinkler_system</c>.</summary>

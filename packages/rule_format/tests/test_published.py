@@ -59,7 +59,7 @@ def _run(repo: Path, *args: str) -> tuple[int, str]:
 def copy(tmp_path_factory):
     repo = _copy_repo(tmp_path_factory.mktemp("published") / "repo")
     assert not list(repo.rglob(published.PUBLISHED))
-    code, said = _run(repo)                    # every state law, in order: one's publishing never stales another
+    code, said = _run(repo, *LAWS)             # every state law, in order: one's publishing never stales another
     assert code == 0 and said.count("written") == len(LAWS), said
     return repo
 
@@ -71,7 +71,7 @@ def test_a_certificate_is_the_same_bytes_from_two_fresh_runs_and_from_another_fo
     code, said = _run(copy, MAINE)
     assert code == 0, said
     assert (copy / CERT).read_bytes() == first
-    assert published.fresh(REPO / MAINE) == first
+    assert published.fresh(REPO / MAINE) == {REPO / MAINE / "5_building_code_rules/drafted/general.yaml": first}
 
 
 def test_a_certificate_names_what_it_was_worked_out_from(copy):
@@ -151,7 +151,7 @@ def test_publish_check_passes_when_clean_and_fails_on_a_missing_or_hand_edited_c
     """Review round 1 (F1): on a fresh clone (no 7_published_rulebooks folders) Maine's compile walked the repo
     before New York's folders were made, so publishing New York made Maine's certificate stale at once. Clean, every
     law matches a fresh compile and none is stale."""
-    code, out = _run(copy, "--check")
+    code, out = _run(copy, "--check", *LAWS)
     assert code == 0 and out.count("matches a fresh compile") == len(LAWS), out
     assert [published.stale(copy / law, repo=copy) for law in LAWS] == [[]] * len(LAWS)
     cert = copy / CERT
@@ -252,14 +252,22 @@ def test_every_name_the_repos_gitignore_files_ignore_is_a_generated_name():
             assert rulebook.generated_name(name), (ignore.name, pattern)
             checked += 1
     assert checked >= 10
-    for path_pattern in ("regulations/jurisdictions/*/*/7_published_rulebooks/*.published.json", ".claude/worktrees"):
-        assert any(rulebook.generated_name(part.replace("*", "x")) for part in path_pattern.split("/")), path_pattern
+    # a path (under one folder): some part of it is a generated name, so the listings and the walk leave it out
+    # (merge of #228 into PR #266: the pane's apartment answer, a path, was ignored but listed in Maine's certificate)
+    paths = 0
+    for ignore in [REPO / ".gitignore", *REPO.glob("apps/*/.gitignore")]:
+        for line in ignore.read_text(encoding="utf-8").splitlines():
+            pattern = line.strip().rstrip("/")
+            if pattern and not pattern.startswith("#") and "/" in pattern:
+                assert any(rulebook.generated_name(part.replace("*", "x")) for part in pattern.split("/")), pattern
+                paths += 1
+    assert paths >= 5
 
 
 def test_a_rhino_lock_beside_a_model_leaves_mains_certificate_current(copy):
     models = copy / "test_data/host_conformance/models"
     lock = models / "01_box_house.rhl"
-    assert models.is_dir() and lock.parent.relative_to(copy).as_posix() in json.loads((copy / CERT).read_bytes())["listed"]
+    assert models.is_dir()
     lock.write_bytes(b"locked")
     try:
         assert published.stale(copy / MAINE, repo=copy) == []
@@ -340,7 +348,7 @@ def test_stale_refuses_an_unknown_format_and_unreadable_certificates(tmp_path, m
     path = tmp_path / "general.published.json"
     monkeypatch.setattr(published, "certificate_path", lambda f, b: path)
     for data, said in ((b"{", "isn't readable JSON"), (b'{"format": "gordium.published_law/0"}', "isn't a gordium"),
-                       (b'{"format": "gordium.published_law/1"}', "can't be read as")):
+                       (b'{"format": "gordium.published_law/1"}', "isn't a gordium"), (b'{"format": "gordium.published_law/2"}', "can't be read as")):
         path.write_bytes(data)
         (why,) = published.stale(folder, book)
         assert said in why and "python -m rule_format publish" in why
@@ -353,8 +361,8 @@ def test_ensure_publishes_only_what_is_missing_or_stale(monkeypatch, tmp_path):
     monkeypatch.setattr(published, "published_folders", lambda repo=REPO: [(Path("a"), Path("a.yaml")),
                                                                            (Path("b"), Path("b.yaml"))])
     state = {"a": [], "b": ["stale (input changed: x)"]}
-    monkeypatch.setattr(published, "stale", lambda f, b, repo=REPO: state[str(f)])
-    monkeypatch.setattr(published, "publish", lambda f: calls.append(str(f)) or [])
+    monkeypatch.setattr(published, "stale", lambda f, b, repo=REPO, memo=None: state[str(f)])
+    monkeypatch.setattr(published, "publish", lambda f: calls.append(str(f)) or {})
     monkeypatch.setattr(published, "certificate_path", lambda f, b: tmp_path / str(f))
     assert published.ensure() == [] and calls == ["b"]
     calls.clear()
@@ -373,3 +381,45 @@ def test_a_report_a_rule_cites_must_be_under_docs_research_where_certificates_li
     assert rulebook._report_problems({"report": "docs/research/2026-10-20_architect_questions.md"}, "r") == []
     for elsewhere in ("packages/rule_format/README.md", "docs/research/../../packages/rule_format/README.md"):
         assert (REPO / elsewhere).is_file() and rulebook._report_problems({"report": elsewhere}, "r"), elsewhere
+
+
+def test_a_certificate_keeps_the_repo_names_its_rules_mention_not_the_whole_repos_listing(copy):
+    """Ithaca's zoning and Maine's rules ask whether a file a rule's notes name is in the repo (rulebook._in_repo, which
+    walks the repo's names). A certificate keeps each name asked and its answer, not a listing of every folder the walk
+    went through: with that, any new file anywhere (a Revit recording, a new test) made the certificate stale, and in
+    the middle of a test session every check of that law needed review. A name asked that appears or goes still
+    makes it stale."""
+    cert = json.loads((copy / CERT).read_bytes())
+    assert cert["repo_names"] and all(cert["repo_names"].values())
+    assert not any(d.startswith(("test_data", "apps", "docs/revit")) for d in cert["listed"])
+    elsewhere = copy / "test_data/a_new_recording.json"
+    elsewhere.write_bytes(b"{}")
+    try:
+        assert published.stale(copy / MAINE, repo=copy) == []
+    finally:
+        elsewhere.unlink()
+    name = next(iter(cert["repo_names"]))
+    found = [p for p in copy.rglob(name) if not published._generated(p.relative_to(copy))]
+    kept = {p: p.read_bytes() for p in found}
+    for p in found:
+        p.unlink()
+    try:
+        assert any(f"a file named {name} went from the repo" in w for w in published.stale(copy / MAINE, repo=copy))
+    finally:
+        for p, data in kept.items():
+            p.write_bytes(data)
+    assert published.stale(copy / MAINE, repo=copy) == []
+
+
+def test_one_compile_works_out_what_its_certificates_share_once(monkeypatch):
+    """Review round 1 of PR 4 (F1): a place has a certificate per district (21 for Ithaca), and each worked out the
+    same inputs, listings and validator again (about 22 s of a 37 s publish). They are worked out once per folder."""
+    ithaca = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+    calls = []
+    real = published._shared
+    monkeypatch.setattr(published, "_shared", lambda *a: calls.append(1) or real(*a))
+    books = published.books_of(ithaca)[:3]                     # three districts, so three certificates
+    monkeypatch.setattr(published, "books_of", lambda folder: books)
+    monkeypatch.setattr(published, "compiled", lambda f, b: {"problems": [], "kinds": {}, "documents": {}})
+    out = json.loads(published._child(str(ithaca), str(REPO), [], [True]))
+    assert calls == [1] and len(out) == 3

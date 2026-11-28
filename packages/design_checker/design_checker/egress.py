@@ -37,11 +37,15 @@ Design: docs/decisions/2026-11-12_building_code_text.md (item 6), docs/interior/
 
 import hashlib
 import json
+import math
 from pathlib import Path
 
 from model_measurement.interior import measure as measure_interior
 from model_measurement.interior.read import FORMAT as INTERIOR_FORMAT
+from model_measurement.interior.stops import Stop as InteriorStop
+import model_measurement.interior as interior_landing
 from model_measurement.routes import measure as measure_routes
+from model_measurement.routes import stair_rooms
 from rule_format import parts as part_rules
 from rule_format.formula import names as formula_names
 from rule_format.labels import load_pieces
@@ -49,7 +53,7 @@ from rule_format.place import place as place_of
 from rule_format.published import frozen, unreadable as _unreadable   # the validation, frozen (published.py)
 from rule_format.rulebook import REPO, STATE_SETTINGS, load, load_bytes
 
-from design_checker import code_scope, each_part, occupant_load, present
+from design_checker import code_scope, each_part, escape_openings, occupant_load, present
 
 WAITING = "waiting"                                 # a law's section state while no interior is read
 WAITING_REASON = "no rooms drawn yet"              # why a law waits: its waiting item's own `waiting` (the headline's words)
@@ -253,8 +257,8 @@ def check(found: dict, interior, values: dict, allowed: dict, ground: dict | Non
     undecided = scope is not None and scope["code"] is None
     sections, items, rows, results, ids, readings = [], [], [], {}, set(), {}
     for law in run:
-        measured = None if waiting else _measured(law, interior, readings, ground)
-        law_values, law_allowed = _law_values(law, values, allowed, building)
+        measured = None if waiting else _measured(law, interior, readings, ground, values)
+        law_values, law_allowed = _law_values(law, values, allowed, building, interior)
         # rules that can't be used are said whether or not rooms are drawn: never hidden behind "waiting"
         mine = _law_items(law, measured, law_values, law_allowed, rows, results) if not waiting or law["problems"]             else [_waiting_item(law)]
         if not waiting and not law["problems"]:   # rules refused: none was used (BAD_RULES says so); waiting stays
@@ -319,56 +323,162 @@ def _reads_interior(law: dict) -> bool:
                for r in law.get("rules") or [])
 
 
-def _stairs_and_guards(interior) -> dict:
+def _stated_stories(interior, values: dict | None):
+    """(the most stories the check gives the building, in whose words) or None: "no stairs" beside two or more is a
+    contradiction (model_measurement.interior._stairs_against_floors). Each count where it is a number: the
+    architect's count above grade plane (the check's values, or the description's `building` block), the count the
+    architect typed for the place (code_scope.STORIES_TYPED, check.py: kept even where the place's count is an open
+    question) and the place's own count (Ithaca's `stories`, as drawn or typed)."""
+    block = interior.get("building") if isinstance(interior, dict) else None
+    values = values if isinstance(values, dict) else {}
+    above = "the architect states {n} stories above grade plane"
+    given = [(values.get("stories_above_grade_plane"), above),
+             (block.get("stories_above_grade_plane") if isinstance(block, dict) else None, above),
+             (values.get(code_scope.STORIES_TYPED), "the architect gives the building {n} stories"),
+             (values.get("stories"), "the building's stories, as the place counts them (drawn or typed), are {n}")]
+    counts = [(v, words) for v, words in given if type(v) in (int, float) and math.isfinite(v)]
+    return max(counts, key=lambda c: c[0]) if counts else None
+
+
+
+def _routes_stories(interior, values: dict | None):
+    """_stated_stories, and the most stories the drawing allows where Ithaca's count is an open question
+    (code_scope.STORIES_AT_MOST, check.py): the routes' story facts never take "no stairs" beside a building that may
+    have two or more (the story facts' merge review of #279). A count the check gives that can't be read (text, not
+    a finite number) may be two: so it is taken."""
+    values = values if isinstance(values, dict) else {}
+    keys = ("stories_above_grade_plane", code_scope.STORIES_TYPED, "stories", code_scope.STORIES_AT_MOST)
+    number = lambda v: type(v) is int or type(v) is float and math.isfinite(v)
+    if any(values.get(k) is not None and not number(values.get(k)) for k in keys):
+        return 2, "a story count the check gives can't be read, so the building may have {n} stories"
+    stated = _stated_stories(interior, values)
+    most = values.get(code_scope.STORIES_AT_MOST)
+    if number(most) and (stated is None or most > stated[0]):
+        return most, "the building may have {n} stories, as the place counts them"
+    return stated
+
+
+def _stairs_and_guards(interior, stated_stories=None) -> dict:
     """The interior measuring of the description's stairs and guards alone (BUILDING_INTERIOR_KINDS): the measuring
     run on the description with its rooms, openings and doors given as none and no `has_none` (a house's claims), so
     its only parts and problems are the stairs' and guards' own. A kind the description doesn't give is not read
     (None, with the measuring's problem saying so): its rules need review, never pass. A description that isn't a
     mapping is measured as it is (its problem said)."""
+    whole = interior                          # "no stairs" is read against the whole description's floors
     if isinstance(interior, dict):
         keep = {k: interior[k] for k in ("format", "units", "stairs", "guards") if k in interior}
         interior = {**keep, "rooms": [], "openings": [], "doors": []}
+    got = measure_interior(interior, whole=whole, stated_stories=stated_stories,
+                           landing=interior_landing.BUILDING_LANDING)   # BCNYS 1010.1.4 and 1010.1.6
+    return {"parts": {k: got["parts"].get(k) for k in BUILDING_INTERIOR_KINDS}, "problems": got["problems"],
+            "refused": got.get("refused") or {}}
+
+
+# the interior measuring's sleeping rooms and escape openings the Building Code reads (section group 8a: 1031,
+# emergency escape and rescue openings), from the description's own rooms and openings alone, no house claims
+BUILDING_ESCAPE_KINDS = ("sleeping_room", "emergency_escape_opening")
+READS_ESCAPE = ("sleeping_room", "emergency_escape_opening", "basement")
+ESCAPE = "escape openings"
+
+
+def _reads_escape(law: dict) -> bool:
+    """Whether any of the law's rules repeats over, or sits within, a kind of READS_ESCAPE."""
+    return any(isinstance(r, dict) and (r.get("for_each") in READS_ESCAPE or r.get("within") in READS_ESCAPE)
+               for r in law.get("rules") or [])
+
+
+def _escape_openings(interior) -> dict:
+    """The interior measuring of the description's rooms and escape openings alone (BUILDING_ESCAPE_KINDS): run on
+    the description with its doors given as none, its stairs and guards left out, and no `has_none` (a house's
+    claims, never a building's), so its only parts and problems are the sleeping rooms' and openings' own (the
+    measuring's "weren't read" for the stairs and guards left out is dropped: _stairs_and_guards reads those). Never
+    "stairs: []" forced in: an empty list of stairs says the building has none, which the measuring checks against
+    its floors (#279), a needs-review line about stairs this reading never gives. A sleeping room is only a room
+    stated `sleeping: true` (or an enclosed space with no room drawn in it, a `maybe` whose every row needs review):
+    never a room said not to be one."""
+    left_out = ()
+    if isinstance(interior, dict):
+        keep = {k: interior[k] for k in ("format", "units", "rooms", "openings", "unknown_spaces") if k in interior}
+        interior = {**keep, "doors": []}
+        left_out = tuple(InteriorStop("not_read", what=k, key=k).reason for k in ("stairs", "guards"))
     got = measure_interior(interior)
-    return {"parts": {k: got["parts"].get(k) for k in BUILDING_INTERIOR_KINDS}, "problems": got["problems"]}
+    got["problems"] = [p for p in got["problems"] if p not in left_out]
+    parts = {k: got["parts"].get(k) for k in BUILDING_ESCAPE_KINDS}
+    # a sleeping room is also a routes' space, and an opening's id may be a door's: each takes its kind into its id
+    # (a part id is one part across every kind, rule_format.parts), its description id kept in `more`
+    for kind, words in (("sleeping_room", "sleeping room"), ("emergency_escape_opening", "escape opening")):
+        for part in parts[kind] or []:
+            if isinstance(part, dict) and isinstance(part.get("id"), str):
+                part.setdefault("more", {})["described_id"] = part["id"]
+                part["id"] = f"{part['id']} ({words})"
+                if isinstance(part.get("within"), str):
+                    part["within"] = f"{part['within']} (sleeping room)"
+    return {"parts": parts, "problems": got["problems"]}
 
 
-def _measured(law: dict, interior, readings: dict, ground: dict | None = None) -> dict:
+def _measured(law: dict, interior, readings: dict, ground: dict | None = None, values: dict | None = None) -> dict:
     """The parts a law's rules read, measured once per kind of reading: the house code's from the interior measuring
     (model_measurement.interior), the Building Code's from the routes (model_measurement.routes: story, space,
     corridor and every door) and, for its stairs and guards, the interior measuring's (_stairs_and_guards), in the
-    same shape."""
+    same shape. `values`: the check's own, whose building facts (code_scope.FACTS) the rules read beside the
+    description's `building` block (_law_values), so the assembly seating reads the same occupancy groups (review
+    round 2)."""
     kind = ROUTES if law.get("scope") == code_scope.BUILDING else "interior"
-    if kind == ROUTES and _reads_interior(law):
+    stairs = kind == ROUTES and _reads_interior(law)
+    escape = kind == ROUTES and _reads_escape(law)
+    if stairs:
         kind = ROUTES_AND_INTERIOR
+    if escape:
+        kind = f"{kind} and the interior's {ESCAPE}"          # its own readings key (section group 8a)
     if kind not in readings:
-        if kind in (ROUTES, ROUTES_AND_INTERIOR):
-            got = measure_routes(interior, ground=ground)
+        if kind.startswith(ROUTES):
+            got = measure_routes(interior, ground=ground, stated_stories=_routes_stories(interior, values))
             factors = Path(law["folder"]) / OCCUPANT_LOAD_FACTORS
             if factors.exists() and isinstance(interior, dict):      # 1004.5: each room's function's load
-                occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors),
-                                    interior.get("building"))
-            inside = _stairs_and_guards(interior) if kind == ROUTES_AND_INTERIOR else {"parts": {}, "problems": []}
+                block = interior.get("building")
+                stated = {**{k: v for k, v in (values or {}).items() if k in code_scope.FACTS},
+                          **(block if isinstance(block, dict) else {})}       # as _law_values merges them
+                occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors), block, stated)
+            inside = [_stairs_and_guards(interior, _stated_stories(interior, values))] if stairs else []
+            if stairs:
+                # each flight's room (in an exit stair enclosure, so no dwelling-unit exception reaches it) and its
+                # risers, for the Building Code's stair rules alone (section group 7c)
+                stair_rooms.apply(inside[0]["parts"].get("stair"), interior, got["parts"].get("space"))
+            inside += [_escape_openings(interior)] if escape else []
             problems = [str(p) for p in got["problems"]]
-            problems += [str(p) for p in inside["problems"] if str(p) not in problems]
-            readings[kind] = {"parts": {**got["parts"], **inside["parts"]}, "problems": problems,
-                              "not_checked": [], "has_none": {}}
+            parts = dict(got["parts"])
+            refused = {}
+            for one in inside:
+                problems += [str(p) for p in one["problems"] if str(p) not in problems]
+                parts.update(one["parts"])
+                refused.update(one.get("refused") or {})
+            if escape:                                # each sleeping room linked to its story and doors (8a)
+                block = interior.get("building") if isinstance(interior, dict) else None
+                facts = {**{k: v for k, v in (values or {}).items() if k in code_scope.FACTS},
+                         **(block if isinstance(block, dict) else {})}       # as _law_values merges them
+                # 8d: the law's limits, which comply; 1007.1.1's separation with the law's own kinds (Chapter 9)
+                escape_openings.link(parts, interior, law.get("rules"), law.get("kinds"), facts)
+            readings[kind] = {"parts": parts, "problems": problems, "not_checked": [], "has_none": {},
+                              "refused": refused}
         else:
-            readings[kind] = measure_interior(interior)
+            readings[kind] = measure_interior(interior, stated_stories=_stated_stories(interior, values))
     return readings[kind]
 
 
-def _law_values(law: dict, values: dict, allowed: dict, building) -> tuple[dict, dict]:
+def _law_values(law: dict, values: dict, allowed: dict, building, interior=None) -> tuple[dict, dict]:
     """The building values and allowed values a law's rules read: the check's own, and for the Building Code the
     building block's measures (code_scope.building_measures: occupancy group, sprinkler system...). A proposed
     measure's kind (the law's drafted/records/proposed_measures.yaml) is added only for one given a value, so a law
     reads exactly what it did where none is given; but the Building Code's every one, so a fact the architect
     hasn't stated is an unknown its rules read as their worked examples do (rule_format: three-valued, "True or
     unknown is True"), never a whole formula unread: a travel distance within every limit isn't held for an
-    unstated balcony increase it doesn't need (2026-11-23)."""
+    unstated balcony increase it doesn't need (2026-11-23). `interior`, the description checked, gives the rooms'
+    functions (code_scope.assembly_spaces_from_rooms: section group 9h)."""
     is_bc = law.get("scope") == code_scope.BUILDING
     if is_bc:
         given = {k: values[k] for k in code_scope.FACTS if k in values}
-        values = {**values, **code_scope.building_measures({**given, **(building if isinstance(building, dict) else {})})}
+        values = {**values, **code_scope.building_measures({**given, **(building if isinstance(building, dict) else {})},
+                                                           interior)}
     kinds = {k: v for k, v in (law.get("kinds") or {}).items() if (is_bc or k in values) and k not in allowed}
     return values, ({**allowed, **kinds} if kinds else allowed)
 
@@ -428,7 +538,7 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
         return [_own_item(law, f"{law['short'].lower()}.rules", f"{law['short']} rules", present.REVIEW,
                           words.format(title=law["title"], why=why))]
     claims = measured.get("has_none") or {}
-    got = each_part.check_parts(law["rules"], measured["parts"], values, allowed, claims)
+    got = each_part.check_parts(law["rules"], measured["parts"], values, allowed, claims, measured.get("refused"))
     rows += got["rows"]
     for key, answer in got["results"].items():   # one rule id in two laws: the more cautious answer, never kinder
         results[key] = part_rules.rule_result([{"outcome": answer}] + ([{"outcome": results[key]}]

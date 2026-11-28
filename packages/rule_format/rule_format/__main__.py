@@ -4,7 +4,7 @@
     python -m rule_format place --write   # writes the plugin's copy of its place's settings (place.py)
     python -m rule_format cite new_york/ithaca_city zoning_charts_2026-04.pdf 3 "Height in feet 35 ft"
                                    # prints the lines to cite: lines: [31, 31]
-    python -m rule_format publish [folder]          # freezes each state law's validation (rule_format/published.py)
+    python -m rule_format publish [folder ...]      # freezes each rulebook's checks (rule_format/published.py)
     python -m rule_format publish --check [folder]  # a fresh compile must give the same certificate, byte for byte
 
 For each place and each state law folder (a state's own law, e.g. New York's Residential Code, with a state.yaml

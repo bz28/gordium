@@ -8,7 +8,34 @@ one happen. Values read through the interior reader (`interior/read.py`) stop wi
 design: docs/decisions/2026-11-20_route_measurement.md.
 """
 
+# what settles a stair that may be anywhere (routes._stair_points), said with the story facts it stops
+STAIRS_TO_DO = ("Gordium can rule out a stair, ramp or ladder within a space only where every stair is drawn (with "
+                "Gordium: These are all the stairs ticked) and each stands in a hall shared between spaces, in an exit "
+                "such a hall opens into, or in another space such a hall opens into, or where the model says there "
+                "are no stairs (Gordium: This house has no stairs); and only where it says there are no ramps, "
+                "alternating tread devices or ship ladders "
+                "(Gordium: This house has no ramps, Gordium: This house has no alternating tread devices, Gordium: "
+                "This house has no ship ladders), since where one of those stands isn't read yet. \"No stairs\" isn't "
+                "taken where the model shows the building may have another story or floor: a second level not marked "
+                "Gordium: Not a story, rooms or an enclosed area with no room on another level, rooms' floors at "
+                "different heights (more than 1/2 in apart), a floor a story's height above or below the ground "
+                "stated (or a step, 8 1/4 in, above the ground given at its openings), or a story count of two or "
+                "more (stated "
+                "with Gordium: Stories above grade plane or Gordium: Stories, or the most the drawing allows), or one "
+                "that can't be read. Otherwise a person checks")
+# the marks it names (Revit's Gordium.Revit.Reading/Marks.cs; test_routes_dwelling_units checks each is defined)
+STAIRS_TO_DO_MARKS = ("Gordium: These are all the stairs", "Gordium: This house has no stairs",
+                      "Gordium: This house has no ramps", "Gordium: This house has no alternating tread devices",
+                      "Gordium: This house has no ship ladders", "Gordium: Not a story",
+                      "Gordium: Stories above grade plane", "Gordium: Stories")
+
 STOPS = {
+    # the room a flight of stairs stands in (stair_rooms.py: the Building Code's stair rules, section group 7c)
+    "stair_no_nosings": "the flight gives no nosings, so where it stands isn't known",
+    "stair_room_unread": "the floor of room {room} can't be read, and it may be the floor under the flight",
+    "stair_over_no_room": "nosing {n} of the flight stands over no room's floor",
+    "stair_room_exit_unknown": "whether room {room}, under nosing {n} of the flight, is an exit enclosure isn't worked "
+                               "out",
     # the description as a whole (every story's route measures need review)
     "description": "the model can't be read for escape routes: {reason}",
     "no_levels": "the model gives no levels: which story each room and door is on isn't known",
@@ -94,8 +121,16 @@ STOPS = {
     "too_few_exits": "the story has {count} distinct exit(s) (counted by the exit each exit door leads into): "
                      "remoteness needs two",
     "outline_needed": "the story's outline isn't read, so its diagonal and areas aren't measured: {reason}",
+    "outline_short": "the story's outer or inner outline doesn't hold all of it (outside it: {names}), so its diagonal, "
+                     "and how far apart its exits are against it, aren't measured",
+    "outline_not_outer": "the story's outer outline isn't at least {wall} in outside its inner one along every wall (drawn at the "
+                         "walls' inside faces?), so its diagonal, and how far apart its exits are against it, aren't "
+                         "measured",
     # the parts handed to the rules (__init__.py)
     "stated_not_given": "stated by the architect ({what}), and Gordium has no mark for it in the model yet",
+    # a corridor's fact the architect states on its room (CORRIDOR_STATED): left out, or not of its kind
+    "corridor_fact_not_stated": "not stated for this corridor: {what} (the room's {mark} mark)",
+    "corridor_fact_not_read": "{what} is given as {got}, not {kind}",
     "not_measured_yet": "Gordium doesn't measure this yet",
     "readings": "given as two readings for open question {question} of the route note ({words}): a rule reading it "
                 "complies only if it complies under both, fails only if it fails under both, else needs review",
@@ -155,10 +190,81 @@ STOPS = {
     "place_either_levels": "{name} could be {could}, depending on where the grade plane lies within what the ground "
                            "stated allows and on whether the levels {levels} are stories (a level with no rooms drawn, "
                            "or a small one that may be a mezzanine)",
+    "place_not_a_story_not_read": "the level {name}'s not-a-story mark is {got}, not yes or no: whether it is a "
+                                  "story isn't known",
+    "place_not_a_story_has_rooms": "the level {name} is marked not a story, yet rooms, or an enclosed space with no "
+                                   "room drawn in it, are on it: which is right isn't known",
     "place_too_many_levels": "{count} levels have no rooms: whether each is a story nobody drew rooms on is tried both "
                              "ways only up to 8",
     "ground_buildings_apart": "the stories' outlines come apart in {count} pieces (separate buildings?): which spot "
                               "grades are each building's ground isn't known",
+    # whether the story's rooms exit directly outside (BCNYS 1006.3.4 item 2: __init__.rooms_exit_outside)
+    "outside_no_rooms": "the story has no room besides its exits",
+    "outside_way_unclear": "the space of {name} has no door to the outside and opens into no corridor or lobby: "
+                           "whether it exits directly outside isn't known",
+    "outside_hall_unclear": "the space of {name} reaches the outside through a corridor or lobby that may be its own "
+                            "(a hallway within one dwelling or tenant space): whether it exits directly outside isn't "
+                            "known",
+    "outside_into_exit": "the space of {name} has a way out besides the shared corridor ({door}): whether it exits "
+                         "directly outside isn't known",
+    "outside_stair": "the space of {name} may have a stair, ramp or ladder within it besides the shared corridor (to "
+                     "another story, maybe to its own door out): whether it exits directly outside isn't known. " +
+                     STAIRS_TO_DO,
+    "outside_link_elsewhere": "a door or opening of the room {name} isn't read on this story (drawn on another "
+                              "level, or listed only among the openings?): whether it exits directly outside isn't "
+                              "known",
+    "outside_link_unread": "a door or opening the model gives can't be read (which rooms it joins): whether each space "
+                           "exits directly outside isn't known",
+    "outside_door_not_marked": "the space of {name} has a door to the outside ({door}) not marked as an exit door at "
+                               "the level of exit discharge: whether it is one isn't known (exits are marked, never "
+                               "guessed)",
+    # the dwelling units on a story (Table 1006.3.4(1): dwelling_units.py)
+    "units_use_unknown": "the room {name} has no use given: whether it is a corridor (shared) or part of a dwelling "
+                         "unit isn't known",
+    "units_function_unknown": "a room of the space of {name} states no function, or one that doesn't settle it (not "
+                              "on Table 1004.5's list, or a sleeping use; Revit's room mark for it): whether it is a "
+                              "dwelling unit, or a room shared between units, isn't known",
+    "units_stair": "the space of {name} may have a stair, ramp or ladder within it: it may hold the upper part of a "
+                   "dwelling unit whose door is downstairs. " + STAIRS_TO_DO,
+    "units_link_elsewhere": "a door or opening of the room {name} isn't read on this story (drawn on another level, "
+                            "or listed only among the openings?): it may be a dwelling unit's own way out, so the "
+                            "units aren't counted",
+    "units_link_unread": "a door or opening the model gives can't be read (which rooms it joins): it may be a dwelling "
+                         "unit's own way out, so the units aren't counted",
+    "units_exit_function": "the room {name} is taken as an exit, yet states a function (an exit has none: a unit's "
+                           "door marked an exit?): it may be a dwelling unit, so the units aren't counted",
+    "units_hall_residential": "the room {name}, marked a corridor or lobby, states a function a dwelling unit may "
+                              "have and opens into no room of a dwelling unit (only into halls, exits, the outside, or "
+                              "toilets, closets or rooms of another use): it may be a dwelling unit marked a hall, so "
+                              "the units aren't counted",
+    "units_shared_room": "the room {room} (a closet, toilet or storeroom, or a room not itself residential) opens onto "
+                         "two or more rooms of the space of {name}: it may be shared by two dwelling units",
+    "units_no_entrance": "the space of {name} has no door or opening to a corridor, an exit or the outside: it may be "
+                         "part of a dwelling unit on two stories, which story counts it isn't known",
+    "units_entrances": "the space of {name} has {count} ways out to the corridors, exits or outside ({doors}): it "
+                       "may be two dwelling units joined by a door",
+    # the count from the architect's unit marks (Gordium: Unit, rooms[].unit: dwelling_units._marked)
+    "units_mark_unreadable": "the room {name}'s unit mark is {got}, not a unit's name: which dwelling unit it belongs "
+                             "to isn't known",
+    "units_mark_several": "the room {name}'s unit mark names more than one unit ({got!r}): a room belongs to one "
+                          "dwelling unit, so the units aren't counted",
+    "units_mark_alike": "the unit marks {names} differ only in capitals or in where spaces stand: one dwelling unit or "
+                        "two isn't known",
+    "units_mark_apart": "the rooms marked unit {unit!r} come apart on this story ({rooms} not joined to the rest "
+                        "through its own rooms): two dwelling units given one name, or a room of it left unmarked "
+                        "(mark the rooms between them too)",
+    "units_mark_not_dwelling": "every lived-in room marked unit {unit!r} states a function no dwelling unit is made of "
+                               "(a listed other use): whether it is a dwelling unit isn't known",
+    "units_mark_on_exit": "the room {name} is taken as an exit (a stair enclosure or exit passageway, shared) yet is "
+                          "marked unit {unit!r}: which is right isn't known",
+    "units_mark_hall_function": "the room {name}, marked a corridor or lobby with no unit mark, states a function a "
+                                "dwelling unit may have and opens into rooms of fewer than two named units: it may be "
+                                "a unit's room left unmarked (mark its unit if it is one); a lobby shared by units "
+                                "reached only through other halls can't be told from one, so the units aren't "
+                                "counted",
+    "units_mark_left_out": "the room {name} has no unit mark while other rooms of this story have one, and may be a "
+                           "dwelling unit's room (it states a function a dwelling unit may have, or none): mark its "
+                           "unit, or, if it is shared between units, mark its use Corridor or Lobby",
     # each door's own part (doors.py, section group 6a): its sizes only from the maker's stated clear opening
     "door_no_stated_clear": "the door {name} has no maker's stated clear opening (its type's clear width and height, "
                             "confirmed): its size is never taken from the door's own size or its leaf",
@@ -176,8 +282,8 @@ STOPS = {
     "egress_side_unclear": "which way egress travel goes through the door {name} isn't worked out: travel may cross it "
                            "both ways (two rooms that both lead out through it, a room others' routes cross, an exit "
                            "stair that may discharge through it, an outdoor area whose way out is back inside)",
-    "door_swing_not_given": "the door {name} doesn't say which side it swings into, and Gordium has no mark for it in "
-                            "the model yet",
+    "door_swing_not_given": "the door {name} doesn't say which side it swings into (in Revit, read from the swing arc "
+                            "its plan symbol draws, where that settles it)",
     "door_swing_not_read": "the door {name} says it swings into {got}, not one of the two sides it joins",
     "door_not_on_routes": "the door {name} isn't one the routes read (its story's routes need review, or it isn't "
                           "placed): which way egress travel goes through it isn't known",
@@ -186,6 +292,14 @@ STOPS = {
                             "(swinging) or another kind isn't known",
     "door_side_room_not_read": "a side of the door {name} is the room {room}, which isn't read: its floor area isn't "
                                "known",
+    # section group 6e (1010.2.8): what latches or locks each door
+    "door_hardware_not_given": "the door {name} doesn't say what latches or locks it (panic or fire exit hardware, "
+                               "with or without an electric lock it releases, another latch or lock, or none), and "
+                               "the model doesn't give it (a door's hardware mark)",
+    "door_hardware_not_read": "the door {name} gives its hardware as {got}, not panic, panic_electric, latch or none "
+                              "(a door's hardware mark)",
+    "door_electric_lock_not_asked": "the door {name} is latched by something other than panic hardware: whether it "
+                                    "is electrically locked isn't asked",
 }
 
 

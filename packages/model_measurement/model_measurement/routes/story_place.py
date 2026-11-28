@@ -28,6 +28,10 @@ How (docs/decisions/2026-11-25_story_facts_from_the_model.md):
   drawn on it too), else nothing is placed: an open parking story with nothing drawn would make the first rooms the
   second story. A level with no rooms (not at a story's floor) may be a story nobody drew rooms on (a garage, a
   lobby) or no story (a roof, a datum): both are tried, so a place is measured only where it is the same either way.
+  A level the architect states is no story (`all_levels[].not_a_story` true: Revit's level mark Gordium: Not a
+  story) is never tried, nor read as a level within a story's floors or as the lowest level: the places are those of
+  the model without it, and the levels set aside are said (`levels_not_stories`). Rooms or an enclosed space with no
+  room on such a level disagree with the mark: nothing is placed.
   A description not read whole (a room on no level read) places nothing.
 - The ground is only what the architect stated: flat ground (one elevation: the grade plane and the finished ground
   everywhere), or spot grades outside the walls. Spot grades are samples: Gordium's reading is that the ground
@@ -81,6 +85,9 @@ SPOTS_READING = ("Gordium's reading: the ground between two spot grades lies bet
                  "slope-away rule (BCNYS 202 GRADE PLANE) can only lower it")
 UNPLACED = "not placed (under the grade plane above a story that is above it)"
 MEZZANINE = "not placed (it may be a mezzanine, or the story one is part of: BCNYS 505.2)"
+NOT_A_STORY = "not_a_story"            # all_levels[].not_a_story: the architect's level mark (Gordium: Not a story)
+NOT_A_STORY_WORDS = ("the architect states these levels are no story (Gordium: Not a story: a datum, a reference or "
+                     "a roof level), so they are never tried as one")
 LEVELS_READING = ("Gordium's reading: a story stands where the model has a level for it (every level tried as a story "
                   "or not), or under the lowest level where that is more than 6 ft over the lowest ground stated (then "
                   "nothing is placed); a story with no level of its own below that isn't looked for")
@@ -142,7 +149,7 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
     every = description.get("all_levels")               # every level of the model, one with nothing on it too
     if not isinstance(every, list):
         return none(Stop("place_levels_not_all").reason)
-    elevation, names = {}, {}
+    elevation, names, not_stories = {}, {}, set()
     for item in every:
         try:
             if not isinstance(item.get("id"), str) or item["id"] in elevation:
@@ -152,8 +159,17 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
         except (InteriorStop, KeyError, TypeError, AttributeError):
             name = item.get("name") if isinstance(item, dict) and isinstance(item.get("name"), str) else "?"
             return none(Stop("place_level_not_read", name=name).reason)
+        said = item.get(NOT_A_STORY)                     # the architect's "not a story" (a datum, a roof level)
+        if said is not None and said is not False:       # (left out, None or false: not said, tried both ways)
+            if said is not True:
+                return none(Stop("place_not_a_story_not_read", name=names[item["id"]], got=repr(said)).reason)
+            not_stories.add(item["id"])
     if any(lid not in elevation for lid in stories):
         return none(Stop("place_levels_not_all").reason)
+    for lid in sorted(not_stories):                      # said not a story, yet rooms or a space with no room on it
+        if lid in floors or any(isinstance(u, dict) and u.get("level") == lid
+                                for u in description.get("unknown_spaces") or []):
+            return none(Stop("place_not_a_story_has_rooms", name=names[lid]).reason)
     for item in description.get("levels") if isinstance(description.get("levels"), list) else []:
         lid = item.get("id") if isinstance(item, dict) else None
         if isinstance(lid, str) and lid in elevation:    # the stories' levels and every level must agree on a height
@@ -174,7 +190,9 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
         if floors[a][1] >= floors[b][0] - SAME:
             return none(Stop("place_split_level", a=stories[a].name, b=stories[b].name).reason)
     # a level with no rooms, not at a story's floor: a story nobody drew rooms on, or none (a roof, a datum)
-    roomless = sorted(((z, lid) for lid, z in elevation.items() if lid not in floors), key=lambda e: e[0])
+    roomless = sorted(((z, lid) for lid, z in elevation.items() if lid not in floors and lid not in not_stories),
+                      key=lambda e: e[0])
+    # (a level said not a story is left out of roomless: never tried, never "within a story's floors")
     inside = [lid for z, lid in roomless if any(floors[r][0] + SAME < z < floors[r][1] - SAME for r in order)]
     if inside:                                           # a level within a story's floors: a story drawn on another
         return none(Stop("place_level_inside_story", name=names[inside[0]]).reason)
@@ -188,7 +206,7 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
     plane, why = _plane(ground, stories, description, reader)
     if why:
         return none(why)
-    lowest = min(elevation.values())
+    lowest = min(z for lid, z in elevation.items() if lid not in not_stories)   # a datum under it shows no story
     if lowest > plane["lowest"] + 6 * FT + SAME:         # a story with no level of its own may stand under the lowest
         return none(Stop("place_under_lowest", gap=f"{(lowest - plane['lowest']) / FT:g} ft").reason)   # (an undercroft)
     seen = {lid: [] for lid in order}                    # every reading's facts (or UNPLACED) for each story placed
@@ -208,6 +226,9 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
              "floors_ft": {lid: [round(floors[lid][0] / FT, 4), round(floors[lid][1] / FT, 4)] for lid in order},
              "levels_maybe_stories": [names[lid] for _, lid in roomless],
              "levels_maybe_mezzanines": [names[lid] for lid in mezzanines]}
+    if not_stories:                                      # the architect's statement the places stand on
+        shown["levels_not_stories"] = sorted(names[lid] for lid in not_stories)
+        shown["levels_not_stories_said"] = NOT_A_STORY_WORDS
     shown["levels_reading"] = LEVELS_READING
     if plane.get("reading"):
         shown["reading"] = plane["reading"]

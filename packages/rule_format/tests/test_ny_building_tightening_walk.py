@@ -37,10 +37,19 @@ SPRINKLERS = {"nfpa_13": (True, False, False), "nfpa_13r": (False, True, False),
 FACTS = ("assembly_fixed_seating", "special_egress_spaces", "merchandise_pads", "building_has_atrium",
          "egress_balcony_increase_taken", "r2_sleeping_units", "emergency_escape_openings_1031",
          "occupied_outdoor_areas", "ambulatory_care_facility", "corridors_within_dwelling_units",
-         "emergency_voice_alarm_system")   # the last: Table 1020.3's (the corridor walk's,
-# test_ny_building_corridor_walk.py, which varies it with every width and load; here for completeness)
+         "emergency_voice_alarm_system", "high_rise_building", "underground_building", "stages_or_platforms",
+         "aircraft_related_occupancy", "service_corridors",   # the emergency voice/alarm system: Table 1020.3's (the
+         # corridor walk's, test_ny_building_corridor_walk.py, which varies it with every width and load; here for
+         # completeness)
+         "assembly_spaces")                # section group 9h: only Section 1030's flags read it
 DERIVED = ("occupancy_group", "occupancy_group_i4", "other_occupancy_present", "sprinklered_903_3_1_1",
-           "sprinklered_903_3_1_2", "sprinklered_903_3_1_3")
+           "sprinklered_903_3_1_2", "sprinklered_903_3_1_3",
+           # Chapter 9 part a's, read only by 903.2's rules (none reads an affected measure: their own walk is
+           # test_ny_building_chapter_9.py's, over every group, system, stories and townhouse fact)
+           "group_r_present", "group_h_present", "group_i1_i2_i3_present", "stories_above_grade_plane",
+           "townhouse_units", "nfpa_13r_stated",
+           # part e's, read only by 905.3's standpipe flags with townhouse_units
+           "separate_means_of_egress")
 
 
 def _given(group, sprinkler, facts):
@@ -157,11 +166,18 @@ def _outcome(r, kind, m, given, ctx):
 STORY_CASES = [dict(egress_travel_distance=t, egress_travel_in_sleeping_room=i, story_exit_count=x,
                     story_occupant_load=n, story_first_above_or_below_grade=f, story_second_above_grade_plane=False,
                     story_fourth_or_higher_above_grade_plane=False, story_rooms_exit_directly_outside=False,
-                    story_dwelling_units=2, exit_remoteness_ratio=0.9)
-               for t, i, x, n, f in itertools.product((51, 76, 126, 201), (51,), (1, 2), (5, 40), (True, False))]
+                    story_dwelling_units=2, exit_remoteness_ratio=0.9, story_assembly_seating_possible=s)
+               for t, i, x, n, f, s in itertools.product((51, 76, 126, 201), (51,), (1, 2), (5, 40), (True, False),
+                                                         (True, False))]
 SPACE_CASES = [dict(space_is_exit=False, space_exit_count=x, space_occupant_load=n, space_common_path=c,
-                    space_exit_remoteness_ratio=0.9)
-               for x, n, c in itertools.product((1, 2), (5, 40, 60), (31, 76, 126))]
+                    space_exit_remoteness_ratio=0.9, space_assembly_seating_possible=s)
+               for x, n, c, s in itertools.product((1, 2), (5, 40, 60), (31, 76, 126), (True, False))]
+# a room on the story may seat people served by aisles, fixed seats or not (the routes' story and space parts,
+# design_checker/occupant_load.py assembly_seating): 1030.7 (p.354, lines 50-51) measures travel "along the aisles and
+# aisle accessways without travel over or on the seats" wherever aisles are provided for seating, and the common path
+# is a portion of exit access travel (202), so neither figure can be trusted there
+SEATING = {"story": ("story_assembly_seating_possible", "egress_travel_distance"),
+           "space": ("space_assembly_seating_possible", "space_common_path")}
 
 
 WHERE = GROUPS + ["mixed", "unstated"]          # one test each, so the parts of the suite spread them
@@ -198,7 +214,11 @@ def _cases(r):
 
 
 def _limits(r, lim, m):
-    return lim if r["for_each"] == "story" else lim[m["space_occupant_load"]]
+    out = dict(lim if r["for_each"] == "story" else lim[m["space_occupant_load"]])
+    seating, measure = SEATING[r["for_each"]]
+    if m.get(seating):
+        out[measure] = 0
+    return out
 
 
 def test_the_walk_covers_every_walked_rule_and_each_applies_somewhere(ctx, rules):

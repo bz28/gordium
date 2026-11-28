@@ -583,6 +583,8 @@ CHANGE_BAR = re.compile(r"^[Il|] (?=\S)")    # a change bar in the margin the OC
 TITLE_SIZE = 0.45       # points: a title's next line is in the same type (a column heading is 0.6 smaller or more)
 TITLE_CENTRE = 5        # points: and centred under it, as the book centres a title over its table
 TITLE_GAP = (-1, 3)     # points between one line's bottom and the next's top: a title's lines are set close
+TITLE_MARKS = re.compile(r"(?:\s*\[fn[^\]]*\])+\s*$")     # raised note letters ending a title's line
+TITLE_MARK_RISE = 1.2   # points: what raised note letters add to a line's height (0.8 on p.165's Table 705.5)
 
 
 def table_title_lines(members: list[dict], starts: re.Pattern) -> list[dict]:
@@ -622,11 +624,17 @@ def _continues_title(first: dict, prev: dict, r: dict) -> bool:
         return False
     size = lambda x: x["bottom"] - x["top"]
     centre = lambda x: (x["x0"] + x["x1"]) / 2
-    if abs(size(r) - size(first)) > TITLE_SIZE or abs(centre(r) - centre(first)) > TITLE_CENTRE:
+    # A title line ending in its raised note letters ("... DISTANCE [fna,] [fnd,] [fng]": Table 705.5, p.165) is
+    # that much taller, the letters set above it, and they are roman: its own words are measured, never the marks
+    # (review round 1 of Chapter 7 part e1: its title had stopped at its first line)
+    marks = TITLE_MARKS.search(r["text"])
+    words = r["text"][:marks.start()] if marks else r["text"]
+    taller = TITLE_MARK_RISE if marks else 0
+    if not -TITLE_SIZE <= size(r) - size(first) <= TITLE_SIZE + taller or abs(centre(r) - centre(first)) > TITLE_CENTRE:
         return False
     if not TITLE_GAP[0] <= r["top"] - prev["bottom"] <= TITLE_GAP[1]:
         return False
-    if "bold" in first and _bold_start(r) != r["text"]:
+    if "bold" in first and _bold_start(r) != words:
         return False
     return True
 

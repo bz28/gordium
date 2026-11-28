@@ -23,9 +23,9 @@ NEW_DAY_CARE = {"nfpa_day_care_occupancy": True, "day_care_existing": False, "sp
                 "sprinklered_903_3_1_2": False}
 
 
-def outlined(d, x1, y1):
-    d["story_outlines"] = [{"level": "L1", "outer": [list(p) for p in rect(-0.5, -0.5, x1 + 0.5, y1 + 0.5)],
-                            "inner": [list(p) for p in rect(0, 0, x1, y1)]}]
+def outlined(d, x1, y1, y0=0):
+    d["story_outlines"] = [{"level": "L1", "outer": [list(p) for p in rect(-0.5, y0 - 0.5, x1 + 0.5, y1 + 0.5)],
+                            "inner": [list(p) for p in rect(0, y0, x1, y1)]}]
     return d
 
 
@@ -55,7 +55,8 @@ def day_care(branch=None, classroom_in_branch=False, unknown=False):
     d = description([room("c", corridor, name="Corridor")] + rooms, doors)
     if unknown:
         d["unknown_spaces"] = [{"id": "q", "name": "Space 9", "level": "L1"}]
-    return outlined(d, 78 if classroom_in_branch else east, 30)
+    # the story's outline holds the branch too (a branch reaching south of y 0 lay outside it, a diagonal too short)
+    return outlined(d, 78 if classroom_in_branch else east, 30, min(0, 11 - branch) if branch is not None else 0)
 
 
 @pytest.fixture(scope="module")
@@ -191,6 +192,51 @@ def test_8_a_door_in_a_dead_end_gives_the_corridor_two_readings(door_in_dead_end
 E2E = ["general.nfpa_16_2_6_2_point_in_room_to_exit", "general.nfpa_16_2_6_2_room_door_to_exit",
        "general.nfpa_16_2_6_2_sleeping_room_to_door", "general.nfpa_16_2_5_3_2_common_path_not_sprinklered",
        "general.nfpa_16_2_5_2_dead_end"]
+
+
+def _corridor_with(**stated):
+    d = day_care()
+    next(r for r in d["rooms"] if r["id"] == "c").update(stated)
+    c, = measure(d)["parts"]["corridor"]
+    return c
+
+
+@pytest.mark.parametrize("stated, rating, smoke", [
+    ({"fire_rating_hours": 1, "walls_smoke_partitions": True}, 1, True),
+    ({"fire_rating_hours": 0.5, "walls_smoke_partitions": False}, 0.5, False),
+    ({"fire_rating_hours": 0}, 0, None),                         # 0: not rated (a statement, never "not given")
+])
+def test_a_corridors_stated_rating_and_smoke_partitions_are_its_measures(stated, rating, smoke):
+    """The egress UI audit's finding 5 (2026-11-26): the corridor walls' fire-resistance rating and whether they are
+    smoke partitions are the architect's to state (a rating is the assembly's, which the model's geometry can't
+    show for certain), on the corridor's room (fire_rating_hours, walls_smoke_partitions); before, nothing could give
+    them, so every rule reading them needed review for good."""
+    c = _corridor_with(**stated)
+    assert c["measures"]["corridor_fire_rating_hours"] == rating
+    assert "corridor_fire_rating_hours" not in c["not_measured"]
+    if smoke is None:
+        assert "the room's Smoke partition walls mark" in c["not_measured"]["corridor_walls_smoke_partitions"]
+    else:
+        assert c["measures"]["corridor_walls_smoke_partitions"] is smoke
+
+
+@pytest.mark.parametrize("stated", [{"fire_rating_hours": True}, {"fire_rating_hours": "1 HR"},
+                                    {"fire_rating_hours": -1}, {"fire_rating_hours": float("nan")},
+                                    {"walls_smoke_partitions": "yes"}, {"walls_smoke_partitions": 1}])
+def test_a_corridor_fact_not_of_its_kind_is_said_never_read(stated):
+    c = _corridor_with(**stated)
+    m = {"fire_rating_hours": "corridor_fire_rating_hours", "walls_smoke_partitions": "corridor_walls_smoke_partitions"}[
+        next(iter(stated))]
+    assert m not in c["measures"] and " is given as " in c["not_measured"][m], c["not_measured"][m]
+
+
+def test_a_corridor_fact_left_out_is_said_by_its_mark(plain):
+    c, = plain["parts"]["corridor"]
+    assert c["not_measured"]["corridor_fire_rating_hours"].startswith("not stated for this corridor:")
+    assert "the room's Corridor rating minutes mark" in c["not_measured"]["corridor_fire_rating_hours"]
+    assert "the room's Smoke partition walls mark" in c["not_measured"]["corridor_walls_smoke_partitions"]
+    assert "fire_rating_hours" not in c["not_measured"]["corridor_fire_rating_hours"]
+    assert "no mark for it" not in c["not_measured"]["corridor_fire_rating_hours"]
 
 
 def test_end_to_end_a_small_day_care_story_complies_with_the_nfpa_route_rules(plain, maine):
@@ -392,6 +438,17 @@ def test_a_room_stopped_by_a_tie_is_not_measured_with_its_own_reason_never_calle
     shown = _over_rooms_measured(story, {"c": Stop("too_many_ties", most=64, x=63.232, y=37.844)})
     assert "no route" not in shown["label"] and "has none" not in shown["label"]
     assert shown["rooms_not_measured"] == {"CORRIDOR (26)": Stop("too_many_ties", most=64, x=63.232, y=37.844).reason}
+
+
+def test_each_corridor_fact_names_the_revit_mark_that_states_it():
+    """A reason for a corridor fact not stated names the host's mark, never the file's key (CI on #229:
+    test_plain_words); the mark it names is one the Revit add-in defines, feeding that very key."""
+    import re
+    from model_measurement.routes import CORRIDOR_STATED
+    text = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
+    for key, _, mark in CORRIDOR_STATED.values():
+        assert re.search(r'"Gordium: ' + re.escape(mark) + r'", new\("[^"]+"\), MarkValueKind\.\w+,\s*MarkBinding\.\w+, '
+                         r'\[Rooms\], "rooms\[\]\.' + re.escape(key) + '"', text), (mark, key)
 
 
 @pytest.mark.parametrize("key, bad", [("rooms", 5), ("rooms", True), ("unknown_spaces", 5), ("unknown_spaces", True),

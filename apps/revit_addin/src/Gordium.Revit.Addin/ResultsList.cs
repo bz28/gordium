@@ -281,7 +281,7 @@ public sealed class EntryView : C.Border
         C.DockPanel.SetDock(count, C.Dock.Right);
         line.Children.Add(count);
         // the headline on one line (change 25), the checker's words behind it on hover ("Why?")
-        var head = Typed(new C.TextBlock { Text = e.Card.Headline, TextTrimming = W.TextTrimming.CharacterEllipsis }, "type.body");
+        var head = Typed(new C.TextBlock { Text = e.Card.Title, TextTrimming = W.TextTrimming.CharacterEllipsis }, "type.body");
         line.ToolTip = ResultViewList.Tip(e);
         line.Children.Add(head);
         // its words for a screen reader are on its list item (EntryStyles: ResultViewList.Spoken)

@@ -272,14 +272,18 @@ def test_a_rulebook_that_fails_the_rule_checks_gives_no_report(monkeypatch):
 
 
 def _patched_load(monkeypatch, change):
-    """report.load and the rule checker's load, with `change(path, data)` applied to what they read."""
+    """report.load and the rule checker's load, with `change(path, data)` applied to what they read. The checks are
+    frozen (rule_format/published.py): a rulebook so edited is never published, so the report here reads what the
+    validation, compile_zoning, says of it, live."""
     import project_report.report as report
     import rule_format.rulebook as rulebook
+    from rule_format import published
     real = rulebook.load
     def load(path):
         return change(Path(path), real(path))
     monkeypatch.setattr(rulebook, "load", load)
     monkeypatch.setattr(report, "load", load)
+    monkeypatch.setattr(report, "frozen", lambda j, b: {**published.compile_zoning(j, b), "book": None})
     return report
 
 
@@ -319,7 +323,7 @@ def test_a_rulebook_that_isnt_valid_yaml_gives_a_plain_refusal(monkeypatch):
 
 def test_a_broken_source_list_gives_a_plain_refusal(monkeypatch):
     report = _patched_load(monkeypatch, lambda path, data: {} if path.name == "sources.yaml" else data)
-    with pytest.raises(ValueError, match="can't load its sources"):
+    with pytest.raises(ValueError, match="its sources can't be read"):
         report.tables(SITE)
 
 

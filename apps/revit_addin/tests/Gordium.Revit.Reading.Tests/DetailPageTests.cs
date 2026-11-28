@@ -43,7 +43,7 @@ public sealed class DetailPageTests
     private static readonly Regex Passes = new(@"\b(will|would|now) (pass|comply|complies)\b|\bpasses\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     [Fact]
-    public void Every_page_ends_with_check_again_unless_settled_and_never_says_it_will_pass()
+    public void Every_page_ends_with_what_moves_it_unless_settled_and_never_says_it_will_pass()
     {
         foreach (var m in new[] { Apartment(), House() })
             foreach (var (row, d, page) in Pages(m))
@@ -57,11 +57,74 @@ public sealed class DetailPageTests
                 else
                 {
                     Assert.NotNull(page.Headline);
-                    Assert.Equal(DetailPages.CheckAgainStep, page.Steps[^1]);
+                    // egress UI audit, finding 2: a result only a person can settle ends with the tick, never Check again
+                    // (which changes nothing for it); anything a check can change ends with Check again
+                    var asks = ResultViews.CardsOf(m.Views!, row.Row.Id).Where(c => c.Kind is not (FixKind.Fails or FixKind.NotChecked or FixKind.Done)).ToList();
+                    var byHand = row.Section != ListSection.Fails && asks.All(a => DetailPages.ByHand(a.Kind));
+                    Assert.Equal(byHand ? DetailPages.CheckAfterChangeStep : DetailPages.CheckAgainStep, page.Steps[^1]);   // not stale here
+                    Assert.Equal(byHand, page.Steps.Contains(DetailPages.LookedStep));
+                    Assert.Equal(!byHand, page.Steps.Contains(DetailPages.CheckAgainStep));
+                    if (byHand)
+                    {
+                        Assert.True(LookedAt.Tickable(row));                       // the tick it points to is on the page
+                        Assert.DoesNotContain("check again", page.Headline!, StringComparison.OrdinalIgnoreCase);
+                    }
                 }
                 foreach (var words in page.Steps.Append(page.Headline ?? ""))
                     Assert.DoesNotMatch(Passes, words);
             }
+    }
+
+    /// <summary>Egress UI audit, finding 2: the apartment's hand checks (its judgment flags) say what to check and to
+    /// tick it; the model changed after the check, Check again comes first, then the tick. A result with several hand
+    /// checks says so in its headline, whatever the apartment holds today (CI on #229: the apartment's only such
+    /// results were each corridor's 716.1.2, 1020.2 fire-partition and 1020.7 continuity flags, a rating worked out by
+    /// hand and a judgment, until the rating got its room mark, Gordium: Corridor rating minutes; a result a mark can
+    /// settle isn't only a person's, so it ends with Check again).</summary>
+    [Fact]
+    public void A_result_only_a_person_settles_ends_with_the_tick_and_check_again_only_when_the_model_changed()
+    {
+        var m = Apartment();
+        var pages = Pages(m);
+        var hand = pages.Where(p => p.Row.Section != ListSection.Complies && p.Page.Steps[^1] == DetailPages.CheckAfterChangeStep).ToList();
+        Assert.NotEmpty(hand);
+        Assert.All(hand, p => Assert.Equal(DetailPages.LookedStep, p.Page.Steps[^2]));
+        foreach (var p in hand)                                   // several hand checks: the headline says how many
+        {
+            var asks = ResultViews.CardsOf(m.Views!, p.Row.Row.Id).Where(c => c.Kind is not (FixKind.Fails or FixKind.NotChecked or FixKind.Done)).ToList();
+            if (asks.Count > 1)
+                Assert.Equal(DetailPages.SeveralByHand(asks.Count), p.Page.Headline);
+        }
+        var one = hand[0];                                        // two hand checks on one result, built here
+        FixCard Card(string key) => new(key, FixKind.Decide, "Look at it", null, null, [], [one.Row.Row]);
+        var two = DetailPages.Of(one.Detail, one.Row, [Card("a"), Card("b")]);
+        Assert.Equal(DetailPages.SeveralByHand(2), two.Headline);
+        Assert.Equal([DetailPages.LookedStep, DetailPages.CheckAfterChangeStep], two.Steps.TakeLast(2));
+        // a hand check beside one a mark settles: not only a person's, so Check again (the corridor's fire partitions)
+        var marked = DetailPages.Of(one.Detail, one.Row, [Card("a"), new("m", FixKind.Mark, "Give the corridor walls' fire rating", null, "rooms[].fire_rating_hours", [], [one.Row.Row])]);
+        Assert.Equal(DetailPages.CheckAgainStep, marked.Steps[^1]);
+        Assert.DoesNotContain(DetailPages.LookedStep, marked.Steps);
+        var partitions = pages.Where(p => p.Row.Row.Id.Contains("bc_1020_2_fire_partitions", StringComparison.Ordinal)).ToList();
+        Assert.NotEmpty(partitions);
+        Assert.All(partitions, p => Assert.Equal(DetailPages.CheckAgainStep, p.Page.Steps[^1]));
+        Assert.Contains(pages, p => p.Page.Steps[^1] == DetailPages.CheckAgainStep);              // and the rest still do
+        var stale = Pages(Apartment(), new DateTime(2026, 11, 23, 14, 32, 0));
+        var after = stale.Single(p => p.Row.Row.Id == hand[0].Row.Row.Id);
+        Assert.Equal([DetailPages.CheckAgainStep, DetailPages.LookedStep], after.Page.Steps.TakeLast(2));
+        Assert.DoesNotContain(DetailPages.CheckAfterChangeStep, after.Page.Steps);
+        // the step names the tick by its own label, which the page draws (confirm round)
+        Assert.Contains(DetailPages.LookedLabel, DetailPages.LookedStep, StringComparison.Ordinal);
+        Assert.Contains("host.TickDetail, DetailPages.LookedLabel)",
+                        File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "DetailView.cs")), StringComparison.Ordinal);
+        Assert.DoesNotMatch(Passes, DetailPages.LookedStep);
+        Assert.DoesNotMatch(Passes, DetailPages.CheckAfterChangeStep);
+        // review round 1: never "it stays Needs review" as if for good (spot grades, a design change, a reading met can
+        // let a later check decide it), never "check by hand" for an open question about the law, and "yet"
+        Assert.DoesNotContain("stays", DetailPages.LookedStep + DetailPages.CheckAfterChangeStep, StringComparison.Ordinal);
+        Assert.Contains("not a verdict", DetailPages.LookedStep, StringComparison.Ordinal);
+        Assert.Contains("yet", DetailPages.SeveralByHand(2), StringComparison.Ordinal);
+        Assert.DoesNotContain("by hand", DetailPages.SeveralByHand(2), StringComparison.Ordinal);
+        Assert.Contains("only a check does", LookedAt.Tip, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -117,7 +180,7 @@ public sealed class DetailPageTests
             if (asks.Count == 1)
                 Assert.Equal(DetailPages.Sentence(asks[0].Headline), page.Headline);
             else if (asks.Count > 1)
-                Assert.Equal(DetailPages.Several(asks.Count), page.Headline);
+                Assert.Equal(asks.All(a => DetailPages.ByHand(a.Kind)) ? DetailPages.SeveralByHand(asks.Count) : DetailPages.Several(asks.Count), page.Headline);
             // every ask is a step, in its order
             Assert.Equal(asks.Select(a => DetailPages.Sentence(a.Headline)), page.Steps.Where(s => asks.Any(a => DetailPages.Sentence(a.Headline) == s)));
             var questions = asks.Count(a => a.Kind == FixKind.Answer);
@@ -203,8 +266,12 @@ public sealed class DetailPageTests
     public void Each_question_is_answered_with_the_setup_forms_own_field_and_one_without_is_said()
     {
         var m = Apartment();
-        var questions = ProjectQuestions.Of(Answers(m), Fields());
-        Assert.Equal(Answers(m).Cards.Count, questions.Count);                  // never dropped
+        // the ADU's follow-ups shown (its answers chosen), so every question is in the card: none dropped
+        var draft = new SetupDraft();
+        draft.Choose(Marks.AccessoryDwellingUnit, "Yes");
+        draft.Choose(Marks.All.Single(x => x.Feeds == "facts.adu_detached"), "Yes");
+        var questions = ProjectQuestions.Of(Answers(m), Fields(), draft);
+        Assert.Equal(Answers(m).Cards.Count - 2, questions.Count);              // a detached ADU's two size questions are moot
         FixCard Card(string field) => Answers(m).Cards.Single(c => c.Field == field);
         Assert.Equal(Marks.SprinklerSystem, questions.Single(q => q.Card == Card("building.sprinkler_system")).Field!.Mark);
         Assert.Equal(FieldKind.Choice, questions.Single(q => q.Card == Card("building.occupancy_groups")).Field!.Kind);
@@ -262,13 +329,14 @@ public sealed class DetailPageTests
         Assert.Equal(ProjectQuestions.ShownAtFirst, first.OfType<QuestionEntry>().Count());
         Assert.DoesNotContain(first, e => e is FixCardEntry { Card.Kind: FixKind.Answer });
         var more = Assert.Single(first.OfType<MoreQuestionsEntry>());
-        Assert.Equal(answers.Cards.Count - ProjectQuestions.ShownAtFirst, more.Hidden);
+        var asked = ProjectQuestions.Of(answers, fields).Count;                 // the ADU's follow-ups held back (FollowUpQuestionsTests)
+        Assert.Equal(asked - ProjectQuestions.ShownAtFirst, more.Hidden);
         var foot = Assert.Single(first.OfType<AnswerFootEntry>());
-        Assert.Equal(answers.Cards.Count, foot.Questions.Count);                // Save covers every question, shown or not
+        Assert.Equal(asked, foot.Questions.Count);                              // Save covers every question, shown or behind "+ N more"
         // the card's scope note counts only its own results (none of them says it on the real answer)
         var scopedInCard = answers.Rows.Count(r => m.Views!.Scoped.Contains(r.Id));
         Assert.Equal(scopedInCard == 0 ? null : ResultViews.ScopeWords(scopedInCard), foot.Scope);
-        Assert.Equal(answers.Cards.Count, Lay(open.Append(ResultViewList.MoreQuestionsKey)).OfType<QuestionEntry>().Count());
+        Assert.Equal(asked, Lay(open.Append(ResultViewList.MoreQuestionsKey)).OfType<QuestionEntry>().Count());
         // every result of the group, even behind "+ N more", is reached by the path to it
         foreach (var row in answers.Rows)
         {
@@ -323,17 +391,20 @@ public sealed class DetailPageTests
         var m = Apartment();
         var answers = Answers(m);
         var fields = Fields();
+        var asked = ProjectQuestions.Of(answers, fields).Select(q => q.Card.Key).ToHashSet();
         foreach (var row in answers.Rows)
         {
-            var keys = ResultViewList.AnswerKeys(m.Views!, row.Id);
+            var keys = ResultViewList.AnswerKeys(m.Views!, row.Id, fields);
             Assert.Contains(ResultViewList.GroupKey(answers), keys);
             var shown = ResultViewList.Layout(m.Views!, ResultList.Place(m), ResultsViewKind.WhatToFix, keys.ToHashSet(), null, null, false, fields)
                                       .OfType<QuestionEntry>().Select(q => q.Question.Card).ToList();
-            Assert.All(answers.Cards.Where(c => c.Rows.Any(r => r.Id == row.Id)), c => Assert.Contains(c, shown));
+            // each of its questions the card asks shows; a follow-up held back has it on the question shown above it
+            Assert.All(answers.Cards.Where(c => c.Rows.Any(r => r.Id == row.Id) && asked.Contains(c.Key)), c => Assert.Contains(c, shown));
+            Assert.Contains(shown, c => c.Rows.Any(r => r.Id == row.Id));
         }
         // a row whose question is past the first five: "+ N more" opened for it
-        var late = answers.Cards.Skip(ProjectQuestions.ShownAtFirst).SelectMany(c => c.Rows).First();
-        Assert.Contains(ResultViewList.MoreQuestionsKey, ResultViewList.AnswerKeys(m.Views!, late.Id));
+        var late = ProjectQuestions.Of(answers, fields).Skip(ProjectQuestions.ShownAtFirst).SelectMany(q => q.Card.Rows).First();
+        Assert.Contains(ResultViewList.MoreQuestionsKey, ResultViewList.AnswerKeys(m.Views!, late.Id, fields));
         // a row that asks no question: nothing to open
         var none = ResultList.Place(m).First(p => answers.Rows.All(r => r.Id != p.Row.Id)).Row.Id;
         Assert.Empty(ResultViewList.AnswerKeys(m.Views!, none));

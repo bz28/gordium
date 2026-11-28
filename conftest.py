@@ -136,7 +136,7 @@ def pytest_sessionfinish(session, exitstatus):
 # 50 ms); a local run publishes the missing or stale ones once, one publisher at a time across pytest-xdist's workers.
 # Done at the session's start, before any test file is loaded: a module that reads the laws when it is loaded
 # (test_waiting_headline's LAWS) read none on a fresh clone (merge review of main into #228). Again as a session
-# fixture, a no-op when nothing changed.
+# fixture, a no-op when nothing changed (about a second: every certificate's files hashed once).
 def _publish_laws():
     from rule_format import published
     for note in published.ensure():     # a law that can't be published is said, never a crash (the check refuses it)

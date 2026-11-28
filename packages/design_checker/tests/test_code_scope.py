@@ -120,13 +120,16 @@ def test_a_building_fact_gordium_cant_read_is_said_never_used():
 def test_the_building_measures_follow_the_groups_and_the_sprinkler_system():
     assert code_scope.building_measures({"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r"}) == {
         "occupancy_group_i4": False, "other_occupancy_present": True, "occupancy_group": "R-2",
-        "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True, "sprinklered_903_3_1_3": False}
+        "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True, "sprinklered_903_3_1_3": False,
+        "group_r_present": True, "group_h_present": False, "group_i1_i2_i3_present": False,      # Chapter 9 part a's
+        "nfpa_13r_stated": True}
     assert code_scope.building_measures({"occupancy_groups": ["I-4"], "sprinkler_system": "nfpa_13"}) == {
         "occupancy_group_i4": True, "other_occupancy_present": False, "occupancy_group": "I-4",
-        "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False, "sprinklered_903_3_1_3": False}
+        "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False, "sprinklered_903_3_1_3": False,
+        "group_r_present": False, "group_h_present": False, "group_i1_i2_i3_present": False, "nfpa_13r_stated": False}
     assert code_scope.building_measures({"sprinkler_system": "nfpa_13d"}) == {
         "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": False,      # 903.3.1.3: neither limit's system,
-        "sprinklered_903_3_1_3": True}                                       # but 1006.2.2.6's (review round 1)
+        "sprinklered_903_3_1_3": True, "nfpa_13r_stated": False}                                       # but 1006.2.2.6's (review round 1)
 
 
 def test_the_one_occupancy_group_or_mixed_for_two_and_the_seating_fact():
@@ -136,6 +139,57 @@ def test_the_one_occupancy_group_or_mixed_for_two_and_the_seating_fact():
     assert code_scope.building_measures({"occupancy_groups": ["M", "M"]})["occupancy_group"] == "M"
     assert "occupancy_group" not in code_scope.building_measures({"sprinkler_system": "none"})
     assert code_scope.building_measures({"assembly_fixed_seating": False}) == {"assembly_fixed_seating": False}
+
+
+# ---- section group 9h: assembly spaces, from the rooms' functions and the architect's statement -----------------------
+
+FACTORS = REPO / "regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/drafted/records/occupant_load_factors.yaml"
+
+
+def _rooms(*functions):
+    return {"rooms": [{"id": f"r{i}", **({"function": f} if f is not None else {})} for i, f in enumerate(functions)]}
+
+
+def test_the_assembly_functions_are_exactly_table_1004_5s_rows_under_its_assembly_heading():
+    """Table 1004.5 prints "Assembly" on p.312, line 19, its rows on lines 20 to 27 (Gaming floors to Bowling centers),
+    and "Business areas" on line 28: the functions that say a room is used for assembly purposes are those rows, read
+    from the frozen table's own sources, never a hand list alone. Every assembly-like function is one of the table's
+    other rows."""
+    rows = load(FACTORS)["functions"]
+    under = {f for f, v in rows.items() if v["source"]["page"] == 312 and 20 <= v["source"]["lines"][0] <= 27}
+    assert set(code_scope.ASSEMBLY_FUNCTIONS) == under
+    assert set(code_scope.ASSEMBLY_LIKE_FUNCTIONS) <= set(rows) - under
+    assert len(code_scope.ASSEMBLY_LIKE_FUNCTIONS) == 7
+
+
+@pytest.mark.parametrize("fn", code_scope.ASSEMBLY_FUNCTIONS)
+def test_a_room_with_an_assembly_function_makes_assembly_spaces_yes_whatever_is_stated(fn):
+    for stated in ({}, {"assembly_spaces": False}, {"assembly_spaces": True}):
+        got = code_scope.building_measures(stated, _rooms("residential", fn, None))
+        assert got["assembly_spaces"] is True, (fn, stated)
+
+
+@pytest.mark.parametrize("fn", code_scope.ASSEMBLY_LIKE_FUNCTIONS)
+def test_an_assembly_like_room_is_never_yes_and_never_lets_a_stated_no_stand(fn):
+    assert "assembly_spaces" not in code_scope.building_measures({}, _rooms(fn))
+    assert "assembly_spaces" not in code_scope.building_measures({"assembly_spaces": False}, _rooms(fn, "business"))
+    assert code_scope.building_measures({"assembly_spaces": True}, _rooms(fn))["assembly_spaces"] is True
+
+
+def test_rooms_never_make_assembly_spaces_no_only_the_statement_does():
+    """A description may hold only some of the building's floors (review round 6 of section group 6b): rooms of
+    other functions, or none, or no rooms at all, leave the fact not stated; only `assembly_spaces: false` makes it
+    no. Whatever the rooms hold, building_measures never gives false without the statement."""
+    every = list(load(FACTORS)["functions"]) + [None, "not a function", 7, ["gaming_floor"], {"a": 1}]
+    others = [f for f in every if f not in code_scope.ASSEMBLY_FUNCTIONS + code_scope.ASSEMBLY_LIKE_FUNCTIONS]
+    for interior in (None, {}, {"rooms": []}, {"rooms": "x"}, {"rooms": [None, 3]}, _rooms(*others),
+                     *(_rooms(f) for f in others)):
+        assert "assembly_spaces" not in code_scope.building_measures({}, interior), interior
+        assert code_scope.building_measures({"assembly_spaces": False}, interior)["assembly_spaces"] is False
+    for fn in every:
+        for stated in ({}, {"assembly_spaces": False}, {"assembly_spaces": True}, {"assembly_spaces": "no"}):
+            got = code_scope.building_measures(stated, _rooms(fn)).get("assembly_spaces")
+            assert got is not False or stated.get("assembly_spaces") is False, (fn, stated)
 
 
 # ---- in the check -----------------------------------------------------------------------------------------------------
@@ -498,3 +552,16 @@ def test_a_misspelled_fact_is_told_every_fact_gordium_reads_marked_or_not():
             continue
         why = code_scope.decide({"use": "one_family_detached"}, {key + "x": True})["why"]
         assert code_scope.fact_words(key) in why, (key, why)
+
+
+def test_a_room_with_fixed_seats_makes_fixed_seating_yes_whatever_is_stated():
+    """Review round 1 of section group 9h (P0): a room stating Table 1004.5's "Assembly with fixed seats" (p.312, line
+    22) has fixed seating; a stated no beside it hid 1030.8's and 1030.8.1's checks for that very room. The room's yes
+    wins; rooms of other functions leave the statement as it is."""
+    for stated in ({}, {"assembly_fixed_seating": False}, {"assembly_fixed_seating": True}):
+        assert code_scope.building_measures(stated, _rooms("residential", "assembly_fixed_seats"))[
+            "assembly_fixed_seating"] is True, stated
+    assert code_scope.building_measures({"assembly_fixed_seating": False}, _rooms("assembly_concentrated", "business"))[
+        "assembly_fixed_seating"] is False
+    assert "assembly_fixed_seating" not in code_scope.building_measures({}, _rooms("assembly_concentrated"))
+

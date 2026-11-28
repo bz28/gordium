@@ -62,7 +62,6 @@ def fast_reads():
     if _RESTORE:
         return
     import yaml
-    from project_report import report
     from rule_format import rulebook
 
     real_load = yaml.load
@@ -85,28 +84,13 @@ def fast_reads():
         if key not in contexts:
             contexts[key] = real_context.__func__(cls, j, use_cache=use_cache)
         return contexts[key]
-    real_terms, real_book = report.term_file_problems, report.rulebook_file_problems
-    checked = {}
-
-    def term_file_problems(j, ctx):
-        key = ("terms", str(j))
-        if key not in checked:
-            checked[key] = real_terms(j, ctx)
-        return checked[key]
-
-    def rulebook_file_problems(path, ctx):
-        key = ("book", str(path))
-        if key not in checked:
-            checked[key] = real_book(path, ctx)
-        return checked[key]
+    # (the zoning rulebook's checks are no longer run per check: they are frozen, rule_format/published.py)
     yaml.load = load
     rulebook.Context.for_jurisdiction = classmethod(for_jurisdiction)
-    report.term_file_problems, report.rulebook_file_problems = term_file_problems, rulebook_file_problems
 
     def restore():
         yaml.load = real_load
         rulebook.Context.for_jurisdiction = real_context
-        report.term_file_problems, report.rulebook_file_problems = real_terms, real_book
     _RESTORE.append(restore)
 
 

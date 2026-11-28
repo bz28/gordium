@@ -31,8 +31,20 @@ itself an exit, leaves its story's load not measured (said, never dropped). Stor
 A corridor's load (section group 4: Table 1020.3) is two readings, none and the whole story's, only where the
 building states no other level's occupants reach its corridors (`other_level_egress_into_corridors: false`), else not
 worked out (_corridor_loads).
+
+Where a space's or story's load isn't worked out (a room's function not stated, a room others pass through), it
+still has a ceiling: no occupant can take less than the densest factor Table 1004.5 gives (one per 5 sq ft net,
+standing space), so a story the building states has no area counted by seats, lanes or actual load, no occupied
+outdoor areas and no mezzanine can't hold more than its floor area / 5 (_bounds;
+docs/decisions/2026-11-26_occupant_load_upper_bound.md proves it from the law, with the facts it needs stated). The
+ceiling is given as the part's `bounds`; a rule settles on it only where the law's words are provably the same for
+every load from none up to it (rule_format.parts.rows), so it never decides a rule a load under it could decide
+otherwise.
 """
 
+import math
+
+from design_checker.code_scope import ASSEMBLY_FUNCTIONS, ASSEMBLY_LIKE_FUNCTIONS
 from model_measurement.routes.stops import STOPS
 from rule_format.rulebook import load
 
@@ -43,6 +55,7 @@ LOWER, UPPER = "room_area", "grossed_up_or_increased"
 # PR #191), so the panel asks for that mark (ui_data: "Set the room's function"), never for an occupant load to mark
 FUNCTION_FIELD = "rooms[].function"
 FUNCTION_ROOMS = "room_ids_without_function"   # a story's `more`: the rooms its function ask is set on (never its level)
+FUNCTIONS_ONLY = "only_functions_wait"         # a story's `more`: true where its load waits on those functions alone
 FUNCTION_STATED = "set the room's Table 1004.5 function (the room mark Gordium: Function)"
 NOT_GIVEN = "the room's function (Table 1004.5) isn't stated, so its occupant load isn't worked out: " + FUNCTION_STATED
 # the same words for a load Gordium (or a person) must work out and no mark carries (round 6): a room others pass
@@ -89,12 +102,93 @@ CORRIDOR_OTHER_LEVELS = ("another level's occupants reach the building's corrido
                          "mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the "
                          "story's occupant load doesn't bound the corridor's: " + CORRIDOR_BY_HAND)
 CORRIDOR_NO_STORY = "the story's occupant load isn't worked out, so the corridor's isn't either: " + CORRIDOR_BY_HAND
+# the story's load waits on its rooms' functions (the model gives the rest): the corridor's ask is those functions, the
+# room mark Gordium: Function on the rooms that lack one (its `more`: FUNCTION_ROOMS), never a load worked out by hand
+CORRIDOR_NO_FUNCTION = ("the story's occupant load isn't worked out until its rooms' functions are set, so the "
+                        "corridor's isn't either" + STORY_FUNCTION)
 CORRIDOR_READINGS = ("given as two readings (none, the least it can serve; {load:.1f}, the whole story's, the most it "
                      "can serve): the routes don't split a story's occupants between its corridors, so a rule "
                      "reading it complies only if it complies at the whole story's load, fails only if it fails at "
                      "none")
 CORRIDOR_FUNCTION = ("{name}'s use is corridor, yet it states the function {f!r}: a corridor holds no occupant load of "
                      "its own (Table 1004.5 has no corridor row), so which it is isn't known")
+
+
+# ---- the ceiling on a load not worked out (docs/decisions/2026-11-26_occupant_load_upper_bound.md) ----------------
+# the building facts it needs, each the building block's own (code_scope.FACTS) and each stated no: an area whose
+# load no floor area bounds (Table 1004.5's rows with no factor: fixed seats in any use, 1004.6; bowling lanes; a
+# concentrated business use, NY 1004.8's "actual occupant load as approved"; a mall, 402.8.2), outdoor areas whose
+# people add to the building's (1004.7), or a mezzanine whose people add to a room on an adjacent level (1004.2.2)
+NOT_BY_AREA, OUTDOOR, MEZZANINES = "loads_not_by_area", "occupied_outdoor_areas", "mezzanines"
+NO_FACTS = (NOT_BY_AREA, OUTDOOR, MEZZANINES)
+BOUND = "at_most"                 # a part's `bounds[measure]`: {BOUND: n, "why"} proven; IF_STATED: what stating
+IF_STATED = "if_stated"           # the facts would prove ({BOUND: n, "why", "facts": [...]}), never a value
+BOUND_WHY = ("the story's {area:,.0f} sq ft at the densest Table 1004.5 allows, one occupant per {d:g} sq ft as for "
+             "standing space, whatever the rooms' functions (the building states no area counted by seats, lanes or "
+             "actual load, no occupied outdoor areas and no mezzanine)")
+# a row the ceiling would settle once the building states these facts (rule_format.parts.rows' `bound_facts`): each
+# fact asked for, in words (panel_data's cause, the pane's ask), before the rooms' functions
+BOUND_FACT_WHY = ("{what}: not stated for the project. Once {once}, the story's floor area alone can settle this: no "
+                  "room holds more than one occupant per 5 sq ft, whatever its function")
+BOUND_FACT_ONCE = {NOT_BY_AREA: "the building states it has no area counted by seats, lanes or actual load",
+                   OUTDOOR: "the building states its occupants use no outdoor areas",
+                   MEZZANINES: "the building states it has no mezzanine"}
+
+
+def densest(factors: dict) -> float | None:
+    """The fewest square feet per occupant any function of Table 1004.5 gives, or 1004.5.1's increase allows (its
+    7): no room's occupant load, worked out from its area, can be more than its area divided by this."""
+    got = [e["factor"] for e in factors["functions"].values() if isinstance(e.get("factor"), (int, float))
+           and not isinstance(e.get("factor"), bool) and e["factor"] > 0]
+    cap = factors.get("increase_cap")
+    if isinstance(cap, (int, float)) and not isinstance(cap, bool) and cap > 0:
+        got.append(cap)
+    return min(got) if got else None
+
+
+def _area(part: dict, name: str):
+    v = part["measures"].get(name)
+    if name in (part.get("not_measured") or {}) or isinstance(v, bool) or not isinstance(v, (int, float)) \
+            or not v == v or v < 0 or v == float("inf"):
+        return None
+    return v
+
+
+def _bounds(story: dict, mine: list, rooms: dict, factors: dict, building: dict | None, corridor_ids=()) -> None:
+    """The ceiling on the story's occupant load, and on each of its spaces' (a space's load, its intervening rooms'
+    added by 1004.2.1, is part of its story's; 1004.2.3 adds no other story's), set as `bounds` on each that has no
+    value or readings: {BOUND: n, "why"} where the building states each of NO_FACTS no, and {IF_STATED: {BOUND: n,
+    "why", "facts"}} where stating the ones not yet stated would. n is the story's floor area (the larger of its gross
+    floor area and its spaces' areas added) divided by the densest factor, rounded up (an occupant load is a number of
+    persons). None at all where a room's stated function has no factor or isn't the table's, where the story's or a
+    space's area isn't measured, or where the building states one of NO_FACTS yes."""
+    b = building if isinstance(building, dict) else {}
+    d = densest(factors)
+    gross = _area(story, "story_gross_floor_area")
+    areas = [_area(p, "space_floor_area") for p in mine]
+    if d is None or gross is None or any(a is None for a in areas):
+        return
+    for rid in [p["id"] for p in mine] + list(corridor_ids):    # a function stated on a corridor counts too
+        fn = (rooms.get(rid) or {}).get("function")
+        if fn is None:
+            continue
+        f = ((factors["functions"].get(fn) if isinstance(fn, str) else None) or {}).get("factor")
+        if isinstance(f, bool) or not isinstance(f, (int, float)) or f <= 0:
+            return
+    missing = []
+    for fact in NO_FACTS:
+        if b.get(fact) is True:
+            return
+        if b.get(fact) is not False:                  # not stated, or not yes or no: never "none"
+            missing.append(fact)
+    area = max(gross, sum(areas))
+    n = math.ceil(area / d - 1e-9)
+    entry = {BOUND: n, "why": BOUND_WHY.format(area=area, d=d)}
+    got = entry if not missing else {IF_STATED: {**entry, "facts": missing}}
+    for part, name in [(story, "story_occupant_load")] + [(p, "space_occupant_load") for p in mine]:
+        if name in part["measures"] or (part.get("readings") or {}).get(name):
+            continue
+        part.setdefault("bounds", {})[name] = {k: dict(v) if isinstance(v, dict) else v for k, v in got.items()}
 
 
 def factors_of(path) -> dict:
@@ -123,7 +217,94 @@ def readable_rooms(description) -> tuple[dict, bool]:
     return rooms, len(rooms) == len(given)
 
 
-def apply(parts: dict, description: dict, factors: dict, building: dict | None) -> dict:
+# Seating served by aisles (BCNYS 1030.7, p.354, lines 50-51: "Where aisles are provided for seating, the distance shall
+# be measured along the aisles and aisle accessways without travel over or on the seats"), fixed seats or loose ones
+# alike (1030.9: every occupied portion of a room or space used for assembly purposes that contains seats, tables,
+# displays, similar fixtures or equipment has aisles; 1030.13.1: aisle accessways for seating at tables). The seats
+# aren't drawn, so the routes measure a story's travel and a space's common path straight across them. Table 1004.5's
+# rows under its "Assembly" heading (p.312, lines 20-27) name a room used for assembly purposes; its other rows a room
+# may be one of (303.1 "awaiting transportation", 303.4's courtrooms, gymnasiums, indoor swimming pools, libraries and
+# terminal waiting areas, 303.5's rinks and pools with spectator seating, 303.2's theaters' stages) may or may not be.
+# The two lists are code_scope's ASSEMBLY_FUNCTIONS and ASSEMBLY_LIKE_FUNCTIONS (imported above), the same ones that
+# settle the building's assembly_spaces, so the seating and the building fact never read different rows.
+SEATING_STORY, SEATING_SPACE = "story_assembly_seating_possible", "space_assembly_seating_possible"
+
+
+def _may_seat(room: dict, functions: dict, is_exit=None) -> bool:
+    """Whether a room may hold seating served by aisles: a function under Table 1004.5's Assembly heading or one that may
+    be an assembly use, no function stated (but a corridor, closet or toilet with none, or a room that is itself an
+    exit with none), or a function that is none of the table's. Only a room stating another of the table's functions
+    is ruled out (a residential, business or mercantile room). A room that is itself an exit yet states a function is
+    one whose use isn't known (EXIT_FUNCTION), so it may seat people (review round 3)."""
+    fn = room.get("function")
+    if is_exit is True:
+        return fn is not None
+    if fn is None:
+        return room.get("use") not in SUPPORT_USES
+    if not isinstance(fn, str) or fn not in functions:
+        return True
+    return fn in ASSEMBLY_FUNCTIONS or fn in ASSEMBLY_LIKE_FUNCTIONS
+
+
+def assembly_seating(parts: dict, description: dict, factors: dict, building: dict | None = None) -> dict:
+    """story_assembly_seating_possible on each story, and space_assembly_seating_possible (its story's) on each of the
+    story's spaces: true where a room on the story may hold seating served by aisles (_may_seat), so the travel and
+    common-path rows need review there (1030.7: measured along the aisles, never over the seats the routes measure
+    across); false only where every room on the story states one of Table 1004.5's other functions, but its exits and
+    its corridors, closets and toilets, which state none. True where an exit or a corridor on the story states a
+    function: its use and its function clash, so which it is isn't known (EXIT_FUNCTION, CORRIDOR_FUNCTION; review
+    rounds 3 and 4). True on every story where a room can't be read or placed on a story, or the description lists an
+    enclosed space with no room drawn in it (its use isn't known): never false on a room unseen. True on every story,
+    too, where the building is stated Group A (an assembly use, 303.1 to 303.6) and no room but such a clashing one
+    states an Assembly function or one that may be an assembly use: its assembly room isn't shown, so any room may be
+    it (review round 1). The same where the building states it has assembly spaces (`assembly_spaces`, section group
+    9h: a room or space used for assembly purposes, whatever its group, 303.1.1 and 303.1.2) and none is shown (found
+    merging main into section group 9i). The story knows its rooms (it is in the model), so a floor the model leaves
+    out doesn't matter here."""
+    rooms, every = readable_rooms(description)
+    unknown = description.get("unknown_spaces") if isinstance(description, dict) else None
+    spaces = [p for p in parts.get("space") or [] if isinstance(p, dict)]
+    corridors = [c for c in parts.get("corridor") or [] if isinstance(c, dict)]
+    placed = {p.get("id") for p in spaces + corridors}
+    unseen = not every or bool(unknown) or any(r not in placed for r in rooms)
+    # an exit or a corridor stating a function: its use isn't known, and it shows no assembly room
+    aside = ({p.get("id") for p in spaces if p["measures"].get("space_is_exit") is True}
+             | {c.get("id") for c in corridors})
+    clash = {i for i in aside if (rooms.get(i) or {}).get("function") is not None}
+    groups = building.get("occupancy_groups") if isinstance(building, dict) else None
+    shown = any(r.get("function") in ASSEMBLY_FUNCTIONS + ASSEMBLY_LIKE_FUNCTIONS for i, r in rooms.items()
+                if isinstance(r.get("function"), str) and i not in clash)
+    group_a = isinstance(groups, list) and any(isinstance(g, str) and g.startswith("A-") for g in groups)
+    spaces_stated = isinstance(building, dict) and building.get("assembly_spaces") is True
+    if (group_a or spaces_stated) and not shown:
+        unseen = True
+    functions = factors["functions"]
+    for story in parts.get("story") or []:
+        mine = [p for p in spaces if p.get("within") == story["id"]]
+        here = {p.get("id") for p in mine} | {c.get("id") for c in corridors if c.get("within") == story["id"]}
+        possible = unseen or bool(here & clash) or any(
+            _may_seat(rooms.get(p.get("id")) or {}, functions, p["measures"].get("space_is_exit")) for p in mine)
+        _set(story, SEATING_STORY, possible)
+        for p in mine:
+            _set(p, SEATING_SPACE, possible)
+    stories = {s.get("id") for s in parts.get("story") or []}
+    for p in spaces:                                # a space no story holds: its story's rooms aren't known
+        if p.get("within") not in stories:
+            _set(p, SEATING_SPACE, True)
+    return parts
+
+
+def _set(part: dict, name: str, value: bool) -> None:
+    """The value, and the routes' "not measured yet" for it taken away (a measure with a reason is never read)."""
+    part.setdefault("measures", {})[name] = value
+    if isinstance(part.get("not_measured"), dict):
+        part["not_measured"].pop(name, None)
+
+
+def apply(parts: dict, description: dict, factors: dict, building: dict | None, stated: dict | None = None) -> dict:
+    """`stated`: every building fact the rules read (the description's block over the check's values), for the
+    assembly seating's occupancy groups; `building` alone otherwise."""
+    assembly_seating(parts, description, factors, building if stated is None else stated)
     rooms, every = readable_rooms(description)
     increase_ruled_out = isinstance(building, dict) and building.get("occupant_load_increased") is False
     cap = factors["increase_cap"]
@@ -205,6 +386,9 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
         if open_ or odd:
             if lacking:                               # the story's ask for a function names these rooms, not the level
                 story.setdefault("more", {}).setdefault("story_occupant_load", {})[FUNCTION_ROOMS] = lacking
+            if lacking and not odd and all(w == NOT_GIVEN for _, w in open_):
+                # only functions wait: setting them works the story's load out (a corridor's ask is them alone)
+                story["more"]["story_occupant_load"][FUNCTIONS_ONLY] = True
             story["not_measured"]["story_occupant_load"] = "; ".join(
                 ([STORY_OPEN.format(names=", ".join(n for n, _ in open_))
                   + (STORY_FUNCTION if any(w == NOT_GIVEN for _, w in open_) else
@@ -218,6 +402,8 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
             _give(story, "story_occupant_load", low, high, no_share)
         else:
             story["not_measured"]["story_occupant_load"] = STORY_NONE
+        _bounds(story, mine, rooms, factors, building,
+                [cid for cid, c in corridors.items() if c.get("within") == story["id"]])
         _corridor_loads(story, [c for c in corridors.values() if c.get("within") == story["id"]], building)
     return parts
 
@@ -248,7 +434,11 @@ def _corridor_loads(story: dict, mine: list, building: dict | None) -> None:
                                                            building.get(OTHER_LEVELS) is True else
                                                            CORRIDOR_NOT_RULED_OUT)
         elif load is None:
-            c["not_measured"]["corridor_occupant_load"] = CORRIDOR_NO_STORY
+            held = (story.get("more") or {}).get("story_occupant_load") or {}
+            lacking = held.get(FUNCTION_ROOMS) if held.get(FUNCTIONS_ONLY) is True else None
+            c["not_measured"]["corridor_occupant_load"] = CORRIDOR_NO_FUNCTION if lacking else CORRIDOR_NO_STORY
+            if lacking:                               # the rooms the function ask is set on (never the corridor)
+                c.setdefault("more", {}).setdefault("corridor_occupant_load", {})[FUNCTION_ROOMS] = list(lacking)
         else:
             c.setdefault("readings", {})["corridor_occupant_load"] = [
                 {"value": 0, "named": {CORRIDOR_QUESTION: CORRIDOR_NONE}},

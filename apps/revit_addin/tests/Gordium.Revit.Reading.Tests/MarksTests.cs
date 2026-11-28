@@ -55,6 +55,8 @@ public sealed class MarksTests
             ("Gordium: This house has no deck or porch or cantilever over an escape opening", "820cd2d1-5b6d-416d-afa8-01cb1f0c4515", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // a real model (Pacific Continental, 2026-11-20): a roof or turret level whose enclosed areas aren't rooms
             ("Gordium: No rooms on this level", "c8cc09e8-00ce-4e4b-a27a-4c2d23410a02", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Levels"]),
+            // a level that is no story (the story facts' level mark: never tried as a story with no rooms drawn)
+            ("Gordium: Not a story", "0938c91d-d646-49f7-b072-465fecbb9325", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Levels"]),
             // the same model's wall niches, corbels and trim drawn as Generic Models (Q2): cleared one by one
             ("Gordium: Not a stair", "6f527562-6b18-467b-9e86-5a2c5489dbc2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_GenericModel", "OST_Stairs", "OST_StairsRailing"]),
             // what a floor outside the house is (reading design note, section 1, "Site slabs")
@@ -74,6 +76,8 @@ public sealed class MarksTests
             ("Gordium: Not occupied", "306bccbe-b2f7-4a73-9169-6be76fb46202", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
             // a room's Table 1004.5 function (the Building Code's occupant loads)
             ("Gordium: Function", "de595662-5386-4cab-9245-600eefb9462d", MarkValueKind.Text, MarkBinding.Instance, ["OST_Rooms"]),
+            // the dwelling unit a room belongs to (the story facts, step 3: the count from the marks)
+            ("Gordium: Unit", "631bdd26-d64d-4d89-b192-04321c4bc82e", MarkValueKind.Text, MarkBinding.Instance, ["OST_Rooms"]),
             // which New York code governs, and what the Building Code's rules read (docs/decisions/2026-11-22_which_ny_code.md)
             ("Gordium: Follows the Building Code", "01405f95-7061-47e2-b2a3-7706747c0817", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Stories above grade plane", "3f5ba80f-f877-49d9-bc47-a86de4a87a19", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
@@ -98,6 +102,11 @@ public sealed class MarksTests
             ("Gordium: Ambulatory care facility", "2a31e2c4-cf29-4ac4-9c57-a41ca85748b3", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Corridors within dwelling units", "a61d6738-cc50-4a7a-bf34-eb258e6b55d7", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Emergency voice/alarm system", "f4184d32-275e-4423-90c6-66a2e4d247ee", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Mezzanines", "c2f4615d-5335-49cc-a997-311bac414fbd", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Loads not by area", "501f87dd-fbc9-4ab6-8478-301feeb6d0a8", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // Chapter 4 part b's (403 high-rise, 405 underground)
+            ("Gordium: High-rise building", "50749eaa-b331-40c1-af60-c1bf02acbc28", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Underground building", "0b116213-0d7e-4e3c-b03b-e71a9f387d05", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // the dwelling's own facts the code decision reads (review round 1: an ask named marks Revit didn't have)
             ("Gordium: Dwelling units", "aa32131a-e757-47a3-abf8-9deb81d7a09a", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Units in the attached building", "bccb088a-c087-475f-9ff9-53fd10133d0e", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
@@ -127,6 +136,28 @@ public sealed class MarksTests
             ("Gordium: Main building floor area", "f237131b-5e7e-4c8e-94df-a8538de16954", MarkValueKind.Area, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // a door type's leaves (BCNYS 1010.1.1: one leaf of a pair with no mullion gives the 32 in)
             ("Gordium: Leaves", "f23ad40b-e048-4b61-a92a-b7963e64d4cf", MarkValueKind.Integer, MarkBinding.Type, ["OST_Doors"]),
+            // what latches or locks each door (BCNYS 1010.2.8): no door family or type parameter says it
+            ("Gordium: Hardware", "9900f8fa-52dd-4654-bda2-1e1a4b9cb959", MarkValueKind.Text, MarkBinding.Instance, ["OST_Doors"]),
+            // the Toposolids show the finished ground (RCNYS R202 GRADE): only then is the ground at each window read
+            ("Gordium: Toposolid is finished ground", "bbb69f1e-d644-4830-8ba0-cd958c04bbb8", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // an escape opening below grade and its area well (BCNYS 1031.5): a well isn't in Revit's vocabulary
+            ("Gordium: Below grade", "250e27a5-d58b-4ddf-8ece-b35235ccc1f2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well area", "6e368439-8dd1-48c8-99bf-eff9afd45b39", MarkValueKind.Area, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well width", "6305ccee-e00f-4870-868f-e58241f9a0ef", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well projection", "8814e090-d06c-467c-ae0f-c0518835997f", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well depth", "8aba2fba-b56c-4825-ab0f-86247ec221c8", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well ladder or steps", "a9a70071-4f69-40e0-9db5-a713f65b7e6a", MarkValueKind.Text, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well ladder width", "2cfc1b61-245d-4783-afab-6eefd4fae35a", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well rung projection", "18694498-b560-4e59-95ac-a555e05d71ec", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well rung spacing", "a380f476-72bc-4ee8-9720-296d49313a30", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well step tread", "8b6628e2-2ee7-434e-ad15-b563fa95ccca", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well step riser", "444f0f5a-3046-4ce6-91b7-570b5cf3e23c", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well ladder full height", "f982cb20-0562-4a16-9cd8-40f8642b9ddb", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well ladder encroachment", "f9c44848-4643-4aca-a1c2-e073d03694d8", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well other encroachment", "961cebf6-451f-4b59-8151-f10eedcf1db5", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            // a corridor's walls (the egress UI audit's finding 5, 2026-11-26)
+            ("Gordium: Corridor rating minutes", "3e9778e1-4f8d-40cc-a224-58933cb06a45", MarkValueKind.Integer, MarkBinding.Instance, ["OST_Rooms"]),
+            ("Gordium: Smoke partition walls", "6a953c28-38f7-49d7-8e3c-5f38cc3aa78c", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))
@@ -139,6 +170,10 @@ public sealed class MarksTests
             Assert.False(string.IsNullOrWhiteSpace(m.Description));
         }
         Assert.Equal(Marks.All.Count, Marks.All.Select(m => m.Guid).Distinct().Count());
+        // a GUID that once meant a narrower question is never reused for a wider one: an answer to the old question
+        // would read as an answer to the new (review round 3: Gordium: Bowling lanes became Gordium: Loads not by area)
+        Guid[] retired = [Guid.Parse("5049ea17-952b-4916-b429-896167244126")];
+        Assert.DoesNotContain(Marks.All, m => retired.Contains(m.Guid));
     }
 
     [Fact]

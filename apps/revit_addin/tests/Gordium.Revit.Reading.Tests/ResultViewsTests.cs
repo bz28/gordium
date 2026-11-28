@@ -11,7 +11,11 @@ namespace Gordium.Revit.Reading.Tests;
 /// test_data/test_sites/new_york/ithaca_city/four_unit_apartment/revit_check_site_request.json, answered by the
 /// worker: answers/four_unit_apartment_check_answer.json) and on that answer changed one way at a time. The rules each
 /// test holds: every row is in both views (never hidden); every count is a count of the checker's rows; a group or
-/// node is never green while anything in it fails, needs review or isn't checked yet; nothing here makes a verdict.</summary>
+/// node is never green while anything in it fails, needs review or isn't checked yet; nothing here makes a verdict.
+/// The apartment's answer is made by the checker, never committed (tools/evals/make_apartment_answer.py), so the counts
+/// compared on it are counted here from the answer's own JSON (its statuses and asks), never written in as numbers a
+/// rule change would move; the words and the counting are pinned with numbers on a small answer made here
+/// (<see cref="Small"/>).</summary>
 public sealed class ResultViewsTests
 {
     private static readonly WorkerAbout About = new("1.3", "gordium.site/1", new string('f', 64), new Dictionary<string, string>());
@@ -32,11 +36,133 @@ public sealed class ResultViewsTests
 
     private static IEnumerable<ResultRow> RowsIn(CodeNode n) => n.Rows.Concat(n.Children.SelectMany(RowsIn));
 
+    /// <summary>The checker's status words and the summary's words for each, worst first, as the design writes them
+    /// (change 18), kept here apart from the pane's own table so a slip in either shows.</summary>
+    private static readonly (string Status, string One, string Many)[] Words =
+    [
+        ("does_not_comply", "fails", "fail"),
+        ("needs_review", "needs review", "need review"),
+        ("not_checked", "not checked yet", "not checked yet"),
+        ("complies", "complies", "comply"),
+        ("not_applicable", "doesn't apply", "don't apply"),
+    ];
+
+    /// <summary>A row's status word as the pane must count it, read from the answer's JSON (never through the pane):
+    /// the checker's word, except that "not applicable" with no reason is needs review (a rule is never set aside
+    /// without its reason shown).</summary>
+    private static string? StatusOf(JsonNode item) =>
+        (string?)item["status"] is "not_applicable" && string.IsNullOrWhiteSpace((string?)item["reason"]) ? "needs_review" : (string?)item["status"];
+
+    /// <summary>How many of the answer's rows the pane must count under each status word.</summary>
+    private static int Count(JsonNode result, string status) => Items(result).Count(i => StatusOf(i!) == status);
+
+    /// <summary>The summary line the answer's own statuses make: each word's count, worst first, zero counts left out.
+    /// An answer with a status word not listed in <see cref="Words"/> fails here, so a new word is never counted as
+    /// nothing.</summary>
+    private static string SummaryOf(JsonNode result)
+    {
+        Assert.All(Items(result), i => Assert.Contains((string)i!["status"]!, Words.Select(w => w.Status)));
+        return string.Join(" · ", Words.Select(w => (w, n: Count(result, w.Status))).Where(x => x.n > 0)
+                                       .Select(x => $"{x.n} {(x.n == 1 ? x.w.One : x.w.Many)}"));
+    }
+
+    /// <summary>The ids of the rows in review that make an ask <paramref name="asks"/> picks (an ask the pane can show:
+    /// with a key and a headline), read from the answer's JSON: what a card of those asks must list, each row once.</summary>
+    private static HashSet<string> Asking(JsonNode result, Func<JsonNode, bool> asks) =>
+        Items(result).Where(i => StatusOf(i!) == "needs_review" && i!["asks"] is JsonArray all
+                                 && all.Any(a => a is JsonObject && (string?)a["key"] is { Length: > 0 }
+                                                 && (string?)a["headline"] is { Length: > 0 } && asks(a)))
+                     .Select(i => (string)i!["id"]!).ToHashSet(StringComparer.Ordinal);
+
+    /// <summary>The ids of the rows in the card of <paramref name="field"/>'s question, read from the answer's JSON.</summary>
+    private static HashSet<string> AskingFor(JsonNode result, string field) =>
+        Asking(result, a => (string?)a["field"] == field && (string?)a["kind"] == "mark");
+
+    /// <summary>The group an ask's card belongs in, by the design's table (strings.md, "What to fix"), written here
+    /// apart from the pane's <see cref="ResultViews.KindOf"/> so a slip in it can't move the test's expectation too: a
+    /// mark of a fact on Project Information (<c>facts.</c>, <c>building.</c>) is a question to answer, any other mark
+    /// an element to mark; an unknown or missing kind is a person's to decide.</summary>
+    private static FixKind GroupOf(JsonNode ask) => ((string?)ask["kind"], (string?)ask["field"]) switch
+    {
+        ("mark", { } f) when f.StartsWith("facts.", StringComparison.Ordinal) || f.StartsWith("building.", StringComparison.Ordinal) => FixKind.Answer,
+        ("mark", _) => FixKind.Mark,
+        ("fix_model", _) => FixKind.FixModel,
+        ("survey", _) => FixKind.Survey,
+        ("measure", _) => FixKind.Measure,
+        ("open_question", _) => FixKind.OpenQuestion,
+        _ => FixKind.Decide,
+    };
+
+    private static JsonObject Work(string kind, string key) => new() { ["kind"] = kind, ["key"] = key, ["headline"] = "Do " + key };
+
+    private static JsonObject Ask(string field, string? headline = null) => new()
+    {
+        ["kind"] = "mark", ["key"] = "field:" + field, ["headline"] = headline ?? "Say " + field, ["why"] = "w",
+        ["elements"] = new JsonArray(), ["field"] = field,
+    };
+
+    private static JsonObject Asked(string id, params JsonObject[] asks)
+    {
+        var item = UxAnswers.Item(id, "needs_review");
+        item["asks"] = new JsonArray(asks.Select(a => (JsonNode)a.DeepClone()).ToArray());
+        return item;
+    }
+
+    /// <summary>A small answer made here, its counts known by hand: one fails; thirteen in review (three ask the
+    /// occupancy group, one of those first the sprinkler system; one asks for a room's function; one each asks to fix the
+    /// model, for a survey, to measure by hand, an open question, to decide, and work of a kind the add-in doesn't know;
+    /// one asks nothing, one has a status word the add-in doesn't know and one doesn't apply but says no reason, each of
+    /// those last three review); two not checked yet; two comply; one doesn't apply.</summary>
+    private static CheckResult Small() => UxAnswers.Answer("does_not_comply",
+        UxAnswers.Item("f1", "does_not_comply"),
+        Asked("r1", Ask("building.sprinkler_system"), Ask("building.occupancy_groups")),
+        Asked("r2", Ask("building.occupancy_groups")),
+        Asked("r3", Ask("building.occupancy_groups"), Ask("building.occupancy_groups")),
+        Asked("r4", new JsonObject { ["kind"] = "mark", ["key"] = "mark:rooms", ["headline"] = "Set the room's function", ["field"] = "rooms[].function" }),
+        Asked("r6", Work("fix_model", "fix:walls")), Asked("r7", Work("survey", "survey")), Asked("r8", Work("measure", "measure:sill")),
+        Asked("r9", Work("open_question", "open:yard")), Asked("r10", Work("decide", "decide:use")), Asked("r11", Work("brand_new", "new:x")),
+        UxAnswers.Item("r5", "needs_review"),
+        UxAnswers.Item("u1", "something_new"),
+        UxAnswers.Item("a2", "not_applicable", reason: null),
+        UxAnswers.Item("n1", "not_checked"), UxAnswers.Item("n2", "not_checked"),
+        UxAnswers.Item("c1", "complies"), UxAnswers.Item("c2", "complies"),
+        UxAnswers.Item("a1", "not_applicable"));
+
+    /// <summary>The counting and the words, pinned with numbers counted by hand on <see cref="Small"/>: the apartment's
+    /// own counts are counted from its answer (it changes with the rules), so a slip that moved both the pane's count
+    /// and the test's would hide there; here it can't.</summary>
+    [Fact]
+    public void The_counts_and_their_words_on_a_small_answer_counted_by_hand()
+    {
+        var m = ResultViews.Build(Small());
+        Assert.Equal("1 fails · 13 need review · 2 not checked yet · 2 comply · 1 doesn't apply", m.Summary);
+        // every group, in the design's order, each with its rows and its words
+        Assert.Equal([FixKind.Fails, FixKind.Answer, FixKind.Mark, FixKind.FixModel, FixKind.Survey, FixKind.Measure, FixKind.Decide,
+                      FixKind.OpenQuestion, FixKind.NotChecked, FixKind.Done], m.Fix.Select(g => g.Kind));
+        Assert.Equal(["f1", "r1 r2 r3", "r4", "r6", "r7", "r8", "r10 r11 r5 u1 a2", "r9", "n1 n2", "c1 c2 a1"],
+                     m.Fix.Select(g => string.Join(" ", g.Rows.Select(r => r.Id))));
+        Assert.Equal(["Fails · 1", "Answer 2 questions about the project", "Mark 1 kind of element", "Fix 1 thing in the model",
+                      "Get a survey", "Measure 1 thing by hand", "5 code questions for you to decide", "1 open question about the law",
+                      "Not checked yet by Gordium", "Complies or doesn't apply · 3"], m.Fix.Select(g => g.Title));
+        var answer = m.Fix.Single(g => g.Kind == FixKind.Answer);
+        // the card most rows wait on first, though the sprinkler system was asked first; a row asking twice is listed once
+        Assert.Equal(["building.occupancy_groups", "building.sprinkler_system"], answer.Cards.Select(c => c.Field));
+        Assert.Equal(["r1 r2 r3", "r1"], answer.Cards.Select(c => string.Join(" ", c.Rows.Select(r => r.Id))));
+        Assert.Equal("Answer 2 questions about the project", answer.Title);
+        Assert.Equal(["r1", "r2", "r3"], answer.Rows.Select(r => r.Id));
+        Assert.Equal(["decide:use", "new:x", "row:r5", "row:u1", "row:a2"], m.Fix.Single(g => g.Kind == FixKind.Decide).Cards.Select(c => c.Key));
+        Assert.Equal("No results", ResultViews.Summary([]));
+        Assert.Equal("1 needs review · 1 complies", ResultViews.Summary([Verdict.Complies, Verdict.NeedsReview]));
+    }
+
     [Fact]
     public void The_top_says_the_checker_s_counts_and_what_they_mean()
     {
-        var m = ResultViews.Build(Apartment());
-        Assert.Equal("286 need review · 8 not checked yet · 31 comply · 1 doesn't apply", m.Summary);   // group 2's story exits: +8; group 3's 1004.7 and 1004.9 flags: +2; group 4a's corridor width and capacity (2 corridors each) and the mixed-building flag: +5; group 4b's seven Table 1020.2 rows and the fire-partition flag (2 corridors each), and its mixed, Group I-2 and hoistway flags: +19; group 4c's obstruction and air-movement flags and the continuity flag (2 corridors): +4; group 5a's stairway and other-component capacity flags: +2; group 5b's continuity, distribution and convergence flags: +3; group 5c's three encroachment flags: +3; group 6a's door width (10 doors, needs review: leaves not stated) and its three flags: +13, its door height (10 doors) complies: +10; group 6b's door swing (10 doors, needs review: the side each swings into isn't stated): +10, its door-kind flag (10 doors, side-hinged) doesn't apply
+        var result = Answer();
+        var m = ResultViews.Build(Parse(result));
+        // the line's numbers are the answer's own counts, in the line's words and order (pinned with numbers on Small)
+        Assert.Equal(SummaryOf(result), m.Summary);
+        Assert.True(Count(result, "needs_review") > 0 && Words.Count(w => Count(result, w.Status) > 0) >= 2);   // never a count of nothing
         // only the results that wait on a question are said to (egress UI audit): their count is the questions card's
         var review = m.Fix.SelectMany(g => g.Rows).Where(r => r.Verdict == Verdict.NeedsReview).Select(r => r.Id).Distinct().Count();
         var asked = m.Fix.Single(g => g.Kind == FixKind.Answer).Rows.Where(r => r.Verdict == Verdict.NeedsReview).Select(r => r.Id).Distinct().Count();
@@ -71,10 +197,57 @@ public sealed class ResultViewsTests
         Assert.Contains("not checked yet", ResultViews.Headline([(Verdict.Complies, "a"), (Verdict.NotChecked, "b")]), StringComparison.Ordinal);
     }
 
+    /// <summary>Egress UI audit, finding 3: cards of a group headed by the same words (the apartment's "Check this by
+    /// hand: a person decides it") are each named by the rule their results are about, so they can be told apart; the
+    /// checker's words stay the headline and the tooltip says both.</summary>
+    [Fact]
+    public void Cards_headed_alike_are_named_by_their_rule()
+    {
+        var m = ResultViews.Build(Apartment());
+        var named = 0;
+        foreach (var g in m.Fix)
+        {
+            // the renamed cards of a group are told apart: no two share a title
+            var renamed = g.Cards.Where(c => c.Title != c.Headline).ToList();
+            Assert.Equal(renamed.Count, renamed.Select(c => c.Title).Distinct().Count());
+            foreach (var c in g.Cards)
+            {
+                if (c.Title != c.Headline)
+                {
+                    named++;
+                    Assert.All(c.Rows, r => Assert.EndsWith(c.Title, r.Name, StringComparison.Ordinal));
+                    var entry = new FixCardEntry(c, ResultViewList.CardKey(c), false, PanelStatus.Review);
+                    var tip = ResultViewList.Tip(entry)!;
+                    Assert.StartsWith(c.Title + "\n" + c.Headline, tip, StringComparison.Ordinal);      // both, rule first
+                    Assert.StartsWith(c.Title + ",", ResultViewList.Spoken(entry), StringComparison.Ordinal);   // what a screen reader says
+                }
+            }
+        }
+        var decide = m.Fix.Single(g => g.Kind == FixKind.Decide);
+        Assert.True(named >= decide.Cards.Count(c => c.Headline == "Check this by hand: a person decides it"), $"{named} named");
+        Assert.True(decide.Cards.Select(c => c.Title).Distinct().Count() > decide.Cards.Select(c => c.Headline).Distinct().Count());
+        // the rule part of a real row's name, and none for rows about two rules
+        var corridorWidth = decide.Cards.Single(c => c.Rows.Count == 1 && c.Rows[0].Name.EndsWith("Corridor width kept clear (BCNYS 1020.4)", StringComparison.Ordinal));
+        Assert.Equal("Corridor width kept clear (BCNYS 1020.4)", ResultViews.RuleOf(corridorWidth.Rows));
+        Assert.Null(ResultViews.RuleOf([.. decide.Cards.Where(c => c.Rows.Count == 1).Take(2).Select(c => c.Rows[0])]));
+        var list = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsList.cs"));
+        Assert.Contains("Text = e.Card.Title, TextTrimming", list, StringComparison.Ordinal);
+        // review round 1: one rule on two elements under the same words: each named by its result's whole name; the
+        // same whole name twice: the checker's words stay
+        var two = corridorWidth.Rows[0];
+        FixCard Card(string key, ResultRow row) => new(key, FixKind.Decide, "Look at it", null, null, [], [row]);
+        var a = two with { Id = "a", Name = "Level 1 \u203A CORRIDOR L1 (3) \u00B7 Corridor width kept clear (BCNYS 1020.4)" };
+        var b = two with { Id = "b", Name = "Level 2 \u203A CORRIDOR L2 (8) \u00B7 Corridor width kept clear (BCNYS 1020.4)" };
+        Assert.Equal([a.Name, b.Name], ResultViews.Named([Card("1", a), Card("2", b)]).Select(c => c.Title));
+        Assert.Equal(["Look at it", "Look at it"], ResultViews.Named([Card("1", a), Card("2", a with { Id = "c" })]).Select(c => c.Title));
+        Assert.Equal(["Look at it", "Other words"], ResultViews.Named([Card("1", a), Card("2", b) with { Headline = "Other words" }]).Select(c => c.Title));
+    }
+
     [Fact]
     public void What_to_fix_holds_every_row_and_each_ask_of_each_row_in_review()
     {
-        var result = Apartment();
+        var raw = Answer();
+        var result = Parse(raw);
         var m = ResultViews.Build(result);
         var all = m.Fix.SelectMany(g => g.Rows).Select(r => r.Id).ToHashSet();
         Assert.All(result.Items, i => Assert.Contains(i.Id, all));
@@ -82,12 +255,34 @@ public sealed class ResultViewsTests
         foreach (var item in result.Items.Where(i => i.Status == Verdict.NeedsReview))
             foreach (var ask in ResultViews.Asks(item.Raw))
             {
-                var card = m.Fix.SelectMany(g => g.Cards).Single(c => c.Key == ask.Key && c.Kind == ResultViews.KindOf(ask.Kind, ask.Field));
+                var kind = GroupOf(new JsonObject { ["kind"] = ask.Kind, ["field"] = ask.Field });
+                var card = m.Fix.SelectMany(g => g.Cards).Single(c => c.Key == ask.Key && c.Kind == kind);
                 Assert.Contains(card.Rows, r => r.Id == item.Id);
                 Assert.All(ask.Elements, e => Assert.Contains(e, card.Elements));
             }
         // a group's rows are its cards' rows, each once
         Assert.All(m.Fix, g => Assert.Equal(g.Cards.SelectMany(c => c.Rows).Select(r => r.Id).Distinct().Count(), g.Rows.Count));
+        // and no more: each card lists exactly the rows in review whose asks it shows, counted from the answer's JSON
+        // (the numbers once written here, 198 and the rest, each a rule change away from wrong), the most first
+        foreach (var g in m.Fix.Where(g => g.Kind is not (FixKind.Fails or FixKind.NotChecked or FixKind.Done)))
+        {
+            foreach (var card in g.Cards)
+            {
+                var asking = Asking(raw, a => (string?)a["key"] == card.Key && GroupOf(a) == card.Kind);
+                if (asking.Count == 0)                                       // a row in review with no ask it can show
+                {
+                    Assert.StartsWith("row:", card.Key, StringComparison.Ordinal);
+                    asking = [card.Key["row:".Length..]];
+                }
+                Assert.Equal(asking.Order(StringComparer.Ordinal), card.Rows.Select(r => r.Id).Order(StringComparer.Ordinal));
+            }
+            Assert.Equal(g.Cards.Select(c => c.Rows.Count).OrderDescending(), g.Cards.Select(c => c.Rows.Count));
+        }
+        // the groups by status alone, each exactly the answer's rows of that status
+        foreach (var (kind, statuses) in new (FixKind, string[])[] { (FixKind.Fails, ["does_not_comply"]), (FixKind.NotChecked, ["not_checked"]),
+                                                                     (FixKind.Done, ["complies", "not_applicable"]) })
+            Assert.Equal(Items(raw).Where(i => statuses.Contains(StatusOf(i!))).Select(i => (string)i!["id"]!).Order(StringComparer.Ordinal),
+                         m.Fix.Where(g => g.Kind == kind).SelectMany(g => g.Rows).Select(r => r.Id).Order(StringComparer.Ordinal));
     }
 
     [Fact]
@@ -117,20 +312,31 @@ public sealed class ResultViewsTests
     [Fact]
     public void The_occupancy_group_and_sprinkler_system_are_questions_to_answer()
     {
-        var m = ResultViews.Build(Apartment());
+        var raw = Answer();
+        var m = ResultViews.Build(Parse(raw));
         var answer = m.Fix.Single(g => g.Kind == FixKind.Answer);
-        // the cards most results wait on come first: the occupancy group, then (NY Building Code egress for every
-        // group, PR #181) the special egress spaces and fixed seating, then the sprinkler system
-        Assert.Equal("building.occupancy_groups", answer.Cards[0].Field);
-        Assert.Equal(198, answer.Cards[0].Rows.Count);                 // group 2's story-exit rules read it too; group 4a's corridor width (2); group 4b's Table 1020.2 rows (7 x 2); group 5a's corridor capacity rule (2); group 6a's door width (10 doors: Group I-2's 41 1/2 in); group 6b's door swing (10 doors: Group H)
-        Assert.Equal(60, answer.Cards.Single(c => c.Field == "building.sprinkler_system").Rows.Count);   // group 4b: Table 1020.2 rows whose answer turns on the system (8)
-        Assert.Equal(82, answer.Cards.Single(c => c.Field == "building.special_egress_spaces").Rows.Count);
-        Assert.Equal(84, answer.Cards.Single(c => c.Field == "building.assembly_fixed_seating").Rows.Count);   // group 5a: the corridor capacity rule (2)
-        Assert.Equal($"Answer {answer.Cards.Count} questions about the project", answer.Title);
+        // the occupancy group, the special egress spaces, fixed seating and the sprinkler system are each a question
+        // card listing exactly the rows in review that ask it, counted from the answer (no number a rule change moves)
+        foreach (var field in new[] { "building.occupancy_groups", "building.special_egress_spaces", "building.assembly_fixed_seating",
+                                      "building.sprinkler_system" })
+        {
+            var asking = AskingFor(raw, field);
+            Assert.NotEmpty(asking);
+            Assert.Equal(asking.Order(StringComparer.Ordinal),
+                         answer.Cards.Single(c => c.Field == field).Rows.Select(r => r.Id).Order(StringComparer.Ordinal));
+        }
+        // the card most results wait on comes first
+        Assert.Equal(answer.Cards.Max(c => c.Rows.Count), answer.Cards[0].Rows.Count);
+        // the title counts the questions shown: the six ADU follow-ups (three on "Is there an ADU?", three on "Is the
+        // ADU detached?") wait until their parent is answered
+        Assert.Equal(6, answer.Cards.Count(c => c.DependsOn is not null));
+        Assert.Equal($"Answer {answer.Cards.Count - 6} questions about the project", answer.Title);
         Assert.DoesNotContain(m.Fix.Where(g => g.Kind != FixKind.Answer).SelectMany(g => g.Cards),
                               c => c.Field is { } f && (f.StartsWith("facts.", StringComparison.Ordinal) || f.StartsWith("building.", StringComparison.Ordinal)));
-        Assert.Equal("Not checked yet by Gordium", m.Fix.Single(g => g.Kind == FixKind.NotChecked).Title);
-        Assert.Equal(8, m.Fix.Single(g => g.Kind == FixKind.NotChecked).Rows.Count);
+        var notChecked = m.Fix.SingleOrDefault(g => g.Kind == FixKind.NotChecked);
+        Assert.Equal(Count(raw, "not_checked"), notChecked?.Rows.Count ?? 0);
+        if (notChecked is not null)
+            Assert.Equal("Not checked yet by Gordium", notChecked.Title);
     }
 
     [Fact]
@@ -216,30 +422,31 @@ public sealed class ResultViewsTests
     }
 
     /// <summary>A section with no rows is "nothing to check" only when all of it was brought in and none of its pieces
-    /// waits for rules (review round 2): BCNYS 903 (sprinkler systems) is a reference section only partly brought in,
-    /// so the rest of it (903.2, where sprinklers are required) is not checked yet, and so is its chapter.</summary>
+    /// waits for rules (review round 2): BCNYS 202 (definitions) is a reference section only partly brought in, so the
+    /// rest of it is not checked yet, and so is its chapter. (It was 903 until Chapter 9 brought 903 in with rules of
+    /// its own, whose rows the apartment has: a chapter with no rows is now Chapter 2.)</summary>
     [Fact]
     public void A_section_only_partly_brought_in_is_not_checked_yet_even_with_no_rows()
     {
-        // BCNYS chapter 9 as if every section in it were a whole reference section, then with 903 only partly brought in
-        static JsonNode Chapter9(bool whole903)
+        // BCNYS chapter 2 as if every section in it were a whole reference section, then with 202 only partly brought in
+        static JsonNode Chapter2(bool whole202)
         {
             var result = Answer();
             var bc = result["view"]!["contents"]!.AsArray().Single(d => ((string?)d!["document"])!.StartsWith("2025 Building Code", StringComparison.Ordinal))!;
-            var ch9 = bc["chapters"]!.AsArray().Single(c => (string?)c!["number"] == "9")!;
-            foreach (var sec in ch9["sections"]!.AsArray())
+            var ch2 = bc["chapters"]!.AsArray().Single(c => (string?)c!["number"] == "2")!;
+            foreach (var sec in ch2["sections"]!.AsArray())
             {
                 sec!["coverage"] = "not_for_checking";
-                sec["whole"] = (string?)sec["number"] != "903" || whole903;
+                sec["whole"] = (string?)sec["number"] != "202" || whole202;
                 sec["pieces"] = new JsonArray();
             }
             return result;
         }
-        CodeNode Ch9(bool whole903) => Walk(ResultViews.Build(Parse(Chapter9(whole903))).Code[1].Children)
-                                           .Single(n => n.Level == CodeLevel.Chapter && n.Number == "9");
-        Assert.Equal(CodeState.NothingToCheck, Ch9(true).State);
-        Assert.Equal(CodeState.NotCheckedYet, Ch9(false).State);
-        Assert.Equal("Not checked yet by Gordium", Ch9(false).Line);
+        CodeNode Ch2(bool whole202) => Walk(ResultViews.Build(Parse(Chapter2(whole202))).Code[1].Children)
+                                           .Single(n => n.Level == CodeLevel.Chapter && n.Number == "2");
+        Assert.Equal(CodeState.NothingToCheck, Ch2(true).State);
+        Assert.Equal(CodeState.NotCheckedYet, Ch2(false).State);
+        Assert.Equal("Not checked yet by Gordium", Ch2(false).Line);
     }
 
     /// <summary>A fold's title says only what is true of every part in it (review round 2): chapters and appendices are

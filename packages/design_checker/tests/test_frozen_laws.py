@@ -72,8 +72,8 @@ def test_a_missing_stale_unknown_or_unusable_certificate_gives_that_law_a_proble
     stale_code = dict(real, validator={**real["validator"], "packages/rule_format/rule_format/rulebook.py": "0" * 64})
     refused = dict(real, result={**real["result"], "problems": ["a quote isn't at its lines"]})
     no_kinds = dict(real, result={k: v for k, v in real["result"].items() if k != "kinds"})
-    cases = {None: "no certificate at", b"{": "isn't readable JSON", b"[]": "isn't a gordium.published_law/1",
-             json.dumps(dict(real, format="gordium.published_law/2")).encode(): "isn't a gordium.published_law/1",
+    cases = {None: "no certificate at", b"{": "isn't readable JSON", b"[]": "isn't a gordium.published_law/2",
+             json.dumps(dict(real, format="gordium.published_law/1")).encode(): "isn't a gordium.published_law/2",
              json.dumps(stale_book).encode(): "the rulebook changed",
              json.dumps(stale_input).encode(): "input changed:",
              json.dumps(new_file).encode(): "new file:",

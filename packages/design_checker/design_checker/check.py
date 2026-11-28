@@ -42,7 +42,7 @@ from rule_format import formula, parts
 from rule_format.place import UnknownPlace
 from rule_format.place import place as place_of_folder
 from rule_format.place import plugin_place
-from rule_format.rulebook import (MEASURE_KINDS, REPO, STATE_SETTINGS, Context, load, load_bytes, outcome, rulebook_for,
+from rule_format.rulebook import (MEASURE_KINDS, REPO, STATE_SETTINGS, load, load_bytes, outcome, rulebook_for,
                                   unknown_settings)
 
 COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
@@ -1008,9 +1008,9 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         path = Path(tmp) / "project.yaml"
         path.write_text(yaml.safe_dump(project, sort_keys=False, allow_unicode=True), encoding="utf-8")
         t = tables(path)              # refuses a project or rulebook that fails its checks (ValueError)
-    rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
+    rules = t["rules"]                  # the frozen rulebook the rows came from, never a second read of the file
     by_id = {r["id"]: r for r in rules}
-    allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
+    allowed = {"use": t["uses"]}
     every = [_why(dict(zip(COLUMNS, r)), by_id, measured, allowed, facts) for r in t["output"]]
     waiting = [r for r in every if waits_on_interior(r, by_id[r["Rule id"]], measured, allowed)]
     for r in waiting:                   # exactly which stated facts each one waits for (its "Enter …" asks those)
@@ -1073,9 +1073,14 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     egress.add_to_view(v, law, found["place"])
     # what the rebuilt results pane reads beyond today's fields (C1-C9): new fields only, never a status
     place_folder = egress._folder(facts["jurisdiction"])
+    try:                             # a hint for the high-rise question only, never a value (high_rise_hint.py)
+        from design_checker import high_rise_hint
+        hint = high_rise_hint.words(high_rise_hint.figure(interior, _story_ground(facts)))
+    except Exception:
+        hint = None
     ui_data.add(v, rules_by_id=by_id, laws=found["laws"], site=site, values=values,
                 place=measuring(facts["jurisdiction"]), place_folder=place_folder,
-                documents=ui_data.place_documents(place_folder))
+                documents=ui_data.place_documents(place_folder), high_rise_hint=hint)
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:
@@ -1125,9 +1130,10 @@ def _with_stories_bound(values: dict, measured: dict, facts: dict | None = None,
     is below the ground: places/ithaca_city/measure.py _stories_whole), never where it is a typed count kept because
     nothing countable is drawn (no parts named) or any measurement hit a geometry error; code_scope.STORIES_HOW, typed
     (the architect's count kept within what the drawing allows) or read; the most stories the drawing allows
-    (code_scope.STORIES_AT_MOST) where the count is an open question between readings; and code_scope.SET_ASIDE, each
+    (code_scope.STORIES_AT_MOST) where the count is an open question between readings; code_scope.SET_ASIDE, each
     stated fact the measuring set aside for contradicting another ({name: its reason}: the place's own
-    `conflicts`, its measuring's fact_conflicts), never read as unstated."""
+    `conflicts`, its measuring's fact_conflicts), never read as unstated; and code_scope.STORIES_TYPED, the story
+    count the architect typed (a number), settled or not, which egress reads against "no stairs"."""
     record = measured.get("stories") or {}
     drawn = bool(record.get("objects")) and not any(isinstance(r, dict) and r.get("geometry_error")
                                                    for r in measured.values())
@@ -1138,6 +1144,9 @@ def _with_stories_bound(values: dict, measured: dict, facts: dict | None = None,
             if k in code_scope.READS:
                 aside.setdefault(k, why)
     out = {**values, code_scope.STORIES_DRAWN: drawn, code_scope.STORIES_HOW: how, code_scope.SET_ASIDE: aside}
+    typed = (facts or {}).get("stories")
+    if type(typed) in (int, float) and math.isfinite(typed):     # the architect's own count, settled or not
+        out[code_scope.STORIES_TYPED] = typed
     most = [r.get("value") for r in record.get("readings") or [] if isinstance(r, dict)]
     if values.get("stories") is not None or not most or not all(type(v) in (int, float) for v in most):
         return out

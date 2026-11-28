@@ -95,6 +95,120 @@ def test_no_outline_no_diagonal():
     assert stop.value.key == "outline_needed" and "story outlines" in stop.value.reason
 
 
+def test_an_outer_outline_short_of_the_story_gives_no_ratio():
+    """An outer outline that doesn't hold every room and exit door (drawn short, a wing only) would shrink the
+    diagonal, so close exits would read as placed apart (BCNYS 1007.1.1, a false pass): no ratio, the outline's reason
+    said. Drawn to the walls' outer faces, or within half an inch of them, it gives one."""
+    assert straight.ratio(story(two_exits()))[2] == pytest.approx(31.536 / math.hypot(41, 21), abs=1e-3)
+    for outer, ok in ((rect(-0.5, -0.5, 40.5, 20.5), True), (rect(-0.46, -0.46, 40.46, 20.46), True),
+                      (rect(0, 0, 40, 20), False), (rect(0.45, 0.45, 39.55, 19.55), False), (rect(-0.5, -0.5, 30, 20.5), False)):
+        d = outlined(two_exits(), outer, rect(0, 0, 40, 20))
+        if ok:
+            assert straight.ratio(story(d))[2] > 0, outer
+            continue
+        with pytest.raises(Stop) as stop:
+            straight.ratio(story(d))
+        assert stop.value.key == "outline_short", outer
+    # the routes' story part: not measured, with the reason (so 1007.1.1's rule needs review)
+    from model_measurement.routes import measure
+    d = outlined(two_exits(), rect(0.45, 0.45, 39.55, 19.55), rect(0, 0, 40, 20))
+    sp = measure(d)["parts"]["story"][0]
+    assert "exit_remoteness_ratio" not in sp["measures"]
+    assert "doesn't hold all of it" in sp["not_measured"]["exit_remoteness_ratio"]
+
+
+def upper_story(outer):
+    """An upper story (no door to outside): a corridor 0 to 60 by 0 to 20, two exit stairs north of it (S1 0 to 10,
+    S2 36.5 to 46.5, by 20.5 to 28), each entered by one door; walls 6 in, the story's inner outline 0 to 60 by 0 to
+    28. Its exits are just under half its diagonal apart, measured to the walls' outer faces."""
+    rooms = [room("c", rect(0, 0, 60, 20), use="corridor", pass_through=True),
+             room("S1", rect(0, 20.5, 10, 28), use="other", lockable=True),
+             room("S2", rect(36.5, 20.5, 46.5, 28), use="other", lockable=True)]
+    doors = [door("a", (5, 20.25), (1, 0), ("c", "S1"), exit_id="S1", kind="exit_enclosure"),
+             door("b", (41.5, 20.25), (1, 0), ("c", "S2"), exit_id="S2", kind="exit_enclosure")]
+    return outlined(description(rooms, doors), outer, rect(0, 0, 60, 28))
+
+
+def test_an_outline_at_the_walls_inside_faces_gives_no_ratio():
+    """Review of #281: an outer outline drawn at the walls' inside faces holds every room but is a wall short at each
+    end, so exits just under 1007.1.1's half read as over it (0.496 to 0.506 here, an upper story whose exits are stair
+    doors: no door to outside pins the outline to the outer face). The outer outline must be at least 3.5 in (the
+    thinnest exterior wall) beyond each wall side of the inner one, and the inner one must hold every room: else no
+    ratio."""
+    true = straight.ratio(story(upper_story(rect(-0.5, -0.5, 60.5, 28.5))))
+    assert true[2] < 0.5, true[2]
+    inside = story(upper_story(rect(0, 0, 60, 28)))
+    assert straight.remoteness(inside).length / straight.diagonal(inside).length > 0.5      # its own: over half
+    with pytest.raises(Stop) as stop:
+        straight.ratio(inside)
+    assert stop.value.key == "outline_not_outer" and "3.5 in" in stop.value.reason
+    # the inner outline drawn inside the rooms too (both a wall short): the rooms outside it
+    d = upper_story(rect(0, 0, 60, 28))
+    d["story_outlines"][0]["inner"] = [list(p) for p in rect(0.5, 0.5, 59.5, 27.5)]
+    with pytest.raises(Stop) as stop:
+        straight.ratio(story(d))
+    assert stop.value.key == "outline_short", stop.value.reason
+    # two rooms of one name outside the outlines: named once
+    d = upper_story(rect(0, 0, 60, 28))
+    d["rooms"][1]["name"] = d["rooms"][2]["name"] = "Stair"
+    d["story_outlines"][0]["inner"] = [list(p) for p in rect(0.5, 0.5, 59.5, 27.5)]
+    with pytest.raises(Stop) as stop:
+        straight.ratio(story(d))
+    assert stop.value.reason.count("Stair") == 1, stop.value.reason
+    # an inner outline that can't be read: that reason, not "drawn at the inside faces"
+    d = upper_story(rect(-0.5, -0.5, 60.5, 28.5))
+    d["story_outlines"][0]["inner"] = [[0, 0], [1, 0]]
+    with pytest.raises(Stop) as stop:
+        straight.ratio(story(d))
+    assert stop.value.key == "outline_needed", stop.value.reason
+    # whichever way the inner outline runs (clockwise here), and with its sides given in short pieces (cold review)
+    import math as _m
+    def pieces(poly, step=2):
+        out = []
+        for i in range(len(poly)):
+            a, b = poly[i], poly[(i + 1) % len(poly)]
+            k = _m.ceil(_m.dist(a, b) / step)
+            out += [[a[0] + (b[0] - a[0]) * j / k, a[1] + (b[1] - a[1]) * j / k] for j in range(k)]
+        return out
+    for inner in ([list(p) for p in reversed(rect(0, 0, 60, 28))], pieces(rect(0, 0, 60, 28))):
+        d = upper_story(rect(0, 0, 60, 28))
+        d["story_outlines"][0]["inner"] = inner
+        with pytest.raises(Stop) as stop:
+            straight.ratio(story(d))
+        assert stop.value.key == "outline_not_outer", stop.value.reason
+    # corners cut back to the inner corners (the diagonal runs between them), or a story of short sides only: refused
+    w = 3.5 / 12
+    cham = [(w, -w), (60 - w, -w), (60 + w, w), (60 + w, 28 - w), (60 - w, 28 + w), (w, 28 + w), (-w, 28 - w), (-w, w)]
+    with pytest.raises(Stop) as stop:
+        straight.ratio(story(upper_story(cham)))
+    assert stop.value.key == "outline_not_outer", stop.value.reason
+    from shapely.geometry import Polygon as _P
+    circle = _P([(360 * _m.cos(2 * _m.pi * k / 120), 360 * _m.sin(2 * _m.pi * k / 120)) for k in range(120)])
+    assert not straight._walled(circle.buffer(0.5), circle)
+    # an honest outline round corners that aren't square (a bay at 135 degrees, a 179 degree bend), its walls 4 in thick:
+    # taken (round 6: the corner tested where an outline 3.5 in out puts it, not as at a square corner)
+    for inner in ([(0, 0), (480, 0), (480, 240), (420, 300), (60, 300), (0, 240)],
+                  [(0, 0), (240, 0), (480, 4.19), (480, 300), (0, 300)]):
+        poly = _P(inner)
+        assert straight._walled(poly.buffer(4, join_style="mitre", mitre_limit=50).buffer(0.5), poly), inner
+    # one long side only drawn at its inside face: refused too
+    d = upper_story(rect(-0.5, -0.5, 60.5, 28.5))
+    d["story_outlines"][0]["outer"] = [list(p) for p in rect(-0.5, -0.5, 60.5, 28)]
+    with pytest.raises(Stop) as stop:
+        straight.ratio(story(d))
+    assert stop.value.key == "outline_not_outer", stop.value.reason
+    # a wall's end kept where it is, as Revit's reader does where two walls in line stand apart (a step up to 0.64 ft
+    # in the Children's Odyssey's ring): its short side brings the faces together, never a refusal (cold review)
+    for step in (0.1, 0.3, 0.64):
+        d = upper_story(rect(-0.5, -0.5, 60.5, 28.5))
+        d["story_outlines"][0]["outer"] = [[-0.5, -0.5], [60.5, -0.5], [60.5, 28.5], [30, 28.5], [30, 28.5 + step],
+                                           [-0.5, 28.5 + step]]
+        d["story_outlines"][0]["inner"] = [[0, 0], [60, 0], [60, 28], [30, 28], [30, 28 + step], [0, 28 + step]]
+        assert straight.ratio(story(d))[2] > 0, step
+    # walls 4 in thick, drawn so (the outer outline 4 in outside the inner one): taken
+    assert straight.ratio(story(upper_story(rect(-1 / 3, -1 / 3, 60 + 1 / 3, 28 + 1 / 3))))[2] > 0
+
+
 # --- test 9: storage on the line -----------------------------------------------------------------------------------
 
 def storage_story(storage_depth=24.5):

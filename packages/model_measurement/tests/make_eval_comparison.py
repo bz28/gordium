@@ -26,6 +26,8 @@ from pathlib import Path
 
 import yaml
 
+from model_measurement.routes.stops import Stop
+
 FT = 12.0
 OUT = Path(__file__).resolve().parents[3] / "test_data/answer_keys/portland_me_19_libby_st/eval_comparison.yaml"
 PT_PER_FT = 9.0                      # 1/8 in = 1 ft at 72 pt an inch
@@ -150,14 +152,24 @@ def main(path, out_path=OUT, co=CO):
         "story": _why(story, measured, "common_path_of_travel")}
     near = [next(d for d in story.exits() if math.dist((d.centre[0] / FT, d.centre[1] / FT), q) < 0.05)
             for q in co["same_pair"]]
-    far, across, ratio = straight.ratio(story)
+    # the figures against the sheet's, as straight.ratio works them; where the outlines don't hold the story (#281:
+    # the routes then give no ratio) the same figures, with why the routes don't (an outer outline not read at all
+    # still stops the eval, as before)
+    refused = None
+    try:
+        far, across, ratio = straight.ratio(story)
+    except Stop as s:
+        if s.key not in ("outline_short", "outline_not_outer", "outline_needed"):
+            raise
+        far, across, refused = straight.remoteness(story), straight.diagonal(story), s.reason
+        ratio = far.length / across.length
     out["figures"]["remoteness"]["gordium"] = {
         "same_pair_nearest_edges": round(straight.opening(near[0]).distance(straight.opening(near[1])) / FT, 3),
         "farthest_pair_nearest_edges": round(far.length / FT, 3), "farthest_pair": list(far.exits),
         "farthest_pair_door_centres": round(far.centres / FT, 3)}
     out["figures"]["diagonal"]["gordium"] = {
         "corner_to_corner": round(across.length / FT, 3), "ends": [[round(v / FT, 3) for v in p] for p in across.corners],
-        "ratio": round(ratio, 4)}
+        "ratio": round(ratio, 4), **({"not_given_by_the_routes": refused} if refused else {})}
     found = dead_ends.corridors(story, uses, StoryRoutes(story))
     out["figures"]["dead_end"]["gordium"] = {
         rid: ({"not_measured": c.stop} if c.stop else

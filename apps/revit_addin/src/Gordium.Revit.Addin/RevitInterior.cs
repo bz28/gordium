@@ -40,10 +40,11 @@ internal static class RevitInterior
         List<StairRecord>? stairs;
         List<StairCandidate> candidates;
         List<RailingRecord>? railings;
+        List<GroundRecord>? grounds;
         // each element's geometry worked out once for the rooms, openings, stairs and railings (the same element over
-        // many rooms was read again for each): kept only until the enclosed areas below, the first step that changes
-        // the model (a Room placed for the moment, rolled back); nothing before it changes anything, so what is kept
-        // is what would be read again
+        // many rooms was read again for each): kept only until the door swings and the enclosed areas below, the
+        // first steps that change the model (a plan view, a Room placed for the moment, each rolled back); nothing
+        // before them changes anything, so what is kept is what would be read again
         using (FacesKept.Open(Hits("inside.cache.faces")))
         using (BandPiecesKept.Open(Hits("inside.cache.band_pieces")))
         using (NearKept.Open(Hits("inside.cache.near")))
@@ -51,12 +52,16 @@ internal static class RevitInterior
         using (IndexKept.Open())
         {
             // each step timed and counted for the log's read_steps (never part of the records)
+            // the grounds first: what stands round each window and door is looked for only where one is drawn (the reader reads a window's ground)
+            grounds = ReadSteps.Time("inside.grounds", () => GroundsOf(doc, diagnostics));
+            ReadSteps.Count("inside.grounds", grounds?.Count ?? 0);
+            var anyGround = grounds is not { Count: 0 };
             rooms = ReadSteps.Time("inside.rooms", () => new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms)
                 .WhereElementIsNotElementType().OfType<Room>().Select(r => RoomOf(doc, r)).ToList());
             ReadSteps.Count("inside.rooms", rooms.Count);
             openings = ReadSteps.Time("inside.openings", () => new[] { BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors }
                 .SelectMany(c => new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().OfType<FamilyInstance>())
-                .Select(fi => OpeningOf(doc, fi, phase)).ToList());
+                .Select(fi => OpeningOf(doc, fi, phase, anyGround)).ToList());
             ReadSteps.Count("inside.openings", openings.Count);
             // the design options (for the trial's log): what is read is the main model and, of each set, the option being
             // edited or else its primary; Revit's enclosed areas (plan circuits) are the main model's own
@@ -77,6 +82,10 @@ internal static class RevitInterior
             diagnostics.Add($"coordination models couldn't be listed ({x.GetType().Name}: {x.Message}): counted as one");
             coordination = 1;                                         // what can't be listed could hold a stair
         }
+        // each door's swing as its plan symbol draws it: in plan views made for the read, rolled back (after the kept
+        // geometry is let go: this changes the model for the moment)
+        var swings = ReadSteps.Time("inside.door_swings", () => SwingsOf(doc, diagnostics));
+        openings = openings.Select(o => swings.TryGetValue(o.UniqueId, out var sw) ? o with { Swing = sw } : o).ToList();
         return new InteriorRecords
         {
             Rooms = rooms,
@@ -92,6 +101,7 @@ internal static class RevitInterior
                 .Select(l => new LevelRecord(l.UniqueId, l.Name, l.ProjectElevation)).ToList(),
             SeparationLines = ReadSteps.Time("inside.separation_lines", () => SeparationLinesOf(doc, diagnostics)),
             GrossAreas = phase is null ? null : ReadSteps.Time("inside.gross_areas", () => GrossAreasOf(doc, phase, diagnostics)),
+            Grounds = grounds,
             Diagnostics = diagnostics,
         };
     }
@@ -143,17 +153,20 @@ internal static class RevitInterior
         var rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType().OfType<Room>()
             .Where(r => r.Location is LocationPoint && r.Area > 0).ToList();
         var result = new Dictionary<string, GrossArea>(StringComparer.Ordinal);
+        var withRooms = rooms.Select(r => r.LevelId).ToHashSet();
         foreach (var level in levels)
         {
             if (!rooms.Any(r => r.LevelId == level.Id))
                 continue;
+            var next = NextAbove(levels, level, withRooms);
             using var group = new TransactionGroup(doc, ResultRows.AreasTransaction);
             group.Start();
             ReadSteps.Count("inside.gross_areas.levels");
             try
             {
                 result[level.UniqueId] = ReadSteps.Time("inside.gross_areas.ring",
-                    () => RingOf(doc, phase, level, walls.Where(w => w.LevelId == level.Id).ToList(), planType, diagnostics));
+                    () => RingOf(doc, phase, level, walls.Where(w => w.LevelId == level.Id).ToList(),
+                                 walls.Where(w => Stands(w, level, next, phase)).ToList(), planType, diagnostics));
             }
             finally
             {
@@ -162,6 +175,146 @@ internal static class RevitInterior
             }
         }
         return result;
+    }
+
+    /// <summary>Each door's swing as its own plan symbol draws it (<see cref="SwingDrawing"/>), by <c>UniqueId</c>:
+    /// for each level with a door, a floor plan made for the read inside a transaction always rolled back (the model
+    /// unchanged), at Fine detail, with no view template and no filters, the Doors category and every subcategory
+    /// (Plan Swing among them) and every user workset shown, so neither a coarse or filtered view nor a hidden
+    /// subcategory drops the arcs; each door's geometry in that view (<c>Options.View</c>), its arcs in a horizontal
+    /// plane kept, nested families' included. A door it couldn't read says why; none drawn is an empty list, never
+    /// read as a door that doesn't swing.</summary>
+    internal static Dictionary<string, SwingDrawing> SwingsOf(Document doc, List<string> diagnostics)
+    {
+        var result = new Dictionary<string, SwingDrawing>(StringComparer.Ordinal);
+        var doors = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Doors).WhereElementIsNotElementType()
+            .OfType<FamilyInstance>().ToList();
+        if (doors.Count == 0)
+            return result;
+        void All(string why)
+        {
+            foreach (var d in doors)
+                result[d.UniqueId] = new SwingDrawing([], why);
+        }
+        if (doc.IsReadOnly || doc.IsModifiable)
+        {
+            All(doc.IsReadOnly ? "the model is read-only, so no plan view could be made to read its swing"
+                               : "the model was in the middle of a change, so no plan view could be made to read its swing");
+            return result;
+        }
+        var planType = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>()
+            .FirstOrDefault(v => v.ViewFamily == ViewFamily.FloorPlan);
+        if (planType is null)
+        {
+            All("the model has no floor plan view type, so no plan view could be made to read its swing");
+            return result;
+        }
+        var worksets = doc.IsWorkshared
+            ? new FilteredWorksetCollector(doc).OfKind(WorksetKind.UserWorkset).Select(w => w.Id).ToList()
+            : new List<WorksetId>();
+        using var t = new Transaction(doc, ResultRows.SwingsTransaction);
+        Quiet(t);
+        try
+        {
+            t.Start();
+            foreach (var level in doors.GroupBy(d => d.LevelId))
+            {
+                if (doc.GetElement(level.Key) is not Level)
+                {
+                    foreach (var d in level)
+                        result[d.UniqueId] = new SwingDrawing([], "it has no level, so no plan view could be made to read its swing");
+                    continue;
+                }
+                ViewPlan view;
+                try
+                {
+                    view = ViewPlan.Create(doc, planType.Id, level.Key);
+                    view.ViewTemplateId = ElementId.InvalidElementId;
+                    view.DetailLevel = ViewDetailLevel.Fine;
+                    view.CropBoxActive = false;
+                    foreach (var f in view.GetFilters().ToList())
+                        view.RemoveFilter(f);
+                    var category = Autodesk.Revit.DB.Category.GetCategory(doc, BuiltInCategory.OST_Doors);
+                    foreach (var c in new[] { category }.Concat(category.SubCategories.Cast<Autodesk.Revit.DB.Category>()))
+                        if (view.CanCategoryBeHidden(c.Id))
+                            view.SetCategoryHidden(c.Id, false);
+                    foreach (var w in worksets)
+                        view.SetWorksetVisibility(w, WorksetVisibility.Visible);
+                    doc.Regenerate();
+                }
+                catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                               or Autodesk.Revit.Exceptions.ArgumentException)
+                {
+                    foreach (var d in level)
+                        result[d.UniqueId] = new SwingDrawing([], $"no plan view could be made on its level to read its swing ({x.GetType().Name}: {x.Message})");
+                    continue;
+                }
+                var options = new Options { View = view, IncludeNonVisibleObjects = false };
+                foreach (var d in level)
+                    result[d.UniqueId] = ArcsOf(d, options);
+            }
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            diagnostics.Add($"door swings couldn't be read ({x.GetType().Name}: {x.Message})");
+            All($"its plan symbol couldn't be read ({x.GetType().Name}: {x.Message})");
+        }
+        finally
+        {
+            if (t.HasStarted() && !t.HasEnded())
+                t.RollBack();                                // the views made for the read taken back: the model as it was
+        }
+        diagnostics.Add($"door swings: {result.Values.Count(r => r.NotRead is null && r.Arcs.Count > 0)} of {doors.Count} doors draw an arc in plan");
+        return result;
+    }
+
+    /// <summary>The arcs in a horizontal plane a door's geometry gives in a view (<see cref="SwingsOf"/>), nested
+    /// families' included, internal.</summary>
+    private static SwingDrawing ArcsOf(FamilyInstance door, Options options)
+    {
+        var arcs = new List<SwingArc>();
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+                switch (o)
+                {
+                    case GeometryInstance gi when gi.GetInstanceGeometry() is { } inner:
+                        Walk(inner);
+                        break;
+                    case Arc { IsBound: true } a when Math.Abs(Math.Abs(a.Normal.Z) - 1) < 1e-6:
+                        arcs.Add(new SwingArc(P(a.Center), a.Radius, P(a.Evaluate(0.5, true))));
+                        break;
+                }
+        }
+        try
+        {
+            if (door.get_Geometry(options) is not { } g)
+                return new SwingDrawing([], "Revit gave no plan geometry for it");
+            Walk(g);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return new SwingDrawing([], $"its plan geometry couldn't be read ({x.GetType().Name}: {x.Message})");
+        }
+        return new SwingDrawing(arcs);
+    }
+
+    /// <summary>The model's doors alone, each with its swing as drawn (<see cref="SwingsOf"/>), for the model build's
+    /// read-back (ModelBuild): read as the check reads them, nothing else of the model.</summary>
+    internal static RevitModel DoorsModel(Document doc)
+    {
+        var phase = doc.Phases.Cast<Phase>().LastOrDefault();
+        var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
+        var doors = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Doors).WhereElementIsNotElementType()
+            .OfType<FamilyInstance>().Select(fi => OpeningOf(doc, fi, phase, false)).ToList();   // swings only: no ground read
+        var swings = SwingsOf(doc, []);
+        return new RevitModel
+        {
+            Document = doc.Title,
+            InternalToShared = RevitRead.InternalToShared(doc),
+            Interior = new InteriorRecords { Openings = doors.Select(o => swings.TryGetValue(o.UniqueId, out var sw) ? o with { Swing = sw } : o).ToList() },
+        };
     }
 
     /// <summary>A transaction whose warnings are dismissed (no dialog in a read), its errors rolling it back.</summary>
@@ -183,13 +336,113 @@ internal static class RevitInterior
         }
     }
 
+    /// <summary>A wall's plan footprint (<see cref="WallFootprint"/>): the end points of its solids' edges, tessellated,
+    /// so a wall's true extent whatever its location line; its bounding box where it has no solid; no corners where
+    /// neither can be read (StoryOutlines then sends no outline: it can't show the wall is inside it). Never a crash.</summary>
+    private static WallFootprint FootprintOf(Wall w, Level level)
+    {
+        string? mark = null;
+        var bounding = false;
+        try
+        {
+            mark = w.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString();
+            bounding = Bounds(w, level);
+            var points = new List<Xyz>();
+            if (w.WallType?.Kind == WallKind.Curtain && w.Location is LocationCurve { Curve: Line line })
+            {                                            // a curtain wall: its line, its width either side (its panels
+                var (a, b) = (line.GetEndPoint(0), line.GetEndPoint(1));   // and mullions are elements of their own)
+                var n = new XYZ(-(b - a).Normalize().Y, (b - a).Normalize().X, 0) * Math.Max(w.Width / 2, 1.0 / 12);
+                return new WallFootprint(w.UniqueId, mark, bounding, [P(a + n), P(b + n), P(b - n), P(a - n)]);
+            }
+            if (w.get_Geometry(new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false }) is { } geometry)
+                foreach (var solid in WallSolids(geometry))
+                    foreach (Edge edge in solid.Edges)
+                        points.AddRange(edge.Tessellate().Select(P));
+            if (points.Count == 0 && w.get_BoundingBox(null) is { } box)
+                points = [P(box.Min), P(new XYZ(box.Max.X, box.Min.Y, box.Min.Z)), P(box.Max), P(new XYZ(box.Min.X, box.Max.Y, box.Min.Z))];
+            return new WallFootprint(w.UniqueId, mark, bounding, points);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return new WallFootprint(w.UniqueId, mark, bounding, []);
+        }
+    }
+
+    private static IEnumerable<Solid> WallSolids(GeometryElement geometry)
+    {
+        foreach (var obj in geometry)
+            if (obj is Solid { Volume: > 0 } s)
+                yield return s;
+            else if (obj is GeometryInstance gi)
+                foreach (var inner in WallSolids(gi.GetInstanceGeometry()))
+                    yield return inner;
+    }
+
+    /// <summary>The next story up: the elevation of the lowest level above this one's room computation height that has
+    /// a Room placed on it (internal ft), so a datum level (a slab top, a plate height) never cuts the story short; 1,000
+    /// ft up where there is none (every wall above read: more refusals at worst, never fewer walls read). Review round 5:
+    /// the Building Story flag can be set on a datum level, so it isn't read.</summary>
+    private static double NextAbove(List<Level> levels, Level level, HashSet<ElementId> withRooms)
+    {
+        var cut = level.ProjectElevation + (level.get_Parameter(BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() ?? 4.0);
+        return levels.Where(l => withRooms.Contains(l.Id) && l.ProjectElevation > Math.Max(cut, level.ProjectElevation + 1e-6))
+                     .Select(l => l.ProjectElevation).DefaultIfEmpty(level.ProjectElevation + 1000).Min();
+    }
+
+    /// <summary>Whether the wall stands on the story, whichever level it is based on (a veneer from the foundation to
+    /// the roof stands on every story): anywhere from just above the level up to the next story; in the phase read (new
+    /// or existing in it) and in the main model or a primary design option. Stacked walls' parents are left out (their
+    /// member walls are read); a room-bounding curtain wall too (the ring Room stops at it).</summary>
+    private static bool Stands(Wall w, Level level, double nextZ, Phase phase)
+    {
+        try
+        {
+            if (w.IsStackedWall || (w.WallType?.Kind == WallKind.Curtain && Bounds(w, level) && AtCut(w, level)))
+                return false;                            // a curtain wall the ring Room stops at; any other is read
+            if (w.DesignOption is { IsPrimary: false })
+                return false;
+            var status = w.GetPhaseStatus(phase.Id);
+            if (status is not (ElementOnPhaseStatus.New or ElementOnPhaseStatus.Existing))
+                return false;
+            return w.get_BoundingBox(null) is not { } box || (box.Min.Z < nextZ && box.Max.Z > level.ProjectElevation + 1e-6);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return true;                                 // unread: kept, and its footprint says so if it can't be read
+        }
+    }
+
+    /// <summary>Whether the wall stands at the level's room computation height (where Revit works out room outlines).</summary>
+    private static bool AtCut(Wall w, Level level)
+    {
+        var z = level.ProjectElevation + (level.get_Parameter(BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() ?? 4.0);
+        return w.get_BoundingBox(null) is { } box && box.Min.Z <= z + 1e-6 && box.Max.Z >= z - 1e-6;
+    }
+
+    /// <summary>Whether the wall is read as one Revit's ring Room stops at on this level: set Room Bounding, and not
+    /// ending below the level's room computation height (where Revit works out room outlines; 4 ft by default). A
+    /// room-bounding wall that ends below it (a wainscot drawn as its own wall, a knee wall) doesn't stop the room, so it
+    /// is read as not bounding: beyond the outline within 3 ft, the outline is refused (review round 3). One wholly above
+    /// it (a gable end, a parapet, the next story's wall lapping down) stays bounding: refused only where it lies
+    /// beyond the outline, never for standing in the exterior walls' band (review round 4).</summary>
+    private static bool Bounds(Wall w, Level level)
+    {
+        if (w.get_Parameter(BuiltInParameter.WALL_ATTR_ROOM_BOUNDING)?.AsInteger() == 0)
+            return false;
+        var z = level.ProjectElevation + (level.get_Parameter(BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() ?? 4.0);
+        return w.get_BoundingBox(null) is not { } box || box.Max.Z >= z - 1e-6;
+    }
+
     /// <summary>The level's exterior walls' outer faces by Revit's own room logic: room separation lines drawn as a
     /// rectangle 20 ft beyond the level's walls, a Room placed in the ring between it and the building, its boundary at
     /// the finished faces read (doors and windows don't break a room's boundary; interior walls never touch this one),
     /// the rectangle's loop dropped. The lines and the Room are each made in a committed transaction (Revit works a
     /// plan's enclosed areas out again only on a commit) inside the transaction group <see cref="GrossAreasOf"/> rolls
     /// back. Each loop's corners and area, and each side with what bounds it, are logged.</summary>
-    private static GrossArea RingOf(Document doc, Phase phase, Level level, List<Wall> walls, ViewFamilyType? planType, List<string> diagnostics)
+    private static GrossArea RingOf(Document doc, Phase phase, Level level, List<Wall> walls, List<Wall> standing, ViewFamilyType? planType,
+                                    List<string> diagnostics)
     {
         GrossArea No(string why) => new(null, new Dictionary<string, double>(), why);
         var boxes = walls.Select(w => w.get_BoundingBox(null)).OfType<BoundingBoxXYZ>().ToList();
@@ -271,7 +524,14 @@ internal static class RevitInterior
                     return $"({c.GetEndPoint(0).X:0.###},{c.GetEndPoint(0).Y:0.###})-({c.GetEndPoint(1).X:0.###},{c.GetEndPoint(1).Y:0.###}) " +
                            $"{by?.Category?.BuiltInCategory.ToString().Replace("OST_", "") ?? "none"} {by?.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString()};";
                 })));
-            return new GrossArea(building, widths);
+            // every wall standing on the level (based on it or not) with its footprint: one beyond the outline (a veneer
+            // not set Room Bounding) or one in the exterior walls that isn't room-bounding keeps the outline from being
+            // sent (StoryOutlines.Of)
+            var footprints = ReadSteps.Time("inside.gross_areas.walls", () => standing.Select(w => FootprintOf(w, level)).ToList());
+            diagnostics.Add($"outer outline of {level.Name}: {footprints.Count} walls read against it " +
+                            $"({footprints.Count(f => f.RoomBounding)} bounding, {footprints.Count(f => f.Corners.Count == 0)} unread); " +
+                            $"Building Story {level.get_Parameter(BuiltInParameter.LEVEL_IS_BUILDING_STORY)?.AsInteger().ToString() ?? "not given"}");
+            return new GrossArea(building, widths, null, footprints);
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
                                        or Autodesk.Revit.Exceptions.InvalidOperationException)
@@ -1421,7 +1681,7 @@ internal static class RevitInterior
 
     // ---- a window or door ---------------------------------------------------------------------------------------
 
-    private static OpeningRecord OpeningOf(Document doc, FamilyInstance fi, Phase? phase)
+    private static OpeningRecord OpeningOf(Document doc, FamilyInstance fi, Phase? phase, bool anyGround)
     {
         var type = doc.GetElement(fi.GetTypeId());
         var level = doc.GetElement(fi.LevelId) as Level;
@@ -1449,8 +1709,136 @@ internal static class RevitInterior
             WallOpening = cut.Points,
             WallOpeningBy = cut.By,
             WallOpeningUnread = cut.Unread,
+            // what stands outside it, only where a ground is drawn (GroundReader reads the ground there)
+            Around = anyGround ? ReadSteps.Time("inside.opening.around", () => AroundOf(doc, fi)) : null,
             Diagnostics = cut.Words,
         };
+    }
+
+    // ---- the ground (GroundReader) -------------------------------------------------------------------------------
+
+    /// <summary>Every <c>Toposolid</c> and every older <c>TopographySurface</c>, each as triangles; null when they
+    /// couldn't be listed (then no ground is read).</summary>
+    private static List<GroundRecord>? GroundsOf(Document doc, List<string> diagnostics)
+    {
+        try
+        {
+            var grounds = new List<GroundRecord>();
+            foreach (var s in new FilteredElementCollector(doc).OfClass(typeof(Toposolid)).WhereElementIsNotElementType().Cast<Toposolid>())
+                grounds.Add(GroundOf(doc, s, "Toposolid", s.HostTopoId));
+#pragma warning disable CS0618 // TopographySurface: older models still hold them, so they are read as ground too
+            foreach (var s in new FilteredElementCollector(doc).OfClass(typeof(TopographySurface)).WhereElementIsNotElementType().Cast<TopographySurface>())
+                grounds.Add(GroundOf(doc, s, "TopographySurface", s.IsSiteSubRegion ? s.AsSiteSubRegion()?.HostId : null));
+#pragma warning restore CS0618
+            diagnostics.Add("grounds: " + string.Join("; ", grounds.Select(g =>
+                $"{g.Kind} {g.UniqueId}: {(g.Triangles is { } x ? x.Count.ToString(CultureInfo.InvariantCulture) : "unread")} triangles")));
+            return grounds;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            diagnostics.Add($"the grounds couldn't be listed ({x.GetType().Name}: {x.Message})");
+            return null;
+        }
+    }
+
+    /// <summary>A ground's triangles: each solid face's (<c>Face.Triangulate()</c>), each mesh's; null when any face
+    /// gives none, <c>get_Geometry</c> refuses, or a piece of another kind is found (never the triangles read alone).</summary>
+    private static GroundRecord GroundOf(Document doc, Element e, string kind, ElementId? host)
+    {
+        var triangles = new List<GroundTriangle>();
+        var failed = false;
+        void Add(Mesh m)
+        {
+            for (var i = 0; i < m.NumTriangles; i++)
+            {
+                var tr = m.get_Triangle(i);
+                triangles.Add(new GroundTriangle(P(tr.get_Vertex(0)), P(tr.get_Vertex(1)), P(tr.get_Vertex(2))));
+            }
+        }
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+            {
+                switch (o)
+                {
+                    case Solid s:
+                        foreach (Face f in s.Faces)
+                        {
+                            if (f.Triangulate() is { NumTriangles: > 0 } m)
+                                Add(m);
+                            else
+                                failed = true;
+                        }
+                        break;
+                    case Mesh m:
+                        Add(m);
+                        break;
+                    case GeometryInstance gi:
+                        if (gi.GetInstanceGeometry() is { } inner)
+                            Walk(inner);
+                        else
+                            failed = true;
+                        break;
+                    case GeometryElement nested:
+                        Walk(nested);
+                        break;
+                    case Curve or PolyLine or Autodesk.Revit.DB.Point:
+                        break;
+                    default:
+                        failed = true;
+                        break;
+                }
+            }
+        }
+        try
+        {
+            if (e.get_Geometry(Fine) is { } g)
+                Walk(g);
+            else
+                failed = true;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            failed = true;
+        }
+        var name = doc.GetElement(e.GetTypeId())?.Name ?? e.Name;
+        return new GroundRecord(e.UniqueId, kind, name, failed || triangles.Count == 0 ? null : triangles,
+                                Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id),
+                                host is null || host == ElementId.InvalidElementId ? null : doc.GetElement(host)?.UniqueId,
+                                Id(e.CreatedPhaseId));
+    }
+
+    /// <summary>Every model element (not view-specific) whose box meets the instance's own box widened
+    /// <see cref="GroundReader.Around"/> in plan and reaching <see cref="GroundReader.Below"/> under it, each with its
+    /// box, category, phase and option; null when it couldn't be looked for (no box, Revit refused).</summary>
+    private static List<NearbyElement>? AroundOf(Document doc, FamilyInstance fi)
+    {
+        try
+        {
+            if (fi.get_BoundingBox(null) is not { } b)
+                return null;
+            var box = Box3.Turned(P(b.Min), P(b.Max), b.Transform is { } bt ? T(bt) : Reading.Transform3.Identity);
+            var outline = new Outline(new XYZ(box.Min.X - GroundReader.Around, box.Min.Y - GroundReader.Around, box.Min.Z - GroundReader.Below),
+                                      new XYZ(box.Max.X + GroundReader.Around, box.Max.Y + GroundReader.Around, box.Max.Z));
+            var list = new List<NearbyElement>();
+            foreach (var e in Collect(doc, outline))
+            {
+                // a linked model and a 3D CAD import are kept whatever their category says (whether Revit Links is a
+                // model category is to check, Records.cs; review round 4), as the outside reader keeps them
+                var kept = e is RevitLinkInstance || (e is ImportInstance && !e.ViewSpecific);
+                if (!kept && (e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model }))
+                    continue;
+                var category = e.Category is { } c ? c.BuiltInCategory.ToString() : e is RevitLinkInstance ? "OST_RvtLinks" : "OST_ImportObjectStyles";
+                list.Add(new NearbyElement(e.UniqueId, category, e.Name, (e as FamilyInstance)?.Host?.UniqueId,
+                                           Box: BoxOf(e), PhaseDemolished: Id(e.DemolishedPhaseId), DesignOption: Id(e.DesignOption?.Id)));
+            }
+            return list;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            return null;
+        }
     }
 
     /// <summary>A window or door type's own Width and Height, or null where it has none.</summary>

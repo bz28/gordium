@@ -41,6 +41,176 @@ egress_travel_distance_at_most: 60
 # Every rule's one answer (the check's `results`), with why. Pass only where the measured figures settle it; a figure
 # Gordium can't settle yet (a fact not stated, an open question) needs review, saying so.
 results:
+  # Chapter 4 part a (2026-11-26: docs/decisions/2026-11-26_ny_building_chapter_4_egress.md): one flag per piece of
+  # 402.1 and 402.8 (covered and open mall buildings), shown while the building doesn't rule out a space the code gives
+  # its own exits or travel limit (special egress spaces: not stated), and of 404.1 and 404.9 to 404.11 (atriums),
+  # shown while an atrium isn't ruled out (not stated): each a person's check. 402.8's review bands change nothing
+  # here: the story and corridor rows already wait on other facts, and the corridor has no dead end
+  general.bc_402_1_mall_buildings: needs_review
+  general.bc_402_8_means_of_egress: needs_review
+  general.bc_402_8_1_mall_width: needs_review
+  general.bc_402_8_1_1_mall_minimum_width: needs_review
+  general.bc_402_8_2_tenant_occupant_load: needs_review
+  general.bc_402_8_2_1_mall_occupant_formula: needs_review
+  general.bc_402_8_2_2_olf_range: needs_review
+  general.bc_402_8_2_3_anchor_buildings: needs_review
+  general.bc_402_8_2_4_food_courts: needs_review
+  general.bc_402_8_3_tenant_two_means_of_egress: needs_review
+  general.bc_402_8_4_assembly_in_a_mall: needs_review
+  general.bc_402_8_4_1_anchor_building_egress: needs_review
+  general.bc_402_8_5_distance_to_exits: needs_review
+  general.bc_402_8_6_access_to_exits: needs_review
+  general.bc_402_8_6_1_exit_passageways: needs_review
+  general.bc_402_8_7_service_areas_on_exit_passageways: needs_review
+  general.bc_402_8_8_security_grilles_and_doors: needs_review
+  general.bc_404_1_atriums: needs_review
+  general.bc_404_9_atrium_travel_distance: needs_review
+  general.bc_404_10_exit_stairways_in_an_atrium: needs_review
+  general.bc_404_11_stairway_discharge_through_an_atrium: needs_review
+  # Chapter 4 part b: one flag per piece of 403.1, 403.2.2, 403.5 and 403.6 (high-rise buildings), shown while the
+  # building doesn't rule out a high-rise or one over 420 ft (no Revit mark yet), and of 405.1, 405.4 and 405.7
+  # (underground buildings), shown while that isn't ruled out (no mark yet): each a person's check. 403.5.2's and
+  # 405.7.1's review bands change nothing here: the story rows already wait on other facts, and each story has two
+  # exits for a load under 500 (403.5.2 doesn't hold Group R-2)
+  general.bc_403_1_high_rise_buildings: needs_review
+  general.bc_403_2_2_exit_stairway_enclosure_strength: needs_review
+  general.bc_403_2_2_1_enclosure_wall_panels: needs_review
+  general.bc_403_2_2_2_concrete_and_masonry_walls: needs_review
+  general.bc_403_2_2_3_other_wall_assemblies: needs_review
+  general.bc_403_2_2_4_glass_walls: needs_review
+  general.bc_403_5_means_of_egress_and_evacuation: needs_review
+  general.bc_403_5_1_remoteness_of_exit_stairways: needs_review
+  general.bc_403_5_2_additional_exit_stairway: needs_review
+  general.bc_403_5_3_stairway_door_operation: needs_review
+  general.bc_403_5_3_1_stairway_communication_system: needs_review
+  general.bc_403_5_4_smokeproof_enclosures: needs_review
+  general.bc_403_5_5_luminous_egress_path_markings: needs_review
+  general.bc_403_6_elevators: needs_review
+  general.bc_403_6_1_fire_service_access_elevators: needs_review
+  general.bc_403_6_2_occupant_evacuation_elevators: needs_review
+  general.bc_405_1_underground_buildings: needs_review
+  general.bc_405_4_compartmentation: needs_review
+  general.bc_405_4_1_number_of_compartments: needs_review
+  general.bc_405_4_2_smoke_barrier_between_compartments: needs_review
+  general.bc_405_4_3_compartment_elevators: needs_review
+  general.bc_405_7_means_of_egress: needs_review
+  general.bc_405_7_1_two_exits_on_each_floor_level: needs_review
+  general.bc_405_7_2_smokeproof_enclosures: needs_review
+  # Chapter 4 part c: one flag per piece of 407.1 to 407.4 (Group I-2), not applicable to a building stated Group R-2
+  general.bc_407_1_group_i2: not_applicable
+  general.bc_407_2_corridor_continuity_and_separation: not_applicable
+  general.bc_407_2_1_waiting_areas_open_to_a_corridor: not_applicable
+  general.bc_407_2_2_care_providers_stations: not_applicable
+  general.bc_407_2_3_psychiatric_treatment_areas: not_applicable
+  general.bc_407_2_4_gift_shops: not_applicable
+  general.bc_407_2_5_nursing_home_housing_units: not_applicable
+  general.bc_407_2_6_nursing_home_cooking_facilities: not_applicable
+  general.bc_407_2_7_domestic_cooking_appliances: not_applicable
+  general.bc_407_3_corridor_wall_construction: not_applicable
+  general.bc_407_3_1_corridor_doors: not_applicable
+  general.bc_407_3_1_1_corridor_door_construction: not_applicable
+  general.bc_407_4_means_of_egress: not_applicable
+  general.bc_407_4_1_direct_access_to_a_corridor: not_applicable
+  general.bc_407_4_1_1_locking_devices: not_applicable
+  general.bc_407_4_3_projections_in_nursing_home_corridors: not_applicable
+  general.bc_407_4_4_care_suites: not_applicable
+  general.bc_407_4_4_1_exit_access_through_care_suites: not_applicable
+  general.bc_407_4_4_2_care_suite_separation: not_applicable
+  general.bc_407_4_4_3_care_suite_access_to_corridor: not_applicable
+  general.bc_407_4_4_4_care_suite_circulation_paths: not_applicable
+  general.bc_407_4_4_5_doors_within_care_suites: not_applicable
+  general.bc_407_4_4_6_care_suites_with_sleeping_rooms: not_applicable
+  general.bc_407_4_4_6_1_sleeping_care_suite_area: not_applicable
+  general.bc_407_4_4_6_2_sleeping_care_suite_exit_access: not_applicable
+  general.bc_407_4_4_7_care_suites_without_sleeping_rooms: not_applicable
+  general.bc_407_4_4_7_1_treatment_care_suite_area: not_applicable
+  general.bc_407_4_4_7_2_treatment_care_suite_exit_access: not_applicable
+  # Chapter 4 part d: one flag per piece of 407.5, 407.6 and 407.10 (Group I-2) and 408.1 to 408.4 (Group I-3), not
+  # applicable to a building stated Group R-2
+  general.bc_407_5_smoke_barriers: not_applicable
+  general.bc_407_5_1_smoke_compartment_size: not_applicable
+  general.bc_407_5_2_travel_to_a_smoke_barrier_door: not_applicable
+  general.bc_407_5_3_refuge_area: not_applicable
+  general.bc_407_5_4_independent_egress: not_applicable
+  general.bc_407_5_5_horizontal_assemblies: not_applicable
+  general.bc_407_6_automatic_closing_doors: not_applicable
+  general.bc_407_6_1_activation_of_automatic_closing_doors: not_applicable
+  general.bc_407_10_secured_yards: not_applicable
+  general.bc_408_1_group_i3: not_applicable
+  general.bc_408_2_other_occupancies: not_applicable
+  general.bc_408_3_means_of_egress: not_applicable
+  general.bc_408_3_1_door_width: not_applicable
+  general.bc_408_3_2_sliding_doors: not_applicable
+  general.bc_408_3_3_guard_tower_doors: not_applicable
+  general.bc_408_3_4_spiral_stairways: not_applicable
+  general.bc_408_3_5_ships_ladders: not_applicable
+  general.bc_408_3_6_exit_discharge_to_a_courtyard: not_applicable
+  general.bc_408_3_7_sallyports: not_applicable
+  general.bc_408_3_8_glazed_exit_stairway: not_applicable
+  general.bc_408_4_locks: not_applicable
+  general.bc_408_4_1_remote_release: not_applicable
+  general.bc_408_4_2_power_operated_doors_and_locks: not_applicable
+  general.bc_408_4_3_redundant_operation: not_applicable
+  general.bc_408_4_4_relock_capability: not_applicable
+  # Chapter 4 part e: 408.6 and 408.8 (Group I-3) and 420.6 to 420.9 (Group I-1) not applicable to a building stated
+  # Group R-2; 420.1 to 420.3 (Groups I-1 and R: its scope, the fire partitions between units and the horizontal
+  # assemblies between floors) apply, a person's check; 422 (ambulatory care) shows while the building doesn't rule
+  # out an ambulatory care facility (not stated)
+  general.bc_408_6_smoke_barrier: not_applicable
+  general.bc_408_6_1_smoke_compartments: not_applicable
+  general.bc_408_6_2_refuge_area: not_applicable
+  general.bc_408_6_3_independent_egress: not_applicable
+  general.bc_408_8_subdivision_of_resident_housing_areas: not_applicable
+  general.bc_408_8_1_occupancy_conditions_3_and_4: not_applicable
+  general.bc_408_8_2_occupancy_condition_5: not_applicable
+  general.bc_408_8_3_openings_in_room_face: not_applicable
+  general.bc_408_8_4_smoke_tight_doors: not_applicable
+  general.bc_420_1_groups_i1_and_r: needs_review
+  general.bc_420_2_separation_walls: needs_review
+  general.bc_420_3_horizontal_separation: needs_review
+  general.bc_420_6_smoke_barriers_in_group_i1_condition_2: not_applicable
+  general.bc_420_6_1_refuge_area: not_applicable
+  general.bc_420_7_assisted_living_housing_units: not_applicable
+  general.bc_420_8_group_i1_cooking_facilities: not_applicable
+  general.bc_420_9_domestic_cooking_appliances: not_applicable
+  general.bc_422_1_ambulatory_care_facilities: needs_review
+  general.bc_422_2_separation: needs_review
+  general.bc_422_3_smoke_compartments: needs_review
+  general.bc_422_3_1_means_of_egress: needs_review
+  general.bc_422_3_2_refuge_area: needs_review
+  general.bc_422_3_3_independent_egress: needs_review
+  # Chapter 4 part f: 406.4.3 and 406.5.7 (Group S-2 or U parking garages), 415.11.3.3, 415.11.3.4 (Group H-5 service
+  # corridors), 415.11.6.6 and 415.11.6.7 (HPM, gas and liquid storage rooms) not applicable to a building stated
+  # Group R-2; 410.5 (stages, platforms and technical production areas), 411.4 (special amusement areas) and 412's
+  # means of egress (aircraft-related occupancies) show while the building doesn't rule them out (not stated)
+  general.bc_406_4_3_vehicle_ramps: not_applicable
+  general.bc_406_5_7_open_parking_garage_egress: not_applicable
+  general.bc_410_5_means_of_egress: needs_review
+  general.bc_410_5_1_arrangement: needs_review
+  general.bc_410_5_2_stairway_and_ramp_enclosure: needs_review
+  general.bc_410_5_3_technical_production_areas: needs_review
+  general.bc_410_5_3_1_number_of_means_of_egress: needs_review
+  general.bc_410_5_3_2_exit_access_travel_distance: needs_review
+  general.bc_410_5_3_3_two_means_of_egress: needs_review
+  general.bc_410_5_3_4_path_of_egress_travel: needs_review
+  general.bc_410_5_3_5_width: needs_review
+  general.bc_411_4_exit_marking: needs_review
+  general.bc_411_4_1_photoluminescent_exit_signs: needs_review
+  general.bc_412_2_2_airport_traffic_control_towers: needs_review
+  general.bc_412_2_2_1_stairways: needs_review
+  general.bc_412_2_2_2_exit_access: needs_review
+  general.bc_412_2_2_3_number_of_exits: needs_review
+  general.bc_412_2_2_3_1_interior_finish: needs_review
+  general.bc_412_2_2_3_2_exit_separation: needs_review
+  general.bc_412_4_2_residential_aircraft_hangar_egress: needs_review
+  general.bc_412_6_aircraft_manufacturing_facilities: needs_review
+  general.bc_table_412_6_aircraft_manufacturing_travel: needs_review
+  general.bc_412_6_1_ancillary_areas: needs_review
+  general.bc_412_7_3_heliports_and_helistops: needs_review
+  general.bc_415_11_3_3_service_corridor_egress: not_applicable
+  general.bc_415_11_3_4_service_corridor_width: not_applicable
+  general.bc_415_11_6_6_hpm_room_exits: not_applicable
+  general.bc_415_11_6_7_hpm_room_doors: not_applicable
   general.bc_1007_1_1_remoteness: pass                 # 0.5992 >= 1/2 on both stories (above)
   general.bc_1007_1_1_space_remoteness: pass           # "space_exit_count < 2 or ...": every space has one doorway
   general.bc_1007_1_2_space_three_or_more: pass        # "space_exit_count < 3 or ...": none has three
@@ -137,6 +307,631 @@ results:
   # stated (no Revit mark yet), and how many people each door serves isn't worked out (50 or more can't be ruled out)
   general.bc_1010_1_2_door_types: not_applicable
   general.bc_1010_1_2_1_direction_of_swing: needs_review
+  # section group 6c: forces, floor levels, landings, thresholds and doors in a series aren't in the model, so each is
+  # a person's check; every door is side-hinged, so 1010.1.3.2's flag for a manual sliding door sets each aside
+  general.bc_1010_1_3_door_forces: needs_review
+  general.bc_1010_1_3_2_sliding_door_latch: not_applicable
+  general.bc_1010_1_4_floor_elevation: needs_review
+  general.bc_1010_1_5_landings: needs_review
+  general.bc_1010_1_6_thresholds: needs_review
+  general.bc_1010_1_7_door_arrangement: needs_review
+  # section group 6d: locks, latches, bolts and hardware aren't in the model, so each of 1010.2's flags is a person's
+  # check; 1010.2.7's intruder locks are for Groups E, B and I-4 only, and this building is Group R-2
+  general.bc_1010_2_door_operations: needs_review
+  general.bc_1010_2_1_unlatching: needs_review
+  general.bc_1010_2_2_hardware: needs_review
+  general.bc_1010_2_3_hardware_height: needs_review
+  general.bc_1010_2_4_locks_and_latches: needs_review
+  general.bc_table_1010_2_4_inactive_leaf_bolts: needs_review
+  general.bc_1010_2_5_closet_doors: needs_review
+  general.bc_1010_2_6_stairway_doors: needs_review
+  general.bc_1010_2_7_educational_locking: not_applicable
+  # section group 6e: 1010.2.8 asks panic or fire exit hardware only in Groups A, E and H, so every door of this
+  # one-group R-2 complies (its hardware not stated); 1010.2.8.1's refrigeration rooms show (special_egress_spaces not
+  # stated); 1010.2.13's controlled egress is for Groups I-1 and I-2 only; the other locking systems aren't in the
+  # model, so each is a person's check
+  general.bc_1010_2_8_panic_hardware: pass
+  general.bc_1010_2_8_1_refrigeration_machinery_rooms: needs_review
+  general.bc_1010_2_8_2_electrical_rooms: needs_review
+  general.bc_1010_2_8_3_panic_hardware_installation: needs_review
+  general.bc_1010_2_8_4_balanced_doors: needs_review
+  general.bc_1010_2_9_access_control: needs_review
+  general.bc_1010_2_10_door_hardware_release: needs_review
+  general.bc_1010_2_11_sensor_release: needs_review
+  general.bc_1010_2_12_delayed_egress: needs_review
+  general.bc_1010_2_12_1_delayed_egress_locking_system: needs_review
+  general.bc_1010_2_13_controlled_egress: not_applicable
+  general.bc_1010_2_14_elevator_lobby_doors: needs_review
+  general.bc_1010_2_15_correctional_facilities: needs_review
+  # section group 8a: each apartment is one room said not to be a sleeping room, so no sleeping room is read: 1031.2's
+  # escape opening rule needs review (a dwelling's bedrooms aren't drawn), never a pass; Group R-2, so its three flags
+  # (basements, opening to a public way, operable from inside) are person's checks
+  general.bc_1031_2_escape_opening_where_required: needs_review
+  general.bc_1031_2_basements: needs_review
+  general.bc_1031_2_openings_to_public_way: needs_review
+  general.bc_1031_2_1_operational_constraints: needs_review
+  # section group 8b: the description gives no openings, so the escape openings aren't read: each opening's size, sill
+  # and door rule needs review (stated none, they would not apply)
+  general.bc_1031_3_1_escape_opening_min_area: needs_review
+  general.bc_1031_3_2_escape_opening_min_height: needs_review
+  general.bc_1031_3_2_escape_opening_min_width: needs_review
+  general.bc_1031_3_3_escape_opening_max_sill_height: needs_review
+  general.bc_1031_4_escape_door_swinging_or_sliding: needs_review
+  # section group 8c: the same for the area-well rules (openings not read); drainage and bars are person's checks
+  general.bc_1031_5_area_well_required: needs_review
+  general.bc_1031_5_1_area_well_min_projection: needs_review
+  general.bc_1031_5_1_area_well_min_width: needs_review
+  general.bc_1031_5_1_area_well_allows_full_opening: needs_review
+  general.bc_1031_5_2_area_well_ladder_over_44: needs_review
+  general.bc_1031_5_2_1_area_well_ladder: needs_review
+  general.bc_1031_5_2_2_area_well_steps: needs_review
+  general.bc_1031_5_3_area_well_drainage: needs_review
+  general.bc_1031_6_bars_grilles_covers_screens: needs_review
+  # section group 9a: 1003's general means of egress and 1012's ramps, each a person's check (ceiling heights, protruding objects, floor surfaces and levels, and ramps aren't in the model)
+  general.bc_1003_2_ceiling_height: needs_review
+  general.bc_1003_3_1_headroom: needs_review
+  general.bc_1003_3_2_post_mounted_objects: needs_review
+  general.bc_1003_3_3_horizontal_projections: needs_review
+  general.bc_1003_3_4_clear_width: needs_review
+  general.bc_1003_4_slip_resistant_surface: needs_review
+  general.bc_1003_5_elevation_change: needs_review
+  general.bc_1003_6_means_of_egress_continuity: needs_review
+  general.bc_1003_7_elevators_escalators_moving_walks: needs_review
+  general.bc_1012_2_slope: needs_review
+  general.bc_1012_3_cross_slope: needs_review
+  general.bc_1012_4_vertical_rise: needs_review
+  general.bc_1012_5_1_width_and_capacity: needs_review
+  general.bc_1012_5_2_headroom: needs_review
+  general.bc_1012_5_3_restrictions: needs_review
+  general.bc_1012_6_landings: needs_review
+  general.bc_1012_6_1_landing_slope: needs_review
+  general.bc_1012_6_2_landing_width: needs_review
+  general.bc_1012_6_3_landing_length: needs_review
+  general.bc_1012_6_4_change_in_direction: needs_review
+  general.bc_1012_7_ramp_construction: needs_review
+  general.bc_1012_7_1_ramp_surface: needs_review
+  general.bc_1012_7_2_outdoor_conditions: needs_review
+  general.bc_1012_8_handrails: needs_review
+  general.bc_1012_9_guards: needs_review
+  general.bc_1012_10_edge_protection: needs_review
+  # section group 9b: 1008's means of egress lighting and 1013's exit signs, each a person's check (lighting and signs aren't in the model); Group I-2's landings and Group R-1's low-level signs don't apply to an R-2
+  general.bc_1008_2_illumination_required: needs_review
+  general.bc_1008_2_1_illumination_level: needs_review
+  general.bc_1008_2_2_group_i2_exterior_landings: not_applicable   # Group R-2
+  general.bc_1008_2_3_exit_discharge_illumination: needs_review
+  general.bc_1008_2_4_power_for_illumination: needs_review
+  general.bc_1008_3_emergency_illumination: needs_review
+  general.bc_1008_3_1_emergency_power_duration: needs_review
+  general.bc_1008_3_2_emergency_illumination_level: needs_review
+  general.bc_1013_1_exit_signs_where_required: needs_review
+  general.bc_1013_2_low_level_exit_signs_group_r1: not_applicable   # Group R-2
+  general.bc_1013_3_exit_sign_illumination: needs_review
+  general.bc_1013_4_raised_character_braille_exit_signs: needs_review
+  general.bc_1013_5_internally_illuminated_exit_signs: needs_review
+  general.bc_1013_5_1_photoluminescent_exit_signs: needs_review
+  general.bc_1013_6_1_exit_sign_graphics: needs_review
+  general.bc_1013_6_2_exit_sign_illumination_intensity: needs_review
+  general.bc_1013_6_3_exit_sign_power_source: needs_review
+  # section group 9c: 1009's accessible means of egress, each a person's check (Chapter 11 isn't brought in, and areas of refuge, elevators and signs aren't in the model); 1009.3.3's areas of refuge at stairways don't apply to Group R-2
+  general.bc_1009_1_accessible_means_of_egress_required: needs_review
+  general.bc_1009_2_continuity_and_components: needs_review
+  general.bc_1009_2_1_elevators_required: needs_review
+  general.bc_1009_2_2_doors: needs_review
+  general.bc_1009_3_1_exit_access_stairways: needs_review
+  general.bc_1009_3_2_stairway_width: needs_review
+  general.bc_1009_3_3_area_of_refuge_at_stairways: not_applicable   # Group R-2 (exception 5)
+  general.bc_1009_4_1_elevator_standby_power: needs_review
+  general.bc_1009_4_2_elevator_area_of_refuge: needs_review
+  general.bc_1009_5_platform_lifts: needs_review
+  general.bc_1009_6_areas_of_refuge: needs_review
+  general.bc_1009_6_1_area_of_refuge_travel_distance: needs_review
+  general.bc_1009_6_2_area_of_refuge_stairway_or_elevator_access: needs_review
+  general.bc_1009_6_3_area_of_refuge_size: needs_review
+  general.bc_1009_6_4_area_of_refuge_separation: needs_review
+  general.bc_1009_6_5_area_of_refuge_two_way_communication: needs_review
+  general.bc_1009_7_exterior_areas_for_assisted_rescue: needs_review
+  general.bc_1009_7_1_assisted_rescue_size: needs_review
+  general.bc_1009_7_2_assisted_rescue_separation: needs_review
+  general.bc_1009_7_3_assisted_rescue_openness: needs_review
+  general.bc_1009_7_4_assisted_rescue_stairways: needs_review
+  general.bc_1009_8_two_way_communication: needs_review
+  general.bc_1009_8_1_two_way_communication_system: needs_review
+  general.bc_1009_8_2_two_way_communication_directions: needs_review
+  general.bc_1009_9_accessibility_signage: needs_review
+  general.bc_1009_10_directional_signage: needs_review
+  general.bc_1009_11_instructions: needs_review
+  # section group 9d: 1018's aisles and 1019's exit access stairways, each a person's check (aisles between fixtures and stair enclosures aren't in the model); Groups B and M's aisles and Groups I-2 and I-3's stairways don't apply to an R-2
+  general.bc_1018_1_aisles_general: needs_review
+  general.bc_1018_3_aisles_groups_b_m: not_applicable   # Group R-2
+  general.bc_1018_5_aisles_other_occupancies: needs_review
+  general.bc_1019_3_exit_access_stairway_enclosure: needs_review
+  general.bc_1019_4_exit_access_stairways_groups_i2_i3: not_applicable   # Group R-2
+  # section group 9e: 1021's egress balconies, 1022's exits and 1023's interior exit stairways and ramps, each a person's check for every building (balconies, exit stairways, their enclosures and signs aren't in the model)
+  general.bc_1021_1_egress_balconies_as_corridors: needs_review
+  general.bc_1021_2_egress_balcony_separation: needs_review
+  general.bc_1021_3_egress_balcony_openness: needs_review
+  general.bc_1021_4_egress_balcony_location: needs_review
+  general.bc_1022_1_exits_general: needs_review
+  general.bc_1022_2_exterior_exit_door: needs_review
+  general.bc_1022_2_2_exterior_exit_door_arrangement: needs_review
+  general.bc_1023_1_interior_exit_stairways_general: needs_review
+  general.bc_1023_2_enclosure_construction: needs_review
+  general.bc_1023_3_termination: needs_review
+  general.bc_1023_3_1_extension: needs_review
+  general.bc_1023_4_openings: needs_review
+  general.bc_1023_5_penetrations: needs_review
+  general.bc_1023_6_ventilation: needs_review
+  general.bc_1023_7_exterior_walls: needs_review
+  general.bc_1023_7_1_building_exterior_walls: needs_review
+  general.bc_1023_7_2_roof_assemblies: needs_review
+  general.bc_1023_8_barrier_at_exit_discharge: needs_review
+  general.bc_1023_9_stairway_identification_signs: needs_review
+  general.bc_1023_9_1_stairway_sign_requirements: needs_review
+  general.bc_1023_10_elevator_lobby_signs: needs_review
+  general.bc_1023_11_tactile_floor_level_signs: needs_review
+  general.bc_1023_12_smokeproof_enclosures: needs_review
+  general.bc_1023_12_1_smokeproof_termination: needs_review
+  general.bc_1023_12_2_smokeproof_access: needs_review
+  general.bc_1023_13_standpipes: needs_review
+  # section group 9f: 1024's exit passageways, each a person's check for every building; 1025's luminous egress path markings, for high-rise buildings of Groups A, B, E, I-1, M and R-1 only, don't apply to an R-2
+  general.bc_1024_1_exit_passageways_general: needs_review
+  general.bc_1024_2_exit_passageway_width: needs_review
+  general.bc_1024_3_exit_passageway_construction: needs_review
+  general.bc_1024_4_exit_passageway_termination: needs_review
+  general.bc_1024_5_exit_passageway_openings: needs_review
+  general.bc_1024_6_exit_passageway_penetrations: needs_review
+  general.bc_1024_7_exit_passageway_ventilation: needs_review
+  general.bc_1024_8_exit_passageway_exterior_walls: needs_review
+  general.bc_1024_9_exit_passageway_standpipes: needs_review
+  general.bc_1025_1_luminous_markings_where_required: not_applicable   # Group R-2
+  general.bc_1025_2_1_steps: not_applicable   # Group R-2
+  general.bc_1025_2_2_landings: not_applicable   # Group R-2
+  general.bc_1025_2_3_handrails: not_applicable   # Group R-2
+  general.bc_1025_2_4_perimeter_demarcation_lines: not_applicable   # Group R-2
+  general.bc_1025_2_4_1_floor_mounted_lines: not_applicable   # Group R-2
+  general.bc_1025_2_4_2_wall_mounted_lines: not_applicable   # Group R-2
+  general.bc_1025_2_4_3_transition: not_applicable   # Group R-2
+  general.bc_1025_2_5_obstacles: not_applicable   # Group R-2
+  general.bc_1025_2_6_1_emergency_exit_symbol: not_applicable   # Group R-2
+  general.bc_1025_2_6_2_door_hardware_markings: not_applicable   # Group R-2
+  general.bc_1025_2_6_3_door_frame_markings: not_applicable   # Group R-2
+  general.bc_1025_3_uniformity: not_applicable   # Group R-2
+  general.bc_1025_4_self_luminous_photoluminescent: not_applicable   # Group R-2
+  general.bc_1025_5_illumination: not_applicable   # Group R-2
+  # section group 9g: 1026's horizontal exits, 1027's exterior exit stairways and ramps, 1028's exit discharge and 1029's egress courts, each a person's check (1029.3's not for a building stated Group R-3 alone)
+  general.bc_1026_1_horizontal_exits_general: needs_review
+  general.bc_1026_2_horizontal_exit_separation: needs_review
+  general.bc_1026_3_horizontal_exit_opening_protectives: needs_review
+  general.bc_1026_4_refuge_area: needs_review
+  general.bc_1026_4_1_refuge_area_capacity: needs_review
+  general.bc_1026_4_2_refuge_area_exits: needs_review
+  general.bc_1026_5_horizontal_exit_standpipes: needs_review
+  general.bc_1027_2_exterior_exit_stairways_use: needs_review
+  general.bc_1027_3_open_side: needs_review
+  general.bc_1027_4_side_yards: needs_review
+  general.bc_1027_5_location: needs_review
+  general.bc_1027_6_protection: needs_review
+  general.bc_1028_2_exit_discharge: needs_review
+  general.bc_1028_3_exit_discharge_width: needs_review
+  general.bc_1028_4_exit_discharge_components: needs_review
+  general.bc_1028_5_access_to_public_way: needs_review
+  general.bc_1029_2_egress_court_width: needs_review
+  general.bc_1029_3_egress_court_construction: needs_review
+  # section group 9h: Section 1030's assembly flags (1030.1 to 1030.9 and Table 1030.6.2), each a person's check: the rooms are residential, but a description may hold only some floors, so a room used for assembly purposes isn't ruled out until the building states none (1030.4's is for Group A-1 only)
+  general.bc_1030_1_1_bleachers: needs_review
+  general.bc_1030_1_1_1_spaces_under_grandstands: needs_review
+  general.bc_1030_2_assembly_main_exit: needs_review
+  general.bc_1030_3_assembly_other_exits: needs_review
+  general.bc_1030_4_foyers_and_lobbies: not_applicable   # Group R-2, not A-1
+  general.bc_1030_5_balcony_and_gallery_egress: needs_review
+  general.bc_1030_6_1_aisle_capacity_without_smoke_protection: needs_review
+  general.bc_1030_6_2_smoke_protected_aisle_capacity: needs_review
+  general.bc_table_1030_6_2_smoke_protected_aisle_factors: needs_review
+  general.bc_1030_6_2_1_smoke_control: needs_review
+  general.bc_1030_6_2_2_roof_height: needs_review
+  general.bc_1030_6_2_3_smoke_protected_sprinklers: needs_review
+  general.bc_1030_6_3_open_air_aisle_capacity: needs_review
+  general.bc_1030_6_3_1_open_air_sprinklers: needs_review
+  general.bc_1030_8_1_path_through_adjacent_row: needs_review
+  general.bc_1030_9_assembly_aisles_required: needs_review
+  general.bc_1030_9_1_minimum_aisle_width: needs_review
+  general.bc_1030_9_2_aisle_catchment_area: needs_review
+  general.bc_1030_9_3_converging_aisles: needs_review
+  general.bc_1030_9_4_uniform_width_and_capacity: needs_review
+  general.bc_1030_9_5_dead_end_aisles: needs_review
+  general.bc_1030_9_6_aisle_measurement: needs_review
+  general.bc_1030_9_6_1_assembly_aisle_obstructions: needs_review
+  general.bc_1030_9_7_stairways_connecting_to_stepped_aisles: needs_review
+  general.bc_1030_9_8_stairways_connecting_to_vomitories: needs_review
+  # section group 9i: Section 1030's transitions, vomitories, aisle construction, aisle accessways, ramped and stepped aisles, seat stability, handrails and guards (1030.10 to 1030.17 and Table 1030.13.2.1), each a person's check where a room used for assembly purposes isn't ruled out
+  general.bc_1030_10_1_transitions_keeping_stepped_aisle_dimensions: needs_review
+  general.bc_1030_10_2_1_straight_run_transitions: needs_review
+  general.bc_1030_10_2_2_transitions_changing_direction: needs_review
+  general.bc_1030_10_3_transition_marking: needs_review
+  general.bc_1030_11_1_stepped_aisles_changing_direction_at_vomitories: needs_review
+  general.bc_1030_11_2_transitions_at_top_of_vomitories: needs_review
+  general.bc_1030_12_construction: needs_review
+  general.bc_1030_12_1_walking_surface: needs_review
+  general.bc_1030_12_2_outdoor_conditions: needs_review
+  general.bc_1030_13_1_seating_at_tables: needs_review
+  general.bc_1030_13_1_1_table_aisle_accessway_width: needs_review
+  general.bc_1030_13_1_2_table_aisle_accessway_length: needs_review
+  general.bc_1030_13_2_rows_of_seats: needs_review
+  general.bc_1030_13_2_1_dual_access: needs_review
+  general.bc_table_1030_13_2_1_smoke_protected_row_lengths: needs_review
+  general.bc_1030_13_2_2_single_access: needs_review
+  general.bc_1030_14_1_ramped_aisles: needs_review
+  general.bc_1030_14_1_1_cross_slope: needs_review
+  general.bc_1030_14_1_2_ramped_aisle_landings: needs_review
+  general.bc_1030_14_1_3_ramped_aisle_edge_protection: needs_review
+  general.bc_1030_14_2_stepped_aisles: needs_review
+  general.bc_1030_14_2_1_stepped_aisle_treads: needs_review
+  general.bc_1030_14_2_2_stepped_aisle_risers: needs_review
+  general.bc_1030_14_2_2_1_construction_tolerances: needs_review
+  general.bc_1030_14_2_3_tread_contrasting_marking_stripe: needs_review
+  general.bc_1030_14_2_4_nosing_and_profile: needs_review
+  general.bc_1030_15_seat_stability: needs_review
+  general.bc_1030_16_handrails: needs_review
+  general.bc_1030_16_1_discontinuous_mid_aisle_handrails: needs_review
+  general.bc_1030_16_2_handrail_termination: needs_review
+  general.bc_1030_16_3_mid_aisle_termination: needs_review
+  general.bc_1030_16_4_rails: needs_review
+  general.bc_1030_17_assembly_guards: needs_review
+  general.bc_1030_17_1_perimeter_guards: needs_review
+  general.bc_1030_17_2_cross_aisle_guards: needs_review
+  general.bc_1030_17_3_sightline_constrained_guard_heights: needs_review
+  general.bc_1030_17_4_guards_at_end_of_aisles: needs_review
+  # Chapter 7 part a (2026-11-26, 28 flags): the fire barriers and shaft enclosures that build exit stairway and passageway
+  # enclosures (703.2.1.1, 703.5, 707, 713): nothing they ask is in the model (an enclosure's rating, the stories it
+  # connects, its walls' construction, penetrations, joints), so each is a person's check for every building
+  general.bc_703_2_1_1_nonsymmetrical_walls: needs_review
+  general.bc_703_5_marking: needs_review
+  # Chapter 7 part e1 (2026-11-28, 26 flags): exterior walls (705), which an exit stairway's and passageway's exterior
+  # walls meet (1023.7, 1024.8), and projections (egress balconies, exterior exit stairways): no wall's rating, fire separation distance or openings are in the model; 705.9.5's
+  # vertical separation needs review too (no sprinkler system: its exception 2 isn't taken)
+  general.bc_705_2_projections: needs_review
+  general.bc_table_705_2_projection_distances: needs_review
+  general.bc_705_2_1_type_i_ii_projections: needs_review
+  general.bc_705_2_2_type_iii_iv_v_projections: needs_review
+  general.bc_705_2_3_projection_protection: needs_review
+  general.bc_705_2_3_1_balconies: needs_review
+  general.bc_705_3_buildings_on_the_same_lot: needs_review
+  general.bc_705_4_exterior_wall_materials: needs_review
+  general.bc_705_5_exterior_wall_ratings: needs_review
+  general.bc_table_705_5_exterior_wall_ratings: needs_review
+  general.bc_705_6_exterior_wall_continuity: needs_review
+  general.bc_705_7_structural_stability: needs_review
+  general.bc_705_7_1_type_iii_floor_assemblies: needs_review
+  general.bc_705_8_unexposed_surface_temperature: needs_review
+  general.bc_table_705_9_exterior_wall_openings: needs_review
+  general.bc_705_9_1_allowable_opening_area: needs_review
+  general.bc_705_9_2_protected_openings: needs_review
+  general.bc_705_9_3_unprotected_openings: needs_review
+  general.bc_705_9_4_mixed_openings: needs_review
+  general.bc_705_9_5_vertical_separation: needs_review
+  general.bc_705_9_6_vertical_exposure: needs_review
+  general.bc_705_10_joints: needs_review
+  general.bc_705_10_1_voids: needs_review
+  general.bc_705_11_ducts: needs_review
+  general.bc_705_12_parapets: needs_review
+  general.bc_705_12_1_parapet_construction: needs_review
+  general.bc_707_3_2_exit_stairway_fire_barriers: needs_review
+  general.bc_707_3_4_exit_passageway_fire_barriers: needs_review
+  general.bc_707_3_5_horizontal_exit_separation: needs_review
+  general.bc_707_4_exterior_walls: needs_review
+  general.bc_707_5_continuity: needs_review
+  general.bc_707_5_1_supporting_construction: needs_review
+  general.bc_707_6_openings: needs_review
+  general.bc_707_7_penetrations: needs_review
+  general.bc_707_7_1_prohibited_penetrations: needs_review
+  general.bc_707_8_joints: needs_review
+  general.bc_707_9_voids: needs_review
+  general.bc_707_10_ducts: needs_review
+  general.bc_713_1_shafts_and_exit_stairways: needs_review
+  general.bc_713_2_shaft_construction: needs_review
+  general.bc_713_4_shaft_rating: needs_review
+  general.bc_713_5_shaft_continuity: needs_review
+  general.bc_713_6_shaft_exterior_walls: needs_review
+  general.bc_713_7_shaft_openings: needs_review
+  general.bc_713_7_1_shaft_prohibited_openings: needs_review
+  general.bc_713_8_shaft_penetrations: needs_review
+  general.bc_713_8_1_shaft_prohibited_penetrations: needs_review
+  general.bc_713_9_shaft_joints: needs_review
+  general.bc_713_10_shaft_ducts: needs_review
+  general.bc_713_11_shaft_bottom: needs_review
+  general.bc_713_12_shaft_top: needs_review
+  general.bc_713_14_hoistways: needs_review
+  # Chapter 7 part b (2026-11-26, 24 flags): opening protectives (716.1, Tables 716.1(1) to (3), 716.2 to 716.2.4):
+  # nothing in the model gives a door's or a wall's rating; the corridor doors' row is per corridor (rating not
+  # stated: needs review), and 716.2.2.3's temperature rise applies (no sprinkler system)
+  general.bc_716_1_opening_protectives_general: needs_review
+  general.bc_table_716_1_2__exit_enclosures: needs_review
+  general.bc_table_716_1_2__corridors: needs_review
+  general.bc_table_716_1_2__smoke_barriers: needs_review
+  general.bc_table_716_1_2__other_assemblies: needs_review
+  general.bc_table_716_1_3__fire_windows: needs_review
+  general.bc_716_1_2_1_safety_glazing: needs_review
+  general.bc_716_1_2_2_marking_glazing: needs_review
+  general.bc_716_1_2_2_1_glazing_identification: needs_review
+  general.bc_716_1_2_2_2_fire_protection_glazing_identification: needs_review
+  general.bc_716_1_2_2_3_fire_resistance_glazing_identification: needs_review
+  general.bc_716_2_1_fire_door_testing: needs_review
+  general.bc_716_2_1_1_swinging_door_tests: needs_review
+  general.bc_716_2_1_2_other_door_tests: needs_review
+  general.bc_716_2_1_3_transom_sidelight_glazing: needs_review
+  general.bc_716_2_1_4_smoke_draft_control_test: needs_review
+  general.bc_716_2_2_fire_door_performance: needs_review
+  general.bc_716_2_2_1_corridor_smoke_barrier_doors: needs_review
+  general.bc_716_2_2_1_1_smoke_draft_control: needs_review
+  general.bc_716_2_2_2_other_fire_partition_doors: needs_review
+  general.bc_716_2_2_3_exit_enclosure_door_temperature_rise: needs_review
+  general.bc_716_2_2_3_1_glazing_in_exit_enclosure_doors: needs_review
+  general.bc_716_2_3_fire_doors: needs_review
+  general.bc_716_2_4_fire_door_frames: needs_review
+  # Chapter 7 part e2 (2026-11-28, 42 flags): the rest of Section 716 (glazing in fire doors, hardware and closers,
+  # fire shutters, labels, fire windows, fire protective curtains): no door's or window's construction is in the model
+  general.bc_716_2_5_1_glazing_size_limitations: needs_review
+  general.bc_716_2_5_1_1_fire_resistance_rated_door_glazing: needs_review
+  general.bc_716_2_5_1_2_fire_protection_rated_door_glazing: needs_review
+  general.bc_716_2_5_1_2_1_horizontal_exit_vision_panels: needs_review
+  general.bc_716_2_5_1_2_2_fire_barrier_door_glazing: needs_review
+  general.bc_716_2_5_2_stairway_door_vision: needs_review
+  general.bc_716_2_5_3_corridor_door_glazing: needs_review
+  general.bc_716_2_5_4_transoms_and_sidelights: needs_review
+  general.bc_716_2_6_1_door_closing: needs_review
+  general.bc_716_2_6_2_latch_required: needs_review
+  general.bc_716_2_6_4_automatic_closing_assemblies: needs_review
+  general.bc_716_2_6_6_smoke_activated_doors: needs_review
+  general.bc_716_2_6_7_pedestrian_way_doors: needs_review
+  general.bc_716_2_7_swinging_fire_shutters: needs_review
+  general.bc_716_2_8_rolling_fire_shutters: needs_review
+  general.bc_716_2_9_labeled_assemblies: needs_review
+  general.bc_716_2_9_1_fire_door_labels: needs_review
+  general.bc_716_2_9_2_oversized_doors: needs_review
+  general.bc_716_2_9_3_smoke_door_labels: needs_review
+  general.bc_716_2_9_4_frame_labels: needs_review
+  general.bc_716_2_9_5_glazing_labels: needs_review
+  general.bc_716_2_9_6_operator_labels: needs_review
+  general.bc_716_2_10_smoke_door_installation: needs_review
+  general.bc_716_3_1_fire_window_testing: needs_review
+  general.bc_716_3_1_1_positive_pressure_test: needs_review
+  general.bc_716_3_1_2_nonsymmetrical_glazing: needs_review
+  general.bc_716_3_2_fire_window_performance: needs_review
+  general.bc_716_3_2_1_interior_fire_windows: needs_review
+  general.bc_716_3_2_1_1_three_quarter_hour_windows: needs_review
+  general.bc_716_3_2_1_2_fire_window_area: needs_review
+  general.bc_716_3_3_fire_window_frames: needs_review
+  general.bc_716_3_3_1_window_mullions: needs_review
+  general.bc_716_3_4_fire_window_glazing: needs_review
+  general.bc_716_3_4_1_glass_and_glazing: needs_review
+  general.bc_716_3_5_labeled_window_assemblies: needs_review
+  general.bc_716_3_5_1_fire_window_frames_approved: needs_review
+  general.bc_716_3_5_2_fire_window_labels: needs_review
+  general.bc_716_3_6_1_fire_window_closure: needs_review
+  general.bc_716_4_fire_protective_curtains: needs_review
+  general.bc_716_4_1_curtain_labels: needs_review
+  general.bc_716_4_2_curtain_smoke_control: needs_review
+  general.bc_716_4_3_curtain_installation: needs_review
+  # Chapter 7 part c (2026-11-26, 31 flags): fire partitions, smoke barriers and smoke partitions (708 to 710): no wall's
+  # rating or construction is in the model; 709.5.1 (Group I-2 and ambulatory care smoke barrier doors) needs review too
+  # (no ambulatory care facility ruled out); 710.5.3 (Group I-2 Condition 2) doesn't apply to the stated Group R-2
+  general.bc_708_1_which_walls_are_fire_partitions: needs_review
+  general.bc_708_3_fire_partition_rating: needs_review
+  general.bc_708_4_fire_partition_continuity: needs_review
+  general.bc_708_4_1_elevator_lobby_fire_partitions: needs_review
+  general.bc_708_4_2_fire_partition_support: needs_review
+  general.bc_708_4_3_fireblocks_draftstops: needs_review
+  general.bc_708_5_fire_partition_exterior_walls: needs_review
+  general.bc_708_6_fire_partition_openings: needs_review
+  general.bc_708_7_fire_partition_penetrations: needs_review
+  general.bc_708_8_fire_partition_joints: needs_review
+  general.bc_708_9_fire_partition_ducts: needs_review
+  general.bc_709_3_smoke_barrier_rating: needs_review
+  general.bc_709_4_smoke_barrier_continuity: needs_review
+  general.bc_709_4_1_smoke_compartment_barriers: needs_review
+  general.bc_709_4_2_refuge_lobby_smoke_barriers: needs_review
+  general.bc_709_5_smoke_barrier_openings: needs_review
+  general.bc_709_5_1_i2_smoke_barrier_doors: needs_review
+  general.bc_709_6_smoke_barrier_penetrations: needs_review
+  general.bc_709_7_smoke_barrier_joints: needs_review
+  general.bc_709_8_smoke_barrier_ducts: needs_review
+  general.bc_710_3_smoke_partition_rating: needs_review
+  general.bc_710_4_smoke_partition_continuity: needs_review
+  general.bc_710_4_1_elevator_lobby_smoke_partitions: needs_review
+  general.bc_710_5_1_smoke_partition_windows: needs_review
+  general.bc_710_5_2_1_smoke_partition_door_louvers: needs_review
+  general.bc_710_5_2_2_smoke_partition_draft_control_doors: needs_review
+  general.bc_710_5_2_3_smoke_partition_self_closing_doors: needs_review
+  general.bc_710_5_3_i2_pass_through_openings: not_applicable   # Group R-2 stated: not Group I-2
+  general.bc_710_6_smoke_partition_penetrations: needs_review
+  general.bc_710_7_smoke_partition_joints: needs_review
+  general.bc_710_8_smoke_partition_ducts: needs_review
+  # Chapter 7 part d (2026-11-26, 23 flags): rated floors, vertical openings and penetrations of rated walls (711, 712,
+  # 714): none of it is in the model
+  general.bc_711_2_2_horizontal_assembly_continuity: needs_review
+  general.bc_711_2_3_horizontal_assembly_support: needs_review
+  general.bc_711_2_4_horizontal_assembly_rating: needs_review
+  general.bc_711_2_4_4_smoke_compartment_floors: needs_review
+  general.bc_711_2_4_6_other_horizontal_separations: needs_review
+  general.bc_711_3_2_unrated_floor_continuity: needs_review
+  general.bc_712_1_vertical_openings: needs_review
+  general.bc_712_1_9_two_story_openings: needs_review
+  general.bc_714_2_penetration_firestop_installation: needs_review
+  general.bc_714_3_sleeves: needs_review
+  general.bc_714_4_rated_wall_penetrations: needs_review
+  general.bc_714_4_1_through_penetrations: needs_review
+  general.bc_714_4_1_1_tested_assembly_penetrations: needs_review
+  general.bc_714_4_1_2_through_penetration_firestop: needs_review
+  general.bc_714_4_2_membrane_penetrations: needs_review
+  general.bc_714_4_3_dissimilar_materials: needs_review
+  general.bc_714_5_horizontal_assembly_penetrations: needs_review
+  general.bc_714_5_1_floor_through_penetrations: needs_review
+  general.bc_714_5_1_1_floor_tested_assembly_penetrations: needs_review
+  general.bc_714_5_1_2_floor_firestop_systems: needs_review
+  general.bc_714_5_2_floor_membrane_penetrations: needs_review
+  general.bc_714_5_3_floor_dissimilar_materials: needs_review
+  general.bc_714_5_4_smoke_barrier_penetrations: needs_review
+  # Chapter 9 part a (2026-11-27, docs/decisions/2026-11-27_ny_building_chapter_9.md): 903.2.8 (p.271 lines 35-36)
+  # requires a sprinkler system "throughout all buildings with a Group R fire area"; the building is Group R-2 with
+  # none, so it fails, whatever its size. Groups H and I and H-5's design are not this building's; 903.3.1.2's and
+  # 903.3.1.3's flags are for a stated 13R or 13D system (none here); the alternative systems (903.1.1) and pyroxylin
+  # plastics (903.2.5.3) are a person's check for every building
+  general.bc_903_1_1_alternative_protection: needs_review
+  general.bc_903_2_5_1_group_h_sprinklers: not_applicable
+  general.bc_903_2_5_2_h5_sprinkler_design: not_applicable
+  general.bc_903_2_5_3_pyroxylin_plastics: needs_review
+  general.bc_903_2_6_group_i_sprinklers: not_applicable
+  general.bc_903_2_8_group_r_sprinklers: fail
+  general.bc_903_3_1_2_nfpa_13r_limits: not_applicable
+  general.bc_903_3_1_2_2_corridors_balconies_13r: not_applicable
+  general.bc_903_3_1_3_nfpa_13d_scope: not_applicable
+  # Chapter 9 part b (2026-11-27): the groups whose requirement turns on a fire area's size, occupant load or story,
+  # none of them this building's (Group R-2 alone); the flags for a building of any group show: an occupiable
+  # roof's assembly use (903.2.1.6, while the building doesn't state its outdoor areas), an ambulatory care
+  # facility's floors (903.2.2.1, while it doesn't state none), bulk tire storage (903.2.9.2) and commercial or
+  # mechanical-access vehicle storage (903.2.10.1, 903.2.10.2: a building of any group, review round 2)
+  general.bc_903_2_mixed_occupancies: not_applicable
+  general.bc_903_2_1_1_group_a1_sprinklers: not_applicable
+  general.bc_903_2_1_2_group_a2_sprinklers: not_applicable
+  general.bc_903_2_1_3_group_a3_sprinklers: not_applicable
+  general.bc_903_2_1_4_group_a4_sprinklers: not_applicable
+  general.bc_903_2_1_5_a5_accessory_areas: not_applicable
+  general.bc_903_2_1_5_1_under_grandstands: needs_review   # an assembly space isn't ruled out (the merge review)
+  general.bc_903_2_1_6_assembly_on_roofs: needs_review
+  general.bc_903_2_1_7_multiple_a_fire_areas: not_applicable
+  general.bc_903_2_2_1_ambulatory_care: needs_review
+  general.bc_903_2_2_2_battery_laboratories: not_applicable
+  general.bc_903_2_3_group_e_sprinklers: not_applicable
+  general.bc_903_2_4_group_f1_sprinklers: not_applicable
+  general.bc_903_2_4_1_woodworking: not_applicable
+  general.bc_903_2_4_2_distilled_spirits: not_applicable
+  general.bc_903_2_4_3_upholstered_furniture: not_applicable
+  general.bc_903_2_7_group_m_sprinklers: not_applicable
+  general.bc_903_2_7_1_high_piled_storage: not_applicable
+  general.bc_903_2_7_2_upholstered_furniture: not_applicable
+  general.bc_903_2_7_3_battery_storage: not_applicable
+  general.bc_903_2_9_group_s1_sprinklers: not_applicable
+  general.bc_903_2_9_1_repair_garages: not_applicable
+  general.bc_903_2_9_2_bulk_tires: needs_review
+  general.bc_903_2_9_3_distilled_spirits_wine: not_applicable
+  general.bc_903_2_9_4_upholstered_furniture: not_applicable
+  general.bc_903_2_10_parking_garages: not_applicable
+  general.bc_903_2_10_1_commercial_parking: needs_review
+  general.bc_903_2_10_2_mechanical_access_garages: needs_review
+  # Chapter 9 part c (2026-11-27): 903.2.11's specific areas and 903.2.12 show for a building of any group but U with
+  # no NFPA 13 system stated (none here); the fire alarm sections: 907.1.3's listed equipment and 907.2's system and
+  # box show for every building, 907.2.2.1's ambulatory care detection while the building doesn't state none; the
+  # rest are Groups A, B, E, F and H's, not this building's
+  general.bc_903_2_11_1_stories_without_openings: needs_review
+  general.bc_903_2_11_1_1_opening_dimensions: needs_review
+  general.bc_903_2_11_1_2_openings_on_one_side: needs_review
+  general.bc_903_2_11_1_3_basements: needs_review
+  general.bc_903_2_11_2_chutes: needs_review
+  general.bc_903_2_11_3_buildings_55_feet: needs_review
+  general.bc_903_2_11_4_hazardous_exhaust_ducts: needs_review
+  general.bc_903_2_11_5_commercial_cooking: needs_review
+  general.bc_903_2_11_6_other_required_systems: needs_review
+  general.bc_903_2_12_during_construction: needs_review
+  general.bc_907_1_3_listed_equipment: needs_review
+  general.bc_907_2_where_required: needs_review
+  general.bc_907_2_1_group_a_fire_alarm: not_applicable
+  general.bc_907_2_1_2_captions: not_applicable
+  general.bc_907_2_1_3_group_a_smoke_detection: not_applicable
+  general.bc_907_2_2_group_b_fire_alarm: not_applicable
+  general.bc_907_2_2_1_ambulatory_care_detection: needs_review
+  general.bc_907_2_2_2_battery_laboratory_detection: not_applicable
+  general.bc_907_2_3_group_e_manual_fire_alarm: not_applicable
+  general.bc_907_2_4_group_f_fire_alarm: not_applicable
+  general.bc_907_2_4_1_battery_manufacturing: not_applicable
+  general.bc_907_2_5_group_h_fire_alarm: not_applicable
+  # Chapter 9 part d (2026-11-27): Group R-2's fire alarm, smoke alarms and college housing detection (907.2.9.1 to
+  # 907.2.9.3), the smoke alarm sections for Groups R and I-1 (907.2.11, 907.2.11.2 to 907.2.11.7; 907.2.11.1 is Group
+  # R-1's), 907.2.11.8's portable alarms for hotels, motels and lodging houses (a nontransient hotel is Group R-2,
+  # 310.3), lithium battery storage in any building (907.2.10.2), and the voice/alarm system's design while the
+  # building doesn't state it has none (907.5.2.2 and its parts; captions are Group A's): a person's check, no fire
+  # alarm or smoke alarm fact stated yet; Groups I, M, R-1 and S's sections not this building's
+  general.bc_907_2_6_group_i_fire_alarm: not_applicable
+  general.bc_907_2_6_1_group_i1_smoke_detection: not_applicable
+  general.bc_907_2_6_1_1_group_i1_smoke_alarms: not_applicable
+  general.bc_907_2_6_2_group_i2_smoke_detection: not_applicable
+  general.bc_907_2_6_3_group_i3_fire_alarm: not_applicable
+  general.bc_907_2_6_3_1_group_i3_initiation: not_applicable
+  general.bc_907_2_6_3_2_group_i3_alarm_boxes: not_applicable
+  general.bc_907_2_6_3_2_1_group_i3_locked_boxes: not_applicable
+  general.bc_907_2_6_3_3_group_i3_smoke_detection: not_applicable
+  general.bc_907_2_7_1_group_m_fire_alarm: not_applicable
+  general.bc_907_2_7_1_1_group_m_notification: not_applicable
+  general.bc_907_2_7_2_group_m_battery_storage: not_applicable
+  general.bc_907_2_8_1_group_r1_fire_alarm: not_applicable
+  general.bc_907_2_8_2_group_r1_corridor_detection: not_applicable
+  general.bc_907_2_8_3_group_r1_smoke_alarms: not_applicable
+  general.bc_907_2_9_1_group_r2_fire_alarm: needs_review
+  general.bc_907_2_9_2_group_r2_smoke_alarms: needs_review
+  general.bc_907_2_9_3_group_r2_college_detection: needs_review
+  general.bc_907_2_10_1_storage_fire_alarm: not_applicable
+  general.bc_907_2_10_2_battery_storage_detection: needs_review
+  general.bc_907_2_11_smoke_alarms: needs_review
+  general.bc_907_2_11_1_group_r1_smoke_alarm_locations: not_applicable
+  general.bc_907_2_11_2_group_r_smoke_alarm_locations: needs_review
+  general.bc_907_2_11_3_smoke_alarms_near_cooking: needs_review
+  general.bc_907_2_11_4_smoke_alarms_near_bathrooms: needs_review
+  general.bc_907_2_11_5_smoke_alarm_interconnection: needs_review
+  general.bc_907_2_11_6_smoke_alarm_power: needs_review
+  general.bc_907_2_11_7_smoke_detection_instead: needs_review
+  general.bc_907_2_11_8_portable_smoke_alarms: needs_review
+  general.bc_907_5_2_2_voice_alarm_design: needs_review
+  general.bc_907_5_2_2_1_voice_alarm_override: needs_review
+  general.bc_907_5_2_2_2_voice_alarm_live_messages: needs_review
+  general.bc_907_5_2_2_3_voice_alarm_other_uses: needs_review
+  general.bc_907_5_2_2_4_voice_alarm_captions: not_applicable
+  general.bc_907_5_2_2_5_voice_alarm_standby_power: needs_review
+  # Chapter 9 part e (2026-11-27): the other Chapter 9 sections Chapter 10 names, each a person's check: standpipes
+  # (905.3 and 905.4, Group R-2 not stated as townhouses; 905.3.2 is Group A's), smoke control (909.1), smokeproof
+  # enclosures (909.20 and its parts) and a fire command center (911.1), none of them in the model
+  general.bc_905_3_standpipes_required: needs_review
+  general.bc_905_3_1_class_iii_by_height: needs_review
+  general.bc_905_3_2_group_a_standpipes: not_applicable
+  general.bc_905_3_3_mall_standpipes: needs_review
+  general.bc_905_3_4_underground_standpipes: needs_review
+  general.bc_905_3_5_helistop_standpipes: needs_review
+  general.bc_905_3_6_marina_standpipes: needs_review
+  general.bc_905_3_7_roof_garden_standpipes: needs_review
+  general.bc_905_4_class_i_hose_connections: needs_review
+  general.bc_905_4_1_standpipe_protection: needs_review
+  general.bc_905_4_2_standpipe_interconnection: needs_review
+  general.bc_909_1_smoke_control_scope: needs_review
+  general.bc_909_20_smokeproof_enclosures: needs_review
+  general.bc_909_20_1_smokeproof_access: needs_review
+  general.bc_909_20_2_smokeproof_construction: needs_review
+  general.bc_909_20_2_1_smokeproof_door_closers: needs_review
+  general.bc_909_20_3_1_smokeproof_balcony_doors: needs_review
+  general.bc_909_20_3_2_smokeproof_vestibule_doors: needs_review
+  general.bc_909_20_3_3_smokeproof_vestibule_ventilation: needs_review
+  general.bc_909_20_4_stair_pressurization: needs_review
+  general.bc_909_20_5_1_pressurized_vestibule_doors: needs_review
+  general.bc_909_20_5_2_pressure_difference: needs_review
+  general.bc_909_20_5_3_relief_opening: needs_review
+  general.bc_909_20_5_4_fan_smoke_detection: needs_review
+  general.bc_909_20_6_ventilating_equipment: needs_review
+  general.bc_909_20_6_1_ventilation_systems: needs_review
+  general.bc_909_20_6_2_smokeproof_standby_power: needs_review
+  general.bc_911_1_fire_command_center: needs_review
+  general.bc_907_2_1_1_group_a_voice_alarm: not_applicable
+  general.bc_907_2_1_1_mixed_voice_alarm: not_applicable
+  general.bc_907_2_3_group_e_voice_alarm: not_applicable
+  # section group 7c: Section 1011's stair rules and flags, one line each. The apartment's two stairs aren't described
+  # (its 9 by 6 ft enclosures can't hold a code-sized stair: the plan's open design item 2), so no flight is read
+  # and every one needs review, never a pass (the stair test building, test_data/test_sites/new_york/stair_enclosure,
+  # carries them end to end)
+  general.bc_1011_1_stairways_general: needs_review
+  general.bc_1011_2_stair_width: needs_review
+  general.bc_1011_3_stair_headroom: needs_review
+  general.bc_1011_5_2_riser_height: needs_review
+  general.bc_1011_5_2_tread_depth: needs_review
+  general.bc_1011_5_4_riser_uniformity: needs_review
+  general.bc_1011_5_4_tread_uniformity: needs_review
+  general.bc_1011_6_stair_landings: needs_review
+  general.bc_1011_11_stair_handrails: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review
