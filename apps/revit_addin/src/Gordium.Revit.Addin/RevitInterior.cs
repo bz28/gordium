@@ -147,17 +147,20 @@ internal static class RevitInterior
         var rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType().OfType<Room>()
             .Where(r => r.Location is LocationPoint && r.Area > 0).ToList();
         var result = new Dictionary<string, GrossArea>(StringComparer.Ordinal);
+        var withRooms = rooms.Select(r => r.LevelId).ToHashSet();
         foreach (var level in levels)
         {
             if (!rooms.Any(r => r.LevelId == level.Id))
                 continue;
+            var next = NextAbove(levels, level, withRooms);
             using var group = new TransactionGroup(doc, ResultRows.AreasTransaction);
             group.Start();
             ReadSteps.Count("inside.gross_areas.levels");
             try
             {
                 result[level.UniqueId] = ReadSteps.Time("inside.gross_areas.ring",
-                    () => RingOf(doc, phase, level, walls.Where(w => w.LevelId == level.Id).ToList(), planType, diagnostics));
+                    () => RingOf(doc, phase, level, walls.Where(w => w.LevelId == level.Id).ToList(),
+                                 walls.Where(w => Stands(w, level, next, phase)).ToList(), planType, diagnostics));
             }
             finally
             {
@@ -327,13 +330,113 @@ internal static class RevitInterior
         }
     }
 
+    /// <summary>A wall's plan footprint (<see cref="WallFootprint"/>): the end points of its solids' edges, tessellated,
+    /// so a wall's true extent whatever its location line; its bounding box where it has no solid; no corners where
+    /// neither can be read (StoryOutlines then sends no outline: it can't show the wall is inside it). Never a crash.</summary>
+    private static WallFootprint FootprintOf(Wall w, Level level)
+    {
+        string? mark = null;
+        var bounding = false;
+        try
+        {
+            mark = w.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString();
+            bounding = Bounds(w, level);
+            var points = new List<Xyz>();
+            if (w.WallType?.Kind == WallKind.Curtain && w.Location is LocationCurve { Curve: Line line })
+            {                                            // a curtain wall: its line, its width either side (its panels
+                var (a, b) = (line.GetEndPoint(0), line.GetEndPoint(1));   // and mullions are elements of their own)
+                var n = new XYZ(-(b - a).Normalize().Y, (b - a).Normalize().X, 0) * Math.Max(w.Width / 2, 1.0 / 12);
+                return new WallFootprint(w.UniqueId, mark, bounding, [P(a + n), P(b + n), P(b - n), P(a - n)]);
+            }
+            if (w.get_Geometry(new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false }) is { } geometry)
+                foreach (var solid in WallSolids(geometry))
+                    foreach (Edge edge in solid.Edges)
+                        points.AddRange(edge.Tessellate().Select(P));
+            if (points.Count == 0 && w.get_BoundingBox(null) is { } box)
+                points = [P(box.Min), P(new XYZ(box.Max.X, box.Min.Y, box.Min.Z)), P(box.Max), P(new XYZ(box.Min.X, box.Max.Y, box.Min.Z))];
+            return new WallFootprint(w.UniqueId, mark, bounding, points);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return new WallFootprint(w.UniqueId, mark, bounding, []);
+        }
+    }
+
+    private static IEnumerable<Solid> WallSolids(GeometryElement geometry)
+    {
+        foreach (var obj in geometry)
+            if (obj is Solid { Volume: > 0 } s)
+                yield return s;
+            else if (obj is GeometryInstance gi)
+                foreach (var inner in WallSolids(gi.GetInstanceGeometry()))
+                    yield return inner;
+    }
+
+    /// <summary>The next story up: the elevation of the lowest level above this one's room computation height that has
+    /// a Room placed on it (internal ft), so a datum level (a slab top, a plate height) never cuts the story short; 1,000
+    /// ft up where there is none (every wall above read: more refusals at worst, never fewer walls read). Review round 5:
+    /// the Building Story flag can be set on a datum level, so it isn't read.</summary>
+    private static double NextAbove(List<Level> levels, Level level, HashSet<ElementId> withRooms)
+    {
+        var cut = level.ProjectElevation + (level.get_Parameter(BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() ?? 4.0);
+        return levels.Where(l => withRooms.Contains(l.Id) && l.ProjectElevation > Math.Max(cut, level.ProjectElevation + 1e-6))
+                     .Select(l => l.ProjectElevation).DefaultIfEmpty(level.ProjectElevation + 1000).Min();
+    }
+
+    /// <summary>Whether the wall stands on the story, whichever level it is based on (a veneer from the foundation to
+    /// the roof stands on every story): anywhere from just above the level up to the next story; in the phase read (new
+    /// or existing in it) and in the main model or a primary design option. Stacked walls' parents are left out (their
+    /// member walls are read); a room-bounding curtain wall too (the ring Room stops at it).</summary>
+    private static bool Stands(Wall w, Level level, double nextZ, Phase phase)
+    {
+        try
+        {
+            if (w.IsStackedWall || (w.WallType?.Kind == WallKind.Curtain && Bounds(w, level) && AtCut(w, level)))
+                return false;                            // a curtain wall the ring Room stops at; any other is read
+            if (w.DesignOption is { IsPrimary: false })
+                return false;
+            var status = w.GetPhaseStatus(phase.Id);
+            if (status is not (ElementOnPhaseStatus.New or ElementOnPhaseStatus.Existing))
+                return false;
+            return w.get_BoundingBox(null) is not { } box || (box.Min.Z < nextZ && box.Max.Z > level.ProjectElevation + 1e-6);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return true;                                 // unread: kept, and its footprint says so if it can't be read
+        }
+    }
+
+    /// <summary>Whether the wall stands at the level's room computation height (where Revit works out room outlines).</summary>
+    private static bool AtCut(Wall w, Level level)
+    {
+        var z = level.ProjectElevation + (level.get_Parameter(BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() ?? 4.0);
+        return w.get_BoundingBox(null) is { } box && box.Min.Z <= z + 1e-6 && box.Max.Z >= z - 1e-6;
+    }
+
+    /// <summary>Whether the wall is read as one Revit's ring Room stops at on this level: set Room Bounding, and not
+    /// ending below the level's room computation height (where Revit works out room outlines; 4 ft by default). A
+    /// room-bounding wall that ends below it (a wainscot drawn as its own wall, a knee wall) doesn't stop the room, so it
+    /// is read as not bounding: beyond the outline within 3 ft, the outline is refused (review round 3). One wholly above
+    /// it (a gable end, a parapet, the next story's wall lapping down) stays bounding: refused only where it lies
+    /// beyond the outline, never for standing in the exterior walls' band (review round 4).</summary>
+    private static bool Bounds(Wall w, Level level)
+    {
+        if (w.get_Parameter(BuiltInParameter.WALL_ATTR_ROOM_BOUNDING)?.AsInteger() == 0)
+            return false;
+        var z = level.ProjectElevation + (level.get_Parameter(BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() ?? 4.0);
+        return w.get_BoundingBox(null) is not { } box || box.Max.Z >= z - 1e-6;
+    }
+
     /// <summary>The level's exterior walls' outer faces by Revit's own room logic: room separation lines drawn as a
     /// rectangle 20 ft beyond the level's walls, a Room placed in the ring between it and the building, its boundary at
     /// the finished faces read (doors and windows don't break a room's boundary; interior walls never touch this one),
     /// the rectangle's loop dropped. The lines and the Room are each made in a committed transaction (Revit works a
     /// plan's enclosed areas out again only on a commit) inside the transaction group <see cref="GrossAreasOf"/> rolls
     /// back. Each loop's corners and area, and each side with what bounds it, are logged.</summary>
-    private static GrossArea RingOf(Document doc, Phase phase, Level level, List<Wall> walls, ViewFamilyType? planType, List<string> diagnostics)
+    private static GrossArea RingOf(Document doc, Phase phase, Level level, List<Wall> walls, List<Wall> standing, ViewFamilyType? planType,
+                                    List<string> diagnostics)
     {
         GrossArea No(string why) => new(null, new Dictionary<string, double>(), why);
         var boxes = walls.Select(w => w.get_BoundingBox(null)).OfType<BoundingBoxXYZ>().ToList();
@@ -415,7 +518,14 @@ internal static class RevitInterior
                     return $"({c.GetEndPoint(0).X:0.###},{c.GetEndPoint(0).Y:0.###})-({c.GetEndPoint(1).X:0.###},{c.GetEndPoint(1).Y:0.###}) " +
                            $"{by?.Category?.BuiltInCategory.ToString().Replace("OST_", "") ?? "none"} {by?.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString()};";
                 })));
-            return new GrossArea(building, widths);
+            // every wall standing on the level (based on it or not) with its footprint: one beyond the outline (a veneer
+            // not set Room Bounding) or one in the exterior walls that isn't room-bounding keeps the outline from being
+            // sent (StoryOutlines.Of)
+            var footprints = ReadSteps.Time("inside.gross_areas.walls", () => standing.Select(w => FootprintOf(w, level)).ToList());
+            diagnostics.Add($"outer outline of {level.Name}: {footprints.Count} walls read against it " +
+                            $"({footprints.Count(f => f.RoomBounding)} bounding, {footprints.Count(f => f.Corners.Count == 0)} unread); " +
+                            $"Building Story {level.get_Parameter(BuiltInParameter.LEVEL_IS_BUILDING_STORY)?.AsInteger().ToString() ?? "not given"}");
+            return new GrossArea(building, widths, null, footprints);
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
                                        or Autodesk.Revit.Exceptions.InvalidOperationException)
