@@ -136,7 +136,8 @@ OTHER_WAYS = (("ramps", "ramp"), ("alternating_tread_devices", "alternating_trea
 def _stair_points(description) -> list:
     """Every way to another story the description gives or doesn't rule out, each {"points": plan points of its
     nosings' ends in inches}, or ANYWHERE: the stairs (`stairs`, house egress) read entry by entry, one that can't be
-    read anywhere; no `stairs` list at all (not read, the format's silence) one anywhere; a ramp, alternating tread
+    read anywhere; no `stairs` list at all (not read, the format's silence) one anywhere, and so an empty list where
+    the description shows more than one floor (interior._stairs_against_floors, #279); a ramp, alternating tread
     device or ship's ladder anywhere unless the description gives its list empty or says it has none (`has_none`
     with a source), since none is said, never inferred."""
     reader = Reader(description["units"])
@@ -145,6 +146,14 @@ def _stair_points(description) -> list:
     if not isinstance(stairs, list):
         out.append(ANYWHERE)
         stairs = []
+    elif not stairs:                                     # "no stairs" beside more than one floor isn't taken: a stair
+        from model_measurement.interior import _stairs_against_floors    # left undrawn may be anywhere (#279's
+        try:                                                              # refusal, the same for the routes)
+            refused = _stairs_against_floors(description, reader)
+        except (InteriorStop, TypeError, AttributeError, KeyError, ValueError):
+            refused = "unread"
+        if refused is not None:
+            out.append(ANYWHERE)
     for st in stairs:
         try:
             nosings = st.get("nosings") or []
