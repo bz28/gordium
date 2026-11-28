@@ -373,10 +373,13 @@ internal static class RevitInterior
 
     /// <summary>The next building story's elevation above this one (internal ft; datum levels such as a plate height
     /// left out), or 1,000 ft up where it is the top one.</summary>
-    private static double NextAbove(List<Level> levels, Level level) =>
-        levels.Where(l => l.get_Parameter(BuiltInParameter.LEVEL_IS_BUILDING_STORY)?.AsInteger() != 0)
-              .Select(l => l.ProjectElevation).Where(z => z > level.ProjectElevation + 1e-6)
-              .DefaultIfEmpty(level.ProjectElevation + 1000).Min();
+    private static double NextAbove(List<Level> levels, Level level)
+    {
+        var above = levels.Where(l => l.ProjectElevation > level.ProjectElevation + 1e-6).ToList();
+        var stories = above.Where(l => l.get_Parameter(BuiltInParameter.LEVEL_IS_BUILDING_STORY)?.AsInteger() != 0).ToList();
+        // no level above flagged a story (levels a script made may all read 0): the next level of any kind
+        return (stories.Count > 0 ? stories : above).Select(l => l.ProjectElevation).DefaultIfEmpty(level.ProjectElevation + 1000).Min();
+    }
 
     /// <summary>Whether the wall stands on the story, whichever level it is based on (a veneer from the foundation to
     /// the roof stands on every story): anywhere from just above the level up to the next story; in the phase read (new
@@ -402,16 +405,18 @@ internal static class RevitInterior
         }
     }
 
-    /// <summary>Whether Revit's ring Room stops at the wall on this level: it is set Room Bounding and stands at the
-    /// level's room computation height (where Revit works out room outlines; 4 ft by default). A room-bounding wall
-    /// lower than that (a wainscot drawn as its own wall, a knee wall) doesn't stop it, so it is read as not bounding:
-    /// beyond the outline within 3 ft, the outline is refused (review round 3).</summary>
+    /// <summary>Whether the wall is read as one Revit's ring Room stops at on this level: set Room Bounding, and not
+    /// ending below the level's room computation height (where Revit works out room outlines; 4 ft by default). A
+    /// room-bounding wall that ends below it (a wainscot drawn as its own wall, a knee wall) doesn't stop the room, so it
+    /// is read as not bounding: beyond the outline within 3 ft, the outline is refused (review round 3). One wholly above
+    /// it (a gable end, a parapet, the next story's wall lapping down) stays bounding: refused only where it lies
+    /// beyond the outline, never for standing in the exterior walls' band (review round 4).</summary>
     private static bool Bounds(Wall w, Level level)
     {
         if (w.get_Parameter(BuiltInParameter.WALL_ATTR_ROOM_BOUNDING)?.AsInteger() == 0)
             return false;
         var z = level.ProjectElevation + (level.get_Parameter(BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() ?? 4.0);
-        return w.get_BoundingBox(null) is { } box && box.Min.Z <= z && box.Max.Z >= z && box.Max.Z > level.ProjectElevation + 1e-6;
+        return w.get_BoundingBox(null) is not { } box || box.Max.Z >= z - 1e-6;
     }
 
     /// <summary>The level's exterior walls' outer faces by Revit's own room logic: room separation lines drawn as a
