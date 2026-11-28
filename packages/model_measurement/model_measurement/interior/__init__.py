@@ -109,8 +109,9 @@ def _level_id(value):
 
 HOUSE_LANDING = (LANDING_STEP, GROUND_ABOVE)
 # BCNYS 1010.1.4: a door's floor or landing at the same elevation on each side, within 1/2 in (exception 4); its
-# exceptions 2 and 3 allow 7 in and 7 3/4 in in some groups only, which the check doesn't know, so the strict
-# 1/2 in; 1010.1.6: thresholds at most 1/2 in. Gordium's reading: within 1/2 in either way, a floor meets the ground
+# looser steps (exceptions 2, 3 and 6: 7 and 7 3/4 in) each turn on what the model doesn't show (a door off an
+# accessible route and not swinging over the landing, units not required Accessible, Type A or B, an equipment
+# space), so the strict 1/2 in; 1010.1.6: thresholds at most 1/2 in. Gordium's reading: within 1/2 in either way
 BUILDING_LANDING = (0.5, 0.5)
 _INCHES = {8.25: "8 1/4", 1.5: "1 1/2", 0.5: "1/2"}
 
@@ -130,11 +131,12 @@ def _stairs_against_floors(whole, reader, stated_stories=None, landing=HOUSE_LAN
     - its floors are more than 1/2 in apart (a room's `floor_elevation`, as a house's gives them; a room with none,
       and an enclosed space, at its level's height in `levels`; a change of floor that size is a step, or a ramp),
       or a floor or level height given can't be read (it may be on another floor);
-    - a ground given outside the openings (`ground_outside`) is more than 8 1/4 in below the lowest floor or more
-      than 1 1/2 in above it (only an upper floor drawn, a floor sunk below the ground, or sloped ground a landing
-      can't meet: R318.3.1, R318.3.2): which ground the way out is on isn't known, so every ground given must allow
-      no stair; a ground given that can't be read may be any, so it refuses too (with no floor given, grounds
-      farther apart than 9 3/4 in, which no one floor can meet);
+    - a ground given outside the openings (`ground_outside`) is farther from a floor than a landing allows
+      (`landing`: below the highest floor and above the lowest; HOUSE_LANDING, 8 1/4 in below and 1 1/2 in above,
+      R318.3.1 and R318.3.2; BUILDING_LANDING, 1/2 in either way, BCNYS 1010.1.4 and 1010.1.6): only an upper floor
+      drawn, a floor sunk below the ground, or sloped ground a landing can't meet. Which ground the way out is on
+      isn't known, so every ground given must allow no stair; a ground given that can't be read may be any, so it
+      refuses too (with no floor given, grounds farther apart than both bounds together, which no floor can meet);
     - the check gives two or more stories (`stated_stories`: a count, or (count, whose words with {n}),
       design_checker.egress._stated_stories).
     Rooms with neither level nor floor given show nothing against it (not given is never a second floor)."""
