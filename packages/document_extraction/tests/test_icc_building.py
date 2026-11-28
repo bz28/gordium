@@ -247,7 +247,10 @@ def test_a_titles_second_line_ending_in_raised_note_letters_is_read_whole():
     whole = "FIRE-RESISTANCE RATING REQUIREMENTS FOR EXTERIOR WALLS BASED ON FIRE SEPARATION DISTANCE"
     assert icc_sections._table_title([first, second]) == whole
     cut = "FIRE-RESISTANCE RATING REQUIREMENTS FOR"
-    assert icc_sections._table_title([first, {**second, "top": 56.0}]) == cut              # taller than marks make
+    # taller than marks make: 1.9 points over the first line, more than 0.45 + 1.2 (review round 2: the gap kept
+    # legal, 0.2 point, so only the height decides); 1.6 points over, within it, still the title
+    assert icc_sections._table_title([first, {**second, "bottom": 69.0}]) == cut
+    assert icc_sections._table_title([first, {**second, "bottom": 68.7}]) == whole
     unmarked = {**second, "text": "EXTERIOR WALLS BASED ON FIRE SEPARATION DISTANCE", "bold": [[0, 48]]}
     assert icc_sections._table_title([first, unmarked]) == cut                   # 0.8 taller with no marks: no title
     assert icc_sections._table_title([first, {**second, "bold": [[0, 20]]}]) == cut    # its words not bold throughout

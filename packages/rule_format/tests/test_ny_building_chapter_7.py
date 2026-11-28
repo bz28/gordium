@@ -700,7 +700,9 @@ def test_705_2s_projections_reach_egress_balconies_and_exterior_exit_stairways(b
     balconies = " ".join(_shown_note(rules["general.bc_705_2_3_1_balconies"]).split())
     assert "50 percent of the building's perimeter on each floor" in balconies
     assert "exterior stairways not used as required exits" in balconies
-    assert "1021 and 1027" in _shown_note(rules["general.bc_705_2_projections"])
+    projections = " ".join(_shown_note(rules["general.bc_705_2_projections"]).split())
+    assert "egress balconies also to 1021 and exterior exit stairways and ramps to 1027" in projections   # round 2
+    assert labels["705.4"]["label"] == "flag" and _flags(book, "705.4")          # round 2: an exit's walls meet all of 705
 
 
 def test_the_readmes_rule_count_is_the_rulebooks():

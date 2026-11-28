@@ -9298,7 +9298,7 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Cornices, eave overhangs, exterior balconies and similar projections beyond the exterior wall conform to 705.2
-      and Section 1405, exterior egress balconies and exterior exit stairways and ramps also to 1021 and 1027; no projection
+      and Section 1405, exterior egress balconies also to 1021 and exterior exit stairways and ramps to 1027; no projection
       comes closer to the line used to determine the fire separation distance than Table 705.2 allows; but buildings on the
       same lot considered portions of one building per 705.3 need not comply for projections between them: a person''s check
       (general.bc_705_2_projections).'
@@ -9463,6 +9463,22 @@ labels:
         not in the exterior wall openings in the R-2 building, and these open- ing protectives in the exterior wall of the
         S-2 parking garage shall be not less than 1 1/2-hour fire protection rating.'
     piece_sha256: de72e1af859a078f606e68d5fa6c711b4cc2d319f25872929470a4d764d1bbb2
+    notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '705.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'Exterior walls, an exit stairway''s and an exit passageway''s among them (1023.7, 1024.8), are of materials the
+      building''s type of construction permits: a person''s check (general.bc_705_4_exterior_wall_materials).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 164
+      lines:
+      - 38
+      - 38
+      quote: 705.4 Materials. Exterior walls shall be of materials permitted by the building’s type of construction.
+    piece_sha256: d9acee4dc7a5b87a0196d5c0bbfe092bd99bad4098fadb2f3fc8ccdaad6b18a5
     notes: Drafted by hand in a Claude Code session (2026-11-28); no recorded labeling run. Chapter 7 part e1.
     drafted_by: claude_code/claude-opus-5-5
     status: draft

@@ -845,6 +845,11 @@ pieces:
     heading: Buildings on the same lot
     rules:
     - general.bc_705_3_buildings_on_the_same_lot
+  '705.4':
+    label: flag
+    heading: Materials
+    rules:
+    - general.bc_705_4_exterior_wall_materials
   '705.5':
     label: flag
     heading: Fire-resistance ratings
