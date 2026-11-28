@@ -790,7 +790,9 @@ def test_table_1006_3_4_1_group_r2_of_dwelling_units(ctx, rules):
     one = {"story_exit_count": 1, "story_occupant_load": 16, "egress_travel_distance": 125, FOURTH: False,
            "story_dwelling_units": 4, "story_rooms_exit_directly_outside": False}
     assert _one(r, "story", one, du | NFPA13, ctx) == "pass"
-    assert _one(r, "story", one, du | {S1: False, S2: True}, ctx) == "pass"                 # NFPA 13R
+    # NFPA 13R: 903.3.1.2's stories and roof height aren't known, so note a isn't known met (the story facts' merge,
+    # 2026-11-28: a 13R statement alone never passes the row)
+    assert _one(r, "story", one, du | {S1: False, S2: True}, ctx) == "needs_review"
     assert _one(r, "story", one | {"story_dwelling_units": 5}, du | NFPA13, ctx) == "fail"
     assert _one(r, "story", one | {"egress_travel_distance": 125.01}, du | NFPA13, ctx) == "fail"
     assert _one(r, "story", one | {FOURTH: True}, du | NFPA13, ctx) == "fail"

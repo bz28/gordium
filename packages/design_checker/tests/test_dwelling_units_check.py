@@ -16,6 +16,7 @@ import pytest
 
 from design_checker import egress
 from model_measurement.routes.dwelling_units import QUOTE_1016_2_1
+from rule_format import parts
 from rule_format.rulebook import REPO, Context, load
 
 sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
@@ -35,10 +36,10 @@ def _check(interior):
 
 
 def test_the_r2_row_passes_on_the_measured_count_saying_the_reading_and_1016_2_1_is_asked():
-    """One exit a story, 2 units each (measured), 53.95 ft of travel, an NFPA 13R system and escape openings: Table
+    """One exit a story, 2 units each (measured), 53.95 ft of travel, an NFPA 13 system and escape openings: Table
     1006.3.4(1) allows it; the row's line says the reading and 1016.2.1, and the 1016.2.1 flag is in the answer."""
     interior = build.interior_of()
-    got = _check({**interior, **_one_exit_building(interior, "nfpa_13r")})
+    got = _check({**interior, **_one_exit_building(interior, "nfpa_13")})
     assert got["results"][ROW] == "pass"
     rows = [r for r in got["rows"] if r["rule"] == ROW]
     assert [r["outcome"] for r in rows] == ["pass", "pass"]
@@ -89,8 +90,10 @@ def test_wherever_a_measured_count_lets_the_r2_row_pass_1016_2_1_is_asked_in_the
         if r["values"].get(UNITS) is not None:
             assert got["results"][FLAG] == "needs_review", (sprinkler, residential)
             assert any(QUOTE_1016_2_1 in w for w in r.get("rests_on") or []), r
-    if sprinkler == "nfpa_13r" and residential == 2:
+    if sprinkler == "nfpa_13" and residential == 2:
         assert passing, "the walk must reach a pass on a measured count"
+    if sprinkler == "nfpa_13r":                          # never on a 13R system alone (its limits aren't known)
+        assert not passing, passing
 
 
 def test_the_1016_2_1_flag_is_never_set_aside_in_group_r2():
@@ -106,7 +109,7 @@ def test_counted_from_the_unit_marks_the_row_says_the_marks_not_the_reading():
     room the drawing takes as an exit stops it (needs review, never a pass)."""
     from model_measurement.routes.dwelling_units import MARKED
     interior = build.interior_of()
-    interior.update(_one_exit_building(interior, "nfpa_13r"))
+    interior.update(_one_exit_building(interior, "nfpa_13"))
     for r in interior["rooms"]:
         if "APARTMENT" in r["name"].upper():
             r["unit"] = r["name"]
@@ -121,3 +124,30 @@ def test_counted_from_the_unit_marks_the_row_says_the_marks_not_the_reading():
     assert got["results"][ROW] == "needs_review"
     why = {s["id"]: s["not_measured"].get(UNITS, "") for s in got["interior"]["parts"]["story"]}
     assert "is taken as an exit" in why[stair["level"]] and "marked unit 'Apartment 1'" in why[stair["level"]], why
+
+
+@pytest.mark.parametrize("stories", [None, 2])
+def test_a_13r_system_alone_never_passes_the_one_exit_row(stories):
+    """The pass path the measured count opens, closed where it rests on a stated NFPA 13R system: note a asks a building
+    sprinklered per 903.3.1.1 or 903.3.1.2, and 903.3.1.2 permits 13R only four stories or fewer above grade plane with
+    a Group R-2 roof under 45 ft above the lowest fire department access, a height the model doesn't show (stated
+    stories, two here, don't settle it). So the same one-exit apartment that passes with NFPA 13 needs review with 13R
+    and never passes, saying why (the coordinator's decision, 2026-11-28)."""
+    interior = build.interior_of()
+    keys = _one_exit_building(interior, "nfpa_13r")
+    if stories is not None:
+        keys["building"]["stories_above_grade_plane"] = stories
+    got = _check({**interior, **keys})
+    rows = [r for r in got["rows"] if r["rule"] == ROW]
+    assert got["results"][ROW] == "needs_review" and rows
+    assert all(r["outcome"] == "needs_review" and r["values"][UNITS] == 2 for r in rows), rows
+    # the row says the rule's own reason, all three of 903.3.1.2's conditions, not the occupant-load open question
+    # its readings leave (whatever the answer, 13R still needs review: parts._own_reviews)
+    for r in rows:
+        assert r["reason"].startswith("One exit, allowed by note a only through an NFPA 13R system (903.3.1.2)"), r
+        assert all(w in r["reason"] for w in ("four stories or fewer above grade plane", "less than 45 feet above",
+                                               "30 feet or less below")), r["reason"]
+        assert not parts.is_reading_words(r["reason"]), r["reason"]
+    assert all("only through an NFPA 13R system" in str(i) for i in got["items"] if i.get("rule") == ROW)
+    sprinklered = _check({**interior, **_one_exit_building(interior, "nfpa_13")})
+    assert sprinklered["results"][ROW] == "pass"                 # the same building with NFPA 13: the pass stands

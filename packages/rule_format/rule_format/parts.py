@@ -620,9 +620,29 @@ def _under_readings(rule: dict, known: dict, allowed: dict, combos: list) -> tup
     results = {r for _, r in got}
     if results in ({"pass"}, {"fail"}, {"not_applicable"}):
         return results.pop(), None
+    if results == {"needs_review"} and (own := _own_reviews(rule, known, allowed, combos)):
+        return "needs_review", "; ".join(own)    # the rule's own review holds whatever the answers: its reason, never
+    #                                              the question (check.py's _why does the same for a site's rows)
     bad = [a for a, r in got if r != "pass"]
     good = [a for a, r in got if r == "pass"]
     return "needs_review", reading_words([a for a, _ in got], good, bad)
+
+
+def _own_reviews(rule: dict, known: dict, allowed: dict, combos: list) -> list:
+    """The reasons of the rule's review_when entries that hold (true, not merely possible) under every combination of
+    the readings, in the rule's order: the needs-review the rule itself asks for, which no answer to the open
+    questions changes (the story facts' merge, 2026-11-28: a one-exit R-2 story resting on NFPA 13R said only its
+    occupant load question)."""
+    from .rulebook import _condition, _kinds
+    kinds = _kinds(allowed, measure_kinds(rule.get("for_each")))
+    held = []
+    for r in rule.get("review_when") or []:
+        try:
+            if all(_condition(r["when"], {**known, **values}, kinds) for _, values in combos):
+                held.append(r.get("reason"))
+        except (MissingMeasure, EvaluationError, FormulaError, ArithmeticError):
+            continue
+    return [r for r in dict.fromkeys(held) if isinstance(r, str) and r]
 
 
 # A part's ceilings on measures it has no value for (`bounds`: {measure: {"at_most": n, "why": words, "if_stated"?:
