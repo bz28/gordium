@@ -143,7 +143,10 @@ def _walled(bound, inner) -> bool:
         if not bound.covers(side):
             return False
         a2, b2, length2, _, (mx, my) = sides[(k + 1) % len(sides)]
-        corner = (b[0] + (nx + mx) * d, b[1] + (ny + my) * d)
+        dot = nx * mx + ny * my                          # where an outline WALL_MIN out puts the corner (a mitre:
+        if dot <= -1 + 1e-9:                             # d (n + m) / (1 + n.m), d (n + m) at a square corner)
+            continue
+        corner = (b[0] + (nx + mx) * d / (1 + dot), b[1] + (ny + my) * d / (1 + dot))
         if length2 > WALL_SIDE and not inner.contains(Point(corner)) and not bound.covers(Point(corner)):
             return False                                 # an outside corner between two walls, cut back
     return checked > 0

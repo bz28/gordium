@@ -185,6 +185,12 @@ def test_an_outline_at_the_walls_inside_faces_gives_no_ratio():
     from shapely.geometry import Polygon as _P
     circle = _P([(360 * _m.cos(2 * _m.pi * k / 120), 360 * _m.sin(2 * _m.pi * k / 120)) for k in range(120)])
     assert not straight._walled(circle.buffer(0.5), circle)
+    # an honest outline round corners that aren't square (a bay at 135 degrees, a 179 degree bend), its walls 4 in thick:
+    # taken (round 6: the corner tested where an outline 3.5 in out puts it, not as at a square corner)
+    for inner in ([(0, 0), (480, 0), (480, 240), (420, 300), (60, 300), (0, 240)],
+                  [(0, 0), (240, 0), (480, 4.19), (480, 300), (0, 300)]):
+        poly = _P(inner)
+        assert straight._walled(poly.buffer(4, join_style="mitre", mitre_limit=50).buffer(0.5), poly), inner
     # one long side only drawn at its inside face: refused too
     d = upper_story(rect(-0.5, -0.5, 60.5, 28.5))
     d["story_outlines"][0]["outer"] = [list(p) for p in rect(-0.5, -0.5, 60.5, 28)]
