@@ -5,8 +5,10 @@ guards or doors, never a house's `has_none` claims, and only for a Building Code
 sleeping room then linked to its story and doors (design_checker.escape_openings.link), no new geometry."""
 
 import copy
+import functools
 from pathlib import Path
 
+import pytest
 import yaml
 
 from design_checker import code_scope, egress, escape_openings
@@ -99,7 +101,7 @@ def test_each_sleeping_room_is_linked_to_its_story_its_openings_and_its_doors():
     assert p["measures"] == {"sleeping_room_escape_openings": 1, "sleeping_room_door_to_outside": False}
     # review round 1 (a false pass): a story's two exits don't show the room's occupants reach two (each dwelling unit
     # may reach only one, Table 1006.3.4(1)), so the one-exit question stays open there
-    assert p["not_measured"]["sleeping_room_story_one_exit"].endswith("isn't worked out")
+    assert "isn't worked out: the routes give no space part(s) for Bedroom" in p["not_measured"]["sleeping_room_story_one_exit"]
     # its story's place not measured: the room's isn't either, with the story's reason (never a guess)
     assert "sleeping_room_fourth_or_higher" not in p["measures"]
     assert p["not_measured"]["sleeping_room_fourth_or_higher"].endswith("Gordium doesn't measure this yet")
@@ -155,6 +157,142 @@ def test_a_room_id_two_rooms_share_counts_no_openings_and_no_doors():
         assert k not in p["measures"] and p["not_measured"][k], k
 
 
+@functools.lru_cache(maxsize=1)
+def _kinds():
+    """The law's measure kinds, as its published certificate gives them (egress: law["kinds"])."""
+    from rule_format.rulebook import Context
+    allowed = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/new_york_state_building").allowed()
+    return {k: v for k, v in allowed.items() if k not in ("use", "district")}
+
+
+def _separation():
+    """The law's own 1007.1.1 rule alone (merge review of #240): two exits count only where placed apart as it asks."""
+    return [r for r in _ny_rules() if r["id"] == "general.bc_1007_1_1_remoteness"]
+
+
+# --- a sleeping room's own reach to the exits (1031.2 item 1, "access to only one exit"; PR: R-2 sleeping rooms) ----
+
+def _with_space(more=None, confirm=None, within="L1", twice=False):
+    parts, desc = _parts()
+    space = {"id": "b", "name": "Bedroom", "within": within, "measures": {}, "not_measured": {}, "more": more or {}}
+    if confirm:
+        space["confirm"] = confirm
+    parts["space"] = [space] + ([dict(space)] if twice else [])
+    escape_openings.link(parts, desc, _separation(), _kinds())
+    return parts["sleeping_room"][0]
+
+
+def test_two_exits_on_the_story_and_every_way_out_of_the_room_reaching_two_is_no_one_exit():
+    """BCNYS 1031.2 item 1 asks the escape opening of Group R-2 "in stories with only one exit or access to only one
+    exit": where the routes show every door out of the room reaches two separate and distinct exits (1006.3; 202
+    COMMON PATH OF EGRESS TRAVEL), the room isn't on such a story: no, with the doors and exits said."""
+    p = _with_space({"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": 0.6}})
+    assert p["measures"]["sleeping_room_story_one_exit"] is False
+    assert p["more"]["exits_reached"] == {"d": ["x", "y"]}
+
+
+@pytest.mark.parametrize("more, why", [
+    ({"exits_reached": {"two": False, "why": "the door d reaches one exit (x)"}}, "reaches one exit"),
+    ({"exits_reached": {"two": True, "doors": {"d": ["x", "x"]}}}, "reaches two exits"),     # one exit named twice
+    ({"exits_reached": {"two": True, "doors": {}}}, "reaches two exits"),                  # no door at all
+    ({"exits_reached": {"two": True, "doors": {"d": ["x", "y"], "e": ["x"]}}}, "reaches two exits"),
+    ({"exits_reached": {"two": "yes", "doors": {"d": ["x", "y"]}}}, "reaches two exits"),
+    ({"exits_reached": ["x", "y"]}, "routes aren't measured"),
+    ({}, "routes aren't measured"),
+])
+def test_anything_short_of_every_way_out_reaching_two_exits_leaves_it_unmeasured(more, why):
+    """A wrong no sets aside the escape opening 1031.2 asks (a false pass), so anything but a whole, well-formed two
+    leaves the one-exit question open, with the routes' reason."""
+    p = _with_space(more)
+    assert "sleeping_room_story_one_exit" not in p["measures"]
+    assert why in p["not_measured"]["sleeping_room_story_one_exit"], p["not_measured"]
+
+
+def test_the_rooms_own_space_part_on_its_own_level_only():
+    """A space part of another level with the same id, or two parts for the room, never stand in for its own."""
+    for kw in ({"within": "L2"}, {"twice": True}):
+        p = _with_space({"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": 0.6}}, **kw)
+        assert "sleeping_room_story_one_exit" not in p["measures"], kw
+
+
+def test_a_reach_through_a_room_the_routes_read_through_says_the_reading():
+    p = _with_space({"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": 0.6}},
+                    confirm={"space_exit_count": "Gordium's reading: Bedroom through Closet"})
+    assert p["measures"]["sleeping_room_story_one_exit"] is False
+    assert p["confirm"]["sleeping_room_story_one_exit"] == "Gordium's reading: Bedroom through Closet"
+
+
+def test_an_opening_set_aside_on_its_rooms_reading_is_never_a_pass():
+    """Merge review (this PR with main's 8b): an opening copies its room's one-exit answer, so where that answer is
+    Gordium's reading (the routes run through a room it serves) the opening says the reading too, and its size rule,
+    set aside for Group R-2 on it, needs review with the reading said, never a pass; a reading an opening arrives
+    with for a room fact is never kept."""
+    from rule_format import parts as rows_of
+    from rule_format.rulebook import REPO as ROOT, Context, load
+    ny = ROOT / "regulations/jurisdictions/new_york/new_york_state_building"
+    rule = {r["id"]: r for r in load(ny / "5_building_code_rules/drafted/general.yaml")["rules"]}[
+        "general.bc_1031_3_1_escape_opening_min_area"]
+    allowed = Context.for_jurisdiction(ny).allowed()
+    reading = "Gordium's reading: Bedroom through Closet"
+    for confirm, outcome in ((reading, "needs_review"), (None, "pass")):
+        parts, desc = _parts(openings=[{"id": "w", "within": "b", "measures": {"opening_net_clear_area": 2.0},
+                                        "confirm": {"opening_room_one_exit": "stale"}}])
+        space = {"id": "b", "name": "Bedroom", "within": "L1", "measures": {}, "not_measured": {},
+                 "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": 0.6}}}
+        if confirm:
+            space["confirm"] = {"space_exit_count": confirm}
+        parts["space"] = [space]
+        escape_openings.link(parts, desc, _separation(), _kinds())
+        o = parts["emergency_escape_opening"][0]
+        assert o["measures"]["opening_room_one_exit"] is False
+        assert o["confirm"].get("opening_room_one_exit") == confirm
+        [row] = rows_of.rows(rule, {"sleeping_room": parts["sleeping_room"], "emergency_escape_opening": [o]},
+                             {"occupancy_group": "R-2"}, allowed)
+        assert row["outcome"] == outcome, row
+        if confirm:
+            assert reading in row["reason"]
+
+
+@pytest.mark.parametrize("bad", [["x"], "s", None])
+def test_a_room_whose_confirm_or_more_isnt_a_mapping_is_never_a_crash(bad):
+    """Merge review: a hand-built sleeping room arriving with a `confirm` or `more` that isn't a mapping, its reach
+    standing on a reading: never a crash, the reading said."""
+    for key in ("confirm", "more"):
+        parts, desc = _parts()
+        parts["sleeping_room"][0][key] = bad
+        parts["space"] = [{"id": "b", "within": "L1", "measures": {}, "not_measured": {},
+                           "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": 0.6}},
+                           "confirm": {"space_exit_count": "Gordium's reading"}}]
+        escape_openings.link(parts, desc, _separation(), _kinds())
+        room = parts["sleeping_room"][0]
+        assert room["confirm"]["sleeping_room_story_one_exit"] == "Gordium's reading", key
+        assert room["more"]["exits_reached"] == {"d": ["x", "y"]}, key
+
+
+def test_a_reading_a_room_arrives_with_for_a_linked_fact_is_never_kept():
+    """Merge review: like its values, a reading a sleeping room arrives with for one of the link's facts is the
+    link's to give: dropped where the link gives none (and so never copied onto its openings); its other readings
+    stay."""
+    parts, desc = _parts()
+    parts["sleeping_room"][0]["confirm"] = {"sleeping_room_story_one_exit": "stale", "other": "kept"}
+    escape_openings.link(parts, desc)
+    assert parts["sleeping_room"][0]["confirm"] == {"other": "kept"}
+    assert "opening_room_one_exit" not in (parts["emergency_escape_opening"][0].get("confirm") or {})
+
+
+def test_the_rooms_reach_decides_the_one_exit_question_only():
+    """Review round 2 (PR 3): the reach fallback ran for every linked measure; a story's fourth-or-higher given as null
+    would have taken the room's reach as its value. Now only the one-exit question reads the reach, and a null story
+    value is never a value."""
+    parts, desc = _parts(story={"id": "L1", "measures": {"story_exit_count": 2,
+                                                        "story_fourth_or_higher_above_grade_plane": None}})
+    parts["space"] = [{"id": "b", "within": "L1", "measures": {}, "not_measured": {},
+                       "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": 0.6}}}]
+    escape_openings.link(parts, desc, _separation(), _kinds())
+    p = parts["sleeping_room"][0]
+    assert p["measures"]["sleeping_room_story_one_exit"] is False
+    assert "sleeping_room_fourth_or_higher" not in p["measures"] and p["not_measured"]["sleeping_room_fourth_or_higher"]
+
 
 def test_each_escape_opening_carries_its_rooms_three_facts():
     """Section group 8b: an opening's size rules fail only where 1031.2 requires it, which is its room's to say (its
@@ -175,7 +313,9 @@ def test_each_escape_opening_carries_its_rooms_three_facts():
     assert set(escape_openings.FROM_ROOM) <= set(x["not_measured"])
     parts, desc = _parts()                                   # two exits: not measured on the room, nor on its opening
     escape_openings.link(parts, desc)
-    assert parts["emergency_escape_opening"][0]["not_measured"]["opening_room_one_exit"].endswith("isn't worked out")
+    # the room's reason, which this PR goes on to give the routes' why (here: no space part for the room)
+    assert parts["emergency_escape_opening"][0]["not_measured"]["opening_room_one_exit"].endswith(
+        "isn't worked out: the routes give no space part(s) for Bedroom")
 
 
 LIMITS = [{"id": i, "for_each": "emergency_escape_opening", "within": "sleeping_room", "when_none": "not_applicable",
@@ -278,10 +418,15 @@ def test_a_rule_over_escape_openings_with_no_limit_leaves_compliance_unknown():
     assert "sleeping_room_compliant_openings" not in parts["sleeping_room"][0]["measures"]
 
 
-def _ny_rules():
+@functools.lru_cache(maxsize=1)
+def _ny_rulebook():
     from rule_format.rulebook import load
-    return load(REPO / "regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/drafted/"
-                       "general.yaml")["rules"]
+    return tuple(load(REPO / "regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/"
+                             "drafted/general.yaml")["rules"])
+
+
+def _ny_rules():
+    return list(_ny_rulebook())
 
 
 
@@ -394,6 +539,29 @@ def test_an_opening_within_no_sleeping_room_read_leaves_every_rooms_count_unknow
     assert _linked()["measures"]["sleeping_room_escape_openings"] == 1
 
 
+@pytest.mark.parametrize("count", [None, "2", True, float("nan"), float("inf")])
+def test_a_story_exit_count_that_isnt_a_number_is_not_known_never_a_crash(count):
+    """Parts built by hand (the routes only ever count exits) may give a story's exit count as null or text: the
+    room's one-exit question is not known (its rows need review), never a crash and never read as two exits."""
+    story = {"id": "L1", "measures": {"story_exit_count": count, "story_fourth_or_higher_above_grade_plane": False}}
+    p = _linked(story=story)
+    assert "sleeping_room_story_one_exit" not in p["measures"]
+    assert "not a number" in p["not_measured"]["sleeping_room_story_one_exit"]
+
+
+def test_a_huge_whole_exit_count_is_two_or_more_never_a_crash():
+    """Review: a whole number too big for a float is still a count (two or more): never a crash."""
+    story = {"id": "L1", "measures": {"story_exit_count": 10 ** 400, "story_fourth_or_higher_above_grade_plane": False}}
+    p = _linked(story=story)
+    assert "sleeping_room_story_one_exit" not in p["measures"]
+
+
+@pytest.mark.parametrize("measures", [["x"], "text"])
+def test_a_storys_measures_that_arent_a_mapping_are_never_a_crash(measures):
+    p = _linked(story={"id": "L1", "measures": measures})
+    assert "sleeping_room_story_one_exit" not in p["measures"]
+
+
 def test_an_opening_never_keeps_a_room_fact_of_its_own():
     """Review of the unreadable-opening skip (a false pass): an opening that carries a room fact itself (here, that its
     room is on the fourth story or higher) and can't be read keeps none of it: the room's facts are only the room's."""
@@ -420,6 +588,35 @@ def test_a_value_a_room_arrives_with_never_stands_beside_its_reason():
         parts, desc = _parts()
         parts["sleeping_room"][0]["measures"] = bad
         escape_openings.link(parts, desc)                # never a crash
+
+
+@pytest.mark.parametrize("count", [1.5, -1, -3])
+def test_an_exit_count_that_isnt_a_whole_count_is_not_known(count):
+    """Review: 1.5 or -3 exits isn't a count of exits: the one-exit question is not known, never "one exit"."""
+    p = _linked(story={"id": "L1", "measures": {"story_exit_count": count}})
+    assert "sleeping_room_story_one_exit" not in p["measures"]
+
+
+@pytest.mark.parametrize("story, space", [
+    ({"id": "L1", "measures": ["x"], "not_measured": ["x"]}, None),
+    ({"id": ["L1"], "measures": {"story_exit_count": 2}}, None),
+    ({"id": "L1", "measures": {"story_exit_count": 2}}, {"id": "b", "within": "L1", "more": ["x"], "not_measured": ["x"]}),
+    ({"id": "L1", "measures": {"story_exit_count": 2}},
+     {"id": "b", "within": "L1", "more": {"exits_reached": {"two": True, "doors": {"d": [{"a": 1}, {"b": 2}]}}}}),
+    ({"id": "L1", "measures": {"story_exit_count": 2}},
+     {"id": "b", "within": "L1", "confirm": ["x"], "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": 0.6}}}),
+    ({"id": "L1", "measures": {"story_exit_count": 2}}, {"id": ["b"], "within": "L1"}),
+])
+def test_hand_built_story_and_space_facts_are_never_a_crash(story, space):
+    """Review: a story or space part built by hand with fields of the wrong shape leaves what it can't say not
+    measured, never a crash; a reach whose exits aren't named exits is never two."""
+    parts, desc = _parts(story=story)
+    if space is not None:
+        parts["space"] = [space]
+    escape_openings.link(parts, desc)
+    room = parts["sleeping_room"][0]                     # never a crash; a reach to exits not named isn't two
+    if space is not None and "doors" in str(space) and "confirm" not in space:
+        assert room["measures"].get("sleeping_room_story_one_exit") is not False
 
 
 def test_an_opening_takes_only_its_rooms_own_facts():
@@ -483,7 +680,6 @@ def test_an_opening_in_a_room_whose_id_another_part_shares_leaves_the_count_unkn
     assert "sleeping_room_escape_openings" not in parts["sleeping_room"][0]["measures"]
 
 
-
 def test_a_room_that_cant_be_read_or_a_count_that_isnt_one_gives_its_openings_nothing():
     """Confirming round on 82651de3: a room holding all four facts but reasons that can't be read gives its openings
     none of them (8d: the other-openings fact is the compliance count's, not the room's)."""
@@ -516,3 +712,119 @@ def test_an_opening_whose_room_isnt_text_is_never_a_crash():
         for o in parts["emergency_escape_opening"]:
             assert "opening_room_other_compliant" not in (o.get("measures") or {}), where
 
+
+
+def _reach_check(openings, reading=None, ratio=0.6, system="none", building=None):
+    """Merge review of #240 on 8d: a Group R-2 sleeping room on a story of two exits whose routes show every way out
+    reaching two (no escape opening asked by 1031.2 item 1), with the law's own rules, ids as the pipeline gives them
+    (the room's own id apart from the routes' space part). Returns 1031.2's outcome, each opening's outcomes over the
+    twelve opening rules, and the room's compliant count (or its reason)."""
+    from rule_format import parts as part_rules
+    from rule_format.rulebook import Context, load
+    ny = REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+    rules = load(ny / "5_building_code_rules/drafted/general.yaml")["rules"]
+    room = {"id": "b (sleeping room)", "name": "Bedroom", "measures": {}, "not_measured": {}, "more": {"described_id": "b"}}
+    space = {"id": "b", "name": "Bedroom", "within": "L1", "measures": {}, "not_measured": {},
+             "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": ratio}}}
+    if reading:
+        space["confirm"] = {"space_exit_count": reading}
+    parts = {"sleeping_room": [room], "space": [space],
+             "story": [{"id": "L1", "measures": {"story_exit_count": 2, "story_fourth_or_higher_above_grade_plane": False}}],
+             "emergency_escape_opening": [dict(o, within="b (sleeping room)") for o in openings],
+             "means_of_egress_door": [{"id": "d", "more": {"sides": ["b", "c"]}}]}
+    building = {"occupancy_groups": ["R-2"], **({"sprinkler_system": system} if system else {}), **(building or {})}
+    escape_openings.link(parts, {"rooms": [{"id": "b", "level": "L1"}], "building": building}, rules, _kinds())
+    given = {"occupancy_group": "R-2", **{f"sprinklered_903_3_1_{n}": False for n in (1, 2, 3)}}
+    allowed = Context.for_jurisdiction(ny).allowed()
+    by_id = {r["id"]: r for r in rules}
+    [where] = part_rules.rows(by_id["general.bc_1031_2_escape_opening_where_required"], parts, given, allowed)
+    rows = {}
+    for r in rules:
+        if r.get("for_each") == "emergency_escape_opening":
+            for row in part_rules.rows(r, parts, given, allowed):
+                if row["id"] is not None:                # with no opening, a rule's own row: doesn't apply
+                    rows.setdefault(row["id"], set()).add(row["outcome"])
+    m = parts["sleeping_room"][0]
+    return where["outcome"], rows, m["measures"].get("sleeping_room_compliant_openings",
+                                                     m["not_measured"].get("sleeping_room_compliant_openings"))
+
+
+def test_an_r2_room_reaching_two_exits_asks_no_opening_and_never_passes_on_a_reading():
+    """BCNYS 1031.2 item 1 asks Group R-2 only "in stories with only one exit or access to only one exit": a room whose
+    routes reach two separate exits is asked no escape opening, so 1031.2 passes with none, and a small one isn't held
+    to the size or well rules; where that reach stands on Gordium's reading, nothing passes on it (8d's count beside
+    it changes nothing)."""
+    assert _reach_check([])[0] == "pass"
+    where, rows, count = _reach_check([{"id": "w", "measures": dict(SMALL)}])
+    assert where == "pass" and rows == {"w": {"pass"}} and count == 0
+    for openings in ([], [{"id": "w", "measures": dict(SMALL)}], [{"id": "w", "measures": dict(GOOD)}]):
+        where, rows, _ = _reach_check(openings, reading="Gordium's reading: Bedroom through Closet")
+        assert where == "needs_review" and all(o == {"needs_review"} for o in rows.values()), (openings, rows)
+
+
+def test_an_opening_arriving_with_a_confirm_that_isnt_a_mapping_never_counts_compliant():
+    """Merge review of #240 on 8d: the opening's compliance is read on the opening as given (8d review round 2: a
+    `confirm` that isn't a mapping leaves it not known), before the room's reading is copied onto it."""
+    _, _, count = _reach_check([{"id": "w", "measures": dict(GOOD), "confirm": "junk"}], reading="Gordium's reading")
+    assert not isinstance(count, int), count
+
+
+def test_an_opening_not_known_says_why_in_its_own_terms():
+    """Merge review of #240 (8d's reasons, after compliance moved before the room's facts are copied): an opening
+    with no figures at all names the figures its limits read, and one whose confirm can't be read says so, never "a
+    reading to confirm"."""
+    from design_checker.escape_openings import _unknown_why, limits
+    held = limits(_ny_rules())
+    assert "opening_net_clear_area" in _unknown_why([({"id": "w"}, None)], held)
+    said = _unknown_why([({"id": "w", "measures": dict(GOOD), "confirm": "junk"}, None)], held)
+    assert "its confirm can't be read" in said and "opening_net_clear_area" not in said, said
+
+
+def test_two_exits_closer_than_1007_1_1_asks_leave_the_r2_room_needing_its_opening_or_a_review():
+    """Merge review of #240 (a false pass its confirming round found: two exit doors 3 ft apart passed 1031.2 with no
+    escape opening). Two exits count for 1031.2 item 1 only where placed apart as BCNYS 1007.1.1 (p.318) asks, held
+    with the law's own rule general.bc_1007_1_1_remoteness: "not less than one-half of the length of the maximum
+    overall diagonal dimension", one-third with an NFPA 13 or 13R system (exception 2). A pair that isn't: the room's
+    one-exit question stays open (a story with one exit as Tables 1006.3.4(1) and (2) permit may be what it is), so
+    1031.2 needs review with no opening, never a pass."""
+    assert _reach_check([], ratio=0.6)[0] == "pass"
+    for ratio, system, outcome in ((0.05, "none", "needs_review"), (0.05, "nfpa_13", "needs_review"),
+                                   (0.4, "none", "needs_review"), (0.4, None, "needs_review"),
+                                   (0.4, "nfpa_13d", "needs_review"), (0.4, "nfpa_13", "pass"),
+                                   (0.4, "nfpa_13r", "pass"), (0.5, None, "pass")):
+        where, _, _ = _reach_check([], ratio=ratio, system=system)
+        assert where == outcome, (ratio, system, where)
+
+
+@pytest.mark.parametrize("ratio", [None, "0.6", True, float("nan"), -1])
+def test_a_reach_whose_ratio_isnt_a_figure_is_never_two(ratio):
+    """A hand-built reach without the routes' ratio (or one that isn't a number): how far apart its exits are isn't
+    known, so the one-exit question stays open."""
+    p = _with_space({"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": ratio}})
+    assert "sleeping_room_story_one_exit" not in p["measures"]
+    assert "1007.1.1" in p["not_measured"]["sleeping_room_story_one_exit"]
+
+
+def test_without_the_laws_separation_rule_two_exits_are_never_two():
+    """The law's 1007.1.1 rule not read (no rules given, or none over stories reading the ratio): not two."""
+    parts, desc = _parts()
+    parts["space"] = [{"id": "b", "within": "L1", "measures": {}, "not_measured": {}, "more": {
+        "exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": 0.9}}}]
+    escape_openings.link(parts, desc)
+    assert "sleeping_room_story_one_exit" not in parts["sleeping_room"][0]["measures"]
+
+
+def test_the_third_counts_only_where_the_building_may_count_its_13r_system():
+    """Merge with Chapter 9: 1007.1.1's check now reads the occupancy group (a third with NFPA 13, or with NFPA 13R in
+    Group R), and code_scope counts a 13R system only where 903.3.1.2 allows it (four stories at most, never a Group
+    R-2 high-rise). Held with the law's own kinds: a 5-story or high-rise R-2 with 13R at 0.4 of the diagonal is not
+    two (its one-exit question stays open), a 3-story one is; with the groups not stated, the separation holds only
+    where every group agrees (0.6: two; 0.4 with 13R: not)."""
+    assert _reach_check([], ratio=0.4, system="nfpa_13r", building={"stories_above_grade_plane": 3})[0] == "pass"
+    for more in ({"stories_above_grade_plane": 5}, {"high_rise_building": True}):
+        assert _reach_check([], ratio=0.4, system="nfpa_13r", building=more)[0] == "needs_review", more
+    from design_checker import escape_openings as eo
+    check = eo._separation_check(_ny_rules())
+    assert eo._apart(check, 0.6, {"sprinkler_system": "nfpa_13"}, _kinds()) is True
+    assert eo._apart(check, 0.4, {"sprinkler_system": "nfpa_13r"}, _kinds()) is None
+    assert eo._apart(check, 0.6, {"occupancy_groups": ["R-2"]}, None) is None       # no kinds: never a guess

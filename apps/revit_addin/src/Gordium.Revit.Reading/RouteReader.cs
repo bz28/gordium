@@ -277,7 +277,7 @@ public static class RouteReader
     }
 
     /// <summary>Inside the polygon (even-odd) and more than 1/16 in from every edge.</summary>
-    private static bool StrictlyInside(P2 p, List<P2> poly)
+    internal static bool StrictlyInside(P2 p, List<P2> poly)
     {
         var inside = false;
         for (var i = 0; i < poly.Count; i++)
@@ -743,8 +743,11 @@ public static class RouteReader
     /// a size Gordium works out), and the wall's thickness between its faces.</summary>
     internal sealed record DoorPlace(P2 Centre, P2 Along, double Thickness, P2 Normal);
 
-    internal static DoorPlace? Place(RevitModel model, OpeningRecord rec, out string? why, double? clearWidth = null)
+    internal static DoorPlace? Place(RevitModel model, OpeningRecord rec, out string? why, double? clearWidth = null,
+                                     string what = "door")
     {
+        // a door's opening wider than it, or off its middle, may hold a sidelight or a pocket; a window's is only wider
+        var hint = what == "door" ? " (a sidelight or a pocket?)" : "";
         why = null;
         if (!rec.HostIsWall || rec.WallSides is not { Count: >= 2 } faces)
         {
@@ -820,9 +823,15 @@ public static class RouteReader
         // an opening wider than the door itself (its type's width, or its clear width) and a frame (FrameAllowance) holds
         // a sidelight or a pocket even when the unit is centred: where its clear opening is isn't told (round 2)
         var door = Math.Max(rec.TypeWidth ?? 0, clearWidth ?? 0);
+        if (door <= 0)
+        {
+            // nothing to hold the opening against (review round 2: never "more than the window (0 in)")
+            why = $"its type's width isn't read, so whether the opening it takes in its wall holds more than the {what} isn't known";
+            return null;
+        }
         if (inWall.Max() - inWall.Min() > door + FrameAllowance)
         {
-            why = I($"the opening it takes in its wall is {(inWall.Max() - inWall.Min()) * 12:0.##} in wide, more than the door ({door * 12:0.##} in) and a frame ({FrameAllowance * 12:0} in): a sidelight or a pocket?, so where its clear opening is isn't told");
+            why = I($"the opening it takes in its wall is {(inWall.Max() - inWall.Min()) * 12:0.##} in wide, more than the {what} ({door * 12:0.##} in) and a frame ({FrameAllowance * 12:0} in)") + (what == "door" ? ": a sidelight or a pocket?" : "") + ", so where its clear opening is isn't told";
             return null;
         }
         // the middle of that opening must agree with where the door is placed (round 1)
@@ -836,7 +845,7 @@ public static class RouteReader
         if (Math.Abs(u - uPoint) > CentreAgree)
         {
             why = I($"the opening it takes in its wall is centred {Math.Abs(u - uPoint) * 12:0.##} in from where it is placed") +
-                  " (a sidelight or a pocket?), so where its clear opening is isn't told";
+                  hint + ", so where its clear opening is isn't told";
             return null;
         }
         var c = (a + b) / 2;

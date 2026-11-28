@@ -84,13 +84,22 @@ def unit_of(kind: str, measure: str) -> str:
     return ((parts.registry().get(kind) or {}).get("measures", {}).get(measure) or {}).get("unit", "")
 
 
+def _finite(v) -> bool:
+    """A number a sheet can print in feet and inches or sq ft: finite, and still finite at 1/8 in or 0.01 sq ft (an
+    integer too big for a float, or 1e308 times 8, is not)."""
+    try:
+        return math.isfinite(float(v)) and math.isfinite(float(v) * 100)
+    except OverflowError:
+        return False
+
+
 def value(v, unit: str, direction: str = "nearest") -> str:
     """One value as a sheet prints it; None is "not measured"."""
     if v is None:
         return NOT_MEASURED
     if type(v) is bool:
         return "yes" if v else "no"
-    if isinstance(v, (int, float)) and math.isfinite(v):
+    if isinstance(v, (int, float)) and _finite(v):
         if unit == "in":
             return length(float(v), direction)
         if unit == "sf":
@@ -98,7 +107,10 @@ def value(v, unit: str, direction: str = "nearest") -> str:
         if unit == "count":
             return str(int(v)) if float(v).is_integer() else f"{v:g}"
         return f"{v:g}"
-    return str(v)
+    try:
+        return str(v)
+    except ValueError:                                  # an integer too long for Python to write out
+        return "a number too large to print"
 
 
 def toward(sign_op, for_proposed: bool) -> str:
@@ -121,9 +133,47 @@ def measure_words(m: str) -> str:
 
 # ---- a rule's limit and a part's values, for the code-analysis table ------------------------------------------------
 
-def _comparisons(check: str):
+# the parts of a check a sheet's columns aren't about, by the measures they read, each set aside with its own short
+# words: an area well's size rules also read what reaches into the well (RCNYS R319.4.1's exception: only the ladder or
+# steps a well over 44 in deep requires, 6 in at most), which the "Required" column says in words, never as a formula
+ASIDE = (({"area_well_other_encroachment", "area_well_ladder_encroachment", "area_well_depth", "area_well_ladder"},
+          "nothing else in its required dimensions but the ladder or steps a well over 44 in deep requires, clear of "
+          "the open window (6 in at most)"),)
+
+
+# the set-aside measures' own words on a sheet (area_well_ladder is a ladder or steps the open window doesn't obstruct)
+ASIDE_WORDS = {"area_well_ladder": "ladder or steps clear of the open window"}
+
+
+def _aside_value(m: str, v, unit: str) -> str:
+    """A set-aside measure's value, rounded the way that never favours compliance: a reach (at most) up, the depth
+    (more than 44 in decides) down, said "over" where it is past 44 in but rounds to it."""
+    if m == "area_well_depth":
+        shown = value(v, unit, toward(ast.Gt, True))
+        # the checker's own comparison (formula: two numbers within its tolerance are equal), never a raw v > 44
+        try:
+            over = isinstance(v, (int, float)) and formula.evaluate(
+                "area_well_depth > 44", {"area_well_depth": v},
+                _kinds({}, parts.measure_kinds("emergency_escape_opening"))) is True
+        except (formula.MissingMeasure, formula.EvaluationError):
+            over = False                          # a value the checker can't use (negative, not finite): as it is
+        return f"over {shown}" if over and shown == value(44, unit) else shown
+    return value(v, unit, toward(ast.LtE, True))
+
+
+def _aside(node) -> str | None:
+    """The words a part of a check is set aside with, or None."""
+    try:
+        names = {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
+    except Exception:
+        return None
+    return next((words for measures, words in ASIDE if names and names <= measures), None)
+
+
+def _comparisons(check: str, aside: list | None = None):
     """The check's parts every one of which must hold (an `and` chain), each (measure, op, limit node) when it is
-    `measure <op> limit` (or mirrored), else None for that part; None when the check can't be read."""
+    `measure <op> limit` (or mirrored), else None for that part; None when the check can't be read. A part ASIDE
+    names goes into `aside` (its words, once) instead, where a list is given."""
     try:
         body = formula.parse(check).body
     except Exception:
@@ -133,8 +183,17 @@ def _comparisons(check: str):
         if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.And):
             return [n for v in node.values for n in every(v)]
         return [node]
-    out = []
-    for node in every(body):
+    out, parts = [], every(body)
+    # set aside only beside what the column is about: a check all of whose parts ASIDE names (R319.4.2's
+    # area_well_ladder) is read as it is
+    if aside is not None and all(_aside(node) for node in parts):
+        aside = None
+    for node in parts:
+        if aside is not None and (words := _aside(node)):
+            if words not in aside:
+                aside.append(words)
+            out.append(("", "aside", node))          # its measures still shown in the Proposed column
+            continue
         if isinstance(node, ast.Compare) and len(node.ops) == 1 and type(node.ops[0]) in SIGN:
             left, op, right = node.left, type(node.ops[0]), node.comparators[0]
             if not isinstance(left, ast.Name) and isinstance(right, ast.Name):
@@ -162,8 +221,8 @@ def in_words(text: str) -> str:
 
 def compared(check) -> set[str]:
     """The measures the check compares with a limit (or needs yes/no): what a schedule column is about."""
-    got = _comparisons(check) if isinstance(check, str) else None
-    return {c[0] for c in got or [] if c}
+    got = _comparisons(check, []) if isinstance(check, str) else None
+    return {c[0] for c in got or [] if c and c[1] != "aside"}
 
 
 def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None) -> tuple[str, str]:
@@ -173,13 +232,16 @@ def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None)
     check, kind = rule.get("check"), rule.get("for_each")
     if not isinstance(check, str):
         return "see the code's words (no formula: a person decides)", ""
-    got = _comparisons(check)
+    aside = []
+    got = _comparisons(check, aside)
     if not got or any(c is None for c in got):
         return f"per formula: {in_words(check)}", "; ".join(
             f"{measure_words(m)} {value(values.get(m), unit_of(kind, m))}" for m in sorted(values)) or ""
     kinds = _kinds(allowed or {}, parts.measure_kinds(kind))
     need, have = [], []
-    named = len(got) > 1
+    shown_aside = sorted({n.id for c in got if c[1] == "aside" for n in ast.walk(c[2]) if isinstance(n, ast.Name)})
+    got = [c for c in got if c[1] != "aside"]
+    named = len(got) > 1 or bool(shown_aside)          # the main value keeps its name beside the set-aside ones
     for m, op, right in got:
         unit = unit_of(kind, m)
         label = f"{measure_words(m)} " if named else ""
@@ -199,4 +261,11 @@ def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None)
             need.append(f"{label}{SIGN[op]} {text}" + (f" {'sq ft' if unit == 'sf' else unit}" if unit in ("in", "sf")
                                                       else ""))
         have.append(f"{label}{value(values.get(m), unit, toward(op, True))}")
-    return "; ".join(need), "; ".join(have)
+    # the measures set aside, as the part has them (the value that may decide a fail is never hidden)
+    # rounded the way that never favours compliance: a reach (at most) up, the depth (more than 44 in) down
+    reach = values.get("area_well_ladder_encroachment")
+    if type(reach) in (int, float) and reach == 0:             # nothing reaches in: the ladder and depth decide nothing
+        shown_aside = [m for m in shown_aside if m not in ("area_well_ladder", "area_well_depth")]
+    have += [f"{ASIDE_WORDS.get(m, measure_words(m))} {_aside_value(m, values.get(m), unit_of(kind, m))}"
+             for m in shown_aside]
+    return "; ".join(need + aside), "; ".join(have)

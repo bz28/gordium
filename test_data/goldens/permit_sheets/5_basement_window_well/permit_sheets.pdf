@@ -274,7 +274,7 @@ BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 410.4 Td (to give: the readings give different
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 401.4 Td (adjacent to an opening in an area well the well's floor or the ground around the) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 392.4 Td (well? \(the ground around it: not within 44 in; the area well's floor: within 44 in\) ·) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 383.4 Td (worked out, not yet checked by the rules: area well area 10 sq ft, area well) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 374.4 Td (depth 66 in and 2 more · not read yet: fully openable, path height and 14 more) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 374.4 Td (depth 66 in and 2 more · not read yet: fully openable, path height and 16 more) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 68 325.4 m 994 325.4 l S
 0.3 w [] 0 d
@@ -652,8 +652,8 @@ BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 589.4 Td (2026-11-15) Tj ET
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 569.4 Td (RULEBOOK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 560.4 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 552.4 Td (s/drafted/general.yaml · status: draft · sha256) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2b8) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (70bb9d56327040adcb5cc98cc0d996f3aebcdd6b78e992ff520e9b9201a1) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2d23) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 526.4 m 1202.4 526.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 518.4 Td (RULES FINGERPRINT AT CHECK) Tj ET
@@ -702,7 +702,7 @@ BT /F2 7 Tf 0 0 0 rg 687.2 712.4 Td (Code section) Tj ET
 BT /F2 7 Tf 0 0 0 rg 745.07 712.4 Td (Why / what to change) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 71 698.4 Td (18) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 698.4 Td (Escape window details: fully) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 689.4 Td (openable, path height and 18 more) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 689.4 Td (openable, path height and 20 more) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 698.4 Td (16 rules on Basement bedroom › Window 2) Tj ET
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 689.9 Td (code_analysis.csv lines 11, 13, 15, 17, 35, 37, 39, 41, 56, 62, 104, 106, 108,) Tj ET
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 682.4 Td (110, 112, 114) Tj ET
@@ -952,8 +952,8 @@ BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 589.4 Td (2026-11-15) Tj ET
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 569.4 Td (RULEBOOK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 560.4 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 552.4 Td (s/drafted/general.yaml · status: draft · sha256) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2b8) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (70bb9d56327040adcb5cc98cc0d996f3aebcdd6b78e992ff520e9b9201a1) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2d23) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 526.4 m 1202.4 526.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 518.4 Td (RULES FINGERPRINT AT CHECK) Tj ET
@@ -1109,8 +1109,8 @@ BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 589.4 Td (2026-11-15) Tj ET
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 569.4 Td (RULEBOOK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 560.4 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 552.4 Td (s/drafted/general.yaml · status: draft · sha256) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2b8) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (70bb9d56327040adcb5cc98cc0d996f3aebcdd6b78e992ff520e9b9201a1) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2d23) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 526.4 m 1202.4 526.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 518.4 Td (RULES FINGERPRINT AT CHECK) Tj ET
@@ -1310,8 +1310,8 @@ BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 589.4 Td (2026-11-15) Tj ET
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 569.4 Td (RULEBOOK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 560.4 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 552.4 Td (s/drafted/general.yaml · status: draft · sha256) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2b8) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (70bb9d56327040adcb5cc98cc0d996f3aebcdd6b78e992ff520e9b9201a1) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2d23) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 526.4 m 1202.4 526.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 518.4 Td (RULES FINGERPRINT AT CHECK) Tj ET
