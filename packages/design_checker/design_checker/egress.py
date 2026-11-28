@@ -342,13 +342,19 @@ def _stated_stories(interior, values: dict | None):
 def _routes_stories(interior, values: dict | None):
     """_stated_stories, and the most stories the drawing allows where Ithaca's count is an open question
     (code_scope.STORIES_AT_MOST, check.py): the routes' story facts never take "no stairs" beside a building that may
-    have two or more (the story facts' merge review of #279)."""
+    have two or more (the story facts' merge review of #279). A count the check gives that can't be read (text, not
+    a finite number) may be two: so it is taken."""
+    values = values if isinstance(values, dict) else {}
+    keys = ("stories_above_grade_plane", code_scope.STORIES_TYPED, "stories", code_scope.STORIES_AT_MOST)
+    number = lambda v: type(v) is int or type(v) is float and math.isfinite(v)
+    if any(values.get(k) is not None and not number(values.get(k)) for k in keys):
+        return 2, "a story count the check gives can't be read, so the building may have {n} stories"
     stated = _stated_stories(interior, values)
-    most = (values or {}).get(code_scope.STORIES_AT_MOST) if isinstance(values, dict) else None
-    if type(most) is int or type(most) is float and math.isfinite(most):
-        if stated is None or most > stated[0]:
-            return most, "the building may have {n} stories, as the place counts them"
+    most = values.get(code_scope.STORIES_AT_MOST)
+    if number(most) and (stated is None or most > stated[0]):
+        return most, "the building may have {n} stories, as the place counts them"
     return stated
+
 
 def _stairs_and_guards(interior, stated_stories=None) -> dict:
     """The interior measuring of the description's stairs and guards alone (BUILDING_INTERIOR_KINDS): the measuring

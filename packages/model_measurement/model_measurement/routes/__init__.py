@@ -148,10 +148,11 @@ def _stories_of(description, stated_stories):
     return None
 
 
-def _levels_listed(description) -> set:
-    """Every level id the description lists (`levels` and `all_levels`), but those the architect marks not a story
-    (`all_levels[].not_a_story` true): each may be a story of its own."""
-    out, marked = set(), set()
+def _levels_listed(description) -> list:
+    """Every level the description lists (`levels` and `all_levels`), by id, but those the architect marks not a
+    story (`all_levels[].not_a_story` true): each may be a story of its own. A level whose id can't be read is one
+    more (it may be another floor, as #279 reads it)."""
+    out, marked, unread = set(), set(), 0
     for key in ("levels", "all_levels"):
         given = description.get(key) if isinstance(description, dict) else None
         for item in given if isinstance(given, list) else []:
@@ -160,23 +161,29 @@ def _levels_listed(description) -> set:
                 out.add(lid)
                 if key == "all_levels" and item.get("not_a_story") is True:
                     marked.add(lid)
-    return out - marked
+            else:
+                unread += 1
+    return sorted(map(str, out - marked)) + ["(a level whose id can't be read)"] * unread
 
 
 def _above_the_ground(description, reader, ground) -> bool:
-    """Whether every room's floor stands more than a landing's step (interior.LANDING_STEP, R318.3.2) above the
-    lowest ground the architect stated (`ground`: story_place.ground_of's, feet): an upper floor drawn alone, reached
-    by a stair or ramp the model doesn't show. A room whose floor isn't given, or no ground stated: not shown."""
-    from model_measurement.interior import LANDING_STEP
+    """Whether the lowest floor drawn stands more than a story's height (story_place's 6 ft, under which a story with
+    no level of its own may stand) above the lowest ground the architect stated (`ground`: story_place.ground_of's,
+    feet): an upper floor drawn alone, reached by a stair the model doesn't show. Each room's floor is its
+    `floor_elevation`, else its level's elevation (as #279 reads it); no ground stated, or no floor: not shown."""
     if not isinstance(ground, dict):
         return False
     lows = [ground["flat"]] if "flat" in ground else [p[2] for p in ground.get("spots") or []]
     if not lows:
         return False
+    heights = {lv["id"]: lv.get("elevation") for key in ("levels", "all_levels")
+               for lv in (description.get(key) if isinstance(description.get(key), list) else [])
+               if isinstance(lv, dict) and isinstance(lv.get("id"), (str, int))}
     rooms = [r for r in description.get("rooms") if isinstance(r, dict)] \
         if isinstance(description.get("rooms"), list) else []
-    floors = [reader.length(r["floor_elevation"], "a room's floor") for r in rooms if "floor_elevation" in r]
-    return bool(floors) and min(floors) > min(lows) * story_place.FT + LANDING_STEP
+    floors = [reader.length(r["floor_elevation"] if "floor_elevation" in r else heights[r["level"]], "a room's floor")
+              for r in rooms]
+    return bool(floors) and min(floors) > min(lows) * story_place.FT + 6 * story_place.FT + story_place.SAME
 
 
 def _stair_points(description, stated_stories=None, ground=None) -> list:
@@ -202,7 +209,8 @@ def _stair_points(description, stated_stories=None, ground=None) -> list:
         given = block.get("stories_above_grade_plane") if isinstance(block, dict) else None
         try:
             stories = _stories_of(description, stated_stories)
-            refused = len(_levels_listed(description)) > 1 or (given is not None and stories is None) or \
+            unread = given is not None and not (type(given) is int or type(given) is float and math.isfinite(given))
+            refused = len(_levels_listed(description)) > 1 or unread or \
                 _above_the_ground(description, reader, ground) or \
                 _stairs_against_floors(description, reader, stories) is not None
         except (InteriorStop, TypeError, AttributeError, KeyError, ValueError, OverflowError, IndexError):

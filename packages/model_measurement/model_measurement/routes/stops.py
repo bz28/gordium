@@ -182,9 +182,10 @@ STOPS = {
     "outside_into_exit": "the space of {name} has a way out besides the shared corridor ({door}): whether it exits "
                          "directly outside isn't known",
     "outside_stair": "the space of {name} may have a stair, ramp or ladder within it besides the shared corridor (to "
-                     "another story, maybe to its own door out; one not read or not said to be none may be anywhere, "
-                     "and so may one where the model says it has none but the building may have another story): "
-                     "whether it exits directly outside isn't known",
+                     "another story, maybe to its own door out). Draw the building's stairs, or mark it as having "
+                     "none; where it says none but may have another story (a second level not marked Gordium: Not a "
+                     "story, a floor far above the ground, or two or more stories given), a stair may still be "
+                     "anywhere: whether it exits directly outside isn't known",
     "outside_link_elsewhere": "a door or opening of the room {name} isn't read on this story (drawn on another "
                               "level, or listed only among the openings?): whether it exits directly outside isn't "
                               "known",
@@ -199,9 +200,10 @@ STOPS = {
     "units_function_unknown": "a room of the space of {name} states no function, or one that doesn't settle it (not "
                               "on Table 1004.5's list, or a sleeping use; Revit's room mark for it): whether it is a "
                               "dwelling unit, or a room shared between units, isn't known",
-    "units_stair": "the space of {name} may have a stair, ramp or ladder within it (one not read or not said to be "
-                   "none may be anywhere, and so may one where the model says it has none but the building may have "
-                   "another story): it may hold the upper part of a dwelling unit whose door is downstairs",
+    "units_stair": "the space of {name} may have a stair, ramp or ladder within it: it may hold the upper part of a "
+                   "dwelling unit whose door is downstairs. Draw the building's stairs, or mark it as having none; "
+                   "where it says none but may have another story (a second level not marked Gordium: Not a story, a "
+                   "floor far above the ground, or two or more stories given), a stair may still be anywhere",
     "units_link_elsewhere": "a door or opening of the room {name} isn't read on this story (drawn on another level, "
                             "or listed only among the openings?): it may be a dwelling unit's own way out, so the "
                             "units aren't counted",

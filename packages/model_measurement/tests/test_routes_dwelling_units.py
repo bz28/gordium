@@ -279,9 +279,25 @@ def test_no_stairs_beside_another_floor_is_never_taken():
     for r in up["rooms"]:                                # floor alone, reached by a stair the model doesn't show
         r["floor_elevation"] = 10
     assert _stair_points(up) == [] and _stair_points(up, ground={"flat": 0.0}) == [{"points": []}]
-    assert _stair_points(up, ground={"flat": 9.5}) == []                 # 6 in above: a landing's step
+    assert _stair_points(up, ground={"flat": 8.0}) == []        # 2 ft above (a crawlspace): no story under it
+    assert _stair_points(up, ground={"spots": [[0, 0, 0.0], [5, 5, 9.0]]}) == [{"points": []}]   # the lowest spot
+    level_only = fresh()                                 # no floor given: the room's level's height (as #279 reads it)
+    level_only["levels"][0]["elevation"] = 10
+    for r in level_only["rooms"]:
+        r.pop("floor_elevation")
+    assert _stair_points(level_only, ground={"flat": 0.0}) == [{"points": []}]
+    story = measure(up, ground={"flat": 0.0})["parts"]["story"][0]        # measure() hands the ground on
+    assert UNITS_FACT not in story["measures"] and UNITS_FACT in story["not_measured"], story
+    assert UNITS_FACT in measure(up, ground={"flat": 8.0})["parts"]["story"][0]["measures"]
     assert _stair_points(fresh(), stated_stories=(2, "the check gives {n}")) == [{"points": []}]
     assert _stair_points(fresh(), stated_stories=(1, "the check gives {n}")) == []
+    for odd in ({"name": "Level 2", "elevation": 10}, {"id": "", "elevation": 10}, {"id": True}, "L2"):
+        nameless = fresh()                               # a level whose id can't be read may be another floor
+        nameless["all_levels"] = [*nameless["levels"], odd]
+        assert _stair_points(nameless) == [{"points": []}], odd
+    text = fresh()                                       # a count that can't be read, whatever the check gives
+    text["building"] = {"stories_above_grade_plane": "2"}
+    assert _stair_points(text, stated_stories=(1, "the check gives {n}")) == [{"points": []}]
 
 
 def test_the_check_s_own_story_count_reaches_the_story_facts():
@@ -292,8 +308,10 @@ def test_the_check_s_own_story_count_reaches_the_story_facts():
     from design_checker.code_scope import BUILDING, STORIES_AT_MOST
     desc = layout([("residential", 1, 1), ("residential", 1, 1), ("business", 1, 1)], (False, False))
     assert egress._routes_stories(desc, {}) is None
-    for values in ({"stories": 2}, {"stories_above_grade_plane": 2}, {STORIES_AT_MOST: 2}):
+    for values in ({"stories": 2}, {"stories_above_grade_plane": 2}, {STORIES_AT_MOST: 2}, {"stories": "2"},
+                   {"stories_above_grade_plane": float("nan")}, {"stories": True}):
         assert egress._routes_stories(desc, values)[0] == 2, values
+    assert egress._routes_stories(desc, {"stories": None, "stories_above_grade_plane": 1})[0] == 1
     calls = []
     real = egress.measure_routes
     try:
