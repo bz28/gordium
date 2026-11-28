@@ -210,6 +210,19 @@ def test_review_round_3_the_travels_end_is_the_exit_door_never_a_point_read_off_
     assert travel["agreement"]["within_tolerance"] is False
 
 
+def test_outlines_the_routes_refuse_still_give_the_sheets_figures_and_say_why(tmp_path):
+    """#281's cold review: the routes give no ratio from outlines that don't hold the story; the eval still compares
+    the figures (as straight.ratio works them) and says why the routes don't give them, never a crash."""
+    desc = day_care(branch=26)
+    desc["story_outlines"][0]["outer"] = desc["story_outlines"][0]["inner"]          # drawn at the inside faces
+    src = tmp_path / "d.json"
+    src.write_text(json.dumps(desc), encoding="utf-8")
+    got = make.main(src, tmp_path / "out.yaml",
+                    {"start_room": "k1", "sheet_exit": "B", "same_pair": ((-0.25, 15), (72.25, 15))})
+    diagonal = got["figures"]["diagonal"]["gordium"]
+    assert "aren't measured" in diagonal["not_given_by_the_routes"] and diagonal["ratio"] > 0
+
+
 @pytest.mark.skipif(not os.environ.get("GORDIUM_CO_DESCRIPTION"),
                     reason="the Children's Odyssey model's description stays outside the repo (open question 5): "
                            "set GORDIUM_CO_DESCRIPTION to its path to check the committed file reproduces")
