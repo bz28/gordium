@@ -45,6 +45,13 @@ def labels(pieces):
     return {k: v for k, v in load(LABELS)["labels"].items() if k in pieces}
 
 
+# lines brought_in.misread empties (a stacked fraction's denominator put back on the line above: p.190 line 45,
+# 716.3.4's "1/2"; p.182 line 12, 714.5.2's "1/8"): nothing on them to quote
+EMPTIED = {(int(w.split()[0][2:]), int(w.split()[2]))
+           for w, fixes in load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]["misread"].items()
+           if any(f.get("printed") == "" for f in fixes)}
+
+
 def _rid(pid: str) -> str:
     """The id prefix the coverage report reads as naming a piece (section_labeling.coverage: the piece's slug, every
     character not a letter or digit an underscore, then "_"): general.bc_716_1_ for 716.1, general.bc_table_716_1_2__
@@ -75,6 +82,7 @@ def test_every_chapter_7_flag_quotes_every_line_of_its_piece(pieces, labels, boo
             continue
         quoted = {(s["page"], n) for r in _flags(book, pid) for s in r["sources"]
                   for n in range(s["lines"][0], s["lines"][1] + 1)}
+        quoted |= EMPTIED                       # a line the misreads empty holds nothing to quote
         for page, a, b in pieces[pid]["lines"]:
             for n in range(a, b + 1):
                 if (page, n) in quoted:
@@ -709,3 +717,32 @@ def test_the_readmes_rule_count_is_the_rulebooks():
     flags = sum(r["kind"] == "flag" for r in rules)
     readme = " ".join((NY / "README.md").read_text(encoding="utf-8").split())
     assert f"{len(rules)} hand-drafted (drafts: approval is deferred): {len(rules) - flags} rules and {flags} flags" in readme
+
+
+def test_part_e2s_notes_keep_the_laws_limits(book, labels):
+    """Part e2: the rest of Section 716 as egress doors and windows use it. Each piece of 716.2.5 to 716.4 brought in is
+    labeled, its flags' notes keep the numbers and conditions the page prints (100 square inches, 20 minutes, 3/4 hour,
+    the 10-second delay, 25 percent, 12 feet, 716.3.4's 1/2-hour partitions read through its stacked fraction), and
+    716.2.6.1's exception 1 stays Group R-1's alone; the parts left out are named in the README's list."""
+    rules = {r["id"]: r for r in book}
+    def shown(rid):
+        return " ".join(_shown_note(rules[rid]).split())
+    want = {"general.bc_716_2_5_1_2_1_horizontal_exit_vision_panels": ["self-closing swinging", "limited to 100 square inches"],
+            "general.bc_716_2_5_1_2_2_fire_barrier_door_glazing": ["1 1/2-hour fire protection rating", "limited to 100 square inches"],
+            "general.bc_716_2_5_3_corridor_door_glazing": ["at least 20 minutes", "exempt from the hose stream test"],
+            "general.bc_716_2_5_4_transoms_and_sidelights": ["3/4 hour or less", "2-hour fire-resistance-rated exterior walls",
+                                                              "more than 3/4 hour"],
+            "general.bc_716_2_6_1_door_closing": ["latching and self-closing or automatic-closing",
+                                                  "dwelling units or sleeping units in Group R-1"],
+            "general.bc_716_2_6_6_smoke_activated_doors": ["no more than 10 seconds", "loss of power"],
+            "general.bc_716_3_2_1_2_fire_window_area": ["at most 25 percent of the area of a common wall"],
+            "general.bc_716_3_3_1_window_mullions": ["more than 12 feet"],
+            "general.bc_716_3_4_fire_window_glazing": ["at least 3/4 hour", "1/2-hour fire-resistance-rated partitions may have a 20-minute"]}
+    for rid, words in want.items():
+        for w in words:
+            assert w in shown(rid), (rid, w)
+    for pid in ("716.2.5.1.2.1", "716.2.6.1", "716.2.6.6", "716.2.9.1", "716.3.4", "716.4.3"):
+        assert labels[pid]["label"] == "flag" and _flags(book, pid), pid
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    left_out = readme.split("## References in the brought-in sections that are not brought in", 1)[1]
+    assert "716.2.5.4.1, 716.2.6.3, 716.2.7, 716.2.8 and 716.3.2.1.1.1" in left_out

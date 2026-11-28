@@ -803,6 +803,13 @@ documents:
         '705.12':
           rated: 'As 707.4 ("required to be fire-resistance rated", p.168, line 25, exception 1): the defined term is
             FIRE-RESISTANCE RATING, brought in. 705.12 is a flag (Chapter 7 part e1).'
+        716.2.5.2:
+          enclosures: 'The book prints "stairway and ramp enclosures" in italics (p.188, line 40); Section 202 defines STAIRWAY
+            and RAMP (brought in), which the italics name, and no term "enclosures", so it is left over. 716.2.5.2 is a flag
+            (Chapter 7 part e2).'
+        716.2.6.2:
+          swinging: 'The book prints "swinging fire doors" in italics (p.189, line 6); Section 202 defines FIRE DOOR (brought
+            in), which the italics name, and no term "swinging", so it is left over. 716.2.6.2 is a flag (Chapter 7 part e2).'
         '707.4':
           rated: 'The book prints "fire-resistance rated" in italics (p.172, line 9, exception 1: "required to be
             fire-resistance rated"); Section 202 defines FIRE-RESISTANCE RATING (brought in, 202:fire_resistance_rating),
