@@ -53,7 +53,7 @@ def as_the_eval():
 
     def both(description, **kw):            # the measuring's own keywords (whole, stated_stories) passed on
         measured = inside(description, **kw)
-        for kind, parts in measure_routes(description)["parts"].items():
+        for kind, parts in measure_routes(description, stated_stories=kw.get("stated_stories"))["parts"].items():
             if kind in ROUTE_KINDS and measured["parts"].get(kind) is None:
                 measured["parts"][kind] = parts
         return measured

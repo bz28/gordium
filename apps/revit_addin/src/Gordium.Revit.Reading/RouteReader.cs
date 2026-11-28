@@ -98,6 +98,10 @@ public static class RouteReader
             room["function"] = typed;
             notes.Add(new(r.Id, "function", $"{Marks.RoomFunction.Name} is \"{typed}\", not one of Table 1004.5's functions Gordium lists: sent as typed, so its occupant load and its story's need review"));
         }
+        // the dwelling unit it belongs to (Gordium: Unit): sent as typed, trimmed, so the route code counts a story's
+        // units from the names (one naming two units, or names the drawing disagrees with, it says); blank is left out
+        if (r.Unit is { } unit)
+            room["unit"] = unit;
         // a corridor's walls as the architect states them (the egress UI audit's finding 5): the rating in minutes, sent
         // in hours; a negative count is no rating Gordium reads (left out, and said); blank is left out (not stated)
         if (r.FireRatingMinutes is { } minutes)
@@ -200,10 +204,19 @@ public static class RouteReader
         // every level of the model, a level with nothing drawn on it too (an open parking story, a roof, a datum): which
         // story is the first above grade plane can't be told while one may be missing (story_place.py: every place
         // needs review without them)
+        // a level the architect ticks "not a story" (a datum, a roof) is sent so, never tried as a story; blank or No is
+        // left out (tried both ways)
+        var notStories = MarkReading.LevelsMarkedNotAStory(model).Select(e => e.UniqueId).ToHashSet(StringComparer.Ordinal);
         if (levels is not null && used.Count > 0)
-            interior["all_levels"] = new JsonArray(levels.Values.Select(l => (JsonNode)new JsonObject
+            interior["all_levels"] = new JsonArray(levels.Values.Select(l =>
             {
-                ["id"] = l.UniqueId, ["name"] = l.Name, ["elevation"] = model.InternalToShared.Apply(new Xyz(0, 0, l.Elevation)).Z,
+                var level = new JsonObject
+                {
+                    ["id"] = l.UniqueId, ["name"] = l.Name, ["elevation"] = model.InternalToShared.Apply(new Xyz(0, 0, l.Elevation)).Z,
+                };
+                if (notStories.Contains(l.UniqueId))
+                    level["not_a_story"] = true;
+                return (JsonNode)level;
             }).ToArray());
         if (levels is not null && used.Count > 0)
             interior["levels"] = new JsonArray(records.Levels!.Where(l => used.Remove(l.UniqueId)).Select(l => (JsonNode)new JsonObject
@@ -277,7 +290,7 @@ public static class RouteReader
     }
 
     /// <summary>Inside the polygon (even-odd) and more than 1/16 in from every edge.</summary>
-    private static bool StrictlyInside(P2 p, List<P2> poly)
+    internal static bool StrictlyInside(P2 p, List<P2> poly)
     {
         var inside = false;
         for (var i = 0; i < poly.Count; i++)
@@ -743,8 +756,11 @@ public static class RouteReader
     /// a size Gordium works out), and the wall's thickness between its faces.</summary>
     internal sealed record DoorPlace(P2 Centre, P2 Along, double Thickness, P2 Normal);
 
-    internal static DoorPlace? Place(RevitModel model, OpeningRecord rec, out string? why, double? clearWidth = null)
+    internal static DoorPlace? Place(RevitModel model, OpeningRecord rec, out string? why, double? clearWidth = null,
+                                     string what = "door")
     {
+        // a door's opening wider than it, or off its middle, may hold a sidelight or a pocket; a window's is only wider
+        var hint = what == "door" ? " (a sidelight or a pocket?)" : "";
         why = null;
         if (!rec.HostIsWall || rec.WallSides is not { Count: >= 2 } faces)
         {
@@ -820,9 +836,15 @@ public static class RouteReader
         // an opening wider than the door itself (its type's width, or its clear width) and a frame (FrameAllowance) holds
         // a sidelight or a pocket even when the unit is centred: where its clear opening is isn't told (round 2)
         var door = Math.Max(rec.TypeWidth ?? 0, clearWidth ?? 0);
+        if (door <= 0)
+        {
+            // nothing to hold the opening against (review round 2: never "more than the window (0 in)")
+            why = $"its type's width isn't read, so whether the opening it takes in its wall holds more than the {what} isn't known";
+            return null;
+        }
         if (inWall.Max() - inWall.Min() > door + FrameAllowance)
         {
-            why = I($"the opening it takes in its wall is {(inWall.Max() - inWall.Min()) * 12:0.##} in wide, more than the door ({door * 12:0.##} in) and a frame ({FrameAllowance * 12:0} in): a sidelight or a pocket?, so where its clear opening is isn't told");
+            why = I($"the opening it takes in its wall is {(inWall.Max() - inWall.Min()) * 12:0.##} in wide, more than the {what} ({door * 12:0.##} in) and a frame ({FrameAllowance * 12:0} in)") + (what == "door" ? ": a sidelight or a pocket?" : "") + ", so where its clear opening is isn't told";
             return null;
         }
         // the middle of that opening must agree with where the door is placed (round 1)
@@ -836,7 +858,7 @@ public static class RouteReader
         if (Math.Abs(u - uPoint) > CentreAgree)
         {
             why = I($"the opening it takes in its wall is centred {Math.Abs(u - uPoint) * 12:0.##} in from where it is placed") +
-                  " (a sidelight or a pocket?), so where its clear opening is isn't told";
+                  hint + ", so where its clear opening is isn't told";
             return null;
         }
         var c = (a + b) / 2;

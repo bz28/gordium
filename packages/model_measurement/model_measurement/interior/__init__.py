@@ -92,8 +92,14 @@ def _given(description: dict, kind: str, problems: list):
 
 
 SAME_FLOOR = 0.5      # in: rooms' floors this close are one floor (a threshold's change in level, never a step)
-LANDING_STEP = 8.25   # in: RCNYS R318.3.2, the most a door's outside landing may be below it; a floor higher above
-#                       every ground given is reached by a stair or a ramp (or its own way out at grade, not shown)
+LANDING_STEP = 8.25   # in: RCNYS R318.3.1's exception and R318.3.2, the most a door's outside landing may be below
+#                       it; a floor farther above any ground given is reached by a stair or a ramp (or its own way
+#                       out at grade, not shown)
+# the house code's (RCNYS) landing bounds, (most below the floor, most above): the Building Code's are tighter
+# (BUILDING_LANDING), and a check under it passes those (egress._stairs_and_guards)
+GROUND_ABOVE = 1.5    # in: R318.3.1, the inside floor at most 1 1/2 in below the threshold, and no landing above it
+#                       (a landing over the threshold is a riser, R202 STAIR): ground higher above the floor than this
+#                       puts the landing below grade, so a ramp or a stairway to grade (R318.3.1's last sentence)
 
 
 def _level_id(value):
@@ -101,7 +107,20 @@ def _level_id(value):
     return value if isinstance(value, str) and value.strip() or type(value) is int else None
 
 
-def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
+HOUSE_LANDING = (LANDING_STEP, GROUND_ABOVE)
+# BCNYS 1010.1.4: a door's floor or landing at the same elevation on each side, within 1/2 in (exception 4); its
+# looser steps (exceptions 2, 3 and 6: 7 and 7 3/4 in) each turn on what the model doesn't show (a door off an
+# accessible route and not swinging over the landing, units not required Accessible, Type A or B, an equipment
+# space), so the strict 1/2 in; 1010.1.6: thresholds at most 1/2 in. Gordium's reading: within 1/2 in either way
+BUILDING_LANDING = (0.5, 0.5)
+_INCHES = {8.25: "8 1/4", 1.5: "1 1/2", 0.5: "1/2"}
+
+
+def _inches(v: float) -> str:
+    return _INCHES.get(v, f"{v:g}")
+
+
+def _stairs_against_floors(whole, reader, stated_stories=None, landing=HOUSE_LANDING) -> str | None:
     """Why "no stairs" (an empty list of stairs) can't be taken beside what the description shows, or None. A stair
     or a ramp joins floors, or each floor has its own way out at grade, which the model doesn't show, so where the
     building may have more than one floor the claim needs review, never a stair rule set aside:
@@ -112,8 +131,12 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
     - its floors are more than 1/2 in apart (a room's `floor_elevation`, as a house's gives them; a room with none,
       and an enclosed space, at its level's height in `levels`; a change of floor that size is a step, or a ramp),
       or a floor or level height given can't be read (it may be on another floor);
-    - every room's floor is more than 8 1/4 in above the highest ground given outside the openings (`ground_outside`:
-      only an upper floor drawn, or a floor a landing's step can't reach the ground from, R318.3.2);
+    - a ground given outside the openings (`ground_outside`) is farther from a floor than a landing allows
+      (`landing`: below the highest floor and above the lowest; HOUSE_LANDING, 8 1/4 in below and 1 1/2 in above,
+      R318.3.1 and R318.3.2; BUILDING_LANDING, 1/2 in either way, BCNYS 1010.1.4 and 1010.1.6): only an upper floor
+      drawn, a floor sunk below the ground, or sloped ground a landing can't meet. Which ground the way out is on
+      isn't known, so every ground given must allow no stair; a ground given that can't be read may be any, so it
+      refuses too (with no floor given, grounds farther apart than both bounds together, which no floor can meet);
     - the check gives two or more stories (`stated_stories`: a count, or (count, whose words with {n}),
       design_checker.egress._stated_stories).
     Rooms with neither level nor floor given show nothing against it (not given is never a second floor)."""
@@ -181,19 +204,36 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
             return Stop("stairs_none_several_floors", what=f"its rooms' floors are at different heights ({low_name}'s "
                                                            f"at {tidy(low):g} in, {high_name}'s at {tidy(high):g} "
                                                            "in)").reason
-        ground = _highest_ground(whole, reader)
-        if ground is not None and low - ground > LANDING_STEP:
+        below, above = landing
+        grounds = _grounds(whole, reader)
+        if grounds is None:
+            return Stop("stairs_none_several_floors", what="the ground outside an opening can't be read, so it may "
+                                                           "be farther from the floor than a landing can meet").reason
+        if grounds and high - min(grounds) > below:            # the highest floor's way out, as any floor's
+            return Stop("stairs_none_several_floors", what=f"its floor ({high_name}'s, at {tidy(high):g} in) is "
+                                                           f"more than {_inches(below)} in above the ground outside "
+                                                           f"an opening (at {tidy(min(grounds)):g} in)").reason
+        if grounds and max(grounds) - low > above:
             return Stop("stairs_none_several_floors", what=f"its lowest floor ({low_name}'s, at {tidy(low):g} in) is "
-                                                           f"more than 8 1/4 in above the ground outside its openings "
-                                                           f"(at most {tidy(ground):g} in)").reason
+                                                           f"more than {_inches(above)} in below the ground outside "
+                                                           f"an opening (at {tidy(max(grounds)):g} in)").reason
+        return None
+    grounds = _grounds(whole, reader)          # no floor height given: ground farther apart than any one floor can
+    if grounds is None:                        # meet needs a stair or a ramp; one that can't be read may be any
+        return Stop("stairs_none_several_floors", what="the ground outside an opening can't be read, so it may "
+                                                       "be farther from the floor than a landing can meet").reason
+    if grounds and max(grounds) - min(grounds) > sum(landing):
+        return Stop("stairs_none_several_floors", what=f"the ground outside its openings is {tidy(min(grounds)):g} "
+                                                       f"in at one and {tidy(max(grounds)):g} in at another, more "
+                                                       f"than any one floor can meet ({_inches(landing[0])} in "
+                                                       f"above, {_inches(landing[1])} in below)").reason
     return None
 
 
-def _highest_ground(whole: dict, reader):
-    """The highest ground given outside any opening that can be read (`ground_outside`, one value or a list), in
-    inches; None where none can. One that can't be read is left out (round 3: never all of them dropped for it):
-    leaving out a ground can only make a floor look higher above the rest, so "no stairs" is refused more, never
-    less; the opening's own rules say its ground isn't read."""
+def _grounds(whole: dict, reader):
+    """Every ground given outside an opening (`ground_outside`, one value or a list), in inches ([] where none is
+    given); None where one given can't be read: then any ground may be there, so "no stairs" is never taken beside
+    it (every ground must allow no stair, above or below the floor)."""
     got = []
     for o in whole.get("openings") if isinstance(whole.get("openings"), list) else []:
         if not isinstance(o, dict) or o.get("ground_outside") is None:
@@ -202,8 +242,8 @@ def _highest_ground(whole: dict, reader):
             try:
                 got.append(reader.length(g, "the ground outside an opening"))
             except Stop:
-                continue
-    return max(got) if got else None
+                return None
+    return got
 
 
 def _unknown_spaces(description: dict, problems: list):
@@ -253,12 +293,13 @@ def _door(item: dict, measured) -> dict:
     return part
 
 
-def measure(description, whole=None, stated_stories=None) -> dict:
+def measure(description, whole=None, stated_stories=None, landing=HOUSE_LANDING) -> dict:
     """The description measured (the module's account). An empty list of stairs is read against the floors
     (_stairs_against_floors): those of `whole`, where the description given isn't the whole one (the Building
     Code's stairs and guards are measured on a description with its rooms left out; None: the description itself),
-    and `stated_stories`, the stories the check gives (a count, or (count, whose words with {n}); None: none).
-    """
+    and `stated_stories`, the stories the check gives (a count, or (count, whose words with {n}); None: none);
+    `landing`: how far (in) the ground may be below and above a floor with no stair (HOUSE_LANDING, the Residential
+    Code's; BUILDING_LANDING for the Building Code's)."""
     out = {"format": MEASURED_FORMAT, "units": {"length": "in", "area": "sf"},
            "parts": {k: None for k in KINDS}, "problems": [], "not_checked": [], "has_none": {}}
     problems = out["problems"]
@@ -315,12 +356,17 @@ def measure(description, whole=None, stated_stories=None) -> dict:
                 out["not_checked"].append({"kind": "emergency_escape_opening", "id": o.get("id"),
                                            "name": name_of(o), "why": "in a room that isn't a sleeping room"})
                 continue
-            parts["emergency_escape_opening"].append(_part(o, measure_opening(o, reader, floor_of), o.get("room")))
+            measured = measure_opening(o, reader, floor_of)
+            part = _part(o, measured, o.get("room"))
+            if measured[3]:                                   # measures standing on Gordium's reading, to confirm
+                part["confirm"] = {m: words for m, words in measured[3].items() if m in part["measures"]}
+            parts["emergency_escape_opening"].append(part)
 
     stairs = _given(description, "stair", problems)
     against = None
     if stairs == []:                                  # "no stairs": never beside rooms on more than one floor
-        against = _stairs_against_floors(description if whole is None else whole, reader, stated_stories)
+        against = _stairs_against_floors(description if whole is None else whole, reader, stated_stories,
+                                         landing)
         if against:
             problems.append(against)
             out.setdefault("refused", {})["stair"] = against     # the rows say "no stairs" wasn't taken, and why

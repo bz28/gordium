@@ -5274,7 +5274,7 @@ rules:
       unless the building official accepts that it was tested with its weaker face to the fire; exterior walls go by 705.5
       instead: which walls are built so, and how they were tested, isn''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. Brought in alone because 713.4 says shaft enclosures
-    meet it; 705.5 is not brought in.
+    meet it; 705.5 is brought in (Chapter 7 part e1's flag).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_703_5_marking
@@ -5304,6 +5304,850 @@ rules:
       SMOKE BARRIER - PROTECT ALL OPENINGS": signs aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. A requirement for every rated wall, the exit
     enclosures' and rated corridors' among them; shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_2_projections
+  kind: flag
+  topic: means_of_egress
+  title: Projections, egress balconies and exterior exit stairs among them (BCNYS 705.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 163
+    lines:
+    - 32
+    - 37
+    quote: '705.2 Projections. Cornices, eave overhangs, exterior balconies and similar projections extending beyond the exterior
+      wall shall conform to the requirements of this section and Section 1405. Exterior egress balconies and exterior exit
+      stairways and ramps shall comply with Sections 1021 and 1027, respectively. Projections shall not extend any closer
+      to the line used to determine the fire sepa- ration distance than shown in Table 705.2. Exception: Buildings on the
+      same lot and considered as portions of one building in accordance with Section 705.3 are not required to comply with
+      this section for projections between the buildings.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Cornices, eave overhangs, exterior balconies and similar projections beyond the exterior wall conform to 705.2
+      and Section 1405, exterior egress balconies also to 1021 and exterior exit stairways and ramps to 1027; no projection
+      comes closer to the line used to determine the fire separation distance than Table 705.2 allows; but buildings on the
+      same lot considered portions of one building per 705.3 need not comply for projections between them: the projections
+      and their distances aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 1405 isn't brought in; 1021, 1027 and 705.3
+    are (section groups 9e and 9g, Chapter 7 part e1). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_705_2_projection_distances
+  kind: flag
+  topic: means_of_egress
+  title: Projections' least distance from the line (BCNYS Table 705.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 163
+    lines:
+    - 38
+    - 44
+    quote: 'TABLE 705.2—MINIMUM DISTANCE OF PROJECTION FIRE SEPARATION DISTANCE (FSD) (feet) MINIMUM DISTANCE FROM LINE USED
+      TO DETERMINE FSD 0 to less than 2 Projections not permitted 2 to less than 3 24 inches 3 to less than 5 Two-thirds of
+      FSD 5 or greater 40 inches For SI: 1 foot = 304.8 mm; 1 inch = 25.4 mm.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Table 705.2 gives the least distance a projection keeps from the line used to determine the fire separation distance
+      (FSD), by the FSD in feet: 0 to less than 2, projections not permitted; 2 to less than 3, 24 inches; 3 to less than
+      5, two-thirds of the FSD; 5 or greater, 40 inches: the projections and their distances aren''t in the model, so a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Typed row by row from the page image (p.163);
+    used by no rule. 1021.4 and 1027.5 keep egress balconies and exterior exit stairways at least 10 feet (5 feet for Group
+    R-3's) from the lot line, more than this table asks. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_2_1_type_i_ii_projections
+  kind: flag
+  topic: means_of_egress
+  title: Projections from Type I and II walls noncombustible (BCNYS 705.2.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 163
+    lines:
+    - 45
+    - 46
+    quote: 705.2.1 Types I and II construction. Projections from walls of Type I or II construction shall be of noncombustible
+      materials or combustible materials as allowed by Sections 705.2.3.1 and 705.2.4.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Projections from walls of Type I or II construction are of noncombustible materials, or of combustible materials
+      as 705.2.3.1 (balconies and similar projections) and 705.2.4 (bay and oriel windows) allow: the type of construction
+      and the projections aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 705.2.4 isn't brought in (bay and oriel windows
+    aren't means of egress); 705.2.3.1 is. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_2_2_type_iii_iv_v_projections
+  kind: flag
+  topic: means_of_egress
+  title: Projections from Type III, IV and V walls of approved material (BCNYS 705.2.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 163
+    lines:
+    - 47
+    - 47
+    quote: 705.2.2 Type III, IV or V construction. Projections from walls of Type III, IV or V construction shall be of any
+      approved material.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Projections from walls of Type III, IV or V construction are of any approved material: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_2_3_projection_protection
+  kind: flag
+  topic: means_of_egress
+  title: Projections within 5 feet of the line protected (BCNYS 705.2.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 163
+    lines:
+    - 48
+    - 54
+    quote: '705.2.3 Projection protection. Projections extending to 5 feet (1524 mm) or less from the line used to determine
+      the fire separa- tion distance shall be one of the following: 1. Noncombustible materials. 2. Combustible materials
+      of not less than 1-hour fire-resistance-rated construction. 3. Heavy timber construction complying with Section 2304.11.
+      4. Fire-retardant-treated wood. 5. As permitted by Section 705.2.3.1.'
+  - file: gov.ny.building.2025.pdf
+    page: 164
+    lines:
+    - 3
+    - 4
+    quote: 'Exception: Type VB construction shall be allowed for combustible projections in Group R-3 and U occupancies with
+      a fire sepa- ration distance greater than or equal to 5 feet (1524 mm).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Projections extending to 5 feet or less from the line used to determine the fire separation distance are of noncombustible
+      materials, combustible materials of at least 1-hour fire-resistance-rated construction, heavy timber construction per
+      2304.11, fire-retardant-treated wood, or as 705.2.3.1 permits; but Type VB construction is allowed for combustible projections
+      in Group R-3 and U occupancies with a fire separation distance of 5 feet or more: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 2304.11 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_2_3_1_balconies
+  kind: flag
+  topic: means_of_egress
+  title: Combustible balconies' rating and length (BCNYS 705.2.3.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 164
+    lines:
+    - 5
+    - 18
+    quote: '705.2.3.1 Balconies and similar projections. Balconies and similar projections of combustible construction other
+      than fire- retardant-treated wood shall be fire-resistance rated where required by Table 601 for floor construction
+      or shall be of heavy timber construction in accordance with Section 2304.11. The aggregate length of the projections
+      shall not exceed 50 percent of the building’s perimeter on each floor. Exceptions: 1. On buildings of Types I and II
+      construction, three stories or less above grade plane, fire-retardant-treated wood shall be permitted for balconies,
+      porches, decks and exterior stairways not used as required exits. 2. Untreated wood and plastic composites that comply
+      with ASTM D7032 and Section 2612 are permitted for pickets, rails and similar guard components that are limited to 42
+      inches (1067 mm) in height. 3. Balconies and similar projections on buildings of Types III, IV-HT and V construction
+      shall be permitted to be of Type V construction and shall not be required to have a fire-resistance rating where sprinkler
+      protection is extended to these areas. 4. Where sprinkler protection is extended to the balcony areas, the aggregate
+      length of the balcony on each floor shall not be limited.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Balconies and similar projections of combustible construction other than fire-retardant-treated wood are fire-resistance
+      rated where Table 601 requires it for floor construction, or of heavy timber construction per 2304.11, and their aggregate
+      length is at most 50 percent of the building''s perimeter on each floor; but on buildings of Types I and II construction,
+      three stories or less above grade plane, fire-retardant-treated wood is permitted for balconies, porches, decks and
+      exterior stairways not used as required exits; untreated wood and plastic composites complying with ASTM D7032 and Section
+      2612 are permitted for pickets, rails and similar guard components at most 42 inches high; balconies and similar projections
+      on buildings of Types III, IV-HT and V construction may be of Type V construction with no fire-resistance rating where
+      sprinkler protection is extended to these areas; and where sprinkler protection is extended to the balcony areas, the
+      aggregate length of balconies on each floor is not limited: the balconies, the type of construction and the sprinklers''
+      extent aren''t in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 601, 2304.11, 2612 and ASTM D7032 aren''t
+    brought in. Shown for every building: a required exit''s exterior stairway never takes exception 1, and exceptions 3 and
+    4 turn on sprinkler protection extended to the balconies, not a stated fact.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_3_buildings_on_the_same_lot
+  kind: flag
+  topic: means_of_egress
+  title: Buildings on the same lot, an imaginary line between them (BCNYS 705.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 164
+    lines:
+    - 23
+    - 37
+    quote: '705.3 Buildings on the same lot. For the purposes of determining the required wall and opening protection, projections
+      and roof- covering requirements, buildings on the same lot shall be assumed to have an imaginary line between them.
+      Where a new building is to be erected on the same lot as an existing building, the location of the assumed imaginary
+      line with rela- tion to the existing building shall be such that the exterior wall and opening protection of the existing
+      building meet the criteria as set forth in Sections 705.5 and 705.9. Exceptions: 1. Two or more buildings on the same
+      lot shall be either regulated as separate buildings or shall be considered as portions of one building if the aggregate
+      area of such buildings is within the limits specified in Chapter 5 for a single building. Where the buildings contain
+      different occupancy groups or are of different types of construction, the area shall be that allowed for the most restrictive
+      occupancy or construction. 2. Where an S-2 parking garage of Construction Type I or IIA is erected on the same lot as
+      a Group R-2 building, and there is no fire separation distance between these buildings, then the adjoining exterior
+      walls between the buildings are permitted to have occupant use openings in accordance with Section 706.8. However, opening
+      protectives in such openings shall only be required in the exterior wall of the S-2 parking garage, not in the exterior
+      wall openings in the R-2 building, and these open- ing protectives in the exterior wall of the S-2 parking garage shall
+      be not less than 1 1/2-hour fire protection rating.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Buildings on the same lot are assumed to have an imaginary line between them for their required wall and opening
+      protection, projections and roof coverings; where a new building is erected on the same lot as an existing one, the
+      line sits so that the existing building''s exterior wall and opening protection meet 705.5 and 705.9; but two or more
+      buildings on the same lot are either regulated as separate buildings or considered portions of one building where their
+      aggregate area is within Chapter 5''s limits for a single building (the most restrictive group''s or type of construction''s
+      area where they differ); and where an S-2 parking garage of Type I or IIA construction is on the same lot as a Group
+      R-2 building with no fire separation distance between them, the adjoining exterior walls may have occupant use openings
+      per 706.8, opening protectives required only in the garage''s exterior wall, rated at least 1 1/2 hours: the buildings
+      on the lot aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Chapter 5 and 706.8 aren't brought in. 1021.4's
+    and 1027.5's "other buildings on the same lot" turn on this line. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_4_exterior_wall_materials
+  kind: flag
+  topic: means_of_egress
+  title: Exterior walls of materials the type of construction permits (BCNYS 705.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 164
+    lines:
+    - 38
+    - 38
+    quote: 705.4 Materials. Exterior walls shall be of materials permitted by the building’s type of construction.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Exterior walls, an exit stairway''s and an exit passageway''s among them (1023.7, 1024.8), are of materials the
+      building''s type of construction permits: the walls'' materials and the type of construction aren''t in the model, so
+      a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Shown for every building (review round 2:
+    1023.7 and 1024.8 send an exit''s exterior walls to every requirement of 705).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_5_exterior_wall_ratings
+  kind: flag
+  topic: means_of_egress
+  title: Exterior wall ratings by construction and separation distance (BCNYS 705.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 164
+    lines:
+    - 39
+    - 43
+    quote: 705.5 Fire-resistance ratings. Exterior walls shall be fire-resistance rated in accordance with Table 601, based
+      on the type of construction, and Table 705.5, based on the fire separation distance. The required fire-resistance rating
+      of exterior walls with a fire separation distance of greater than 10 feet (3048 mm) shall be rated for exposure to fire
+      from the inside. The required fire-resistance rating of exterior walls with a fire separation distance of less than
+      or equal to 10 feet (3048 mm) shall be rated for exposure to fire from both sides.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Exterior walls are rated per Table 601 by the type of construction and per Table 705.5 by the fire separation distance;
+      a wall with a fire separation distance of more than 10 feet is rated for exposure to fire from the inside, one of 10
+      feet or less for exposure to fire from both sides: the walls'' ratings, the type of construction and the distances aren''t
+      in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 601 isn''t brought in; Table 705.5
+    is (its own flag). Shown for every building: an exit stairway''s or exit passageway''s exterior walls meet 705 (1023.7,
+    1024.8).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_705_5_exterior_wall_ratings
+  kind: flag
+  topic: means_of_egress
+  title: Exterior wall ratings by fire separation distance (BCNYS Table 705.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 165
+    lines:
+    - 3
+    - 27
+    quote: 'TABLE 705.5—FIRE-RESISTANCE RATING REQUIREMENTS FOR EXTERIOR WALLS BASED ON FIRE SEPARATION DISTANCE [fna,] [fnd,]
+      [fng] FIRE SEPARATION TYPE OF OCCUPANCY GROUP OCCUPANCY GROUP A, OCCUPANCY GROUP H [fne] DISTANCE = X (feet) CONSTRUCTION
+      F-1, M, S-1 [fnf] B, E, F-2, I, R[fni], S-2, U [fnh] X < 5 [fnb] All 3 2 1 IA, IVA 3 2 1 5 ≤ X < 10 Others 2 1 1 IA,
+      IB, IVA, IVB 2 1 1 [fnc] 10 ≤ X < 30 IIB, VB 1 0 0 Others 1 1 1 [fnc] X ≥ 30 All 0 0 0 For SI: 1 foot = 304.8 mm. a.Load-bearing
+      exterior walls shall also comply with the fire-resistance rating requirements of Table 601. b.See Section 706.1.1 for
+      party walls. c. Open parking garages complying with Section 406 shall not be required to have a fire-resistance rating.
+      d.The fire-resistance rating of an exterior wall is determined based upon the fire separation distance of the exterior
+      wall and the story in which the wall is located. e.For special requirements for Group H occupancies, see Section 415.6.
+      f. For special requirements for Group S aircraft hangars, see Section 412.3.1. g.Where Section 705.9.1 permits nonbearing
+      exterior walls with unlimited area of unprotected openings, the required fire-resistance rating for the exterior walls
+      is 0 hours. h.For a building containing only a Group U occupancy private garage or carport, the exterior wall shall
+      not be required to have a fire-resistance rating where the fire separation distance is 5 feet (1523 mm) or greater.
+      i. For a Group R-3 building of Type II-B or Type V-B construction, the exterior wall shall not be required to have a
+      fire-resistance rating where the fire separation distance is 5 feet (1523 mm) or greater.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Table 705.5 (notes a, d and g on the whole table) gives an exterior wall''s rating in hours by its fire separation
+      distance X in feet, the type of construction and the group, in three columns: Group H (note e), Groups F-1, M and S-1
+      (note f), Groups A, B, E, F-2, I, R (note i), S-2 and U (note h). X less than 5 (note b): every type 3, 2 and 1; X 5
+      or more and less than 10: Types IA and IVA 3, 2 and 1, other types 2, 1 and 1; X 10 or more and less than 30: Types
+      IA, IB, IVA and IVB 2, 1 and 1 (note c), Types IIB and VB 1, 0 and 0, other types 1, 1 and 1 (note c); X 30 or more:
+      every type 0, 0 and 0. Note a: load-bearing exterior walls also meet Table 601''s ratings. Note b: see 706.1.1 for party
+      walls. Note c: open parking garages complying with 406 need no rating. Note d: a wall''s rating is set by its own fire
+      separation distance and the story it is in. Note e: Group H''s special requirements, 415.6. Note f: Group S aircraft
+      hangars'' special requirements, 412.3.1. Note g: where 705.9.1 permits nonbearing exterior walls with unlimited unprotected
+      openings, the rating is 0 hours. Note h: a building containing only a Group U private garage or carport needs no rating
+      where the fire separation distance is 5 feet or more. Note i: a Group R-3 building of Type II-B or V-B construction
+      needs no rating where the fire separation distance is 5 feet or more. The walls, their distances and the type of construction
+      aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 601, 706.1.1, 415.6 and 412.3.1 aren't
+    brought in; of Section 406 only 406.4.3 and 406.5.7 are (Chapter 4 part f). Typed row by row from the page image (p.165);
+    the walls' ratings are a person's check, so the table is used by no rule. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_6_exterior_wall_continuity
+  kind: flag
+  topic: means_of_egress
+  title: An exterior wall's rating continuous floor to floor (BCNYS 705.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 165
+    lines:
+    - 28
+    - 33
+    quote: '705.6 Continuity. The fire-resistance rating of exterior walls shall extend from the top of the foundation or
+      floor/ceiling assembly below to one of the following: 1. The underside of the floor sheathing, roof sheathing, deck
+      or slab above. 2. The underside of a floor/ceiling or roof/ceiling assembly having a fire-resistance rating equal to
+      or greater than the exterior wall and the fire separation distance is greater than 10 feet. Parapets shall be provided
+      as required by Section 705.12.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An exterior wall''s fire-resistance rating extends from the top of the foundation or the floor/ceiling assembly
+      below to the underside of the floor sheathing, roof sheathing, deck or slab above, or to the underside of a floor/ceiling
+      or roof/ceiling assembly rated equal to or more than the exterior wall where the fire separation distance is more than
+      10 feet; parapets are provided as 705.12 requires: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 705.12 is brought in (its own flag). Shown
+    for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_7_structural_stability
+  kind: flag
+  topic: means_of_egress
+  title: What braces an exterior wall has its rating (BCNYS 705.7)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 165
+    lines:
+    - 34
+    - 37
+    quote: 705.7 Structural stability. Interior structural elements that brace the exterior wall but that are not located
+      within the plane of the exterior wall shall have the minimum fire-resistance rating required in Table 601 for that structural
+      element. Structural elements that brace the exterior wall but are located outside of the exterior wall or within the
+      plane of the exterior wall shall have the minimum fire- resistance rating required in Table 601 and Table 705.5 for
+      the exterior wall.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Interior structural elements that brace an exterior wall but are not within its plane have the rating Table 601
+      requires for that element; structural elements that brace it from outside the wall or within its plane have the rating
+      Table 601 and Table 705.5 require for the exterior wall: the structure isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 601 isn't brought in; Table 705.5 is
+    (its own flag). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_7_1_type_iii_floor_assemblies
+  kind: flag
+  topic: means_of_egress
+  title: Floors carrying an exterior wall in Type III construction (BCNYS 705.7.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 165
+    lines:
+    - 38
+    - 44
+    quote: 705.7.1 Floor assemblies in Type III construction. In Type III construction where a floor assembly supports gravity
+      loads from an exterior wall, the fire-resistance rating of the portion of the floor assembly that supports the exterior
+      wall shall be not less than the fire-resistance rating required for the exterior wall in Table 601. The fire-resistance
+      rating provided by the portion of the floor assembly supporting and within the plane of the exterior wall shall be permitted
+      to include the contribution of the ceiling membrane when considering exposure to fire from the inside. Where a floor
+      assembly supports gravity loads from an exterior wall, the building elements of the floor construction within the plane
+      of the exterior wall, including but not limited to rim joists, rim boards and blocking, shall be in accordance with
+      the requirements for interior building elements of Type III construction.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In Type III construction, where a floor assembly carries gravity loads from an exterior wall, the part of the floor
+      assembly supporting the wall is rated at least as Table 601 requires for the exterior wall (the part supporting it and
+      within its plane may count the ceiling membrane for exposure to fire from the inside), and the building elements of
+      the floor within the wall''s plane, rim joists, rim boards and blocking among them, meet the requirements for interior
+      building elements of Type III construction: a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 601 isn''t brought in. Shown for every
+    building: the type of construction isn''t a stated fact.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_8_unexposed_surface_temperature
+  kind: flag
+  topic: means_of_egress
+  title: An exterior wall's unexposed surface temperature and Equation 7-1 (BCNYS 705.8)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 165
+    lines:
+    - 45
+    - 61
+    quote: '705.8 Unexposed surface temperature. Where protected openings are not limited by Section 705.9, the limitation
+      on the rise of temperature on the unexposed surface of exterior walls as required by ASTM E119 or UL 263 shall not apply.
+      Where protected open- ings are limited by Section 705.9, the limitation on the rise of temperature on the unexposed
+      surface of exterior walls as required by ASTM E119 or UL 263 shall not apply provided that a correction is made for
+      radiation from the unexposed exterior wall surface in accordance with the following formula: Equation 7-1 A = A + (A
+      × F ) e f eo where: A = Equivalent area of protected openings. e A = Actual area of protected openings. A = Area of
+      exterior wall surface in the story under consideration exclusive of openings, on which the temperature limitations f
+      of ASTM E119 or UL 263 for walls are exceeded. F = An “equivalent opening factor” derived from Figure 705.8 based on
+      the average temperature of the unexposed wall eo surface and the fire-resistance rating of the wall.'
+  - file: gov.ny.building.2025.pdf
+    page: 166
+    lines:
+    - 3
+    - 4
+    quote: FIGURE 705.8—EQUIVALENT OPENING FACTOR For SI:°C = [(°F) - 32]/1.8.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where protected openings are not limited by 705.9, the limit on the temperature rise of an exterior wall''s unexposed
+      surface required by ASTM E119 or UL 263 does not apply; where 705.9 limits them, it does not apply provided a correction
+      is made for radiation from the unexposed wall surface by Equation 7-1, Ae = A + (Af x Feo): Ae the equivalent area of
+      protected openings, A their actual area, Af the area of the wall surface in the story, openings excluded, on which ASTM
+      E119''s or UL 263''s temperature limits for walls are exceeded, and Feo the equivalent opening factor from Figure 705.8
+      by the unexposed surface''s average temperature and the wall''s rating: the walls and their openings aren''t in the
+      model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. ASTM E119 and UL 263 aren't brought in. Figure
+    705.8 (a chart of the equivalent opening factor against temperature, one curve per rating of 1 to 4 hours) is read on
+    the page. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_705_9_exterior_wall_openings
+  kind: flag
+  topic: means_of_egress
+  title: Exterior wall openings' area by fire separation distance (BCNYS Table 705.9)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 166
+    lines:
+    - 6
+    - 29
+    quote: TABLE 705.9—MAXIMUM AREA OF EXTERIOR WALL OPENINGS BASED ON FIRE SEPARATION DISTANCE AND DEGREE OF OPENING PROTECTION
+      FIRE SEPARATION DISTANCE (feet) DEGREE OF OPENING PROTECTION ALLOWABLE AREA[fna] Unprotected, Nonsprinklered (UP, NS)
+      Not Permitted[fnk] 0 to less than 3[fnb,] [fnc,] [fnk] Unprotected, Sprinklered (UP, S)[fni] Not Permitted[fnk] Protected
+      (P) Not Permitted[fnk] Unprotected, Nonsprinklered (UP, NS) Not Permitted 3 to less than 5[fnd,] [fne] Unprotected,
+      Sprinklered (UP, S)[fni] 15% Protected (P) 15% Unprotected, Nonsprinklered (UP, NS) 10%[fnh] 5 to less than 10[fne,]
+      [fnf,] [fnj] Unprotected, Sprinklered (UP, S)[fni] 25% Protected (P) 25% Unprotected, Nonsprinklered (UP, NS) 15%[fnh]
+      10 to less than 15[fne,] [fnf,] [fng,] [fnj] Unprotected, Sprinklered (UP, S)[fni] 45% Protected (P) 45% Unprotected,
+      Nonsprinklered (UP, NS) 25% 15 to less than 20[fnf,] [fng,] [fnj] Unprotected, Sprinklered (UP, S)[fni] 75% Protected
+      (P) 75% Unprotected, Nonsprinklered (UP, NS) 45% 20 to less than 25[fnf,] [fng,] [fnj] Unprotected, Sprinklered (UP,
+      S)[fni] No Limit Protected (P) No Limit Unprotected, Nonsprinklered (UP, NS) 70% 25 to less than 30[fnf,] [fng,] [fnj]
+      Unprotected, Sprinklered (UP, S)[fni] No Limit Protected (P) No Limit
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 3
+    - 23
+    quote: 'TABLE 705.9—MAXIMUM AREA OF EXTERIOR WALL OPENINGS BASED ON FIRE SEPARATION DISTANCE AND DEGREE OF OPENING PROTECTION
+      (Continued) FIRE SEPARATION DISTANCE (feet) DEGREE OF OPENING PROTECTION ALLOWABLE AREA[fna] Unprotected, Nonsprinklered
+      (UP, NS) No Limit 30 or greater Unprotected, Sprinklered (UP, S)[fni] No Limit Protected (P) No Limit For SI: 1 foot
+      = 304.8 mm. UP, NS = Unprotected openings in buildings not equipped throughout with an automatic sprinkler system in
+      accordance with Section 903.3.1.1. UP, S = Unprotected openings in buildings equipped throughout with an automatic sprinkler
+      system in accordance with Section 903.3.1.1. P = Openings protected with an opening protective assembly in accordance
+      with Section 705.9.2. a.Values indicated are the percentage of the area of the exterior wall, per story. b.For the requirements
+      for fire walls of buildings with differing heights, see Section 706.6.1. c. For openings in a fire wall for buildings
+      on the same lot, see Section 706.8. d.The maximum percentage of unprotected and protected openings shall be 25 percent
+      for Group R-3 occupancies. e.Unprotected openings shall not be permitted for openings with a fire separation distance
+      of less than 15 feet for Group H-2 and H-3 occupancies. f. The area of unprotected and protected openings shall not
+      be limited for Group R-3 occupancies, with a fire separation distance of 5 feet or greater. g.The area of openings in
+      an open parking garage in accordance with Section 406.5 with a fire separation distance of 10 feet or greater shall
+      not be limited. h.Includes buildings accessory to Group R-3. i. Not applicable to Group H-1, H-2 and H-3 occupancies.
+      j. The area of openings in a building containing only a Group U occupancy private garage or carport with a fire separation
+      distance of 5 feet or greater shall not be limited. k.For openings between S-2 parking garage and Group R-2 building,
+      see Section 705.3, Exception 2.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Table 705.9 gives the most area of openings in an exterior wall, as a percentage of the wall''s area per story
+      (note a), by the fire separation distance in feet and the openings'' protection: unprotected in a building not sprinklered
+      throughout per 903.3.1.1 (UP, NS), unprotected in a building sprinklered throughout per 903.3.1.1 (UP, S, note i: not
+      for Groups H-1, H-2 and H-3; an NFPA 13R or 13D system is not 903.3.1.1''s), and protected per 705.9.2 (P). 0 to less
+      than 3 (notes b, c, k): UP, NS, UP, S and P all not permitted (note k); 3 to less than 5 (notes d, e): UP, NS not permitted,
+      UP, S 15%, P 15%; 5 to less than 10 (notes e, f, j): UP, NS 10% (note h), UP, S 25%, P 25%; 10 to less than 15 (notes
+      e, f, g, j): UP, NS 15% (note h), UP, S 45%, P 45%; 15 to less than 20 (notes f, g, j): UP, NS 25%, UP, S 75%, P 75%;
+      20 to less than 25 (notes f, g, j): UP, NS 45%, UP, S no limit, P no limit; 25 to less than 30 (notes f, g, j): UP,
+      NS 70%, UP, S no limit, P no limit; 30 or greater: no limit for each. Note b: fire walls of buildings with differing
+      heights, 706.6.1. Note c: openings in a fire wall for buildings on the same lot, 706.8. Note d: at most 25 percent of
+      unprotected and protected openings for Group R-3 occupancies. Note e: unprotected openings are not permitted with a
+      fire separation distance of less than 15 feet for Group H-2 and H-3 occupancies. Note f: no limit on unprotected and
+      protected openings for Group R-3 occupancies with a fire separation distance of 5 feet or more. Note g: no limit on
+      the openings of an open parking garage per 406.5 with a fire separation distance of 10 feet or more. Note h: includes
+      buildings accessory to Group R-3. Note j: no limit on the openings of a building containing only a Group U private garage
+      or carport with a fire separation distance of 5 feet or more. Note k: openings between an S-2 parking garage and a Group
+      R-2 building, 705.3 exception 2. The walls, their openings and distances aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 706.6.1 and 706.8 aren't brought in; of 406.5
+    only 406.5.7 is (Chapter 4 part f). Typed row by row from the page images (pp.166-167); used by no rule. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_1_allowable_opening_area
+  kind: flag
+  topic: means_of_egress
+  title: Openings in each story within Table 705.9's area (BCNYS 705.9.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 24
+    - 35
+    quote: '705.9.1 Allowable area of openings. The maximum area of unprotected and protected openings permitted in an exterior
+      wall in any story of a building shall not exceed the percentages specified in Table 705.9 based on the fire separation
+      distance of each indi- vidual story. Exceptions: 1. In other than Group H occupancies, unlimited unprotected openings
+      are permitted in the first story above grade plane where the wall faces one of the following: 1.1. A street and has
+      a fire separation distance of more than 15 feet (4572 mm). 1.2. An unoccupied space. The unoccupied space shall be on
+      the same lot or dedicated for public use, shall be not less than 30 feet (9144 mm) in width and shall have access from
+      a street by a posted fire lane in accor- dance with the Fire Code of New York State. 2. Buildings whose exterior bearing
+      walls, exterior nonbearing walls and exterior primary structural frame are not required to be fire-resistance rated
+      shall be permitted to have unlimited unprotected openings.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The area of unprotected and protected openings in an exterior wall in any story is at most the percentage Table
+      705.9 gives for that story''s own fire separation distance; but, in other than Group H occupancies, unlimited unprotected
+      openings are permitted in the first story above grade plane where the wall faces a street and has a fire separation
+      distance of more than 15 feet, or faces an unoccupied space on the same lot or dedicated for public use, at least 30
+      feet wide, with access from a street by a posted fire lane per the Fire Code of New York State; and buildings whose
+      exterior bearing walls, exterior nonbearing walls and exterior primary structural frame need no rating may have unlimited
+      unprotected openings: the walls'' openings and distances aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. The Fire Code of New York State isn't brought
+    in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_2_protected_openings
+  kind: flag
+  topic: means_of_egress
+  title: Protected openings in exterior walls meet 716 (BCNYS 705.9.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 36
+    - 39
+    quote: '705.9.2 Protected openings. Where openings are required to be protected, opening protectives shall comply with
+      Section 716. Exception: Opening protectives are not required where the building is equipped throughout with an automatic
+      sprinkler system in accordance with Section 903.3.1.1 and the exterior openings are protected by a water curtain using
+      automatic sprin- klers approved for that use.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where openings in an exterior wall must be protected, their opening protectives meet Section 716; but none are
+      required where the building is equipped throughout with an automatic sprinkler system per 903.3.1.1 (an NFPA 13R or
+      13D system is not one) and the exterior openings are protected by a water curtain of automatic sprinklers approved for
+      that use: the openings and any water curtain aren''t in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Section 716 is brought in (Chapter 7 part
+    b''s flags). Shown for every building, a sprinklered one too: the water curtain isn''t a stated fact.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_3_unprotected_openings
+  kind: flag
+  topic: means_of_egress
+  title: Unprotected openings' windows and doors (BCNYS 705.9.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 40
+    - 41
+    quote: 705.9.3 Unprotected openings. Where unprotected openings are permitted, windows and doors shall be constructed
+      of any approved materials. Glazing shall conform to the requirements of Chapters 24 and 26.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where unprotected openings are permitted, their windows and doors are of any approved materials, the glazing per
+      Chapters 24 and 26: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Chapters 24 and 26 aren't brought in. Shown
+    for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_4_mixed_openings
+  kind: flag
+  topic: means_of_egress
+  title: Protected and unprotected openings together, Equation 7-2 (BCNYS 705.9.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 42
+    - 53
+    quote: '705.9.4 Mixed openings. Where both unprotected and protected openings are located in the exterior wall in any
+      story of a build- ing, the total area of openings shall be determined in accordance with the following: Equation 7-2
+      (A /a ) + (A /a ) ≤ 1 p p u u A = Actual area of protected openings, or the equivalent area of protected openings, A
+      (see Section 705.8). p e a = Allowable area of protected openings. p A = Actual area of unprotected openings. u a =
+      allowable area of unprotected openings. u'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where an exterior wall in any story has both unprotected and protected openings, their total area meets Equation
+      7-2, (Ap/ap) + (Au/au) at most 1: Ap the actual area of protected openings, or their equivalent area Ae (705.8), ap
+      the allowable area of protected openings, Au the actual area of unprotected openings, au the allowable area of unprotected
+      openings: the openings aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 705.8 is brought in (its own flag). Shown
+    for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_5_vertical_separation
+  kind: flag
+  topic: means_of_egress
+  title: Openings in adjacent stories separated vertically (BCNYS 705.9.5)
+  applies_when: not sprinklered_903_3_1_1 and not (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 54
+    - 65
+    quote: '705.9.5 Vertical separation of openings. Openings in exterior walls in adjacent stories shall be separated vertically
+      to protect against fire spread on the exterior of the buildings where the openings are within 5 feet (1524 mm) of each
+      other horizontally and the opening in the lower story is not a protected opening with a fire protection rating of not
+      less than 3/4 hour. Such openings shall be separated vertically not less than 3 feet (914 mm) by spandrel girders, exterior
+      walls or other similar assemblies that have a fire- resistance rating of not less than 1 hour, rated for exposure to
+      fire from both sides, or by flame barriers that extend horizontally not less than 30 inches (762 mm) beyond the exterior
+      wall. Flame barriers shall have a fire-resistance rating of not less than 1 hour. The unexposed surface temperature
+      limitations specified in ASTM E119 or UL 263 shall not apply to the flame barriers unless otherwise required by the
+      provisions of this code. Exceptions: 1. This section shall not apply to buildings that are three stories or less above
+      grade plane. 2. This section shall not apply to buildings equipped throughout with an automatic sprinkler system in
+      accordance with Section 903.3.1.1 or 903.3.1.2.'
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 3
+    - 3
+    quote: 3. Open parking garages.
+  examples:
+  - given:
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      occupancy_group: R-2
+    expect: needs_review
+    note: 'Openings in exterior walls in adjacent stories, within 5 feet of each other horizontally where the opening in the
+      lower story is not a protected opening rated at least 3/4 hour, are separated vertically at least 3 feet by spandrel
+      girders, exterior walls or other similar assemblies rated at least 1 hour for exposure to fire from both sides, or by
+      flame barriers extending at least 30 inches beyond the exterior wall, rated at least 1 hour (ASTM E119''s or UL 263''s
+      unexposed surface temperature limits don''t apply to flame barriers unless the code otherwise requires); but not in
+      buildings of three stories or less above grade plane, buildings equipped throughout with an automatic sprinkler system
+      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only where 903.3.1.2''s limits are known to hold: Group R alone, four or fewer stories and its heights stated within; in Group I-1, 903.2.6 exception 1''s Condition 1 is a person''s check), or open parking garages: with no such sprinkler system stated, a person''s check
+      (the openings and the stories above grade plane aren''t read here).'
+  - given:
+      sprinklered_903_3_1_1: true
+      occupancy_group: B
+    expect: not_applicable
+    note: 'A building stated sprinklered throughout per 903.3.1.1: exception 2 takes the section away.'
+  - given:
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'A Group R building stated sprinklered per 903.3.1.2 (NFPA 13R, which 903.3.1.2 allows in Group R): exception 2
+      applies.'
+  - given:
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      occupancy_group: B
+    expect: needs_review
+    note: 'An NFPA 13R system in a Group B building isn''t one 903.3.1.2 allows: exception 2 isn''t taken, a person''s check.'
+  - given:
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      occupancy_group: B
+    expect: needs_review
+    note: 'No sprinkler system: whether the building is three stories or less above grade plane, or an open parking garage,
+      is a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'No sprinkler system stated: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Exception 2 is read on the stated sprinkler
+    system (NFPA 13R counted only in Group R, as 716.2.2.3's flag reads it); exceptions 1 (three stories or less above grade
+    plane) and 3 (open parking garages) stay in the flag's words, a person's check. ASTM E119 and UL 263 aren't brought in;
+    903.3.1.1 and 903.3.1.2 are, alone.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_6_vertical_exposure
+  kind: flag
+  topic: means_of_egress
+  title: Openings above an adjacent roof on the same lot (BCNYS 705.9.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 4
+    - 14
+    quote: '705.9.6 Vertical exposure. For buildings on the same lot, opening protectives having a fire protection rating
+      of not less than 3/4 hour shall be provided in every opening that is less than 15 feet (4572 mm) vertically above the
+      roof of an adjacent building or structure based on assuming an imaginary line between them. The opening protectives
+      are required where the fire separation distances from the imaginary line to each building or structure are less than
+      15 feet (4572 mm). Exceptions: 1. Opening protectives are not required where the roof assembly of the adjacent building
+      or structure has a fire-resis- tance rating of not less than 1 hour for a minimum distance of 10 feet (3048 mm) from
+      the exterior wall facing the imaginary line and the entire length and span of the supporting elements for the fire-resistance-rated
+      roof assembly has a fire-resistance rating of not less than 1 hour. 2. Buildings on the same lot and considered as portions
+      of one building in accordance with Section 705.3 are not required to comply with Section 705.9.6.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'For buildings on the same lot, every opening less than 15 feet vertically above the roof of an adjacent building
+      or structure has an opening protective rated at least 3/4 hour, where the fire separation distances from the imaginary
+      line between them to each building or structure are less than 15 feet; but none is required where the adjacent roof
+      assembly is rated at least 1 hour for at least 10 feet from the exterior wall facing the imaginary line and the entire
+      length and span of its supporting elements are rated at least 1 hour, nor for buildings on the same lot considered portions
+      of one building per 705.3: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 705.3 is brought in (its own flag). Shown
+    for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_10_joints
+  kind: flag
+  topic: means_of_egress
+  title: Joints in rated exterior walls (BCNYS 705.10)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 15
+    - 17
+    quote: '705.10 Joints. Joints made in or between exterior walls required by this section to have a fire-resistance rating
+      shall comply with Section 715. Exception: Joints in exterior walls that are permitted to have unprotected openings.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Joints made in or between exterior walls this section requires to be rated meet Section 715, but not joints in
+      exterior walls permitted to have unprotected openings: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Section 715 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_10_1_voids
+  kind: flag
+  topic: means_of_egress
+  title: The void where a floor meets a curtain wall (BCNYS 705.10.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 18
+    - 19
+    quote: 705.10.1 Voids. The void created at the intersection of a floor/ceiling assembly and an exterior curtain wall assembly
+      shall be protected in accordance with Section 715.4.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The void where a floor/ceiling assembly meets an exterior curtain wall assembly is protected per 715.4: a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 715.4 isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_11_ducts
+  kind: flag
+  topic: means_of_egress
+  title: Ducts through rated exterior walls (BCNYS 705.11)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 20
+    - 22
+    quote: '705.11 Ducts and air transfer openings. Penetrations by air ducts and air transfer openings in fire-resistance-rated
+      exterior walls required to have protected openings shall comply with Section 717. Exception: Foundation vents installed
+      in accordance with this code are permitted.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Air ducts and air transfer openings penetrating rated exterior walls required to have protected openings meet Section
+      717; foundation vents installed per the code are permitted: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Section 717 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_12_parapets
+  kind: flag
+  topic: means_of_egress
+  title: Parapets on exterior walls, and when none is needed (BCNYS 705.12)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 23
+    - 48
+    quote: '705.12 Parapets. Parapets shall be provided on exterior walls of buildings. Exceptions: A parapet need not be
+      provided on an exterior wall where any of the following conditions exist: 1. The wall is not required to be fire-resistance
+      rated in accordance with Table 705.5 because of fire separation distance. 2. The building has an area of not more than
+      1,000 square feet (93 m[fn2]) on any floor. 3. Walls that terminate at roofs of not less than 2-hour fire-resistance-rated
+      construction or where the roof, including the deck or slab and supporting construction, is constructed entirely of noncombustible
+      materials. 4. One-hour fire-resistance-rated exterior walls that terminate at the underside of the roof sheathing, deck
+      or slab, provided that: 4.1. Where the roof/ceiling framing elements are parallel to the walls, such framing and elements
+      supporting such framing shall not be of less than 1-hour fire-resistance-rated construction for a width of 4 feet (1220
+      mm) for Groups R and U and 10 feet (3048 mm) for other occupancies, measured from the interior side of the wall. 4.2.
+      Where roof/ceiling framing elements are not parallel to the wall, the entire span of such framing and elements supporting
+      such framing shall not be of less than 1-hour fire-resistance-rated construction. 4.3. Openings in the roof shall not
+      be located within 5 feet (1524 mm) of the 1-hour fire-resistance-rated exterior wall for Groups R and U and 10 feet
+      (3048 mm) for other occupancies, measured from the interior side of the wall. 4.4. The entire building shall be provided
+      with not less than a Class B roof covering. 5. In Groups R-2 and R-3 where the entire building is provided with a Class
+      C roof covering, the exterior wall shall be permit- ted to terminate at the underside of the roof sheathing or deck
+      in Types III, IV and V construction, provided that one or both of the following criteria is met: 5.1. The roof sheathing
+      or deck is constructed of approved noncombustible materials or of fire-retardant-treated wood for a distance of 4 feet
+      (1220 mm). 5.2. The roof is protected with 0.625-inch (16 mm) Type X gypsum board directly beneath the underside of
+      the roof sheathing or deck, supported by not less than nominal 2-inch (51 mm) ledgers attached to the sides of the roof
+      framing members for a minimum distance of 4 feet (1220 mm). 6. Where the wall is permitted to have not less than 25
+      percent of the exterior wall areas containing unprotected openings based on fire separation distance as determined in
+      accordance with Section 705.9.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Exterior walls of buildings have parapets, except where: the wall needs no rating by Table 705.5 because of its
+      fire separation distance; the building has at most 1,000 square feet on any floor; the walls end at roofs of at least
+      2-hour rated construction, or at a roof (deck or slab and supporting construction included) entirely of noncombustible
+      materials; 1-hour rated exterior walls end at the underside of the roof sheathing, deck or slab, provided roof/ceiling
+      framing parallel to the wall, and what supports it, is at least 1-hour rated for a width of 4 feet (Groups R and U)
+      or 10 feet (other occupancies) from the wall''s interior side, framing not parallel to it, and what supports it, is
+      at least 1-hour rated for its entire span, no roof openings lie within 5 feet (Groups R and U) or 10 feet (other occupancies)
+      of the wall''s interior side, and the entire building has at least a Class B roof covering; in Groups R-2 and R-3 with
+      a Class C roof covering on the entire building, in Types III, IV and V, the wall ends at the underside of the roof sheathing
+      or deck where the sheathing or deck is of approved noncombustible materials or fire-retardant-treated wood for 4 feet,
+      or the roof is protected with 0.625-inch Type X gypsum board directly beneath the sheathing or deck, on ledgers of at
+      least nominal 2 inches attached to the sides of the roof framing, for at least 4 feet (one or both); or the wall is
+      permitted at least 25 percent of its area in unprotected openings by fire separation distance per 705.9: the walls,
+      roofs and distances aren''t in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 705.5 and 705.9 are brought in (their
+    own flags). Shown for every building: the floor areas a description holds may be only some floors''.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_12_1_parapet_construction
+  kind: flag
+  topic: means_of_egress
+  title: A required parapet's rating, faces and height (BCNYS 705.12.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 49
+    - 54
+    quote: 705.12.1 Parapet construction. Required parapets shall have the same fire-resistance rating as that required for
+      the supporting wall, and on any side adjacent to a roof surface, shall have noncombustible faces for the uppermost 18
+      inches (457 mm), including counterflashing and coping materials. The height of the parapet shall be not less than 30
+      inches (762 mm) above the point where the roof surface and the wall intersect. Where the roof slopes toward a parapet
+      at a slope greater than 2 units vertical in 12 units horizontal (16.7-percent slope), the parapet shall extend to the
+      same height as any portion of the roof within a fire separation distance where protection of wall openings is required,
+      but the height shall be not less than 30 inches (762 mm).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A required parapet has the same rating as the wall supporting it, noncombustible faces for its uppermost 18 inches
+      on any side next to a roof surface (counterflashing and coping materials included), and a height of at least 30 inches
+      above where the roof surface and the wall meet; where the roof slopes toward it at more than 2 units vertical in 12
+      horizontal (16.7 percent), it extends to the same height as any part of the roof within a fire separation distance where
+      wall openings must be protected, and at least 30 inches: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_707_3_2_exit_stairway_fire_barriers
@@ -5405,7 +6249,7 @@ rules:
       egress balconies), 1023.7 (interior exit stairways and ramps), 1024.8 (exit passageways), 1027.6 (exterior exit stairways
       and ramps) or 1207 of the Fire Code of New York State (energy storage systems) asks the exterior wall itself to be rated:
       which enclosure walls are exterior walls, and their ratings, a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 705 and the Fire Code's 1207 aren't brought in (1027.6 is, section group 9g's flag). Shown
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. The Fire Code's 1207 isn't brought in; 705 is, its egress parts (Chapter 7 part e1's flags), and 1027.6 (section group 9g's flag). Shown
     for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -5739,7 +6583,7 @@ rules:
     note: 'An exterior wall that is part of a required shaft enclosure follows Section 705 for exterior walls instead of the
       enclosure''s rating, except where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or
       1027.6 (exterior exit stairways and ramps) asks the exterior wall itself to be rated: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 705 isn't brought in (1027.6 is, section group
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 705's egress parts are brought in (Chapter 7 part e1's flags), and 1027.6 (section group
     9g's flag). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -5761,9 +6605,8 @@ rules:
     note: 'Openings in a shaft enclosure are protected per Section 716 as for fire barriers, and its doors are self-closing
       or close automatically on smoke detection per 716.2.6.6: the doors'' ratings and closers aren''t in the model, so a
       person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 716.2.6.6 isn't brought in; 716's fire
-    door ratings and tests are Chapter 7 part b's flags. Shown
-    for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 716's fire door ratings and tests are Chapter
+    7 part b's flags, 716.2.6.6's smoke-activated doors part e2's. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_713_7_1_shaft_prohibited_openings
@@ -6254,8 +7097,8 @@ rules:
       encloses energy storage systems, fire-resistance-rated glazing tested to ASTM E119 or UL 263 per 716.1.2.3 allowed instead.
       A horizontal exit''s door, a unit''s door in a rated separation and an exit door in an exterior wall are among them:
       the walls'' and doors'' ratings aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 706.4, 716.2.5.1.2, NFPA 221 and the Fire Code's
-    1207 aren't brought in. Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 706.4, NFPA 221 and the Fire Code's 1207 aren't
+    brought in; 716.2.5.1.2 is (Chapter 7 part e2). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_716_1_3__fire_windows
@@ -6488,8 +7331,8 @@ rules:
     note: 'In a fire door assembly in a corridor or a smoke barrier (the section''s heading), glazing elsewhere in the assembly,
       transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1 (elsewhere
       Table 716.1(2) and 716.2.5.4 decide where fire-protection-rated sidelights are allowed at all): a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 716.3.1.1 isn't brought in (Chapter 7 part
-    b3). Shown for every building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 716.3.1.1 and 716.2.5.4 are Chapter 7 part
+    e2's flags. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_716_2_1_4_smoke_draft_control_test
@@ -6735,6 +7578,949 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_716_2_5_1_glazing_size_limitations
+  kind: flag
+  topic: means_of_egress
+  title: Glazing sizes in fire door assemblies (BCNYS 716.2.5.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 188
+    lines:
+    - 26
+    - 27
+    quote: 716.2.5.1 Size limitations. Fire-resistance-rated glazing shall comply with the size limitations in Section 716.2.5.1.1.
+      Fire- protection-rated glazing shall comply with the size limitations of NFPA 80, and as provided in Section 716.2.5.1.2.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire-resistance-rated glazing in a fire door assembly meets the size limits of 716.2.5.1.1; fire-protection-rated
+      glazing meets NFPA 80''s size limits and 716.2.5.1.2: the doors'' glazing isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. NFPA 80 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_5_1_1_fire_resistance_rated_door_glazing
+  kind: flag
+  topic: means_of_egress
+  title: Fire-resistance-rated door glazing in rated walls (BCNYS 716.2.5.1.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 188
+    lines:
+    - 28
+    - 31
+    quote: 716.2.5.1.1 Fire-resistance-rated glazing in door assemblies in fire walls and fire barriers rated greater than
+      1 hour. Fire-resistance-rated glazing tested to ASTM E119 or UL 263 and NFPA 252, UL 10B or UL 10C shall be permitted
+      in fire door assemblies located in fire walls and in fire barriers in accordance with Table 716.1(2) to the maximum
+      size tested and in accor- dance with their listings.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire-resistance-rated glazing in fire door assemblies in fire walls and fire barriers (rated more than 1 hour)
+      is tested to ASTM E119 or UL 263 and to NFPA 252, UL 10B or UL 10C, used per Table 716.1(2) up to the maximum size tested
+      and per its listing: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. ASTM E119, UL 263, NFPA 252, UL 10B and UL
+    10C aren't brought in; Table 716.1(2) is (Chapter 7 part b's flags). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_5_1_2_fire_protection_rated_door_glazing
+  kind: flag
+  topic: means_of_egress
+  title: Fire-protection-rated door glazing in rated walls (BCNYS 716.2.5.1.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 188
+    lines:
+    - 32
+    - 34
+    quote: 716.2.5.1.2 Fire-protection-rated glazing in door assemblies in fire walls and fire barriers rated greater than
+      1 hour. Fire-protection-rated glazing shall be prohibited in fire walls and fire barriers except as provided in Sections
+      716.2.5.1.2.1 and 716.2.5.1.2.2.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire-protection-rated glazing is prohibited in fire walls and fire barriers (rated more than 1 hour) except as
+      716.2.5.1.2.1 (vision panels of horizontal exits'' doors) and 716.2.5.1.2.2 (1 1/2-hour doors in fire barriers) permit:
+      a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Both exceptions are brought in (their own
+    flags). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_5_1_2_1_horizontal_exit_vision_panels
+  kind: flag
+  topic: means_of_egress
+  title: Horizontal exit doors' vision panels, 100 sq in (BCNYS 716.2.5.1.2.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 188
+    lines:
+    - 35
+    - 36
+    quote: 716.2.5.1.2.1 Horizontal exits. Fire-protection-rated glazing shall be permitted as vision panels in self-closing
+      swinging fire door assemblies serving as horizontal exits in fire walls where limited to 100 square inches (0.065 m[fn2]).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire-protection-rated glazing is permitted as vision panels in self-closing swinging fire door assemblies serving
+      as horizontal exits in fire walls, limited to 100 square inches: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_5_1_2_2_fire_barrier_door_glazing
+  kind: flag
+  topic: means_of_egress
+  title: 1 1/2-hour fire barrier doors' glazing, 100 sq in (BCNYS 716.2.5.1.2.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 188
+    lines:
+    - 37
+    - 38
+    quote: 716.2.5.1.2.2 Fire barriers. Fire-protection-rated glazing shall be permitted in fire doors having a 1 1/2-hour
+      fire protec- tion rating intended for installation in fire barriers, where limited to 100 square inches (0.065 m[fn2]).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire-protection-rated glazing is permitted in fire doors with a 1 1/2-hour fire protection rating intended for
+      fire barriers, limited to 100 square inches: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_5_2_stairway_door_vision
+  kind: flag
+  topic: means_of_egress
+  title: Stair and elevator door glazing gives a clear view (BCNYS 716.2.5.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 188
+    lines:
+    - 39
+    - 41
+    quote: 716.2.5.2 Elevator, stairway and ramp protectives. Approved fire-protection-rated glazing used in fire door assemblies
+      in elevator, stairway and ramp enclosures shall be so located as to furnish clear vision of the passageway or approach
+      to the elevator, stairway or ramp.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Approved fire-protection-rated glazing in fire door assemblies in elevator, stairway and ramp enclosures is placed
+      to give a clear view of the passageway or approach to the elevator, stairway or ramp: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_5_3_corridor_door_glazing
+  kind: flag
+  topic: means_of_egress
+  title: Glazing in 20-minute corridor and smoke barrier doors (BCNYS 716.2.5.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 188
+    lines:
+    - 42
+    - 44
+    quote: 716.2.5.3 Glazing in door assemblies in corridors and smoke barriers. In a 20-minute fire door assembly, the glazing
+      mate- rial in the door itself shall have a minimum fire-protection-rated glazing of 20 minutes and shall be exempt from
+      the hose stream test.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In a 20-minute fire door assembly (in a corridor or smoke barrier), the glazing in the door itself is fire-protection-rated
+      at least 20 minutes and is exempt from the hose stream test: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_5_4_transoms_and_sidelights
+  kind: flag
+  topic: means_of_egress
+  title: Fire door frames with transom lights and sidelights (BCNYS 716.2.5.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 188
+    lines:
+    - 45
+    - 49
+    quote: 716.2.5.4 Fire door frames with transom lights and sidelights. Fire-protection-rated glazing shall be permitted
+      in door frames with transom lights, sidelights or both, where a 3/4-hour fire protection rating or less is required
+      and in 2-hour fire-resis- tance-rated exterior walls in accordance with Table 716.1(2). Fire door frames with transom
+      lights, sidelights or both, installed with fire-resistance-rated glazing tested as an assembly in accordance with ASTM
+      E119 or UL 263 shall be permitted where a fire protection rating exceeding 3/4 hour is required in accordance with Table
+      716.1(2).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire-protection-rated glazing is permitted in door frames with transom lights, sidelights or both where a fire
+      protection rating of 3/4 hour or less is required, and in 2-hour fire-resistance-rated exterior walls, per Table 716.1(2);
+      where a fire protection rating of more than 3/4 hour is required per Table 716.1(2), such frames are permitted with
+      fire-resistance-rated glazing tested as an assembly per ASTM E119 or UL 263: a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. ASTM E119 and UL 263 aren''t brought in;
+    Table 716.1(2) is. 716.2.5.4.1 (energy storage system enclosures) isn''t brought in: not means of egress. Shown for every
+    building.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_6_1_door_closing
+  kind: flag
+  topic: means_of_egress
+  title: Fire doors latching and self- or automatic-closing (BCNYS 716.2.6.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 188
+    lines:
+    - 55
+    - 58
+    quote: '716.2.6.1 Door closing. Fire doors shall be latching and self- or automatic-closing in accordance with this section.
+      Exceptions: 1. Fire doors located in common walls separating dwelling units or sleeping units in Group R-1 shall be
+      permitted without automatic- or self-closing devices.'
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 3
+    - 5
+    quote: 2. The elevator car doors and the associated elevator hoistway doors at the floor level designated for recall in
+      accor- dance with Section 3003.2 shall be permitted to remain open during Phase I emergency recall operation. 3. Fire
+      doors required solely for compliance with ICC 500 shall not be required to be self-closing or automatic-closing.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire doors are latching and self-closing or automatic-closing per 716.2.6; but fire doors in common walls separating
+      dwelling units or sleeping units in Group R-1 may have no automatic- or self-closing devices, elevator car doors and
+      their hoistway doors at the floor designated for recall per 3003.2 may stay open during Phase I emergency recall, and
+      fire doors required only for ICC 500 need not be self-closing or automatic-closing: the doors'' closers and latches
+      aren''t in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. 3003.2 and ICC 500 aren''t brought in. Shown
+    for every building: exception 1 is Group R-1''s common walls only, and which doors are fire doors isn''t in the model.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_6_2_latch_required
+  kind: flag
+  topic: means_of_egress
+  title: An active latch bolt on side-hinged fire doors (BCNYS 716.2.6.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 6
+    - 7
+    quote: 716.2.6.2 Latch required. Unless otherwise specifically permitted, single side-hinged swinging fire doors and both
+      leaves of pairs of side-hinged swinging fire doors shall be provided with an active latch bolt that will secure the
+      door when it is closed.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Unless otherwise specifically permitted, a single side-hinged swinging fire door, and both leaves of a pair of
+      them, has an active latch bolt that secures the door when closed: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_6_4_automatic_closing_assemblies
+  kind: flag
+  topic: means_of_egress
+  title: Automatic-closing fire doors self-closing per NFPA 80 (BCNYS 716.2.6.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 10
+    - 11
+    quote: 716.2.6.4 Automatic-closing fire door assemblies. Automatic-closing fire door assemblies shall be self-closing
+      in accordance with NFPA 80.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Automatic-closing fire door assemblies are self-closing per NFPA 80: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. NFPA 80 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_6_6_smoke_activated_doors
+  kind: flag
+  topic: means_of_egress
+  title: Automatic-closing doors held open, closing on smoke detection (BCNYS 716.2.6.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 14
+    - 27
+    quote: '716.2.6.6 Smoke-activated doors. Automatic-closing doors installed in the following locations shall be permitted
+      to have hold-open devices. Doors shall automatically close by the actuation of smoke detectors installed in accordance
+      with Section 907.3 or by loss of power to the smoke detector or hold-open device. Doors that are automatic-closing by
+      smoke detection shall not have more than a 10-second delay before the door starts to close after the smoke detector
+      is actuated. Automatic-closing doors that protect openings installed in the following locations shall comply with this
+      section: 1. In walls that separate incidental uses in accordance with Section 509.4. 2. In fire walls in accordance
+      with Section 706.8. 3. In fire barriers in accordance with Section 707.6. 4. In fire partitions in accordance with Section
+      708.6. 5. In smoke barriers in accordance with Section 709.5. 6. In smoke partitions in accordance with Section 710.5.2.3.
+      7. In shaft enclosures in accordance with Section 713.7. 8. In waste and linen chutes, discharge openings and access
+      and discharge rooms in accordance with Section 713.13. Loading doors installed in waste and linen chutes shall meet
+      the requirements of Sections 716.2.6.1 and 716.2.6.3.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Automatic-closing doors may have hold-open devices where they are in walls separating incidental uses (509.4),
+      fire walls (706.8), fire barriers (707.6), fire partitions (708.6), smoke barriers (709.5), smoke partitions (710.5.2.3),
+      shaft enclosures (713.7), or waste and linen chutes, discharge openings and access and discharge rooms (713.13); such
+      doors close automatically on actuation of smoke detectors installed per 907.3, or on loss of power to the smoke detector
+      or hold-open device, starting to close no more than 10 seconds after the smoke detector actuates; loading doors in waste
+      and linen chutes meet 716.2.6.1 and 716.2.6.3: the doors'' hold-opens and detectors aren''t in the model, so a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. 509.4, 706.8, 713.13, 907.3 and 716.2.6.3
+    aren't brought in; 707.6, 708.6, 709.5, 710.5.2.3 and 713.7 are (Chapter 7 parts a and c). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_6_7_pedestrian_way_doors
+  kind: flag
+  topic: means_of_egress
+  title: Vertical sliding or rolling steel fire doors where people walk (BCNYS 716.2.6.7)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 28
+    - 29
+    quote: 716.2.6.7 Doors in pedestrian ways. Vertical sliding or vertical rolling steel fire doors in openings through which
+      pedestrians travel shall be heat activated or activated by smoke detectors with alarm verification.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Vertical sliding or vertical rolling steel fire doors in openings people walk through are heat activated or activated
+      by smoke detectors with alarm verification: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_7_swinging_fire_shutters
+  kind: flag
+  topic: means_of_egress
+  title: Swinging fire shutters openable from outside (BCNYS 716.2.7)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 30
+    - 32
+    quote: 716.2.7 Swinging fire shutters. Where fire shutters of the swinging type are installed in exterior openings, not
+      less than one row in every three vertical rows shall be arranged to be readily opened from the outside, and shall be
+      identified by distinguishing marks or letters not less than 6 inches (152 mm) high.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where swinging fire shutters are installed in exterior openings (an exit stairway''s exterior wall among them,
+      1023.7 and 705.9.2), at least one row in every three vertical rows is arranged to be readily opened from the outside
+      and is identified by distinguishing marks or letters at least 6 inches high: shutters aren''t in the model, so a person''s
+      check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Brought in by part e2''s review round 1:
+    a fire shutter is an opening protective 705.9.2 sends to 716. Shown for every building.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_8_rolling_fire_shutters
+  kind: flag
+  topic: means_of_egress
+  title: Rolling fire shutters with automatic-closing devices (BCNYS 716.2.8)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 33
+    - 34
+    quote: 716.2.8 Rolling fire shutters. Where fire shutters of the rolling type are installed, such shutters shall include
+      approved auto- matic-closing devices.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Wherever rolling fire shutters are installed (opening protectives in any wall Table 716.1(2) rates, fire walls,
+      fire barriers, fire partitions, corridor walls, smoke barriers and exterior walls among them, and those 705.9.2 sends
+      to 716), they include approved automatic-closing devices: shutters aren''t in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Brought in by part e2''s review round 1:
+    a fire shutter is an opening protective Table 716.1(2) rates and 705.9.2 sends to 716. Shown for every building.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_9_labeled_assemblies
+  kind: flag
+  topic: means_of_egress
+  title: Fire door assemblies labeled by an approved agency (BCNYS 716.2.9)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 35
+    - 36
+    quote: 716.2.9 Labeled protective assemblies. Fire door assemblies shall be labeled by an approved agency. The labels
+      shall comply with NFPA 80, and shall be permanently affixed to the door or frame.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire door assemblies are labeled by an approved agency, the labels per NFPA 80, permanently affixed to the door
+      or frame: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. NFPA 80 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_9_1_fire_door_labels
+  kind: flag
+  topic: means_of_egress
+  title: What a fire door's label shows (BCNYS 716.2.9.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 37
+    - 42
+    quote: 716.2.9.1 Fire door labeling requirements. Fire doors shall be labeled showing the name of the manufacturer or
+      other identi- fication readily traceable back to the manufacturer, the name or trademark of the third-party inspection
+      agency, the fire protection rating and, where required for fire doors in interior exit stairways and ramps and exit
+      passageways by Section 716.2.2.3, the maximum transmitted temperature end point. Smoke and draft control doors complying
+      with UL 1784 shall be labeled as such and shall comply with Section 716.2.9.3. Labels shall be approved and permanently
+      affixed. The label shall be applied at the factory or location where fabrication and assembly are performed.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A fire door''s label shows the manufacturer''s name or other identification readily traceable to the manufacturer,
+      the name or trademark of the third-party inspection agency, the fire protection rating and, where 716.2.2.3 requires
+      it for fire doors in interior exit stairways and ramps and exit passageways, the maximum transmitted temperature end
+      point; smoke and draft control doors complying with UL 1784 are labeled as such and meet 716.2.9.3; labels are approved,
+      permanently affixed and applied at the factory or where the door is fabricated and assembled: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. UL 1784 isn't brought in; 716.2.2.3 is (Chapter
+    7 part b) and 716.2.9.3 (its own flag). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_9_2_oversized_doors
+  kind: flag
+  topic: means_of_egress
+  title: Oversized fire doors' label or certificate (BCNYS 716.2.9.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 47
+    - 50
+    quote: 716.2.9.2 Oversized doors. Oversized fire doors shall bear an oversized fire door label by an approved agency or
+      shall be provided with a certificate of inspection furnished by an approved testing agency. Where a certificate of inspection
+      is furnished by an approved testing agency, the certificate shall state that the door conforms to the requirements of
+      design, materials and construction, but has not been subjected to the fire test.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An oversized fire door bears an oversized fire door label by an approved agency, or has a certificate of inspection
+      from an approved testing agency stating that it conforms to the requirements of design, materials and construction but
+      has not been subjected to the fire test: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_9_3_smoke_door_labels
+  kind: flag
+  topic: means_of_egress
+  title: Smoke and draft control doors' "S" label (BCNYS 716.2.9.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 51
+    - 53
+    quote: 716.2.9.3 Smoke and draft control door labeling requirements. Smoke and draft control doors complying with UL 1784
+      shall be labeled in accordance with Section 716.2.9.1 and shall show the letter “S” on the fire-rating label of the
+      door. This marking shall indicate that the door and frame assembly are in compliance where listed or labeled gasketing
+      is installed.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Smoke and draft control doors complying with UL 1784 are labeled per 716.2.9.1 and show the letter "S" on the door''s
+      fire-rating label, meaning the door and frame assembly complies where listed or labeled gasketing is installed: a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. UL 1784 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_9_4_frame_labels
+  kind: flag
+  topic: means_of_egress
+  title: Fire door frames' labels (BCNYS 716.2.9.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 54
+    - 55
+    quote: 716.2.9.4 Fire door frame labeling requirements. Fire door frames shall be labeled showing the names of the manufacturer
+      and the third-party inspection agency.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire door frames are labeled with the names of the manufacturer and the third-party inspection agency: a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_9_5_glazing_labels
+  kind: flag
+  topic: means_of_egress
+  title: Fire-rated glazing in doors labeled (BCNYS 716.2.9.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 189
+    lines:
+    - 56
+    - 58
+    quote: 716.2.9.5 Labeling. Fire-rated glazing shall bear a label or other identification showing the name of the manufacturer,
+      the test standard and information required in Table 716.1(1) that shall be issued by an approved agency and shall be
+      permanently iden- tified on the glazing.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire-rated glazing bears a label or other identification, issued by an approved agency and permanently identified
+      on the glazing, showing the manufacturer''s name, the test standard and the information Table 716.1(1) requires: a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Table 716.1(1) is brought in (Chapter 7 part
+    b). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_9_6_operator_labels
+  kind: flag
+  topic: means_of_egress
+  title: Horizontal sliding fire doors' operators labeled and listed (BCNYS 716.2.9.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 3
+    - 4
+    quote: 716.2.9.6 Fire door operator labeling requirements. Fire door operators for horizontal sliding doors shall be labeled
+      and listed for use with the assembly.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire door operators for horizontal sliding doors are labeled and listed for use with the assembly: a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_2_10_smoke_door_installation
+  kind: flag
+  topic: means_of_egress
+  title: Corridor and smoke barrier doors installed per NFPA 105 (BCNYS 716.2.10)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 5
+    - 6
+    quote: 716.2.10 Installation of door assemblies in corridors and smoke barriers. Installation of smoke doors shall be
+      in accordance with NFPA 105.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Smoke doors (door assemblies in corridors and smoke barriers) are installed per NFPA 105: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. NFPA 105 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_1_fire_window_testing
+  kind: flag
+  topic: means_of_egress
+  title: Fire windows tested and rated per Table 716.1(3) (BCNYS 716.3.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 9
+    - 10
+    quote: 716.3.1 Testing requirements. Fire window assemblies shall be constructed of any material or assembly of component
+      materials that conforms to the test requirements of Sections 716.3.1.1 and 716.3.1.2 and the fire protection rating
+      indicated in Table 716.1(3).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire window assemblies are of any material or assembly of component materials that meets the tests of 716.3.1.1
+      and 716.3.1.2 and the fire protection rating Table 716.1(3) gives: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Table 716.1(3) is brought in (Chapter 7 part
+    b). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_1_1_positive_pressure_test
+  kind: flag
+  topic: means_of_egress
+  title: Fire window glazing tested under positive pressure (BCNYS 716.3.1.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 11
+    - 14
+    quote: 716.3.1.1 Testing under positive pressure. NFPA 257 or UL 9 shall evaluate fire-protection-rated glazing under
+      positive pres- sure. Within the first 10 minutes of a test, the pressure in the furnace shall be adjusted so not less
+      than two-thirds of the test specimen is above the neutral pressure plane, and the neutral pressure plane shall be maintained
+      at that height for the balance of the test.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'NFPA 257 or UL 9 evaluates fire-protection-rated glazing under positive pressure: within the first 10 minutes of
+      the test the furnace pressure is set so at least two-thirds of the specimen is above the neutral pressure plane, held
+      at that height for the rest of the test: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. NFPA 257 and UL 9 aren't brought in. Shown
+    for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_1_2_nonsymmetrical_glazing
+  kind: flag
+  topic: means_of_egress
+  title: Nonsymmetrical fire window glazing tested from both faces (BCNYS 716.3.1.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 15
+    - 18
+    quote: 716.3.1.2 Nonsymmetrical glazing systems. Nonsymmetrical fire-protection-rated glazing systems in fire partitions,
+      fire barriers or in exterior walls with a fire separation distance of 10 feet (3048 mm) or less pursuant to Section
+      705 shall be tested with both faces exposed to the furnace, and the assigned fire protection rating shall be the shortest
+      duration obtained from the two tests conducted in compliance with NFPA 257 or UL 9.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Nonsymmetrical fire-protection-rated glazing systems in fire partitions, fire barriers or exterior walls with a
+      fire separation distance of 10 feet or less per Section 705 are tested with both faces exposed to the furnace, the rating
+      the shorter of the two tests per NFPA 257 or UL 9: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. NFPA 257 and UL 9 aren't brought in; 705 is
+    (Chapter 7 part e1). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_2_fire_window_performance
+  kind: flag
+  topic: means_of_egress
+  title: Fire windows rated as Table 716.1(3) says (BCNYS 716.3.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 19
+    - 20
+    quote: 716.3.2 Performance requirements. Fire window assemblies shall be installed in the assemblies and comply with the
+      fire protec- tion rating specified in Table 716.1(3).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire window assemblies are installed in the assemblies and have the fire protection rating Table 716.1(3) gives:
+      a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_2_1_interior_fire_windows
+  kind: flag
+  topic: means_of_egress
+  title: Interior fire windows only in walls rated at most 1 hour (BCNYS 716.3.2.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 21
+    - 23
+    quote: 716.3.2.1 Interior fire window assemblies. Fire-protection-rated glazing used in fire window assemblies located
+      in fire parti- tions and fire barriers shall be limited to use in assemblies with a maximum fire-resistance rating of
+      1 hour in accordance with this section.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire-protection-rated glazing in fire window assemblies in fire partitions and fire barriers is used only in assemblies
+      with a fire-resistance rating of at most 1 hour, per 716.3.2.1.1 to 716.3.2.1.3: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_2_1_1_three_quarter_hour_windows
+  kind: flag
+  topic: means_of_egress
+  title: Where 3/4-hour fire windows are allowed (BCNYS 716.3.2.1.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 24
+    - 28
+    quote: 716.3.2.1.1 Where 3/4-hour-fire-protection window assemblies permitted. Fire-protection-rated glazing requiring
+      45- minute opening protection in accordance with Table 716.1(3) shall be limited to fire partitions designed in accordance
+      with Section 708 and fire barriers utilized in the applications set forth in Sections 707.3.6, 707.3.7 and 707.3.9 where
+      the fire-resis- tance rating does not exceed 1 hour. Fire-resistance-rated glazing assemblies tested in accordance with
+      ASTM E119 or UL 263 shall not be subject to the limitations of this section.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire-protection-rated glazing needing 45-minute opening protection per Table 716.1(3) is limited to fire partitions
+      per Section 708 and to fire barriers used as 707.3.6, 707.3.7 and 707.3.9 set out, where the fire-resistance rating
+      is at most 1 hour; fire-resistance-rated glazing assemblies tested per ASTM E119 or UL 263 are not so limited: a person''s
+      check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. 707.3.6, 707.3.7, 707.3.9, ASTM E119 and
+    UL 263 aren''t brought in; 708 is (Chapter 7 part c). 716.3.2.1.1.1 (energy storage system enclosures) isn''t brought
+    in: not means of egress. Shown for every building.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_2_1_2_fire_window_area
+  kind: flag
+  topic: means_of_egress
+  title: Fire windows at most 25 percent of a common wall (BCNYS 716.3.2.1.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 31
+    - 32
+    quote: 716.3.2.1.2 Area limitations. The total area of the glazing in fire-protection-rated window assemblies shall not
+      exceed 25 percent of the area of a common wall with any room.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The total glazing area of fire-protection-rated window assemblies is at most 25 percent of the area of a common
+      wall with any room: the walls and windows aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_3_fire_window_frames
+  kind: flag
+  topic: means_of_egress
+  title: Fire window frames rated as Table 716.1(3) says (BCNYS 716.3.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 36
+    - 37
+    quote: 716.3.3 Fire window frames. Fire window frames installed with a fire window assembly shall meet the fire-protection
+      rating indi- cated in Table 716.1(3).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire window frames installed with a fire window assembly have the fire protection rating Table 716.1(3) gives:
+      a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_3_1_window_mullions
+  kind: flag
+  topic: means_of_egress
+  title: Metal mullions taller than 12 feet protected (BCNYS 716.3.3.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 38
+    - 39
+    quote: 716.3.3.1 Window mullions. Metal mullions that exceed a nominal height of 12 feet (3658 mm) shall be protected
+      with materi- als to afford the same fire-resistance rating as required for the wall construction in which the protective
+      is located.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Metal mullions of a nominal height of more than 12 feet are protected with materials giving the same fire-resistance
+      rating as the wall the protective is in: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_4_fire_window_glazing
+  kind: flag
+  topic: means_of_egress
+  title: Fire window glazing rated, and exterior wall openings 3/4 hour (BCNYS 716.3.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 40
+    - 44
+    quote: '716.3.4 Fire-protection-rated glazing. Glazing in fire window assemblies shall be fire protection rated in accordance
+      with this section and Table 716.1(3). Fire-protection-rated glazing in fire window assemblies shall be tested in accordance
+      with and shall meet the acceptance criteria of NFPA 257 or UL 9. Openings in nonfire-resistance-rated exterior wall
+      assemblies that require protection in accordance with Section 705.3, 705.9, 705.9.5 or 705.9.6 shall have a fire protection
+      rating of not less than 3/4 hour. Fire-protection-rated glazing in 1/2-hour fire-resistance-rated partitions is permitted
+      to have a 20-minute fire protection rating.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Glazing in fire window assemblies is fire protection rated per this section and Table 716.1(3), tested to and meeting
+      the acceptance criteria of NFPA 257 or UL 9; openings in exterior wall assemblies that are not fire-resistance rated,
+      where 705.3, 705.9, 705.9.5 or 705.9.6 requires them protected, have a fire protection rating of at least 3/4 hour;
+      fire-protection-rated glazing in 1/2-hour fire-resistance-rated partitions may have a 20-minute rating: a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. NFPA 257 and UL 9 aren't brought in; 705.3,
+    705.9, 705.9.5 and 705.9.6 are (Chapter 7 part e1). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_4_1_glass_and_glazing
+  kind: flag
+  topic: means_of_egress
+  title: Fire window glazing installed within NFPA 80's sizes (BCNYS 716.3.4.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 46
+    - 47
+    quote: 716.3.4.1 Glass and glazing. Glazing in fire window assemblies shall be fire-protection-rated glazing installed
+      in accordance with and complying with the size limitations set forth in NFPA 80.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Glazing in fire window assemblies is fire-protection-rated glazing installed per, and within the size limits of,
+      NFPA 80: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. NFPA 80 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_5_labeled_window_assemblies
+  kind: flag
+  topic: means_of_egress
+  title: Fire window glazing labeled by an approved agency (BCNYS 716.3.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 48
+    - 49
+    quote: 716.3.5 Labeled protective assemblies. Glazing in fire window assemblies shall be labeled by an approved agency.
+      The labels shall comply with NFPA 80 and Section 716.3.5.2.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Glazing in fire window assemblies is labeled by an approved agency, the labels per NFPA 80 and 716.3.5.2: a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. NFPA 80 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_5_1_fire_window_frames_approved
+  kind: flag
+  topic: means_of_egress
+  title: Fire window frames approved for the use (BCNYS 716.3.5.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 50
+    - 50
+    quote: 716.3.5.1 Fire window frames. Fire window frames shall be approved for the intended application.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire window frames are approved for the intended application: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_5_2_fire_window_labels
+  kind: flag
+  topic: means_of_egress
+  title: What a fire window glazing's label shows (BCNYS 716.3.5.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 51
+    - 53
+    quote: 716.3.5.2 Labeling requirements. Fire-protection-rated glazing shall bear a label or other identification showing
+      the name of the manufacturer, the test standard and information required in Section 716.1.2.2.2 and Table 716.1(3) that
+      shall be issued by an approved agency and permanently identified on the glazing.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire-protection-rated glazing bears a label or other identification, issued by an approved agency and permanently
+      identified on the glazing, showing the manufacturer''s name, the test standard and the information 716.1.2.2.2 and Table
+      716.1(3) require: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. 716.1.2.2.2 and Table 716.1(3) are brought
+    in (Chapter 7 part b). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_3_6_1_fire_window_closure
+  kind: flag
+  topic: means_of_egress
+  title: Fire window glazing fixed or automatic-closing (BCNYS 716.3.6.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 55
+    - 56
+    quote: 716.3.6.1 Closure. Fire-protection-rated glazing shall be in the fixed position or be automatic-closing and shall
+      be installed in labeled frames.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire-protection-rated glazing is in the fixed position or automatic-closing, installed in labeled frames: a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_4_fire_protective_curtains
+  kind: flag
+  topic: means_of_egress
+  title: Fire protective curtain assemblies tested to UL 10D (BCNYS 716.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 190
+    lines:
+    - 57
+    - 59
+    quote: 716.4 Fire protective curtain assembly. Approved fire protective curtain assemblies shall be constructed of any
+      materials or assem- bly of component materials tested without hose stream in accordance with UL 10D, and shall comply
+      with the Sections 716.4.1 through 716.4.3.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Approved fire protective curtain assemblies are of any materials or assembly of component materials tested without
+      hose stream per UL 10D, and meet 716.4.1 to 716.4.3: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. UL 10D isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_4_1_curtain_labels
+  kind: flag
+  topic: means_of_egress
+  title: Fire protective curtains labeled (BCNYS 716.4.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 191
+    lines:
+    - 3
+    - 4
+    quote: 716.4.1 Label. Fire protective curtain assemblies used as opening protectives in fire-rated walls and smoke partitions
+      shall be labeled in accordance with Section 716.2.9.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire protective curtain assemblies used as opening protectives in fire-rated walls and smoke partitions are labeled
+      per 716.2.9: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_4_2_curtain_smoke_control
+  kind: flag
+  topic: means_of_egress
+  title: Curtains where smoke and draft control is required (BCNYS 716.4.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 191
+    lines:
+    - 5
+    - 6
+    quote: 716.4.2 Smoke and draft control. Fire protective curtain assemblies used to protect openings where smoke and draft
+      control assemblies are required shall comply with Section 716.2.1.4.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire protective curtain assemblies protecting openings where smoke and draft control assemblies are required meet
+      716.2.1.4: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. 716.2.1.4 is brought in (Chapter 7 part b).
+    Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_716_4_3_curtain_installation
+  kind: flag
+  topic: means_of_egress
+  title: Fire protective curtains installed per NFPA 80 (BCNYS 716.4.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 191
+    lines:
+    - 7
+    - 7
+    quote: 716.4.3 Installation. Fire protective curtain assemblies shall be installed in accordance with NFPA 80.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire protective curtain assemblies are installed per NFPA 80: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. NFPA 80 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_708_1_which_walls_are_fire_partitions
   kind: flag
   topic: means_of_egress
@@ -6946,7 +8732,7 @@ rules:
     note: 'An exterior wall that is part of a required rated separation follows Section 705 for exterior walls instead, except
       where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways
       and ramps) asks the exterior wall itself to be rated: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 705 isn't brought in (1027.6 is, section group
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 705's egress parts are brought in (Chapter 7 part e1's flags), and 1027.6 (section group
     9g's flag). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -7183,9 +8969,9 @@ rules:
   - given:
       occupancy_group: I-2
     expect: needs_review
-    note: 'In Group I-2 and ambulatory care facilities (and a Group I-1 Condition 2 pair of corridor doors 709.5 exception 1
-      sends here), smoke barrier doors across a corridor with hold-open devices close automatically per 716.2.6.6, and have a
-      vision panel of fire-protection-rated glazing in fire-protection-rated frames no larger than tested: the doors aren''t
+    note: 'In Group I-2 and ambulatory care facilities (and a Group I-1 Condition 2 pair of corridor doors 709.5 exception
+      1 sends here), smoke barrier doors across a corridor with hold-open devices close automatically per 716.2.6.6, and have
+      a vision panel of fire-protection-rated glazing in fire-protection-rated frames no larger than tested: the doors aren''t
       in the model, so a person''s check.'
   - given:
       occupancy_group: I-1
@@ -7205,9 +8991,9 @@ rules:
   - given: {}
     expect: needs_review
     note: 'No group stated: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 716.2.6.6 isn't brought in. Narrowed to Groups
-    I-1 (709.5 exception 1 sends Condition 2's corridor door pairs here) and I-2, a building of two or more groups, and one
-    where an ambulatory care facility is stated or not ruled out.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 716.2.6.6 is Chapter 7 part e2's flag. Narrowed
+    to Groups I-1 (709.5 exception 1 sends Condition 2's corridor door pairs here) and I-2, a building of two or more groups,
+    and one where an ambulatory care facility is stated or not ruled out.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_709_6_smoke_barrier_penetrations
@@ -7416,8 +9202,8 @@ rules:
     expect: needs_review
     note: 'Where another section requires it, a door in a smoke partition is self-closing or closes automatically on smoke
       detection per 716.2.6.6: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 716.2.6.6 isn't brought in. Shown for every
-    building.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 716.2.6.6 is Chapter 7 part e2's flag. Shown
+    for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_710_5_3_i2_pass_through_openings
@@ -21502,6 +23288,22 @@ rules:
     quote: '[BE] 405.7.1 Number of exits. Each floor level shall be provided with not fewer than two exits. Where compartmentation
       is required by Section 405.4, each compartment shall have not fewer than one exit and not fewer than one exit access
       doorway into the adjoining compartment.'
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 26
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:
+      1. Four stories or fewer above grade plane. 2. For other than Group R-2 occupancies, the floor level of the highest
+      story is 30 feet (9144 mm) or less above the lowest level of fire department vehicle access. For Group R-2 occupancies,
+      the roof assembly is less than 45 feet (13 716 mm) above the lowest level of fire depart- ment vehicle access. The height
+      of the roof assembly shall be determined by measuring the distance from the lowest required fire vehicle access road
+      surface adjacent to the building to the eave of the highest pitched roof, the intersec- tion of the highest roof to
+      the exterior wall, or the top of the highest parapet, whichever yields the greatest distance. 3. The floor level of
+      the lowest story is 30 feet (9144 mm) or less below the lowest level of fire department vehicle access. The number of
+      stories of Group R occupancies constructed in accordance with Sections 510.2 and 510.4 shall be measured from grade
+      plane.'
   examples:
   - given:
       occupancy_group: R-2
@@ -21746,6 +23548,33 @@ rules:
     expect: needs_review
     note: 'A story with one exit, a pass where the building states it isn''t underground, where it states it is: 405.7.1 asks
       two exits on each floor level, so a person checks.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      nfpa_13r_stated: true
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      underground_building: false
+    parts:
+      story:
+      - id: p1
+        name: Four apartments, one exit, an NFPA 13R system
+        measures:
+          story_assembly_seating_possible: false
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 18
+          egress_travel_distance: 125
+          story_fourth_or_higher_above_grade_plane: false
+          story_dwelling_units: 4
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The pass at the limits with an NFPA 13R system stated whose 903.3.1.2 limits aren''t all known (its stories,
+      roof height and lowest floor): whether it is a 903.3.1.2 system isn''t known, so a person checks.'
   notes: 'Table 1006.3.4(1) for Group R-2 of dwelling units (note b; one of sleeping units is Table 1006.3.4(2)''s): a basement
     or the first, second or third story above grade plane may have one exit with at most 4 dwelling units and 125 ft of exit
     access travel, only in a building sprinklered per 903.3.1.1 or 903.3.1.2 with emergency escape and rescue openings per
@@ -21758,7 +23587,10 @@ rules:
     gives the same place, else needs review. A basement is never proven (review round 6). With spot grades, Gordium''s reading,
     shown to confirm: the ground between spots lies between their values, so the grade plane is at most the highest finished
     spot grade outside the building itself; the slope-away rule can only lower it, so a basement is never proven from spot
-    grades. No ground stated, or existing ground: needs review.'
+    grades. No ground stated, or existing ground: needs review.
+    The merge of the story facts (2026-11-28, the coordinator''s decision): the dwelling units now measured, a one-exit
+    pass resting on an NFPA 13R system needs review unless 903.3.1.2''s limits are known to hold (#288 decides it for
+    every rule: its own review here was dropped there, since it would hold back a 13R system counted).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_1_remoteness
@@ -27852,7 +29684,7 @@ rules:
     note: 'No corridor: with none, the flag doesn''t apply.'
   notes: '1020.2''s second sentence: corridor walls required to be rated comply with Section 708 (fire partitions: continuity,
     openings, doors; Chapter 7 part c''s flags); exception 5 permits unprotected openings on unrated exterior walls (Tables 705.5 and
-    705.9, not brought in). Hand-drafted in a Claude Code session (2026-11-25).'
+    705.9, Chapter 7 part e1''s flags). Hand-drafted in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1020_2_1_hoistway_protection
@@ -34263,34 +36095,37 @@ rules:
   title: An area well of at least 9 sq ft below grade (BCNYS 1031.5, 1031.5.1)
   applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
   limit: not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment
-    <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))
+    <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment <= 6)))
   check: (not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment
-    <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher or (occupancy_group
-    in ["R-2"] and not opening_room_one_exit)
+    <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher
+    or (occupancy_group in ["R-2"] and not opening_room_one_exit)
   review_when:
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_door_to_outside
     reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded, or not known), but
       its room has a door to outside: exception 2 sets the opening aside where that door is an exit or exit access door opening
       directly into a public way, or a yard, court or exterior egress balcony leading to one, which the model doesn''t show:
       a person checks.'
   - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
     reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded, or not known), in
       a Group R-2 or R-3 building sprinklered throughout (stated, or not ruled out): exception 5 sets the opening aside for
       a sleeping room in a basement with two means of egress, or one and an escape opening, which the model doesn''t show:
       a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_other_compliant
     reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded, or not known), but
       another escape opening in its room is known to comply: 1031.2 asks each sleeping room for not fewer than one, so this
       one may not be the one relied on (an extra window needn''t meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))))
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6))))
     reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded, or not known), in
       a building of two or more groups: whether its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t
       shown: a person checks.'
@@ -34604,6 +36439,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_other_compliant: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -34633,6 +36469,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_other_compliant: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -34728,10 +36565,72 @@ rules:
     - outcome: needs_review
       part: o1
       within: r1
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 10
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_other_compliant: false
+          area_well_depth: 50
+          area_well_ladder: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'A required ladder, not obstructed, reaching 3 in: the exception allows it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 10
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_other_compliant: false
+          area_well_depth: 50
+          area_well_ladder: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'A ladder the open window obstructs reaching 3 in: not the ladder or steps 1031.5.2 requires (it shall not be
+      obstructed), so its reach isn''t excused: it fails, as 1031.5.2''s own rule fails the obstruction (Gordium''s strict
+      reading of an open question).'
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). An opening whose bottom is below the adjacent grade has an area well (1031.5) of at least 9 sq ft horizontal
     area (1031.5.1), to its walls, with nothing standing in it reaching into its required dimensions but the ladder or steps
-    1031.5.2 requires (a well over 44 inches deep), and those no more than 6 inches (the exception; not measured yet, a review);
+    1031.5.2 requires (a well over 44 inches deep), not obstructed by the open window, those no more than 6 inches (the exception; one the open window obstructs isn''t the ladder or steps 1031.5.2 requires, which "shall not be obstructed", so its reach isn''t excused and the well''s size fails, as 1031.5.2''s own rule fails the obstruction where the well is known over 44 inches deep: Gordium''s strict reading of an open question, recorded below; one not stated clear of the open window needs review);
     no well read is no area. Past those limits (something else in the required dimensions, the ladder or steps more than 6
     inches into them, or any in a well no deeper than 44 inches) it fails too (review round 4). It applies only where 1031.2
     requires the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher,
@@ -34742,39 +36641,146 @@ rules:
     Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  open_questions:
+  - Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose reach
+    into the well the exception allows?
+  research:
+  - question: Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose
+      reach into the well the exception allows?
+    searched:
+    - 1031.5.1
+    - 1031.5.2
+    sources:
+    - rank: 4
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s ladder sentence of that edition (R310.2.3.1)'
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
+    why_open: '1031.5.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
+      the emergency escape and rescue opening when the window or door is in the open position'', so the plain reading is that
+      an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
+      words name the ladder the section requires, not one that complies with it, so the words don''t settle whether an obstructed ladder''s reach of 6 in or less is allowed. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
+      (the same words) reads it the same way. Searched (2026-11-26): 1031.5.1 and 1031.5.2 whole, RCNYS R319.4.1 and R319.4.2
+      (the same words), a web search for ICC commentary (none found), a web search for New York State Department of State
+      code interpretations (2026-11-26: none on an obstructed well ladder found; only New York City''s own Building Code,
+      a separate code, came up), and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the
+      required ladder or steps "usable with the window in the fully open position" (leaning toward the plain reading) but
+      says nothing of an obstructed ladder''s reach. Gordium''s reading meanwhile (2026-11-27, merging with 8d''s limits, which can''t hold a review band for it): the strict one, an obstructed ladder''s reach fails the size rule (beside 1031.5.2''s own fail where the well is known over 44 inches deep), and a ladder not stated clear of the open window needs review; never a pass. An answer from the City or the architects replaces it.'
+  revised:
+  - field: check
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: review_when
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: examples
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: open_questions
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: notes
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 4)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 4: the research''s citation names the handout''s passage (the IRC''s
+      ladder sentence, R310.2.3.1) and records the search for New York State''s code interpretations (none found on the point).'
+  - field: limit
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: review_when
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: examples
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: notes
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: research
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
 - id: general.bc_1031_5_1_area_well_min_projection
   kind: rule
   topic: means_of_egress
   title: Area well at least 36 in out from the wall (BCNYS 1031.5.1)
   applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
   limit: not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment
-    <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))
+    <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment <= 6)))
   check: (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment
-    <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher or (occupancy_group
-    in ["R-2"] and not opening_room_one_exit)
+    <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher
+    or (occupancy_group in ["R-2"] and not opening_room_one_exit)
   review_when:
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_door_to_outside
     reason: 'The opening has an area well short of 36 inches out clear (short, crowded, or not known), but its room has a
       door to outside: exception 2 sets the opening aside where that door is an exit or exit access door opening directly
       into a public way, or a yard, court or exterior egress balcony leading to one, which the model doesn''t show: a person
       checks.'
   - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
     reason: 'The opening has an area well short of 36 inches out clear (short, crowded, or not known), in a Group R-2 or R-3
       building sprinklered throughout (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room in
       a basement with two means of egress, or one and an escape opening, which the model doesn''t show: a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_other_compliant
     reason: 'The opening has an area well short of 36 inches out clear (short, crowded, or not known), but another escape
       opening in its room is known to comply: 1031.2 asks each sleeping room for not fewer than one, so this one may not be
       the one relied on (an extra window needn''t meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))))
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6))))
     reason: 'The opening has an area well short of 36 inches out clear (short, crowded, or not known), in a building of two
       or more groups: whether its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
   for_each: emergency_escape_opening
@@ -35080,6 +37086,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_other_compliant: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -35109,6 +37116,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_other_compliant: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -35204,9 +37212,71 @@ rules:
     - outcome: needs_review
       part: o1
       within: r1
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 40
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_other_compliant: false
+          area_well_depth: 50
+          area_well_ladder: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'A required ladder, not obstructed, reaching 3 in: the exception allows it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 40
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_other_compliant: false
+          area_well_depth: 50
+          area_well_ladder: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'A ladder the open window obstructs reaching 3 in: not the ladder or steps 1031.5.2 requires (it shall not be
+      obstructed), so its reach isn''t excused: it fails, as 1031.5.2''s own rule fails the obstruction (Gordium''s strict
+      reading of an open question).'
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). Its area well''s horizontal projection is 36 inches or more to its walls, and nothing standing in it reaches
-    into it but the ladder or steps 1031.5.2 requires, those no more than 6 inches (not measured yet, a review); short of
+    into it but the ladder or steps 1031.5.2 requires, not obstructed by the open window, those no more than 6 inches (the exception; one the open window obstructs isn''t the ladder or steps 1031.5.2 requires, which "shall not be obstructed", so its reach isn''t excused and the well''s size fails, as 1031.5.2''s own rule fails the obstruction where the well is known over 44 inches deep: Gordium''s strict reading of an open question, recorded below; one not stated clear of the open window needs review); short of
     36 inches it fails whatever stands in it (review rounds 1 to 3). Past those limits (something else in the required dimensions,
     the ladder or steps more than 6 inches into them, or any in a well no deeper than 44 inches) it fails too (review round
     4). It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth
@@ -35217,39 +37287,146 @@ rules:
     yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  open_questions:
+  - Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose reach
+    into the well the exception allows?
+  research:
+  - question: Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose
+      reach into the well the exception allows?
+    searched:
+    - 1031.5.1
+    - 1031.5.2
+    sources:
+    - rank: 4
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s ladder sentence of that edition (R310.2.3.1)'
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
+    why_open: '1031.5.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
+      the emergency escape and rescue opening when the window or door is in the open position'', so the plain reading is that
+      an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
+      words name the ladder the section requires, not one that complies with it, so the words don''t settle whether an obstructed ladder''s reach of 6 in or less is allowed. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
+      (the same words) reads it the same way. Searched (2026-11-26): 1031.5.1 and 1031.5.2 whole, RCNYS R319.4.1 and R319.4.2
+      (the same words), a web search for ICC commentary (none found), a web search for New York State Department of State
+      code interpretations (2026-11-26: none on an obstructed well ladder found; only New York City''s own Building Code,
+      a separate code, came up), and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the
+      required ladder or steps "usable with the window in the fully open position" (leaning toward the plain reading) but
+      says nothing of an obstructed ladder''s reach. Gordium''s reading meanwhile (2026-11-27, merging with 8d''s limits, which can''t hold a review band for it): the strict one, an obstructed ladder''s reach fails the size rule (beside 1031.5.2''s own fail where the well is known over 44 inches deep), and a ladder not stated clear of the open window needs review; never a pass. An answer from the City or the architects replaces it.'
+  revised:
+  - field: check
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: review_when
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: examples
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: open_questions
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: notes
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 4)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 4: the research''s citation names the handout''s passage (the IRC''s
+      ladder sentence, R310.2.3.1) and records the search for New York State''s code interpretations (none found on the point).'
+  - field: limit
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: review_when
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: examples
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: notes
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: research
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
 - id: general.bc_1031_5_1_area_well_min_width
   kind: rule
   topic: means_of_egress
   title: Area well at least 36 in wide (BCNYS 1031.5.1)
   applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
   limit: not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment
-    <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))
+    <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment <= 6)))
   check: (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment
-    <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher or (occupancy_group
-    in ["R-2"] and not opening_room_one_exit)
+    <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher
+    or (occupancy_group in ["R-2"] and not opening_room_one_exit)
   review_when:
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_door_to_outside
     reason: 'The opening has an area well short of 36 inches wide clear (short, crowded, or not known), but its room has a
       door to outside: exception 2 sets the opening aside where that door is an exit or exit access door opening directly
       into a public way, or a yard, court or exterior egress balcony leading to one, which the model doesn''t show: a person
       checks.'
   - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
     reason: 'The opening has an area well short of 36 inches wide clear (short, crowded, or not known), in a Group R-2 or
       R-3 building sprinklered throughout (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room
       in a basement with two means of egress, or one and an escape opening, which the model doesn''t show: a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_other_compliant
     reason: 'The opening has an area well short of 36 inches wide clear (short, crowded, or not known), but another escape
       opening in its room is known to comply: 1031.2 asks each sleeping room for not fewer than one, so this one may not be
       the one relied on (an extra window needn''t meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))))
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6))))
     reason: 'The opening has an area well short of 36 inches wide clear (short, crowded, or not known), in a building of two
       or more groups: whether its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
   for_each: emergency_escape_opening
@@ -35555,6 +37732,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_other_compliant: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -35584,6 +37762,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_other_compliant: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -35679,9 +37858,71 @@ rules:
     - outcome: needs_review
       part: o1
       within: r1
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 40
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_other_compliant: false
+          area_well_depth: 50
+          area_well_ladder: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'A required ladder, not obstructed, reaching 3 in: the exception allows it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 40
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_other_compliant: false
+          area_well_depth: 50
+          area_well_ladder: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'A ladder the open window obstructs reaching 3 in: not the ladder or steps 1031.5.2 requires (it shall not be
+      obstructed), so its reach isn''t excused: it fails, as 1031.5.2''s own rule fails the obstruction (Gordium''s strict
+      reading of an open question).'
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). Its area well''s width is 36 inches or more to its walls, and nothing standing in it reaches into it but
-    the ladder or steps 1031.5.2 requires, those no more than 6 inches (not measured yet, a review); short of 36 inches it
+    the ladder or steps 1031.5.2 requires, not obstructed by the open window, those no more than 6 inches (the exception; one the open window obstructs isn''t the ladder or steps 1031.5.2 requires, which "shall not be obstructed", so its reach isn''t excused and the well''s size fails, as 1031.5.2''s own rule fails the obstruction where the well is known over 44 inches deep: Gordium''s strict reading of an open question, recorded below; one not stated clear of the open window needs review); short of 36 inches it
     fails whatever stands in it (review rounds 1 to 3). Past those limits (something else in the required dimensions, the
     ladder or steps more than 6 inches into them, or any in a well no deeper than 44 inches) it fails too (review round 4).
     It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth
@@ -35692,6 +37933,110 @@ rules:
     yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  open_questions:
+  - Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose reach
+    into the well the exception allows?
+  research:
+  - question: Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose
+      reach into the well the exception allows?
+    searched:
+    - 1031.5.1
+    - 1031.5.2
+    sources:
+    - rank: 4
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s ladder sentence of that edition (R310.2.3.1)'
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
+    why_open: '1031.5.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
+      the emergency escape and rescue opening when the window or door is in the open position'', so the plain reading is that
+      an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
+      words name the ladder the section requires, not one that complies with it, so the words don''t settle whether an obstructed ladder''s reach of 6 in or less is allowed. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
+      (the same words) reads it the same way. Searched (2026-11-26): 1031.5.1 and 1031.5.2 whole, RCNYS R319.4.1 and R319.4.2
+      (the same words), a web search for ICC commentary (none found), a web search for New York State Department of State
+      code interpretations (2026-11-26: none on an obstructed well ladder found; only New York City''s own Building Code,
+      a separate code, came up), and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the
+      required ladder or steps "usable with the window in the fully open position" (leaning toward the plain reading) but
+      says nothing of an obstructed ladder''s reach. Gordium''s reading meanwhile (2026-11-27, merging with 8d''s limits, which can''t hold a review band for it): the strict one, an obstructed ladder''s reach fails the size rule (beside 1031.5.2''s own fail where the well is known over 44 inches deep), and a ladder not stated clear of the open window needs review; never a pass. An answer from the City or the architects replaces it.'
+  revised:
+  - field: check
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: review_when
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: examples
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: open_questions
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: notes
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 4)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 4: the research''s citation names the handout''s passage (the IRC''s
+      ladder sentence, R310.2.3.1) and records the search for New York State''s code interpretations (none found on the point).'
+  - field: limit
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: review_when
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: examples
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: notes
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
+  - field: research
+    by: Claude for Ben (merge of PR 257 with section group 8d)
+    date: 2026-11-27
+    why: 'Merging line D (Revit hardware and well marks, #257) with section group 8d''s limits (#242): 8d holds each escape-opening rule to its limit and refuses a review band whose other conditions read the limit''s figures, so the band that sent an obstructed ladder''s reach of 6 in or less to review can''t stay. The limit keeps line D''s strict check (only a ladder or steps not obstructed by the open window may reach in), so that case fails the size rule, as 1031.5.2''s own rule fails the obstruction: no row passes on the unclear reading and no opening''s compliance or the building''s verdict changes. The open question stays recorded (docs/questions_for_architects.md). Chosen by the coordinator, option A, 2026-11-27.'
 - id: general.bc_1031_5_1_area_well_allows_full_opening
   kind: rule
   topic: means_of_egress
@@ -39568,7 +41913,8 @@ rules:
       exterior edge, to adjacent lot lines, to other portions of the building (treated as separate buildings) and to other
       buildings on the same lot unless their exterior walls and openings are protected per 705: balconies and their distances
       aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 705 isn't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 705 isn't brought in whole, only its egress
+    parts (Chapter 7 part e1's flags).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1022_1_exits_general
@@ -39883,7 +42229,8 @@ rules:
       enclose its exterior and other parts of the building expose them at an angle under 180 degrees, construction within
       10 feet meets 1023.7.1 and 1023.7.2: walls'' ratings and the angles between them aren''t in the model, so a person''s
       check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 705 isn't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 705 isn't brought in whole, only its egress
+    parts (Chapter 7 part e1's flags).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_7_1_building_exterior_walls
@@ -40382,7 +42729,8 @@ rules:
       and other parts of the building expose them at an angle under 180 degrees, building exterior walls within 10 feet horizontally
       are rated at least 1 hour with openings protected at least 3/4 hour, from the ground to 10 feet above the passageway''s
       floor or to the roof line, whichever is lower: ratings and angles aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 705 isn't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 705 isn't brought in whole, only its egress
+    parts (Chapter 7 part e1's flags).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1024_9_exit_passageway_standpipes
@@ -41105,7 +43453,7 @@ rules:
     note: 'Fire doors in a horizontal exit are self-closing or close automatically on a smoke detector per 716.2.6.6, and
       doors in a cross-corridor close automatically on a smoke detector so installed: door closers aren''t in the model, so
       a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 716.2.6.6 isn't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 716.2.6.6 is Chapter 7 part e2's flag.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1026_4_refuge_area
@@ -41312,7 +43660,8 @@ rules:
       buildings) and to other buildings on the same lot unless their exterior walls and openings are protected per 705; but
       at least 5 feet for one serving individual dwelling units of Group R-3: exterior stairways and their distances aren''t
       in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 705 isn't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 705 isn't brought in whole, only its egress
+    parts (Chapter 7 part e1's flags).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1027_6_protection

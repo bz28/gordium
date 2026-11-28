@@ -238,9 +238,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     nontransient hotel is Group R-2, 310.3), 907.2.10.2's battery storage and 907.5.2.2's five while the voice/alarm
     system isn't stated (467). Part e adds the standpipe, smoke control, smokeproof enclosure and fire command center
     flags but Group A's standpipes (494). The merge of main's section group 9h shows 903.2.1.5.1's
-    grandstands too, an assembly space not ruled out (495)."""
+    grandstands too, an assembly space not ruled out (495). Chapter 7 part e1 (2026-11-28) adds 705's twenty-six exterior
+    wall and projection flags, 705.9.5's vertical separation among them (no sprinkler system stated: its exception 2 isn't taken) (521). Part e2 adds the rest of Section 716's forty-two door, shutter, window and curtain flags (563)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 495 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 563 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
     # review round 4 of section group 9g: the docstring's per-section counts for 9g, pinned
     from collections import Counter
     assert Counter(i["code"]["section"].split(".")[0] for i in flags
@@ -808,9 +809,14 @@ ESCAPE = "general.bc_1031_2_escape_opening_where_required"
 def test_escape_openings_as_sent_and_with_one_room_stated_a_sleeping_room(got):
     """Before: each apartment is one room said not to be a sleeping room, so no sleeping room is read and 1031.2's rule
     needs review (a dwelling's bedrooms aren't drawn), never a pass. After, one apartment stated a sleeping room (the
-    description gives no openings): it is read and linked to its story, Level 1 with two exits, which doesn't show that
-    the room's occupants reach two (review round 1: Group R-2 is asked where they have access to only one), so it still
-    needs review with no escape opening marked, never a pass; only that rule's rows change."""
+    description gives no openings): it is read and linked to its story, Level 1 with two exits. A story's two exits
+    alone don't show the room's occupants reach two (group 8a review round 1); its routes may: its one door opens into
+    the corridor, which reaches both stair enclosures. As sent, the stairs' doors to outside aren't marked exterior
+    exit doors (each stair may discharge back through the corridor, 1028.1) and the building doesn't state that no
+    corridor is within a dwelling unit, so the one-exit question stays open and the rule needs review, never a pass.
+    With both stated, it isn't on a story "with only one exit or access to only one exit" (1031.2 item 1), so Group
+    R-2 asks it no escape opening: the row passes, saying the door and the exits it reaches; only that rule's rows
+    change. With the east stair unmarked (one exit), it doesn't pass."""
     assert got["results"][ESCAPE] == present.REVIEW
     assert [r["outcome"] for r in got["rows"] if r["rule"] == ESCAPE] == [present.REVIEW]
     desc = build.interior_of()
@@ -819,6 +825,23 @@ def test_escape_openings_as_sent_and_with_one_room_stated_a_sleeping_room(got):
     rows = [r for r in stated["rows"] if r["rule"] == ESCAPE]
     assert [(r["id"], r["outcome"]) for r in rows] == [(desc["rooms"][0]["id"] + " (sleeping room)", present.REVIEW)]
     assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == set()
+    part = next(p for p in stated["interior"]["parts"]["sleeping_room"] if p["id"] == rows[0]["id"])
+    assert "sleeping_room_story_one_exit" not in part["measures"]
+    for d in desc["doors"]:                              # the stairs' doors out marked; no corridor within a unit
+        if d["id"] in ("L1WO", "L1EO"):
+            d["exit_kind"], d["exit_id"] = "exterior_at_discharge", next(x for x in d["sides"] if x != "outside")
+    desc["building"] = {**(desc.get("building") or {}), "corridors_within_dwelling_units": False}
+    marked = _check(desc, egress.measure_routes(desc))
+    rows = [r for r in marked["rows"] if r["rule"] == ESCAPE]
+    assert [r["outcome"] for r in rows] == ["pass"], rows
+    part = next(p for p in marked["interior"]["parts"]["sleeping_room"] if p["id"] == rows[0]["id"])
+    assert part["measures"]["sleeping_room_story_one_exit"] is False
+    assert part["more"]["exits_reached"] == {"L1DS": ["L1SE", "L1SW"]}
+    for d in desc["doors"]:                              # the east stair not an exit: one exit on the story
+        if d.get("exit_id") == "L1SE":
+            d.pop("exit_kind"), d.pop("exit_id")
+    one = _check(desc, egress.measure_routes(desc))
+    assert [r["outcome"] for r in one["rows"] if r["rule"] == ESCAPE] != ["pass"]
 
 
 SIZES = ("general.bc_1031_3_1_escape_opening_min_area", "general.bc_1031_3_2_escape_opening_min_height",
@@ -952,3 +975,44 @@ def test_a_13r_systems_limit_is_asked_by_its_own_fact_and_a_person_checks_where_
     assert mixed and all(c["key"] == "decide:sprinklered_903_3_1_2" and c["words"] == code_scope.NFPA_13R_BY_HAND
                          for c in mixed), mixed[:2]
     assert "903.2.6 exception 1 in a Group I-1 Condition 1 facility" in code_scope.NFPA_13R_BY_HAND   # round 3
+
+
+def test_the_escape_openings_reading_never_says_no_stairs_and_the_stairs_reading_still_does(got, laws):
+    """The escape openings' reading (egress._escape_openings) measured the drawing with "stairs: []" forced in, which
+    since #279 is checked against the floors: the apartment (two levels, its stairs not described) got a needs-review
+    line "the model says there are no stairs, yet its rooms are on 2 levels", noise from a reading that gives no
+    stairs. It now leaves the stairs and guards out: the apartment as sent has no such line, nor the stairs and
+    guards' "weren't read" twice; stated "no stairs", the stairs' own reading still says it, once."""
+    said = lambda answer: [i for i in answer["items"] if "the model says there are no stairs" in (i.get("reason") or "")]
+    assert not said(got)
+    escape = egress._escape_openings(build.interior_of())
+    assert not any("stairs" in p or "guards" in p for p in escape["problems"]), escape["problems"]
+    desc = build.interior_of()
+    desc["stairs"] = []
+    stated = egress.check(laws, desc, VALUES, ALLOWED)
+    assert len(said(stated)) == 1, [i["reason"] for i in said(stated)]
+    assert {v for k, v in stated["results"].items() if k.startswith("general.bc_1011_")} == {present.REVIEW}
+
+
+def test_the_building_codes_stairs_reading_reads_no_stairs_against_the_ground_within_its_own_half_inch(laws):
+    """Ground-fix review round 3 (skeptic A): the Building Code's stairs are read with BCNYS 1010.1.4's and 1010.1.6's
+    1/2 in either way (egress._stairs_and_guards passes BUILDING_LANDING), never the house code's 8 1/4 in. The
+    apartment cut to Level 1 with "no stairs" and one opening whose ground is 4.8 in below the floor: every 1011
+    rule needs review (with the house bounds it was set aside); the ground 0.4 in below, the claim stands."""
+    desc = build.interior_of()
+    desc["stairs"] = []
+    desc["rooms"] = [r for r in desc["rooms"] if r["level"] == "L1"]
+    ids = {r["id"] for r in desc["rooms"]}
+    desc["doors"] = [d for d in desc["doors"] if all(v in ids or v is None for v in (d.get("from_room"), d.get("to_room")))]
+    desc["story_outlines"] = [o for o in desc["story_outlines"] if o["level"] == "L1"]
+    per_in = {"ft": 1 / 12, "in": 1, "mm": 25.4, "m": 0.0254}[desc["units"]]
+    floor = next(lv["elevation"] for lv in desc["levels"] if lv["id"] == "L1")
+
+    def stair_results(ground_in):
+        d = copy.deepcopy(desc)
+        d["openings"] = [{"id": "probe_w", "name": "Probe", "escape": False, "ground_outside": floor + ground_in * per_in}]
+        got = egress.check(laws, d, VALUES, ALLOWED)
+        return {v for k, v in got["results"].items() if k.startswith("general.bc_1011_")}, got["interior"]["problems"]
+    results, problems = stair_results(-4.8)
+    assert results == {present.REVIEW} and any("more than 1/2 in above the ground" in p for p in problems), problems
+    assert stair_results(-0.4)[0] == {"not_applicable"}

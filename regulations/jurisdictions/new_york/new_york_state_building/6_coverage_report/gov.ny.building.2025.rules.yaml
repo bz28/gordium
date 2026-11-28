@@ -810,6 +810,136 @@ pieces:
     heading: Marking and identification
     rules:
     - general.bc_703_5_marking
+  '705.2':
+    label: flag
+    heading: Projections
+    rules:
+    - general.bc_705_2_projections
+  Table 705.2:
+    label: flag
+    heading: Minimum distance of projection
+    rules:
+    - general.bc_table_705_2_projection_distances
+  705.2.1:
+    label: flag
+    heading: Projections › Types I and II construction
+    rules:
+    - general.bc_705_2_1_type_i_ii_projections
+  705.2.2:
+    label: flag
+    heading: Projections › Type III, IV or V construction
+    rules:
+    - general.bc_705_2_2_type_iii_iv_v_projections
+  705.2.3:
+    label: flag
+    heading: Projections › Projection protection
+    rules:
+    - general.bc_705_2_3_projection_protection
+  705.2.3.1:
+    label: flag
+    heading: Projection protection › Balconies and similar projections
+    rules:
+    - general.bc_705_2_3_1_balconies
+  '705.3':
+    label: flag
+    heading: Buildings on the same lot
+    rules:
+    - general.bc_705_3_buildings_on_the_same_lot
+  '705.4':
+    label: flag
+    heading: Materials
+    rules:
+    - general.bc_705_4_exterior_wall_materials
+  '705.5':
+    label: flag
+    heading: Fire-resistance ratings
+    rules:
+    - general.bc_705_5_exterior_wall_ratings
+  Table 705.5:
+    label: flag
+    heading: Fire-resistance rating requirements for exterior walls based on fire separation distance
+    rules:
+    - general.bc_table_705_5_exterior_wall_ratings
+  '705.6':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_705_6_exterior_wall_continuity
+  '705.7':
+    label: flag
+    heading: Structural stability
+    rules:
+    - general.bc_705_7_structural_stability
+  705.7.1:
+    label: flag
+    heading: Structural stability › Floor assemblies in Type III construction
+    rules:
+    - general.bc_705_7_1_type_iii_floor_assemblies
+  '705.8':
+    label: flag
+    heading: Unexposed surface temperature
+    rules:
+    - general.bc_705_8_unexposed_surface_temperature
+  Table 705.9:
+    label: flag
+    heading: Maximum area of exterior wall openings based on fire separation distance and degree of opening protection
+    rules:
+    - general.bc_table_705_9_exterior_wall_openings
+  705.9.1:
+    label: flag
+    heading: Openings › Allowable area of openings
+    rules:
+    - general.bc_705_9_1_allowable_opening_area
+  705.9.2:
+    label: flag
+    heading: Openings › Protected openings
+    rules:
+    - general.bc_705_9_2_protected_openings
+  705.9.3:
+    label: flag
+    heading: Openings › Unprotected openings
+    rules:
+    - general.bc_705_9_3_unprotected_openings
+  705.9.4:
+    label: flag
+    heading: Openings › Mixed openings
+    rules:
+    - general.bc_705_9_4_mixed_openings
+  705.9.5:
+    label: flag
+    heading: Openings › Vertical separation of openings
+    rules:
+    - general.bc_705_9_5_vertical_separation
+  705.9.6:
+    label: flag
+    heading: Openings › Vertical exposure
+    rules:
+    - general.bc_705_9_6_vertical_exposure
+  '705.10':
+    label: flag
+    heading: Joints
+    rules:
+    - general.bc_705_10_joints
+  705.10.1:
+    label: flag
+    heading: Joints › Voids
+    rules:
+    - general.bc_705_10_1_voids
+  '705.11':
+    label: flag
+    heading: Ducts and air transfer openings
+    rules:
+    - general.bc_705_11_ducts
+  '705.12':
+    label: flag
+    heading: Parapets
+    rules:
+    - general.bc_705_12_parapets
+  705.12.1:
+    label: flag
+    heading: Parapets › Parapet construction
+    rules:
+    - general.bc_705_12_1_parapet_construction
   707.3.2:
     label: flag
     heading: Fire-resistance rating › Interior exit stairway and ramp construction
@@ -1318,6 +1448,220 @@ pieces:
     heading: Fire door assemblies › Fire door frames
     rules:
     - general.bc_716_2_4_fire_door_frames
+  716.2.5.1:
+    label: flag
+    heading: Glazing in fire door assemblies › Size limitations
+    rules:
+    - general.bc_716_2_5_1_glazing_size_limitations
+  716.2.5.1.1:
+    label: flag
+    heading: Size limitations › Fire-resistance-rated glazing in door assemblies in fire walls and fire barriers rated greater
+      than 1 hour
+    rules:
+    - general.bc_716_2_5_1_1_fire_resistance_rated_door_glazing
+  716.2.5.1.2:
+    label: flag
+    heading: Size limitations › Fire-protection-rated glazing in door assemblies in fire walls and fire barriers rated greater
+      than 1 hour
+    rules:
+    - general.bc_716_2_5_1_2_fire_protection_rated_door_glazing
+  716.2.5.1.2.1:
+    label: flag
+    heading: Fire-protection-rated glazing in door assemblies in fire walls and fire barriers rated greater than 1 hour ›
+      Horizontal exits
+    rules:
+    - general.bc_716_2_5_1_2_1_horizontal_exit_vision_panels
+  716.2.5.1.2.2:
+    label: flag
+    heading: Fire-protection-rated glazing in door assemblies in fire walls and fire barriers rated greater than 1 hour ›
+      Fire barriers
+    rules:
+    - general.bc_716_2_5_1_2_2_fire_barrier_door_glazing
+  716.2.5.2:
+    label: flag
+    heading: Glazing in fire door assemblies › Elevator, stairway and ramp protectives
+    rules:
+    - general.bc_716_2_5_2_stairway_door_vision
+  716.2.5.3:
+    label: flag
+    heading: Glazing in fire door assemblies › Glazing in door assemblies in corridors and smoke barriers
+    rules:
+    - general.bc_716_2_5_3_corridor_door_glazing
+  716.2.5.4:
+    label: flag
+    heading: Glazing in fire door assemblies › Fire door frames with transom lights and sidelights
+    rules:
+    - general.bc_716_2_5_4_transoms_and_sidelights
+  716.2.6.1:
+    label: flag
+    heading: Fire door hardware and closers › Door closing
+    rules:
+    - general.bc_716_2_6_1_door_closing
+  716.2.6.2:
+    label: flag
+    heading: Fire door hardware and closers › Latch required
+    rules:
+    - general.bc_716_2_6_2_latch_required
+  716.2.6.4:
+    label: flag
+    heading: Fire door hardware and closers › Automatic-closing fire door assemblies
+    rules:
+    - general.bc_716_2_6_4_automatic_closing_assemblies
+  716.2.6.6:
+    label: flag
+    heading: Fire door hardware and closers › Smoke-activated doors
+    rules:
+    - general.bc_716_2_6_6_smoke_activated_doors
+  716.2.6.7:
+    label: flag
+    heading: Fire door hardware and closers › Doors in pedestrian ways
+    rules:
+    - general.bc_716_2_6_7_pedestrian_way_doors
+  716.2.7:
+    label: flag
+    heading: Fire door assemblies › Swinging fire shutters
+    rules:
+    - general.bc_716_2_7_swinging_fire_shutters
+  716.2.8:
+    label: flag
+    heading: Fire door assemblies › Rolling fire shutters
+    rules:
+    - general.bc_716_2_8_rolling_fire_shutters
+  716.2.9:
+    label: flag
+    heading: Fire door assemblies › Labeled protective assemblies
+    rules:
+    - general.bc_716_2_9_labeled_assemblies
+  716.2.9.1:
+    label: flag
+    heading: Labeled protective assemblies › Fire door labeling requirements
+    rules:
+    - general.bc_716_2_9_1_fire_door_labels
+  716.2.9.2:
+    label: flag
+    heading: Labeled protective assemblies › Oversized doors
+    rules:
+    - general.bc_716_2_9_2_oversized_doors
+  716.2.9.3:
+    label: flag
+    heading: Labeled protective assemblies › Smoke and draft control door labeling requirements
+    rules:
+    - general.bc_716_2_9_3_smoke_door_labels
+  716.2.9.4:
+    label: flag
+    heading: Labeled protective assemblies › Fire door frame labeling requirements
+    rules:
+    - general.bc_716_2_9_4_frame_labels
+  716.2.9.5:
+    label: flag
+    heading: Labeled protective assemblies › Labeling
+    rules:
+    - general.bc_716_2_9_5_glazing_labels
+  716.2.9.6:
+    label: flag
+    heading: Labeled protective assemblies › Fire door operator labeling requirements
+    rules:
+    - general.bc_716_2_9_6_operator_labels
+  716.2.10:
+    label: flag
+    heading: Fire door assemblies › Installation of door assemblies in corridors and smoke barriers
+    rules:
+    - general.bc_716_2_10_smoke_door_installation
+  716.3.1:
+    label: flag
+    heading: Fire window assemblies › Testing requirements
+    rules:
+    - general.bc_716_3_1_fire_window_testing
+  716.3.1.1:
+    label: flag
+    heading: Testing requirements › Testing under positive pressure
+    rules:
+    - general.bc_716_3_1_1_positive_pressure_test
+  716.3.1.2:
+    label: flag
+    heading: Testing requirements › Nonsymmetrical glazing systems
+    rules:
+    - general.bc_716_3_1_2_nonsymmetrical_glazing
+  716.3.2:
+    label: flag
+    heading: Fire window assemblies › Performance requirements
+    rules:
+    - general.bc_716_3_2_fire_window_performance
+  716.3.2.1:
+    label: flag
+    heading: Performance requirements › Interior fire window assemblies
+    rules:
+    - general.bc_716_3_2_1_interior_fire_windows
+  716.3.2.1.1:
+    label: flag
+    heading: Interior fire window assemblies › Where 3/4-hour-fire-protection window assemblies permitted
+    rules:
+    - general.bc_716_3_2_1_1_three_quarter_hour_windows
+  716.3.2.1.2:
+    label: flag
+    heading: Interior fire window assemblies › Area limitations
+    rules:
+    - general.bc_716_3_2_1_2_fire_window_area
+  716.3.3:
+    label: flag
+    heading: Fire window assemblies › Fire window frames
+    rules:
+    - general.bc_716_3_3_fire_window_frames
+  716.3.3.1:
+    label: flag
+    heading: Fire window frames › Window mullions
+    rules:
+    - general.bc_716_3_3_1_window_mullions
+  716.3.4:
+    label: flag
+    heading: Fire window assemblies › Fire-protection-rated glazing
+    rules:
+    - general.bc_716_3_4_fire_window_glazing
+  716.3.4.1:
+    label: flag
+    heading: Fire-protection-rated glazing › Glass and glazing
+    rules:
+    - general.bc_716_3_4_1_glass_and_glazing
+  716.3.5:
+    label: flag
+    heading: Fire window assemblies › Labeled protective assemblies
+    rules:
+    - general.bc_716_3_5_labeled_window_assemblies
+  716.3.5.1:
+    label: flag
+    heading: Labeled protective assemblies › Fire window frames
+    rules:
+    - general.bc_716_3_5_1_fire_window_frames_approved
+  716.3.5.2:
+    label: flag
+    heading: Labeled protective assemblies › Labeling requirements
+    rules:
+    - general.bc_716_3_5_2_fire_window_labels
+  716.3.6.1:
+    label: flag
+    heading: Installation › Closure
+    rules:
+    - general.bc_716_3_6_1_fire_window_closure
+  '716.4':
+    label: flag
+    heading: Fire protective curtain assembly
+    rules:
+    - general.bc_716_4_fire_protective_curtains
+  716.4.1:
+    label: flag
+    heading: Fire protective curtain assembly › Label
+    rules:
+    - general.bc_716_4_1_curtain_labels
+  716.4.2:
+    label: flag
+    heading: Fire protective curtain assembly › Smoke and draft control
+    rules:
+    - general.bc_716_4_2_curtain_smoke_control
+  716.4.3:
+    label: flag
+    heading: Fire protective curtain assembly › Installation
+    rules:
+    - general.bc_716_4_3_curtain_installation
   903.1.1:
     label: flag
     heading: General › Alternative protection

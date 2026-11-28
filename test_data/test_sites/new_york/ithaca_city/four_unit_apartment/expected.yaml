@@ -586,6 +586,35 @@ results:
   # connects, its walls' construction, penetrations, joints), so each is a person's check for every building
   general.bc_703_2_1_1_nonsymmetrical_walls: needs_review
   general.bc_703_5_marking: needs_review
+  # Chapter 7 part e1 (2026-11-28, 26 flags): exterior walls (705), which an exit stairway's and passageway's exterior
+  # walls meet (1023.7, 1024.8), and projections (egress balconies, exterior exit stairways): no wall's rating, fire separation distance or openings are in the model; 705.9.5's
+  # vertical separation needs review too (no sprinkler system: its exception 2 isn't taken)
+  general.bc_705_2_projections: needs_review
+  general.bc_table_705_2_projection_distances: needs_review
+  general.bc_705_2_1_type_i_ii_projections: needs_review
+  general.bc_705_2_2_type_iii_iv_v_projections: needs_review
+  general.bc_705_2_3_projection_protection: needs_review
+  general.bc_705_2_3_1_balconies: needs_review
+  general.bc_705_3_buildings_on_the_same_lot: needs_review
+  general.bc_705_4_exterior_wall_materials: needs_review
+  general.bc_705_5_exterior_wall_ratings: needs_review
+  general.bc_table_705_5_exterior_wall_ratings: needs_review
+  general.bc_705_6_exterior_wall_continuity: needs_review
+  general.bc_705_7_structural_stability: needs_review
+  general.bc_705_7_1_type_iii_floor_assemblies: needs_review
+  general.bc_705_8_unexposed_surface_temperature: needs_review
+  general.bc_table_705_9_exterior_wall_openings: needs_review
+  general.bc_705_9_1_allowable_opening_area: needs_review
+  general.bc_705_9_2_protected_openings: needs_review
+  general.bc_705_9_3_unprotected_openings: needs_review
+  general.bc_705_9_4_mixed_openings: needs_review
+  general.bc_705_9_5_vertical_separation: needs_review
+  general.bc_705_9_6_vertical_exposure: needs_review
+  general.bc_705_10_joints: needs_review
+  general.bc_705_10_1_voids: needs_review
+  general.bc_705_11_ducts: needs_review
+  general.bc_705_12_parapets: needs_review
+  general.bc_705_12_1_parapet_construction: needs_review
   general.bc_707_3_2_exit_stairway_fire_barriers: needs_review
   general.bc_707_3_4_exit_passageway_fire_barriers: needs_review
   general.bc_707_3_5_horizontal_exit_separation: needs_review
@@ -639,6 +668,50 @@ results:
   general.bc_716_2_2_3_1_glazing_in_exit_enclosure_doors: needs_review
   general.bc_716_2_3_fire_doors: needs_review
   general.bc_716_2_4_fire_door_frames: needs_review
+  # Chapter 7 part e2 (2026-11-28, 42 flags): the rest of Section 716 (glazing in fire doors, hardware and closers,
+  # fire shutters, labels, fire windows, fire protective curtains): no door's or window's construction is in the model
+  general.bc_716_2_5_1_glazing_size_limitations: needs_review
+  general.bc_716_2_5_1_1_fire_resistance_rated_door_glazing: needs_review
+  general.bc_716_2_5_1_2_fire_protection_rated_door_glazing: needs_review
+  general.bc_716_2_5_1_2_1_horizontal_exit_vision_panels: needs_review
+  general.bc_716_2_5_1_2_2_fire_barrier_door_glazing: needs_review
+  general.bc_716_2_5_2_stairway_door_vision: needs_review
+  general.bc_716_2_5_3_corridor_door_glazing: needs_review
+  general.bc_716_2_5_4_transoms_and_sidelights: needs_review
+  general.bc_716_2_6_1_door_closing: needs_review
+  general.bc_716_2_6_2_latch_required: needs_review
+  general.bc_716_2_6_4_automatic_closing_assemblies: needs_review
+  general.bc_716_2_6_6_smoke_activated_doors: needs_review
+  general.bc_716_2_6_7_pedestrian_way_doors: needs_review
+  general.bc_716_2_7_swinging_fire_shutters: needs_review
+  general.bc_716_2_8_rolling_fire_shutters: needs_review
+  general.bc_716_2_9_labeled_assemblies: needs_review
+  general.bc_716_2_9_1_fire_door_labels: needs_review
+  general.bc_716_2_9_2_oversized_doors: needs_review
+  general.bc_716_2_9_3_smoke_door_labels: needs_review
+  general.bc_716_2_9_4_frame_labels: needs_review
+  general.bc_716_2_9_5_glazing_labels: needs_review
+  general.bc_716_2_9_6_operator_labels: needs_review
+  general.bc_716_2_10_smoke_door_installation: needs_review
+  general.bc_716_3_1_fire_window_testing: needs_review
+  general.bc_716_3_1_1_positive_pressure_test: needs_review
+  general.bc_716_3_1_2_nonsymmetrical_glazing: needs_review
+  general.bc_716_3_2_fire_window_performance: needs_review
+  general.bc_716_3_2_1_interior_fire_windows: needs_review
+  general.bc_716_3_2_1_1_three_quarter_hour_windows: needs_review
+  general.bc_716_3_2_1_2_fire_window_area: needs_review
+  general.bc_716_3_3_fire_window_frames: needs_review
+  general.bc_716_3_3_1_window_mullions: needs_review
+  general.bc_716_3_4_fire_window_glazing: needs_review
+  general.bc_716_3_4_1_glass_and_glazing: needs_review
+  general.bc_716_3_5_labeled_window_assemblies: needs_review
+  general.bc_716_3_5_1_fire_window_frames_approved: needs_review
+  general.bc_716_3_5_2_fire_window_labels: needs_review
+  general.bc_716_3_6_1_fire_window_closure: needs_review
+  general.bc_716_4_fire_protective_curtains: needs_review
+  general.bc_716_4_1_curtain_labels: needs_review
+  general.bc_716_4_2_curtain_smoke_control: needs_review
+  general.bc_716_4_3_curtain_installation: needs_review
   # Chapter 7 part c (2026-11-26, 31 flags): fire partitions, smoke barriers and smoke partitions (708 to 710): no wall's
   # rating or construction is in the model; 709.5.1 (Group I-2 and ambulatory care smoke barrier doors) needs review too
   # (no ambulatory care facility ruled out); 710.5.3 (Group I-2 Condition 2) doesn't apply to the stated Group R-2

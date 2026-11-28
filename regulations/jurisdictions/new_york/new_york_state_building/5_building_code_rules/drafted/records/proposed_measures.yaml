@@ -50,6 +50,7 @@ sprinklered_903_3_1_1:
   - general.bc_1031_5_2_2_area_well_steps
   - general.bc_1031_5_2_area_well_ladder_over_44
   - general.bc_1031_5_area_well_required
+  - general.bc_705_9_5_vertical_separation
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_903_2_11_1_1_opening_dimensions
   - general.bc_903_2_11_1_2_openings_on_one_side
@@ -134,6 +135,7 @@ sprinklered_903_3_1_2:
   - general.bc_1031_5_2_2_area_well_steps
   - general.bc_1031_5_2_area_well_ladder_over_44
   - general.bc_1031_5_area_well_required
+  - general.bc_705_9_5_vertical_separation
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
   - general.bc_903_2_8_group_r_sprinklers
   - general.bc_table_1006_2_1_a_e_m
@@ -439,6 +441,7 @@ occupancy_group:
   - general.bc_420_7_assisted_living_housing_units
   - general.bc_420_8_group_i1_cooking_facilities
   - general.bc_420_9_domestic_cooking_appliances
+  - general.bc_705_9_5_vertical_separation
   - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_710_5_3_i2_pass_through_openings
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
