@@ -14060,7 +14060,7 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
-  - when: not space_is_exit and space_exit_count < 2 and nfpa_13r_stated and not sprinklered_903_3_1_1 and occupancy_group in ["mixed", "I-1"] and space_occupant_load <= 10 and space_common_path <= 75
+  - when: not space_is_exit and space_exit_count < 2 and nfpa_13r_stated and not sprinklered_903_3_1_1 and occupancy_group in ["mixed"] and space_occupant_load <= 10 and space_common_path <= 75
     reason: 'An NFPA 13R system in a building of Group I-1 or of two or more groups (in a building of one other group it is no 903.3.1.2 system, and the row reads as with none): 903.3.1.2 permits one only in Group R occupancies (and in
       Group I-1 Condition 1, 903.2.6 exception 1), so Table 1006.2.1''s sprinklered I-4 row (note a: a system per 903.3.1.1
       or 903.3.1.2, Section 903 saying where 13R is permitted) may not apply: a person checks.'
@@ -14397,12 +14397,6 @@ rules:
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
       whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
       a person checks.'
-  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
-      <= 49 and space_common_path <= 75
-    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
-      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
-      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
-      to Section 903 for where it is permitted: outside Group R and I-1 a 13R system is no 903.3.1.2 system, so the row reads the column without a sprinkler system; in a building of Group I-1 or of two or more groups, where only the sprinklered column would pass, a person checks the system.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and (space_occupant_load <= 49 and space_common_path
       <= (75 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else
       (75 if space_occupant_load <= 30 else 75)))
@@ -14936,12 +14930,6 @@ rules:
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
       whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
       a person checks.'
-  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
-      <= 49 and space_common_path <= 100
-    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
-      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
-      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
-      to Section 903 for where it is permitted: outside Group R and I-1 a 13R system is no 903.3.1.2 system, so the row reads the column without a sprinkler system; in a building of Group I-1 or of two or more groups, where only the sprinklered column would pass, a person checks the system.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and (space_occupant_load <= 49 and space_common_path
       <= (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else
       (100 if space_occupant_load <= 30 else 75)))
@@ -15307,12 +15295,6 @@ rules:
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
       whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
       a person checks.'
-  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
-      <= 49 and space_common_path <= 100
-    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
-      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
-      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
-      to Section 903 for where it is permitted: outside Group R and I-1 a 13R system is no 903.3.1.2 system, so the row reads the column without a sprinkler system; in a building of Group I-1 or of two or more groups, where only the sprinklered column would pass, a person checks the system.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and (space_occupant_load <= 49 and space_common_path
       <= (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else
       (75 if space_occupant_load <= 30 else 75)))
@@ -16703,12 +16685,6 @@ rules:
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
       whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
       a person checks.'
-  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
-      <= 10 and space_common_path <= 100
-    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
-      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
-      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
-      to Section 903 for where it is permitted: outside Group R and I-1 a 13R system is no 903.3.1.2 system, so the row reads the column without a sprinkler system; in a building of Group I-1 or of two or more groups, where only the sprinklered column would pass, a person checks the system.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and (space_occupant_load <= 10 and (sprinklered_903_3_1_1
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 100)
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
@@ -18188,12 +18164,6 @@ rules:
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
       whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
       a person checks.'
-  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
-      <= 29 and space_common_path <= 100
-    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
-      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
-      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
-      to Section 903 for where it is permitted: outside Group R and I-1 a 13R system is no 903.3.1.2 system, so the row reads the column without a sprinkler system; in a building of Group I-1 or of two or more groups, where only the sprinklered column would pass, a person checks the system.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and (space_occupant_load <= 29 and space_common_path
       <= (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else
       (100 if space_occupant_load <= 30 else 75)))
@@ -18546,12 +18516,6 @@ rules:
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
       whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
       a person checks.'
-  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
-      <= 49 and space_common_path <= 75
-    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
-      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
-      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
-      to Section 903 for where it is permitted: outside Group R and I-1 a 13R system is no 903.3.1.2 system, so the row reads the column without a sprinkler system; in a building of Group I-1 or of two or more groups, where only the sprinklered column would pass, a person checks the system.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and (space_occupant_load <= 49 and space_common_path
       <= (75 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else
       (100 if space_occupant_load <= 30 else 75)))
@@ -23274,12 +23238,6 @@ rules:
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
       the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
       rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
-  - when: nfpa_13r_stated and not sprinklered_903_3_1_1 and occupancy_group in ["mixed", "I-1"] and
-      egress_travel_distance <= 250 and egress_travel_distance > 200
-    reason: 'Within the sprinklered column only, with an NFPA 13R system (903.3.1.2) in a building of Group I-1 or of two or more groups (in a building of one other group it is no 903.3.1.2 system, and the row reads as with none): 903.3.1.2 permits an
-      NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies shall be permitted
-      to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader to Section 903 for
-      where it is permitted: outside Group R and I-1 a 13R system is no 903.3.1.2 system, so the row reads the column without a sprinkler system; in a building of Group I-1 or of two or more groups, where only the sprinklered column would pass, a person checks the system.'
   - when: occupancy_group in ["F-1", "S-1"] and sprinklered_903_3_1_1 and egress_travel_distance > 250 and egress_travel_distance
       <= 400
     reason: 'Over 250 ft in Group F-1 or S-1 with NFPA 13, within 1017.2.2''s 400 ft, whose other conditions (one story; 24
@@ -23769,7 +23727,7 @@ rules:
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
       the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
       rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
-  - when: nfpa_13r_stated and not sprinklered_903_3_1_1 and occupancy_group in ["mixed", "I-1"] and
+  - when: nfpa_13r_stated and not sprinklered_903_3_1_1 and occupancy_group in ["I-1"] and
       egress_travel_distance <= 250
     reason: 'Within the sprinklered column only, with an NFPA 13R system (903.3.1.2) in a building of Group I-1 or of two or more groups (in a building of one other group it is no 903.3.1.2 system, and the row reads as with none): 903.3.1.2 permits an
       NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies shall be permitted
@@ -26669,11 +26627,6 @@ rules:
   title: Corridor rating, H-1, H-2, H-3 (BCNYS Table 1020.2)
   applies_when: occupancy_group in ["H-1", "H-2", "H-3"]
   check: (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours >= 1
-  review_when:
-  - when: sprinklered_903_3_1_2 and not sprinklered_903_3_1_1
-    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
-      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
-      system is the one the column means is a person''s check (never a pass on it).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -26762,7 +26715,8 @@ rules:
   - given:
       occupancy_group: H-2
       sprinklered_903_3_1_1: false
-      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_2: false
+      nfpa_13r_stated: true
       sprinklered_903_3_1_3: false
     parts:
       corridor:
@@ -26773,9 +26727,9 @@ rules:
           corridor_fire_rating_hours: 1
     rows:
     - part: p1
-      outcome: needs_review
-    expect: needs_review
-    note: 'Note c: 903.3.1.2 only where allowed.'
+      outcome: fail
+    expect: fail
+    note: 'Note c: 903.3.1.2 only where allowed, and it permits 13R only in Group R: in Group H it is no 903.3.1.2 system, so the corridor reads as with none (not permitted).'
   - given:
       occupancy_group: H-2
       sprinklered_903_3_1_1: true
@@ -26799,10 +26753,6 @@ rules:
   check: corridor_occupant_load <= 30 or ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours
     >= 1)
   review_when:
-  - when: corridor_occupant_load > 30 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1
-    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
-      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
-      system is the one the column means is a person''s check (never a pass on it).'
   - when: special_egress_spaces and corridor_occupant_load <= 30 and not (sprinklered_903_3_1_1 and corridor_fire_rating_hours
       >= 1)
     reason: 'Not rated, allowed only by the corridor''s occupant load worked out from its story''s rooms, in a building that
@@ -27940,12 +27890,9 @@ rules:
       else corridor_occupant_load * 0.2)
     reason: 'Narrower than the factor, but the building may have smoke-protected or open-air assembly seating (fixed seating
       stated or not ruled out), whose factors (Table 1030.6.2, 1030.6.3) may ask less: a person checks.'
-  - when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "I-1", "I-3", "I-4", "M", "S-1",
-      "S-2", "U"] and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and corridor_width >= corridor_occupant_load * 0.15
+  - when: occupancy_group in ["I-1"] and nfpa_13r_stated and not sprinklered_903_3_1_1 and corridor_width >= corridor_occupant_load * 0.15
       and corridor_width < corridor_occupant_load * 0.2 and emergency_voice_alarm_system
-    reason: 'Between 0.15 and 0.2 in per occupant, with an NFPA 13R system and a voice/alarm system outside Group R: exception
-      1 counts a 903.3.1.2 system, but 903.3.1.2 allows it in Group R occupancies, so whether the building''s system is one
-      that counts is a person''s check (as Table 1006.2.1''s rows take it).'
+    reason: 'Between 0.15 and 0.2 in per occupant, with an NFPA 13R system and a voice/alarm system in Group I-1: exception 1 counts a 903.3.1.2 system, which 903.2.6 exception 1 permits only in a Condition 1 facility, not stated, so whether it counts is a person''s check (in a building of one other group outside Group R it is no 903.3.1.2 system, and the corridor reads as with none).'
   - when: occupancy_group == "mixed" and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_width >= corridor_occupant_load
       * 0.15 and corridor_width < corridor_occupant_load * 0.2 and emergency_voice_alarm_system
     reason: 'Between 0.15 and 0.2 in per occupant in a building of two or more groups with a sprinkler system and a voice/alarm
@@ -28123,7 +28070,8 @@ rules:
   - given:
       occupancy_group: B
       sprinklered_903_3_1_1: false
-      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_2: false
+      nfpa_13r_stated: true
       emergency_voice_alarm_system: true
       assembly_fixed_seating: false
       special_egress_spaces: false
@@ -28136,9 +28084,9 @@ rules:
           corridor_occupant_load: 300
     rows:
     - part: p1
-      outcome: needs_review
-    expect: needs_review
-    note: '903.3.1.2 allows a 13R system in Group R: whether this office''s system counts for exception 1 is a person''s check.'
+      outcome: fail
+    expect: fail
+    note: '903.3.1.2 permits a 13R system only in Group R: in an office it is no 903.3.1.2 system, so exception 1''s smaller factor doesn''t count and 45 in is under 300 occupants at 0.2 in.'
   - given:
       occupancy_group: I-2
       sprinklered_903_3_1_1: true

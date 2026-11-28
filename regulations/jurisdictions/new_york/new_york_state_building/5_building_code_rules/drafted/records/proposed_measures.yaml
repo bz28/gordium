@@ -963,8 +963,8 @@ nfpa_13r_stated:
   - general.bc_903_2_5_1_group_h_sprinklers
   - general.bc_903_2_6_group_i_sprinklers
   - general.bc_903_3_1_2_2_corridors_balconies_13r
+  - general.bc_1020_3_corridor_capacity
   - general.bc_903_3_1_2_nfpa_13r_limits
-  - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1017_2_i1
 stages_or_platforms:
   meaning: 'The building has a stage, a platform or a technical production area (2025 BCNYS 202), as the architect states
