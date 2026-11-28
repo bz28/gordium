@@ -19,7 +19,7 @@ LABELS = NY / "3_section_labels/gov.ny.building.2025.yaml"
 CHAPTER_7 = re.compile(r"(Table )?7\d\d(\.\d+)*(\(\d\))?$")       # 707.6, Table 716.1(2)
 # The only facts a Chapter 7 flag may be narrowed by, each one the architect states (never a fact the model could get
 # wrong): a corridor's stated rating (Table 716.1(2)'s corridor row), the sprinkler system and group (716.2.2.3's
-# exception), an ambulatory care facility (709.5.1)
+# and 705.9.5's exceptions), an ambulatory care facility (709.5.1)
 NARROWED_BY = {"corridor_fire_rating_hours", "sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "occupancy_group",
                "ambulatory_care_facility"}
 
@@ -43,6 +43,13 @@ def pieces():
 @pytest.fixture(scope="module")
 def labels(pieces):
     return {k: v for k, v in load(LABELS)["labels"].items() if k in pieces}
+
+
+# lines brought_in.misread empties (a stacked fraction's denominator put back on the line above: p.190 line 45,
+# 716.3.4's "1/2"; p.182 line 12, 714.5.2's "1/8"): nothing on them to quote
+EMPTIED = {(int(w.split()[0][2:]), int(w.split()[2]))
+           for w, fixes in load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]["misread"].items()
+           if any(f.get("printed") == "" for f in fixes)}
 
 
 def _rid(pid: str) -> str:
@@ -75,6 +82,7 @@ def test_every_chapter_7_flag_quotes_every_line_of_its_piece(pieces, labels, boo
             continue
         quoted = {(s["page"], n) for r in _flags(book, pid) for s in r["sources"]
                   for n in range(s["lines"][0], s["lines"][1] + 1)}
+        quoted |= EMPTIED                       # a line the misreads empty holds nothing to quote
         for page, a, b in pieces[pid]["lines"]:
             for n in range(a, b + 1):
                 if (page, n) in quoted:
@@ -166,7 +174,7 @@ def test_every_chapter_7_flag_is_a_persons_check_for_every_building(labels, book
                 assert row["outcome"] == "needs_review", r["id"]
             else:
                 assert outcome(r, {}, allowed) == "needs_review", r["id"]
-    assert sorted(narrowed) == ["general.bc_709_5_1_i2_smoke_barrier_doors", "general.bc_710_5_3_i2_pass_through_openings",
+    assert sorted(narrowed) == ["general.bc_705_9_5_vertical_separation", "general.bc_709_5_1_i2_smoke_barrier_doors", "general.bc_710_5_3_i2_pass_through_openings",
                                 "general.bc_716_2_2_3_exit_enclosure_door_temperature_rise",
                                 "general.bc_table_716_1_2__corridors"]
 
@@ -577,3 +585,200 @@ def test_part_d_review_round_4s_notes(book):
         assert not re.search(r"(?<!listed )putty pads", note), r["id"]                      # review round 5
         assert "cellulose" not in note or "cellulose loose-fill" in note, r["id"]
         assert not re.search(r"(?<!solid )fireblock", note), r["id"]
+
+
+# Tables 705.5 and 705.9, typed row by row from the page images (PDF pp.165-167; never from the rules or the extracted
+# text): each row's own words in the flag's note (an anchor that starts the row's clause) and what the page prints for
+# that row, each looked for only inside the row's own clause, as CHART_716
+CHART_705 = {
+    "general.bc_table_705_2_projection_distances": [
+        ("0 to less than 2", ["projections not permitted"]),
+        ("2 to less than 3", ["24 inches"]),
+        ("3 to less than 5", ["two-thirds of the FSD"]),
+        ("5 or greater", ["40 inches"])],
+    "general.bc_table_705_5_exterior_wall_ratings": [
+        ("in three columns", ["Group H (note e)", "Groups F-1, M and S-1 (note f)",
+                              "Groups A, B, E, F-2, I, R (note i), S-2 and U (note h)"]),
+        ("X less than 5 (note b)", ["every type 3, 2 and 1"]),
+        ("X 5 or more and less than 10", ["Types IA and IVA 3, 2 and 1", "other types 2, 1 and 1"]),
+        ("X 10 or more and less than 30", ["Types IA, IB, IVA and IVB 2, 1 and 1 (note c)", "Types IIB and VB 1, 0 and 0",
+                                           "other types 1, 1 and 1 (note c)"]),
+        ("X 30 or more", ["every type 0, 0 and 0"]),
+        ("Note a:", ["load-bearing exterior walls also meet Table 601"]),
+        ("Note c:", ["open parking garages complying with 406 need no rating"]),
+        ("Note g:", ["unlimited unprotected openings, the rating is 0 hours"]),
+        ("Note h:", ["only a Group U private garage or carport", "5 feet or more"]),
+        ("Note i:", ["Group R-3 building of Type II-B or V-B", "5 feet or more"])],
+    "general.bc_table_705_9_exterior_wall_openings": [
+        ("unprotected in a building not sprinklered", ["903.3.1.1 (UP, NS)"]),
+        ("unprotected in a building sprinklered", ["903.3.1.1 (UP, S, note i: not for Groups H-1, H-2 and H-3",
+                                                  "an NFPA 13R or 13D system is not 903.3.1.1's"]),
+        ("0 to less than 3 (notes b, c, k)", ["UP, NS, UP, S and P all not permitted (note k)"]),
+        ("3 to less than 5 (notes d, e)", ["UP, NS not permitted", "UP, S 15%", "P 15%"]),
+        ("5 to less than 10 (notes e, f, j)", ["UP, NS 10% (note h)", "UP, S 25%", "P 25%"]),
+        ("10 to less than 15 (notes e, f, g, j)", ["UP, NS 15% (note h)", "UP, S 45%", "P 45%"]),
+        ("15 to less than 20 (notes f, g, j)", ["UP, NS 25%", "UP, S 75%", "P 75%"]),
+        ("20 to less than 25 (notes f, g, j)", ["UP, NS 45%", "UP, S no limit", "P no limit"]),
+        ("25 to less than 30 (notes f, g, j)", ["UP, NS 70%", "UP, S no limit", "P no limit"]),
+        ("30 or greater", ["no limit for each"]),
+        ("Note d:", ["at most 25 percent", "Group R-3"]),
+        ("Note e:", ["less than 15 feet for Group H-2 and H-3"]),
+        ("Note f:", ["no limit", "Group R-3", "5 feet or more"]),
+        ("Note g:", ["open parking garage per 406.5", "10 feet or more"]),
+        ("Note j:", ["only a Group U private garage or carport", "5 feet or more"]),
+        ("Note k:", ["705.3 exception 2"])],
+}
+
+
+def _chart_705_misses(notes: dict) -> list:
+    out = []
+    for rid, rows in CHART_705.items():
+        note = " ".join(notes[rid].split())
+        for anchor, values in rows:
+            if anchor not in note:
+                out.append((rid, anchor))
+                continue
+            clause = _clause(note, anchor)
+            out += [(rid, anchor, v) for v in values if v not in clause]
+    return out
+
+
+def test_table_705s_flags_chart_match_the_page(book):
+    """Part e1: each row of Tables 705.5 and 705.9, typed from the page images, is in its flag's shown note with the
+    hours or percentages the page prints, inside that row's own clause; Table 705.9's sprinklered column is
+    903.3.1.1's alone (its UP, S key), so the note says an NFPA 13R system is not one."""
+    notes = {rid: _shown_note([r for r in book if r["id"] == rid][0]) for rid in CHART_705}
+    assert _chart_705_misses(notes) == []
+
+
+def test_the_705_chart_catches_a_row_changed(book):
+    """The pin: a cell, a note letter or a column changed in a copy of the notes is caught."""
+    notes = {rid: " ".join(_shown_note([r for r in book if r["id"] == rid][0]).split()) for rid in CHART_705}
+    ratings, openings = "general.bc_table_705_5_exterior_wall_ratings", "general.bc_table_705_9_exterior_wall_openings"
+    changes = [(ratings, "Types IA and IVA 3, 2 and 1", "Types IA and IVA 2, 2 and 1"),
+               (ratings, "other types 2, 1 and 1;", "other types 1, 1 and 1;"),
+               (ratings, "Types IIB and VB 1, 0 and 0", "Types IIB and VB 1, 1 and 0"),
+               (ratings, "IVB 2, 1 and 1 (note c)", "IVB 2, 1 and 1"),
+               (ratings, "every type 3, 2 and 1", "every type 2, 2 and 1"),
+               (ratings, "every type 0, 0 and 0", "every type 1, 0 and 0"),
+               (ratings, "R (note i), S-2", "R, S-2"),
+               (openings, "UP, NS 10% (note h)", "UP, NS 15% (note h)"),
+               (openings, "UP, S 45%, P 45%", "UP, S 45%, P 75%"),
+               (openings, "UP, NS 70%", "UP, NS 45%"),
+               (openings, "UP, NS not permitted, UP, S 15%", "UP, NS 15%, UP, S 15%"),
+               (openings, "UP, S 75%", "UP, S no limit"),
+               (openings, "an NFPA 13R or 13D system is not 903.3.1.1's", "an NFPA 13D system is not 903.3.1.1's"),
+               ("general.bc_table_705_2_projection_distances", "5 or greater, 40 inches", "5 or greater, 24 inches"),
+               ("general.bc_table_705_2_projection_distances", "2 to less than 3, 24 inches", "2 to less than 3, 40 inches")]
+    for rid, a, b in changes:
+        assert a in notes[rid], a
+        assert _chart_705_misses({**notes, rid: notes[rid].replace(a, b, 1)}), (rid, a)
+
+
+def test_705_9_5s_exceptions_need_a_stated_fact(book, ctx):
+    """705.9.5's vertical separation is set aside only where the architect states a sprinkler system throughout per
+    903.3.1.1, or per 903.3.1.2 in Group R (an NFPA 13R system counts only where 903.3.1.2 allows it); a 13R system in
+    another group or a building of two or more groups, no system, or nothing stated, leave it a person's check, never
+    not applicable. Exception 1 (three stories or less) stays in the flag's words: the stories set nothing aside."""
+    [r] = [r for r in book if r["id"] == "general.bc_705_9_5_vertical_separation"]
+    allowed = ctx.allowed()
+    for group in ("R-1", "R-2", "R-3", "R-4"):
+        assert outcome(r, {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True, "occupancy_group": group},
+                       allowed) == "not_applicable", group
+    for group in ("B", "M", "I-2", "mixed"):
+        assert outcome(r, {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True, "occupancy_group": group},
+                       allowed) == "needs_review", group
+        assert outcome(r, {"sprinklered_903_3_1_1": True, "occupancy_group": group}, allowed) == "not_applicable", group
+    for given in ({}, {"occupancy_group": "R-2"}, {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": False,
+                                                   "occupancy_group": "R-2"}, {"sprinklered_903_3_1_2": True},
+                  {"sprinklered_903_3_1_1": False, "occupancy_group": "B", "stories_above_grade_plane": 2}):
+        assert outcome(r, given, allowed) == "needs_review", given
+    note = " ".join(_shown_note(r).split())
+    assert "three stories or less above grade plane" in note and "open parking garages" in note
+
+
+def test_705_2s_projections_reach_egress_balconies_and_exterior_exit_stairways(book, labels):
+    """Review round 1 of part e1: exterior egress balconies and exterior exit stairways are projections (705.2 adds 1021
+    and 1027 to its own requirements, never replaces them), so 705.2 to 705.2.3.1 and Table 705.2 are brought in as
+    flags; 705.2.3.1's note keeps the balconies' 50 percent of the perimeter and the fire-retardant-treated wood
+    allowance only for exterior stairways "not used as required exits"."""
+    rules = {r["id"]: r for r in book}
+    for pid in ("705.2", "Table 705.2", "705.2.1", "705.2.2", "705.2.3", "705.2.3.1"):
+        assert labels[pid]["label"] == "flag" and _flags(book, pid), pid
+    balconies = " ".join(_shown_note(rules["general.bc_705_2_3_1_balconies"]).split())
+    assert "50 percent of the building's perimeter on each floor" in balconies
+    assert "exterior stairways not used as required exits" in balconies
+    projections = " ".join(_shown_note(rules["general.bc_705_2_projections"]).split())
+    assert "egress balconies also to 1021 and exterior exit stairways and ramps to 1027" in projections   # round 2
+    assert labels["705.4"]["label"] == "flag" and _flags(book, "705.4")          # round 2: an exit's walls meet all of 705
+
+
+def test_the_readmes_rule_count_is_the_rulebooks():
+    """Review round 1 of part e1: the README's count of hand-drafted rules and flags is the rulebook's own."""
+    rules = load(RULEBOOK)["rules"]
+    flags = sum(r["kind"] == "flag" for r in rules)
+    readme = " ".join((NY / "README.md").read_text(encoding="utf-8").split())
+    assert f"{len(rules)} hand-drafted (drafts: approval is deferred): {len(rules) - flags} rules and {flags} flags" in readme
+
+
+def test_part_e2s_notes_keep_the_laws_limits(book, labels):
+    """Part e2: the rest of Section 716 as egress doors and windows use it. Each piece of 716.2.5 to 716.4 brought in is
+    labeled, its flags' notes keep the numbers and conditions the page prints (100 square inches, 20 minutes, 3/4 hour,
+    the 10-second delay, 25 percent, 12 feet, 716.3.4's 1/2-hour partitions read through its stacked fraction), and
+    716.2.6.1's exception 1 stays Group R-1's alone; the parts left out are named in the README's list."""
+    rules = {r["id"]: r for r in book}
+    def shown(rid):
+        return " ".join(_shown_note(rules[rid]).split())
+    want = {"general.bc_716_2_5_1_2_1_horizontal_exit_vision_panels": ["self-closing swinging", "limited to 100 square inches"],
+            "general.bc_716_2_5_1_2_2_fire_barrier_door_glazing": ["1 1/2-hour fire protection rating", "limited to 100 square inches"],
+            "general.bc_716_2_5_3_corridor_door_glazing": ["at least 20 minutes", "exempt from the hose stream test"],
+            "general.bc_716_2_5_4_transoms_and_sidelights": ["3/4 hour or less", "2-hour fire-resistance-rated exterior walls",
+                                                              "more than 3/4 hour"],
+            "general.bc_716_2_6_1_door_closing": ["latching and self-closing or automatic-closing",
+                                                  "dwelling units or sleeping units in Group R-1"],
+            "general.bc_716_2_6_6_smoke_activated_doors": ["no more than 10 seconds", "loss of power"],
+            "general.bc_716_3_2_1_2_fire_window_area": ["at most 25 percent of the area of a common wall"],
+            "general.bc_716_3_3_1_window_mullions": ["more than 12 feet"],
+            "general.bc_716_3_4_fire_window_glazing": ["at least 3/4 hour", "1/2-hour fire-resistance-rated partitions may have a 20-minute"]}
+    for rid, words in want.items():
+        for w in words:
+            assert w in shown(rid), (rid, w)
+    for pid in ("716.2.5.1.2.1", "716.2.6.1", "716.2.6.6", "716.2.9.1", "716.3.4", "716.4.3"):
+        assert labels[pid]["label"] == "flag" and _flags(book, pid), pid
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    left_out = readme.split("## References in the brought-in sections that are not brought in", 1)[1]
+    assert "716.2.5.4.1, 716.2.6.3 and 716.3.2.1.1.1" in left_out
+    # review round 1: fire shutters are opening protectives 705.9.2 and Table 716.1(2) reach, so 716.2.7 and 716.2.8 are
+    # flags; 716.2.6's pointer names the one hardware piece left out
+    for pid, words in (("716.2.7", "readily opened from the outside"), ("716.2.8", "approved automatic-closing devices")):
+        assert labels[pid]["label"] == "flag" and words in " ".join(_shown_note(_flags(book, pid)[0]).split()), pid
+    assert "716.2.6.3, chute intake doors, isn't brought in" in labels["716.2.6"]["reason"]
+    # review round 2: every rolling fire shutter, wherever installed (the bracket names examples, never a limit), and
+    # 716.3.2.1.3's '9 inch' recorded as UL 9's number, not a length
+    rolling = " ".join(_shown_note(_flags(book, "716.2.8")[0]).split())
+    assert rolling.startswith("Wherever rolling fire shutters are installed") and "smoke barriers" in rolling
+    assert "among them" in rolling and "among them" in labels["716.2.8"]["reason"]
+    tv = load(NY / "text_verification.yaml")["pieces"]
+    assert any("'9 inch'" in f and "UL 9" in f for f in tv["716.3.2.1.3"].get("flags") or [])
+
+
+# the definitions part e1 brought in by the italics of its pieces (sources.yaml names none by hand)
+E1_DEFINITIONS = {"202:cornice", "202:fire_lane", "202:fire_retardant_treated_wood", "202:plastic_composite",
+                  "202:plastic_lumber", "202:primary_structural_frame"}
+
+
+def test_the_plans_part_e1_counts_are_the_datas(labels):
+    """Review round 3 of part e1: the plan's status line for part e1 (pieces, definitions, numbers read a second time,
+    flags and pointers) is worked out from the data, so it can't drift again as it did in round 1."""
+    rows = [json.loads(line) for line in SECTIONS.read_text(encoding="utf-8").splitlines()]
+    ids = {p["id"] for p in rows[1:]}
+    assert E1_DEFINITIONS <= ids
+    pieces = {p for p in ids if re.match(r"(Table )?705\.", p)} | E1_DEFINITIONS
+    numbers = sum(len(load(NY / "text_verification.yaml")["pieces"][p]["numbers"]) for p in pieces)
+    e1 = {p: v for p, v in labels.items() if re.match(r"(Table )?705\.", p)}
+    flags = sum(v["label"] == "flag" for v in e1.values())
+    pointers = sum(v["label"] == "reference" for v in e1.values())
+    plan = " ".join((REPO / "docs/decisions/2026-11-26_ny_building_chapter_7.md").read_text(encoding="utf-8").split())
+    line = plan.split("Status, e1 drafted", 1)[1].split("Status, e2", 1)[0]
+    assert f"and {len(E1_DEFINITIONS)} definitions: {len(pieces)} pieces read a second time ({numbers} numbers" in line
+    assert f"{flags} flags and {pointers} pointers" in line
