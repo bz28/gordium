@@ -561,8 +561,9 @@ def test_the_building_codes_stated_stories_reach_its_stairs_through_its_reading(
     desc = build.interior_of()
     desc["stairs"] = []
     for r in desc["rooms"] + (desc.get("unknown_spaces") or []):
-        r["level"] = desc["rooms"][0]["level"]                     # every room on one level, one floor height:
-        r.pop("floor_elevation", None)                             # only the count tells
+        r["level"] = desc["rooms"][0]["level"]                     # every room on one level, one floor height,
+        r.pop("floor_elevation", None)                             # one story's walls: only the count tells
+    desc["story_outlines"] = [o for o in desc.get("story_outlines") or [] if o.get("level") == desc["rooms"][0]["level"]]
     law = {"scope": code_scope.BUILDING, "folder": str(REPO / "regulations/jurisdictions/new_york/new_york_state_building"),
            "rules": [{"id": "x", "for_each": "stair"}]}
     assert egress._reads_interior(law)
