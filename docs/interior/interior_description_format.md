@@ -229,11 +229,33 @@ building:
                                        # (1005.6) or an exit stair discharging into one; only where false is a
                                        # corridor's occupant load bounded by its story's (1004.2.3; Table 1020.3)
   ambulatory_care_facility: false      # the building is or holds an ambulatory care facility (BCNYS 202, 422):
-                                       # Table 1020.3's 72 in for corridors serving stretcher traffic
+                                       # Section 422's flags (false sets them aside), Table 1020.2's Group B
+                                       # corridor rating (422.2's fire partition) and Table 1020.3's 72 in for
+                                       # corridors serving stretcher traffic
   corridors_within_dwelling_units: false  # a corridor is inside a dwelling unit or sleeping unit (BCNYS 1020.2
                                        # exception 2: no rating there in Groups I-1 and R; Table 1020.3: 36 in)
   emergency_voice_alarm_system: false  # an emergency voice/alarm communication system per BCNYS 907.5.2.2 (with a
                                        # 903.3.1.1 or 903.3.1.2 sprinkler system: 1005.3's smaller capacity factors)
+  high_rise_building: false            # a high-rise (BCNYS 202: an occupied floor or occupiable roof more than 75 ft
+                                       # above the lowest level of fire department vehicle access) or more than 420 ft
+                                       # in building height (403.2.2, 403.5.2): Section 403's flags and the story exit
+                                       # rules' additional stairway (403.5.2)
+  underground_building: false          # a floor level used for human occupancy more than 30 ft below the finished
+                                       # floor of the lowest level of exit discharge (BCNYS 405.1): Section 405's flags
+                                       # and each floor level's two exits (405.7.1)
+  stages_or_platforms: false           # a stage, a platform or a technical production area (BCNYS 202): Section
+                                       # 410.5's flags, and Table 1006.2.1's 125 ft rows (Groups R-2, R-3 and R-4)
+                                       # held to 410.5.3.3's 100 ft common path
+  aircraft_related_occupancy: false    # an airport traffic control tower, an aircraft hangar (a residential one
+                                       # too), an aircraft paint hangar, an aircraft manufacturing facility, a
+                                       # heliport or a helistop (BCNYS Section 412): its flags, and Table
+                                       # 1006.2.1's Group U row held to 412.4.2's two means of egress
+  service_corridors: false             # a service corridor (BCNYS 202: a fully enclosed passage used for
+                                       # transporting HPM and purposes other than required means of egress): in
+                                       # Group H-5 or two or more groups, 415.11.3's flags and 1020.3's capacity
+                                       # held to 415.11.3.4; in Group H-5, Table 1017.2's H-5 row, Table
+                                       # 1006.3.4(2)'s one-exit stories, 1020.5's dead ends and Table 1020.3's width
+                                       # held to 415.11.3.3 and 415.11.3.4
   assembly_spaces: false               # a room or space used for assembly purposes, whatever the building's group
                                        # (BCNYS 1030.1; 303.1.1 and 303.1.2 put small ones in Group B or the main
                                        # occupancy): Section 1030's checks show where true or not stated. Also true

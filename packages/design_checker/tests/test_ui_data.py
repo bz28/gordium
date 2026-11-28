@@ -31,6 +31,11 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "ambulatory_care_facility": False,                 # group 4's
                                           "corridors_within_dwelling_units": False,
                                           "emergency_voice_alarm_system": False,             # group 5a's
+                                          "high_rise_building": False,                       # Chapter 4 part b's
+                                          "underground_building": False,
+                                          "stages_or_platforms": False,                      # Chapter 4 part f's
+                                          "aircraft_related_occupancy": False,
+                                          "service_corridors": False,
                                           "assembly_spaces": False})                         # group 9h's
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
@@ -588,15 +593,19 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # and this branch's own: emergency_voice_alarm_system (their marks follow in the Revit-fields work)
     # (groups 4 and 5's four have theirs too, the Revit-fields PR for them)
     # (the occupant-load ceiling's mezzanines and loads not by area, 2026-11-26, came with their own)
-    # section group 9h's assembly_spaces has none yet (asked for by name, never by a mark: the Section 1030 flags
-    # that read it are a person's check whatever it is; its Project Information Yes/No follows in the Revit-fields work)
-    assert keys - set(revit) == {"assembly_spaces"}
+    # Chapter 4 part b's two (a high-rise, an underground building) have theirs too (the Chapter 4 marks PR)
+    # Chapter 4 part f's three (a stage or platform, an aircraft-related occupancy, a service corridor) and section
+    # group 9h's assembly_spaces have no Revit mark yet: read only by flags' applies_when, by bands placed last in their
+    # chains and (assembly_spaces) by the seating reviews, each asked for by name; their marks follow in the
+    # Revit-fields work
+    assert keys - set(revit) == {"stages_or_platforms", "aircraft_related_occupancy", "service_corridors",
+                                 "assembly_spaces"}
     assert "assembly_spaces" not in code_scope.MARK and code_scope.field_of("assembly_spaces") == "building.assembly_spaces"
     assert code_scope.MARK["mezzanines"] == revit["mezzanines"] == "Gordium: Mezzanines"
     assert code_scope.MARK["loads_not_by_area"] == revit["loads_not_by_area"] == "Gordium: Loads not by area"
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased",
               "other_level_egress_into_corridors", "ambulatory_care_facility", "corridors_within_dwelling_units",
-              "emergency_voice_alarm_system"):
+              "emergency_voice_alarm_system", "high_rise_building", "underground_building"):
         # a fact a rule reads as a measure is answered by its field (field_of); occupant_load_increased is read by the
         # occupant loads themselves, not as a measure
         assert code_scope.field_of(k) == (f"building.{k}" if k in code_scope.DERIVED else None), k
@@ -784,3 +793,15 @@ def test_every_restatement_of_the_leaves_rule_carries_the_mullioned_pair():
     assert "narrower leaf" in STOPS["door_leaves_not_given"]
     fmt = (REPO / "docs/interior/interior_description_format.md").read_text(encoding="utf-8")
     assert "narrower leaf" in next(line for line in fmt.splitlines() if line.startswith("| `leaves`"))
+
+
+def test_the_high_rise_question_asks_the_whole_definition():
+    """Review round 1 of Chapter 4 part b: the question once left out 202's occupiable roof, so a building whose roof
+    deck is the high part could be answered No and lose every Section 403 flag."""
+    words = ui_data.FIELD_HEADLINES["building.high_rise_building"]
+    assert "occupiable roof" in words and "lowest level of fire department vehicle access" in words
+    assert "420 ft in building height" in words
+    # the class: the underground question, too, in 405.1's own words
+    words = ui_data.FIELD_HEADLINES["building.underground_building"]
+    assert "floor level used for human occupancy" in words and "finished floor of the lowest level of exit discharge" in words
+

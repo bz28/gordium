@@ -51,6 +51,7 @@ MARK, FIX_MODEL, SURVEY, DECIDE, MEASURE, OPEN_QUESTION = ("mark", "fix_model", 
 KINDS = (MARK, FIX_MODEL, SURVEY, DECIDE, MEASURE, OPEN_QUESTION)
 
 # the headline of a project question, by the field that answers it
+HIGH_RISE_FIELD = "building.high_rise_building"      # the fact the model's figure hints at (high_rise_hint.py)
 FIELD_HEADLINES = {
     "building.occupancy_groups": "Set the occupancy group",
     "building.sprinkler_system": "Set the sprinkler system",
@@ -62,9 +63,14 @@ FIELD_HEADLINES = {
     "building.r2_sleeping_units": "Say whether the Group R-2 units are all sleeping units, all dwelling units, or both",
     "building.emergency_escape_openings_1031": "Say whether every sleeping room has an emergency escape opening (1031)",
     "building.occupied_outdoor_areas": "Say whether the occupants use outdoor areas (yards, patios, roofs: 1004.7)",
-    "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Table 1020.3)",
+    "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Section 422)",
     "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
     "building.emergency_voice_alarm_system": "Say whether the whole building has an emergency voice/alarm communication system (907.5.2.2)",
+    "building.high_rise_building": "Say whether the building is a high-rise (an occupied floor or occupiable roof more than 75 ft above the lowest level of fire department vehicle access, 202) or more than 420 ft in building height (403)",
+    "building.underground_building": "Say whether any floor level used for human occupancy is more than 30 ft below the finished floor of the lowest level of exit discharge (405.1)",
+    "building.stages_or_platforms": "Say whether the building has a stage, a platform or a technical production area (202, 410)",
+    "building.aircraft_related_occupancy": "Say whether the building is or holds an airport traffic control tower, an aircraft hangar, an aircraft paint hangar, an aircraft manufacturing facility, a heliport or a helistop (412)",
+    "building.service_corridors": "Say whether the building has a service corridor, a fully enclosed passage used for transporting HPM (202, 415.11.3)",
     "building.assembly_spaces": "Say whether any room or space is used for assembly purposes, whatever the building's group (1030.1)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
     "building.mezzanines": "Say whether the building has a mezzanine (505.2)",
@@ -497,9 +503,11 @@ def limit_words(item: dict, rule: dict | None, values: dict) -> str | None:
 # ---- adding them to the view ----------------------------------------------------------------------------------
 
 def add(view: dict, *, rules_by_id: dict, laws: list[dict], site: dict | None, values: dict, place=None,
-        place_folder=None, documents: dict | None = None) -> None:
+        place_folder=None, documents: dict | None = None, high_rise_hint: str | None = None) -> None:
     """Every new field onto the view's items, and the view's `contents` (the module's note). Never a crash: a field
-    that can't be worked out is left out, the rest of the answer as it was."""
+    that can't be worked out is left out, the rest of the answer as it was. `high_rise_hint`: the model's figure for
+    the high-rise question (design_checker/high_rise_hint.py), added to the words of each ask for that fact; it
+    decides nothing (the fact stays unstated until the architect answers)."""
     from design_checker import contents as contents_mod
     law_rules = {(law["key"], r.get("id")): r for law in laws for r in law.get("rules") or [] if isinstance(r, dict)}
     rule_kinds = {r.get("id"): r.get("for_each") for law in laws for r in law.get("rules") or []
@@ -523,6 +531,12 @@ def add(view: dict, *, rules_by_id: dict, laws: list[dict], site: dict | None, v
                     "why": str(c.get("words") or ""), "elements": list(c.get("elements") or [])}
                    for c in item.get("causes") or []] if item.get("status") == present.REVIEW else None
         if got is not None:
+            if high_rise_hint:
+                for a in got:
+                    if a.get("field") == HIGH_RISE_FIELD:
+                        why = str(a.get("why") or "").rstrip()      # a sentence of its own (marks PR round 2)
+                        a["why"] = (why + ("" if not why or why[-1] in ".?!" else ".") + " " + high_rise_hint).strip()
+                        a["hint"] = high_rise_hint
             for a in got:                # a follow-up question names the one it hangs on
                 parent = depends_on(a.get("field"))
                 if parent is not None:

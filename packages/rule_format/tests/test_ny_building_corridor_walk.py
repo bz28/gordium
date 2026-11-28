@@ -306,7 +306,10 @@ def test_a_rating_not_stated_passes_only_where_the_table_asks_none(ctx, rules):
     assert _row(r, unstated, _rating_given("M", "none", False), ctx) == "needs_review"
     assert _row(r, unstated, _rating_given("M", "nfpa_13", False), ctx) == "pass"
     small = {"measures": {"corridor_occupant_load": 30}, "not_measured": {"corridor_fire_rating_hours": "stated"}}
-    assert _row(r, small, _rating_given("M", "none", False), ctx) == "pass"
+    # Chapter 4 part a: passing on the corridor's load alone, only where the building rules out a mall (402.8.2.1)
+    no_mall = {"special_egress_spaces": False}
+    assert _row(r, small, _rating_given("M", "none", False) | no_mall, ctx) == "pass"
+    assert _row(r, small, _rating_given("M", "none", False), ctx) == "needs_review"
 
 
 

@@ -398,7 +398,12 @@ def test_an_italic_word_r202_doesnt_define_must_be_named_with_why():
     (["The landing shall be not less than 1.5. The tread"], ["not less than 1.5"]),     # a number ending a sentence
     (["shall be 36 inches.", "2. Where the stair is", "curved"], ["36 inch"]),           # a list item's own number
     (["Group E classrooms with an occupant load of less than 50.", "3. In courtrooms"], ["less than 50"]),  # 1010.2.12
-    (["area of 200 gross square feet"], ["200 gross square foot"])])
+    (["area of 200 gross square feet"], ["200 gross square foot"]),
+    # Chapter 4 part c's conversion walk (BCNYS 420.8, 407.5.3): a word after a sentence's end is never the number's
+    # unit ("not be greater than", "30.", "2. In Group I-1" read as 30 inches), and "net" is read like "gross"
+    (["shall not be greater than", "30.", "2. In Group I-1, Condition 2"], ["not be greater than 30", "2"]),
+    (["installed in accordance with Section 907. In Group"], ["907"]),
+    (["Not less than 30 net square feet (2.8 m[fn2]) per"], ["not less than 30 net square foot", "2.8 m"])])
 def test_numbers_of_a_pieces_lines(lines, expect):
     from document_extraction.numbers import statements_of_lines
     assert [shown(s) for s in statements_of_lines(lines)] == expect
