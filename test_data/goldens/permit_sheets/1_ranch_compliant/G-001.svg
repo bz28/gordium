@@ -3,8 +3,8 @@
 <rect x="0" y="0" width="1224" height="792" fill="#ffffff"/>
 <text x="68" y="47.6" font-size="14" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">CODE ANALYSIS: EGRESS</text>
 <text x="68" y="63.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Egress result: NEEDS REVIEW</text>
-<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 3 to review · 11 comply · 12 parts not read yet · 86 sections not checked yet (the check's own count)</text>
-<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 125)</text>
+<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 1 to review · 11 comply · 12 parts not read yet · 86 sections not checked yet (the check's own count)</text>
+<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 94)</text>
 <polygon points="68,99.6 994,99.6 994,114.6 68,114.6" fill="#e6e6e6" stroke="#1a1a1a" stroke-width="0.6"/>
 <text x="71" y="109.6" font-size="7" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">#</text>
 <text x="94.83" y="109.6" font-size="7" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">Item</text>
@@ -23,7 +23,7 @@
 <text x="210.58" y="153.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3 rules: One egress door for each dwelling unit (R318.2);</text>
 <text x="210.58" y="162.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress doors readily openable without key (R318.2); Exit into</text>
 <text x="210.58" y="171.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">a patio cover not unenclosed: exits per R318 (BF103.2)</text>
-<text x="210.58" y="180.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 1–2, 12</text>
+<text x="210.58" y="180.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 1–2, 11</text>
 <text x="408.04" y="153.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="153.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,144.6 684.2,144.6 684.2,183.1 602.49,183.1" fill="#fff1d6"/>
@@ -43,349 +43,303 @@
 <line x1="742.07" y1="144.6" x2="742.07" y2="183.1" stroke="#8c8c8c" stroke-width="0.3"/>
 <line x1="68" y1="144.6" x2="68" y2="183.1" stroke="#1a1a1a" stroke-width="0.6"/>
 <line x1="994" y1="144.6" x2="994" y2="183.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="192.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">2</text>
-<text x="94.83" y="192.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Stairs</text>
-<text x="210.58" y="192.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">30 rules: Handrail on one side of flights with four or more</text>
-<text x="210.58" y="201.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">risers (R318.7.8); Sleeping loft stair riser height, 7 to 12 in</text>
-<text x="210.58" y="210.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">(R315.5.2.2); Sleeping loft stair tread/riser formula</text>
-<text x="210.58" y="219.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">(R315.5.2.2); and 27 more</text>
-<text x="210.58" y="227.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 3, 25–26, 36–48, 66–79</text>
-<text x="408.04" y="192.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="192.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,183.1 684.2,183.1 684.2,277.1 602.49,277.1" fill="#fff1d6"/>
-<text x="605.49" y="192.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="192.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R315.5.2.1,</text>
-<text x="687.2" y="201.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R315.5.2.2,</text>
-<text x="687.2" y="210.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.1,</text>
-<text x="687.2" y="219.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.2,</text>
-<text x="687.2" y="228.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.3,</text>
-<text x="687.2" y="237.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.5.1,</text>
-<text x="687.2" y="246.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.5.2,</text>
-<text x="687.2" y="255.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.6,</text>
-<text x="687.2" y="264.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.8,</text>
-<text x="687.2" y="273.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.11.1</text>
-<text x="745.07" y="192.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">to give: the model's &quot;no stairs&quot; isn't taken: the interior drawing says why</text>
-<line x1="68" y1="277.1" x2="994" y2="277.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="183.1" x2="91.83" y2="277.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="183.1" x2="207.58" y2="277.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="183.1" x2="405.04" y2="277.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="183.1" x2="503.76" y2="277.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="183.1" x2="602.49" y2="277.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="183.1" x2="684.2" y2="277.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="183.1" x2="742.07" y2="277.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="183.1" x2="68" y2="277.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="183.1" x2="994" y2="277.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="286.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3</text>
-<text x="94.83" y="286.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Interior drawing</text>
-<text x="210.58" y="286.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="210.58" y="294.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 124</text>
-<text x="408.04" y="286.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="286.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,277.1 684.2,277.1 684.2,317.1 602.49,317.1" fill="#fff1d6"/>
-<text x="605.49" y="286.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="286.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="745.07" y="286.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">The interior drawing: the model says there are no stairs, yet the architect gives</text>
-<text x="745.07" y="295.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">the building 2 stories: a stair or a ramp joins its floors or leads down to the</text>
-<text x="745.07" y="304.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">ground, unless each floor has its own way out at grade, which the model</text>
-<text x="745.07" y="313.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">doesn't show, so 'no stairs' isn't taken and the stair rules need review</text>
-<line x1="68" y1="317.1" x2="994" y2="317.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="277.1" x2="91.83" y2="317.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="277.1" x2="207.58" y2="317.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="277.1" x2="405.04" y2="317.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="277.1" x2="503.76" y2="317.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="277.1" x2="602.49" y2="317.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="277.1" x2="684.2" y2="317.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="277.1" x2="742.07" y2="317.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="277.1" x2="68" y2="317.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="277.1" x2="994" y2="317.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<polygon points="68,317.1 994,317.1 994,332.1 68,332.1" fill="#f5f5f5" stroke="#1a1a1a" stroke-width="0.4"/>
-<text x="71" y="327.1" font-size="7.5" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">Check by hand: not read by Gordium yet</text>
-<text x="71" y="341.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">4</text>
-<text x="94.83" y="341.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrails</text>
-<text x="210.58" y="341.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">10 rules</text>
-<text x="210.58" y="349.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 13–14, 116–123</text>
-<text x="408.04" y="341.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="341.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,332.1 684.2,332.1 684.2,363.1 602.49,363.1" fill="#fff1d6"/>
-<text x="605.49" y="341.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="341.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R320.2, R320.3,</text>
-<text x="687.2" y="350.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R320.4, R320.5,</text>
-<text x="687.2" y="359.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R320.6</text>
-<text x="745.07" y="341.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
-<line x1="68" y1="363.1" x2="994" y2="363.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="332.1" x2="91.83" y2="363.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="332.1" x2="207.58" y2="363.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="332.1" x2="405.04" y2="363.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="332.1" x2="503.76" y2="363.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="332.1" x2="602.49" y2="363.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="332.1" x2="684.2" y2="363.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="332.1" x2="742.07" y2="363.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="332.1" x2="68" y2="363.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="332.1" x2="994" y2="363.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="372.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">5</text>
-<text x="94.83" y="372.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Guards (open sides)</text>
-<text x="210.58" y="372.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7 rules</text>
-<text x="210.58" y="380.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 15–20, 27</text>
-<text x="408.04" y="372.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="372.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,363.1 684.2,363.1 684.2,394.1 602.49,394.1" fill="#fff1d6"/>
-<text x="605.49" y="372.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="372.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.1,</text>
-<text x="687.2" y="381.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.2,</text>
-<text x="687.2" y="390.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.3</text>
-<text x="745.07" y="372.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
-<line x1="68" y1="394.1" x2="994" y2="394.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="363.1" x2="91.83" y2="394.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="363.1" x2="207.58" y2="394.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="363.1" x2="405.04" y2="394.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="363.1" x2="503.76" y2="394.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="363.1" x2="602.49" y2="394.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="363.1" x2="684.2" y2="394.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="363.1" x2="742.07" y2="394.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="363.1" x2="68" y2="394.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="363.1" x2="994" y2="394.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="403.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">6</text>
-<text x="94.83" y="403.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts</text>
-<text x="210.58" y="403.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">5 rules</text>
-<text x="210.58" y="411.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 21–24, 54</text>
-<text x="408.04" y="403.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="403.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,394.1 684.2,394.1 684.2,416.1 602.49,416.1" fill="#fff1d6"/>
-<text x="605.49" y="403.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="403.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R315.2, R315.3,</text>
-<text x="687.2" y="412.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.1</text>
-<text x="745.07" y="403.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
-<line x1="68" y1="416.1" x2="994" y2="416.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="394.1" x2="91.83" y2="416.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="394.1" x2="207.58" y2="416.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="394.1" x2="405.04" y2="416.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="394.1" x2="503.76" y2="416.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="394.1" x2="602.49" y2="416.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="394.1" x2="684.2" y2="416.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="394.1" x2="742.07" y2="416.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="394.1" x2="68" y2="416.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="394.1" x2="994" y2="416.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="425.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7</text>
-<text x="94.83" y="425.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Basements</text>
-<text x="210.58" y="425.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">2 rules</text>
-<text x="210.58" y="433.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 51, 115</text>
-<text x="408.04" y="425.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="425.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,416.1 684.2,416.1 684.2,436.6 602.49,436.6" fill="#fff1d6"/>
-<text x="605.49" y="425.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="425.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.1, R319.6</text>
-<text x="745.07" y="425.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
+<polygon points="68,183.1 994,183.1 994,198.1 68,198.1" fill="#f5f5f5" stroke="#1a1a1a" stroke-width="0.4"/>
+<text x="71" y="193.1" font-size="7.5" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">Check by hand: not read by Gordium yet</text>
+<text x="71" y="207.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">2</text>
+<text x="94.83" y="207.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrails</text>
+<text x="210.58" y="207.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">10 rules</text>
+<text x="210.58" y="215.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 12–13, 86–93</text>
+<text x="408.04" y="207.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="207.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,198.1 684.2,198.1 684.2,229.1 602.49,229.1" fill="#fff1d6"/>
+<text x="605.49" y="207.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="207.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R320.2, R320.3,</text>
+<text x="687.2" y="216.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R320.4, R320.5,</text>
+<text x="687.2" y="225.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R320.6</text>
+<text x="745.07" y="207.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
+<line x1="68" y1="229.1" x2="994" y2="229.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="198.1" x2="91.83" y2="229.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="198.1" x2="207.58" y2="229.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="198.1" x2="405.04" y2="229.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="198.1" x2="503.76" y2="229.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="198.1" x2="602.49" y2="229.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="198.1" x2="684.2" y2="229.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="198.1" x2="742.07" y2="229.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="198.1" x2="68" y2="229.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="198.1" x2="994" y2="229.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="238.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3</text>
+<text x="94.83" y="238.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Guards (open sides)</text>
+<text x="210.58" y="238.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7 rules</text>
+<text x="210.58" y="246.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 14–19, 24</text>
+<text x="408.04" y="238.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="238.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,229.1 684.2,229.1 684.2,260.1 602.49,260.1" fill="#fff1d6"/>
+<text x="605.49" y="238.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="238.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.1,</text>
+<text x="687.2" y="247.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.2,</text>
+<text x="687.2" y="256.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.3</text>
+<text x="745.07" y="238.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
+<line x1="68" y1="260.1" x2="994" y2="260.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="229.1" x2="91.83" y2="260.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="229.1" x2="207.58" y2="260.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="229.1" x2="405.04" y2="260.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="229.1" x2="503.76" y2="260.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="229.1" x2="602.49" y2="260.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="229.1" x2="684.2" y2="260.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="229.1" x2="742.07" y2="260.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="229.1" x2="68" y2="260.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="229.1" x2="994" y2="260.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="269.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">4</text>
+<text x="94.83" y="269.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts</text>
+<text x="210.58" y="269.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">5 rules</text>
+<text x="210.58" y="277.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 20–23, 38</text>
+<text x="408.04" y="269.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="269.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,260.1 684.2,260.1 684.2,282.1 602.49,282.1" fill="#fff1d6"/>
+<text x="605.49" y="269.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="269.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R315.2, R315.3,</text>
+<text x="687.2" y="278.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.1</text>
+<text x="745.07" y="269.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
+<line x1="68" y1="282.1" x2="994" y2="282.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="260.1" x2="91.83" y2="282.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="260.1" x2="207.58" y2="282.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="260.1" x2="405.04" y2="282.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="260.1" x2="503.76" y2="282.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="260.1" x2="602.49" y2="282.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="260.1" x2="684.2" y2="282.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="260.1" x2="742.07" y2="282.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="260.1" x2="68" y2="282.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="260.1" x2="994" y2="282.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="291.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">5</text>
+<text x="94.83" y="291.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Basements</text>
+<text x="210.58" y="291.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">2 rules</text>
+<text x="210.58" y="299.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 35, 85</text>
+<text x="408.04" y="291.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="291.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,282.1 684.2,282.1 684.2,302.6 602.49,302.6" fill="#fff1d6"/>
+<text x="605.49" y="291.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="291.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.1, R319.6</text>
+<text x="745.07" y="291.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
+<line x1="68" y1="302.6" x2="994" y2="302.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="282.1" x2="91.83" y2="302.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="282.1" x2="207.58" y2="302.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="282.1" x2="405.04" y2="302.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="282.1" x2="503.76" y2="302.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="282.1" x2="602.49" y2="302.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="282.1" x2="684.2" y2="302.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="282.1" x2="742.07" y2="302.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="282.1" x2="68" y2="302.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="282.1" x2="994" y2="302.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="311.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">6</text>
+<text x="94.83" y="311.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Habitable attics</text>
+<text x="210.58" y="311.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1 rule</text>
+<text x="210.58" y="320.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 36</text>
+<text x="408.04" y="311.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="311.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,302.6 684.2,302.6 684.2,323.1 602.49,323.1" fill="#fff1d6"/>
+<text x="605.49" y="311.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="311.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.1</text>
+<text x="745.07" y="311.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
+<line x1="68" y1="323.1" x2="994" y2="323.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="302.6" x2="91.83" y2="323.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="302.6" x2="207.58" y2="323.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="302.6" x2="405.04" y2="323.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="302.6" x2="503.76" y2="323.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="302.6" x2="602.49" y2="323.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="302.6" x2="684.2" y2="323.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="302.6" x2="742.07" y2="323.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="302.6" x2="68" y2="323.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="302.6" x2="994" y2="323.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="332.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7</text>
+<text x="94.83" y="332.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Rooms a loft opens to</text>
+<text x="210.58" y="332.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1 rule</text>
+<text x="210.58" y="340.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 37</text>
+<text x="408.04" y="332.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="332.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,323.1 684.2,323.1 684.2,343.6 602.49,343.6" fill="#fff1d6"/>
+<text x="605.49" y="332.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="332.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.1</text>
+<text x="745.07" y="332.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
+<line x1="68" y1="343.6" x2="994" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="323.1" x2="91.83" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="323.1" x2="207.58" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="323.1" x2="405.04" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="323.1" x2="503.76" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="323.1" x2="602.49" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="323.1" x2="684.2" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="323.1" x2="742.07" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="323.1" x2="68" y2="343.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="323.1" x2="994" y2="343.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="352.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">8</text>
+<text x="94.83" y="352.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Exterior doors</text>
+<text x="210.58" y="352.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">8 rules</text>
+<text x="210.58" y="361.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 41–47, 49</text>
+<text x="408.04" y="352.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="352.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,343.6 684.2,343.6 684.2,374.6 602.49,374.6" fill="#fff1d6"/>
+<text x="605.49" y="352.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="352.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.3,</text>
+<text x="687.2" y="361.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.3.1,</text>
+<text x="687.2" y="370.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.3.2</text>
+<text x="745.07" y="352.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
+<line x1="68" y1="374.6" x2="994" y2="374.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="343.6" x2="91.83" y2="374.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="343.6" x2="207.58" y2="374.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="343.6" x2="405.04" y2="374.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="343.6" x2="503.76" y2="374.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="343.6" x2="602.49" y2="374.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="343.6" x2="684.2" y2="374.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="343.6" x2="742.07" y2="374.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="343.6" x2="68" y2="374.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="343.6" x2="994" y2="374.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="383.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">9</text>
+<text x="94.83" y="383.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Alternating tread devices</text>
+<text x="210.58" y="383.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">10 rules</text>
+<text x="210.58" y="392.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 50–59</text>
+<text x="408.04" y="383.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="383.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,374.6 684.2,374.6 684.2,405.6 602.49,405.6" fill="#fff1d6"/>
+<text x="605.49" y="383.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="383.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.12,</text>
+<text x="687.2" y="392.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.12.1,</text>
+<text x="687.2" y="401.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.12.2</text>
+<text x="745.07" y="383.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
+<line x1="68" y1="405.6" x2="994" y2="405.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="374.6" x2="91.83" y2="405.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="374.6" x2="207.58" y2="405.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="374.6" x2="405.04" y2="405.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="374.6" x2="503.76" y2="405.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="374.6" x2="602.49" y2="405.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="374.6" x2="684.2" y2="405.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="374.6" x2="742.07" y2="405.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="374.6" x2="68" y2="405.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="374.6" x2="994" y2="405.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="414.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">10</text>
+<text x="94.83" y="414.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Ship's ladders</text>
+<text x="210.58" y="414.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">6 rules</text>
+<text x="210.58" y="423.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 60–65</text>
+<text x="408.04" y="414.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="414.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,405.6 684.2,405.6 684.2,436.6 602.49,436.6" fill="#fff1d6"/>
+<text x="605.49" y="414.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="414.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.13,</text>
+<text x="687.2" y="423.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.13.1,</text>
+<text x="687.2" y="432.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.13.2</text>
+<text x="745.07" y="414.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
 <line x1="68" y1="436.6" x2="994" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="416.1" x2="91.83" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="416.1" x2="207.58" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="416.1" x2="405.04" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="416.1" x2="503.76" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="416.1" x2="602.49" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="416.1" x2="684.2" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="416.1" x2="742.07" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="416.1" x2="68" y2="436.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="416.1" x2="994" y2="436.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="445.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">8</text>
-<text x="94.83" y="445.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Habitable attics</text>
-<text x="210.58" y="445.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1 rule</text>
-<text x="210.58" y="454.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 52</text>
+<line x1="91.83" y1="405.6" x2="91.83" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="405.6" x2="207.58" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="405.6" x2="405.04" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="405.6" x2="503.76" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="405.6" x2="602.49" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="405.6" x2="684.2" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="405.6" x2="742.07" y2="436.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="405.6" x2="68" y2="436.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="405.6" x2="994" y2="436.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="445.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">11</text>
+<text x="94.83" y="445.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Ramps</text>
+<text x="210.58" y="445.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7 rules</text>
+<text x="210.58" y="454.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 66–72</text>
 <text x="408.04" y="445.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="445.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,436.6 684.2,436.6 684.2,457.1 602.49,457.1" fill="#fff1d6"/>
+<polygon points="602.49,436.6 684.2,436.6 684.2,467.6 602.49,467.6" fill="#fff1d6"/>
 <text x="605.49" y="445.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="445.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.1</text>
+<text x="687.2" y="445.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.8.1,</text>
+<text x="687.2" y="454.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.8.2,</text>
+<text x="687.2" y="463.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.8.3</text>
 <text x="745.07" y="445.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
-<line x1="68" y1="457.1" x2="994" y2="457.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="436.6" x2="91.83" y2="457.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="436.6" x2="207.58" y2="457.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="436.6" x2="405.04" y2="457.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="436.6" x2="503.76" y2="457.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="436.6" x2="602.49" y2="457.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="436.6" x2="684.2" y2="457.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="436.6" x2="742.07" y2="457.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="436.6" x2="68" y2="457.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="436.6" x2="994" y2="457.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="466.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">9</text>
-<text x="94.83" y="466.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Rooms a loft opens to</text>
-<text x="210.58" y="466.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1 rule</text>
-<text x="210.58" y="474.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 53</text>
-<text x="408.04" y="466.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="466.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,457.1 684.2,457.1 684.2,477.6 602.49,477.6" fill="#fff1d6"/>
-<text x="605.49" y="466.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="466.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.1</text>
-<text x="745.07" y="466.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
-<line x1="68" y1="477.6" x2="994" y2="477.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="457.1" x2="91.83" y2="477.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="457.1" x2="207.58" y2="477.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="457.1" x2="405.04" y2="477.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="457.1" x2="503.76" y2="477.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="457.1" x2="602.49" y2="477.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="457.1" x2="684.2" y2="477.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="457.1" x2="742.07" y2="477.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="457.1" x2="68" y2="477.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="457.1" x2="994" y2="477.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="486.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">10</text>
-<text x="94.83" y="486.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Exterior doors</text>
-<text x="210.58" y="486.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">8 rules</text>
-<text x="210.58" y="495.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 57–63, 65</text>
-<text x="408.04" y="486.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="486.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,477.6 684.2,477.6 684.2,508.6 602.49,508.6" fill="#fff1d6"/>
-<text x="605.49" y="486.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="486.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.3,</text>
-<text x="687.2" y="495.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.3.1,</text>
-<text x="687.2" y="504.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.3.2</text>
-<text x="745.07" y="486.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
-<line x1="68" y1="508.6" x2="994" y2="508.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="477.6" x2="91.83" y2="508.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="477.6" x2="207.58" y2="508.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="477.6" x2="405.04" y2="508.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="477.6" x2="503.76" y2="508.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="477.6" x2="602.49" y2="508.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="477.6" x2="684.2" y2="508.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="477.6" x2="742.07" y2="508.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="477.6" x2="68" y2="508.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="477.6" x2="994" y2="508.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="517.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">11</text>
-<text x="94.83" y="517.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Alternating tread devices</text>
-<text x="210.58" y="517.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">10 rules</text>
-<text x="210.58" y="526.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 80–89</text>
-<text x="408.04" y="517.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="517.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,508.6 684.2,508.6 684.2,539.6 602.49,539.6" fill="#fff1d6"/>
-<text x="605.49" y="517.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="517.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.12,</text>
-<text x="687.2" y="526.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.12.1,</text>
-<text x="687.2" y="535.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.12.2</text>
-<text x="745.07" y="517.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
-<line x1="68" y1="539.6" x2="994" y2="539.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="508.6" x2="91.83" y2="539.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="508.6" x2="207.58" y2="539.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="508.6" x2="405.04" y2="539.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="508.6" x2="503.76" y2="539.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="508.6" x2="602.49" y2="539.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="508.6" x2="684.2" y2="539.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="508.6" x2="742.07" y2="539.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="508.6" x2="68" y2="539.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="508.6" x2="994" y2="539.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="548.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">12</text>
-<text x="94.83" y="548.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Ship's ladders</text>
-<text x="210.58" y="548.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">6 rules</text>
-<text x="210.58" y="557.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 90–95</text>
-<text x="408.04" y="548.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="548.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,539.6 684.2,539.6 684.2,570.6 602.49,570.6" fill="#fff1d6"/>
-<text x="605.49" y="548.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="548.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.13,</text>
-<text x="687.2" y="557.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.13.1,</text>
-<text x="687.2" y="566.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.7.13.2</text>
-<text x="745.07" y="548.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
-<line x1="68" y1="570.6" x2="994" y2="570.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="539.6" x2="91.83" y2="570.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="539.6" x2="207.58" y2="570.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="539.6" x2="405.04" y2="570.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="539.6" x2="503.76" y2="570.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="539.6" x2="602.49" y2="570.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="539.6" x2="684.2" y2="570.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="539.6" x2="742.07" y2="570.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="539.6" x2="68" y2="570.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="539.6" x2="994" y2="570.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="579.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">13</text>
-<text x="94.83" y="579.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Ramps</text>
-<text x="210.58" y="579.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7 rules</text>
-<text x="210.58" y="588.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 96–102</text>
-<text x="408.04" y="579.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="579.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,570.6 684.2,570.6 684.2,601.6 602.49,601.6" fill="#fff1d6"/>
-<text x="605.49" y="579.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="579.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.8.1,</text>
-<text x="687.2" y="588.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.8.2,</text>
-<text x="687.2" y="597.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.8.3</text>
-<text x="745.07" y="579.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not read from the model yet: check by hand</text>
-<line x1="68" y1="601.6" x2="994" y2="601.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="570.6" x2="91.83" y2="601.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="570.6" x2="207.58" y2="601.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="570.6" x2="405.04" y2="601.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="570.6" x2="503.76" y2="601.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="570.6" x2="602.49" y2="601.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="570.6" x2="684.2" y2="601.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="570.6" x2="742.07" y2="601.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="570.6" x2="68" y2="601.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="570.6" x2="994" y2="601.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="610.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">14</text>
-<text x="94.83" y="610.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Escape window details: fully</text>
-<text x="94.83" y="619.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">openable, path height and 18 more</text>
-<text x="210.58" y="610.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">16 rules on 2 escape windows</text>
-<text x="210.58" y="619.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 4–11, 28–35, 49–50, 55–56, 103–114</text>
-<text x="408.04" y="610.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="610.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,601.6 684.2,601.6 684.2,686.6 602.49,686.6" fill="#fff1d6"/>
-<text x="605.49" y="610.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="610.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">BF103.2,</text>
-<text x="687.2" y="619.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.1,</text>
-<text x="687.2" y="628.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.2.4,</text>
-<text x="687.2" y="637.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4,</text>
-<text x="687.2" y="646.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.1,</text>
-<text x="687.2" y="655.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.2,</text>
-<text x="687.2" y="664.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.2.1,</text>
-<text x="687.2" y="673.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.2.2,</text>
-<text x="687.2" y="682.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.6</text>
-<text x="745.07" y="610.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not measured from the model yet: check by hand</text>
-<line x1="68" y1="686.6" x2="994" y2="686.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="601.6" x2="91.83" y2="686.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="601.6" x2="207.58" y2="686.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="601.6" x2="405.04" y2="686.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="601.6" x2="503.76" y2="686.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="601.6" x2="602.49" y2="686.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="601.6" x2="684.2" y2="686.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="601.6" x2="742.07" y2="686.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="601.6" x2="68" y2="686.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="601.6" x2="994" y2="686.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="695.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">15</text>
-<text x="94.83" y="695.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Exit door details: egress given as</text>
-<text x="94.83" y="704.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">exterior door</text>
-<text x="210.58" y="695.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1 rule on Front door</text>
-<text x="210.58" y="704.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 64</text>
-<text x="408.04" y="695.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="695.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,686.6 684.2,686.6 684.2,708.6 602.49,708.6" fill="#fff1d6"/>
-<text x="605.49" y="695.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="695.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.3.1</text>
-<text x="745.07" y="695.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not measured from the model yet: check by hand</text>
-<line x1="68" y1="708.6" x2="994" y2="708.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="686.6" x2="91.83" y2="708.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="686.6" x2="207.58" y2="708.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="686.6" x2="405.04" y2="708.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="686.6" x2="503.76" y2="708.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="686.6" x2="602.49" y2="708.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="686.6" x2="684.2" y2="708.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="686.6" x2="742.07" y2="708.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="686.6" x2="68" y2="708.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="686.6" x2="994" y2="708.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="717.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">16</text>
-<text x="94.83" y="717.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not checked yet by Gordium</text>
-<text x="210.58" y="717.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not checked yet by Gordium: window fall protection</text>
-<text x="210.58" y="726.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">(R321.2.1), hallway width (R318.6) and 84 more: check these</text>
-<text x="210.58" y="735.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">by hand</text>
-<text x="210.58" y="744.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 125</text>
-<text x="408.04" y="717.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="506.76" y="717.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,708.6 684.2,708.6 684.2,747.1 602.49,747.1" fill="#fff1d6"/>
-<text x="605.49" y="717.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="717.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<text x="745.07" y="717.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">86 code sections Gordium doesn't check yet: check each by hand (listed</text>
-<text x="745.07" y="726.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">below; by name in the CSV)</text>
-<line x1="68" y1="747.1" x2="994" y2="747.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="708.6" x2="91.83" y2="747.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="708.6" x2="207.58" y2="747.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="708.6" x2="405.04" y2="747.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="708.6" x2="503.76" y2="747.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="708.6" x2="602.49" y2="747.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="708.6" x2="684.2" y2="747.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="708.6" x2="742.07" y2="747.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="708.6" x2="68" y2="747.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="708.6" x2="994" y2="747.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="68" y1="467.6" x2="994" y2="467.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="436.6" x2="91.83" y2="467.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="436.6" x2="207.58" y2="467.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="436.6" x2="405.04" y2="467.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="436.6" x2="503.76" y2="467.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="436.6" x2="602.49" y2="467.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="436.6" x2="684.2" y2="467.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="436.6" x2="742.07" y2="467.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="436.6" x2="68" y2="467.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="436.6" x2="994" y2="467.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="476.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">12</text>
+<text x="94.83" y="476.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Escape window details: fully</text>
+<text x="94.83" y="485.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">openable, path height and 18 more</text>
+<text x="210.58" y="476.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">16 rules on 2 escape windows</text>
+<text x="210.58" y="485.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 3–10, 25–34, 39–40, 73–84</text>
+<text x="408.04" y="476.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="476.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,467.6 684.2,467.6 684.2,552.6 602.49,552.6" fill="#fff1d6"/>
+<text x="605.49" y="476.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="476.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">BF103.2,</text>
+<text x="687.2" y="485.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.1,</text>
+<text x="687.2" y="494.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.2.4,</text>
+<text x="687.2" y="503.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4,</text>
+<text x="687.2" y="512.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.1,</text>
+<text x="687.2" y="521.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.2,</text>
+<text x="687.2" y="530.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.2.1,</text>
+<text x="687.2" y="539.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.2.2,</text>
+<text x="687.2" y="548.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.6</text>
+<text x="745.07" y="476.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not measured from the model yet: check by hand</text>
+<line x1="68" y1="552.6" x2="994" y2="552.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="467.6" x2="91.83" y2="552.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="467.6" x2="207.58" y2="552.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="467.6" x2="405.04" y2="552.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="467.6" x2="503.76" y2="552.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="467.6" x2="602.49" y2="552.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="467.6" x2="684.2" y2="552.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="467.6" x2="742.07" y2="552.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="467.6" x2="68" y2="552.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="467.6" x2="994" y2="552.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="561.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">13</text>
+<text x="94.83" y="561.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Exit door details: egress given as</text>
+<text x="94.83" y="570.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">exterior door</text>
+<text x="210.58" y="561.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1 rule on Front door</text>
+<text x="210.58" y="570.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 48</text>
+<text x="408.04" y="561.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="561.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,552.6 684.2,552.6 684.2,574.6 602.49,574.6" fill="#fff1d6"/>
+<text x="605.49" y="561.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="561.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R318.3.1</text>
+<text x="745.07" y="561.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not measured from the model yet: check by hand</text>
+<line x1="68" y1="574.6" x2="994" y2="574.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="552.6" x2="91.83" y2="574.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="552.6" x2="207.58" y2="574.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="552.6" x2="405.04" y2="574.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="552.6" x2="503.76" y2="574.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="552.6" x2="602.49" y2="574.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="552.6" x2="684.2" y2="574.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="552.6" x2="742.07" y2="574.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="552.6" x2="68" y2="574.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="552.6" x2="994" y2="574.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="583.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">14</text>
+<text x="94.83" y="583.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not checked yet by Gordium</text>
+<text x="210.58" y="583.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not checked yet by Gordium: window fall protection</text>
+<text x="210.58" y="592.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">(R321.2.1), hallway width (R318.6) and 84 more: check these</text>
+<text x="210.58" y="601.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">by hand</text>
+<text x="210.58" y="610.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 94</text>
+<text x="408.04" y="583.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="506.76" y="583.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,574.6 684.2,574.6 684.2,613.1 602.49,613.1" fill="#fff1d6"/>
+<text x="605.49" y="583.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="583.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<text x="745.07" y="583.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">86 code sections Gordium doesn't check yet: check each by hand (listed</text>
+<text x="745.07" y="592.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">below; by name in the CSV)</text>
+<line x1="68" y1="613.1" x2="994" y2="613.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="574.6" x2="91.83" y2="613.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="574.6" x2="207.58" y2="613.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="574.6" x2="405.04" y2="613.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="574.6" x2="503.76" y2="613.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="574.6" x2="602.49" y2="613.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="574.6" x2="684.2" y2="613.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="574.6" x2="742.07" y2="613.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="574.6" x2="68" y2="613.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="574.6" x2="994" y2="613.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<polygon points="68,613.1 994,613.1 994,703.1 68,703.1" fill="#fff1d6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="531" y="631.1" font-size="10" font-weight="bold" text-anchor="middle" fill="#8a5300" xml:space="preserve">NEEDS REVIEW: not checked yet by Gordium, check these 86 code sections by hand: R321.2.1, R318.6, R318.1, R319.1.1, R321.2.2, R318.7.5.3, R318.7.5.2.1, R318.7.7, R325.6, R325.7, R318.4,</text>
+<text x="531" y="644.1" font-size="10" font-weight="bold" text-anchor="middle" fill="#8a5300" xml:space="preserve">R318.7.11.2, R316.3, R314.2, R314.3, R314.5, R315.1, R315.4, R315.5, R315.5.1, R315.5.2.3, R315.5.3.1, R315.5.3.2, BO102.6.3, BO105.10.5, BO105.10.6, BO105.10.7, BO105.11, BO108.2, BO108.3,</text>
+<text x="531" y="657.1" font-size="10" font-weight="bold" text-anchor="middle" fill="#8a5300" xml:space="preserve">R102.6, R102.6.1, R102.6.2, R316.2, R318.5, R318.7.5.4, R318.7.9, R319.4.3, R319.4.4, R319.5, R319.5.1, R319.7, R320.7, R321.1.4, R507.10, R507.10.1, R507.10.1.1, R507.10.1.2, R507.10.2,</text>
+<text x="531" y="670.1" font-size="10" font-weight="bold" text-anchor="middle" fill="#8a5300" xml:space="preserve">R507.10.3, R507.10.4, BF101.1, BF101.2, BF103.1, BO101.1, BO102.1, BO102.1.2, BO102.6, BO104.1, BO104.1.1, BO105.1, BO105.1.1, BO105.1.2, BO105.1.3, BO105.2.2, BO105.2.3, BO105.3,</text>
+<text x="531" y="683.1" font-size="10" font-weight="bold" text-anchor="middle" fill="#8a5300" xml:space="preserve">BO105.8, BO105.10.1, BO105.10.2, BO105.10.3, BO105.10.4, BO105.13, BO106.1, BO106.1.1, BO106.1.2, BO106.7, BO107.1, BO107.2, BO107.2.1, BO107.2.2, BO108.4, BO109.1, BO109.8.1,</text>
+<text x="531" y="696.1" font-size="10" font-weight="bold" text-anchor="middle" fill="#8a5300" xml:space="preserve">BO109.8.5, BO109.8.6</text>
+<polygon points="68,703.1 994,703.1 994,718.1 68,718.1" fill="#f5f5f5" stroke="#1a1a1a" stroke-width="0.4"/>
+<text x="71" y="713.1" font-size="7.5" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">Complies</text>
 <polygon points="54,21.6 1202.4,21.6 1202.4,770.4 54,770.4" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
 <line x1="1008" y1="21.6" x2="1008" y2="770.4" stroke="#1a1a1a" stroke-width="1.2"/>
 <polygon points="1016,29.6 1194.4,29.6 1194.4,63.6 1016,63.6" fill="#fbe3e1" stroke="#b3261e" stroke-width="1"/>
