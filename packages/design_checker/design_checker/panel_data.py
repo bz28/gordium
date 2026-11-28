@@ -281,7 +281,7 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
     own = set(parts.measure_kinds(kind))
     kinds = _kinds(allowed, parts.measure_kinds(kind))
     known = {**parts.building_values(building), **(row.get("values") or {})}
-    from design_checker.each_part import NOT_SENT, _usable, _words
+    from design_checker.each_part import NOT_SENT, NOT_TAKEN, _usable, _words
     from design_checker.occupant_load import BOUND_FACT_ONCE, BOUND_FACT_WHY
     for fact in row.get("bound_facts") or []:   # stated, these would settle it on the floor area alone: asked first
         if isinstance(fact, str) and fact in BOUND_FACT_ONCE:
@@ -329,7 +329,7 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
                  "words": f"{_words(rule, m)} not measured" + (f": {why}" if why else " (or not usable)"),
                  "elements": own_id, "measure": m})
     for note in o.get("inputs") or []:
-        if NOT_SENT in note:
+        if NOT_SENT in note or NOT_TAKEN in note:
             add({"kind": FIX_MODEL, "key": f"drawing:{note}", "words": note, "elements": []})
     if row.get("has_none"):
         add({"kind": DECIDE, "key": f"reading:{row['has_none']}", "words": row.get("reason") or "a reading to confirm",

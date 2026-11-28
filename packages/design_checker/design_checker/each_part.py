@@ -29,7 +29,8 @@ def part_rules(rules: list[dict]) -> list[dict]:
     return [r for r in rules if parts.is_part_rule(r)]
 
 
-def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none: dict | None = None) -> dict:
+def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none: dict | None = None,
+                refused: dict | None = None) -> dict:
     """Every per-part rule's rows, each rule's one answer, and the panel items.
 
     given: the parts read, {kind: [part, …]} (parts.rows), or None when the interior isn't being checked at all
@@ -37,7 +38,8 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none:
     shown as complying with rules nobody checked (needs review: principle 4). values: the building's measures.
     has_none: what the interior description says the house has none of ({kind: {"source", "words", "parts"}},
     model_measurement.interior's): each row it makes not applicable says so, with its source, and `set_aside` lists
-    them by claim ({kind: [rule key, …]}) for the panel to show (egress.py)."""
+    them by claim ({kind: [rule key, …]}) for the panel to show (egress.py). refused: the kinds whose "none" the
+    measuring refused ({kind: why}): their rows say so, never that the kind wasn't sent."""
     rules = part_rules(rules)
     if given is None:
         items = [_item(INTERIOR_NOT_STARTED, None, "Interior", present.REVIEW, INTERIOR_NOT_STARTED_WHY)] \
@@ -71,7 +73,7 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none:
                     set_aside[claim].append(_key(rule, n))
             row["line"] = line(row, rule, values, allowed, why_not.get((row["part"], row["id"])))
             open_[id(row)] = unsettled(row, rule, given, values, allowed, why_not.get((row["part"], row["id"])),
-                                       more.get((row["part"], row["id"])))
+                                       more.get((row["part"], row["id"])), refused)
             panel[id(row)] = _panel(rule, row, open_[id(row)], given, values, allowed, more, why_not)
         out += got
         key = _key(rule, n)          # two rules with one id (never validated so): one answer from both, never kinder
@@ -256,6 +258,13 @@ def _more(given) -> dict:
 
 
 NOT_SENT = "weren't sent from the model"
+NOT_TAKEN = "isn't taken: the interior drawing says why"
+
+
+def not_taken_words(kind: str) -> str:
+    """A part kind the description says it has none of, refused beside what it shows (model_measurement.interior's
+    `refused`: "no stairs" beside rooms on two floors), in an architect's words: never "weren't sent"."""
+    return f"the model's \"no {parts._plural(kind).replace('_', ' ')}\" {NOT_TAKEN}"
 
 
 def not_sent_words(kind: str) -> str:
@@ -265,7 +274,7 @@ def not_sent_words(kind: str) -> str:
 
 
 def unsettled(row: dict, rule: dict, given, values: dict, allowed: dict, why_not: dict | None,
-              more: dict | None = None) -> dict | None:
+              more: dict | None = None, refused: dict | None = None) -> dict | None:
     """Why a needs-review row isn't settled, for grouping the results (docs/decisions/2026-11-16_results_grouping.md);
     None for any other row. Words only: the row's status is parts.rows', never changed here.
 
@@ -292,7 +301,8 @@ def unsettled(row: dict, rule: dict, given, values: dict, allowed: dict, why_not
                 return {"gordium": NOT_READ, "kinds": unread}
             # a kind the description can give but left out (no `stairs` list): the drawing's to give, never a gap
             return {"gordium": None, "measures": [], "gaps": [], "notes": [],
-                    "inputs": [not_sent_words(k) for k in drawn], "decide": False}
+                    "inputs": [not_taken_words(k) if k in (refused if isinstance(refused, dict) else {})
+                               else not_sent_words(k) for k in drawn], "decide": False}
         return {"gordium": None, "measures": [], "gaps": [], "inputs": [], "notes": [row["reason"]],
                 "decide": False}
     why_not = why_not or {}
