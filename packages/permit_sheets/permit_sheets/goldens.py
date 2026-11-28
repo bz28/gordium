@@ -43,6 +43,10 @@ HOUSES = {     # golden folder: (interior description, or None for no rooms draw
     "orangetown_ny_80_south_william": ("test_data/real_houses/orangetown_ny_80_south_william/house.yaml",
                                        "Bennington model (transcribed from public drawings)"),
 }
+# each house's own story count (Ithaca's Stories, as the architect types it): the test lot's FACTS give 2, the
+# massing box's; a one-story house says 1, so its "no stairs" is taken (model_measurement.interior's
+# _stairs_against_floors refuses it beside two or more stories) and the ranch is a compliant one-story example
+STORIES = {"1_ranch_compliant": 1}
 ADDRESS = {"orangetown_ny_80_south_william": "80 South William Street, Lot 2, Pearl River (Town of Orangetown), NY; "
                                              "checked as if in Ithaca's R-1b on a test lot"}
 
@@ -63,6 +67,11 @@ def site() -> dict:
             "buildings": [_box(10, 25, 40, 75, 0, 30)], "problems": []}
 
 
+def facts_of(name: str) -> dict:
+    """The test lot's facts for one house: FACTS, with the house's own story count (STORIES) where it has one."""
+    return {**FACTS, **({"stories": STORIES[name]} if name in STORIES else {})}
+
+
 def interior_of(name: str):
     path = HOUSES[name][0]
     return None if path is None else yaml.safe_load((REPO / path).read_text(encoding="utf-8"))
@@ -76,7 +85,7 @@ def gathered(name: str, recorded: dict | None = None) -> dict:
     """The house checked (through the guarded way in) and gathered; with `recorded`, the fingerprints printed are
     the recorded ones (the guard has already passed with today's)."""
     house = interior_of(name)
-    got = checked(lambda: check_site(site(), dict(FACTS), name=name, today=DATE, interior=house), house)
+    got = checked(lambda: check_site(site(), facts_of(name), name=name, today=DATE, interior=house), house)
     if recorded:
         got["worker_fingerprint"] = recorded["worker_fingerprint"]
         for law in got["laws"]:
