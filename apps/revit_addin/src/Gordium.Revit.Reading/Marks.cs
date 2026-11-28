@@ -91,6 +91,20 @@ public static class Marks
         "BCNYS 1010.1.1: \"Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm).\" " +
         "1: the door's clear width is checked against 32 in. 2: one leaf of the pair must give the 32 in, which the maker's clear opening of the whole pair doesn't show, so a person checks. Blank or any other number: the door width needs review.");
 
+    /// <summary>A corridor's walls' fire-resistance rating, in minutes (<c>rooms[].fire_rating_hours</c>, sent in hours):
+    /// the architect's statement of the assemblies (BCNYS Table 1020.2), never read from the walls' geometry.</summary>
+    public static readonly MarkDefinition CorridorFireRating = new(
+        "Gordium: Corridor rating minutes", new("3e9778e1-4f8d-40cc-a224-58933cb06a45"), MarkValueKind.Integer,
+        MarkBinding.Instance, [Rooms], "rooms[].fire_rating_hours",
+        "A count: on a room whose Gordium: Use is Corridor, the minutes of fire-resistance rating of its walls (0 where they aren't rated; 30 for 1/2 hour, 60 for 1 hour; the least, where its walls differ), as the wall assemblies are rated. " +
+        "BCNYS 1020.2: \"Corridors shall be fire-resistance rated in accordance with Table 1020.2.\" Blank: the corridor rating rules need review.");
+
+    /// <summary>Whether a corridor's walls are smoke partitions (<c>rooms[].walls_smoke_partitions</c>, NFPA 101 2012 8.4).</summary>
+    public static readonly MarkDefinition SmokePartitionWalls = new(
+        "Gordium: Smoke partition walls", new("6a953c28-38f7-49d7-8e3c-5f38cc3aa78c"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [Rooms], "rooms[].walls_smoke_partitions",
+        "On a room whose Gordium: Use is Corridor: Yes when its walls form smoke partitions (NFPA 101 2012 8.4, a continuous membrane that restricts smoke). No: they don't. Blank: the rules that turn on it need review.");
+
     public static readonly MarkDefinition ClearConfirmed = new(
         "Gordium: Clear confirmed", new("66ced3f6-2dd7-4aa7-a0ce-89d086652103"), MarkValueKind.Text, MarkBinding.Type,
         [Windows, Doors], "openings[].stated_clear, doors[].stated_clear (the confirmation stamp)",
@@ -367,12 +381,12 @@ public static class Marks
         "Yes: a corridor's occupant load is worked out by hand (the story's doesn't bound it). No: none does, so each corridor's load lies between none and its whole story's. Blank: worked out by hand, as for Yes.");
 
     /// <summary>Whether the building is or holds an ambulatory care facility (<c>building.ambulatory_care_facility</c>,
-    /// BCNYS 202, Section 422, Table 1020.3).</summary>
+    /// BCNYS 202, Section 422, Tables 1020.2 and 1020.3).</summary>
     public static readonly MarkDefinition AmbulatoryCareFacility = new(
         "Gordium: Ambulatory care facility", new("2a31e2c4-cf29-4ac4-9c57-a41ca85748b3"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "building.ambulatory_care_facility",
         "Yes when the building is or holds an ambulatory care facility (BCNYS 202 AMBULATORY CARE FACILITY, Section 422: outpatient care where patients may be rendered incapable of self-preservation, Group B). " +
-        "Table 1020.3 asks 72 in for its corridors and areas serving stretcher traffic, which the model doesn't show. Yes: a Group B corridor under 72 in is a person's check. No: none. Blank: that check needs review.");
+        "Table 1020.3 asks 72 in for its corridors and areas serving stretcher traffic, which the model doesn't show; Section 422 asks its fire partition from adjacent corridors (422.2) and its smoke compartments (422.3). Yes: Section 422's flags, a Group B corridor under 72 in and an unrated Group B corridor (Table 1020.2) are a person's check. No: none of them. Blank: those checks need review.");
 
     /// <summary>Whether any corridor is inside a dwelling or sleeping unit (<c>building.corridors_within_dwelling_units</c>,
     /// BCNYS 1020.2 exception 2, Table 1020.3).</summary>
@@ -390,6 +404,40 @@ public static class Marks
         "Yes only when the building is equipped throughout with an emergency voice/alarm communication system in accordance with BCNYS Section 907.5.2.2. A system in only part of the building: No. " +
         "With an automatic sprinkler system throughout too (NFPA 13; NFPA 13R in Group R only, elsewhere a person checks), BCNYS 1005.3.1 and 1005.3.2 exception 1 lower the egress capacity factors (other than Groups H and I-2): 0.15 in per occupant for corridors and other components, 0.2 in for stairways. " +
         "No: the full factors (0.2 in and 0.3 in). Blank: a capacity met only at the lower factor needs review.");
+
+    /// <summary>Whether the building has a mezzanine (<c>building.mezzanines</c>, BCNYS 505.2): read by the occupant
+    /// loads' ceiling (occupant_load.py), never a rule's own measure.</summary>
+    public static readonly MarkDefinition Mezzanines = new(
+        "Gordium: Mezzanines", new("c2f4615d-5335-49cc-a997-311bac414fbd"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.mezzanines",
+        "Yes when the building has a mezzanine: BCNYS 202 MEZZANINE: \"An intermediate level or levels between the floor and ceiling of any story and in accordance with Section 505.\" " +
+        "Its occupants add to a room on an adjacent level (1004.2.2), so with no room function set Gordium bounds a story's occupant load by its floor area alone only where the building has none. " +
+        "No: there is none (with the other facts that bound stated, a story holds at most one occupant per 5 sq ft of it). Yes: no such bound. Blank: no such bound, and asked where No would settle a rule.");
+
+    /// <summary>Whether any area's occupant load is counted by something other than its floor area
+    /// (<c>building.loads_not_by_area</c>, BCNYS Table 1004.5's rows with no factor): read by the occupant loads'
+    /// ceiling (occupant_load.py), never a rule's own measure.</summary>
+    public static readonly MarkDefinition LoadsNotByArea = new(
+        "Gordium: Loads not by area", new("501f87dd-fbc9-4ab6-8478-301feeb6d0a8"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.loads_not_by_area",
+        "Yes when any room or area of the building has an occupant load Table 1004.5 counts by something other than its floor area, whatever its use or group: fixed seats or benches, bowling lanes (Table 1004.5: 5 persons for each lane), a concentrated business use such as a call center or trading floor (1004.8: the actual occupant load as approved), or a covered or open mall (402.8.2). BCNYS 1004.6: \"For areas having fixed seats and aisles, the occupant load shall be determined by the number of fixed seats installed therein.\" " +
+        "No: there is none (with the other facts that bound stated, a story holds at most one occupant per 5 sq ft of it). Yes: no such bound. Blank: no such bound, and asked where No would settle a rule.");
+    /// <summary>Whether the building is a high-rise or more than 420 ft in building height (<c>building.high_rise_building</c>,
+    /// BCNYS 202 HIGH-RISE BUILDING, Section 403: 403.2.2, 403.5.2).</summary>
+    public static readonly MarkDefinition HighRiseBuilding = new(
+        "Gordium: High-rise building", new("50749eaa-b331-40c1-af60-c1bf02acbc28"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.high_rise_building",
+        "Yes when the building is a high-rise, or more than 420 ft in building height. BCNYS 202: \"A building with an occupied floor or occupiable roof located more than 75 feet (22 860 mm) above the lowest level of fire department vehicle access.\" " +
+        "The model can't show where fire trucks reach the building, so Gordium never decides it; its question may give the model's height over the lowest finished ground as a hint. " +
+        "Yes: Section 403's requirements are a person's check, and outside Group R-2 a story with no more exits than 1006.3 asks needs review (403.5.2: one more interior exit stairway over 420 ft). No: neither. Blank: as for Yes.");
+
+    /// <summary>Whether a floor level used for human occupancy is more than 30 ft below the lowest level of exit
+    /// discharge (<c>building.underground_building</c>, BCNYS 405.1, 405.7.1).</summary>
+    public static readonly MarkDefinition UndergroundBuilding = new(
+        "Gordium: Underground building", new("0b116213-0d7e-4e3c-b03b-e71a9f387d05"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.underground_building",
+        "Yes when a floor level used for human occupancy is more than 30 ft below the finished floor of the lowest level of exit discharge. BCNYS 405.1: \"The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level used for human occupancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge.\" " +
+        "Yes: Section 405's requirements are a person's check, and a story with one exit needs review (405.7.1: two exits on each floor level). No: none. Blank: as for Yes.");
 
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
     public static readonly MarkDefinition Atrium = new(
@@ -702,13 +750,13 @@ public static class Marks
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
         EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased, OtherLevelsReachCorridors,
-        AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm,
+        AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm, Mezzanines, LoadsNotByArea, HighRiseBuilding, UndergroundBuilding,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
         AbutsR1, Conversion, PrimaryBuildings, PrimaryBuildingsSameUse, HomeOccupationArea, HomeOccupationUnitArea,
         AduExistingBuilding, AduBedrooms, AduFloorArea, MainBuildingFloorArea,
-        DoorLeaves,
+        DoorLeaves, CorridorFireRating, SmokePartitionWalls,
     ];
 
     /// <summary>What a number typed in a mark means, said before it is typed, true wherever it is read: "count" for a

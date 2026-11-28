@@ -102,6 +102,11 @@ public sealed class MarksTests
             ("Gordium: Ambulatory care facility", "2a31e2c4-cf29-4ac4-9c57-a41ca85748b3", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Corridors within dwelling units", "a61d6738-cc50-4a7a-bf34-eb258e6b55d7", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Emergency voice/alarm system", "f4184d32-275e-4423-90c6-66a2e4d247ee", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Mezzanines", "c2f4615d-5335-49cc-a997-311bac414fbd", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Loads not by area", "501f87dd-fbc9-4ab6-8478-301feeb6d0a8", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // Chapter 4 part b's (403 high-rise, 405 underground)
+            ("Gordium: High-rise building", "50749eaa-b331-40c1-af60-c1bf02acbc28", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Underground building", "0b116213-0d7e-4e3c-b03b-e71a9f387d05", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // the dwelling's own facts the code decision reads (review round 1: an ask named marks Revit didn't have)
             ("Gordium: Dwelling units", "aa32131a-e757-47a3-abf8-9deb81d7a09a", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Units in the attached building", "bccb088a-c087-475f-9ff9-53fd10133d0e", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
@@ -131,6 +136,9 @@ public sealed class MarksTests
             ("Gordium: Main building floor area", "f237131b-5e7e-4c8e-94df-a8538de16954", MarkValueKind.Area, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // a door type's leaves (BCNYS 1010.1.1: one leaf of a pair with no mullion gives the 32 in)
             ("Gordium: Leaves", "f23ad40b-e048-4b61-a92a-b7963e64d4cf", MarkValueKind.Integer, MarkBinding.Type, ["OST_Doors"]),
+            // a corridor's walls (the egress UI audit's finding 5, 2026-11-26)
+            ("Gordium: Corridor rating minutes", "3e9778e1-4f8d-40cc-a224-58933cb06a45", MarkValueKind.Integer, MarkBinding.Instance, ["OST_Rooms"]),
+            ("Gordium: Smoke partition walls", "6a953c28-38f7-49d7-8e3c-5f38cc3aa78c", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))
@@ -143,6 +151,10 @@ public sealed class MarksTests
             Assert.False(string.IsNullOrWhiteSpace(m.Description));
         }
         Assert.Equal(Marks.All.Count, Marks.All.Select(m => m.Guid).Distinct().Count());
+        // a GUID that once meant a narrower question is never reused for a wider one: an answer to the old question
+        // would read as an answer to the new (review round 3: Gordium: Bowling lanes became Gordium: Loads not by area)
+        Guid[] retired = [Guid.Parse("5049ea17-952b-4916-b429-896167244126")];
+        Assert.DoesNotContain(Marks.All, m => retired.Contains(m.Guid));
     }
 
     [Fact]

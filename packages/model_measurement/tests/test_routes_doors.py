@@ -22,7 +22,9 @@ DOOR_KEYS = {"door_no_stated_clear", "door_clear_not_read", "door_clear_disagree
              "door_side_room_not_read",
              # section group 6b: each door's kind and swing
              "egress_side_unclear", "door_swing_not_given", "door_swing_not_read", "door_operation_not_given",
-             "door_operation_other", "door_not_on_routes"}
+             "door_operation_other", "door_not_on_routes",
+             # section group 6e: what latches or locks each door
+             "door_hardware_not_given", "door_hardware_not_read", "door_electric_lock_not_asked"}
 STATED = {"width": 34 / 12, "height": 80 / 12, "source": "maker's catalogue, p.4"}
 
 
@@ -133,6 +135,16 @@ def test_the_leaves_meaning_gives_the_mullioned_pair_reading():
     assert "Gordium's reading" in rule["notes"] and "a pair with a mullion between its leaves is two door openings" in " ".join(
         rule["notes"].split())
     assert "else 2 (needs review at 32 in or more)" in " ".join(rule["notes"].split())   # under 32 in it fails
+
+
+def test_a_swing_not_given_never_says_why_it_is_missing():
+    # door swing review round 1: the Revit reader leaves swings_into out for many reasons where a swing is drawn (both
+    # sides, an arc in the wall, rooms not found, a read-only model), and a description from another host has no plan
+    # symbol at all: the reason never claims the model draws none
+    words = STOPS["door_swing_not_given"].format(name="d")
+    assert "draws no swing" not in words and "no mark" not in words
+    assert "notes" not in words              # round 2: the reading's notes aren't shown to the architect
+    assert _why(_parts(_office())["d"], "moe_door_swings_with_egress") == words
 
 
 def test_an_exit_kind_not_read_is_not_measured():
@@ -408,3 +420,35 @@ def test_a_stairs_unmarked_outside_door_never_makes_its_lobby_door_one_way():
     d["doors"][2].update(exit_kind="exterior_at_discharge", exit_id="OUT2")
     got = {p["id"]: p for p in measure(d)["parts"]["means_of_egress_door"]}
     assert got["E"]["measures"]["moe_door_swings_with_egress"] is True
+
+
+# ---- section group 6e (2026-11-26): what latches or locks each door (1010.2.8) -------------------------------------
+
+def test_a_doors_latch_and_panic_hardware_from_its_stated_hardware():
+    """panic: latched, by panic or fire exit hardware only; panic_electric: that, and an electric lock it releases
+    (review round 1 of group 6e: told apart, since exception 2 allows the lock only in Groups A and E); latch: latched
+    by something else, whether electrically not asked; none: neither."""
+    for hw, latched, panic, electric in (("panic", True, True, False), ("panic_electric", True, True, True),
+                                         ("latch", True, False, None), ("none", False, False, False)):
+        got = _parts(_office(hardware=hw))["d"]
+        m = got["measures"]
+        assert m["moe_door_latched"] is latched and m["moe_door_panic_hardware"] is panic, hw
+        if electric is None:
+            assert "moe_door_electric_lock" not in m
+            assert _why(got, "moe_door_electric_lock") == STOPS["door_electric_lock_not_asked"].format(name="d")
+        else:
+            assert m["moe_door_electric_lock"] is electric, hw
+
+
+def test_hardware_not_given_or_not_read_leaves_both_unmeasured():
+    """Never a guess: a door that doesn't say, or says something else, has neither measured (1010.2.8 then needs
+    review, never a pass, on a swinging door in a group it asks)."""
+    got = _parts(_office())["d"]
+    for k in ("moe_door_latched", "moe_door_panic_hardware", "moe_door_electric_lock"):
+        assert k not in got["measures"]
+        assert _why(got, k) == STOPS["door_hardware_not_given"].format(name="d")
+    for bad in ("Panic", "lock", "electric", True, 1, ["panic"]):
+        got = _parts(_office(hardware=bad))["d"]
+        for k in ("moe_door_latched", "moe_door_panic_hardware", "moe_door_electric_lock"):
+            assert k not in got["measures"], bad
+            assert _why(got, k).startswith("the door d gives its hardware as "), bad

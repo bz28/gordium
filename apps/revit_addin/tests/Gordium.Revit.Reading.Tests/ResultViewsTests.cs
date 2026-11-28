@@ -197,6 +197,52 @@ public sealed class ResultViewsTests
         Assert.Contains("not checked yet", ResultViews.Headline([(Verdict.Complies, "a"), (Verdict.NotChecked, "b")]), StringComparison.Ordinal);
     }
 
+    /// <summary>Egress UI audit, finding 3: cards of a group headed by the same words (the apartment's "Check this by
+    /// hand: a person decides it") are each named by the rule their results are about, so they can be told apart; the
+    /// checker's words stay the headline and the tooltip says both.</summary>
+    [Fact]
+    public void Cards_headed_alike_are_named_by_their_rule()
+    {
+        var m = ResultViews.Build(Apartment());
+        var named = 0;
+        foreach (var g in m.Fix)
+        {
+            // the renamed cards of a group are told apart: no two share a title
+            var renamed = g.Cards.Where(c => c.Title != c.Headline).ToList();
+            Assert.Equal(renamed.Count, renamed.Select(c => c.Title).Distinct().Count());
+            foreach (var c in g.Cards)
+            {
+                if (c.Title != c.Headline)
+                {
+                    named++;
+                    Assert.All(c.Rows, r => Assert.EndsWith(c.Title, r.Name, StringComparison.Ordinal));
+                    var entry = new FixCardEntry(c, ResultViewList.CardKey(c), false, PanelStatus.Review);
+                    var tip = ResultViewList.Tip(entry)!;
+                    Assert.StartsWith(c.Title + "\n" + c.Headline, tip, StringComparison.Ordinal);      // both, rule first
+                    Assert.StartsWith(c.Title + ",", ResultViewList.Spoken(entry), StringComparison.Ordinal);   // what a screen reader says
+                }
+            }
+        }
+        var decide = m.Fix.Single(g => g.Kind == FixKind.Decide);
+        Assert.True(named >= decide.Cards.Count(c => c.Headline == "Check this by hand: a person decides it"), $"{named} named");
+        Assert.True(decide.Cards.Select(c => c.Title).Distinct().Count() > decide.Cards.Select(c => c.Headline).Distinct().Count());
+        // the rule part of a real row's name, and none for rows about two rules
+        var corridorWidth = decide.Cards.Single(c => c.Rows.Count == 1 && c.Rows[0].Name.EndsWith("Corridor width kept clear (BCNYS 1020.4)", StringComparison.Ordinal));
+        Assert.Equal("Corridor width kept clear (BCNYS 1020.4)", ResultViews.RuleOf(corridorWidth.Rows));
+        Assert.Null(ResultViews.RuleOf([.. decide.Cards.Where(c => c.Rows.Count == 1).Take(2).Select(c => c.Rows[0])]));
+        var list = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsList.cs"));
+        Assert.Contains("Text = e.Card.Title, TextTrimming", list, StringComparison.Ordinal);
+        // review round 1: one rule on two elements under the same words: each named by its result's whole name; the
+        // same whole name twice: the checker's words stay
+        var two = corridorWidth.Rows[0];
+        FixCard Card(string key, ResultRow row) => new(key, FixKind.Decide, "Look at it", null, null, [], [row]);
+        var a = two with { Id = "a", Name = "Level 1 \u203A CORRIDOR L1 (3) \u00B7 Corridor width kept clear (BCNYS 1020.4)" };
+        var b = two with { Id = "b", Name = "Level 2 \u203A CORRIDOR L2 (8) \u00B7 Corridor width kept clear (BCNYS 1020.4)" };
+        Assert.Equal([a.Name, b.Name], ResultViews.Named([Card("1", a), Card("2", b)]).Select(c => c.Title));
+        Assert.Equal(["Look at it", "Look at it"], ResultViews.Named([Card("1", a), Card("2", a with { Id = "c" })]).Select(c => c.Title));
+        Assert.Equal(["Look at it", "Other words"], ResultViews.Named([Card("1", a), Card("2", b) with { Headline = "Other words" }]).Select(c => c.Title));
+    }
+
     [Fact]
     public void What_to_fix_holds_every_row_and_each_ask_of_each_row_in_review()
     {
@@ -281,7 +327,10 @@ public sealed class ResultViewsTests
         }
         // the card most results wait on comes first
         Assert.Equal(answer.Cards.Max(c => c.Rows.Count), answer.Cards[0].Rows.Count);
-        Assert.Equal($"Answer {answer.Cards.Count} questions about the project", answer.Title);
+        // the title counts the questions shown: the six ADU follow-ups (three on "Is there an ADU?", three on "Is the
+        // ADU detached?") wait until their parent is answered
+        Assert.Equal(6, answer.Cards.Count(c => c.DependsOn is not null));
+        Assert.Equal($"Answer {answer.Cards.Count - 6} questions about the project", answer.Title);
         Assert.DoesNotContain(m.Fix.Where(g => g.Kind != FixKind.Answer).SelectMany(g => g.Cards),
                               c => c.Field is { } f && (f.StartsWith("facts.", StringComparison.Ordinal) || f.StartsWith("building.", StringComparison.Ordinal)));
         var notChecked = m.Fix.SingleOrDefault(g => g.Kind == FixKind.NotChecked);

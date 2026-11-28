@@ -53,7 +53,11 @@ MARK_WORD = re.compile(r"\b(un)?mark(s|ed)?\b")
 # a part's measure the description's own field states, as a host's mark gives it (never one measured): its cause is
 # a mark, naming that field, so the host's card opens its mark (the door-type mark Gordium: Leaves; before it the
 # reason said "no mark for it in the model yet", a dead end in Revit)
-MEASURE_FIELDS = {"moe_door_leaves": "doors[].leaves"}
+MEASURE_FIELDS = {"moe_door_leaves": "doors[].leaves",
+                  # a corridor's facts its room states (model_measurement.routes CORRIDOR_STATED); in Revit the room marks
+                  # Gordium: Corridor rating minutes (sent in hours) and Gordium: Smoke partition walls
+                  "corridor_fire_rating_hours": "rooms[].fire_rating_hours",
+                  "corridor_walls_smoke_partitions": "rooms[].walls_smoke_partitions"}
 
 
 # ---- how far off ------------------------------------------------------------------------------------------------
@@ -278,7 +282,13 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
     kinds = _kinds(allowed, parts.measure_kinds(kind))
     known = {**parts.building_values(building), **(row.get("values") or {})}
     from design_checker.each_part import NOT_SENT, _usable, _words
-    if flag:                       # a person decides with every figure the rule reads: each one missing is a cause
+    from design_checker.occupant_load import BOUND_FACT_ONCE, BOUND_FACT_WHY
+    for fact in row.get("bound_facts") or []:   # stated, these would settle it on the floor area alone: asked first
+        if isinstance(fact, str) and fact in BOUND_FACT_ONCE:
+            add({"kind": MARK, "key": f"fact:{fact}", "words": BOUND_FACT_WHY.format(what=_words(rule, fact),
+                                                                                     once=BOUND_FACT_ONCE[fact]),
+                 "elements": [], "measure": fact, "field": f"building.{fact}"})
+    if flag:                      # a person decides with every figure the rule reads: each one missing is a cause
         try:
             missing = [m for m in sorted(parts.formula_names(rule)) if not _usable(known.get(m), kinds.get(m))]
         except formula.FormulaError:

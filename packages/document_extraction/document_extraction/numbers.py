@@ -70,9 +70,10 @@ def statements(text: str) -> list[dict]:
         used = 1 if unit else 0
         if after_words[:1] and after_words[0] in TWO_WORD_UNITS and after_words[1:2] and after_words[1] in UNITS:
             unit, used = f"{after_words[0]} {UNITS[after_words[1]]}", 2
-        elif after_words[:1] == ["gross"] and after_words[1:2] and after_words[1] in TWO_WORD_UNITS \
+        elif after_words[:1] in (["gross"], ["net"]) and after_words[1:2] and after_words[1] in TWO_WORD_UNITS \
                 and after_words[2:3] and after_words[2] in UNITS:
-            unit, used = f"gross {after_words[1]} {UNITS[after_words[2]]}", 3     # "200 gross square feet"
+            # "200 gross square feet"; "30 net square feet" (BCNYS 407.10, Chapter 4 part c's conversion check)
+            unit, used = f"{after_words[0]} {after_words[1]} {UNITS[after_words[2]]}", 3
         if unit == "unit" and after_words[1:2] and after_words[1] in DIRECTIONS:
             unit, used = f"unit {after_words[1]}", 2
         # What follows, with numbers and stops kept, so a comparison word is never taken across them ("4 inches

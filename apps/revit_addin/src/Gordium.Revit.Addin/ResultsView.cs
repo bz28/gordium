@@ -74,6 +74,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private C.Grid? _searchBox;
     private readonly C.TextBlock _searchHint = Small("Search rules, sections, elements (Ctrl+F)");
     private readonly C.TextBlock _shown = Small("");
+
+    /// <summary>The summary's headline sentence of the results shown, or null (none drawn).</summary>
+    private C.TextBlock? _headline;
     private readonly C.ListBox _list = new();
     // UI changes 13-15: every write of _content goes through this one setter, which raises Shown (PaneExtras follows
     // it for the ribbon badge, the selection strip and the summary); never write _contentValue but here
@@ -535,6 +538,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private W.UIElement Summary(ResultModel model, IReadOnlyList<PanelPart> parts, bool stale)
     {
         var summary = new C.StackPanel { Margin = new W.Thickness(0, 2, 0, 2) };
+        _headline = null;                                        // drawn below only when the state is (not stale)
         if (_content?.NotStated is { Count: > 0 } notStated)
         {
             // checked anyway: what was left out first, each making its rules need review, and the way back to Setup
@@ -595,11 +599,13 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     var fails = PaneWords.FilterCount(_placed, ListFilter.Fails);
                     var st = StatusLook.Of(model.StateTone, stale);
                     summary.Children.Add(WithGlyph(st, Ink(Typed(new C.TextBlock { Text = ResultText.StateWords(model.State), TextWrapping = W.TextWrapping.Wrap }, "type.state"), StatusLook.Colour(st)), size: 18));
-                    summary.Children.Add(Typed(new C.TextBlock
+                    // the headline as the questions card stands (said again when an answer chosen there changes it)
+                    _headline = Typed(new C.TextBlock
                     {
-                        Text = model.Views is { } v ? v.Headline : PaneWords.StartHere(fails, Groups.Count),
+                        Text = model.Views is { } v ? ResultViews.HeadlineOf(v, _content?.Questions, _answers) : PaneWords.StartHere(fails, Groups.Count),
                         TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 2, 0, 2),
-                    }, Body));
+                    }, Body);
+                    summary.Children.Add(_headline);
                     if (model.Views is { } sv)
                     {
                         summary.Children.Add(ProportionBarView(model, stale));
@@ -1176,7 +1182,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var labels = _content?.Labels;
         var stale = _content?.Model?.Stale is not null;
         var layout = _content?.Model?.Views is { } views
-            ? ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, labels, stale, _content?.Questions)
+            ? ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, labels, stale, _content?.Questions, _answers)
             : ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),
                                     _summary is not null && AllCards.Count > 0, _filter, _search.Text);
         _entries = _summary is null ? layout : ResultList.WithSummary(layout);
@@ -1526,7 +1532,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         // UI polish changes 28 to 32: the page laid out from the checker's asks for this result (an answer without the
         // two views keeps the page as before)
         if (_content?.Model?.Views is { } views)
-            detail = detail with { Page = DetailPages.Of(detail, rows[index], ResultViews.CardsOf(views, id)) };
+            detail = detail with { Page = DetailPages.Of(detail, rows[index], ResultViews.CardsOf(views, id, _content?.Questions, _answers)) };
         _detail = DetailView.Build(detail, this, canStepBack: index > 0, canStepOn: index < rows.Count - 1);
         _bodyHost.Child = _detail;
         _detail.Focus();
@@ -1607,7 +1613,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     /// keyboard on it (the view chosen for the project is not changed by this).</summary>
     public void Answer()
     {
-        if (_content?.Model?.Views is not { } views || _detailId is not { } id || ResultViewList.AnswerKeys(views, id) is not { Count: > 0 } keys)
+        if (_content?.Model?.Views is not { } views || _detailId is not { } id || ResultViewList.AnswerKeys(views, id, _content?.Questions, _answers) is not { Count: > 0 } keys)
             return;
         _detailId = null;
         _bodyHost.Child = _results;
@@ -1625,9 +1631,26 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
 
     public SetupDraft Answers => _answers;
 
-    /// <summary>A question answered (in the draft only): the card's Save says how many answers it would write.</summary>
+    /// <summary>A question answered (in the draft only): the card's Save says how many answers it would write; and when
+    /// the answer brings in or hides a follow-up question ("Is the ADU detached?" once "Is there an ADU?" is Yes), the
+    /// list again, the keyboard kept on the question answered.</summary>
     public void Answered()
     {
+        if (_content?.Model?.Views is { } views)
+        {
+            var after = ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, _content.Labels, _content.Model.Stale is not null,
+                                              _content.Questions, _answers);
+            if (_headline is not null && _content.Model.Stale is null)
+                _headline.Text = ResultViews.HeadlineOf(views, _content.Questions, _answers);
+            if (ResultViewList.QuestionsDiffer(_entries, after))
+            {
+                var on = Within<C.ListBoxItem>(I.Keyboard.FocusedElement as W.DependencyObject)?.DataContext is QuestionItem q ? q.Entry.Key : null;
+                Relayout();
+                var at = on is null ? -1 : _items.FindIndex(i => i is QuestionItem x && x.Entry.Key == on);
+                if (at >= 0)
+                    FocusEntry(at);
+            }
+        }
         foreach (var e in Descendants(_list))
             if (e is C.Button { Tag: AnswerFootItem foot } save)
             {
@@ -1756,7 +1779,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             _filter = ListFilter.All;
             _opened.Add(ListSection.Complies);
             if (_content?.Model?.Views is { } views)
-                _openView.UnionWith(ResultViewList.PathTo(views, _view, id));
+                _openView.UnionWith(ResultViewList.PathTo(views, _view, id, _content?.Questions, _answers));
             _search.Text = "";
             Chips(_content?.Model?.Stale is not null);
             Relayout();

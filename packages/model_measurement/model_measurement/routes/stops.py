@@ -9,6 +9,12 @@ design: docs/decisions/2026-11-20_route_measurement.md.
 """
 
 STOPS = {
+    # the room a flight of stairs stands in (stair_rooms.py: the Building Code's stair rules, section group 7c)
+    "stair_no_nosings": "the flight gives no nosings, so where it stands isn't known",
+    "stair_room_unread": "the floor of room {room} can't be read, and it may be the floor under the flight",
+    "stair_over_no_room": "nosing {n} of the flight stands over no room's floor",
+    "stair_room_exit_unknown": "whether room {room}, under nosing {n} of the flight, is an exit enclosure isn't worked "
+                               "out",
     # the description as a whole (every story's route measures need review)
     "description": "the model can't be read for escape routes: {reason}",
     "no_levels": "the model gives no levels: which story each room and door is on isn't known",
@@ -96,6 +102,9 @@ STOPS = {
     "outline_needed": "the story's outline isn't read, so its diagonal and areas aren't measured: {reason}",
     # the parts handed to the rules (__init__.py)
     "stated_not_given": "stated by the architect ({what}), and Gordium has no mark for it in the model yet",
+    # a corridor's fact the architect states on its room (CORRIDOR_STATED): left out, or not of its kind
+    "corridor_fact_not_stated": "not stated for this corridor: {what} (the room's {mark} mark)",
+    "corridor_fact_not_read": "{what} is given as {got}, not {kind}",
     "not_measured_yet": "Gordium doesn't measure this yet",
     "readings": "given as two readings for open question {question} of the route note ({words}): a rule reading it "
                 "complies only if it complies under both, fails only if it fails under both, else needs review",
@@ -247,8 +256,8 @@ STOPS = {
     "egress_side_unclear": "which way egress travel goes through the door {name} isn't worked out: travel may cross it "
                            "both ways (two rooms that both lead out through it, a room others' routes cross, an exit "
                            "stair that may discharge through it, an outdoor area whose way out is back inside)",
-    "door_swing_not_given": "the door {name} doesn't say which side it swings into, and Gordium has no mark for it in "
-                            "the model yet",
+    "door_swing_not_given": "the door {name} doesn't say which side it swings into (in Revit, read from the swing arc "
+                            "its plan symbol draws, where that settles it)",
     "door_swing_not_read": "the door {name} says it swings into {got}, not one of the two sides it joins",
     "door_not_on_routes": "the door {name} isn't one the routes read (its story's routes need review, or it isn't "
                           "placed): which way egress travel goes through it isn't known",
@@ -257,6 +266,13 @@ STOPS = {
                             "(swinging) or another kind isn't known",
     "door_side_room_not_read": "a side of the door {name} is the room {room}, which isn't read: its floor area isn't "
                                "known",
+    # section group 6e (1010.2.8): what latches or locks each door
+    "door_hardware_not_given": "the door {name} doesn't say what latches or locks it (panic or fire exit hardware, "
+                               "with or without an electric lock it releases, another latch or lock, or none), and "
+                               "Gordium has no mark for it in the model yet",
+    "door_hardware_not_read": "the door {name} gives its hardware as {got}, not panic, panic_electric, latch or none",
+    "door_electric_lock_not_asked": "the door {name} is latched by something other than panic hardware: whether it "
+                                    "is electrically locked isn't asked",
 }
 
 

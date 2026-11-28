@@ -29,11 +29,756 @@ pieces:
     heading: Institutional Group I-4, day care facilities › Five or fewer persons receiving care in a dwelling unit
     rules:
     - general.bc_308_5_4_dwelling_unit
+  '402.1':
+    label: flag
+    heading: Applicability
+    rules:
+    - general.bc_402_1_mall_buildings
+  '402.8':
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_402_8_means_of_egress
+  402.8.1:
+    label: flag
+    heading: Means of egress › Mall width
+    rules:
+    - general.bc_402_8_1_mall_width
+  402.8.1.1:
+    label: flag
+    heading: Mall width › Minimum width
+    rules:
+    - general.bc_402_8_1_1_mall_minimum_width
+  402.8.2:
+    label: flag
+    heading: Means of egress › Determination of occupant load
+    rules:
+    - general.bc_402_8_2_tenant_occupant_load
+  402.8.2.1:
+    label: flag
+    heading: Determination of occupant load › Occupant formula
+    rules:
+    - general.bc_402_8_2_1_mall_occupant_formula
+  402.8.2.2:
+    label: flag
+    heading: Determination of occupant load › OLF range
+    rules:
+    - general.bc_402_8_2_2_olf_range
+  402.8.2.3:
+    label: flag
+    heading: Determination of occupant load › Anchor buildings
+    rules:
+    - general.bc_402_8_2_3_anchor_buildings
+  402.8.2.4:
+    label: flag
+    heading: Determination of occupant load › Food courts
+    rules:
+    - general.bc_402_8_2_4_food_courts
+  402.8.3:
+    label: flag
+    heading: Means of egress › Number of means of egress
+    rules:
+    - general.bc_402_8_3_tenant_two_means_of_egress
+  402.8.4:
+    label: flag
+    heading: Means of egress › Arrangements of means of egress
+    rules:
+    - general.bc_402_8_4_assembly_in_a_mall
+  402.8.4.1:
+    label: flag
+    heading: Arrangements of means of egress › Anchor building means of egress
+    rules:
+    - general.bc_402_8_4_1_anchor_building_egress
+  402.8.5:
+    label: flag
+    heading: Means of egress › Distance to exits
+    rules:
+    - general.bc_402_8_5_distance_to_exits
+  402.8.6:
+    label: flag
+    heading: Means of egress › Access to exits
+    rules:
+    - general.bc_402_8_6_access_to_exits
+  402.8.6.1:
+    label: flag
+    heading: Access to exits › Exit passageways
+    rules:
+    - general.bc_402_8_6_1_exit_passageways
+  402.8.7:
+    label: flag
+    heading: Means of egress › Service areas fronting on exit passageways
+    rules:
+    - general.bc_402_8_7_service_areas_on_exit_passageways
+  402.8.8:
+    label: flag
+    heading: Means of egress › Security grilles and doors
+    rules:
+    - general.bc_402_8_8_security_grilles_and_doors
+  '403.1':
+    label: flag
+    heading: Applicability
+    rules:
+    - general.bc_403_1_high_rise_buildings
+  403.2.2:
+    label: flag
+    heading: Structural integrity of interior exit stairways and elevator hoistway enclosures
+    rules:
+    - general.bc_403_2_2_exit_stairway_enclosure_strength
+  403.2.2.1:
+    label: flag
+    heading: Structural integrity of interior exit stairways and elevator hoistway enclosures › Wall assembly materials
+    rules:
+    - general.bc_403_2_2_1_enclosure_wall_panels
+  403.2.2.2:
+    label: flag
+    heading: Structural integrity of interior exit stairways and elevator hoistway enclosures › Concrete and masonry walls
+    rules:
+    - general.bc_403_2_2_2_concrete_and_masonry_walls
+  403.2.2.3:
+    label: flag
+    heading: Structural integrity of interior exit stairways and elevator hoistway enclosures › Other wall assemblies
+    rules:
+    - general.bc_403_2_2_3_other_wall_assemblies
+  403.2.2.4:
+    label: flag
+    heading: Structural integrity of interior exit stairways and elevator hoistway enclosures › Glass walls
+    rules:
+    - general.bc_403_2_2_4_glass_walls
+  '403.5':
+    label: flag
+    heading: Means of egress and evacuation
+    rules:
+    - general.bc_403_5_means_of_egress_and_evacuation
+  403.5.1:
+    label: flag
+    heading: Means of egress and evacuation › Remoteness of interior exit stairways
+    rules:
+    - general.bc_403_5_1_remoteness_of_exit_stairways
+  403.5.2:
+    label: flag
+    heading: Means of egress and evacuation › Additional interior exit stairway
+    rules:
+    - general.bc_403_5_2_additional_exit_stairway
+  403.5.3:
+    label: flag
+    heading: Means of egress and evacuation › Stairway door operation
+    rules:
+    - general.bc_403_5_3_stairway_door_operation
+  403.5.3.1:
+    label: flag
+    heading: Stairway door operation › Stairway communication system
+    rules:
+    - general.bc_403_5_3_1_stairway_communication_system
+  403.5.4:
+    label: flag
+    heading: Means of egress and evacuation › Smokeproof enclosures
+    rules:
+    - general.bc_403_5_4_smokeproof_enclosures
+  403.5.5:
+    label: flag
+    heading: Means of egress and evacuation › Luminous egress path markings
+    rules:
+    - general.bc_403_5_5_luminous_egress_path_markings
+  '403.6':
+    label: flag
+    heading: Elevators
+    rules:
+    - general.bc_403_6_elevators
+  403.6.1:
+    label: flag
+    heading: Elevators › Fire service access elevator
+    rules:
+    - general.bc_403_6_1_fire_service_access_elevators
+  403.6.2:
+    label: flag
+    heading: Elevators › Occupant evacuation elevators
+    rules:
+    - general.bc_403_6_2_occupant_evacuation_elevators
+  '404.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_404_1_atriums
+  '404.9':
+    label: flag
+    heading: Exit access travel distance
+    rules:
+    - general.bc_404_9_atrium_travel_distance
+  '404.10':
+    label: flag
+    heading: Exit stairways in an atrium
+    rules:
+    - general.bc_404_10_exit_stairways_in_an_atrium
+  '404.11':
+    label: flag
+    heading: Interior exit stairway discharge
+    rules:
+    - general.bc_404_11_stairway_discharge_through_an_atrium
+  '405.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_405_1_underground_buildings
+  '405.4':
+    label: flag
+    heading: Compartmentation
+    rules:
+    - general.bc_405_4_compartmentation
+  405.4.1:
+    label: flag
+    heading: Compartmentation › Number of compartments
+    rules:
+    - general.bc_405_4_1_number_of_compartments
+  405.4.2:
+    label: flag
+    heading: Compartmentation › Smoke barrier penetration
+    rules:
+    - general.bc_405_4_2_smoke_barrier_between_compartments
+  405.4.3:
+    label: flag
+    heading: Compartmentation › Elevators
+    rules:
+    - general.bc_405_4_3_compartment_elevators
+  '405.7':
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_405_7_means_of_egress
+  405.7.1:
+    label: flag
+    heading: Means of egress › Number of exits
+    rules:
+    - general.bc_405_7_1_two_exits_on_each_floor_level
+  405.7.2:
+    label: flag
+    heading: Means of egress › Smokeproof enclosure
+    rules:
+    - general.bc_405_7_2_smokeproof_enclosures
+  406.4.3:
+    label: flag
+    heading: Ramps
+    rules:
+    - general.bc_406_4_3_vehicle_ramps
+  406.5.7:
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_406_5_7_open_parking_garage_egress
+  '407.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_407_1_group_i2
+  '407.2':
+    label: flag
+    heading: Corridors continuity and separation
+    rules:
+    - general.bc_407_2_corridor_continuity_and_separation
+  407.2.1:
+    label: flag
+    heading: Corridors continuity and separation › Waiting and similar areas
+    rules:
+    - general.bc_407_2_1_waiting_areas_open_to_a_corridor
+  407.2.2:
+    label: flag
+    heading: Corridors continuity and separation › Care providers’ stations
+    rules:
+    - general.bc_407_2_2_care_providers_stations
+  407.2.3:
+    label: flag
+    heading: Corridors continuity and separation › Psychiatric treatment areas
+    rules:
+    - general.bc_407_2_3_psychiatric_treatment_areas
+  407.2.4:
+    label: flag
+    heading: Corridors continuity and separation › Gift shops
+    rules:
+    - general.bc_407_2_4_gift_shops
+  407.2.5:
+    label: flag
+    heading: Corridors continuity and separation › Nursing home housing units
+    rules:
+    - general.bc_407_2_5_nursing_home_housing_units
+  407.2.6:
+    label: flag
+    heading: Corridors continuity and separation › Nursing home cooking facilities
+    rules:
+    - general.bc_407_2_6_nursing_home_cooking_facilities
+  407.2.7:
+    label: flag
+    heading: Corridors continuity and separation › Domestic cooking appliances
+    rules:
+    - general.bc_407_2_7_domestic_cooking_appliances
+  '407.3':
+    label: flag
+    heading: Corridor wall construction
+    rules:
+    - general.bc_407_3_corridor_wall_construction
+  407.3.1:
+    label: flag
+    heading: Corridor wall construction › Corridor doors
+    rules:
+    - general.bc_407_3_1_corridor_doors
+  407.3.1.1:
+    label: flag
+    heading: Corridor doors › Door construction
+    rules:
+    - general.bc_407_3_1_1_corridor_door_construction
+  '407.4':
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_407_4_means_of_egress
+  407.4.1:
+    label: flag
+    heading: Means of egress › Direct access to a corridor
+    rules:
+    - general.bc_407_4_1_direct_access_to_a_corridor
+  407.4.1.1:
+    label: flag
+    heading: Direct access to a corridor › Locking devices
+    rules:
+    - general.bc_407_4_1_1_locking_devices
   407.4.2:
     label: rule
-    heading: Distance of travel
+    heading: Means of egress › Distance of travel
     rules:
     - general.bc_407_4_2_sleeping_room_travel
+  407.4.3:
+    label: flag
+    heading: Means of egress › Projections in nursing home corridors
+    rules:
+    - general.bc_407_4_3_projections_in_nursing_home_corridors
+  407.4.4:
+    label: flag
+    heading: Means of egress › Group I-2 care suites
+    rules:
+    - general.bc_407_4_4_care_suites
+  407.4.4.1:
+    label: flag
+    heading: Group I-2 care suites › Exit access through care suites
+    rules:
+    - general.bc_407_4_4_1_exit_access_through_care_suites
+  407.4.4.2:
+    label: flag
+    heading: Group I-2 care suites › Separation
+    rules:
+    - general.bc_407_4_4_2_care_suite_separation
+  407.4.4.3:
+    label: flag
+    heading: Group I-2 care suites › Access to corridor
+    rules:
+    - general.bc_407_4_4_3_care_suite_access_to_corridor
+  407.4.4.4:
+    label: flag
+    heading: Group I-2 care suites › Circulation paths within a care suite
+    rules:
+    - general.bc_407_4_4_4_care_suite_circulation_paths
+  407.4.4.5:
+    label: flag
+    heading: Group I-2 care suites › Doors within care suites
+    rules:
+    - general.bc_407_4_4_5_doors_within_care_suites
+  407.4.4.6:
+    label: flag
+    heading: Group I-2 care suites › Care suites containing sleeping room areas
+    rules:
+    - general.bc_407_4_4_6_care_suites_with_sleeping_rooms
+  407.4.4.6.1:
+    label: flag
+    heading: Care suites containing sleeping room areas › Area
+    rules:
+    - general.bc_407_4_4_6_1_sleeping_care_suite_area
+  407.4.4.6.2:
+    label: flag
+    heading: Care suites containing sleeping room areas › Exit access
+    rules:
+    - general.bc_407_4_4_6_2_sleeping_care_suite_exit_access
+  407.4.4.7:
+    label: flag
+    heading: Group I-2 care suites › Care suites not containing sleeping rooms
+    rules:
+    - general.bc_407_4_4_7_care_suites_without_sleeping_rooms
+  407.4.4.7.1:
+    label: flag
+    heading: Care suites not containing sleeping rooms › Area
+    rules:
+    - general.bc_407_4_4_7_1_treatment_care_suite_area
+  407.4.4.7.2:
+    label: flag
+    heading: Care suites not containing sleeping rooms › Exit access
+    rules:
+    - general.bc_407_4_4_7_2_treatment_care_suite_exit_access
+  '407.5':
+    label: flag
+    heading: Smoke barriers
+    rules:
+    - general.bc_407_5_smoke_barriers
+  407.5.1:
+    label: flag
+    heading: Smoke barriers › Smoke compartment size
+    rules:
+    - general.bc_407_5_1_smoke_compartment_size
+  407.5.2:
+    label: flag
+    heading: Smoke barriers › Exit access travel distance
+    rules:
+    - general.bc_407_5_2_travel_to_a_smoke_barrier_door
+  407.5.3:
+    label: flag
+    heading: Smoke barriers › Refuge area
+    rules:
+    - general.bc_407_5_3_refuge_area
+  407.5.4:
+    label: flag
+    heading: Smoke barriers › Independent egress
+    rules:
+    - general.bc_407_5_4_independent_egress
+  407.5.5:
+    label: flag
+    heading: Smoke barriers › Horizontal assemblies
+    rules:
+    - general.bc_407_5_5_horizontal_assemblies
+  '407.6':
+    label: flag
+    heading: Automatic-closing doors
+    rules:
+    - general.bc_407_6_automatic_closing_doors
+  407.6.1:
+    label: flag
+    heading: Automatic-closing doors › Activation of automatic-closing doors
+    rules:
+    - general.bc_407_6_1_activation_of_automatic_closing_doors
+  '407.10':
+    label: flag
+    heading: Secured yards
+    rules:
+    - general.bc_407_10_secured_yards
+  '408.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_408_1_group_i3
+  '408.2':
+    label: flag
+    heading: Other occupancies
+    rules:
+    - general.bc_408_2_other_occupancies
+  '408.3':
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_408_3_means_of_egress
+  408.3.1:
+    label: flag
+    heading: Means of egress › Door width
+    rules:
+    - general.bc_408_3_1_door_width
+  408.3.2:
+    label: flag
+    heading: Means of egress › Sliding doors
+    rules:
+    - general.bc_408_3_2_sliding_doors
+  408.3.3:
+    label: flag
+    heading: Means of egress › Guard tower doors
+    rules:
+    - general.bc_408_3_3_guard_tower_doors
+  408.3.4:
+    label: flag
+    heading: Means of egress › Spiral stairways
+    rules:
+    - general.bc_408_3_4_spiral_stairways
+  408.3.5:
+    label: flag
+    heading: Means of egress › Ship’s ladders
+    rules:
+    - general.bc_408_3_5_ships_ladders
+  408.3.6:
+    label: flag
+    heading: Means of egress › Exit discharge
+    rules:
+    - general.bc_408_3_6_exit_discharge_to_a_courtyard
+  408.3.7:
+    label: flag
+    heading: Means of egress › Sallyports
+    rules:
+    - general.bc_408_3_7_sallyports
+  408.3.8:
+    label: flag
+    heading: Means of egress › Interior exit stairway and ramp construction
+    rules:
+    - general.bc_408_3_8_glazed_exit_stairway
+  '408.4':
+    label: flag
+    heading: Locks
+    rules:
+    - general.bc_408_4_locks
+  408.4.1:
+    label: flag
+    heading: Locks › Remote release
+    rules:
+    - general.bc_408_4_1_remote_release
+  408.4.2:
+    label: flag
+    heading: Locks › Power-operated doors and locks
+    rules:
+    - general.bc_408_4_2_power_operated_doors_and_locks
+  408.4.3:
+    label: flag
+    heading: Locks › Redundant operation
+    rules:
+    - general.bc_408_4_3_redundant_operation
+  408.4.4:
+    label: flag
+    heading: Locks › Relock capability
+    rules:
+    - general.bc_408_4_4_relock_capability
+  '408.6':
+    label: flag
+    heading: Smoke barrier
+    rules:
+    - general.bc_408_6_smoke_barrier
+  408.6.1:
+    label: flag
+    heading: Smoke barrier › Smoke compartments
+    rules:
+    - general.bc_408_6_1_smoke_compartments
+  408.6.2:
+    label: flag
+    heading: Smoke barrier › Refuge area
+    rules:
+    - general.bc_408_6_2_refuge_area
+  408.6.3:
+    label: flag
+    heading: Smoke barrier › Independent egress
+    rules:
+    - general.bc_408_6_3_independent_egress
+  '408.8':
+    label: flag
+    heading: Subdivision of resident housing areas
+    rules:
+    - general.bc_408_8_subdivision_of_resident_housing_areas
+  408.8.1:
+    label: flag
+    heading: Subdivision of resident housing areas › Occupancy Conditions 3 and 4
+    rules:
+    - general.bc_408_8_1_occupancy_conditions_3_and_4
+  408.8.2:
+    label: flag
+    heading: Subdivision of resident housing areas › Occupancy Condition 5
+    rules:
+    - general.bc_408_8_2_occupancy_condition_5
+  408.8.3:
+    label: flag
+    heading: Subdivision of resident housing areas › Openings in room face
+    rules:
+    - general.bc_408_8_3_openings_in_room_face
+  408.8.4:
+    label: flag
+    heading: Subdivision of resident housing areas › Smoke-tight doors
+    rules:
+    - general.bc_408_8_4_smoke_tight_doors
+  '410.5':
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_410_5_means_of_egress
+  410.5.1:
+    label: flag
+    heading: Means of egress › Arrangement
+    rules:
+    - general.bc_410_5_1_arrangement
+  410.5.2:
+    label: flag
+    heading: Means of egress › Stairway and ramp enclosure
+    rules:
+    - general.bc_410_5_2_stairway_and_ramp_enclosure
+  410.5.3:
+    label: flag
+    heading: Means of egress › Technical production areas
+    rules:
+    - general.bc_410_5_3_technical_production_areas
+  410.5.3.1:
+    label: flag
+    heading: Technical production areas › Number of means of egress
+    rules:
+    - general.bc_410_5_3_1_number_of_means_of_egress
+  410.5.3.2:
+    label: flag
+    heading: Technical production areas › Exit access travel distance
+    rules:
+    - general.bc_410_5_3_2_exit_access_travel_distance
+  410.5.3.3:
+    label: flag
+    heading: Technical production areas › Two means of egress
+    rules:
+    - general.bc_410_5_3_3_two_means_of_egress
+  410.5.3.4:
+    label: flag
+    heading: Technical production areas › Path of egress travel
+    rules:
+    - general.bc_410_5_3_4_path_of_egress_travel
+  410.5.3.5:
+    label: flag
+    heading: Technical production areas › Width
+    rules:
+    - general.bc_410_5_3_5_width
+  '411.4':
+    label: flag
+    heading: Exit marking
+    rules:
+    - general.bc_411_4_exit_marking
+  411.4.1:
+    label: flag
+    heading: Exit marking › Photoluminescent exit signs
+    rules:
+    - general.bc_411_4_1_photoluminescent_exit_signs
+  412.2.2:
+    label: flag
+    heading: Means of egress and evacuation
+    rules:
+    - general.bc_412_2_2_airport_traffic_control_towers
+  412.2.2.1:
+    label: flag
+    heading: Means of egress and evacuation › Stairways
+    rules:
+    - general.bc_412_2_2_1_stairways
+  412.2.2.2:
+    label: flag
+    heading: Means of egress and evacuation › Exit access
+    rules:
+    - general.bc_412_2_2_2_exit_access
+  412.2.2.3:
+    label: flag
+    heading: Means of egress and evacuation › Number of exits
+    rules:
+    - general.bc_412_2_2_3_number_of_exits
+  412.2.2.3.1:
+    label: flag
+    heading: Number of exits › Interior finish
+    rules:
+    - general.bc_412_2_2_3_1_interior_finish
+  412.2.2.3.2:
+    label: flag
+    heading: Number of exits › Exit separation
+    rules:
+    - general.bc_412_2_2_3_2_exit_separation
+  412.4.2:
+    label: flag
+    heading: Egress
+    rules:
+    - general.bc_412_4_2_residential_aircraft_hangar_egress
+  '412.6':
+    label: flag
+    heading: Aircraft manufacturing facilities
+    rules:
+    - general.bc_412_6_aircraft_manufacturing_facilities
+  Table 412.6:
+    label: flag
+    heading: Aircraft manufacturing exit access travel distance
+    rules:
+    - general.bc_table_412_6_aircraft_manufacturing_travel
+  412.6.1:
+    label: flag
+    heading: Aircraft manufacturing facilities › Ancillary areas
+    rules:
+    - general.bc_412_6_1_ancillary_areas
+  412.7.3:
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_412_7_3_heliports_and_helistops
+  415.11.3.3:
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_415_11_3_3_service_corridor_egress
+  415.11.3.4:
+    label: flag
+    heading: Minimum width
+    rules:
+    - general.bc_415_11_3_4_service_corridor_width
+  415.11.6.6:
+    label: flag
+    heading: Exits
+    rules:
+    - general.bc_415_11_6_6_hpm_room_exits
+  415.11.6.7:
+    label: flag
+    heading: Doors
+    rules:
+    - general.bc_415_11_6_7_hpm_room_doors
+  '420.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_420_1_groups_i1_and_r
+  '420.2':
+    label: flag
+    heading: Separation walls
+    rules:
+    - general.bc_420_2_separation_walls
+  '420.3':
+    label: flag
+    heading: Horizontal separation
+    rules:
+    - general.bc_420_3_horizontal_separation
+  '420.6':
+    label: flag
+    heading: Smoke barriers in Group I-1, Condition 2
+    rules:
+    - general.bc_420_6_smoke_barriers_in_group_i1_condition_2
+  420.6.1:
+    label: flag
+    heading: Smoke barriers in Group I-1, Condition 2 › Refuge area
+    rules:
+    - general.bc_420_6_1_refuge_area
+  '420.7':
+    label: flag
+    heading: Group I-1 assisted living housing units
+    rules:
+    - general.bc_420_7_assisted_living_housing_units
+  '420.8':
+    label: flag
+    heading: Group I-1 cooking facilities
+    rules:
+    - general.bc_420_8_group_i1_cooking_facilities
+  '420.9':
+    label: flag
+    heading: Domestic cooking appliances
+    rules:
+    - general.bc_420_9_domestic_cooking_appliances
+  '422.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_422_1_ambulatory_care_facilities
+  '422.2':
+    label: flag
+    heading: Separation
+    rules:
+    - general.bc_422_2_separation
+  '422.3':
+    label: flag
+    heading: Smoke compartments
+    rules:
+    - general.bc_422_3_smoke_compartments
+  422.3.1:
+    label: flag
+    heading: Smoke compartments › Means of egress
+    rules:
+    - general.bc_422_3_1_means_of_egress
+  422.3.2:
+    label: flag
+    heading: Smoke compartments › Refuge area
+    rules:
+    - general.bc_422_3_2_refuge_area
+  422.3.3:
+    label: flag
+    heading: Smoke compartments › Independent egress
+    rules:
+    - general.bc_422_3_3_independent_egress
   508.2.1:
     label: flag
     heading: Accessory occupancies › Occupancy classification
@@ -573,6 +1318,51 @@ pieces:
     heading: Fire door assemblies › Fire door frames
     rules:
     - general.bc_716_2_4_fire_door_frames
+  '1003.2':
+    label: flag
+    heading: General means of egress › Ceiling height
+    rules:
+    - general.bc_1003_2_ceiling_height
+  1003.3.1:
+    label: flag
+    heading: Protruding objects › Headroom
+    rules:
+    - general.bc_1003_3_1_headroom
+  1003.3.2:
+    label: flag
+    heading: Protruding objects › Post-mounted objects
+    rules:
+    - general.bc_1003_3_2_post_mounted_objects
+  1003.3.3:
+    label: flag
+    heading: Protruding objects › Horizontal projections
+    rules:
+    - general.bc_1003_3_3_horizontal_projections
+  1003.3.4:
+    label: flag
+    heading: Protruding objects › Clear width
+    rules:
+    - general.bc_1003_3_4_clear_width
+  '1003.4':
+    label: flag
+    heading: General means of egress › Slip-resistant surface
+    rules:
+    - general.bc_1003_4_slip_resistant_surface
+  '1003.5':
+    label: flag
+    heading: General means of egress › Elevation change
+    rules:
+    - general.bc_1003_5_elevation_change
+  '1003.6':
+    label: flag
+    heading: General means of egress › Means of egress continuity
+    rules:
+    - general.bc_1003_6_means_of_egress_continuity
+  '1003.7':
+    label: flag
+    heading: General means of egress › Elevators, escalators and moving walks
+    rules:
+    - general.bc_1003_7_elevators_escalators_moving_walks
   '1004.7':
     label: flag
     heading: Occupant load › Outdoor areas
@@ -726,6 +1516,181 @@ pieces:
     heading: Remoteness of exit access stairways or ramps › Three or more exit access stairways or ramps
     rules:
     - general.bc_1007_1_3_1_three_or_more_stairways
+  '1008.2':
+    label: flag
+    heading: Means of egress illumination › Illumination required
+    rules:
+    - general.bc_1008_2_illumination_required
+  1008.2.1:
+    label: flag
+    heading: Illumination required › Illumination level under normal power
+    rules:
+    - general.bc_1008_2_1_illumination_level
+  1008.2.2:
+    label: flag
+    heading: Illumination required › Group I-2
+    rules:
+    - general.bc_1008_2_2_group_i2_exterior_landings
+  1008.2.3:
+    label: flag
+    heading: Illumination required › Exit discharge
+    rules:
+    - general.bc_1008_2_3_exit_discharge_illumination
+  1008.2.4:
+    label: flag
+    heading: Illumination required › Power for illumination
+    rules:
+    - general.bc_1008_2_4_power_for_illumination
+  '1008.3':
+    label: flag
+    heading: Means of egress illumination › Illumination required by an emergency electrical system
+    rules:
+    - general.bc_1008_3_emergency_illumination
+  1008.3.1:
+    label: flag
+    heading: Illumination required by an emergency electrical system › Duration
+    rules:
+    - general.bc_1008_3_1_emergency_power_duration
+  1008.3.2:
+    label: flag
+    heading: Illumination required by an emergency electrical system › Illumination level under emergency power
+    rules:
+    - general.bc_1008_3_2_emergency_illumination_level
+  '1009.1':
+    label: flag
+    heading: Accessible means of egress › Accessible means of egress required
+    rules:
+    - general.bc_1009_1_accessible_means_of_egress_required
+  '1009.2':
+    label: flag
+    heading: Accessible means of egress › Continuity and components
+    rules:
+    - general.bc_1009_2_continuity_and_components
+  1009.2.1:
+    label: flag
+    heading: Continuity and components › Elevators required
+    rules:
+    - general.bc_1009_2_1_elevators_required
+  1009.2.2:
+    label: flag
+    heading: Continuity and components › Doors
+    rules:
+    - general.bc_1009_2_2_doors
+  1009.3.1:
+    label: flag
+    heading: Stairways › Exit access stairways
+    rules:
+    - general.bc_1009_3_1_exit_access_stairways
+  1009.3.2:
+    label: flag
+    heading: Stairways › Stairway width
+    rules:
+    - general.bc_1009_3_2_stairway_width
+  1009.3.3:
+    label: flag
+    heading: Stairways › Area of refuge
+    rules:
+    - general.bc_1009_3_3_area_of_refuge_at_stairways
+  1009.4.1:
+    label: flag
+    heading: Elevators › Standby power
+    rules:
+    - general.bc_1009_4_1_elevator_standby_power
+  1009.4.2:
+    label: flag
+    heading: Elevators › Area of refuge
+    rules:
+    - general.bc_1009_4_2_elevator_area_of_refuge
+  '1009.5':
+    label: flag
+    heading: Accessible means of egress › Platform lifts
+    rules:
+    - general.bc_1009_5_platform_lifts
+  '1009.6':
+    label: flag
+    heading: Accessible means of egress › Areas of refuge
+    rules:
+    - general.bc_1009_6_areas_of_refuge
+  1009.6.1:
+    label: flag
+    heading: Areas of refuge › Travel distance
+    rules:
+    - general.bc_1009_6_1_area_of_refuge_travel_distance
+  1009.6.2:
+    label: flag
+    heading: Areas of refuge › Stairway or elevator access
+    rules:
+    - general.bc_1009_6_2_area_of_refuge_stairway_or_elevator_access
+  1009.6.3:
+    label: flag
+    heading: Areas of refuge › Size
+    rules:
+    - general.bc_1009_6_3_area_of_refuge_size
+  1009.6.4:
+    label: flag
+    heading: Areas of refuge › Separation
+    rules:
+    - general.bc_1009_6_4_area_of_refuge_separation
+  1009.6.5:
+    label: flag
+    heading: Areas of refuge › Two-way communication
+    rules:
+    - general.bc_1009_6_5_area_of_refuge_two_way_communication
+  '1009.7':
+    label: flag
+    heading: Accessible means of egress › Exterior areas for assisted rescue
+    rules:
+    - general.bc_1009_7_exterior_areas_for_assisted_rescue
+  1009.7.1:
+    label: flag
+    heading: Exterior areas for assisted rescue › Size
+    rules:
+    - general.bc_1009_7_1_assisted_rescue_size
+  1009.7.2:
+    label: flag
+    heading: Exterior areas for assisted rescue › Separation
+    rules:
+    - general.bc_1009_7_2_assisted_rescue_separation
+  1009.7.3:
+    label: flag
+    heading: Exterior areas for assisted rescue › Openness
+    rules:
+    - general.bc_1009_7_3_assisted_rescue_openness
+  1009.7.4:
+    label: flag
+    heading: Exterior areas for assisted rescue › Stairways
+    rules:
+    - general.bc_1009_7_4_assisted_rescue_stairways
+  '1009.8':
+    label: flag
+    heading: Accessible means of egress › Two-way communication
+    rules:
+    - general.bc_1009_8_two_way_communication
+  1009.8.1:
+    label: flag
+    heading: Two-way communication › System requirements
+    rules:
+    - general.bc_1009_8_1_two_way_communication_system
+  1009.8.2:
+    label: flag
+    heading: Two-way communication › Directions
+    rules:
+    - general.bc_1009_8_2_two_way_communication_directions
+  '1009.9':
+    label: flag
+    heading: Accessible means of egress › Signage
+    rules:
+    - general.bc_1009_9_accessibility_signage
+  '1009.10':
+    label: flag
+    heading: Accessible means of egress › Directional signage
+    rules:
+    - general.bc_1009_10_directional_signage
+  '1009.11':
+    label: flag
+    heading: Accessible means of egress › Instructions
+    rules:
+    - general.bc_1009_11_instructions
   '1010.1':
     label: flag
     heading: General
@@ -753,6 +1718,313 @@ pieces:
     heading: Egress door types › Direction of swing
     rules:
     - general.bc_1010_1_2_1_direction_of_swing
+  1010.1.3:
+    label: flag
+    heading: General › Forces to unlatch and open doors
+    rules:
+    - general.bc_1010_1_3_door_forces
+  1010.1.3.2:
+    label: flag
+    heading: Forces to unlatch and open doors › Manual horizontal sliding doors
+    rules:
+    - general.bc_1010_1_3_2_sliding_door_latch
+  1010.1.4:
+    label: flag
+    heading: General › Floor elevation
+    rules:
+    - general.bc_1010_1_4_floor_elevation
+  1010.1.5:
+    label: flag
+    heading: General › Landings at doors
+    rules:
+    - general.bc_1010_1_5_landings
+  1010.1.6:
+    label: flag
+    heading: General › Thresholds
+    rules:
+    - general.bc_1010_1_6_thresholds
+  1010.1.7:
+    label: flag
+    heading: General › Door arrangement
+    rules:
+    - general.bc_1010_1_7_door_arrangement
+  '1010.2':
+    label: flag
+    heading: Door operations
+    rules:
+    - general.bc_1010_2_door_operations
+  1010.2.1:
+    label: flag
+    heading: Door operations › Unlatching
+    rules:
+    - general.bc_1010_2_1_unlatching
+  1010.2.2:
+    label: flag
+    heading: Door operations › Hardware
+    rules:
+    - general.bc_1010_2_2_hardware
+  1010.2.3:
+    label: flag
+    heading: Door operations › Hardware height
+    rules:
+    - general.bc_1010_2_3_hardware_height
+  1010.2.4:
+    label: flag
+    heading: Door operations › Locks and latches
+    rules:
+    - general.bc_1010_2_4_locks_and_latches
+  Table 1010.2.4:
+    label: flag
+    heading: Manual bolts, automatic flush bolts and constant latching bolts on the inactive leaf of a pair of doors
+    rules:
+    - general.bc_table_1010_2_4_inactive_leaf_bolts
+  1010.2.5:
+    label: flag
+    heading: Door operations › Closet doors
+    rules:
+    - general.bc_1010_2_5_closet_doors
+  1010.2.6:
+    label: flag
+    heading: Door operations › Stairway doors
+    rules:
+    - general.bc_1010_2_6_stairway_doors
+  1010.2.7:
+    label: flag
+    heading: Door operations › Locking arrangements in educational occupancies
+    rules:
+    - general.bc_1010_2_7_educational_locking
+  1010.2.8:
+    label: rule
+    heading: Door operations › Panic and fire exit hardware
+    rules:
+    - general.bc_1010_2_8_panic_hardware
+  1010.2.8.1:
+    label: flag
+    heading: Panic and fire exit hardware › Refrigeration machinery room
+    rules:
+    - general.bc_1010_2_8_1_refrigeration_machinery_rooms
+  1010.2.8.2:
+    label: flag
+    heading: Panic and fire exit hardware › Rooms with electrical equipment
+    rules:
+    - general.bc_1010_2_8_2_electrical_rooms
+  1010.2.8.3:
+    label: flag
+    heading: Panic and fire exit hardware › Installation
+    rules:
+    - general.bc_1010_2_8_3_panic_hardware_installation
+  1010.2.8.4:
+    label: flag
+    heading: Panic and fire exit hardware › Balanced doors
+    rules:
+    - general.bc_1010_2_8_4_balanced_doors
+  1010.2.9:
+    label: flag
+    heading: Door operations › Monitored or recorded egress, and access control systems
+    rules:
+    - general.bc_1010_2_9_access_control
+  1010.2.10:
+    label: flag
+    heading: Door operations › Door hardware release of electrically locked egress doors
+    rules:
+    - general.bc_1010_2_10_door_hardware_release
+  1010.2.11:
+    label: flag
+    heading: Door operations › Sensor release of electrically locked egress doors
+    rules:
+    - general.bc_1010_2_11_sensor_release
+  1010.2.12:
+    label: flag
+    heading: Door operations › Delayed egress
+    rules:
+    - general.bc_1010_2_12_delayed_egress
+  1010.2.12.1:
+    label: flag
+    heading: Delayed egress › Delayed egress locking system
+    rules:
+    - general.bc_1010_2_12_1_delayed_egress_locking_system
+  1010.2.13:
+    label: flag
+    heading: Door operations › Controlled egress doors in Groups I-1 and I-2
+    rules:
+    - general.bc_1010_2_13_controlled_egress
+  1010.2.14:
+    label: flag
+    heading: Door operations › Elevator lobby exit access doors
+    rules:
+    - general.bc_1010_2_14_elevator_lobby_doors
+  1010.2.15:
+    label: flag
+    heading: Door operations › Locking arrangements in buildings within correctional facilities
+    rules:
+    - general.bc_1010_2_15_correctional_facilities
+  '1011.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_1011_1_stairways_general
+  '1011.2':
+    label: rule
+    heading: Width and capacity
+    rules:
+    - general.bc_1011_2_stair_width
+  '1011.3':
+    label: rule
+    heading: Headroom
+    rules:
+    - general.bc_1011_3_stair_headroom
+  1011.5.2:
+    label: rule
+    heading: Stair treads and risers › Riser height and tread depth
+    rules:
+    - general.bc_1011_5_2_riser_height
+    - general.bc_1011_5_2_tread_depth
+  1011.5.4:
+    label: rule
+    heading: Stair treads and risers › Dimensional uniformity
+    rules:
+    - general.bc_1011_5_4_riser_uniformity
+    - general.bc_1011_5_4_tread_uniformity
+  '1011.6':
+    label: flag
+    heading: Stairway landings
+    rules:
+    - general.bc_1011_6_stair_landings
+  '1011.11':
+    label: rule
+    heading: Handrails
+    rules:
+    - general.bc_1011_11_stair_handrails
+  '1012.2':
+    label: flag
+    heading: Ramps › Slope
+    rules:
+    - general.bc_1012_2_slope
+  '1012.3':
+    label: flag
+    heading: Ramps › Cross slope
+    rules:
+    - general.bc_1012_3_cross_slope
+  '1012.4':
+    label: flag
+    heading: Ramps › Vertical rise
+    rules:
+    - general.bc_1012_4_vertical_rise
+  1012.5.1:
+    label: flag
+    heading: Minimum dimensions › Width and capacity
+    rules:
+    - general.bc_1012_5_1_width_and_capacity
+  1012.5.2:
+    label: flag
+    heading: Minimum dimensions › Headroom
+    rules:
+    - general.bc_1012_5_2_headroom
+  1012.5.3:
+    label: flag
+    heading: Minimum dimensions › Restrictions
+    rules:
+    - general.bc_1012_5_3_restrictions
+  '1012.6':
+    label: flag
+    heading: Ramps › Landings
+    rules:
+    - general.bc_1012_6_landings
+  1012.6.1:
+    label: flag
+    heading: Landings › Slope
+    rules:
+    - general.bc_1012_6_1_landing_slope
+  1012.6.2:
+    label: flag
+    heading: Landings › Width
+    rules:
+    - general.bc_1012_6_2_landing_width
+  1012.6.3:
+    label: flag
+    heading: Landings › Length
+    rules:
+    - general.bc_1012_6_3_landing_length
+  1012.6.4:
+    label: flag
+    heading: Landings › Change in direction
+    rules:
+    - general.bc_1012_6_4_change_in_direction
+  '1012.7':
+    label: flag
+    heading: Ramps › Ramp construction
+    rules:
+    - general.bc_1012_7_ramp_construction
+  1012.7.1:
+    label: flag
+    heading: Ramp construction › Ramp surface
+    rules:
+    - general.bc_1012_7_1_ramp_surface
+  1012.7.2:
+    label: flag
+    heading: Ramp construction › Outdoor conditions
+    rules:
+    - general.bc_1012_7_2_outdoor_conditions
+  '1012.8':
+    label: flag
+    heading: Ramps › Handrails
+    rules:
+    - general.bc_1012_8_handrails
+  '1012.9':
+    label: flag
+    heading: Ramps › Guards
+    rules:
+    - general.bc_1012_9_guards
+  '1012.10':
+    label: flag
+    heading: Ramps › Edge protection
+    rules:
+    - general.bc_1012_10_edge_protection
+  '1013.1':
+    label: flag
+    heading: Exit signs › Where required
+    rules:
+    - general.bc_1013_1_exit_signs_where_required
+  '1013.2':
+    label: flag
+    heading: Exit signs › Low-level exit signs in Group R-1
+    rules:
+    - general.bc_1013_2_low_level_exit_signs_group_r1
+  '1013.3':
+    label: flag
+    heading: Exit signs › Illumination
+    rules:
+    - general.bc_1013_3_exit_sign_illumination
+  '1013.4':
+    label: flag
+    heading: Exit signs › Raised character and braille exit signs
+    rules:
+    - general.bc_1013_4_raised_character_braille_exit_signs
+  '1013.5':
+    label: flag
+    heading: Exit signs › Internally illuminated exit signs
+    rules:
+    - general.bc_1013_5_internally_illuminated_exit_signs
+  1013.5.1:
+    label: flag
+    heading: Internally illuminated exit signs › Photoluminescent exit signs
+    rules:
+    - general.bc_1013_5_1_photoluminescent_exit_signs
+  1013.6.1:
+    label: flag
+    heading: Externally illuminated exit signs › Graphics
+    rules:
+    - general.bc_1013_6_1_exit_sign_graphics
+  1013.6.2:
+    label: flag
+    heading: Externally illuminated exit signs › Exit sign illumination
+    rules:
+    - general.bc_1013_6_2_exit_sign_illumination_intensity
+  1013.6.3:
+    label: flag
+    heading: Externally illuminated exit signs › Power source
+    rules:
+    - general.bc_1013_6_3_exit_sign_power_source
   '1016.2':
     label: rule
     heading: Egress through intervening spaces
@@ -807,11 +2079,36 @@ pieces:
     heading: Atriums › Exit access travel distance at other than the level of exit discharge
     rules:
     - general.bc_1017_3_2_3_atrium
+  '1018.1':
+    label: flag
+    heading: Aisles › General
+    rules:
+    - general.bc_1018_1_aisles_general
+  '1018.3':
+    label: flag
+    heading: Aisles › Aisles in Groups B and M
+    rules:
+    - general.bc_1018_3_aisles_groups_b_m
   '1018.4':
     label: flag
-    heading: Aisle accessways in Group M
+    heading: Aisles › Aisle accessways in Group M
     rules:
     - general.bc_1018_4_merchandise_pads
+  '1018.5':
+    label: flag
+    heading: Aisles › Aisles in other than assembly spaces and Groups B and M
+    rules:
+    - general.bc_1018_5_aisles_other_occupancies
+  '1019.3':
+    label: flag
+    heading: Exit access stairways and ramps › Occupancies other than Groups I-2 and I-3
+    rules:
+    - general.bc_1019_3_exit_access_stairway_enclosure
+  '1019.4':
+    label: flag
+    heading: Exit access stairways and ramps › Group I-2 and I-3 occupancies
+    rules:
+    - general.bc_1019_4_exit_access_stairways_groups_i2_i3
   '1020.2':
     label: rule
     heading: Construction
@@ -868,9 +2165,731 @@ pieces:
     heading: Corridor continuity
     rules:
     - general.bc_1020_7_continuity
+  '1021.1':
+    label: flag
+    heading: Egress balconies › General
+    rules:
+    - general.bc_1021_1_egress_balconies_as_corridors
+  '1021.2':
+    label: flag
+    heading: Egress balconies › Wall separation
+    rules:
+    - general.bc_1021_2_egress_balcony_separation
+  '1021.3':
+    label: flag
+    heading: Egress balconies › Openness
+    rules:
+    - general.bc_1021_3_egress_balcony_openness
+  '1021.4':
+    label: flag
+    heading: Egress balconies › Location
+    rules:
+    - general.bc_1021_4_egress_balcony_location
+  '1022.1':
+    label: flag
+    heading: Exits › General
+    rules:
+    - general.bc_1022_1_exits_general
+  '1022.2':
+    label: flag
+    heading: Exits › Exterior exit doors
+    rules:
+    - general.bc_1022_2_exterior_exit_door
+  1022.2.2:
+    label: flag
+    heading: Exterior exit doors › Arrangement
+    rules:
+    - general.bc_1022_2_2_exterior_exit_door_arrangement
+  '1023.1':
+    label: flag
+    heading: Interior exit stairways and ramps › General
+    rules:
+    - general.bc_1023_1_interior_exit_stairways_general
+  '1023.2':
+    label: flag
+    heading: Interior exit stairways and ramps › Construction
+    rules:
+    - general.bc_1023_2_enclosure_construction
+  '1023.3':
+    label: flag
+    heading: Interior exit stairways and ramps › Termination
+    rules:
+    - general.bc_1023_3_termination
+  1023.3.1:
+    label: flag
+    heading: Termination › Extension
+    rules:
+    - general.bc_1023_3_1_extension
+  '1023.4':
+    label: flag
+    heading: Interior exit stairways and ramps › Openings
+    rules:
+    - general.bc_1023_4_openings
+  '1023.5':
+    label: flag
+    heading: Interior exit stairways and ramps › Penetrations
+    rules:
+    - general.bc_1023_5_penetrations
+  '1023.6':
+    label: flag
+    heading: Interior exit stairways and ramps › Ventilation
+    rules:
+    - general.bc_1023_6_ventilation
+  '1023.7':
+    label: flag
+    heading: Interior exit stairways and ramps › Interior exit stairway and ramp exterior walls
+    rules:
+    - general.bc_1023_7_exterior_walls
+  1023.7.1:
+    label: flag
+    heading: Interior exit stairway and ramp exterior walls › Building exterior walls
+    rules:
+    - general.bc_1023_7_1_building_exterior_walls
+  1023.7.2:
+    label: flag
+    heading: Interior exit stairway and ramp exterior walls › Roof assemblies
+    rules:
+    - general.bc_1023_7_2_roof_assemblies
+  '1023.8':
+    label: flag
+    heading: Interior exit stairways and ramps › Barrier at level of exit discharge
+    rules:
+    - general.bc_1023_8_barrier_at_exit_discharge
+  '1023.9':
+    label: flag
+    heading: Interior exit stairways and ramps › Stairway identification signs
+    rules:
+    - general.bc_1023_9_stairway_identification_signs
+  1023.9.1:
+    label: flag
+    heading: Stairway identification signs › Signage requirements
+    rules:
+    - general.bc_1023_9_1_stairway_sign_requirements
+  '1023.10':
+    label: flag
+    heading: Interior exit stairways and ramps › Elevator lobby identification signs
+    rules:
+    - general.bc_1023_10_elevator_lobby_signs
+  '1023.11':
+    label: flag
+    heading: Interior exit stairways and ramps › Tactile floor-level signs
+    rules:
+    - general.bc_1023_11_tactile_floor_level_signs
+  '1023.12':
+    label: flag
+    heading: Interior exit stairways and ramps › Smokeproof enclosures
+    rules:
+    - general.bc_1023_12_smokeproof_enclosures
+  1023.12.1:
+    label: flag
+    heading: Smokeproof enclosures › Termination and extension
+    rules:
+    - general.bc_1023_12_1_smokeproof_termination
+  1023.12.2:
+    label: flag
+    heading: Smokeproof enclosures › Enclosure access
+    rules:
+    - general.bc_1023_12_2_smokeproof_access
+  '1023.13':
+    label: flag
+    heading: Interior exit stairways and ramps › Standpipes
+    rules:
+    - general.bc_1023_13_standpipes
+  '1024.1':
+    label: flag
+    heading: Exit passageways › General
+    rules:
+    - general.bc_1024_1_exit_passageways_general
+  '1024.2':
+    label: flag
+    heading: Exit passageways › Width and capacity
+    rules:
+    - general.bc_1024_2_exit_passageway_width
+  '1024.3':
+    label: flag
+    heading: Exit passageways › Construction
+    rules:
+    - general.bc_1024_3_exit_passageway_construction
+  '1024.4':
+    label: flag
+    heading: Exit passageways › Termination
+    rules:
+    - general.bc_1024_4_exit_passageway_termination
+  '1024.5':
+    label: flag
+    heading: Exit passageways › Openings
+    rules:
+    - general.bc_1024_5_exit_passageway_openings
+  '1024.6':
+    label: flag
+    heading: Exit passageways › Penetrations
+    rules:
+    - general.bc_1024_6_exit_passageway_penetrations
+  '1024.7':
+    label: flag
+    heading: Exit passageways › Ventilation
+    rules:
+    - general.bc_1024_7_exit_passageway_ventilation
+  '1024.8':
+    label: flag
+    heading: Exit passageways › Exit passageway exterior walls
+    rules:
+    - general.bc_1024_8_exit_passageway_exterior_walls
+  '1024.9':
+    label: flag
+    heading: Exit passageways › Standpipes
+    rules:
+    - general.bc_1024_9_exit_passageway_standpipes
+  '1025.1':
+    label: flag
+    heading: Luminous egress path markings › General
+    rules:
+    - general.bc_1025_1_luminous_markings_where_required
+  1025.2.1:
+    label: flag
+    heading: Markings within exit components › Steps
+    rules:
+    - general.bc_1025_2_1_steps
+  1025.2.2:
+    label: flag
+    heading: Markings within exit components › Landings
+    rules:
+    - general.bc_1025_2_2_landings
+  1025.2.3:
+    label: flag
+    heading: Markings within exit components › Handrails
+    rules:
+    - general.bc_1025_2_3_handrails
+  1025.2.4:
+    label: flag
+    heading: Markings within exit components › Perimeter demarcation lines
+    rules:
+    - general.bc_1025_2_4_perimeter_demarcation_lines
+  1025.2.4.1:
+    label: flag
+    heading: Perimeter demarcation lines › Floor-mounted demarcation lines
+    rules:
+    - general.bc_1025_2_4_1_floor_mounted_lines
+  1025.2.4.2:
+    label: flag
+    heading: Perimeter demarcation lines › Wall-mounted demarcation lines
+    rules:
+    - general.bc_1025_2_4_2_wall_mounted_lines
+  1025.2.4.3:
+    label: flag
+    heading: Perimeter demarcation lines › Transition
+    rules:
+    - general.bc_1025_2_4_3_transition
+  1025.2.5:
+    label: flag
+    heading: Markings within exit components › Obstacles
+    rules:
+    - general.bc_1025_2_5_obstacles
+  1025.2.6.1:
+    label: flag
+    heading: Doors within the exit path › Emergency exit symbol
+    rules:
+    - general.bc_1025_2_6_1_emergency_exit_symbol
+  1025.2.6.2:
+    label: flag
+    heading: Doors within the exit path › Door hardware markings
+    rules:
+    - general.bc_1025_2_6_2_door_hardware_markings
+  1025.2.6.3:
+    label: flag
+    heading: Doors within the exit path › Door frame markings
+    rules:
+    - general.bc_1025_2_6_3_door_frame_markings
+  '1025.3':
+    label: flag
+    heading: Luminous egress path markings › Uniformity
+    rules:
+    - general.bc_1025_3_uniformity
+  '1025.4':
+    label: flag
+    heading: Luminous egress path markings › Self-luminous and photoluminescent
+    rules:
+    - general.bc_1025_4_self_luminous_photoluminescent
+  '1025.5':
+    label: flag
+    heading: Luminous egress path markings › Illumination
+    rules:
+    - general.bc_1025_5_illumination
+  '1026.1':
+    label: flag
+    heading: Horizontal exits › General
+    rules:
+    - general.bc_1026_1_horizontal_exits_general
+  '1026.2':
+    label: flag
+    heading: Horizontal exits › Separation
+    rules:
+    - general.bc_1026_2_horizontal_exit_separation
+  '1026.3':
+    label: flag
+    heading: Horizontal exits › Opening protectives
+    rules:
+    - general.bc_1026_3_horizontal_exit_opening_protectives
+  '1026.4':
+    label: flag
+    heading: Horizontal exits › Refuge area
+    rules:
+    - general.bc_1026_4_refuge_area
+  1026.4.1:
+    label: flag
+    heading: Refuge area › Capacity
+    rules:
+    - general.bc_1026_4_1_refuge_area_capacity
+  1026.4.2:
+    label: flag
+    heading: Refuge area › Number of exits
+    rules:
+    - general.bc_1026_4_2_refuge_area_exits
+  '1026.5':
+    label: flag
+    heading: Horizontal exits › Standpipes
+    rules:
+    - general.bc_1026_5_horizontal_exit_standpipes
+  '1027.2':
+    label: flag
+    heading: Exterior exit stairways and ramps › Use in a means of egress
+    rules:
+    - general.bc_1027_2_exterior_exit_stairways_use
+  '1027.3':
+    label: flag
+    heading: Exterior exit stairways and ramps › Open side
+    rules:
+    - general.bc_1027_3_open_side
+  '1027.4':
+    label: flag
+    heading: Exterior exit stairways and ramps › Side yards
+    rules:
+    - general.bc_1027_4_side_yards
+  '1027.5':
+    label: flag
+    heading: Exterior exit stairways and ramps › Location
+    rules:
+    - general.bc_1027_5_location
+  '1027.6':
+    label: flag
+    heading: Exterior exit stairways and ramps › Exterior exit stairway and ramp protection
+    rules:
+    - general.bc_1027_6_protection
+  '1028.2':
+    label: flag
+    heading: Exit discharge › Exit discharge
+    rules:
+    - general.bc_1028_2_exit_discharge
+  '1028.3':
+    label: flag
+    heading: Exit discharge › Exit discharge width or capacity
+    rules:
+    - general.bc_1028_3_exit_discharge_width
+  '1028.4':
+    label: flag
+    heading: Exit discharge › Exit discharge components
+    rules:
+    - general.bc_1028_4_exit_discharge_components
+  '1028.5':
+    label: flag
+    heading: Exit discharge › Access to a public way
+    rules:
+    - general.bc_1028_5_access_to_public_way
+  '1029.2':
+    label: flag
+    heading: Egress courts › Width or capacity
+    rules:
+    - general.bc_1029_2_egress_court_width
+  '1029.3':
+    label: flag
+    heading: Egress courts › Construction and openings
+    rules:
+    - general.bc_1029_3_egress_court_construction
+  1030.1.1:
+    label: flag
+    heading: General › Bleachers
+    rules:
+    - general.bc_1030_1_1_bleachers
+  1030.1.1.1:
+    label: flag
+    heading: Bleachers › Spaces under grandstands and bleachers
+    rules:
+    - general.bc_1030_1_1_1_spaces_under_grandstands
+  '1030.2':
+    label: flag
+    heading: Assembly › Assembly main exit
+    rules:
+    - general.bc_1030_2_assembly_main_exit
+  '1030.3':
+    label: flag
+    heading: Assembly › Assembly other exits
+    rules:
+    - general.bc_1030_3_assembly_other_exits
+  '1030.4':
+    label: flag
+    heading: Assembly › Foyers and lobbies
+    rules:
+    - general.bc_1030_4_foyers_and_lobbies
+  '1030.5':
+    label: flag
+    heading: Assembly › Interior balcony and gallery means of egress
+    rules:
+    - general.bc_1030_5_balcony_and_gallery_egress
+  1030.6.1:
+    label: flag
+    heading: Capacity of aisle for assembly › Without smoke protection
+    rules:
+    - general.bc_1030_6_1_aisle_capacity_without_smoke_protection
+  1030.6.2:
+    label: flag
+    heading: Capacity of aisle for assembly › Smoke-protected assembly seating
+    rules:
+    - general.bc_1030_6_2_smoke_protected_aisle_capacity
+  Table 1030.6.2:
+    label: flag
+    heading: Capacity for aisles for smoke-protected assembly
+    rules:
+    - general.bc_table_1030_6_2_smoke_protected_aisle_factors
+  1030.6.2.1:
+    label: flag
+    heading: Smoke-protected assembly seating › Smoke control
+    rules:
+    - general.bc_1030_6_2_1_smoke_control
+  1030.6.2.2:
+    label: flag
+    heading: Smoke-protected assembly seating › Roof height
+    rules:
+    - general.bc_1030_6_2_2_roof_height
+  1030.6.2.3:
+    label: flag
+    heading: Smoke-protected assembly seating › Automatic sprinklers
+    rules:
+    - general.bc_1030_6_2_3_smoke_protected_sprinklers
+  1030.6.3:
+    label: flag
+    heading: Capacity of aisle for assembly › Open-air assembly seating
+    rules:
+    - general.bc_1030_6_3_open_air_aisle_capacity
+  1030.6.3.1:
+    label: flag
+    heading: Open-air assembly seating › Automatic sprinklers
+    rules:
+    - general.bc_1030_6_3_1_open_air_sprinklers
   '1030.8':
     label: flag
-    heading: Common path of egress travel
+    heading: Assembly › Common path of egress travel
     rules:
     - general.bc_1030_8_fixed_seating_common_path
+  1030.8.1:
+    label: flag
+    heading: Common path of egress travel › Path through adjacent row
+    rules:
+    - general.bc_1030_8_1_path_through_adjacent_row
+  '1030.9':
+    label: flag
+    heading: Assembly › Assembly aisles are required
+    rules:
+    - general.bc_1030_9_assembly_aisles_required
+  1030.9.1:
+    label: flag
+    heading: Assembly aisles are required › Minimum aisle width
+    rules:
+    - general.bc_1030_9_1_minimum_aisle_width
+  1030.9.2:
+    label: flag
+    heading: Assembly aisles are required › Aisle catchment area
+    rules:
+    - general.bc_1030_9_2_aisle_catchment_area
+  1030.9.3:
+    label: flag
+    heading: Assembly aisles are required › Converging aisles
+    rules:
+    - general.bc_1030_9_3_converging_aisles
+  1030.9.4:
+    label: flag
+    heading: Assembly aisles are required › Uniform width and capacity
+    rules:
+    - general.bc_1030_9_4_uniform_width_and_capacity
+  1030.9.5:
+    label: flag
+    heading: Assembly aisles are required › Dead-end aisles
+    rules:
+    - general.bc_1030_9_5_dead_end_aisles
+  1030.9.6:
+    label: flag
+    heading: Assembly aisles are required › Aisle measurement
+    rules:
+    - general.bc_1030_9_6_aisle_measurement
+  1030.9.6.1:
+    label: flag
+    heading: Aisle measurement › Assembly aisle obstructions
+    rules:
+    - general.bc_1030_9_6_1_assembly_aisle_obstructions
+  1030.9.7:
+    label: flag
+    heading: Assembly aisles are required › Stairways connecting to stepped aisles
+    rules:
+    - general.bc_1030_9_7_stairways_connecting_to_stepped_aisles
+  1030.9.8:
+    label: flag
+    heading: Assembly aisles are required › Stairways connecting to vomitories
+    rules:
+    - general.bc_1030_9_8_stairways_connecting_to_vomitories
+  1030.10.1:
+    label: flag
+    heading: Transitions › Transitions to stairways that maintain stepped aisle riser and tread dimensions
+    rules:
+    - general.bc_1030_10_1_transitions_keeping_stepped_aisle_dimensions
+  1030.10.2.1:
+    label: flag
+    heading: Transitions to stairways that do not maintain stepped aisle riser and tread dimensions › Stairways and stepped
+      aisles in a straight run
+    rules:
+    - general.bc_1030_10_2_1_straight_run_transitions
+  1030.10.2.2:
+    label: flag
+    heading: Transitions to stairways that do not maintain stepped aisle riser and tread dimensions › Stairways that change
+      direction from stepped aisles
+    rules:
+    - general.bc_1030_10_2_2_transitions_changing_direction
+  1030.10.3:
+    label: flag
+    heading: Transitions › Transition marking
+    rules:
+    - general.bc_1030_10_3_transition_marking
+  1030.11.1:
+    label: flag
+    heading: Stepped aisles at vomitories › Stepped aisles that change direction at vomitories
+    rules:
+    - general.bc_1030_11_1_stepped_aisles_changing_direction_at_vomitories
+  1030.11.2:
+    label: flag
+    heading: Stepped aisles at vomitories › Stepped aisle transitions at the top of vomitories
+    rules:
+    - general.bc_1030_11_2_transitions_at_top_of_vomitories
+  '1030.12':
+    label: flag
+    heading: Assembly › Construction
+    rules:
+    - general.bc_1030_12_construction
+  1030.12.1:
+    label: flag
+    heading: Construction › Walking surface
+    rules:
+    - general.bc_1030_12_1_walking_surface
+  1030.12.2:
+    label: flag
+    heading: Construction › Outdoor conditions
+    rules:
+    - general.bc_1030_12_2_outdoor_conditions
+  1030.13.1:
+    label: flag
+    heading: Aisle accessways › Seating at tables
+    rules:
+    - general.bc_1030_13_1_seating_at_tables
+  1030.13.1.1:
+    label: flag
+    heading: Seating at tables › Aisle accessway capacity and width for seating at tables
+    rules:
+    - general.bc_1030_13_1_1_table_aisle_accessway_width
+  1030.13.1.2:
+    label: flag
+    heading: Seating at tables › Seating at table aisle accessway length
+    rules:
+    - general.bc_1030_13_1_2_table_aisle_accessway_length
+  1030.13.2:
+    label: flag
+    heading: Aisle accessways › Clear width of aisle accessways serving seating in rows
+    rules:
+    - general.bc_1030_13_2_rows_of_seats
+  1030.13.2.1:
+    label: flag
+    heading: Clear width of aisle accessways serving seating in rows › Dual access
+    rules:
+    - general.bc_1030_13_2_1_dual_access
+  Table 1030.13.2.1:
+    label: flag
+    heading: Smoke-protected or open-air assembly aisle accessways
+    rules:
+    - general.bc_table_1030_13_2_1_smoke_protected_row_lengths
+  1030.13.2.2:
+    label: flag
+    heading: Clear width of aisle accessways serving seating in rows › Single access
+    rules:
+    - general.bc_1030_13_2_2_single_access
+  1030.14.1:
+    label: flag
+    heading: Assembly aisle walking surfaces › Ramped aisles
+    rules:
+    - general.bc_1030_14_1_ramped_aisles
+  1030.14.1.1:
+    label: flag
+    heading: Ramped aisles › Cross slope
+    rules:
+    - general.bc_1030_14_1_1_cross_slope
+  1030.14.1.2:
+    label: flag
+    heading: Ramped aisles › Landings
+    rules:
+    - general.bc_1030_14_1_2_ramped_aisle_landings
+  1030.14.1.3:
+    label: flag
+    heading: Ramped aisles › Edge protection
+    rules:
+    - general.bc_1030_14_1_3_ramped_aisle_edge_protection
+  1030.14.2:
+    label: flag
+    heading: Assembly aisle walking surfaces › Stepped aisles
+    rules:
+    - general.bc_1030_14_2_stepped_aisles
+  1030.14.2.1:
+    label: flag
+    heading: Stepped aisles › Treads
+    rules:
+    - general.bc_1030_14_2_1_stepped_aisle_treads
+  1030.14.2.2:
+    label: flag
+    heading: Stepped aisles › Risers
+    rules:
+    - general.bc_1030_14_2_2_stepped_aisle_risers
+  1030.14.2.2.1:
+    label: flag
+    heading: Risers › Construction tolerances
+    rules:
+    - general.bc_1030_14_2_2_1_construction_tolerances
+  1030.14.2.3:
+    label: flag
+    heading: Stepped aisles › Tread contrasting marking stripe
+    rules:
+    - general.bc_1030_14_2_3_tread_contrasting_marking_stripe
+  1030.14.2.4:
+    label: flag
+    heading: Stepped aisles › Nosing and profile
+    rules:
+    - general.bc_1030_14_2_4_nosing_and_profile
+  '1030.15':
+    label: flag
+    heading: Assembly › Seat stability
+    rules:
+    - general.bc_1030_15_seat_stability
+  '1030.16':
+    label: flag
+    heading: Assembly › Handrails
+    rules:
+    - general.bc_1030_16_handrails
+  1030.16.1:
+    label: flag
+    heading: Handrails › Discontinuous mid-aisle handrails
+    rules:
+    - general.bc_1030_16_1_discontinuous_mid_aisle_handrails
+  1030.16.2:
+    label: flag
+    heading: Handrails › Handrail termination
+    rules:
+    - general.bc_1030_16_2_handrail_termination
+  1030.16.3:
+    label: flag
+    heading: Handrails › Mid-aisle termination
+    rules:
+    - general.bc_1030_16_3_mid_aisle_termination
+  1030.16.4:
+    label: flag
+    heading: Handrails › Rails
+    rules:
+    - general.bc_1030_16_4_rails
+  '1030.17':
+    label: flag
+    heading: Assembly › Assembly guards
+    rules:
+    - general.bc_1030_17_assembly_guards
+  1030.17.1:
+    label: flag
+    heading: Assembly guards › Perimeter guards
+    rules:
+    - general.bc_1030_17_1_perimeter_guards
+  1030.17.2:
+    label: flag
+    heading: Assembly guards › Cross aisles
+    rules:
+    - general.bc_1030_17_2_cross_aisle_guards
+  1030.17.3:
+    label: flag
+    heading: Assembly guards › Sightline-constrained guard heights
+    rules:
+    - general.bc_1030_17_3_sightline_constrained_guard_heights
+  1030.17.4:
+    label: flag
+    heading: Assembly guards › Guards at the end of aisles
+    rules:
+    - general.bc_1030_17_4_guards_at_end_of_aisles
+  '1031.2':
+    label: rule
+    heading: Where required
+    rules:
+    - general.bc_1031_2_escape_opening_where_required
+    - general.bc_1031_2_basements
+    - general.bc_1031_2_openings_to_public_way
+  1031.2.1:
+    label: flag
+    heading: Where required › Operational constraints and opening control devices
+    rules:
+    - general.bc_1031_2_1_operational_constraints
+  1031.3.1:
+    label: rule
+    heading: Emergency escape and rescue openings › Minimum size
+    rules:
+    - general.bc_1031_3_1_escape_opening_min_area
+  1031.3.2:
+    label: rule
+    heading: Emergency escape and rescue openings › Minimum dimensions
+    rules:
+    - general.bc_1031_3_2_escape_opening_min_height
+    - general.bc_1031_3_2_escape_opening_min_width
+  1031.3.3:
+    label: rule
+    heading: Emergency escape and rescue openings › Maximum height from floor
+    rules:
+    - general.bc_1031_3_3_escape_opening_max_sill_height
+  '1031.4':
+    label: rule
+    heading: Emergency escape and rescue doors
+    rules:
+    - general.bc_1031_4_escape_door_swinging_or_sliding
+  '1031.5':
+    label: rule
+    heading: Area wells
+    rules:
+    - general.bc_1031_5_area_well_required
+  1031.5.1:
+    label: rule
+    heading: Area wells › Minimum size
+    rules:
+    - general.bc_1031_5_1_area_well_min_projection
+    - general.bc_1031_5_1_area_well_min_width
+    - general.bc_1031_5_1_area_well_allows_full_opening
+  1031.5.2:
+    label: rule
+    heading: Area wells › Ladders or steps
+    rules:
+    - general.bc_1031_5_2_area_well_ladder_over_44
+  1031.5.2.1:
+    label: rule
+    heading: Ladders or steps › Ladders
+    rules:
+    - general.bc_1031_5_2_1_area_well_ladder
+  1031.5.2.2:
+    label: rule
+    heading: Ladders or steps › Steps
+    rules:
+    - general.bc_1031_5_2_2_area_well_steps
+  1031.5.3:
+    label: flag
+    heading: Area wells › Drainage
+    rules:
+    - general.bc_1031_5_3_area_well_drainage
+  '1031.6':
+    label: flag
+    heading: Bars, grilles, covers and screens
+    rules:
+    - general.bc_1031_6_bars_grilles_covers_screens
 not_checked_yet: []

@@ -20,7 +20,9 @@ RULEBOOK = NY / "5_building_code_rules/drafted/general.yaml"
 KEY = REPO / "test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml"
 I4 = {"occupancy_group_i4": True, "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False,
       # the sheet's day care has none of the spaces that tighten the tables (review rounds 1 and 2, 2026-11-23)
-      "assembly_fixed_seating": False, "special_egress_spaces": False, "egress_balcony_increase_taken": False}
+      "assembly_fixed_seating": False, "special_egress_spaces": False, "egress_balcony_increase_taken": False,
+      # Chapter 4 part b: the day care is neither a high-rise (403.5.2) nor underground (405.7.1)
+      "high_rise_building": False, "underground_building": False}
 
 
 @pytest.fixture(scope="module")
@@ -38,6 +40,10 @@ def _rows(rule, kind, measures, given, ctx):
     # exit be and so need review where it isn't known (PR #181)
     if kind == "space":
         measures = {"space_is_exit": False, **measures}
+    # a day care's rooms, none seating people served by aisles (1030.7: the routes' story and space parts say so from
+    # the rooms' functions, design_checker/occupant_load.py), unless a test says otherwise
+    measures = {**{"story": {"story_assembly_seating_possible": False},
+                   "space": {"space_assembly_seating_possible": False}}.get(kind, {}), **measures}
     return [r["outcome"] for r in parts.rows(rule, {kind: [{"id": "p1", "measures": measures}]}, given, ctx.allowed())]
 
 
