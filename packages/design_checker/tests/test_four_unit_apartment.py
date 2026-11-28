@@ -940,6 +940,8 @@ def test_a_13r_systems_limit_is_asked_by_its_own_fact_and_a_person_checks_where_
     assert got and all(c["field"] == "building.nfpa_13r_heights_within" for c in got), got[:2]
     assert all(c["words"].startswith("sprinkler system (NFPA 13R): stated") and "not stated for the project"
                not in c["words"] for c in got), got[:2]
+    assert all(c["words"].endswith("not stated yet: whether its heights are within 903.3.1.2's (Gordium: 13R "
+                                   "heights within limits)") for c in got), got[0]["words"]   # round 3 of #288
     from design_checker import ui_data                  # review round 2 of #288: the ask the pane shows is it too
     for c in got:
         ask = ui_data._from_cause(c, "story")
@@ -949,3 +951,4 @@ def test_a_13r_systems_limit_is_asked_by_its_own_fact_and_a_person_checks_where_
                    occupancy_groups=["R-2", "B"])
     assert mixed and all(c["key"] == "decide:sprinklered_903_3_1_2" and c["words"] == code_scope.NFPA_13R_BY_HAND
                          for c in mixed), mixed[:2]
+    assert "903.2.6 exception 1 in a Group I-1 Condition 1 facility" in code_scope.NFPA_13R_BY_HAND   # round 3

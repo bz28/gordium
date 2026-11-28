@@ -887,7 +887,8 @@ def test_a_line_a_13r_system_doesnt_spare_says_why(book):
     for r in guarded:
         if r["id"] == "general.bc_716_2_2_3_exit_enclosure_door_temperature_rise":
             continue
-        assert "a 13R system counts only in Group R, within 903.3.1.2's four stories, and in Group I-1 Condition 1" in _shown_note(r), r["id"]
+        assert ("a 13R system counts only where 903.3.1.2's limits are known to hold, Group R alone, four or fewer "
+                "stories and its heights stated within, and in Group I-1 Condition 1") in _shown_note(r), r["id"]
         kinds = {(str(e["given"].get("occupancy_group", "")).startswith("R-"), e["expect"]) for e in r["examples"]
                  if e["given"].get("sprinklered_903_3_1_2") is True and not e["given"].get("sprinklered_903_3_1_1")}
         assert (True, "not_applicable") in kinds and (False, "needs_review") in kinds, r["id"]

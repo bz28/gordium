@@ -586,3 +586,6 @@ def test_a_story_count_too_large_for_a_float_is_a_count_never_a_crash():
     assert stated[0] == huge
     assert _stairs_against_floors({"rooms": []}, Reader("ft"), stated) is not None
     assert _stairs_against_floors({"rooms": []}, Reader("ft"), huge) is not None
+    from design_checker.check import _with_stories_bound      # the place's typed count too (round 3 of #288)
+    got = _with_stories_bound({}, {"stories": {"value": None, "readings": []}}, {"stories": huge})
+    assert got.get("stories_typed") == huge

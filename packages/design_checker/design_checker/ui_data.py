@@ -86,7 +86,7 @@ FIELD_HEADLINES = {
     "building.separate_means_of_egress": "Does each unit have a separate means of egress?",
     "building.townhouse_units": "Are the units townhouse units?",
     "building.stories_above_grade_plane": "Set the stories above grade plane",
-    "building.nfpa_13r_heights_within": "Say whether the NFPA 13R system is within 903.3.1.2's heights (roof to its highest eave or parapet, top floor, lowest floor)",
+    "building.nfpa_13r_heights_within": "Say whether the NFPA 13R system is within 903.3.1.2's heights of fire department access (roof to its highest eave or parapet, top floor, lowest floor)",
     "facts.use": "Set the building's use",
     "facts.abuts_r1_district": "Does the lot abut R-1a or R-1b land? (§325-19E)",
     "facts.stream_near_lot": "Is a stream or inlet within 20 ft of the lot? (§325-26)",
