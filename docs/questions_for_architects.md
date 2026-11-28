@@ -189,6 +189,14 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Until you answer:** Today, escape windows are not checked yet: check them by hand. From a model, Gordium measures both readings; where they disagree the window gets no grade-floor answer, so a rule that turns on it gets NEEDS REVIEW (the test house `test_data/interior_houses/5_basement_window_well/`).
 - **Options:** (a) the ground around the well (the stricter reading: a window deep in a well needs the full 5.7 sq ft); (b) the well's own floor.
 
+### 4.7 An escape window's area well: may a ladder the open window blocks reach 6 in into the well?
+
+- **The code's words** (2025 Building Code of New York State; the Residential Code's R319.4.1 and R319.4.2 have the same words): "The ladder or steps required by Section 1031.5.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." (1031.5.1 exception, p.360); "Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency escape and rescue opening when the window or door is in the open position." (1031.5.2, p.360).
+- **What research found:** the plain reading is that a blocked ladder isn't "the ladder or steps required by Section 1031.5.2" (the section requires one that isn't blocked), so its reach has no exception; but the exception names the ladder the section requires, not one that complies with it. No ICC commentary was found, and no New York State code interpretation on the point (searched 2026-11-26). The City of Boise's handout on the IRC's earlier wording has the ladder "usable with the window in the fully open position", which leans toward the plain reading but says nothing of its reach. The searches are recorded in the rules (general.bc_1031_5_area_well_required, general.bc_1031_5_1_area_well_min_width, general.bc_1031_5_1_area_well_min_projection: their research).
+- **Why it matters:** a basement bedroom's window in a 50 in deep well, whose ladder reaches 4 in into the well and sits where the window, fully open, blocks it.
+- **Until you answer:** Today, with typed-in numbers, escape windows are checked by hand. From a model, the window fails 1031.5.2 either way (its ladder is blocked); under the Building Code its well-size rules fail too (Gordium assumes the strict reading, since those rules can't hold a review on this question beside their limits, 2026-11-27); under the Residential Code its well-size rules get NEEDS REVIEW. Neither ever passes on it.
+- **Options:** (a) a blocked ladder's reach isn't excused (the well's size fails too); (b) the exception allows its 6 in as well, and only 1031.5.2 fails it.
+
 ---
 
 ## 5. Accessory buildings, accessory dwelling units, and the R-3a, R-2c, R-3aa, R-3b, RU and B districts

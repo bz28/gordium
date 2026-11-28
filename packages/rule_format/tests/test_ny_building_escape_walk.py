@@ -3,17 +3,18 @@ of docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md: BCNYS 1031.2
 3-23).
 
 Every drafted rule over sleeping rooms is walked (found from their formulas), over every occupancy group (and two or
-more, and not stated), each sleeping room fact yes, no and not measured, its escape openings 0, 1 or not measured, its
+more, and not stated), each sleeping room fact yes, no and not measured, its escape openings known to comply (8d) 0,
+1 or not measured, its
 story's exits 1, 2 or not measured, and the sprinkler systems stated none, one, or not stated. The oracle is written
 from the page here, never from the rule:
 
 - **Strict** (a pass allowed only here): the room is on the fourth story above grade plane or higher, or the building
   is stated Group R-2 and the room's occupants are shown to have access to two or more exits (item 1 asks Group R-2
   only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit; a story's two exits
-  don't show it: review round 1). A marked opening alone isn't a pass while its area well and bars aren't checked
-  (1031.5, 1031.6, section group 8c: review round 2; its size, sill and door kind are its own rows since 8b).
+  don't show it: review round 1), or an opening in the room is known to comply with every escape-opening limit
+  (1031.3 to 1031.5: section group 8d, which counts them; a marked opening that may not comply never counts).
 - **Loosest** (a fail allowed only here): a building stated Group R-3 or R-4, or Group R-2 with the room's story at
-  one exit; no opening marked; below the fourth story; no door of the room to outside (exception 2: an exit door to a
+  one exit; no opening known to comply (none marked, or every marked one known short of a limit); below the fourth story; no door of the room to outside (exception 2: an exit door to a
   public way, yard, court or exterior egress balcony); and in Group R-2 or R-3 no sprinkler system stated (exception 5:
   a sprinklered building's basement sleeping rooms, whether the room is in a basement not shown).
 - **Not applicable** only where the building is stated one group other than R-2, R-3 and R-4."""
@@ -55,7 +56,7 @@ def _reads(r):
 
 def test_the_walk_finds_the_sleeping_room_rules(rules):
     got = {r["id"] for r in rules if r.get("for_each") == "sleeping_room" or _reads(r) & {
-        "sleeping_room_escape_openings", "sleeping_room_fourth_or_higher", "sleeping_room_story_one_exit",
+        "sleeping_room_compliant_openings", "sleeping_room_fourth_or_higher", "sleeping_room_story_one_exit",
         "sleeping_room_door_to_outside"}}
     assert got == {RULE}
 
@@ -70,7 +71,7 @@ def _given(group, sprinkler):
 
 
 def _part(openings, fourth, exits, door):
-    m = {k: v for k, v in (("sleeping_room_escape_openings", openings), ("sleeping_room_fourth_or_higher", fourth),
+    m = {k: v for k, v in (("sleeping_room_compliant_openings", openings), ("sleeping_room_fourth_or_higher", fourth),
                            ("sleeping_room_story_one_exit", exits), ("sleeping_room_door_to_outside", door))
          if v is not U}
     return {"id": "r", "name": "Bedroom", "measures": m}
@@ -83,7 +84,7 @@ def _wrong(out, group, openings, fourth, exits, door, sprinkler):
     if group is not U and group not in ("R-2", "R-3", "R-4", "mixed"):
         return "not set aside where 1031.2 asks nothing"
     if out == "pass":
-        ok = fourth is True or (group == "R-2" and exits is False)
+        ok = (openings is not U and openings >= 1) or fourth is True or (group == "R-2" and exits is False)
         return None if ok else "passes short of the strict reading"
     if out == "fail":
         required = group in ("R-3", "R-4") or (group == "R-2" and exits is True)
@@ -120,16 +121,16 @@ def test_no_sleeping_room_read_never_passes(rules, ctx):
             == "needs_review", group
 
 
-def test_a_marked_opening_alone_needs_review_until_its_area_well_and_bars_are_checked(rules, ctx):
-    """Review round 2 of group 8a: 1031.2 asks for an opening "in accordance with this section"; until 1031.5 and 1031.6
-    (area wells, bars: section group 8c) are checked, a sleeping room that 1031.2 may ask passes on a marked opening
-    never (its size, sill and door kind are the opening's own rows, section group 8b)."""
+def test_one_compliant_opening_passes_and_none_compliant_fails_where_1031_2_requires_one(rules, ctx):
+    """Section group 8d (the coordinator's two cases): a room with an opening known to comply passes 1031.2, whatever
+    else is marked; a room whose every marked opening is known short of a limit (none compliant) fails where 1031.2
+    requires one; one not known either way needs review."""
     rule = {r["id"]: r for r in rules}[RULE]
-    for group in ("R-2", "R-3", "R-4", "mixed", U):
-        out = parts.rows(rule, {"sleeping_room": [_part(1, False, True, False)]}, _given(group, "none"),
-                         ctx.allowed())[0]["outcome"]
-        assert out == "needs_review", group
-
+    for group in ("R-3", "R-4"):
+        given = _given(group, "none")
+        rows = lambda n: parts.rows(rule, {"sleeping_room": [_part(n, False, True, False)]}, given,
+                                    ctx.allowed())[0]["outcome"]
+        assert (rows(1), rows(0), rows(U)) == ("pass", "fail", "needs_review"), group
 
 
 # ---- section group 8b (2026-11-26): each escape opening's size, sill and door kind (1031.3.1 to 1031.3.3, 1031.4) -------
@@ -287,7 +288,9 @@ def _ladder_cases():
                 for dims, short in _one_off(GOOD_LADDER, BAD_LADDER):
                     m = _well(opening_below_grade=below, area_well_ladder=ladder, area_well_steps=steps,
                               area_well_depth=depth, **dims)
-                    ok = below is False or ladder is False or steps is True or short is False
+                    # 8d: only a ladder 1031.5.2 requires (over 44 in deep) is asked, the house code's reading
+                    ok = below is False or (depth is not U and depth <= 44) or ladder is False or steps is True \
+                        or short is False
                     past = below is True and ladder is True and steps is False and short is True and \
                         depth is not U and depth > 44
                     yield m, ok, past
@@ -299,7 +302,7 @@ def _steps_cases():
             for depth in (U, 44, 50):
                 for dims, short in _one_off(GOOD_STEPS, BAD_STEPS):
                     m = _well(opening_below_grade=below, area_well_steps=steps, area_well_depth=depth, **dims)
-                    ok = below is False or steps is False or short is False
+                    ok = below is False or (depth is not U and depth <= 44) or steps is False or short is False
                     past = below is True and steps is True and short is True and depth is not U and depth > 44
                     yield m, ok, past
 
@@ -337,7 +340,7 @@ def test_no_escape_opening_passes_short_of_its_limit_or_fails_where_1031_2_may_n
             for fourth, one_exit, door, other in (ROOM_FACTS if len(cases) <= 20 else ROOM_FACTS_FEW):
                 room = {k: v for k, v in (("opening_room_fourth_or_higher", fourth), ("opening_room_one_exit", one_exit),
                                           ("opening_room_door_to_outside", door),
-                                          ("opening_room_has_other_openings", other)) if v is not U}
+                                          ("opening_room_other_compliant", other)) if v is not U}
                 got = parts.rows(rule, {"emergency_escape_opening": [{"id": "o", "within": "r", "measures": {**m, **room}}],
                                         "sleeping_room": [{"id": "r", "measures": {}}]}, given, ctx.allowed())
                 out = got[0]["outcome"]

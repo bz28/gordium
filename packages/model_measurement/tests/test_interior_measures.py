@@ -70,7 +70,9 @@ def test_the_base_case():
     s = got["parts"]["stair"][0]
     # risers 7 (x4), treads 10 (x3); headroom least at the top nosing: 120 - 28
     assert s["measures"] == {"stair_riser_height": 7.0, "stair_tread_depth": 10.0, "stair_headroom": 92.0,
-                             "stair_clear_width": 36.0, "stair_riser_variation": 0.0}
+                             "stair_clear_width": 36.0, "stair_riser_variation": 0.0,
+                             "stair_clear_width_at_handrail": 36.0, "stair_handrail_sides": 0}
+    # given to the rules (section group 7c) and still shown with the extra values: the same figures
     assert s["more"]["stair_handrail_sides"] == 0 and s["more"]["stair_clear_width_at_handrail"] == 36.0
     g = got["parts"]["guard"][0]["measures"]
     assert g == {"guard_height": 36.0, "guard_opening_sphere": 10.0}   # one opening 10 wide x 34 high
@@ -501,7 +503,8 @@ def test_a_flight_running_any_direction():
     st["overhead"] = [[turn(*p[:2]) + [p[2]] for p in o] for o in st["overhead"]]
     m, _, _ = stair(d)
     assert m == pytest.approx({"stair_riser_height": 7.0, "stair_tread_depth": 10.0, "stair_headroom": 92.0,
-                               "stair_clear_width": 36.0, "stair_riser_variation": 0.0})
+                               "stair_clear_width": 36.0, "stair_riser_variation": 0.0,
+                               "stair_clear_width_at_handrail": 36.0, "stair_handrail_sides": 0})
 
 
 def test_nosings_given_top_down_or_turned_around_still_read_up():

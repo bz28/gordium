@@ -14,7 +14,8 @@ public enum MarkedKind { Room, Window, Door, Level, SiteSlab, SiteObject }
 /// word not in <see cref="RoomUses"/>), <see cref="UseWord"/> what the architect typed.</summary>
 public sealed record RoomMarks(string Id, string? Name, bool? Sleeping, string? Use = null, string? UseWord = null,
                                bool? Lockable = null, bool? PassThrough = null, bool? NotOccupied = null,
-                               string? Function = null, string? FunctionWord = null);
+                               string? Function = null, string? FunctionWord = null,
+                               int? FireRatingMinutes = null, bool? SmokePartitions = null);
 
 /// <summary>A window's or door's marks as an opening: null when not stated (an operation word not in the list, or a
 /// door's word that isn't a door's, is not stated).</summary>
@@ -75,7 +76,8 @@ public static class MarkReading
                                        RoomUses.Table.Of(Marks.Text(Get(e, Marks.Use))), Marks.Text(Get(e, Marks.Use)),
                                        Marks.YesNo(Get(e, Marks.CanBeLocked)), Marks.YesNo(Get(e, Marks.PassThrough)),
                                        Marks.YesNo(Get(e, Marks.NotOccupied)),
-                                       RoomFunctions.Of(Marks.Text(Get(e, Marks.RoomFunction))), Marks.Text(Get(e, Marks.RoomFunction)))).ToList();
+                                       RoomFunctions.Of(Marks.Text(Get(e, Marks.RoomFunction))), Marks.Text(Get(e, Marks.RoomFunction)),
+                                       Marks.Count(Get(e, Marks.CorridorFireRating)), Marks.YesNo(Get(e, Marks.SmokePartitionWalls)))).ToList();
 
     public static IReadOnlyList<OpeningMarks> Openings(RevitModel model) =>
         InDesign(model).Where(e => KindOf(e) is MarkedKind.Window or MarkedKind.Door)

@@ -93,3 +93,14 @@ def test_the_stair_is_marked_outside_every_dwelling_unit_and_level_2_is_open_ove
         assert routes["problems"] == [], routes["problems"]
         spaces = {p["id"]: p for p in routes["parts"]["space"]}
         assert spaces["L1S"]["measures"]["space_is_exit"] is True and spaces["L2S"]["measures"]["space_is_exit"] is True
+
+
+def test_the_two_values_kept_with_the_extra_values_are_given_to_the_rules_as_they_were():
+    # section group 7c (approved 2026-11-26): the handrail sides and the clear width at the handrails, worked out and
+    # tested since 2026-11-13 and kept in `more`, are now measures the rules read, equal to what `more` holds
+    for variant in ("compliant", "failing"):
+        stairs, _ = _measured(variant)
+        for f, p in stairs.items():
+            for name in ("stair_handrail_sides", "stair_clear_width_at_handrail"):
+                assert p["measures"][name] == p["more"][name], (variant, f, name)
+                assert name not in p["not_measured"]

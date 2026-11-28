@@ -1073,9 +1073,14 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     egress.add_to_view(v, law, found["place"])
     # what the rebuilt results pane reads beyond today's fields (C1-C9): new fields only, never a status
     place_folder = egress._folder(facts["jurisdiction"])
+    try:                             # a hint for the high-rise question only, never a value (high_rise_hint.py)
+        from design_checker import high_rise_hint
+        hint = high_rise_hint.words(high_rise_hint.figure(interior, _story_ground(facts)))
+    except Exception:
+        hint = None
     ui_data.add(v, rules_by_id=by_id, laws=found["laws"], site=site, values=values,
                 place=measuring(facts["jurisdiction"]), place_folder=place_folder,
-                documents=ui_data.place_documents(place_folder))
+                documents=ui_data.place_documents(place_folder), high_rise_hint=hint)
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:

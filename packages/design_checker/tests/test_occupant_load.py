@@ -12,7 +12,7 @@ import sys
 
 import pytest
 
-from design_checker import egress, occupant_load
+from design_checker import code_scope, egress, occupant_load
 from design_checker.egress import OCCUPANT_LOAD_FACTORS
 from model_measurement.routes import measure
 from rule_format.rulebook import REPO, Context, load
@@ -546,9 +546,11 @@ def _asked_corridor(why):
     from design_checker.each_part import GORDIUM_GAPS
     rule = next(r for r in load(NY / "5_building_code_rules/drafted/general.yaml")["rules"]
                 if r["id"] == "general.bc_table_1020_3_corridor_width")
-    # the building facts the rule reads stated (group 4b's dwelling-unit fact too), so only the load is asked
+    # the building facts the rule reads stated (group 4b's dwelling-unit fact too, and Chapter 4 part a's: no mall,
+    # whose 402.8 band reads special_egress_spaces), so only the load is asked
     part = {"id": "c", "measures": {"corridor_width": 40}, "not_measured": {"corridor_occupant_load": why}}
-    stated = {"occupancy_group": "R-2", "ambulatory_care_facility": False, "corridors_within_dwelling_units": True}
+    stated = {"occupancy_group": "R-2", "ambulatory_care_facility": False, "corridors_within_dwelling_units": True,
+              "special_egress_spaces": False}
     row = {"outcome": "needs_review", "id": "c", "values": {**part["measures"], **stated}}
     law = Context.for_jurisdiction(NY).allowed()           # the Building Code's own facts, each with its kind
     found = panel_data.causes(rule, row, None, part, None, part["not_measured"], stated, law, GORDIUM_GAPS)
@@ -580,17 +582,20 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         "CORRIDOR_NOT_RULED_OUT": (ol.CORRIDOR_NOT_RULED_OUT, "mark"),    # Gordium: Other levels reach corridors
         "CORRIDOR_OTHER_LEVELS": (ol.CORRIDOR_OTHER_LEVELS, by_hand),
         "CORRIDOR_NO_STORY": (ol.CORRIDOR_NO_STORY, by_hand),
+        # the egress UI audit's finding 5: a story waiting on its rooms' functions asks those, never by hand
+        "CORRIDOR_NO_FUNCTION": (ol.CORRIDOR_NO_FUNCTION, function),
     }
     fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "FUNCTION_ROOMS", "LOAD_STATED",
                  "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "OTHER_LEVELS_FIELD", "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
-                 "CORRIDOR_READINGS",     # the readings' own words: a load given, never asked
+                 "CORRIDOR_READINGS", "FUNCTIONS_ONLY",     # the readings' own words: a load given, never asked
                  # the ceiling's (a load bounded, never a reason a load isn't given; BOUND_FACT_WHY is a fact's ask)
                  "NOT_BY_AREA", "OUTDOOR", "MEZZANINES", "BOUND", "IF_STATED",
                  "BOUND_WHY", "BOUND_FACT_WHY",
                  "SEATING_STORY", "SEATING_SPACE"}        # the assembly seating measures' names (1030.7), never a reason
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
-    corridor = {k: reasons[k] for k in ("CORRIDOR_NOT_RULED_OUT", "CORRIDOR_OTHER_LEVELS", "CORRIDOR_NO_STORY")}
+    corridor = {k: reasons[k] for k in ("CORRIDOR_NOT_RULED_OUT", "CORRIDOR_OTHER_LEVELS", "CORRIDOR_NO_STORY",
+                                        "CORRIDOR_NO_FUNCTION")}
     for why, kind in corridor.values():
         heads = _asked_corridor(why)
         assert heads and not any(h.startswith(("Mark the", "Fix the model")) for h in heads), (why, heads)
@@ -599,6 +604,8 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         # architect's to work out (other levels do reach the corridors, or the story's isn't known): by hand
         if kind == "mark":
             assert heads == ["Say whether another level's occupants reach the corridors"], (why, heads)
+        elif kind == function:
+            assert heads == ["Set the room's function"], (why, heads)
         else:
             assert any(h.startswith("Work out") for h in heads) and not any(h.startswith("Say whether") for h in heads), \
                 (why, kind, heads)
@@ -631,6 +638,35 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
     closet = _space(parts, "s13")["not_measured"]["space_occupant_load"]
     assert "st egresses through it" in closet
     assert not any(h.startswith(("Fix the model", "Mark the")) for h in _asked(closet)), closet
+
+
+def _story_with_corridor(second_area=690.0):
+    parts = {"story": [{"id": "L1", "measures": {"story_gross_floor_area": 1800.0}, "not_measured": {}}],
+             "space": [{"id": "a", "name": "A", "within": "L1", "measures": {"space_floor_area": 690.0,
+                                                                            "space_is_exit": False}, "not_measured": {}},
+                       {"id": "b", "name": "B", "within": "L1", "measures": {"space_is_exit": False}, "not_measured": {}}],
+             "corridor": [{"id": "c", "name": "C", "within": "L1", "measures": {}, "not_measured": {}, "more": {}}]}
+    if second_area is not None:
+        parts["space"][1]["measures"]["space_floor_area"] = second_area
+    desc = {"rooms": [{"id": "a"}, {"id": "b"}, {"id": "c", "use": "corridor"}]}
+    return parts, desc
+
+
+def test_a_corridor_asks_the_rooms_functions_only_where_they_alone_wait():
+    """Review round 1 of the corridor asks (P3): a story whose load waits on more than functions (a room's floor area
+    not measured too) once had its corridor say the load 'isn't worked out until its rooms' functions are set' and
+    ask only for them, though setting them wouldn't give it. Now only a story waiting on functions alone asks them;
+    any other is by hand."""
+    parts, desc = _story_with_corridor()
+    occupant_load.apply(parts, desc, FACTORS, {occupant_load.OTHER_LEVELS: False})
+    c = parts["corridor"][0]
+    assert c["not_measured"]["corridor_occupant_load"] == occupant_load.CORRIDOR_NO_FUNCTION
+    assert c["more"]["corridor_occupant_load"][occupant_load.FUNCTION_ROOMS] == ["a", "b"]
+    parts, desc = _story_with_corridor(second_area=None)               # B's area not measured as well
+    occupant_load.apply(parts, desc, FACTORS, {occupant_load.OTHER_LEVELS: False})
+    c = parts["corridor"][0]
+    assert c["not_measured"]["corridor_occupant_load"] == occupant_load.CORRIDOR_NO_STORY
+    assert "corridor_occupant_load" not in c["more"]
 
 
 # ---- the ceiling on a load not worked out (occupant_load._bounds; docs/decisions/2026-11-26_occupant_load_upper_bound.md)
@@ -813,6 +849,18 @@ def test_the_assembly_functions_are_exactly_table_1004_5s_rows_under_its_assembl
     assert set(occupant_load.ASSEMBLY_LIKE_FUNCTIONS) <= set(rows) - under and len(occupant_load.ASSEMBLY_LIKE_FUNCTIONS) == 7
 
 
+@pytest.mark.parametrize("fn", sorted(FACTORS["functions"]))
+def test_the_seating_and_the_buildings_assembly_spaces_read_one_list_of_assembly_functions(fn):
+    """The assembly seating (1030.7: a story's travel measured along the aisles) and the building's assembly_spaces
+    (code_scope.building_measures, section group 9h) read the same Table 1004.5 rows, as one list each (merging main
+    into section group 9i found them written twice), so a row added to one is never missed by the other: a room
+    stating a function may seat people exactly where the rooms say the building has, or may have, assembly spaces."""
+    assert occupant_load.ASSEMBLY_FUNCTIONS is code_scope.ASSEMBLY_FUNCTIONS
+    assert occupant_load.ASSEMBLY_LIKE_FUNCTIONS is code_scope.ASSEMBLY_LIKE_FUNCTIONS
+    seen = code_scope.assembly_spaces_from_rooms({"rooms": [{"id": "r", "function": fn}]})
+    assert occupant_load._may_seat({"function": fn}, FACTORS["functions"]) is (seen is not None), fn
+
+
 _SEATING_PARTS = {}
 
 
@@ -887,6 +935,25 @@ def test_the_apartments_stories_seat_no_one_served_by_aisles(apartment):
     next(r for r in desc["rooms"] if r["id"] == "L2N").pop("function")
     parts = _loads(desc)
     assert {s["id"]: s["measures"][occupant_load.SEATING_STORY] for s in parts["story"]} == {"L1": False, "L2": True}
+
+
+def test_a_building_stated_to_have_assembly_spaces_with_none_shown_may_seat_people_on_every_story():
+    """Merging main into section group 9i (review, two skeptics): 9h's stated fact assembly_spaces (a room or space used
+    for assembly purposes, whatever the group: 303.1.1, 303.1.2) says what a stated Group A says, that an assembly room
+    exists, so where no room shows one, any room may be it, as for Group A: a Group B or R-2 building stating it, its
+    rooms all business, never passes a travel or common-path row on travel measured across seats (1030.7). Stated
+    false or not stated, the business story seats no one; with the assembly room shown, its business story neither."""
+    for groups in (["B"], ["R-2"], None):
+        building = {"assembly_spaces": True, "assembly_fixed_seating": False,
+                    **({"occupancy_groups": groups} if groups else {})}
+        assert _seating_story("business", building=building) is True, groups
+        assert _seating_story("business", building={**building, "assembly_spaces": False}) is False, groups
+    building = {"occupancy_groups": ["B"], "assembly_spaces": True}
+    shown = copy.deepcopy(_SEATING_PARTS["r"])
+    desc = _seating_desc_with_extra({"id": "dining", "name": "dining", "function": "assembly_unconcentrated"})
+    shown["space"].append({"id": "dining", "within": "elsewhere", "measures": {}, "not_measured": {}})
+    occupant_load.assembly_seating(shown, desc, FACTORS, building)
+    assert shown["story"][0]["measures"][occupant_load.SEATING_STORY] is False      # the dining room is shown, elsewhere
 
 
 @pytest.mark.parametrize("groups", [["A-1"], ["A-2"], ["A-3"], ["A-4"], ["A-5"], ["B", "A-3"]])

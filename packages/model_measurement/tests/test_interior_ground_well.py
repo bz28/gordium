@@ -254,7 +254,7 @@ def _rows(d):
     rules, allowed = _book()
     p = part(d)
     room = {"opening_room_fourth_or_higher": False, "opening_room_one_exit": True,
-            "opening_room_door_to_outside": False, "opening_room_has_other_openings": False}
+            "opening_room_door_to_outside": False, "opening_room_other_compliant": False}
     given = {"occupancy_group": "R-3", **{k: False for k in ("sprinklered_903_3_1_1", "sprinklered_903_3_1_2",
                                                              "sprinklered_903_3_1_3")}}
     one = {"id": "o", "within": "r", "measures": {**p["measures"], **room}, **({"confirm": p["confirm"]}

@@ -55,7 +55,11 @@ MARK_WORD = re.compile(r"\b(un)?mark(s|ed)?\b")
 # a part's measure the description's own field states, as a host's mark gives it (never one measured): its cause is
 # a mark, naming that field, so the host's card opens its mark (the door-type mark Gordium: Leaves; before it the
 # reason said "no mark for it in the model yet", a dead end in Revit)
-MEASURE_FIELDS = {"moe_door_leaves": "doors[].leaves"}
+MEASURE_FIELDS = {"moe_door_leaves": "doors[].leaves",
+                  # a corridor's facts its room states (model_measurement.routes CORRIDOR_STATED); in Revit the room marks
+                  # Gordium: Corridor rating minutes (sent in hours) and Gordium: Smoke partition walls
+                  "corridor_fire_rating_hours": "rooms[].fire_rating_hours",
+                  "corridor_walls_smoke_partitions": "rooms[].walls_smoke_partitions"}
 # a part's measure a field of the description states, as a host's mark gives it: {measure: (the field, the mark its
 # reasons name)}. Its cause is that mark only where the measuring's reason names the mark (its "not given" and "can't
 # read" reasons do; any other is the drawing's or Gordium's, as before: a latch's electric lock isn't asked, a drawn

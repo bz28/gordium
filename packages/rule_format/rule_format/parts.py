@@ -18,7 +18,12 @@ from . import formula
 from .formula import EvaluationError, FormulaError, MissingMeasure
 
 PARTS_FILE = Path(__file__).with_name("parts.yaml")
-PART_FIELDS = ("for_each", "within", "when_none")      # a rule's fields for repeating over parts
+PART_FIELDS = ("for_each", "within", "when_none", "limit")   # a rule's fields for repeating over parts
+# `limit` (section group 8d): the part's own requirement, apart from whether the law asks it of this part, so code can
+# tell which parts comply (design_checker/escape_openings.py counts a sleeping room's compliant escape openings). On
+# the parsed formulas: the check a top-level "(<limit>) or <set-aside>", every review_when a top-level "... and not
+# (<limit>) and ...", no "if ... else", the limit's measures the part's own (never one marked `from`) and read nowhere
+# else in the rule, and an applies_when reading no part measure: the two can't drift apart (limit_problems).
 EXAMPLE_FIELDS = ("parts", "rows")                     # a per-part rule's worked example: the parts, the rows expected
 PART_ENTRY_FIELDS = {"id", "name", "within", "measures"}
 ROW_FIELDS = {"part", "within", "outcome"}             # an expected row: the part's id, the id of the part it sits in
@@ -27,7 +32,9 @@ WHEN_NONE = ("fail", "needs_review", "not_applicable")  # never "pass": nothing 
 UNITS = {"ft", "sf", "in", "count", "text", "yes_no"}
 UNIT_KINDS = {"text": "text", "yes_no": "boolean"}       # every other unit is a number (as in measures.yaml)
 KIND_FIELDS = {"meaning", "within", "measures"}
-MEASURE_FIELDS = {"unit", "meaning"}
+MEASURE_FIELDS = {"unit", "meaning", "from"}
+# `from` (section group 8d, review round 1): a measure the checker copies onto a part from another part (an escape
+# opening's room facts), never the part's own figure: a `limit` may not read one
 
 
 def registry_problems(kinds, building_measures) -> list[str]:
@@ -63,6 +70,8 @@ def registry_problems(kinds, building_measures) -> list[str]:
             if not isinstance(d, dict) or d.keys() - MEASURE_FIELDS or d.get("unit") not in UNITS \
                     or not (isinstance(d.get("meaning"), str) and d["meaning"].strip()):
                 p.append(f"{name}: measure {m!r} needs a unit from {sorted(UNITS)} and a meaning")
+            if isinstance(d, dict) and "from" in d and (d["from"] not in kinds or d["from"] == name):
+                p.append(f"{name}: measure {m!r}: 'from' must name another part kind, the one it is copied from")
             if m in building_measures:
                 p.append(f"{name}: measure {m!r} is also a building measure (measures.yaml)")
             if m in seen:
@@ -139,9 +148,92 @@ def rule_problems(rule: dict) -> list[str]:
                      f"(when_none: {none}) can't rule parts out, or a {_words(rule.get('within') or 'building')} "
                      f"whose every {_words(kind)} is ruled out has no row that fails; say how parts differ inside "
                      f"'check' (a if condition else b)")
+    p += limit_problems(rule)
     if none not in WHEN_NONE:
         p.append(f"when_none: what the law says when there is nothing to check, one of {WHEN_NONE} "
                  f"(never pass), got {none!r}")
+    return p
+
+
+def _spaced(text: str) -> str:
+    return " ".join(text.split())
+
+
+def limit_problems(rule: dict) -> list[str]:
+    """A rule's `limit` (section group 8d), in its one fixed shape, checked on the parsed formulas (review round 1 of
+    8d: a text match let drift through):
+
+    - the limit reads only the part's own figures: none of its names is read anywhere else in the rule (the check's
+      set-aside, a band's other conditions, applies_when), so it never carries a fact copied from elsewhere;
+    - the check is a top-level "or" whose first operand is the limit (as parsed), the rest the set-aside;
+    - every review_when is a top-level "and" with "not (<limit>)" (as parsed) one of its operands, so no band fires
+      where the limit holds;
+    - no "if ... else" anywhere in the check or a band (it binds looser than "or").
+
+    A check or band that drifts from its limit could pass what the limit fails, or count as compliant a part its own
+    rule doesn't pass: refused."""
+    import ast
+    if "limit" not in rule:
+        return []
+    limit, check, kind = rule.get("limit"), rule.get("check"), rule.get("for_each")
+    if not isinstance(limit, str) or not limit.strip():
+        return ["limit: the part's own requirement, a formula"]
+    try:
+        reads = formula.names(limit)
+        lim = ast.dump(formula.parse(limit).body)
+    except FormulaError as e:
+        return [f"limit can't be read: {e}"]
+    own = set(measure_kinds(kind)) if isinstance(kind, str) else set()
+    copied = {m for m, d in (registry().get(kind, {}).get("measures") or {}).items()
+              if isinstance(d, dict) and "from" in d} if isinstance(kind, str) else set()
+    if reads - (own - copied):
+        return [f"limit reads {sorted(reads - (own - copied))}, not the {_words(kind or 'part')}'s own figures (a fact "
+                f"copied from another part, or another kind's): a limit is the part's own requirement"]
+
+    def parsed(text, where):
+        try:
+            body = formula.parse(text).body
+        except FormulaError as e:
+            raise ValueError(f"{where} can't be read: {e}")
+        if any(isinstance(n, ast.IfExp) for n in ast.walk(body)):
+            raise ValueError(f"{where} has an 'if ... else', which binds looser than its limit: refused with a limit")
+        return body
+
+    if not isinstance(check, str):
+        return ["check must be \"(<limit>) or <the condition setting it aside>\""]
+    p = []
+    try:
+        body = parsed(check, "check")
+        if not (isinstance(body, ast.BoolOp) and isinstance(body.op, ast.Or) and ast.dump(body.values[0]) == lim):
+            return [f"check must be exactly \"({_spaced(limit)}) or <the condition setting it aside>\", its limit first"]
+        elsewhere = set()
+        for v in body.values[1:]:
+            elsewhere |= {n.id for n in ast.walk(v) if isinstance(n, ast.Name)}
+        for n, r in enumerate(rule.get("review_when") or [], 1):
+            when = r.get("when") if isinstance(r, dict) else None
+            if not isinstance(when, str):
+                continue
+            band = parsed(when, f"review_when {n}")
+            gate = [v for v in (band.values if isinstance(band, ast.BoolOp) and isinstance(band.op, ast.And) else [])
+                    if isinstance(v, ast.UnaryOp) and isinstance(v.op, ast.Not) and ast.dump(v.operand) == lim]
+            if not gate:
+                p.append(f"review_when {n} must be \"... and not ({_spaced(limit)}) and ...\": every band of a rule with a "
+                         f"limit fires only where the limit fails")
+                continue
+            for v in band.values:
+                if v is not gate[0]:
+                    elsewhere |= {x.id for x in ast.walk(v) if isinstance(x, ast.Name)}
+        if isinstance(rule.get("applies_when"), str):
+            elsewhere |= formula.names(rule["applies_when"])
+            if formula.names(rule["applies_when"]) & own:
+                p.append("applies_when reads the part's measures: with a limit, whether the rule applies must be "
+                         "the building's alone, so a part is held to its limit only where the rule applies (review "
+                         "round 2 of 8d)")
+    except ValueError as e:
+        return [str(e)]
+    if reads & elsewhere:
+        p.append(f"the limit reads {sorted(reads & elsewhere)}, which the rule reads outside its limit too: a limit is the "
+                 f"part's own figures only")
     return p
 
 

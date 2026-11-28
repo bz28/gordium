@@ -297,6 +297,44 @@ def headroom(st: dict, flight: Flight, reader) -> float:
     return least_gap(framed, pieces, "what is overhead", "flight")
 
 
+def headroom_past_bottom(st: dict, flight: Flight, reader) -> float:
+    """The 2025 Building Code of New York State's 1011.3 headroom past the foot of the flight: "Such headroom shall be
+    continuous above the stairway to the point where the line intersects the landing below, one tread depth beyond
+    the bottom riser." The least height to anything overhead, over the first nosing's width, from the first nosing
+    back to the farther of one tread depth (the flight's deepest: treads are measured between nosings, and the bottom
+    riser's face stands at or behind the first nosing, never in front of it) and wherever the line connecting the
+    nosings, carried on down at its first slope, meets the floor or landing at the foot (a bottom riser taller than
+    the next puts that farther back; review round 1). The height is taken from that line, and from the floor or
+    landing wherever the line has gone below it (a bottom riser shorter than the next; review round 2), never from
+    under the floor. Needs two nosings (the flight placed in plan). Used by the
+    Building Code check only (model_measurement/routes/stair_rooms.py): the house code's R318.7.2 has no such
+    stretch."""
+    given = st.get("overhead")
+    if given is None:
+        raise Stop("missing", what="what is above the flight")
+    if not isinstance(given, list):
+        raise Stop("not_a_list", key="overhead")
+    if not given:
+        raise Stop("nothing_overhead")
+    surfaces = [Surface(reader.points(p, 3, f"overhead surface {n}", 3), f"overhead surface {n}")
+                for n, p in enumerate(given, 1)]
+    (s1, z1), (s2, z2) = flight.line()[:2]
+    slope = (z2 - z1) / (s2 - s1)
+    meets = (z1 - flight.bottom) / slope if slope > 0 else 0       # how far back the line reaches the floor
+    back = max(max(flight.treads_most), meets)
+    right, left = flight.ends[0]
+    with shapes("what is overhead"):
+        # over the line where it stands above the floor; over the floor beyond (each reference flat or straight over
+        # its piece, so the least gap is at a piece's corner)
+        pieces = [(Polygon([(s1 - meets, right), (s1, right), (s1, left), (s1 - meets, left)]),
+                   lambda s, a: z1 - (s1 - s) * slope)] if meets > 0 else []
+        if back > meets:
+            pieces.append((Polygon([(s1 - back, right), (s1 - meets, right), (s1 - meets, left), (s1 - back, left)]),
+                           lambda s, a: flight.bottom))
+        framed = [InFrame(f, flight) for f in surfaces]
+    return least_gap(framed, pieces, "what is overhead", "stretch one tread depth past the flight's bottom riser")
+
+
 class InFrame:
     """A surface seen in a flight's own frame (s, a): its plan turned into it, its height read back in plan."""
 
@@ -373,11 +411,13 @@ def measure_stair(st: dict, reader) -> tuple[dict, dict, dict, Flight | None]:
         if low is None:
             stop(["stair_clear_width_at_handrail", "stair_handrail_sides"], why)
         else:
-            more["stair_clear_width_at_handrail"] = tidy(low)
+            # given to the rules (section group 7c, 2026-11-26: worked out and tested since 2026-11-13, kept in
+            # `more` until a rule needed it), and kept in `more` too, where the panel has shown it
+            more["stair_clear_width_at_handrail"] = measures["stair_clear_width_at_handrail"] = tidy(low)
             if why:
                 stop(["stair_handrail_sides"], why)
             else:
-                more["stair_handrail_sides"] = rails
+                more["stair_handrail_sides"] = measures["stair_handrail_sides"] = rails
     except Stop as s:
         stop(["stair_clear_width", "stair_clear_width_at_handrail", "stair_handrail_sides"], s.reason)
     return measures, more, stopped, flight
