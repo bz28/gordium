@@ -136,9 +136,9 @@ OTHER_WAYS = (("ramps", "ramp"), ("alternating_tread_devices", "alternating_trea
 
 
 def _stories_of(description, stated_stories):
-    """The stories the check gives the building (egress._stated_stories' count or (count, words)), else the
-    description's own building block's stories above grade plane where it is a whole number or a finite one, else
-    None."""
+    """The larger of the stories the check gives the building (egress._routes_stories' count or (count, words)) and
+    the description's own building block's stories above grade plane (a whole number or a finite one), as (count,
+    words), or None where neither is given."""
     block = description.get("building") if isinstance(description, dict) else None
     n = block.get("stories_above_grade_plane") if isinstance(block, dict) else None
     own = (n, "the architect states {n} stories above grade plane") \

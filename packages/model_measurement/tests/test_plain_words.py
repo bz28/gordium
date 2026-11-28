@@ -314,11 +314,12 @@ def test_no_reason_shows_a_python_value():
 
 def test_reasons_are_lower_case_mid_sentence():
     """A reason starts lower case (the presenter capitalises where one opens a sentence): after a colon, a semicolon
-    or a parenthesis, and at its start, only a proper name (Gordium, a code section) is capitalised."""
+    or a parenthesis, and at its start, only a proper name (Gordium, a code section) is capitalised; a Revit mark's
+    own name after "Gordium: " is one (Gordium: Not a story)."""
     from model_measurement.routes.stops import STOPS as ROUTES
     said = _broken_reasons() + list(INTERIOR_STOPS.values()) + list(ROUTES.values())
     for w in said:
-        for piece in [w] + re.split(r"(?:: |; |\()", w)[1:]:
+        for piece in [w] + re.split(r"(?:(?<!Gordium): |; |\()", w)[1:]:
             if piece[:1].isupper():
                 assert PROPER.match(piece), (piece, w)
 

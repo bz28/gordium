@@ -11,10 +11,13 @@ be some other count, so the story's count isn't measured."""
 
 import itertools
 import json
+import re
 import sys
 from pathlib import Path
 
 import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 sys.path.insert(0, str(Path(__file__).parent))
 from routes_layouts import description, door, rect, room  # noqa: E402
@@ -304,7 +307,18 @@ def test_no_stairs_beside_another_floor_is_never_taken():
     contradicted["all_levels"] = [{**contradicted["levels"][0], "not_a_story": True},
                                   {"id": "L2", "name": "Level 2", "elevation": 10}]
     assert _stair_points(contradicted) == [{"points": []}]
-    assert "draw every stair" in Stop("units_stair", name="x").reason      # the reason says how to settle it
+    from model_measurement.routes.stops import STAIRS_TO_DO, STAIRS_TO_DO_MARKS
+    for key in ("units_stair", "outside_stair"):
+        assert STAIRS_TO_DO in Stop(key, name="x").reason, key
+    assert all(m in STAIRS_TO_DO for m in STAIRS_TO_DO_MARKS) and \
+        STAIRS_TO_DO.count("Gordium: ") == len(STAIRS_TO_DO_MARKS)     # every mark it names is listed
+    marks = (REPO_ROOT / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
+    defined = set(re.findall(r'"(Gordium: [^"]+)", new\(', marks))
+    defined |= {"Gordium: This house has no " + n for n in re.findall(r'NoneTick\(\s*"([^"]+)"', marks)}
+    assert set(STAIRS_TO_DO_MARKS) <= defined, set(STAIRS_TO_DO_MARKS) - defined   # each named as Revit shows it
+    both = fresh()                                       # the description says 2, the check 1: the larger is taken
+    both["building"] = {"stories_above_grade_plane": 2}
+    assert _stair_points(both, stated_stories=(1, "the check gives {n}")) == [{"points": []}]
     text = fresh()                                       # a count that can't be read, whatever the check gives
     text["building"] = {"stories_above_grade_plane": "2"}
     assert _stair_points(text, stated_stories=(1, "the check gives {n}")) == [{"points": []}]
