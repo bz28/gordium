@@ -110,30 +110,43 @@ def held(story: Story) -> None:
 
 WALL_SIDE = 36.0  # in: a side of the inner outline longer than this is a wall's inside face (a shorter one may be a
                   # wall's end where two walls in line stand apart, kept where it is: StoryOutlines.cs WallEnd, 2 ft on
-                  # the outer outline, its inner side longer by the walls' difference in thickness, up to a foot)
+                  # the outer outline, its inner side longer by the walls' difference in thickness, a foot here: a
+                  # bigger difference is checked, and so refused, never a pass)
 
 
 def _walled(bound, inner) -> bool:
-    """Whether every wall side of the inner outline (longer than WALL_SIDE, its pieces in line joined) has the outer
-    outline at least WALL_MIN beyond it (to within SLACK): the side, less WALL_MIN at each end (where a wall's end or a
-    corner brings the faces together), moved out by WALL_MIN, lies inside `bound`, whichever way the outline runs. An
-    outer outline at the inside faces, on any wall side, fails."""
-    pts = list(inner.simplify(SLACK / 8).exterior.coords)     # pieces in line joined (a side given in short pieces)
-    for a, b in zip(pts, pts[1:]):
+    """Whether the outer outline (`bound`: grown by SLACK, rounding only) is at least WALL_MIN beyond the inner one
+    along every wall: each wall side of the inner outline (longer than WALL_SIDE, its pieces in line joined), less
+    WALL_MIN at each end, moved out by WALL_MIN, lies inside it, and so does each outside corner between two wall sides
+    moved out by WALL_MIN along both (the corners the diagonal runs between, never cut back), whichever way the outline
+    runs. An outline with no wall side long enough to check isn't shown to be outside it (False). An outer outline at
+    the inside faces, on any wall or corner, fails."""
+    pts = list(inner.simplify(SLACK / 8).exterior.coords)[:-1]   # pieces in line joined (a side given in short pieces)
+    sides = []                                           # each side: (a, b, its length, its outward normal)
+    for i, a in enumerate(pts):
+        b = pts[(i + 1) % len(pts)]
         length = math.dist(a, b)
-        if length <= WALL_SIDE:
+        if length <= 0:
             continue
         ux, uy = (b[0] - a[0]) / length, (b[1] - a[1]) / length
-        mid = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
         nx, ny = uy, -ux                                 # one normal; flipped where it points into the inner outline
+        mid = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
         if inner.contains(Point(mid[0] + nx, mid[1] + ny)):
             nx, ny = -nx, -ny
-        d = WALL_MIN                                     # (bound is the outer outline grown by SLACK: rounding only)
-        side = LineString([(a[0] + ux * WALL_MIN + nx * d, a[1] + uy * WALL_MIN + ny * d),
-                           (b[0] - ux * WALL_MIN + nx * d, b[1] - uy * WALL_MIN + ny * d)])
+        sides.append((a, b, length, (ux, uy), (nx, ny)))
+    d, checked = WALL_MIN, 0
+    for k, (a, b, length, (ux, uy), (nx, ny)) in enumerate(sides):
+        if length <= WALL_SIDE:
+            continue
+        checked += 1
+        side = LineString([(a[0] + ux * d + nx * d, a[1] + uy * d + ny * d), (b[0] - ux * d + nx * d, b[1] - uy * d + ny * d)])
         if not bound.covers(side):
             return False
-    return True
+        a2, b2, length2, _, (mx, my) = sides[(k + 1) % len(sides)]
+        corner = (b[0] + (nx + mx) * d, b[1] + (ny + my) * d)
+        if length2 > WALL_SIDE and not inner.contains(Point(corner)) and not bound.covers(Point(corner)):
+            return False                                 # an outside corner between two walls, cut back
+    return checked > 0
 
 
 def ratio(story: Story) -> tuple:

@@ -176,6 +176,15 @@ def test_an_outline_at_the_walls_inside_faces_gives_no_ratio():
         with pytest.raises(Stop) as stop:
             straight.ratio(story(d))
         assert stop.value.key == "outline_not_outer", stop.value.reason
+    # corners cut back to the inner corners (the diagonal runs between them), or a story of short sides only: refused
+    w = 3.5 / 12
+    cham = [(w, -w), (60 - w, -w), (60 + w, w), (60 + w, 28 - w), (60 - w, 28 + w), (w, 28 + w), (-w, 28 - w), (-w, w)]
+    with pytest.raises(Stop) as stop:
+        straight.ratio(story(upper_story(cham)))
+    assert stop.value.key == "outline_not_outer", stop.value.reason
+    from shapely.geometry import Polygon as _P
+    circle = _P([(360 * _m.cos(2 * _m.pi * k / 120), 360 * _m.sin(2 * _m.pi * k / 120)) for k in range(120)])
+    assert not straight._walled(circle.buffer(0.5), circle)
     # one long side only drawn at its inside face: refused too
     d = upper_story(rect(-0.5, -0.5, 60.5, 28.5))
     d["story_outlines"][0]["outer"] = [list(p) for p in rect(-0.5, -0.5, 60.5, 28)]

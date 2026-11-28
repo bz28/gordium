@@ -153,7 +153,8 @@ def main(path, out_path=OUT, co=CO):
     near = [next(d for d in story.exits() if math.dist((d.centre[0] / FT, d.centre[1] / FT), q) < 0.05)
             for q in co["same_pair"]]
     # the figures against the sheet's, as straight.ratio works them; where the outlines don't hold the story (#281:
-    # the routes then give no ratio) the same figures, with why the routes don't, never a crash
+    # the routes then give no ratio) the same figures, with why the routes don't (an outer outline not read at all
+    # still stops the eval, as before)
     refused = None
     try:
         far, across, ratio = straight.ratio(story)
