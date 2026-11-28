@@ -48,7 +48,7 @@ public sealed class NfpaThirteenRHeightsTests
         Assert.Contains("\"The floor level of the lowest story is 30 feet (9144 mm) or less below the lowest level of fire department vehicle access.\"", d, StringComparison.Ordinal);
         Assert.Contains("Gordium never decides it", d, StringComparison.Ordinal);
         Assert.Contains("Yes, with Group R alone and the stories above grade plane stated four or fewer, and not a Group R-2 high-rise", d, StringComparison.Ordinal);
-        Assert.Contains("No, in a building of Group R alone:", d, StringComparison.Ordinal);
+        Assert.Contains("No, in a building of Group R alone (and in a Group R-2 high-rise, whatever this mark says):", d, StringComparison.Ordinal);
         Assert.Contains("Blank, or a building of Group R beside another group", d, StringComparison.Ordinal);
         Assert.Contains("whether it counts isn't known", d, StringComparison.Ordinal);
     }

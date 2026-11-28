@@ -15,8 +15,8 @@ RULEBOOK = NY / "5_building_code_rules/drafted/general.yaml"
 A = ["A-1", "A-2", "A-3", "A-4", "A-5"]
 R = ["R-1", "R-2", "R-3", "R-4"]
 S1, S2 = "sprinklered_903_3_1_1", "sprinklered_903_3_1_2"
-NFPA13 = {S1: True, S2: False, "sprinklered_903_3_1_3": False}
-NONE = {S1: False, S2: False, "sprinklered_903_3_1_3": False}
+NFPA13 = {S1: True, S2: False, "sprinklered_903_3_1_3": False, "nfpa_13r_stated": False}
+NONE = {S1: False, S2: False, "sprinklered_903_3_1_3": False, "nfpa_13r_stated": False}
 STATED = {"egress_balcony_increase_taken": False, "assembly_fixed_seating": False, "special_egress_spaces": False,
           "building_has_atrium": False, "merchandise_pads": False,
           # Chapter 4 part f's three (NOT_PART_F, below)
@@ -122,11 +122,16 @@ def test_table_1017_2_each_row_at_its_limit_and_just_past(ctx, rules, line):
 def test_an_nfpa_13r_system_counts_only_in_group_r(ctx, rules):
     """Note b: 903.3.1.1 or 903.3.1.2, and 903.3.1.2 (p.274) permits NFPA 13R in Group R only: an apartment floor
     gets 250 ft with it; a shop within 250 ft only by it needs review; note c (B) gives a 13R system nothing."""
+    # the 13R limits PR: in a shop a 13R system is no 903.3.1.2 system (code_scope makes it no), so 250 ft fails; in a
+    # building of two or more groups whether it counts isn't known, so a person checks
     row = rules["general.bc_table_1017_2_a_e_f1_m_r_s1"]
-    nfpa_13r = {S1: False, S2: True} | STATED
+    nfpa_13r = {S1: False, S2: True, "nfpa_13r_stated": True} | STATED
     assert _one(row, "story", {"egress_travel_distance": 250}, {"occupancy_group": "R-2"} | nfpa_13r, ctx) == "pass"
-    assert _one(row, "story", {"egress_travel_distance": 250}, {"occupancy_group": "M"} | nfpa_13r, ctx) == \
-        "needs_review"
+    not_counted = {**nfpa_13r, S2: False}
+    assert _one(row, "story", {"egress_travel_distance": 250}, {"occupancy_group": "M"} | not_counted, ctx) == "fail"
+    unknown = {k: v for k, v in nfpa_13r.items() if k != S2}          # Group I-1: 903.2.6 exception 1's Condition 1
+    assert _one(rules["general.bc_table_1017_2_i1"], "story", {"egress_travel_distance": 200},
+                {"occupancy_group": "I-1"} | unknown, ctx) == "needs_review"
     assert _one(rules["general.bc_table_1017_2_b"], "story", {"egress_travel_distance": 250},
                 {"occupancy_group": "B"} | nfpa_13r, ctx) == "fail"
 

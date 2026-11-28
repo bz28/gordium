@@ -887,8 +887,9 @@ def test_a_line_a_13r_system_doesnt_spare_says_why(book):
     for r in guarded:
         if r["id"] == "general.bc_716_2_2_3_exit_enclosure_door_temperature_rise":
             continue
-        assert ("a 13R system counts only where 903.3.1.2's limits are known to hold, Group R alone, four or fewer "
-                "stories and its heights stated within, and in Group I-1 Condition 1") in _shown_note(r), r["id"]
+        assert ("a 13R system counts only where 903.3.1.2's limits are known to hold: Group R alone, four or fewer "
+                "stories and its heights stated within; in Group I-1, 903.2.6 exception 1's Condition 1 is a person's "
+                "check") in _shown_note(r), r["id"]
         kinds = {(str(e["given"].get("occupancy_group", "")).startswith("R-"), e["expect"]) for e in r["examples"]
                  if e["given"].get("sprinklered_903_3_1_2") is True and not e["given"].get("sprinklered_903_3_1_1")}
         assert (True, "not_applicable") in kinds and (False, "needs_review") in kinds, r["id"]
@@ -960,3 +961,21 @@ def test_chapter_9s_lines_set_aside_on_chapter_4s_stated_facts(book, ctx):
         assert outcome(r, code_scope.building_measures({"occupancy_groups": ["B"], **no}), allowed) == "not_applicable", rid
         assert outcome(r, code_scope.building_measures({"occupancy_groups": ["B"]}), allowed) == "needs_review", rid
     assert "high-rise is now the architect's statement" in _rule(book, "general.bc_911_1_fire_command_center")["notes"]
+
+
+def test_no_rule_or_label_still_says_a_13r_system_is_taken_on_its_statement():
+    """Review rounds 3 and 4 of #288 (the 13R limits PR): every reason, note and label the architect or a reviewer
+    reads says the revised rule (a 13R system counts only where 903.3.1.2's limits are known to hold; outside Group R
+    and I-1 it is no system), never the old one, and the pane's heights question says what they are measured from."""
+    from pathlib import Path
+
+    from design_checker import ui_data
+    root = Path(__file__).resolve().parents[3] / "regulations/jurisdictions/new_york/new_york_state_building"
+    stale = ["taken on the architect's statement of the system", "needs review between the limits",
+             "a 13R system alone gets the column without a sprinkler system",
+             "counts only in Group R, within 903.3.1.2's four stories", "in a building not stated Group R:"]
+    for f in (root / "5_building_code_rules/drafted/general.yaml", root / "3_section_labels/gov.ny.building.2025.yaml"):
+        text = " ".join(f.read_text(encoding="utf-8").replace("''", "'").split())
+        for words in stale:
+            assert words not in text, (f.name, words)
+    assert "fire department access" in ui_data.FIELD_HEADLINES["building.nfpa_13r_heights_within"]

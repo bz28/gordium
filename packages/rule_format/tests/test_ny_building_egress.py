@@ -18,7 +18,7 @@ from rule_format.rulebook import REPO, Context, load, rulebook_file_problems
 NY = REPO / "regulations/jurisdictions/new_york/new_york_state_building"
 RULEBOOK = NY / "5_building_code_rules/drafted/general.yaml"
 KEY = REPO / "test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml"
-I4 = {"occupancy_group_i4": True, "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False,
+I4 = {"occupancy_group_i4": True, "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False, "nfpa_13r_stated": False,
       # the sheet's day care has none of the spaces that tighten the tables (review rounds 1 and 2, 2026-11-23)
       "assembly_fixed_seating": False, "special_egress_spaces": False, "egress_balcony_increase_taken": False,
       # Chapter 4 part b: the day care is neither a high-rise (403.5.2) nor underground (405.7.1)

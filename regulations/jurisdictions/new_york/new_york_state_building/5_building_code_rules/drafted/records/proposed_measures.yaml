@@ -951,14 +951,21 @@ separate_means_of_egress:
   - general.bc_905_3_standpipes_required
 nfpa_13r_stated:
   meaning: 'The architect states an NFPA 13R sprinkler system, whether or not it counts as one per 2025 BCNYS 903.3.1.2
-    (sprinklered_903_3_1_2 is no in a building stated Group R alone above four stories): 903.3.1.2''s own flags show wherever
-    one is stated'
+    (sprinklered_903_3_1_2 is yes only where every one of its limits is known to hold, no where one is stated broken, not
+    known otherwise): 903.3.1.2''s own flags show wherever one is stated, and the rules that mean "a 13R system is
+    stated" (903.2''s, the reviews for a building of Group I-1 or of two or more groups) read it'
   unit: yes_no
   needed_by:
+  - general.bc_1006_2_1_two_exits
+  - general.bc_1007_1_1_remoteness
+  - general.bc_1007_1_1_space_remoteness
+  - general.bc_1007_1_2_space_three_or_more
   - general.bc_903_2_5_1_group_h_sprinklers
   - general.bc_903_2_6_group_i_sprinklers
   - general.bc_903_3_1_2_2_corridors_balconies_13r
   - general.bc_903_3_1_2_nfpa_13r_limits
+  - general.bc_table_1017_2_a_e_f1_m_r_s1
+  - general.bc_table_1017_2_i1
 stages_or_platforms:
   meaning: 'The building has a stage, a platform or a technical production area (2025 BCNYS 202), as the architect states
     it: Section 410.5''s flags show, and a space''s common path over 100 feet can''t pass Table 1006.2.1''s 125 ft rows
