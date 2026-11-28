@@ -592,6 +592,6 @@ def test_no_stairs_beside_more_than_one_story_never_settles_the_space():
     two = {**stated, "building": {**stated["building"], "stories_above_grade_plane": 2}}
     got = _story(two)
     assert OUTSIDE_FACT not in got["measures"], got
-    assert "\"No stairs\" isn't taken where the building may have another story" in got["not_measured"][OUTSIDE_FACT]
+    assert "\"No stairs\" isn't taken where the model shows the building may have another story" in got["not_measured"][OUTSIDE_FACT]
     story = next(s for s in measure(stated, stated_stories=(2, "the check gives {n}"))["parts"]["story"])
     assert OUTSIDE_FACT not in story["measures"] and OUTSIDE_FACT in story["not_measured"], story

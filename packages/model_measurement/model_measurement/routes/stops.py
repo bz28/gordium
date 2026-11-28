@@ -10,15 +10,19 @@ design: docs/decisions/2026-11-20_route_measurement.md.
 
 # what settles a stair that may be anywhere (routes._stair_points), said with the story facts it stops
 STAIRS_TO_DO = ("Gordium can rule out a stair, ramp or ladder within a space only where every stair is drawn (with "
-                "Gordium: These are all the stairs ticked) and each stands in a shared hall or exit, or in another "
-                "space opening onto one, or where the model says there are no stairs (Gordium: This house has no "
-                "stairs); and only where it says there are no ramps, alternating tread devices or ship ladders "
+                "Gordium: These are all the stairs ticked) and each stands in a hall shared between spaces, in an exit "
+                "such a hall opens into, or in another space such a hall opens into, or where the model says there "
+                "are no stairs (Gordium: This house has no stairs); and only where it says there are no ramps, "
+                "alternating tread devices or ship ladders "
                 "(Gordium: This house has no ramps, Gordium: This house has no alternating tread devices, Gordium: "
                 "This house has no ship ladders), since where one of those stands isn't read yet. \"No stairs\" isn't "
-                "taken where the building may have another story: a second level not marked Gordium: Not a story, a "
-                "floor drawn a story's height above or below the ground stated, rooms on two floors, or a story "
-                "count of two or more (stated with Gordium: Stories above grade plane or Gordium: Stories, or the "
-                "most the drawing allows), or one that can't be read. Otherwise a person checks")
+                "taken where the model shows the building may have another story or floor: a second level not marked "
+                "Gordium: Not a story, rooms or an enclosed area with no room on another level, rooms' floors at "
+                "different heights (more than 1/2 in apart), a floor a story's height above or below the ground "
+                "stated (or a step, 8 1/4 in, above the ground given at its openings), or a story count of two or "
+                "more (stated "
+                "with Gordium: Stories above grade plane or Gordium: Stories, or the most the drawing allows), or one "
+                "that can't be read. Otherwise a person checks")
 # the marks it names (Revit's Gordium.Revit.Reading/Marks.cs; test_routes_dwelling_units checks each is defined)
 STAIRS_TO_DO_MARKS = ("Gordium: These are all the stairs", "Gordium: This house has no stairs",
                       "Gordium: This house has no ramps", "Gordium: This house has no alternating tread devices",
