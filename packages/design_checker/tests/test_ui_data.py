@@ -31,6 +31,8 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "ambulatory_care_facility": False,                 # group 4's
                                           "corridors_within_dwelling_units": False,
                                           "emergency_voice_alarm_system": False,             # group 5a's
+                                          "stories_above_grade_plane": 3, "townhouse_units": False,  # Chapter 9's
+                                          "separate_means_of_egress": True,                  # part e's
                                           "high_rise_building": False,                       # Chapter 4 part b's
                                           "underground_building": False,
                                           "stages_or_platforms": False,                      # Chapter 4 part f's

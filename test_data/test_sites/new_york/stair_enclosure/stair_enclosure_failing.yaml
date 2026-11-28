@@ -215,4 +215,4 @@ guards:
   - {left: 42.5, right: 44, bottom: 147.5, top: 176.5}
 building:
   occupancy_groups: [R-2]
-  sprinkler_system: none
+  sprinkler_system: nfpa_13
