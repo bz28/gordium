@@ -147,10 +147,12 @@ internal static class RevitInterior
         var rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType().OfType<Room>()
             .Where(r => r.Location is LocationPoint && r.Area > 0).ToList();
         var result = new Dictionary<string, GrossArea>(StringComparer.Ordinal);
+        var withRooms = rooms.Select(r => r.LevelId).ToHashSet();
         foreach (var level in levels)
         {
             if (!rooms.Any(r => r.LevelId == level.Id))
                 continue;
+            var next = NextAbove(levels, level, withRooms);
             using var group = new TransactionGroup(doc, ResultRows.AreasTransaction);
             group.Start();
             ReadSteps.Count("inside.gross_areas.levels");
@@ -158,7 +160,7 @@ internal static class RevitInterior
             {
                 result[level.UniqueId] = ReadSteps.Time("inside.gross_areas.ring",
                     () => RingOf(doc, phase, level, walls.Where(w => w.LevelId == level.Id).ToList(),
-                                 walls.Where(w => Stands(w, level, NextAbove(levels, level), phase)).ToList(), planType, diagnostics));
+                                 walls.Where(w => Stands(w, level, next, phase)).ToList(), planType, diagnostics));
             }
             finally
             {
@@ -371,14 +373,15 @@ internal static class RevitInterior
                     yield return inner;
     }
 
-    /// <summary>The next building story's elevation above this one (internal ft; datum levels such as a plate height
-    /// left out), or 1,000 ft up where it is the top one.</summary>
-    private static double NextAbove(List<Level> levels, Level level)
+    /// <summary>The next story up: the elevation of the lowest level above this one's room computation height that has
+    /// a Room placed on it (internal ft), so a datum level (a slab top, a plate height) never cuts the story short; 1,000
+    /// ft up where there is none (every wall above read: more refusals at worst, never fewer walls read). Review round 5:
+    /// the Building Story flag can be set on a datum level, so it isn't read.</summary>
+    private static double NextAbove(List<Level> levels, Level level, HashSet<ElementId> withRooms)
     {
-        var above = levels.Where(l => l.ProjectElevation > level.ProjectElevation + 1e-6).ToList();
-        var stories = above.Where(l => l.get_Parameter(BuiltInParameter.LEVEL_IS_BUILDING_STORY)?.AsInteger() != 0).ToList();
-        // no level above flagged a story (levels a script made may all read 0): the next level of any kind
-        return (stories.Count > 0 ? stories : above).Select(l => l.ProjectElevation).DefaultIfEmpty(level.ProjectElevation + 1000).Min();
+        var cut = level.ProjectElevation + (level.get_Parameter(BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() ?? 4.0);
+        return levels.Where(l => withRooms.Contains(l.Id) && l.ProjectElevation > Math.Max(cut, level.ProjectElevation + 1e-6))
+                     .Select(l => l.ProjectElevation).DefaultIfEmpty(level.ProjectElevation + 1000).Min();
     }
 
     /// <summary>Whether the wall stands on the story, whichever level it is based on (a veneer from the foundation to
@@ -389,8 +392,8 @@ internal static class RevitInterior
     {
         try
         {
-            if (w.IsStackedWall || (w.WallType?.Kind == WallKind.Curtain && Bounds(w, level)))
-                return false;
+            if (w.IsStackedWall || (w.WallType?.Kind == WallKind.Curtain && Bounds(w, level) && AtCut(w, level)))
+                return false;                            // a curtain wall the ring Room stops at; any other is read
             if (w.DesignOption is { IsPrimary: false })
                 return false;
             var status = w.GetPhaseStatus(phase.Id);
@@ -403,6 +406,13 @@ internal static class RevitInterior
         {
             return true;                                 // unread: kept, and its footprint says so if it can't be read
         }
+    }
+
+    /// <summary>Whether the wall stands at the level's room computation height (where Revit works out room outlines).</summary>
+    private static bool AtCut(Wall w, Level level)
+    {
+        var z = level.ProjectElevation + (level.get_Parameter(BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() ?? 4.0);
+        return w.get_BoundingBox(null) is { } box && box.Min.Z <= z + 1e-6 && box.Max.Z >= z - 1e-6;
     }
 
     /// <summary>Whether the wall is read as one Revit's ring Room stops at on this level: set Room Bounding, and not

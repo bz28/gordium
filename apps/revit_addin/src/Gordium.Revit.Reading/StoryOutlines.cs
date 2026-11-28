@@ -117,7 +117,7 @@ public static class StoryOutlines
                 return new(null, null, $"a wall on the level{named} couldn't be read, so the outline can't be shown to hold it");
             // beyond the outline: any room-bounding wall (a second building is two pieces, refused above); a wall that
             // isn't room-bounding only near it (a veneer, cladding), not a garden wall standing apart
-            var beyond = corners.Where(c => !Within(c, o) && (w.RoomBounding || Distance(c, o) <= Apart)).ToList();
+            var beyond = corners.Where(c => !Within(c, o) && Distance(c, o) > Overlap && (w.RoomBounding || Distance(c, o) <= Apart)).ToList();
             if (beyond.Count > 0)
                 return new(null, null, $"a wall on the level{named} lies outside the building's outline at " +
                                        $"{Xy(beyond[0])} (a veneer or cladding not set Room Bounding?), " +
@@ -130,6 +130,11 @@ public static class StoryOutlines
         }
         return new(o, n2, null);
     }
+
+    /// <summary>How far a wall may run past the outline and still be the walls it follows, ft: half an inch. Walls in a
+    /// real model overlap at their joins by a hair (the Children's Odyssey's W2 runs 0.14 in past W74's face, where the
+    /// outline steps by as much); a veneer or cladding stands out by its own thickness, inches.</summary>
+    public const double Overlap = 0.5 / 12;
 
     /// <summary>How far beyond the outline a wall that isn't room-bounding is still the building's (a veneer, cladding,
     /// an air gap), ft; one farther out stands apart (a garden wall).</summary>

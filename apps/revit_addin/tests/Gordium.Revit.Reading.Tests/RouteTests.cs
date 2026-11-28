@@ -638,6 +638,9 @@ public sealed class RouteTests
         floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [inside, west, veneer] } };
         Assert.Contains("lies outside the building's outline", OutlineNote(InteriorReader.Read(floor.Model())));
         Assert.Contains("Mark V1", OutlineNote(InteriorReader.Read(floor.Model())));
+        // a wall running a hair past the outline where it steps (the Children's Odyssey's W2, 0.14 in past W74's face): fine
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-s", "W2", true, (5, -0.5), (25, -0.5), (25, -0.512), (5, -0.512))] } };
+        Assert.Null(OutlineNote(InteriorReader.Read(floor.Model())));
         // a partition that isn't room-bounding whose studs run half an inch into the exterior wall's lining: fine
         floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-t", "P2", false, (10, -0.04), (10.3, -0.04), (10.3, 5), (10, 5))] } };
         Assert.Null(OutlineNote(InteriorReader.Read(floor.Model())));
