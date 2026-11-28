@@ -78,7 +78,25 @@ def diagonal(story: Story) -> Diagonal:
     return Diagonal(length, (a, b))
 
 
+SLACK = 0.5      # in: the outer outline holds every room and exit door to within this (rounding only)
+
+
+def held(story: Story) -> None:
+    """Refuse (Stop) an outer outline that doesn't hold every room's outline and every exit door's clear opening, to
+    within SLACK: drawn short (a wing only, a slip, a reader's bug), it shrinks the diagonal, so close exits would read
+    as placed apart (BCNYS 1007.1.1, a false pass); never a diagonal from it."""
+    if story.outer is None:
+        return                                           # diagonal() says why
+    shapes = [(r.name, r.outline) for r in story.rooms.values() if r is not None] +         [(d.name, opening(d)) for d in story.exits()]
+    bound = story.outer.buffer(SLACK)
+    out = [name for name, shape in shapes if not bound.covers(shape)]
+    if out:
+        raise Stop("outline_short", names=", ".join(sorted(out)[:3]) + (" and others" if len(out) > 3 else ""))
+
+
 def ratio(story: Story) -> tuple:
-    """(remoteness, diagonal, their ratio): the branch's `exit_remoteness_ratio`."""
+    """(remoteness, diagonal, their ratio): the branch's `exit_remoteness_ratio`, from an outer outline that holds the
+    story (held)."""
     far, across = remoteness(story), diagonal(story)
+    held(story)
     return far, across, far.length / across.length

@@ -95,6 +95,28 @@ def test_no_outline_no_diagonal():
     assert stop.value.key == "outline_needed" and "story outlines" in stop.value.reason
 
 
+def test_an_outer_outline_short_of_the_story_gives_no_ratio():
+    """An outer outline that doesn't hold every room and exit door (drawn short, a wing only) would shrink the
+    diagonal, so close exits would read as placed apart (BCNYS 1007.1.1, a false pass): no ratio, the outline's reason
+    said. Drawn to the walls' outer faces, or within half an inch of them, it gives one."""
+    assert straight.ratio(story(two_exits()))[2] == pytest.approx(31.536 / math.hypot(41, 21), abs=1e-3)
+    for outer, ok in ((rect(-0.5, -0.5, 40.5, 20.5), True), (rect(-0.46, -0.46, 40.46, 20.46), True),
+                      (rect(0, 0, 40, 20), False), (rect(0.45, 0.45, 39.55, 19.55), False), (rect(-0.5, -0.5, 30, 20.5), False)):
+        d = outlined(two_exits(), outer, rect(0, 0, 40, 20))
+        if ok:
+            assert straight.ratio(story(d))[2] > 0, outer
+            continue
+        with pytest.raises(Stop) as stop:
+            straight.ratio(story(d))
+        assert stop.value.key == "outline_short", outer
+    # the routes' story part: not measured, with the reason (so 1007.1.1's rule needs review)
+    from model_measurement.routes import measure
+    d = outlined(two_exits(), rect(0.45, 0.45, 39.55, 19.55), rect(0, 0, 40, 20))
+    sp = measure(d)["parts"]["story"][0]
+    assert "exit_remoteness_ratio" not in sp["measures"]
+    assert "doesn't hold all of it" in sp["not_measured"]["exit_remoteness_ratio"]
+
+
 # --- test 9: storage on the line -----------------------------------------------------------------------------------
 
 def storage_story(storage_depth=24.5):

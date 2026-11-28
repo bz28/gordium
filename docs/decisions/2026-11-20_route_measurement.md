@@ -462,7 +462,10 @@ area need review.
    distinct exits: no remoteness (needs review where two are required).
    The diagonal is the longest straight line between two corners of the story's **outer** outline (the longest line
    in a polygon always ends at corners, so this is exact; the outer faces give the longer diagonal, the cautious
-   side). The ratio is the branch's `exit_remoteness_ratio`.
+   side). The ratio is the branch's `exit_remoteness_ratio`. Amended 2026-11-28: only from an outer outline that
+   holds every room and every exit door's clear opening to within half an inch (`straight.held`); one drawn short (a
+   wing only, a slip) would shrink the diagonal and make close exits read as placed apart, so the ratio isn't
+   measured and 1007.1.1's rule needs review.
 8. **Areas: two readings each, as the checker takes readings.** 502.1 measures building area "within surrounding
    exterior walls" without saying which face, and nothing says where a storage room's area stops. So
    `story_building_area` is given as two named readings for one open question (inside the exterior walls; to their
