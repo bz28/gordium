@@ -192,8 +192,10 @@ def _well(**m):
 
 # review rounds 2 and 3 of 8c: how far the ladder or steps, and anything else, reach into the required dimensions are
 # their own facts; only a required ladder or steps (a well over 44 in deep) may take up to 6 in, and only one not
-# obstructed by the open window (area_well_ladder: PR feat/r319-well-encroachment, review round 2; whether an
-# obstructed one's reach is allowed is an open question, so it is neither clear nor crowded here)
+# obstructed by the open window (area_well_ladder: PR feat/r319-well-encroachment, review round 2). Whether an
+# obstructed one's reach is allowed is an open question; the size rules hold section group 8d's limits, which can't
+# carry a review band for it, so they read it strictly (the merge of line D with 8d, the coordinator's option A,
+# 2026-11-27): past, as 1031.5.2's own rule fails the obstruction (docs/questions_for_architects.md 4.7)
 LADDER_IN = (U, 0, 6, 7)
 OTHER_IN = (U, 0, 1)
 DEPTHS = (U, 44, 45)
@@ -206,10 +208,12 @@ def _clear(other, ladder, depth, accepted):
         ladder <= 0 or (accepted is True and depth is not U and depth > 44 and ladder <= 6))
 
 
-def _crowded(other, ladder, depth):
-    """Past it whatever else is known: something else in them, a ladder past 6 in, or one in a shallow well."""
+def _crowded(other, ladder, depth, accepted=U):
+    """Past it whatever else is known: something else in them, a ladder past 6 in, one in a shallow well, or (Gordium's
+    strict reading of the open question) one the open window obstructs."""
     return (other is not U and other > 0) or (ladder is not U and ladder > 6) or (
-        ladder is not U and ladder > 0 and depth is not U and depth <= 44)
+        ladder is not U and ladder > 0 and depth is not U and depth <= 44) or (
+        accepted is False and ladder is not U and ladder > 0 and depth is not U and depth > 44)
 
 
 def _clear_cases():
@@ -221,7 +225,7 @@ def _clear_cases():
                 for accepted in (TRI if ladder not in (U, 0) and depth == 45 else (U,)):
                     yield _well(area_well_other_encroachment=other, area_well_ladder_encroachment=ladder,
                                 area_well_depth=depth, area_well_ladder=accepted), \
-                        _clear(other, ladder, depth, accepted), _crowded(other, ladder, depth)
+                        _clear(other, ladder, depth, accepted), _crowded(other, ladder, depth, accepted)
 
 
 def _required_cases():
