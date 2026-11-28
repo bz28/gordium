@@ -274,7 +274,7 @@ def test_an_outline_that_doesnt_hold_the_story_never_shows_exits_apart():
     d = side_by_side()
     d["story_outlines"] = [outline(0, -7, 10, 0)]
     for got in (g for g in reached(d).values() if g is not None):
-        assert got["two"] is False and "doesn't hold all its rooms" in got["why"], got
+        assert got["two"] is False and "doesn't hold all of it" in got["why"], got
 
 
 def test_the_rooms_figure_is_its_worst_doors():
@@ -302,4 +302,32 @@ def test_an_outline_a_few_inches_short_of_the_walls_never_shows_exits_apart():
     assert all(g["remoteness_ratio"] < 0.5 for g in reached(d).values() if g is not None)
     d["story_outlines"] = [outline(0.45, -6.05, 35.05, 17.55)]
     for got in (g for g in reached(d).values() if g is not None):
-        assert got["two"] is False and "doesn't hold all its rooms" in got["why"], got
+        assert got["two"] is False and "doesn't hold all of it" in got["why"], got
+
+
+def upper_story_bedroom(outer):
+    """main's upper story (test_routes_straight_areas.upper_story: a corridor 0 to 60 by 0 to 20 ft, exit stairs S1 0 to
+    10 and S2 36.5 to 46.5 north of it, inner outline 0 to 60 by 0 to 28) with a bedroom b (50 to 60) off the corridor,
+    the building stating no corridor is within a dwelling unit; `outer` is the story's outer outline."""
+    rooms = [room("c", rect(0, 0, 60, 20), use="corridor", pass_through=True),
+             room("S1", rect(0, 20.5, 10, 28), use="other", lockable=True),
+             room("S2", rect(36.5, 20.5, 46.5, 28), use="other", lockable=True),
+             room("b", rect(50, 20.5, 60, 28), use="other", lockable=True, sleeping=True)]
+    doors = [door("a", (5, 20.25), (1, 0), ("c", "S1"), exit_id="S1", kind="exit_enclosure"),
+             door("bb", (41.5, 20.25), (1, 0), ("c", "S2"), exit_id="S2", kind="exit_enclosure"),
+             door("e", (55, 20.25), (1, 0), ("b", "c"))]
+    d = description(rooms, doors)
+    d["story_outlines"] = [{"level": "L1", "outer": [list(p) for p in outer], "inner": [list(p) for p in rect(0, 0, 60, 28)]}]
+    d["building"] = {"corridors_within_dwelling_units": False}
+    return d
+
+
+def test_an_outline_at_the_walls_inside_faces_never_shows_the_rooms_exits_apart():
+    """Merge of #240 with #281 (merge review): the room's ratio is held to the same outlines as the story's
+    (straight.held). Its two stairs are 0.496 of the true diagonal apart (under 1007.1.1's half); an outer outline drawn
+    at the walls' inside faces holds every room and stair door but is a wall short at each end, which made it 0.506 and
+    the room "two" (so 1031.2 item 1 asked no escape opening of it, a false pass): now not two, with the story's reason."""
+    true = reached(upper_story_bedroom(rect(-0.5, -0.5, 60.5, 28.5)))["b"]
+    assert true["two"] is True and true["remoteness_ratio"] < 0.5, true
+    got = reached(upper_story_bedroom(rect(0, 0, 60, 28)))["b"]
+    assert got["two"] is False and "isn't at least 3.5 in outside its inner one" in got["why"], got
