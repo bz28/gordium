@@ -101,7 +101,7 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
     out["problems"] = list(floor.stops)
     if not floor.stories:
         return out
-    stairs = _stair_points(description, stated_stories)
+    stairs = _stair_points(description, stated_stories, ground)
     placed = story_place.places(description, Reader(description["units"]),
                                 {lid: s.name for lid, s in floor.stories.items()}, floor.stories, ground,
                                 floor.stops)
@@ -137,37 +137,77 @@ OTHER_WAYS = (("ramps", "ramp"), ("alternating_tread_devices", "alternating_trea
 
 def _stories_of(description, stated_stories):
     """The stories the check gives the building (egress._stated_stories' count or (count, words)), else the
-    description's own building block's stories above grade plane where it is a number, else None."""
+    description's own building block's stories above grade plane where it is a whole number or a finite one, else
+    None."""
     if stated_stories is not None:
         return stated_stories
     block = description.get("building") if isinstance(description, dict) else None
     n = block.get("stories_above_grade_plane") if isinstance(block, dict) else None
-    if type(n) in (int, float) and math.isfinite(n):
+    if type(n) is int or type(n) is float and math.isfinite(n):
         return n, "the architect states {n} stories above grade plane"
     return None
 
 
-def _stair_points(description, stated_stories=None) -> list:
+def _levels_listed(description) -> set:
+    """Every level id the description lists (`levels` and `all_levels`), but those the architect marks not a story
+    (`all_levels[].not_a_story` true): each may be a story of its own."""
+    out, marked = set(), set()
+    for key in ("levels", "all_levels"):
+        given = description.get(key) if isinstance(description, dict) else None
+        for item in given if isinstance(given, list) else []:
+            lid = item.get("id") if isinstance(item, dict) else None
+            if isinstance(lid, str) and lid.strip() or type(lid) is int:
+                out.add(lid)
+                if key == "all_levels" and item.get("not_a_story") is True:
+                    marked.add(lid)
+    return out - marked
+
+
+def _above_the_ground(description, reader, ground) -> bool:
+    """Whether every room's floor stands more than a landing's step (interior.LANDING_STEP, R318.3.2) above the
+    lowest ground the architect stated (`ground`: story_place.ground_of's, feet): an upper floor drawn alone, reached
+    by a stair or ramp the model doesn't show. A room whose floor isn't given, or no ground stated: not shown."""
+    from model_measurement.interior import LANDING_STEP
+    if not isinstance(ground, dict):
+        return False
+    lows = [ground["flat"]] if "flat" in ground else [p[2] for p in ground.get("spots") or []]
+    if not lows:
+        return False
+    rooms = [r for r in description.get("rooms") if isinstance(r, dict)] \
+        if isinstance(description.get("rooms"), list) else []
+    floors = [reader.length(r["floor_elevation"], "a room's floor") for r in rooms if "floor_elevation" in r]
+    return bool(floors) and min(floors) > min(lows) * story_place.FT + LANDING_STEP
+
+
+def _stair_points(description, stated_stories=None, ground=None) -> list:
     """Every way to another story the description gives or doesn't rule out, each {"points": plan points of its
     nosings' ends in inches}, or ANYWHERE: the stairs (`stairs`, house egress) read entry by entry, one that can't be
-    read anywhere; no `stairs` list at all (not read, the format's silence) one anywhere, and so an empty list where
-    the description shows more than one floor, or the check gives the building two or more stories (`stated_stories`,
-    else the description's own `building.stories_above_grade_plane`; interior._stairs_against_floors, #279); a ramp,
-    alternating tread device or ship's ladder anywhere unless the description gives its list empty or says it has
-    none (`has_none` with a source), since none is said, never inferred."""
+    read anywhere; no `stairs` list at all (not read, the format's silence) one anywhere, and so an empty list ("no
+    stairs") wherever the building may have more than one story: two or more levels listed (any not marked not a
+    story may be one, with nothing drawn on it), every floor more than a step above the ground stated (`ground`),
+    a stated story count that isn't a number, or what interior._stairs_against_floors refuses it beside (rooms on
+    two floors, an upper floor alone, two or more stories the check gives: `stated_stories`, else the description's
+    own `building.stories_above_grade_plane`; #279); a ramp, alternating tread device or ship's ladder anywhere unless
+    the description gives its list empty or says it has none (`has_none` with a source), since none is said, never
+    inferred."""
     reader = Reader(description["units"])
     out = []
     stairs = description.get("stairs")
     if not isinstance(stairs, list):
         out.append(ANYWHERE)
         stairs = []
-    elif not stairs:                                     # "no stairs" beside more than one floor isn't taken: a stair
-        from model_measurement.interior import _stairs_against_floors    # left undrawn may be anywhere (#279's
-        try:                                                              # refusal, the same for the routes)
-            refused = _stairs_against_floors(description, reader, _stories_of(description, stated_stories))
-        except (InteriorStop, TypeError, AttributeError, KeyError, ValueError):
-            refused = "unread"
-        if refused is not None:
+    elif not stairs:                                     # "no stairs" where there may be another story isn't taken:
+        from model_measurement.interior import _stairs_against_floors    # a stair left undrawn may be anywhere
+        block = description.get("building")               # (#279's refusal, for the routes too)
+        given = block.get("stories_above_grade_plane") if isinstance(block, dict) else None
+        try:
+            stories = _stories_of(description, stated_stories)
+            refused = len(_levels_listed(description)) > 1 or (given is not None and stories is None) or \
+                _above_the_ground(description, reader, ground) or \
+                _stairs_against_floors(description, reader, stories) is not None
+        except (InteriorStop, TypeError, AttributeError, KeyError, ValueError, OverflowError, IndexError):
+            refused = True
+        if refused:
             out.append(ANYWHERE)
     for st in stairs:
         try:

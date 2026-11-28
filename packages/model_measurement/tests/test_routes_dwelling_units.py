@@ -257,10 +257,52 @@ def test_no_stairs_beside_another_floor_is_never_taken():
                           "level": "L2", "floor_elevation": 10, "function": "residential"})
     got = count(desc)
     assert isinstance(got, Stop) and got.key == "units_stair", got
-    one = layout([("residential", 1, 1), ("residential", 1, 1), ("business", 1, 1)], (False, False))
+    fresh = lambda: layout([("residential", 1, 1), ("residential", 1, 1), ("business", 1, 1)], (False, False))
+    refused = []
+    one = fresh()
     one["building"] = {"stories_above_grade_plane": 2}   # one floor drawn, two stated (review of the merge: the
-    got = count(one)                                     # stated count is #279's trigger too)
-    assert isinstance(got, Stop) and got.key == "units_stair", got
+    refused.append(one)                                  # stated count is #279's trigger too)
+    text = fresh()
+    text["building"] = {"stories_above_grade_plane": "2"}   # a count that can't be read: it may be two
+    refused.append(text)
+    empty = fresh()                                      # a second level listed with nothing drawn on it (skeptics
+    empty["all_levels"] = [*empty["levels"], {"id": "L0", "name": "Level 0", "elevation": -10}]   # of the merge)
+    refused.append(empty)
+    for desc in refused:
+        got = count(desc)
+        assert isinstance(got, Stop) and got.key == "units_stair", (desc.get("building"), got)
+    roof = fresh()                                       # a level marked not a story (a roof) is no other story
+    roof["all_levels"] = [*roof["levels"], {"id": "R", "name": "Roof", "elevation": 12, "not_a_story": True}]
+    assert count(roof) == 2
+    from model_measurement.routes import _stair_points
+    up = fresh()                                         # one floor drawn 10 ft above the ground stated: an upper
+    for r in up["rooms"]:                                # floor alone, reached by a stair the model doesn't show
+        r["floor_elevation"] = 10
+    assert _stair_points(up) == [] and _stair_points(up, ground={"flat": 0.0}) == [{"points": []}]
+    assert _stair_points(up, ground={"flat": 9.5}) == []                 # 6 in above: a landing's step
+    assert _stair_points(fresh(), stated_stories=(2, "the check gives {n}")) == [{"points": []}]
+    assert _stair_points(fresh(), stated_stories=(1, "the check gives {n}")) == []
+
+
+def test_the_check_s_own_story_count_reaches_the_story_facts():
+    """The stories the check gives (its values, not the description: egress._routes_stories, the place's count or
+    the most its drawing allows) refuse "no stairs" for the routes too, so a one-floor drawing of a two-story building
+    never counts a unit split by an undrawn stair as no unit (review of the merge of #279)."""
+    from design_checker import egress
+    from design_checker.code_scope import BUILDING, STORIES_AT_MOST
+    desc = layout([("residential", 1, 1), ("residential", 1, 1), ("business", 1, 1)], (False, False))
+    assert egress._routes_stories(desc, {}) is None
+    for values in ({"stories": 2}, {"stories_above_grade_plane": 2}, {STORIES_AT_MOST: 2}):
+        assert egress._routes_stories(desc, values)[0] == 2, values
+    calls = []
+    real = egress.measure_routes
+    try:
+        egress.measure_routes = lambda *a, **k: calls.append(k) or real(*a, **k)
+        law = {"scope": BUILDING, "folder": str(Path(__file__).parent), "rules": []}
+        egress._measured(law, desc, {}, None, {"stories": 2})
+    finally:
+        egress.measure_routes = real
+    assert calls and calls[0]["stated_stories"][0] == 2, calls
 
 
 def test_a_closet_between_two_rooms_of_a_group_may_be_shared():

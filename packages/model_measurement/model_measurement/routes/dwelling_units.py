@@ -17,9 +17,10 @@ How (docs/decisions/2026-11-25_story_facts_from_the_model.md, step 3):
   Gordium: Function) and every lived-in room (not a toilet, closet or storeroom) states one. A group whose lived-in
   rooms all state a listed other function (NOT_DWELLING) is no dwelling unit; one with a room stating none, or one not
   on the list (a typo, dormitory, institutional sleeping), may be one: not measured.
-- A group with a stair, ramp or ladder within it (or one not read, or not said to be none: it may be anywhere), or
-  with a closet, toilet or storeroom, or a room not itself residential, opening onto two or more of its rooms, may
-  hold the upper part of a unit whose door is downstairs, or two units sharing that room: not measured.
+- A group with a stair, ramp or ladder within it (or one not read, or not said to be none, or said to be none where
+  the building may have another story: it may be anywhere; routes._stair_points), or with a closet, toilet or
+  storeroom, or a room not itself residential, opening onto two or more of its rooms, may hold the upper part of a
+  unit whose door is downstairs, or two units sharing that room: not measured.
 - A dwelling unit reaches the exits without passing through another (1016.2.1), so a group with one way out to a
   shared space is one unit: Gordium's reading, to confirm, said with every row reading the count (`rests_on`, RESTS_ON),
   which also says the count holds only if 1016.2.1 is met (a flag, a person's check, in every Group R-2 answer). It
