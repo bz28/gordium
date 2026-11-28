@@ -51,8 +51,8 @@ def as_the_eval():
     real = egress.place_of, egress.refuse_state_alone, egress.measure_interior
     inside = real[2]
 
-    def both(description):
-        measured = inside(description)
+    def both(description, **kw):            # the measuring's own keywords (whole, stated_stories) passed on
+        measured = inside(description, **kw)
         for kind, parts in measure_routes(description)["parts"].items():
             if kind in ROUTE_KINDS and measured["parts"].get(kind) is None:
                 measured["parts"][kind] = parts

@@ -382,6 +382,7 @@
 "packages/design_checker/tests/test_four_unit_apartment.py::test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits": 22.1,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass": 44.2,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_groups_4_and_5s_marks_stated_on_the_apartment": 77.4,
+"packages/design_checker/tests/test_four_unit_apartment.py::test_no_stairs_on_its_upper_storys_walls_with_no_rooms_yet_never_sets_the_stair_rules_aside": 9.6,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_panic_hardware_as_sent_and_with_each_doors_hardware_stated": 18.0,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_section_1030s_flags_show_on_residential_rooms_alone_and_hide_only_on_a_stated_no": 50.0,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_the_building_code_governs_it": 42.6,
