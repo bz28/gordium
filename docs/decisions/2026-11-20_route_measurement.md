@@ -465,7 +465,10 @@ area need review.
    side). The ratio is the branch's `exit_remoteness_ratio`. Amended 2026-11-28: only from an outer outline that
    holds every room and every exit door's clear opening to within half an inch (`straight.held`); one drawn short (a
    wing only, a slip) would shrink the diagonal and make close exits read as placed apart, so the ratio isn't
-   measured and 1007.1.1's rule needs review.
+   measured and 1007.1.1's rule needs review. And never a diagonal shorter than the rooms and their walls give
+   (`straight.bounded`: the rooms' and exit openings' hull grown by the thickest wall a door sits in, mitred): an
+   outline drawn at the walls' inside faces holds every room but is a wall short at each end, so the longer of the
+   two is used.
 8. **Areas: two readings each, as the checker takes readings.** 502.1 measures building area "within surrounding
    exterior walls" without saying which face, and nothing says where a storage room's area stops. So
    `story_building_area` is given as two named readings for one open question (inside the exterior walls; to their

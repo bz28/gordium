@@ -21,7 +21,7 @@ import math
 from dataclasses import dataclass
 from itertools import combinations
 
-from shapely.geometry import Polygon
+from shapely.geometry import MultiPoint, Polygon
 
 from model_measurement.routes.floor import Door, Story
 from model_measurement.routes.stops import Stop
@@ -87,16 +87,40 @@ def held(story: Story) -> None:
     as placed apart (BCNYS 1007.1.1, a false pass); never a diagonal from it."""
     if story.outer is None:
         return                                           # diagonal() says why
-    shapes = [(r.name, r.outline) for r in story.rooms.values() if r is not None] +         [(d.name, opening(d)) for d in story.exits()]
+    shapes = [(r.name, r.outline) for r in story.rooms.values() if r is not None]
+    shapes += [(d.name, opening(d)) for d in story.exits()]
     bound = story.outer.buffer(SLACK)
     out = [name for name, shape in shapes if not bound.covers(shape)]
     if out:
         raise Stop("outline_short", names=", ".join(sorted(out)[:3]) + (" and others" if len(out) > 3 else ""))
 
 
+def bounded(story: Story) -> Diagonal:
+    """The longest the story's diagonal can be from its rooms alone: the convex hull of its rooms and its exit doors'
+    clear openings, grown by the thickest wall its doors sit in with square (mitred) corners, as an exterior wall's
+    outer face lies that far beyond the rooms' inside faces; the farthest two corners of that. For a story whose outer
+    outline is drawn at the walls' outer faces it is no longer than the outline's own diagonal (the same rectangle, for
+    a rectangular story); an outline drawn at the inside faces instead (it holds every room, so held() takes it) would
+    be short by a wall at each end and make exits just under 1007.1.1's share read as placed apart, so the ratio is
+    worked out against the longer of the two, never a shorter diagonal than the walls can give."""
+    pts = [p for r in story.rooms.values() if r is not None for p in r.outline.exterior.coords]
+    pts += [p for d in story.exits() for p in opening(d).exterior.coords]
+    hull = MultiPoint(pts).convex_hull if pts else None
+    if hull is None or hull.is_empty:
+        raise Stop("outline_needed", reason="no rooms or exit doors are drawn on it")
+    wall = max((d.thickness for d in story.doors.values()), default=0.0)
+    grown = hull.buffer(wall, join_style="mitre", mitre_limit=10.0) if wall > 0 else hull
+    corners = list(grown.exterior.coords)[:-1] if hasattr(grown, "exterior") else list(grown.coords)
+    length, a, b = max((math.dist(p, q), p, q) for p, q in combinations(corners, 2))
+    return Diagonal(length, (a, b))
+
+
 def ratio(story: Story) -> tuple:
     """(remoteness, diagonal, their ratio): the branch's `exit_remoteness_ratio`, from an outer outline that holds the
-    story (held)."""
+    story (held), its diagonal never shorter than the rooms and their walls can give (bounded)."""
     far, across = remoteness(story), diagonal(story)
     held(story)
+    rooms = bounded(story)
+    if rooms.length > across.length:
+        across = rooms
     return far, across, far.length / across.length

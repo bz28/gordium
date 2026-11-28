@@ -117,6 +117,32 @@ def test_an_outer_outline_short_of_the_story_gives_no_ratio():
     assert "doesn't hold all of it" in sp["not_measured"]["exit_remoteness_ratio"]
 
 
+def upper_story(outer):
+    """An upper story (no door to outside): a corridor 0 to 60 by 0 to 20, two exit stairs north of it (S1 0 to 10,
+    S2 36.5 to 46.5, by 20.5 to 28), each entered by one door; walls 6 in, the story's inner outline 0 to 60 by 0 to
+    28. Its exits are just under half its diagonal apart, measured to the walls' outer faces."""
+    rooms = [room("c", rect(0, 0, 60, 20), use="corridor", pass_through=True),
+             room("S1", rect(0, 20.5, 10, 28), use="other", lockable=True),
+             room("S2", rect(36.5, 20.5, 46.5, 28), use="other", lockable=True)]
+    doors = [door("a", (5, 20.25), (1, 0), ("c", "S1"), exit_id="S1", kind="exit_enclosure"),
+             door("b", (41.5, 20.25), (1, 0), ("c", "S2"), exit_id="S2", kind="exit_enclosure")]
+    return outlined(description(rooms, doors), outer, rect(0, 0, 60, 28))
+
+
+def test_an_outline_at_the_walls_inside_faces_never_shortens_the_diagonal():
+    """Review of #281: an outer outline drawn at the walls' inside faces holds every room (held() takes it) but is a
+    wall short at each end, so exits just under 1007.1.1's half read as over it (0.496 to 0.506 here: a false pass).
+    The diagonal is never shorter than the rooms and their walls give (bounded: the rooms' hull grown by the thickest
+    wall, mitred): the inside-face outline gives the outer one's ratio, under half; the outer-face outline is
+    unchanged (its own diagonal is the longer)."""
+    true = straight.ratio(story(upper_story(rect(-0.5, -0.5, 60.5, 28.5))))
+    inside = story(upper_story(rect(0, 0, 60, 28)))
+    got = straight.ratio(inside)
+    assert true[2] < 0.5 and got[2] == pytest.approx(true[2], abs=1e-3) and got[2] < 0.5, (true[2], got[2])
+    assert straight.remoteness(inside).length / straight.diagonal(inside).length > 0.5      # the outline's own: over
+    assert true[1].length == straight.diagonal(story(upper_story(rect(-0.5, -0.5, 60.5, 28.5)))).length
+
+
 # --- test 9: storage on the line -----------------------------------------------------------------------------------
 
 def storage_story(storage_depth=24.5):
