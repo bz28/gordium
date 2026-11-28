@@ -573,3 +573,19 @@ def test_the_building_codes_stated_stories_reach_its_stairs_through_its_reading(
         assert (got["parts"].get("stair") is None) is refused, stated
         assert bool(got.get("refused")) is refused, stated
         assert any("the architect states 2 stories above grade plane" in p for p in got["problems"]) is refused
+
+
+def test_a_story_count_too_large_for_a_float_is_a_count_never_a_crash():
+    """The 13R limits PR (from the story facts line's review): a description's stories above grade plane of 10**400
+    overflowed math.isfinite in egress._stated_stories and interior._stairs_against_floors. A whole number of any size
+    is a count: "no stairs" beside it is refused (many stories), never a crash."""
+    from model_measurement.interior import _stairs_against_floors
+    from model_measurement.interior.read import Reader
+    huge = 10 ** 400
+    stated = egress._stated_stories({"building": {"stories_above_grade_plane": huge}}, {})
+    assert stated[0] == huge
+    assert _stairs_against_floors({"rooms": []}, Reader("ft"), stated) is not None
+    assert _stairs_against_floors({"rooms": []}, Reader("ft"), huge) is not None
+    from design_checker.check import _with_stories_bound      # the place's typed count too (round 3 of #288)
+    got = _with_stories_bound({}, {"stories": {"value": None, "readings": []}}, {"stories": huge})
+    assert got.get("stories_typed") == huge

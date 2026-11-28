@@ -15,8 +15,8 @@ RULEBOOK = NY / "5_building_code_rules/drafted/general.yaml"
 A = ["A-1", "A-2", "A-3", "A-4", "A-5"]
 R = ["R-1", "R-2", "R-3", "R-4"]
 S1, S2 = "sprinklered_903_3_1_1", "sprinklered_903_3_1_2"
-NFPA13 = {S1: True, S2: False, "sprinklered_903_3_1_3": False}
-NONE = {S1: False, S2: False, "sprinklered_903_3_1_3": False}
+NFPA13 = {S1: True, S2: False, "sprinklered_903_3_1_3": False, "nfpa_13r_stated": False}
+NONE = {S1: False, S2: False, "sprinklered_903_3_1_3": False, "nfpa_13r_stated": False}
 STATED = {"egress_balcony_increase_taken": False, "assembly_fixed_seating": False, "special_egress_spaces": False,
           "building_has_atrium": False, "merchandise_pads": False,
           # Chapter 4 part f's three (NOT_PART_F, below)
@@ -122,11 +122,16 @@ def test_table_1017_2_each_row_at_its_limit_and_just_past(ctx, rules, line):
 def test_an_nfpa_13r_system_counts_only_in_group_r(ctx, rules):
     """Note b: 903.3.1.1 or 903.3.1.2, and 903.3.1.2 (p.274) permits NFPA 13R in Group R only: an apartment floor
     gets 250 ft with it; a shop within 250 ft only by it needs review; note c (B) gives a 13R system nothing."""
+    # the 13R limits PR: in a shop a 13R system is no 903.3.1.2 system (code_scope makes it no), so 250 ft fails; in a
+    # building of two or more groups whether it counts isn't known, so a person checks
     row = rules["general.bc_table_1017_2_a_e_f1_m_r_s1"]
-    nfpa_13r = {S1: False, S2: True} | STATED
+    nfpa_13r = {S1: False, S2: True, "nfpa_13r_stated": True} | STATED
     assert _one(row, "story", {"egress_travel_distance": 250}, {"occupancy_group": "R-2"} | nfpa_13r, ctx) == "pass"
-    assert _one(row, "story", {"egress_travel_distance": 250}, {"occupancy_group": "M"} | nfpa_13r, ctx) == \
-        "needs_review"
+    not_counted = {**nfpa_13r, S2: False}
+    assert _one(row, "story", {"egress_travel_distance": 250}, {"occupancy_group": "M"} | not_counted, ctx) == "fail"
+    unknown = {k: v for k, v in nfpa_13r.items() if k != S2}          # Group I-1: 903.2.6 exception 1's Condition 1
+    assert _one(rules["general.bc_table_1017_2_i1"], "story", {"egress_travel_distance": 200},
+                {"occupancy_group": "I-1"} | unknown, ctx) == "needs_review"
     assert _one(rules["general.bc_table_1017_2_b"], "story", {"egress_travel_distance": 250},
                 {"occupancy_group": "B"} | nfpa_13r, ctx) == "fail"
 
@@ -790,9 +795,10 @@ def test_table_1006_3_4_1_group_r2_of_dwelling_units(ctx, rules):
     one = {"story_exit_count": 1, "story_occupant_load": 16, "egress_travel_distance": 125, FOURTH: False,
            "story_dwelling_units": 4, "story_rooms_exit_directly_outside": False}
     assert _one(r, "story", one, du | NFPA13, ctx) == "pass"
-    # NFPA 13R: 903.3.1.2's stories and roof height aren't known, so note a isn't known met (the story facts' merge,
-    # 2026-11-28: a 13R statement alone never passes the row)
-    assert _one(r, "story", one, du | {S1: False, S2: True}, ctx) == "needs_review"
+    # NFPA 13R: counted (every 903.3.1.2 limit known, code_scope: #288) note a is met; not known, a person checks
+    assert _one(r, "story", one, du | {S1: False, S2: True}, ctx) == "pass"
+    assert _one(r, "story", one, {k: v for k, v in du.items() if k != S2} | {S1: False, "nfpa_13r_stated": True},
+                ctx) == "needs_review"
     assert _one(r, "story", one | {"story_dwelling_units": 5}, du | NFPA13, ctx) == "fail"
     assert _one(r, "story", one | {"egress_travel_distance": 125.01}, du | NFPA13, ctx) == "fail"
     assert _one(r, "story", one | {FOURTH: True}, du | NFPA13, ctx) == "fail"
@@ -1100,11 +1106,14 @@ def test_a_corridors_capacity_is_1005_3_2s_factor_at_its_limit_and_just_past_it(
         assert _one(r, "corridor", _corridor(44.9, 300), {"occupancy_group": g} | voice, ctx) == "fail", g
     assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "mixed"} | voice | {
         "emergency_voice_alarm_system": False}, ctx) == "fail"
-    # review round 1 (P1): 903.3.1.2 (13R) counts in Group R; elsewhere it is a person's check, never a pass on 0.15
-    r13r = voice | {S1: False, S2: True}
+    # review round 1 (P1): 903.3.1.2 (13R) counts in Group R (where its limits are known, #288); in Group B it is no
+    # 903.3.1.2 system (the factor 0.2 in), and in Group I-1 (903.2.6 exception 1's Condition 1) a person's check
+    r13r = voice | {S1: False, S2: True, "nfpa_13r_stated": True}
     assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "R-2"} | r13r, ctx) == "pass"
-    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "B"} | r13r, ctx) == "needs_review"
-    assert _one(r, "corridor", _corridor(44.9, 300), {"occupancy_group": "B"} | r13r, ctx) == "fail"
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "B"} | r13r | {S2: False}, ctx) == "fail"
+    unknown = {k: v for k, v in r13r.items() if k != S2}
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "I-1"} | unknown, ctx) == "needs_review"
+    assert _one(r, "corridor", _corridor(44.9, 300), {"occupancy_group": "B"} | r13r | {S2: False}, ctx) == "fail"
     no_voice = voice | {"emergency_voice_alarm_system": False}
     assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "B"} | no_voice, ctx) == "fail"
     seats = voice | {"assembly_fixed_seating": True}
@@ -1174,9 +1183,15 @@ def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ct
     # note c's 903.3.1.2 (NFPA 13R): Group R's 0.5 hour; elsewhere "where allowed", a person's check
     s13r = {S1: False, S2: True, "sprinklered_903_3_1_3": False} | NO_UNITS | NO_MALL
     assert _one(r, "corridor", _rating(11, 0.5), {"occupancy_group": "R-2"} | s13r, ctx) == "pass"
-    for rid, g in (("h1_h2_h3", "H-1"), ("i1_i3", "I-1"), ("i2", "I-2"), ("i4", "I-4"), ("a_b_e_f_m_s_u", "M")):
-        assert _one(rules[f"general.bc_table_1020_2_{rid}"], "corridor", _rating(31, 0.5),
-                    {"occupancy_group": g} | s13r, ctx) == "needs_review", rid
+    # outside Group R and I-1 a 13R system is no 903.3.1.2 system (#288): each row reads as with none; in Group I-1
+    # whether it counts isn't known, a person's check
+    no13r = {**s13r, S2: False, "nfpa_13r_stated": True}
+    for rid, g in (("h1_h2_h3", "H-1"), ("i2", "I-2"), ("i4", "I-4"), ("a_b_e_f_m_s_u", "M")):
+        row = rules[f"general.bc_table_1020_2_{rid}"]
+        assert _one(row, "corridor", _rating(31, 0.5), {"occupancy_group": g} | no13r, ctx) == \
+            _one(row, "corridor", _rating(31, 0.5), {"occupancy_group": g} | NONE | NO_UNITS | NO_MALL, ctx), rid
+    assert _one(rules["general.bc_table_1020_2_i1_i3"], "corridor", _rating(31, 0.5),
+                {"occupancy_group": "I-1"} | {k: v for k, v in s13r.items() if k != S2}, ctx) == "needs_review"
     # exception 2 (p.343 lines 47-48): a corridor within a dwelling or sleeping unit, stated or not ruled out
     for units in ({"corridors_within_dwelling_units": True}, {}):
         assert _one(r, "corridor", _rating(11, 0), {"occupancy_group": "R-2"} | NONE | units, ctx) == "needs_review"

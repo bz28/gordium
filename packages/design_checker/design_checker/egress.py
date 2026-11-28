@@ -336,7 +336,8 @@ def _stated_stories(interior, values: dict | None):
              (block.get("stories_above_grade_plane") if isinstance(block, dict) else None, above),
              (values.get(code_scope.STORIES_TYPED), "the architect gives the building {n} stories"),
              (values.get("stories"), "the building's stories, as the place counts them (drawn or typed), are {n}")]
-    counts = [(v, words) for v, words in given if type(v) in (int, float) and math.isfinite(v)]
+    counts = [(v, words) for v, words in given          # a whole number of any size is a count (never a crash)
+              if type(v) is int or type(v) is float and math.isfinite(v)]
     return max(counts, key=lambda c: c[0]) if counts else None
 
 

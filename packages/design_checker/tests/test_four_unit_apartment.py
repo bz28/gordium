@@ -470,6 +470,11 @@ def test_chapter_4_part_fs_facts_stated_on_the_apartment(no_mall, laws):
 RATING_R = "general.bc_table_1020_2_r"
 
 
+# an NFPA 13R system 903.3.1.2 is known to permit: Group R-2 alone (the apartment's), two stories above grade plane,
+# its heights stated within items 2 and 3 (code_scope.nfpa_13r_counts)
+COUNTED_13R = {"sprinkler_system": "nfpa_13r", "stories_above_grade_plane": 2, "nfpa_13r_heights_within": True}
+
+
 def _corridor_case(rating=None, functions=True, **building):
     desc = build.interior_of()
     for r in desc["rooms"]:
@@ -520,8 +525,9 @@ def _rated(routes, desc):
 
 @pytest.fixture(scope="module")
 def unrated(routes):
-    """The apartment with an NFPA 13R system and no other level reaching its corridors, no rating stated."""
-    return _check(_corridor_case(sprinkler_system="nfpa_13r", other_level_egress_into_corridors=False), routes)
+    """The apartment with an NFPA 13R system that counts (two stories, its heights stated within 903.3.1.2's: the 13R
+    limits PR) and no other level reaching its corridors, no rating stated."""
+    return _check(_corridor_case(other_level_egress_into_corridors=False, **COUNTED_13R), routes)
 
 
 @pytest.mark.parametrize("rating, want", [(1, "pass"), (0.5, "pass"), (0, present.REVIEW), (None, present.REVIEW)])
@@ -531,7 +537,7 @@ def test_a_stated_corridor_rating_moves_table_1020_2s_row(routes, unrated, ratin
     system. A stated rating of 0.5 or 1 hour complies at both; 0 complies only at none (needs review, never a pass);
     not stated, it needs review as before. Only the rows reading the rating move, and never to a fail here."""
     base = unrated
-    desc = _corridor_case(rating, sprinkler_system="nfpa_13r", other_level_egress_into_corridors=False)
+    desc = _corridor_case(rating, other_level_egress_into_corridors=False, **COUNTED_13R)
     now = _check(desc, _rated(routes, desc))
     assert all(c["measures"].get("corridor_fire_rating_hours") == rating for c in now["interior"]["parts"]["corridor"])
     assert now["results"][RATING_R] == want, now["results"][RATING_R]
@@ -541,6 +547,21 @@ def test_a_stated_corridor_rating_moves_table_1020_2s_row(routes, unrated, ratin
         assert "corridor_fire_rating_hours" in str([rules[k].get(f) for f in ("check", "review_when", "applies_when")]), k
         assert base["results"][k] == present.REVIEW and now["results"][k] != "fail", (k, now["results"][k])
 
+
+
+@pytest.mark.parametrize("left_out", ["stories_above_grade_plane", "nfpa_13r_heights_within"])
+def test_a_corridor_rating_never_passes_on_a_13r_system_whose_limits_arent_stated(routes, left_out):
+    """The 13R limits PR: the same rated corridor, its NFPA 13R system's stories or heights not stated: whether it is a
+    903.3.1.2 system isn't known, so Table 1020.2's sprinklered row needs review, never a pass on the statement alone;
+    stated broken (five stories, or heights not within) it isn't one, and the row reads as with no system."""
+    building = {k: v for k, v in COUNTED_13R.items() if k != left_out}
+    desc = _corridor_case(1, other_level_egress_into_corridors=False, **building)
+    assert _check(desc, _rated(routes, desc))["results"][RATING_R] == present.REVIEW
+    for broken in ({"stories_above_grade_plane": 5}, {"nfpa_13r_heights_within": False}):
+        desc = _corridor_case(1, other_level_egress_into_corridors=False, **{**COUNTED_13R, **broken})
+        none = _corridor_case(1, other_level_egress_into_corridors=False, sprinkler_system="none")
+        got, without = _check(desc, _rated(routes, desc)), _check(none, _rated(routes, none))
+        assert got["results"][RATING_R] == without["results"][RATING_R], broken
 
 # ---- the ceiling on an occupant load not worked out (occupant_load._bounds, 2026-11-26: the egress UI audit's 6) -------
 
@@ -707,7 +728,7 @@ R_RULE = "general.bc_903_2_8_group_r_sprinklers"
 def test_903_2_8_fails_the_apartment_as_stated_and_follows_each_sprinkler_system(got, routes):
     """The apartment, Group R-2 with no sprinkler system: 903.2.8 asks a system throughout every building with a
     Group R fire area, so it fails on each story, whatever its size. Stated NFPA 13 it passes; NFPA 13R needs review
-    at its two stories (903.3.1.2's heights aren't in the model) and fails at five, where it is no
+    at its two stories (903.3.1.2's heights not stated: the 13R limits PR) and fails at five, where it is no
     903.3.1.2 system (its flag, naming the four stories, still shown: review round 4); NFPA 13D fails in an R-2 of
     dwelling units, not townhouses (903.3.1.3), and needs review while either isn't stated. 903.3.1.2's two flags show
     only with a 13R system, 903.3.1.3's only with a 13D one; nothing outside Chapter 9 is compared here."""
@@ -926,6 +947,34 @@ def test_no_stairs_on_its_upper_storys_walls_with_no_rooms_yet_never_sets_the_st
     one = dict(desc, story_outlines=[o for o in desc["story_outlines"] if o["level"] == "L1"])
     got = egress.check(laws, one, VALUES, ALLOWED)
     assert {v for k, v in got["results"].items() if k.startswith("general.bc_1011_")} == {"not_applicable"}
+
+
+def test_a_13r_systems_limit_is_asked_by_its_own_fact_and_a_person_checks_where_no_fact_settles_it(routes):
+    """The 13R limits PR's review: with an NFPA 13R system stated and two stories, the rows resting on it ask for its
+    heights (Gordium: 13R heights within limits), saying the system is stated, never "not stated for the project" nor
+    to set the sprinkler system again; in a building of Group R beside another group no fact can settle it, so the
+    rows say a person checks."""
+    def causes(**building):
+        desc = build.interior_of()
+        desc["building"] = {**desc["building"], **building}
+        return [c for i in _check(desc, routes)["items"] for c in i.get("causes") or []
+                if c.get("measure") == "sprinklered_903_3_1_2" or str(c.get("key")).endswith("sprinklered_903_3_1_2")]
+    got = causes(sprinkler_system="nfpa_13r", stories_above_grade_plane=2)
+    assert got and all(c["field"] == "building.nfpa_13r_heights_within" for c in got), got[:2]
+    assert all(c["words"].startswith("sprinkler system (NFPA 13R): stated") and "not stated for the project"
+               not in c["words"] for c in got), got[:2]
+    assert all(c["words"].endswith("not stated yet: whether its heights are within 903.3.1.2's (Gordium: 13R "
+                                   "heights within limits)") for c in got), got[0]["words"]   # round 3 of #288
+    from design_checker import ui_data                  # review round 2 of #288: the ask the pane shows is it too
+    for c in got:
+        ask = ui_data._from_cause(c, "story")
+        assert (ask["field"], ask["headline"]) == ("building.nfpa_13r_heights_within",
+                                                   ui_data.FIELD_HEADLINES["building.nfpa_13r_heights_within"]), ask
+    mixed = causes(sprinkler_system="nfpa_13r", stories_above_grade_plane=2, nfpa_13r_heights_within=True,
+                   occupancy_groups=["R-2", "B"])
+    assert mixed and all(c["key"] == "decide:sprinklered_903_3_1_2" and c["words"] == code_scope.NFPA_13R_BY_HAND
+                         for c in mixed), mixed[:2]
+    assert "903.2.6 exception 1 in a Group I-1 Condition 1 facility" in code_scope.NFPA_13R_BY_HAND   # round 3
 
 
 def test_the_escape_openings_reading_never_says_no_stairs_and_the_stairs_reading_still_does(got, laws):

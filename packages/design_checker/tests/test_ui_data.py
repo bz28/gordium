@@ -38,7 +38,8 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "stages_or_platforms": False,                      # Chapter 4 part f's
                                           "aircraft_related_occupancy": False,
                                           "service_corridors": False,
-                                          "assembly_spaces": False})                         # group 9h's
+                                          "assembly_spaces": False,                          # group 9h's
+                                          "nfpa_13r_heights_within": True})                  # 903.3.1.2's heights
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False

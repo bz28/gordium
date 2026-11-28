@@ -132,7 +132,7 @@ def test_a_13r_system_alone_never_passes_the_one_exit_row(stories):
     sprinklered per 903.3.1.1 or 903.3.1.2, and 903.3.1.2 permits 13R only four stories or fewer above grade plane with
     a Group R-2 roof under 45 ft above the lowest fire department access, a height the model doesn't show (stated
     stories, two here, don't settle it). So the same one-exit apartment that passes with NFPA 13 needs review with 13R
-    and never passes, saying why (the coordinator's decision, 2026-11-28)."""
+    and never passes; with every limit stated within (#288) it counts, and passes."""
     interior = build.interior_of()
     keys = _one_exit_building(interior, "nfpa_13r")
     if stories is not None:
@@ -141,13 +141,12 @@ def test_a_13r_system_alone_never_passes_the_one_exit_row(stories):
     rows = [r for r in got["rows"] if r["rule"] == ROW]
     assert got["results"][ROW] == "needs_review" and rows
     assert all(r["outcome"] == "needs_review" and r["values"][UNITS] == 2 for r in rows), rows
-    # the row says the rule's own reason, all three of 903.3.1.2's conditions, not the occupant-load open question
-    # its readings leave (whatever the answer, 13R still needs review: parts._own_reviews)
-    for r in rows:
-        assert r["reason"].startswith("One exit, allowed by note a only through an NFPA 13R system (903.3.1.2)"), r
-        assert all(w in r["reason"] for w in ("four stories or fewer above grade plane", "less than 45 feet above",
-                                               "30 feet or less below")), r["reason"]
-        assert not parts.is_reading_words(r["reason"]), r["reason"]
-    assert all("only through an NFPA 13R system" in str(i) for i in got["items"] if i.get("rule") == ROW)
+    # since #288 the 13R system's count is decided for every rule (code_scope.nfpa_13r_counts): not known here (its
+    # stories or heights not stated), so the row needs review on the system itself
+    from design_checker import code_scope
+    assert "sprinklered_903_3_1_2" not in code_scope.building_measures(keys["building"])
+    counted = copy.deepcopy(keys)                                  # every limit stated within: the 13R system counts
+    counted["building"].update(stories_above_grade_plane=2, nfpa_13r_heights_within=True)
+    assert _check({**interior, **counted})["results"][ROW] == "pass"
     sprinklered = _check({**interior, **_one_exit_building(interior, "nfpa_13")})
     assert sprinklered["results"][ROW] == "pass"                 # the same building with NFPA 13: the pass stands

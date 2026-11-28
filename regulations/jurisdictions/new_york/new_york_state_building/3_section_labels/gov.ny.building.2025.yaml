@@ -9830,7 +9830,7 @@ labels:
       flame barriers extending at least 30 inches beyond the exterior wall, rated at least 1 hour (ASTM E119''s or UL 263''s
       unexposed surface temperature limits don''t apply to flame barriers unless the code otherwise requires); but not in
       buildings of three stories or less above grade plane, buildings equipped throughout with an automatic sprinkler system
-      per 903.3.1.1 or 903.3.1.2 (an NFPA 13R system counts only in Group R, where 903.3.1.2 allows it), or open parking garages:
+      per 903.3.1.1 or 903.3.1.2 (an NFPA 13R system counts only where 903.3.1.2''s limits are known to hold: Group R alone, four or fewer stories and its heights stated within), or open parking garages:
       a person''s check (general.bc_705_9_5_vertical_separation).'
     sources:
     - file: gov.ny.building.2025.pdf
@@ -18075,8 +18075,7 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'A stairway in an accessible means of egress has at least 48 inches clear between handrails; not required in a
-      building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s
-      four stories, and in Group I-1 Condition 1, 903.2.6 exception 1), or for stairways reached from a refuge area with a
+      building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only where 903.3.1.2''s limits are known to hold: Group R alone, four or fewer stories and its heights stated within; in Group I-1, 903.2.6 exception 1''s Condition 1 is a person''s check), or for stairways reached from a refuge area with a
       horizontal exit: which stairways serve as an accessible means of egress, and their width between handrails, aren''t
       measured, so a person''s check.'
     sources:
@@ -18099,8 +18098,7 @@ labels:
     topic: means_of_egress
     reason: 'A stairway in an accessible means of egress has an area of refuge within an enlarged floor-level landing or is
       reached from one complying with 1009.6; not required at exit access stairways with two-way communication at the elevator
-      landing (1009.8), in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group
-      R, within 903.3.1.2''s four stories, and in Group I-1 Condition 1, 903.2.6 exception 1), at open parking garages'' stairways,
+      landing (1009.8), in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only where 903.3.1.2''s limits are known to hold: Group R alone, four or fewer stories and its heights stated within; in Group I-1, 903.2.6 exception 1''s Condition 1 is a person''s check), at open parking garages'' stairways,
       for smoke-protected or open-air assembly seating (1030.6.2 and 1030.6.3), in Group R-2, or for stairways reached from
       a refuge area with a horizontal exit: areas of refuge aren''t in the model, so a person''s check.'
     sources:
@@ -18161,8 +18159,7 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'An elevator in an accessible means of egress is reached from an area of refuge complying with 1009.6; not required
-      in open parking garages, in buildings and facilities sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system
-      counts only in Group R, within 903.3.1.2''s four stories, and in Group I-1 Condition 1, 903.2.6 exception 1), at elevators
+      in open parking garages, in buildings and facilities sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only where 903.3.1.2''s limits are known to hold: Group R alone, four or fewer stories and its heights stated within; in Group I-1, 903.2.6 exception 1''s Condition 1 is a person''s check), at elevators
       712 doesn''t require in a shaft, for smoke-protected or open-air assembly seating (1030.6.2 and 1030.6.3), or for elevators
       reached from a refuge area with a horizontal exit: elevators and areas of refuge aren''t in the model, so a person''s
       check.'
@@ -18359,8 +18356,7 @@ labels:
       1 hour from the inside, extending at least 10 feet beyond the landing on either side (or equivalent rated construction
       at least 4 feet out from the wall beside the landing) and from the ground to at least 10 feet above the area''s floor
       or the roof line, whichever is lower, openings protected per 716; neither the rating nor the opening protectives is
-      required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within
-      903.3.1.2''s four stories, and in Group I-1 Condition 1, 903.2.6 exception 1): such areas and wall ratings aren''t in
+      required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only where 903.3.1.2''s limits are known to hold: Group R alone, four or fewer stories and its heights stated within; in Group I-1, 903.2.6 exception 1''s Condition 1 is a person''s check): such areas and wall ratings aren''t in
       the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
@@ -18405,8 +18401,7 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Stairways in the means of egress from an exterior area for assisted rescue have at least 48 inches clear between
-      handrails; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in
-      Group R, within 903.3.1.2''s four stories, and in Group I-1 Condition 1, 903.2.6 exception 1): such areas aren''t in
+      handrails; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only where 903.3.1.2''s limits are known to hold: Group R alone, four or fewer stories and its heights stated within; in Group I-1, 903.2.6 exception 1''s Condition 1 is a person''s check): such areas aren''t in
       the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
@@ -20132,8 +20127,7 @@ labels:
     reason: 'Where 1013.1 requires exit signs in Group R-1, low-level exit signs complying with 1013.5 are added in every
       area serving guest rooms, their bottom at least 10 and at most 18 inches above the floor, flush on the door or wall,
       a wall sign''s edge within 4 inches of the door frame on the latch side; not required in a building sprinklered throughout
-      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories, and in Group I-1
-      Condition 1, 903.2.6 exception 1): exit signs aren''t in the model, so a person''s check.'
+      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only where 903.3.1.2''s limits are known to hold: Group R alone, four or fewer stories and its heights stated within; in Group I-1, 903.2.6 exception 1''s Condition 1 is a person''s check): exit signs aren''t in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 336
@@ -22564,8 +22558,7 @@ labels:
       grade plane; nor where it is served by an exterior ramp or balcony connecting two remote exterior exit stairways or
       other approved exits, its perimeter at least 50 percent open (openings at least half the enclosing wall''s height, their
       tops at least 7 feet above the balcony); nor from an open-ended corridor where the building is sprinklered throughout
-      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories, and in Group I-1
-      Condition 1, 903.2.6 exception 1), the corridors meet 1020 and connect at each end to an exterior exit stairway or ramp
+      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only where 903.3.1.2''s limits are known to hold: Group R alone, four or fewer stories and its heights stated within; in Group I-1, 903.2.6 exception 1''s Condition 1 is a person''s check), the corridors meet 1020 and connect at each end to an exterior exit stairway or ramp
       meeting 1027, the walls and openings beside it meet 1023.7, and each change of direction over 45 degrees has a clear
       opening of at least 35 square feet or an exterior stairway or ramp; nor in Group R-3 of at most four stories where it
       serves individual dwelling units and discharges directly to grade: exterior stairways, their separation and walls aren''t
@@ -22641,8 +22634,7 @@ labels:
       of the number and the minimum width or required capacity of interior exit stairways and ramps may egress through areas
       on the level of exit discharge (a free and unobstructed path to a readily visible exterior exit door, the whole level
       separated from areas below as the enclosure is, the egress path sprinklered and the portions with access to it sprinklered
-      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories, and in Group I-1
-      Condition 1, 903.2.6 exception 1) or separated from it, and an exit access stairway or ramp ending at least 30 feet,
+      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only where 903.3.1.2''s limits are known to hold: Group R alone, four or fewer stories and its heights stated within; in Group I-1, 903.2.6 exception 1''s Condition 1 is a person''s check) or separated from it, and an exit access stairway or ramp ending at least 30 feet,
       or a quarter of the building''s greatest diagonal if less, from the exit stairway''s discharge door), or through a vestibule
       (separated from areas below as the enclosure is, at most 10 feet deep and 30 feet long, separated from the rest of the
       level by a fire partition per 708, used only for egress and exiting directly outside), the two together at most 50 percent

@@ -333,6 +333,18 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
         if why in gaps:
             add({"kind": BY_HAND, "key": f"gap:{kind}:{m}", "words": f"{_words(rule, m)}: Gordium doesn't measure "
                  "this yet: measure it by hand", "elements": own_id})
+        elif m == "sprinklered_903_3_1_2" and known.get("nfpa_13r_stated") is True:
+            from design_checker import code_scope    # a stated 13R system whose count waits on 903.3.1.2's limits
+            field = code_scope.field_of(m, known)
+            if field:
+                what = {"building.occupancy_groups": "the occupancy groups", "building.stories_above_grade_plane":
+                        "the stories above grade plane", "building.nfpa_13r_heights_within":
+                        "whether its heights are within 903.3.1.2's (Gordium: 13R heights within limits)"}.get(
+                field, field)
+                add({"kind": MARK, "key": f"fact:{m}", "words": code_scope.NFPA_13R_LIMIT_WORDS.format(what=what),
+                     "elements": [], "measure": m, "field": field})
+            else:
+                add({"kind": DECIDE, "key": f"decide:{m}", "words": code_scope.NFPA_13R_BY_HAND, "elements": own_id})
         elif m not in own:                            # the building's: a fact the architect states for the project
             add({"kind": MARK, "key": f"fact:{m}", "words": f"{_words(rule, m)}: not stated for the project",
                  "elements": [], "measure": m, "field": f"facts.{m}"})

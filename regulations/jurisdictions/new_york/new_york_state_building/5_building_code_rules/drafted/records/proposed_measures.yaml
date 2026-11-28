@@ -103,9 +103,11 @@ sprinklered_903_3_1_1:
   - general.bc_table_1020_2_r
 sprinklered_903_3_1_2:
   meaning: 'The building is equipped throughout with an automatic sprinkler system in accordance with 2025 BCNYS Section 903.3.1.2
-    (NFPA 13R, permitted in some Group R occupancies), as the architect states it; no where the building is stated Group R
-    alone and states more than four stories above grade plane (903.3.1.2 item 1: "Four stories or fewer above grade plane"),
-    its heights above fire department vehicle access taken on the architect''s statement'
+    (NFPA 13R): yes only where the architect states an NFPA 13R system and every one of 903.3.1.2''s limits is known to
+    hold (the building stated Group R alone, four or fewer stories above grade plane stated, and its heights against fire
+    department vehicle access stated within items 2 and 3); no where a limit is stated broken (more than four stories, the
+    heights not within, a Group R-2 high-rise, or no Group R or I-1 among the groups); otherwise not known, so every rule
+    resting on it needs review (revised 2026-11-28: a limit not stated is unknown, never assumed met)'
   unit: yes_no
   needed_by:
   - general.bc_1006_2_1_two_exits
@@ -135,8 +137,6 @@ sprinklered_903_3_1_2:
   - general.bc_1031_5_area_well_required
   - general.bc_705_9_5_vertical_separation
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
-  - general.bc_903_2_5_1_group_h_sprinklers
-  - general.bc_903_2_6_group_i_sprinklers
   - general.bc_903_2_8_group_r_sprinklers
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
@@ -927,8 +927,7 @@ stories_above_grade_plane:
   meaning: 'The building''s stories above grade plane (2025 BCNYS 202 STORY ABOVE GRADE PLANE), as the architect counts
     them: 903.3.1.2 permits an NFPA 13R system only in a Group R occupancy of four stories or fewer above grade plane'
   unit: count
-  needed_by:
-  - general.bc_903_2_8_group_r_sprinklers
+  needed_by: []
 townhouse_units:
   meaning: 'Every dwelling unit of the building is a townhouse unit (2025 BCNYS 202 TOWNHOUSE UNIT: a single-family dwelling
     unit in a townhouse that extends from the foundation to the roof, that has a yard or public way on not fewer than two sides and a separate means of egress),
@@ -955,12 +954,21 @@ separate_means_of_egress:
   - general.bc_905_3_standpipes_required
 nfpa_13r_stated:
   meaning: 'The architect states an NFPA 13R sprinkler system, whether or not it counts as one per 2025 BCNYS 903.3.1.2
-    (sprinklered_903_3_1_2 is no in a building stated Group R alone above four stories): 903.3.1.2''s own flags show wherever
-    one is stated'
+    (sprinklered_903_3_1_2 is yes only where every one of its limits is known to hold, no where one is stated broken, not
+    known otherwise): 903.3.1.2''s own flags show wherever one is stated, and the rules that mean "a 13R system is
+    stated" (903.2''s, the reviews for a building of Group I-1 or of two or more groups) read it'
   unit: yes_no
   needed_by:
+  - general.bc_1006_2_1_two_exits
+  - general.bc_1007_1_1_remoteness
+  - general.bc_1007_1_1_space_remoteness
+  - general.bc_1007_1_2_space_three_or_more
+  - general.bc_903_2_5_1_group_h_sprinklers
+  - general.bc_903_2_6_group_i_sprinklers
   - general.bc_903_3_1_2_2_corridors_balconies_13r
+  - general.bc_1020_3_corridor_capacity
   - general.bc_903_3_1_2_nfpa_13r_limits
+  - general.bc_table_1017_2_i1
 stages_or_platforms:
   meaning: 'The building has a stage, a platform or a technical production area (2025 BCNYS 202), as the architect states
     it: Section 410.5''s flags show, and a space''s common path over 100 feet can''t pass Table 1006.2.1''s 125 ft rows

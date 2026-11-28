@@ -142,8 +142,9 @@ def _stairs_against_floors(whole, reader, stated_stories=None, landing=HOUSE_LAN
     Rooms with neither level nor floor given show nothing against it (not given is never a second floor)."""
     count, said = stated_stories if isinstance(stated_stories, tuple) else \
         (stated_stories, "the check gives the building {n} stories")
-    if type(count) in (int, float) and math.isfinite(count) and count >= 2:
-        return Stop("stairs_none_several_floors", what=said.format(n=f"{count:g}")).reason
+    if (type(count) is int or type(count) is float and math.isfinite(count)) and count >= 2:   # any whole number
+        n = str(count) if type(count) is int else f"{count:g}"
+        return Stop("stairs_none_several_floors", what=said.format(n=n)).reason
     if not isinstance(whole, dict):
         return None
     rooms = [r for r in whole.get("rooms") if isinstance(r, dict)] if isinstance(whole.get("rooms"), list) else []
