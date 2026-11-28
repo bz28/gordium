@@ -591,7 +591,7 @@ public static class Marks
         "Gordium: Aircraft-related occupancy", new("ee2e811c-ae68-49d3-9423-adabbc484b10"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "building.aircraft_related_occupancy",
         "Yes when the building is or holds an airport traffic control tower, an aircraft hangar (a residential aircraft hangar too), an aircraft paint hangar, an aircraft manufacturing facility, a heliport or a helistop (BCNYS Section 412), whatever its occupancy group: a hangar may be Group U, a tower Group B. " +
-        "Yes: Section 412's means of egress and 905.3.5's standpipes for a rooftop heliport or helistop are a person's check, and in Group U a room's one exit needs review (BCNYS 412.4.2, a residential aircraft hangar: \"A hangar shall provide two means of egress. One of the doors into the dwelling shall be considered as meeting only one of the two means of egress.\"). No: none. Blank: as for Yes.");
+        "Yes: Section 412's means of egress and 905.3.5's standpipes for a rooftop heliport or helistop are a person's check, and in Group U a room's one exit needs review (BCNYS 412.4.2, a residential aircraft hangar: \"A hangar shall provide two means of egress.\" A door into the dwelling counts as only one of them). No: none. Blank: as for Yes.");
 
     /// <summary>Whether the building has a service corridor (<c>building.service_corridors</c>, BCNYS 202, 415.11.3.3,
     /// 415.11.3.4).</summary>
