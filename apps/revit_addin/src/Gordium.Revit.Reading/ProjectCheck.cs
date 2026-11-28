@@ -156,7 +156,12 @@ public static class BuildingFacts
                      // the occupant loads' ceiling: a mezzanine adds its occupants to the room below (1004.2.2)
                      (Marks.Mezzanines, "mezzanines"), (Marks.LoadsNotByArea, "loads_not_by_area"),
                      // Chapter 4 part b's: a high-rise (202, 403) and an underground building (405.1)
-                     (Marks.HighRiseBuilding, "high_rise_building"), (Marks.UndergroundBuilding, "underground_building") })
+                     (Marks.HighRiseBuilding, "high_rise_building"), (Marks.UndergroundBuilding, "underground_building"),
+                     // Chapter 4 part f's (410.5 stages, Section 412, 415.11.3 service corridors) and section group
+                     // 9h's (1030.1: assembly in any group)
+                     (Marks.StagesOrPlatforms, "stages_or_platforms"),
+                     (Marks.AircraftRelatedOccupancy, "aircraft_related_occupancy"),
+                     (Marks.ServiceCorridors, "service_corridors"), (Marks.AssemblySpaces, "assembly_spaces") })
         {
             var v = Get(mark);
             if (Marks.YesNo(v) is { } yes)

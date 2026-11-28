@@ -570,6 +570,47 @@ public static class Marks
         "Yes when a floor level used for human occupancy is more than 30 ft below the finished floor of the lowest level of exit discharge. BCNYS 405.1: \"The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level used for human occupancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge.\" " +
         "Yes: Section 405's requirements are a person's check, and a story with one exit needs review (405.7.1: two exits on each floor level). No: none. Blank: as for Yes.");
 
+    // Chapter 4 part f's three facts and section group 9h's (docs/decisions/2026-11-28_revit_marks_building_facts.md,
+    // PR A): stated facts the rules already read, asked by name until now. None is worked out from the model: a stage
+    // is a raised floor, a hangar may be Group U and a tower Group B, a service corridor looks like any corridor, and a
+    // model may hold only some floors.
+
+    /// <summary>Whether the building has a stage, a platform or a technical production area
+    /// (<c>building.stages_or_platforms</c>, BCNYS 202, 410.5, 410.5.3.3).</summary>
+    public static readonly MarkDefinition StagesOrPlatforms = new(
+        "Gordium: Stages or platforms", new("5ce6a3b6-e5f6-4e2f-9493-04a3317962a0"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.stages_or_platforms",
+        "Yes when the building has a stage, a platform or a technical production area. BCNYS 202 STAGE: \"A space within a building utilized for entertainment or presentations, which includes overhead hanging curtains, drops, scenery or stage effects other than lighting and sound.\" " +
+        "PLATFORM: a raised area for worship, music, plays or other entertainment, a head table, lecturers and speakers, boxing and wrestling rings and the like, with no overhead hanging curtains, drops, scenery or stage effects but lighting and sound (a temporary one too). " +
+        "TECHNICAL PRODUCTION AREA: \"Open elevated areas or spaces intended for entertainment technicians to walk on and occupy for servicing and operating entertainment technology systems and equipment.\" " +
+        "Yes: Section 410.5's means of egress are a person's check, and in Groups R-2, R-3 and R-4 a room's one exit with a common path over 100 ft needs review (410.5.3.3). No: none. Blank: as for Yes.");
+
+    /// <summary>Whether the building is or holds an aircraft-related occupancy (<c>building.aircraft_related_occupancy</c>,
+    /// BCNYS Section 412: 412.2.2, 412.4.2, 412.6, 412.7.3; 905.3.5).</summary>
+    public static readonly MarkDefinition AircraftRelatedOccupancy = new(
+        "Gordium: Aircraft-related occupancy", new("ee2e811c-ae68-49d3-9423-adabbc484b10"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.aircraft_related_occupancy",
+        "Yes when the building is or holds an airport traffic control tower, an aircraft hangar (a residential aircraft hangar too), an aircraft paint hangar, an aircraft manufacturing facility, a heliport or a helistop (BCNYS Section 412), whatever its occupancy group: a hangar may be Group U, a tower Group B. " +
+        "Yes: Section 412's means of egress and 905.3.5's standpipes for a rooftop heliport or helistop are a person's check, and in Group U a room's one exit needs review (BCNYS 412.4.2, a residential aircraft hangar: \"A hangar shall provide two means of egress. One of the doors into the dwelling shall be considered as meeting only one of the two means of egress.\"). No: none. Blank: as for Yes.");
+
+    /// <summary>Whether the building has a service corridor (<c>building.service_corridors</c>, BCNYS 202, 415.11.3.3,
+    /// 415.11.3.4).</summary>
+    public static readonly MarkDefinition ServiceCorridors = new(
+        "Gordium: Service corridors", new("dbfc23b8-3106-4f5e-a9bb-e40da891f5c8"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.service_corridors",
+        "Yes when the building has a service corridor. BCNYS 202 SERVICE CORRIDOR: \"A fully enclosed passage used for transporting HPM and purposes other than required means of egress.\" (HPM: hazardous production materials, in a Group H-5 fabrication building.) " +
+        "Yes: in Group H-5 or a building of two or more groups, 415.11.3.3's and 415.11.3.4's service corridor sections are a person's check, and a corridor's capacity needs review; in Group H-5, a travel distance over 75 ft, a story with one exit, a dead end over 4 ft and a corridor's width need review too. No: none. Blank: as for Yes.");
+
+    /// <summary>Whether any room or space is used for assembly purposes, whatever the building's group
+    /// (<c>building.assembly_spaces</c>, BCNYS 1030.1; 303.1.1 and 303.1.2). Also Yes from a room's Function
+    /// (<c>code_scope.assembly_spaces_from_rooms</c>), whatever the mark says.</summary>
+    public static readonly MarkDefinition AssemblySpaces = new(
+        "Gordium: Assembly spaces", new("ed28622b-f010-4974-be91-5fabeaf65a6f"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.assembly_spaces",
+        "Yes when any room or space of the building is used for assembly purposes, whatever the building's occupancy group (BCNYS 303.1.1 and 303.1.2 put a small assembly room in Group B or in the main occupancy). BCNYS 1030.1: \"A room or space used for assembly purposes that contains seats, tables, displays, equipment or other material shall comply with this section.\" " +
+        "Yes: Section 1030's assembly checks apply whatever the group. No: none; in a building stated as one group other than Group A, with Gordium: Fixed assembly seating No too, they are set aside (Group E keeps 903.2.1.5.1's). A room whose Gordium: Function is one of Table 1004.5's Assembly rows makes it Yes, whatever this says; one that may be used for assembly (a courtroom, a library reading room, an exercise room, a rink or pool, a stage or platform, an airport waiting area) means a No is not read. " +
+        "Blank: the checks that turn on it need review.");
+
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
     public static readonly MarkDefinition Atrium = new(
         "Gordium: Atrium", new("8c3211a5-546b-463e-8d8c-b70fd753c1b6"), MarkValueKind.YesNo,
@@ -882,6 +923,7 @@ public static class Marks
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
         EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased, OtherLevelsReachCorridors,
         AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm, Mezzanines, LoadsNotByArea, HighRiseBuilding, UndergroundBuilding,
+        StagesOrPlatforms, AircraftRelatedOccupancy, ServiceCorridors, AssemblySpaces,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,

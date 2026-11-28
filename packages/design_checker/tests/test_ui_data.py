@@ -597,17 +597,15 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # (the occupant-load ceiling's mezzanines and loads not by area, 2026-11-26, came with their own)
     # Chapter 4 part b's two (a high-rise, an underground building) have theirs too (the Chapter 4 marks PR)
     # Chapter 4 part f's three (a stage or platform, an aircraft-related occupancy, a service corridor) and section
-    # group 9h's assembly_spaces have no Revit mark yet: read only by flags' applies_when, by bands placed last in their
-    # chains and (assembly_spaces) by the seating reviews, each asked for by name; their marks follow in the
-    # Revit-fields work
-    assert keys - set(revit) == {"stages_or_platforms", "aircraft_related_occupancy", "service_corridors",
-                                 "assembly_spaces"}
-    assert "assembly_spaces" not in code_scope.MARK and code_scope.field_of("assembly_spaces") == "building.assembly_spaces"
+    # group 9h's assembly_spaces have theirs too (docs/decisions/2026-11-28_revit_marks_building_facts.md, PR A): every
+    # fact has its mark
+    assert keys - set(revit) == set()
     assert code_scope.MARK["mezzanines"] == revit["mezzanines"] == "Gordium: Mezzanines"
     assert code_scope.MARK["loads_not_by_area"] == revit["loads_not_by_area"] == "Gordium: Loads not by area"
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased",
               "other_level_egress_into_corridors", "ambulatory_care_facility", "corridors_within_dwelling_units",
-              "emergency_voice_alarm_system", "high_rise_building", "underground_building"):
+              "emergency_voice_alarm_system", "high_rise_building", "underground_building", "stages_or_platforms",
+              "aircraft_related_occupancy", "service_corridors", "assembly_spaces"):
         # a fact a rule reads as a measure is answered by its field (field_of); occupant_load_increased is read by the
         # occupant loads themselves, not as a measure
         assert code_scope.field_of(k) == (f"building.{k}" if k in code_scope.DERIVED else None), k

@@ -183,7 +183,11 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         # the occupant loads' ceiling (occupant_load._bounds): a mezzanine's occupants add to the room below
         "mezzanines": "Gordium: Mezzanines", "loads_not_by_area": "Gordium: Loads not by area",
         # Chapter 4 part b's: a high-rise (202, or over 420 ft in building height) and an underground building (405.1)
-        "high_rise_building": "Gordium: High-rise building", "underground_building": "Gordium: Underground building"}
+        "high_rise_building": "Gordium: High-rise building", "underground_building": "Gordium: Underground building",
+        # Chapter 4 part f's (410.5 stages, Section 412, 415.11.3 service corridors) and section group 9h's (1030.1)
+        "stages_or_platforms": "Gordium: Stages or platforms",
+        "aircraft_related_occupancy": "Gordium: Aircraft-related occupancy",
+        "service_corridors": "Gordium: Service corridors", "assembly_spaces": "Gordium: Assembly spaces"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise
