@@ -171,9 +171,10 @@ public sealed class ReadSpeedTests
         // the index lists what Revit's box filter passes for a box round any model, each with its box round all 8 corners
         Assert.Contains(".WherePasses(new BoundingBoxIntersectsFilter(new Outline(new XYZ(-Everywhere, -Everywhere, -Everywhere), new XYZ(Everywhere, Everywhere, Everywhere))))", source);
         Assert.Contains("e.get_BoundingBox(null) is { } b ? Box3.Turned(P(b.Min), P(b.Max), b.Transform is { } t ? T(t) : Reading.Transform3.Identity) : null;", source);
-        // every look round goes through Collect: the rooms' insides and Near's
+        // every look round goes through Collect: the rooms' insides, Near's and what stands outside an opening (GroundReader)
         Assert.Contains("var found = ReadSteps.Time(step + \".collect\", () => Collect(doc, box));", source);
-        Assert.Equal(2, Count(source, "Collect(doc, "));
+        Assert.Contains("foreach (var e in Collect(doc, outline))", source);
+        Assert.Equal(3, Count(source, "Collect(doc, "));
     }
 
     private static int Count(string text, string what)

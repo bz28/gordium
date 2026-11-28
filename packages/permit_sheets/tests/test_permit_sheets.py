@@ -32,7 +32,8 @@ ORANGETOWN = "orangetown_ny_80_south_william"
 def _result(name: str, mutate: str = "") -> str:
     """check_site's result for a golden house (JSON text, so each test gets its own copy)."""
     house = _house(name, mutate)
-    return json.dumps(check_site(goldens.site(), dict(goldens.FACTS), name=name, today=goldens.DATE, interior=house))
+    return json.dumps(check_site(goldens.site(), goldens.facts_of(name), name=name, today=goldens.DATE,
+                                 interior=house))
 
 
 def _house(name: str, mutate: str = ""):
@@ -526,7 +527,7 @@ def test_a_list_of_sections_that_cant_be_read_says_check_the_whole_law(name, mon
     real = egress._not_checked_yet
     monkeypatch.setattr(egress, "_not_checked_yet", lambda folder, rules: ([], "no 6_coverage_report/*.rules.yaml"))
     house = _house(name)
-    r = check_site(goldens.site(), dict(goldens.FACTS), name=name, today=goldens.DATE, interior=house)
+    r = check_site(goldens.site(), goldens.facts_of(name), name=name, today=goldens.DATE, interior=house)
     g = source.gather(r, about(), house)
     banners = [b for b in sheets.code_table(g) if b[0] == "__banner__"]
     assert len(banners) == 1 and "check the whole law by hand" in banners[0][1]

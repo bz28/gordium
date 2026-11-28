@@ -354,3 +354,11 @@ def test_a_rule_for_each_parts_examples_show_its_parts_and_rows():
         " · parts: sleeping_room br1; sleeping_room br2; emergency_escape_opening w1 in br1 "
         "(opening_net_clear_area = 6) · rows: pass for w1 in br1; fail in br2 → fail"])
     assert wbk._examples([{"given": {"a": 1}, "expect": "pass"}]) == wbk._bullets(["a = 1 → pass"])
+
+
+def test_a_part_rules_own_limit_is_its_own_column():
+    """Section group 8d: a per-part rule's `limit` (its part's own requirement, apart from whether the law asks it of
+    this part) is shown, so a person reading the rules sees the opening's own requirement beside the check."""
+    col = next(c for c in wbk.COLUMNS["rule"] if "limit" in c.fields)
+    rule = {"id": "x", "limit": "opening_net_clear_area >= 5.7", "check": "(opening_net_clear_area >= 5.7) or y"}
+    assert col.value(rule, None, 0, 1) == "opening_net_clear_area >= 5.7"

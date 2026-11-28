@@ -234,9 +234,15 @@ public static class PaneWords
     public static string ChangeHeading(CheckChange change)
     {
         ArgumentNullException.ThrowIfNull(change);
-        var n = change.Rows.Count;
+        // the results no longer in the check counted apart from those that changed (egress UI audit, finding 4: setting
+        // the occupancy group took 148 rules for other groups out, and the heading said "196 results changed")
+        var gone = change.Rows.Count(r => r.After is null);
+        var n = change.Rows.Count - gone;
         var since = change.Since is { } at ? $"Since {at.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture)} · " : "";
-        return $"{since}{n} result{(n == 1 ? "" : "s")} changed";
+        var left = $"{gone} {(gone == 1 ? "result" : "results")} left the check";
+        return gone == 0 ? $"{since}{n} result{(n == 1 ? "" : "s")} changed"
+            : n == 0 ? since + left
+            : $"{since}{n} result{(n == 1 ? "" : "s")} changed · {gone} left the check";
     }
 
     /// <summary>The changed results listed: the first <see cref="ChangesListed"/>, or every one once "Show all" is

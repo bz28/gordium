@@ -13,7 +13,7 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
 endobj
 5 0 obj
-<< /Length 30232 >>
+<< /Length 30143 >>
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (CODE ANALYSIS: EGRESS) Tj ET
 BT /F2 7.5 Tf 0.7 0.15 0.12 rg 68 728.4 Td (Egress result: DOES NOT COMPLY) Tj ET
@@ -126,9 +126,8 @@ BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 558.4 Td (may not comply: clear width 24 in, n
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 549.4 Td (needs >= 31.5 in; riser height 9 in, needs <= 8.25 in; tread depth 7 in, needs >=) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 540.4 Td (9 in · a person decides: Riser slope from the vertical \(R318.7.5.1\), Open risers:) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 531.4 Td (4-inch sphere limit \(R318.7.5.1\) · to give: nosings under floor opening not) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 522.4 Td (measured \(or not usable\) · worked out, not yet checked by the rules: handrail) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 513.4 Td (sides 1, clear width at handrail 21 in and 1 more · not read yet: riser count,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 504.4 Td (serves sleeping loft) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 522.4 Td (measured \(or not usable\) · worked out, not yet checked by the rules: tread) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 513.4 Td (variation 0 in · not read yet: riser count, serves sleeping loft) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 68 500.4 m 994 500.4 l S
 0.3 w [] 0 d
@@ -206,7 +205,7 @@ BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 380.9 Td (R319.4.2.2,) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 371.9 Td (R319.6) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 470.9 Td (to give: an awning window's clear opening depends on how far it opens and its) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 461.9 Td (hardware: give the maker's net clear opening \(its clear width, height, bottom) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 452.9 Td (and source\) · not read yet: fully openable, path height and 18 more) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 452.9 Td (and source\) · not read yet: fully openable, path height and 20 more) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 68 367.9 m 994 367.9 l S
 0.3 w [] 0 d
@@ -622,19 +621,19 @@ BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 589.4 Td (2026-11-15) Tj ET
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 569.4 Td (RULEBOOK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 560.4 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 552.4 Td (s/drafted/general.yaml · status: draft · sha256) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2b8) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (70bb9d56327040adcb5cc98cc0d996f3aebcdd6b78e992ff520e9b9201a1) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2d23) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 526.4 m 1202.4 526.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 518.4 Td (RULES FINGERPRINT AT CHECK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 509.4 Td (new_york/ithaca_city) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 501.4 Td (dec99f4abe818da1d5e24ed0fe50a5b417461d8d0fdeed7adc395c1c7f33) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (a53f) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 501.4 Td (12638d6a5e2ce91253cc2a653a9590e88606fe3891f7c582a377a63e2c4) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (35884) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (83d1a1eab3682f7be8bbbda8e520f1f4ac5d4eafd11be3ba0e22b0f50bee) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (8981) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (a1bcef77354c74e4eb096a06b4c7322d1043225419653cc8e5abcb250ba) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (396f9) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -747,19 +746,19 @@ BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 589.4 Td (2026-11-15) Tj ET
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 569.4 Td (RULEBOOK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 560.4 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 552.4 Td (s/drafted/general.yaml · status: draft · sha256) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2b8) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (70bb9d56327040adcb5cc98cc0d996f3aebcdd6b78e992ff520e9b9201a1) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2d23) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 526.4 m 1202.4 526.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 518.4 Td (RULES FINGERPRINT AT CHECK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 509.4 Td (new_york/ithaca_city) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 501.4 Td (dec99f4abe818da1d5e24ed0fe50a5b417461d8d0fdeed7adc395c1c7f33) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (a53f) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 501.4 Td (12638d6a5e2ce91253cc2a653a9590e88606fe3891f7c582a377a63e2c4) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (35884) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (83d1a1eab3682f7be8bbbda8e520f1f4ac5d4eafd11be3ba0e22b0f50bee) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (8981) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (a1bcef77354c74e4eb096a06b4c7322d1043225419653cc8e5abcb250ba) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (396f9) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -900,19 +899,19 @@ BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 589.4 Td (2026-11-15) Tj ET
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 569.4 Td (RULEBOOK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 560.4 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 552.4 Td (s/drafted/general.yaml · status: draft · sha256) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2b8) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (70bb9d56327040adcb5cc98cc0d996f3aebcdd6b78e992ff520e9b9201a1) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2d23) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 526.4 m 1202.4 526.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 518.4 Td (RULES FINGERPRINT AT CHECK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 509.4 Td (new_york/ithaca_city) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 501.4 Td (dec99f4abe818da1d5e24ed0fe50a5b417461d8d0fdeed7adc395c1c7f33) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (a53f) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 501.4 Td (12638d6a5e2ce91253cc2a653a9590e88606fe3891f7c582a377a63e2c4) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (35884) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (83d1a1eab3682f7be8bbbda8e520f1f4ac5d4eafd11be3ba0e22b0f50bee) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (8981) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (a1bcef77354c74e4eb096a06b4c7322d1043225419653cc8e5abcb250ba) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (396f9) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -1053,19 +1052,19 @@ BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 589.4 Td (2026-11-15) Tj ET
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 569.4 Td (RULEBOOK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 560.4 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 552.4 Td (s/drafted/general.yaml · status: draft · sha256) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2b8) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (70bb9d56327040adcb5cc98cc0d996f3aebcdd6b78e992ff520e9b9201a1) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2d23) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 526.4 m 1202.4 526.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 518.4 Td (RULES FINGERPRINT AT CHECK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 509.4 Td (new_york/ithaca_city) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 501.4 Td (dec99f4abe818da1d5e24ed0fe50a5b417461d8d0fdeed7adc395c1c7f33) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (a53f) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 501.4 Td (12638d6a5e2ce91253cc2a653a9590e88606fe3891f7c582a377a63e2c4) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (35884) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (83d1a1eab3682f7be8bbbda8e520f1f4ac5d4eafd11be3ba0e22b0f50bee) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (8981) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (a1bcef77354c74e4eb096a06b4c7322d1043225419653cc8e5abcb250ba) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (396f9) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -1243,19 +1242,19 @@ BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 589.4 Td (2026-11-15) Tj ET
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 569.4 Td (RULEBOOK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 560.4 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 552.4 Td (s/drafted/general.yaml · status: draft · sha256) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2b8) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 544.4 Td (70bb9d56327040adcb5cc98cc0d996f3aebcdd6b78e992ff520e9b9201a1) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 536.4 Td (2d23) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 526.4 m 1202.4 526.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 518.4 Td (RULES FINGERPRINT AT CHECK) Tj ET
 BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 509.4 Td (new_york/ithaca_city) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 501.4 Td (dec99f4abe818da1d5e24ed0fe50a5b417461d8d0fdeed7adc395c1c7f33) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (a53f) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 501.4 Td (12638d6a5e2ce91253cc2a653a9590e88606fe3891f7c582a377a63e2c4) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (35884) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (83d1a1eab3682f7be8bbbda8e520f1f4ac5d4eafd11be3ba0e22b0f50bee) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (8981) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (a1bcef77354c74e4eb096a06b4c7322d1043225419653cc8e5abcb250ba) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (396f9) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -1288,18 +1287,18 @@ xref
 0000000148 00000 n 
 0000000245 00000 n 
 0000000347 00000 n 
-0000030631 00000 n 
-0000030768 00000 n 
-0000038636 00000 n 
-0000038773 00000 n 
-0000046784 00000 n 
-0000046922 00000 n 
-0000054978 00000 n 
-0000055117 00000 n 
-0000064992 00000 n 
-0000065131 00000 n 
+0000030542 00000 n 
+0000030679 00000 n 
+0000038547 00000 n 
+0000038684 00000 n 
+0000046695 00000 n 
+0000046833 00000 n 
+0000054889 00000 n 
+0000055028 00000 n 
+0000064903 00000 n 
+0000065042 00000 n 
 trailer
 << /Size 16 /Root 1 0 R /Info 15 0 R >>
 startxref
-65249
+65160
 %%EOF

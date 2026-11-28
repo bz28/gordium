@@ -9,7 +9,8 @@ the field is left out or says so, never filled in.
 New fields on an item:
 
   asks        (C1, C2, C3, C5) on a row in review: one entry per thing it asks of the architect, in order, each
-              {kind, key, headline, why, elements, field?, fields?, measure?, rooms?, questions?}.
+              {kind, key, headline, why, elements, field?, fields?, measure?, rooms?, questions?, depends_on?}.
+              depends_on: on a follow-up question, the question it hangs on (depends_on() below).
               kind: "mark" (state a fact or set a mark: `field` names the description's field that answers it, so a
               host names its own mark; a field starting "facts." or "building." is a project question), "fix_model"
               (the model, as `why` says: `elements` the element ids to show), "survey" (the lot needs a survey),
@@ -50,6 +51,7 @@ MARK, FIX_MODEL, SURVEY, DECIDE, MEASURE, OPEN_QUESTION = ("mark", "fix_model", 
 KINDS = (MARK, FIX_MODEL, SURVEY, DECIDE, MEASURE, OPEN_QUESTION)
 
 # the headline of a project question, by the field that answers it
+HIGH_RISE_FIELD = "building.high_rise_building"      # the fact the model's figure hints at (high_rise_hint.py)
 FIELD_HEADLINES = {
     "building.occupancy_groups": "Set the occupancy group",
     "building.sprinkler_system": "Set the sprinkler system",
@@ -61,11 +63,36 @@ FIELD_HEADLINES = {
     "building.r2_sleeping_units": "Say whether the Group R-2 units are all sleeping units, all dwelling units, or both",
     "building.emergency_escape_openings_1031": "Say whether every sleeping room has an emergency escape opening (1031)",
     "building.occupied_outdoor_areas": "Say whether the occupants use outdoor areas (yards, patios, roofs: 1004.7)",
-    "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Table 1020.3)",
+    "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Section 422)",
     "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
     "building.emergency_voice_alarm_system": "Say whether the whole building has an emergency voice/alarm communication system (907.5.2.2)",
+    "building.high_rise_building": "Say whether the building is a high-rise (an occupied floor or occupiable roof more than 75 ft above the lowest level of fire department vehicle access, 202) or more than 420 ft in building height (403)",
+    "building.underground_building": "Say whether any floor level used for human occupancy is more than 30 ft below the finished floor of the lowest level of exit discharge (405.1)",
+    "building.stages_or_platforms": "Say whether the building has a stage, a platform or a technical production area (202, 410)",
+    "building.aircraft_related_occupancy": "Say whether the building is or holds an airport traffic control tower, an aircraft hangar, an aircraft paint hangar, an aircraft manufacturing facility, a heliport or a helistop (412)",
+    "building.service_corridors": "Say whether the building has a service corridor, a fully enclosed passage used for transporting HPM (202, 415.11.3)",
+    "building.assembly_spaces": "Say whether any room or space is used for assembly purposes, whatever the building's group (1030.1)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
+    "building.mezzanines": "Say whether the building has a mezzanine (505.2)",
+    "building.loads_not_by_area": "Say whether any area is counted by seats, lanes or actual load (fixed seats, bowling, call centers)",
     "doors[].leaves": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)",
+    "doors[].hardware": "Set what latches or locks each door (panic hardware, an electric lock with it, a latch, or none)",
+    "openings[].stated_well.below_grade": "Say whether each escape opening's bottom is below the ground outside it",
+    "openings[].stated_well.area": "Set each escape opening's area well's horizontal area",
+    "openings[].stated_well.width": "Set each escape opening's area well's width along the wall",
+    "openings[].stated_well.projection": "Set how far each escape opening's area well projects from the wall",
+    "openings[].stated_well.depth": "Set each escape opening's area well's depth",
+    "openings[].stated_well.ladder": "Say whether each escape opening's area well has a ladder or steps",
+    "openings[].stated_well.ladder_width": "Set the inside width of each area well's ladder or steps",
+    "openings[].stated_well.ladder_projection": "Set how far each area well ladder's rungs stand out from the wall",
+    "openings[].stated_well.rung_spacing": "Set the spacing of each area well ladder's rungs",
+    "openings[].stated_well.step_tread": "Set the tread depth of each area well's steps",
+    "openings[].stated_well.step_riser": "Set the riser height of each area well's steps",
+    "openings[].stated_well.full_height": "Say whether each area well's ladder or steps run its full height",
+    "openings[].stated_well.ladder_encroachment": "Set how far each area well's ladder or steps reach into the well",
+    "openings[].stated_well.other_encroachment": "Set how far anything else in each area well reaches into it",
+    "rooms[].fire_rating_hours": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)",
+    "rooms[].walls_smoke_partitions": "Say whether the corridor's walls are smoke partitions",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",
     "facts.ground_is_flat": "Say whether the ground is flat",
@@ -82,13 +109,40 @@ FIELD_HEADLINES = {
     "facts.conversion": "Is it made by converting an existing building? (§325-3B)",
     "facts.primary_buildings_same_use": "Does every primary building hold the lot's use?",
 }
+# A follow-up question hangs on another: its parent is the fact the setup already waits on before it asks it
+# (host_core.facts.ROW_ONLY_FACTS: "is the ADU detached?" only once "is there an ADU?" is answered). The answers to
+# the parent that make the follow-up moot (every rule reading it then doesn't apply: its applies_when is false,
+# test_ui_data checks each against the rules) are below; a parent missing here (the garage's car count, whose limit
+# is the chart's) holds its follow-up back but never makes it moot.
+MOOT_WHEN = {"adu_detached": [False], "adus_on_parcel": [False], "adu_bedrooms": [False],
+             "adu_existing_building": [False],          # an attached ADU is in no accessory building
+             "adu_floor_area": [True], "primary_floor_area": [True]}    # §325-28's size limit is an attached ADU's
+
+
+def depends_on(field) -> dict | None:
+    """{"field": the parent question's field, "moot_if"?: [its answers that make this one moot]} for a follow-up
+    question's field ("facts.adu_detached"), else None. The pane holds the follow-up back until the parent is
+    answered, and drops it once the parent's answer is one of moot_if."""
+    from design_checker.host_core.facts import ROW_ONLY_FACTS
+    if not isinstance(field, str) or not field.startswith("facts."):
+        return None
+    fact = field[len("facts."):]
+    if fact not in ROW_ONLY_FACTS:
+        return None
+    out = {"field": f"facts.{ROW_ONLY_FACTS[fact]}"}
+    if fact in MOOT_WHEN:
+        out["moot_if"] = list(MOOT_WHEN[fact])
+    return out
+
+
 # the facts the site's own questions answer, by the measuring's stop that asks for them (model_measurement/stops.py)
 SITE_STOPS = {"corner_unknown": ["corner_lot"], "two_streets": ["corner_lot"], "one_street_or_two": ["corner_lot"],
               "survey_unknown": ["lot_surveyed"], "ground_unknown": ["ground_is_flat"]}
 SURVEY_STOPS = ("not_surveyed",)
 OPEN_STOPS = ("readings_differ", "all_street", "rear_on_street", "no_side_line", "no_rear_line",
               "corner_outside_residential", "lines_unclear")
-# the questions a by-hand check asks, for the measures Gordium doesn't measure yet (strings.md, Checker reasons)
+# the questions a by-hand check asks, for the measures Gordium doesn't measure yet, or couldn't on this model
+# (strings.md, Checker reasons)
 BY_HAND_QUESTIONS = {
     "space_egress_through_locked_room": "Check by hand: does the path pass through a room that can be locked?",
     "space_egress_through_other_room": "Check by hand: does the path pass through another room?",
@@ -168,8 +222,9 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
             return {**base, "kind": MARK, "key": f"field:{field}", "field": field,
                     "headline": FIELD_HEADLINES.get(field) or f"Set the {name}"}
         stated = STOPS["stated_not_given"].split("{what}")[0]
-        if key.startswith("mark:") and measure in panel_data.MEASURE_FIELDS:   # a measure a host's mark states
-            f = panel_data.MEASURE_FIELDS[measure]
+        if key.startswith("mark:") and isinstance(measure, str) and (f := panel_data.field_of_why(measure, words)):
+            # a measure a host's mark states (a door type's leaves; a door's hardware, an escape opening's area well
+            # where the reason names the field)
             return {**base, "kind": MARK, "key": f"field:{f}", "field": f, "headline": FIELD_HEADLINES[f]}
         if key.startswith("mark:") and occupant_load.FUNCTION_STATED in words:   # a room's function: its own mark
             return {**base, "kind": MARK, "key": f"field:{occupant_load.FUNCTION_FIELD}",
@@ -181,8 +236,7 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
             return {**base, "kind": MARK, "key": f"field:{f}", "field": f, "headline": FIELD_HEADLINES[f]}
         if key.startswith("mark:") and isinstance(measure, str) and stated in words:
             name = _measure_name(measure, rule_kind)
-            return {**base, "kind": MEASURE,
-                    "headline": f"Work out the {name} by hand: Gordium has no field for it yet"}
+            return {**base, "kind": MEASURE, "headline": f"Work out the {name} by hand (a person's check)"}
         if key.startswith("mark:") and isinstance(measure, str):
             return {**base, "kind": MARK, "headline": f"Mark the {_measure_name(measure, rule_kind)} in the model"}
         out = {**base, "kind": MARK, "headline": _clause_head(words) or "Set the mark this asks for"}
@@ -466,9 +520,11 @@ def limit_words(item: dict, rule: dict | None, values: dict) -> str | None:
 # ---- adding them to the view ----------------------------------------------------------------------------------
 
 def add(view: dict, *, rules_by_id: dict, laws: list[dict], site: dict | None, values: dict, place=None,
-        place_folder=None, documents: dict | None = None) -> None:
+        place_folder=None, documents: dict | None = None, high_rise_hint: str | None = None) -> None:
     """Every new field onto the view's items, and the view's `contents` (the module's note). Never a crash: a field
-    that can't be worked out is left out, the rest of the answer as it was."""
+    that can't be worked out is left out, the rest of the answer as it was. `high_rise_hint`: the model's figure for
+    the high-rise question (design_checker/high_rise_hint.py), added to the words of each ask for that fact; it
+    decides nothing (the fact stays unstated until the architect answers)."""
     from design_checker import contents as contents_mod
     law_rules = {(law["key"], r.get("id")): r for law in laws for r in law.get("rules") or [] if isinstance(r, dict)}
     rule_kinds = {r.get("id"): r.get("for_each") for law in laws for r in law.get("rules") or []
@@ -492,6 +548,16 @@ def add(view: dict, *, rules_by_id: dict, laws: list[dict], site: dict | None, v
                     "why": str(c.get("words") or ""), "elements": list(c.get("elements") or [])}
                    for c in item.get("causes") or []] if item.get("status") == present.REVIEW else None
         if got is not None:
+            if high_rise_hint:
+                for a in got:
+                    if a.get("field") == HIGH_RISE_FIELD:
+                        why = str(a.get("why") or "").rstrip()      # a sentence of its own (marks PR round 2)
+                        a["why"] = (why + ("" if not why or why[-1] in ".?!" else ".") + " " + high_rise_hint).strip()
+                        a["hint"] = high_rise_hint
+            for a in got:                # a follow-up question names the one it hangs on
+                parent = depends_on(a.get("field"))
+                if parent is not None:
+                    a["depends_on"] = parent
             item["asks"] = got
         try:
             name = rule_name(item, rule)

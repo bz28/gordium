@@ -708,7 +708,7 @@ ELEMENTS:
   Element 3
 
 [60 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well where opening is below grade (R319.4) · R319.4
-WHY: area well area not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well area not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's horizontal area, and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -720,7 +720,7 @@ ELEMENTS:
   Element 3
 
 [61 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well deeper than 44 in: ladder or steps (R319.4.2) · R319.4.2
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -744,7 +744,7 @@ ELEMENTS:
   Element 3
 
 [63 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well horizontal area at least 9 sf (R319.4.1) · R319.4.1
-WHY: area well area not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well area not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's horizontal area, and the model doesn't give it (its area well marks); area well depth not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder encroachment not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state how far its area well's ladder or steps reach into the well's required dimensions, and the model doesn't give it (its area well marks); area well other encroachment not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state how far anything else in its area well reaches into the well's required dimensions, and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -752,11 +752,12 @@ WHAT TO DO:
 THE LAW'S WORDS:
   "The horizontal area of the area well shall be not less than 9 square feet (0.9 m[fn2]), with a horizontal projec-" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
   Element 3
 
 [64 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well horizontal projection at least 36 in (R319.4.1) · R319.4.1
-WHY: area well ladder not measured: Gordium doesn't measure this yet; area well projection not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder encroachment not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state how far its area well's ladder or steps reach into the well's required dimensions, and the model doesn't give it (its area well marks); area well other encroachment not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state how far anything else in its area well reaches into the well's required dimensions, and the model doesn't give it (its area well marks); area well projection not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's projection out from the wall, and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -764,11 +765,12 @@ WHAT TO DO:
 THE LAW'S WORDS:
   "tion and width of not less than 36 inches (914 mm)." (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
   Element 3
 
 [65 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well width at least 36 in (R319.4.1) · R319.4.1
-WHY: area well ladder not measured: Gordium doesn't measure this yet; area well width not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder encroachment not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state how far its area well's ladder or steps reach into the well's required dimensions, and the model doesn't give it (its area well marks); area well other encroachment not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state how far anything else in its area well reaches into the well's required dimensions, and the model doesn't give it (its area well marks); area well width not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's width along the wall, and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -776,11 +778,12 @@ WHAT TO DO:
 THE LAW'S WORDS:
   "tion and width of not less than 36 inches (914 mm)." (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
   Element 3
 
 [66 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well size allows opening to fully open (R319.4.1) · R319.4.1
-WHY: below grade not measured: Gordium doesn't measure this yet; fully openable not measured: Gordium doesn't measure this yet
+WHY: below grade not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark); fully openable not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -815,7 +818,7 @@ ELEMENTS:
   Element 3
 
 [69 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well ladder inside width (R319.4.2.1) · R319.4.2.1
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder width not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder width not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state the inside width of its area well's ladder or steps, and the model doesn't give it (its area well marks); area well steps not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -827,7 +830,7 @@ ELEMENTS:
   Element 3
 
 [70 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well ladder projection from wall (R319.4.2.1) · R319.4.2.1
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder projection not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder projection not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state how far its area well ladder's rungs stand out from the wall, and the model doesn't give it (its area well marks); area well steps not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -839,7 +842,7 @@ ELEMENTS:
   Element 3
 
 [71 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well ladder rung spacing (R319.4.2.1) · R319.4.2.1
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well rung spacing not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well rung spacing not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state the spacing of its area well ladder's rungs, and the model doesn't give it (its area well marks); area well steps not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -851,7 +854,7 @@ ELEMENTS:
   Element 3
 
 [72 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well ladder rungs for full height (R319.4.2.1) · R319.4.2.1
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder full height not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder full height not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether its area well's ladder or steps run its full height, and the model doesn't give it (its area well marks); area well steps not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -863,7 +866,7 @@ ELEMENTS:
   Element 3
 
 [73 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well steps: width, tread, riser (R319.4.2.2) · R319.4.2.2
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder full height not measured: Gordium doesn't measure this yet; area well ladder width not measured: Gordium doesn't measure this yet; area well step riser not measured: Gordium doesn't measure this yet; area well step tread not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder full height not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether its area well's ladder or steps run its full height, and the model doesn't give it (its area well marks); area well ladder width not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state the inside width of its area well's ladder or steps, and the model doesn't give it (its area well marks); area well step riser not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state the riser height of its area well's steps, and the model doesn't give it (its area well marks); area well step tread not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state the tread depth of its area well's steps, and the model doesn't give it (its area well marks); area well steps not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 30 x 36 (Window 1) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -898,7 +901,7 @@ ELEMENTS:
   Element 1
 
 [76 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well where opening is below grade (R319.4) · R319.4
-WHY: area well area not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well area not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's horizontal area, and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -910,7 +913,7 @@ ELEMENTS:
   Element 1
 
 [77 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well deeper than 44 in: ladder or steps (R319.4.2) · R319.4.2
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -934,7 +937,7 @@ ELEMENTS:
   Element 1
 
 [79 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well horizontal area at least 9 sf (R319.4.1) · R319.4.1
-WHY: area well area not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well area not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's horizontal area, and the model doesn't give it (its area well marks); area well depth not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder encroachment not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state how far its area well's ladder or steps reach into the well's required dimensions, and the model doesn't give it (its area well marks); area well other encroachment not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state how far anything else in its area well reaches into the well's required dimensions, and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -942,11 +945,12 @@ WHAT TO DO:
 THE LAW'S WORDS:
   "The horizontal area of the area well shall be not less than 9 square feet (0.9 m[fn2]), with a horizontal projec-" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
   Element 1
 
 [80 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well horizontal projection at least 36 in (R319.4.1) · R319.4.1
-WHY: area well ladder not measured: Gordium doesn't measure this yet; area well projection not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder encroachment not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state how far its area well's ladder or steps reach into the well's required dimensions, and the model doesn't give it (its area well marks); area well other encroachment not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state how far anything else in its area well reaches into the well's required dimensions, and the model doesn't give it (its area well marks); area well projection not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's projection out from the wall, and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -954,11 +958,12 @@ WHAT TO DO:
 THE LAW'S WORDS:
   "tion and width of not less than 36 inches (914 mm)." (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
   Element 1
 
 [81 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well width at least 36 in (R319.4.1) · R319.4.1
-WHY: area well ladder not measured: Gordium doesn't measure this yet; area well width not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder encroachment not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state how far its area well's ladder or steps reach into the well's required dimensions, and the model doesn't give it (its area well marks); area well other encroachment not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state how far anything else in its area well reaches into the well's required dimensions, and the model doesn't give it (its area well marks); area well width not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's width along the wall, and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -966,11 +971,12 @@ WHAT TO DO:
 THE LAW'S WORDS:
   "tion and width of not less than 36 inches (914 mm)." (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
   Element 1
 
 [82 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well size allows opening to fully open (R319.4.1) · R319.4.1
-WHY: below grade not measured: Gordium doesn't measure this yet; fully openable not measured: Gordium doesn't measure this yet
+WHY: below grade not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark); fully openable not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -1005,7 +1011,7 @@ ELEMENTS:
   Element 1
 
 [85 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder inside width (R319.4.2.1) · R319.4.2.1
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder width not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder width not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state the inside width of its area well's ladder or steps, and the model doesn't give it (its area well marks); area well steps not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -1017,7 +1023,7 @@ ELEMENTS:
   Element 1
 
 [86 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder projection from wall (R319.4.2.1) · R319.4.2.1
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder projection not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder projection not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state how far its area well ladder's rungs stand out from the wall, and the model doesn't give it (its area well marks); area well steps not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -1029,7 +1035,7 @@ ELEMENTS:
   Element 1
 
 [87 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder rung spacing (R319.4.2.1) · R319.4.2.1
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well rung spacing not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well rung spacing not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state the spacing of its area well ladder's rungs, and the model doesn't give it (its area well marks); area well steps not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -1041,7 +1047,7 @@ ELEMENTS:
   Element 1
 
 [88 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder rungs for full height (R319.4.2.1) · R319.4.2.1
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder full height not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder full height not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether its area well's ladder or steps run its full height, and the model doesn't give it (its area well marks); area well steps not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -1053,7 +1059,7 @@ ELEMENTS:
   Element 1
 
 [89 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well steps: width, tread, riser (R319.4.2.2) · R319.4.2.2
-WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder full height not measured: Gordium doesn't measure this yet; area well ladder width not measured: Gordium doesn't measure this yet; area well step riser not measured: Gordium doesn't measure this yet; area well step tread not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHY: area well depth not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state its area well's vertical depth, and the model doesn't give it (its area well marks); area well ladder not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); area well ladder full height not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether its area well's ladder or steps run its full height, and the model doesn't give it (its area well marks); area well ladder width not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state the inside width of its area well's ladder or steps, and the model doesn't give it (its area well marks); area well step riser not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state the riser height of its area well's steps, and the model doesn't give it (its area well marks); area well step tread not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state the tread depth of its area well's steps, and the model doesn't give it (its area well marks); area well steps not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state what its area well has to climb out by (a ladder, steps or none), and the model doesn't give it (its area well marks); below grade not measured: the opening Gordium test window: 24 x 20 (Window 2) doesn't state whether the bottom of its clear opening is below the adjacent grade, and the model doesn't give it (its below-grade mark)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]

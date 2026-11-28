@@ -1537,7 +1537,10 @@ _repo_file_names: set[str] | None = None
 # an open model (review round 2) are no more the repo's than a Python cache. Except a name Python can import: a
 # compiled module (.pyd, .pyc) beside a validator's .py is imported in its place, so it must change the listing
 # (review round 3); Python's own caches are in __pycache__, left out whole.
-GENERATED_NAMES = ("__pycache__", "bin", "obj", "TestResults", "7_published_rulebooks", "venv", "dist", "build")
+# The Revit pane's apartment answer is made before the C# tests (apps/revit_addin/tools/evals/make_apartment_answer.py,
+# gitignored) in a folder Maine's compile walks: made after a publish, it would otherwise make that certificate stale.
+GENERATED_NAMES = ("__pycache__", "bin", "obj", "TestResults", "7_published_rulebooks", "venv", "dist", "build",
+                   "four_unit_apartment_check_answer.json")
 PUBLISHED_SUFFIX = ".published.json"
 GENERATED_SUFFIXES = (".egg-info", PUBLISHED_SUFFIX, ".rhl", ".3dmbak")
 

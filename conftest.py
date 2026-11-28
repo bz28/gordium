@@ -134,8 +134,19 @@ def pytest_sessionfinish(session, exitstatus):
 # Compile, then freeze (rule_format/published.py; docs/decisions/2026-11-23_laws_validation_speed.md): every state
 # law's certificate is current before any test runs. CI publishes before the tests, so there this only checks (about
 # 50 ms); a local run publishes the missing or stale ones once, one publisher at a time across pytest-xdist's workers.
-@pytest.fixture(scope="session", autouse=True)
-def published_laws():
+# Done at the session's start, before any test file is loaded: a module that reads the laws when it is loaded
+# (test_waiting_headline's LAWS) read none on a fresh clone (merge review of main into #228). Again as a session
+# fixture, a no-op when nothing changed.
+def _publish_laws():
     from rule_format import published
     for note in published.ensure():     # a law that can't be published is said, never a crash (the check refuses it)
         print(f"\nnot published: {note}", file=sys.stderr)
+
+
+def pytest_sessionstart(session):
+    _publish_laws()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def published_laws():
+    _publish_laws()

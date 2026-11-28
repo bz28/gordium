@@ -1,0 +1,85 @@
+{
+ "what": "The model build's read-back of door swings run in Revit (ModelBuild.SwingDoors, then the swing check SwingCheck.cs on the model it saved), recorded from the trial log",
+ "recorded": {
+  "by": "Claude Code (door swing agent)",
+  "date": "2026-11-25",
+  "tool": "Revit 2027.4, Gordium add-in (fix/build-reads-door-swing)"
+ },
+ "build_data": {
+  "file": "test_data/test_sites/revit_door_swing/revit_build_data.json",
+  "sha256": "81b0e099a66d8ab5e14d92110d119fb127c962b0a2b142406b2a1a6d2640e149"
+ },
+ "build": {
+  "request": {
+   "data": "test_data/test_sites/revit_door_swing/revit_build_data.json",
+   "save_as": "door_swing_built3.rvt"
+  },
+  "ok": true,
+  "all_built": true,
+  "failed": [],
+  "doors": [
+   "D01 (the template's family, swing (1, 0)): facing flipped, hand flipped; read back: swings - (the data -), hinged + (the data +); swings as the data",
+   "D02 (the template's family, swing (-1, 0)): nothing flipped; read back: swings + (the data +), hinged + (the data +); swings as the data",
+   "D03 (the template's family, swing (0, 1)): nothing flipped; read back: swings + (the data +), hinged + (the data +); swings as the data",
+   "D04 (the template's family, swing (0, -1)): facing flipped, hand flipped; read back: swings - (the data -), hinged + (the data +); swings as the data",
+   "D05 (the template's family, swing (-1, 0)): facing flipped; read back: swings - (the data -), hinged + (the data +); swings as the data",
+   "D06 (the template's family, swing (-1, 0)): nothing flipped; read back: swings + (the data +), hinged + (the data +); swings as the data",
+   "D07 (the template's family, swing (-1, 0)): hand flipped; read back: swings + (the data +), hinged + (the data +); swings as the data",
+   "D08 (the template's family, swing (1, 0)): facing flipped; read back: swings - (the data -), hinged + (the data +); swings as the data",
+   "D09 (Gordium's family, swing (0, 1)): facing flipped; read back: swings + (the data +); swings as the data",
+   "D10 (the template's family, swing (0, 1)): hand flipped; read back: swings + (the data +), hinged + (the data +); swings as the data"
+  ]
+ },
+ "swing_check": {
+  "doors": 10,
+  "as_built": [
+   "D01 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (1, -0) flipped True, hand (-0, -1) flipped True, mirrored False: read -, built - (agrees)",
+   "D02 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-1, 0) flipped False, hand (0, 1) flipped False, mirrored False: read +, built + (agrees)",
+   "D03 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (0, 1) flipped False, hand (1, 0) flipped False, mirrored False: read +, built + (agrees)",
+   "D04 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-0, -1) flipped True, hand (-1, -0) flipped True, mirrored False: read -, built - (agrees)",
+   "D05 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-1, -0) flipped True, hand (0, -1) flipped False, mirrored True: read -, built - (agrees)",
+   "D06 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-1, 0) flipped False, hand (0, 1) flipped False, mirrored False: read +, built + (agrees)",
+   "D07 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-1, -0) flipped False, hand (0, -1) flipped True, mirrored True: read +, built + (agrees)",
+   "D08 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (1, -0) flipped True, hand (0, 1) flipped False, mirrored True: read -, built - (agrees)",
+   "D09 (Gordium double door 36 x 84 in (swing check): Door 36\" x 84\" (swing check); double): facing (-0, -1) flipped True, hand (1, 0) flipped False, mirrored True: read +, built + (agrees)",
+   "D10 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-0, 1) flipped False, hand (-1, 0) flipped True, mirrored True: read +, built + (agrees)"
+  ],
+  "rooms": [
+   "D01: swings_into CORRIDOR L1 3; Revit's room on the built side CORRIDOR L1 3 (agrees)",
+   "D02: swings_into CORRIDOR L1 3; Revit's room on the built side CORRIDOR L1 3 (agrees)",
+   "D03: swings_into CORRIDOR L1 3; Revit's room on the built side CORRIDOR L1 3 (agrees)",
+   "D04: swings_into CORRIDOR L1 3; Revit's room on the built side CORRIDOR L1 3 (agrees)",
+   "D05: swings_into outside; Revit's room on the built side outside (agrees)",
+   "D06: swings_into STAIR EAST L1 4; Revit's room on the built side STAIR EAST L1 4 (agrees)",
+   "D07: swings_into STAIR WEST L2 7; Revit's room on the built side STAIR WEST L2 7 (agrees)",
+   "D08: swings_into STAIR EAST L2 9; Revit's room on the built side STAIR EAST L2 9 (agrees)",
+   "D09: swings_into CORRIDOR L2 8; Revit's room on the built side CORRIDOR L2 8 (agrees)",
+   "D10: swings_into APARTMENT NORTH L2 10; Revit's room on the built side APARTMENT NORTH L2 10 (agrees)"
+  ],
+  "subcategories_hidden": 63,
+  "views_coarse_swings_hidden": [
+   "D01 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (1, -0) flipped True, hand (-0, -1) flipped True, mirrored False: read -, built - (agrees)",
+   "D02 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-1, 0) flipped False, hand (0, 1) flipped False, mirrored False: read +, built + (agrees)",
+   "D03 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (0, 1) flipped False, hand (1, 0) flipped False, mirrored False: read +, built + (agrees)",
+   "D04 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-0, -1) flipped True, hand (-1, -0) flipped True, mirrored False: read -, built - (agrees)",
+   "D05 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-1, -0) flipped True, hand (0, -1) flipped False, mirrored True: read -, built - (agrees)",
+   "D06 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-1, 0) flipped False, hand (0, 1) flipped False, mirrored False: read +, built + (agrees)",
+   "D07 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-1, -0) flipped False, hand (0, -1) flipped True, mirrored True: read +, built + (agrees)",
+   "D08 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (1, -0) flipped True, hand (0, 1) flipped False, mirrored True: read -, built - (agrees)",
+   "D09 (Gordium double door 36 x 84 in (swing check): Door 36\" x 84\" (swing check); double): facing (-0, -1) flipped True, hand (1, 0) flipped False, mirrored True: read +, built + (agrees)",
+   "D10 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-0, 1) flipped False, hand (-1, 0) flipped True, mirrored True: read +, built + (agrees)"
+  ],
+  "arcs": [
+   "D01: centre (9.5, 13.5) r 3.01 mid (11.57, 15.68)",
+   "D02: centre (50.5, 16.5) r 3.01 mid (48.43, 14.32)",
+   "D03: centre (31.5, 12) r 3.01 mid (29.32, 14.07)",
+   "D04: centre (28.5, 18) r 3.01 mid (30.68, 15.93)",
+   "D05: centre (-0.5, 13.5) r 3.01 mid (-2.57, 15.68)",
+   "D06: centre (60, 16.5) r 3.01 mid (57.93, 14.32)",
+   "D07: centre (9, 13.5) r 3.01 mid (6.93, 15.68)",
+   "D08: centre (51, 16.5) r 3.01 mid (53.07, 14.32)",
+   "D09: centre (31.5, 11.75) r 1.5 mid (30.44, 12.81); centre (28.5, 11.75) r 1.5 mid (29.56, 12.81)",
+   "D10: centre (28.5, 18.5) r 3.01 mid (30.68, 20.57)"
+  ]
+ }
+}

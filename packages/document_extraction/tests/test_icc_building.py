@@ -147,3 +147,110 @@ def test_a_raised_letter_before_a_slash_ends_a_cell_so_both_numbers_are_read():
     # fraction's top, read as before (Table 716.1's "2 1[fn1]/ 2" hours, a drawing's "[fn5]/8 IN.")
     assert "1" not in [shown(s) for s in statements("2 1[fn1]/ 2 W-120")]
     assert "8 inch" not in [shown(s) for s in statements("[fn5]/8 IN. MIN. TO EDGE")]
+
+
+def _at(row, x0, top, x1, bottom):
+    """A built line with its place on the page (points), as the text layer gives it."""
+    return {**row, "x0": x0, "top": top, "x1": x1, "bottom": bottom}
+
+
+# Table 1010.2.4 as p.325 prints it (each line's place read from the book's text layer): a title on two lines, in the
+# title's type (9 points), centred; then its column headings, smaller (8.4 points), and further below
+TITLE_1010_2_4 = [
+    _at(_row(2, 9, "TABLE 1010.2.4—MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND",
+             bold="TABLE 1010.2.4—MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND"), 168.8, 458.2, 425.2, 467.2),
+    _at(_row(2, 10, "CONSTANT LATCHING BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS",
+             bold="CONSTANT LATCHING BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS"), 151.9, 468.2, 440.1, 477.2),
+    _at(_row(2, 11, "PERMITTED USES OF MANUAL BOLTS,", bold="PERMITTED USES OF MANUAL BOLTS,"),
+        381.1, 483.3, 520.6, 491.7)]
+
+
+def test_a_tables_title_printed_on_two_lines_is_read_whole():
+    # Table 1010.2.4's title was cut after its first line ("... FLUSH BOLTS AND")
+    assert icc_sections._table_title(TITLE_1010_2_4) == (
+        "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND CONSTANT LATCHING BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS")
+    rows = _book()
+    rows[rows.index(next(r for r in rows if r.get("line") == 9 and r["page"] == 2))] = TITLE_1010_2_4[0]
+    rows[rows.index(next(r for r in rows if r.get("line") == 10 and r["page"] == 2))] = TITLE_1010_2_4[1]
+    got = _pieces(icc_sections.split(rows, BROUGHT_IN, STYLE))["Table 1017.2"]
+    assert got["title"].endswith("FLUSH BOLTS AND CONSTANT LATCHING BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS")
+    assert got["lines"] == [[2, 9, 10]]                       # the lines of the piece are as they were
+
+
+def test_a_column_heading_under_a_title_is_never_part_of_it():
+    first = TITLE_1010_2_4[0]
+    # Table 1006.3.3 (p.316): a heading centred and bold under the title, but smaller and set further below
+    heading = _at(_row(2, 10, "OCCUPANT LOAD PER MINIMUM NUMBER OF EXITS OR ACCESS",
+                       bold="OCCUPANT LOAD PER MINIMUM NUMBER OF EXITS OR ACCESS"), 186.9, 474.7, 405.1, 483.1)
+    assert icc_sections._table_title([first, heading]) == "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND"
+    second = TITLE_1010_2_4[1]
+    assert icc_sections._table_title([first, {**second, "top": 473.3, "bottom": 482.3}]) == \
+        "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND"                          # set too far below
+    assert icc_sections._table_title([first, {**second, "bottom": 476.6}]) == \
+        "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND"                          # smaller type
+    assert icc_sections._table_title([first, {**second, "x0": 171.9, "x1": 460.1}]) == \
+        "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND"                          # not centred on it
+    assert icc_sections._table_title([first, {k: v for k, v in second.items() if k != "bold"}]) == \
+        "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND"                          # roman, in a book that marks bold
+    assert icc_sections._table_title([first, {**second, "line": 11}]) == \
+        "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND"                          # not the next line
+    no_place = {k: v for k, v in second.items() if k not in ("x0", "x1", "top", "bottom")}
+    assert icc_sections._table_title([first, no_place]) == "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND"
+    # a one-line title with its footnote marker, as before
+    one = _at(_row(2, 9, "TABLE 1017.2—EXIT ACCESS TRAVEL DISTANCE[fna]", bold="TABLE 1017.2—EXIT ACCESS TRAVEL "
+                   "DISTANCE[fna]"), 196.7, 300.0, 397.3, 309.3)
+    assert icc_sections._table_title([one, TITLE_1010_2_4[2]]) == "EXIT ACCESS TRAVEL DISTANCE"
+
+
+def test_a_two_column_books_title_under_its_number_is_read_with_it():
+    from document_extraction import columns_sections
+    ibc = columns_sections.STYLES["ibc_2009"].table
+    lines = lambda *rows: icc_sections.joined_title(icc_sections.table_title_lines(list(rows), ibc))
+    # the 2009 IBC prints the number, then the name under it (Table 508.2.5, p.112), then the column headings
+    number = _at(_row(112, 43, "TABLE 508.2.5"), 290.0, 300.0, 342.8, 307.3)
+    name = _at(_row(112, 44, "INCIDENTAL ACCESSORY OCCUPANCIES"), 252.0, 308.5, 381.2, 315.8)
+    heading = _at(_row(112, 45, "ROOM OR AREA"), 170.0, 323.4, 221.4, 329.9)
+    assert lines(number, name, heading) == "TABLE 508.2.5 INCIDENTAL ACCESSORY OCCUPANCIES"
+    # past the title's footnote letter on a line of its own (Table 1016.1, p.267)
+    number = _at(_row(267, 56, "TABLE 1016.1"), 399.0, 300.0, 448.8, 307.3)
+    letter = _at(_row(267, 57, "a"), 484.0, 307.2, 487.8, 312.9)
+    name = _at(_row(267, 58, "EXIT ACCESS TRAVEL DISTANCE"), 368.0, 308.7, 478.2, 316.0)
+    heading = _at(_row(267, 59, "WITHOUT SPRINKLER WITH SPRINKLER"), 400.0, 322.4, 522.2, 328.9)
+    assert lines(number, letter, name, heading) == "TABLE 1016.1 EXIT ACCESS TRAVEL DISTANCE"
+    # a change bar the OCR joined to the name is no part of it (Table 1015.1, p.266)
+    number = _at(_row(266, 18, "TABLE 1015.1"), 164.7, 298.5, 213.9, 305.8)
+    name = _at(_row(266, 19, "I SPACES WITH ONE EXIT OR EXIT ACCESS DOORWAY"), 61.7, 304.4, 288.0, 315.1)
+    heading = _at(_row(266, 20, "OCCUPANCY MAXIMUM OCCUPANT LOAD"), 110.3, 321.8, 293.8, 328.2)
+    assert lines(number, name, heading) == "TABLE 1015.1 SPACES WITH ONE EXIT OR EXIT ACCESS DOORWAY"
+    # NFPA 101 prints a mark above the title (Table 6.1.14.4.1(a), p.49): the title starts at its own line
+    nfpa = columns_sections.STYLES["nfpa_101_2012"].table
+    mark = _at(_row(49, 3, "†", bold="†"), 305.3, 300.0, 308.1, 305.5)
+    title = _at(_row(49, 4, "Table 6.1.14.4.1(a) Required Separation of Occupancies (hours), Part 1",
+                     bold="Table 6.1.14.4.1(a) Required Separation of Occupancies (hours), Part 1"), 50.0, 301.2, 333.4, 310.1)
+    head = _at(_row(49, 5, "Lodging", bold="Lodging"), 476.0, 322.8, 502.8, 329.8)
+    assert icc_sections.joined_title(icc_sections.table_title_lines([mark, title, head], nfpa)) == \
+        "Table 6.1.14.4.1(a) Required Separation of Occupancies (hours), Part 1"
+    # a hyphen ending a line runs on into the next ("SMOKE-" "PROTECTED")
+    assert icc_sections.joined_title([_row(1, 1, "AISLES FOR SMOKE-"), _row(1, 2, "PROTECTED ASSEMBLY")]) == \
+        "AISLES FOR SMOKE-PROTECTED ASSEMBLY"
+
+
+def test_a_titles_second_line_ending_in_raised_note_letters_is_read_whole():
+    """Review round 1 of Chapter 7 part e1: Table 705.5 (p.165) prints its title on two lines, the second ending in its
+    raised note letters a, d and g, which make that line 0.8 point taller and are roman; its title stopped at the first
+    line. Its own words are measured, never the marks; a line taller than the marks can make is still no title."""
+    first = _at(_row(2, 9, "TABLE 705.5—FIRE-RESISTANCE RATING REQUIREMENTS FOR",
+                     bold="TABLE 705.5—FIRE-RESISTANCE RATING REQUIREMENTS FOR"), 176.3, 48.9, 417.7, 57.9)
+    text = "EXTERIOR WALLS BASED ON FIRE SEPARATION DISTANCE [fna,] [fnd,] [fng]"
+    second = {**_at(_row(2, 10, text), 176.9, 58.1, 417.1, 67.9),
+              "bold": [[0, 48], [52, 54], [59, 61], [66, 67]]}
+    whole = "FIRE-RESISTANCE RATING REQUIREMENTS FOR EXTERIOR WALLS BASED ON FIRE SEPARATION DISTANCE"
+    assert icc_sections._table_title([first, second]) == whole
+    cut = "FIRE-RESISTANCE RATING REQUIREMENTS FOR"
+    # taller than marks make: 1.9 points over the first line, more than 0.45 + 1.2 (review round 2: the gap kept
+    # legal, 0.2 point, so only the height decides); 1.6 points over, within it, still the title
+    assert icc_sections._table_title([first, {**second, "bottom": 69.0}]) == cut
+    assert icc_sections._table_title([first, {**second, "bottom": 68.7}]) == whole
+    unmarked = {**second, "text": "EXTERIOR WALLS BASED ON FIRE SEPARATION DISTANCE", "bold": [[0, 48]]}
+    assert icc_sections._table_title([first, unmarked]) == cut                   # 0.8 taller with no marks: no title
+    assert icc_sections._table_title([first, {**second, "bold": [[0, 20]]}]) == cut    # its words not bold throughout

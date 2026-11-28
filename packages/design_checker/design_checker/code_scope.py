@@ -45,16 +45,24 @@ FACTS = {
     "sprinkler_system": "sprinkler",          # none, nfpa_13 (903.3.1.1), nfpa_13r (903.3.1.2), nfpa_13d (903.3.1.3)
     "egress_balcony_increase_taken": "yes_no",
     "building_has_atrium": "yes_no",
-    "assembly_fixed_seating": "yes_no",       # rooms used for assembly with fixed seating (Table 1006.2.1 note c)
+    "assembly_fixed_seating": "yes_no",       # rooms used for assembly with fixed seating (Table 1006.2.1 note c);
+                                              # also true where a room states assembly_fixed_seats (building_measures)
     "r2_sleeping_units": "yes_no",            # Group R-2 of sleeping units, not dwelling units (Table 1006.3.4(1) note b)
     "emergency_escape_openings_1031": "yes_no",   # emergency escape and rescue openings per 1031 (Table 1006.3.4 note a)
     "special_egress_spaces": "yes_no",        # a space with its own exits or travel limit (1006.2.2, Table 1017.2 note a)
     "merchandise_pads": "yes_no",             # Group M merchandise pads (1018.4: their own common path)
     "occupied_outdoor_areas": "yes_no",       # outdoor areas the occupants use (1004.7)
     "occupant_load_increased": "yes_no",      # the design takes 1004.5.1's increased occupant load (up to 1 per 7 sq ft)
+    # the building has a mezzanine (505.2: an intermediate level within a story): its occupants add to the room below
+    # (1004.2.2), so only where it states none is a story's floor area / 5 the most its spaces can hold (occupant_load)
+    "mezzanines": "yes_no",
+    # an area whose load Table 1004.5 counts by seats, lanes or actual load, not floor area (fixed seats in any use,
+    # bowling lanes, concentrated business use, a mall)
+    "loads_not_by_area": "yes_no",
     # section group 4 (corridors): another level's occupants reach a corridor (an unenclosed stairway or ramp, a
     # mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's load doesn't
-    # bound the corridor's; and the building is (or holds) an ambulatory care facility (Table 1020.3's 72 in)
+    # bound the corridor's; and the building is (or holds) an ambulatory care facility (Section 422's flags, Table
+    # 1020.2's Group B corridor rating, Table 1020.3's 72 in)
     "other_level_egress_into_corridors": "yes_no",
     "ambulatory_care_facility": "yes_no",
     # section group 4b: the building has corridors within a dwelling or sleeping unit (1020.2 exception 2; Table
@@ -63,6 +71,25 @@ FACTS = {
     # section group 5a: an emergency voice/alarm communication system per 907.5.2.2 (1005.3.1 and 1005.3.2's
     # exception 1: the smaller capacity factors, with a sprinkler system per 903.3.1.1 or 903.3.1.2)
     "emergency_voice_alarm_system": "yes_no",
+    # Chapter 4 part b: the building is a high-rise (202: an occupied floor or occupiable roof more than 75 ft above the
+    # lowest level of fire department vehicle access) or more than 420 ft in building height (403.2.2, 403.5.2); and it
+    # has a floor level used for human occupancy more than 30 ft below the lowest level of exit discharge (405.1)
+    "high_rise_building": "yes_no",
+    "underground_building": "yes_no",
+    # Chapter 4 part f: the building has a stage, a platform or a technical production area (202; 410.5, and Table
+    # 1006.2.1's 125 ft rows held to 410.5.3.3's 100 ft common path); and it is or holds an aircraft-related occupancy
+    # (Section 412: an airport traffic control tower, an aircraft hangar, an aircraft paint hangar, an aircraft
+    # manufacturing facility, a heliport or helistop; 412.4.2's two means of egress from a residential hangar); and
+    # it has a service corridor (202: a fully enclosed passage for transporting HPM and purposes other than required
+    # means of egress; 415.11.3.3's 75 ft, 4 ft dead ends and two exits, 415.11.3.4's width in Group H-5)
+    "stages_or_platforms": "yes_no",
+    "aircraft_related_occupancy": "yes_no",
+    "service_corridors": "yes_no",
+    # section group 9h: a room or space used for assembly purposes, whatever the building's group (303.1.1 and 303.1.2
+    # put small assembly rooms in Group B or the main occupancy, so the group alone doesn't settle it): Section 1030's
+    # flags show where it is true or not stated. True also from a room's Table 1004.5 Assembly function
+    # (assembly_spaces_from_rooms); false only as stated (a model may hold only some floors)
+    "assembly_spaces": "yes_no",
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
     # the decision reads each as stated and unread, never as not stated (review round 5)
     "facts_not_sent": "names",
@@ -112,7 +139,11 @@ CITES = {
               "enlargement, replacement, repair, equipment, use and occupancy, location, maintenance, removal and "
               "demolition of every building or structure"),
     "101.2 exception 1": (BCNYS, 22, "Application of the provisions of the Residential Code of New York State to"),
-    "202 LIVE/WORK UNIT": (BCNYS, 52, "A dwelling unit or sleeping unit in which a significant portion of the space "
+    # the underground building mark's quote, the line-break hyphen of "occu- pancy" joined (marks PR, review round 1)
+    "405.1": (BCNYS, 92, "The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level "
+              "used for human occupancy more than 30 feet (9144 mm) below the finished floor of the lowest level of "
+              "exit discharge."),
+    "202 LIVE/WORK UNIT": (BCNYS, 52,"A dwelling unit or sleeping unit in which a significant portion of the space "
                            "includes a nonresidential use that is operated by the tenant."),
     "308.2.4": (BCNYS, 78, "A facility with five or fewer persons receiving custodial care shall be classified as Group "
                 "R-3 or shall comply with the Residential Code of New York State provided an automatic sprinkler "
@@ -148,7 +179,11 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         "other_level_egress_into_corridors": "Gordium: Other levels reach corridors",
         "ambulatory_care_facility": "Gordium: Ambulatory care facility",
         "corridors_within_dwelling_units": "Gordium: Corridors within dwelling units",
-        "emergency_voice_alarm_system": "Gordium: Emergency voice/alarm system"}
+        "emergency_voice_alarm_system": "Gordium: Emergency voice/alarm system",
+        # the occupant loads' ceiling (occupant_load._bounds): a mezzanine's occupants add to the room below
+        "mezzanines": "Gordium: Mezzanines", "loads_not_by_area": "Gordium: Loads not by area",
+        # Chapter 4 part b's: a high-rise (202, or over 420 ft in building height) and an underground building (405.1)
+        "high_rise_building": "Gordium: High-rise building", "underground_building": "Gordium: Underground building"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise
@@ -161,6 +196,9 @@ ASSUMED = (("care_facility", "no one outside the household receives care here"),
 # the kinds of the lot facts the decision reads (a value of another kind is said, never used)
 COUNTS = ("dwelling_units", "attached_units_in_building", "adus_on_parcel", "rooms_let_for_profit", "stories")
 YES_NO = ("accessory_dwelling_unit", "adu_detached", "home_occupation")
+# the check's value: the place's story count as the architect typed it, kept even where the place's count is an
+# open question (check.py _with_stories_bound): "no stairs" beside two or more is refused (egress._stated_stories)
+STORIES_TYPED = "stories_typed"
 # where check.py found Ithaca's stories count read from the drawing with nothing drawn below the ground
 STORIES_DRAWN = "stories_from_drawing"
 # how that count came: "read" (counted from Gordium's floor blocks or a drawing that allows one count) or "typed"
@@ -292,13 +330,93 @@ def _given(building) -> tuple[dict, list[str]]:
     return out, bad
 
 
-def building_measures(building: dict | None) -> dict:
+def building_measures(building: dict | None, interior=None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
-    states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the three sprinkler systems the limits name from the system, and the eleven stated yes/no facts. A fact
-    not stated is left out (its rules need review)."""
+    states: occupancy_group_i4, other_occupancy_present, occupancy_group (the one group, or "mixed") and whether a
+    Group R, H or I-1 to I-3 occupancy is among them (903.2's) from the groups, the three sprinkler systems the limits
+    name from the system, the stories above grade plane, and the nineteen stated yes/no facts. A fact not stated is
+    left out (its rules need review). In a building stated as Group R alone (one or more of R-1 to R-4), a stated NFPA
+    13R system counts as one per 903.3.1.2 only where the stated stories above grade plane don't exceed its four
+    (903.3.1.2 item 1: the Group R occupancy's stories, here the building's): stated more, sprinklered_903_3_1_2 is no,
+    so no allowance counts it and 903.2.8 fails it (Chapter 9 part a's review round 3); not stated, it is the
+    architect's statement, as the Chapter 10 plan decided for 13R's limits (group 4b). In a building with another group
+    the Group R portion's stories aren't the building's, so the stories decide nothing there. `interior`, the
+    interior description, settles one more: assembly_spaces is true wherever a room states a Table 1004.5 Assembly
+    function, whatever the block says, and a stated false is left out (not stated) where a room states a function that
+    may be an assembly use (assembly_spaces_from_rooms); and assembly_fixed_seating is true wherever a room states Table
+    1004.5's "Assembly with fixed seats" (review round 1 of section group 9h)."""
     facts, _ = _given(building)
-    return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
+    out = {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
+    groups = facts.get("occupancy_groups") or []
+    all_r = bool(groups) and all(g.startswith("R-") for g in groups)
+    if out.get("sprinklered_903_3_1_2") and all_r and facts.get("stories_above_grade_plane", 0) > NFPA_13R_STORIES:
+        out["sprinklered_903_3_1_2"] = False
+    # 903.3.1.2 item 2 (p.274 lines 18-23): Group R-2's roof assembly under 45 feet, the other Group R's highest floor
+    # 30 feet or less, above the lowest level of fire department vehicle access; a stated high-rise (202: an occupied
+    # floor or occupiable roof more than 75 feet above that level) breaks it in Group R-2 outright, so a 13R system there
+    # is no 903.3.1.2 system; in the other Group R only an occupiable roof might be the high one, so it isn't known
+    # (the merge of Chapter 4's high_rise_building, 2026-11-28)
+    if out.get("sprinklered_903_3_1_2") and all_r and facts.get("high_rise_building") is True:
+        if all(g == "R-2" for g in groups):
+            out["sprinklered_903_3_1_2"] = False
+        else:
+            del out["sprinklered_903_3_1_2"]
+    seen = assembly_spaces_from_rooms(interior)
+    if FIXED_SEATS in room_functions(interior):     # the rooms show fixed seating: never a stated no over them
+        out["assembly_fixed_seating"] = True
+    if seen == ASSEMBLY_YES:
+        out["assembly_spaces"] = True
+    elif seen == ASSEMBLY_MAYBE and out.get("assembly_spaces") is False:
+        del out["assembly_spaces"]
+    return out
+
+
+# 903.3.1.2 item 1 (p.274 line 17): "Four stories or fewer above grade plane"
+NFPA_13R_STORIES = 4
+
+
+# Table 1004.5's rows under its "Assembly" heading (p.312, lines 19-27, to "Business areas" on line 28), by their
+# function ids (docs/interior/interior_description_format.md, rooms[].function): a room stating one is used for
+# assembly purposes (1030.1), whatever the building's group, so the building has assembly spaces. The one list:
+# occupant_load's assembly seating (1030.7) imports this and ASSEMBLY_LIKE_FUNCTIONS
+ASSEMBLY_FUNCTIONS = ("gaming_floor", "exhibit_gallery_museum", "assembly_fixed_seats", "assembly_concentrated",
+                      "assembly_standing", "assembly_unconcentrated", "bowling_center")
+# the table's other rows a room used for assembly purposes may state (Table 1004.5's courtrooms, library reading rooms,
+# exercise rooms, rinks, pools and their decks, stages and platforms, airport waiting areas): 303.1 counts "awaiting
+# transportation" as assembly (p.68, lines 36-38), 303.4 lists courtrooms, gymnasiums, indoor swimming pools,
+# libraries and waiting areas in transportation terminals in Group A-3 (p.69, lines 13-32), 303.5 skating rinks and
+# swimming pools with spectator seating in Group A-4 (p.69, lines 33-38), and 303.2's theaters have their stages
+# (p.68, line 51). Each may be an assembly use or not, so it is never a yes, and never lets a stated no stand
+ASSEMBLY_LIKE_FUNCTIONS = ("courtroom", "library_reading_room", "exercise_room", "rink_pool", "pool_deck",
+                           "stage_platform", "airport_waiting")
+ASSEMBLY_YES, ASSEMBLY_MAYBE = "yes", "maybe"
+
+
+def room_functions(interior) -> set:
+    """The Table 1004.5 functions the description's rooms state (a function of another kind is occupant_load's to
+    say, unread here)."""
+    rooms = interior.get("rooms") if isinstance(interior, dict) else None
+    if not isinstance(rooms, list):
+        return set()
+    return {r["function"] for r in rooms if isinstance(r, dict) and isinstance(r.get("function"), str)}
+
+
+# Table 1004.5's "Assembly with fixed seats" (p.312, line 22): a room stating it has fixed seating (Table 1006.2.1 note
+# c, 1030.7, 1030.8), whatever the building block says (review round 1 of section group 9h)
+FIXED_SEATS = "assembly_fixed_seats"
+
+
+def assembly_spaces_from_rooms(interior) -> str | None:
+    """What the rooms' stated functions say of assembly_spaces: ASSEMBLY_YES where a room states one of
+    ASSEMBLY_FUNCTIONS, else ASSEMBLY_MAYBE where one states one of ASSEMBLY_LIKE_FUNCTIONS, else None. Never a no:
+    a description may hold only some of the building's floors (review round 6 of section group 6b), so rooms with no
+    assembly function don't rule one out; only the architect's stated `assembly_spaces: false` does."""
+    functions = room_functions(interior)
+    if functions & set(ASSEMBLY_FUNCTIONS):
+        return ASSEMBLY_YES
+    if functions & set(ASSEMBLY_LIKE_FUNCTIONS):
+        return ASSEMBLY_MAYBE
+    return None
 
 
 # Each building measure the BCNYS rulebook reads: the `building` fact it is worked out from, and how
@@ -313,6 +431,9 @@ DERIVED = {
     "sprinklered_903_3_1_1": ("sprinkler_system", lambda system: system == "nfpa_13"),
     "sprinklered_903_3_1_2": ("sprinkler_system", lambda system: system == "nfpa_13r"),
     "sprinklered_903_3_1_3": ("sprinkler_system", lambda system: system == "nfpa_13d"),
+    # the system as stated, whether it counts or not (903.3.1.2's flags show wherever a 13R system is stated, above
+    # its four stories too, where sprinklered_903_3_1_2 is no: Chapter 9 part a's review round 4)
+    "nfpa_13r_stated": ("sprinkler_system", lambda system: system == "nfpa_13r"),
     "egress_balcony_increase_taken": ("egress_balcony_increase_taken", lambda v: v),
     "building_has_atrium": ("building_has_atrium", lambda v: v),
     "assembly_fixed_seating": ("assembly_fixed_seating", lambda v: v),
@@ -324,6 +445,24 @@ DERIVED = {
     "ambulatory_care_facility": ("ambulatory_care_facility", lambda v: v),
     "corridors_within_dwelling_units": ("corridors_within_dwelling_units", lambda v: v),
     "emergency_voice_alarm_system": ("emergency_voice_alarm_system", lambda v: v),
+    # Chapter 9 part a (docs/decisions/2026-11-27_ny_building_chapter_9.md): the groups 903.2 requires a sprinkler
+    # system for whatever the building's size (903.2.8 "all buildings with a Group R fire area", 903.2.5.1 Group H,
+    # 903.2.6 Group I but I-4's exceptions), each read in a building of two or more groups too; the stories 903.3.1.2's
+    # NFPA 13R is limited to; townhouses, where 903.3.1.3 permits NFPA 13D
+    "group_r_present": ("occupancy_groups", lambda groups: any(g.startswith("R-") for g in groups)),
+    "group_h_present": ("occupancy_groups", lambda groups: any(g.startswith("H-") for g in groups)),
+    "group_i1_i2_i3_present": ("occupancy_groups", lambda groups: any(g in ("I-1", "I-2", "I-3") for g in groups)),
+    "stories_above_grade_plane": ("stories_above_grade_plane", lambda v: v),
+    "townhouse_units": ("townhouse_units", lambda v: v),
+    # Chapter 9 part e: a BCNYS 202 TOWNHOUSE UNIT "has a separate means of egress", read with townhouse_units where
+    # 905.3's exception leaves standpipes out of "Group R-2 townhouses"
+    "separate_means_of_egress": ("separate_means_of_egress", lambda v: v),
+    "high_rise_building": ("high_rise_building", lambda v: v),
+    "underground_building": ("underground_building", lambda v: v),
+    "stages_or_platforms": ("stages_or_platforms", lambda v: v),
+    "aircraft_related_occupancy": ("aircraft_related_occupancy", lambda v: v),
+    "service_corridors": ("service_corridors", lambda v: v),
+    "assembly_spaces": ("assembly_spaces", lambda v: v),
 }
 
 

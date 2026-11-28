@@ -219,7 +219,6 @@ draft_fixes:
   - R319.4.1/draft/general.r319_4_1_area_well_min_projection#3/o1
   - R319.4.1/draft/general.r319_4_1_area_well_min_width#1/o1
   - R319.4.1/draft/general.r319_4_1_area_well_min_width#3/o1
-  - R319.4.1/key/general.r319_4_1_area_well_size#1/w1
   - R319.4.1/key/general.r319_4_1_area_well_size#3/w1
 - cause: r319_4_2_not_tied_to_below_grade
   verdict: draft_wrong
@@ -647,6 +646,15 @@ causes:
       unenclosed structure: the law asks no more (key: not applicable). The drafts' flag ignores that measure and
       needs review. The open question (does screening make it enclosed) only arises when something fills them.
     law: 'BF103.2: "Exterior openings required for light and ventilation into a patio structure conforming to Section BF101 shall be unenclosed where such openings serve as emergency egress or rescue openings from sleeping rooms."'
+  r319_4_1_reach_not_in_the_example:
+    verdict: drafts_stricter
+    why: >-
+      The key's example passes a 12 sq ft, 36 by 48 in well with no ladder and says nothing of what else reaches into
+      it. The drafts' size rules now read how far anything other than the required ladder or steps reaches into the
+      well's required dimensions (area_well_other_encroachment, and the ladder's or steps' own reach), stated in Revit
+      by the window's Gordium: Well marks; not stated, the well needs review. Needs review only, never a fail: the
+      key's example has no measure for the reaches.
+    law: 'R319.4.1: "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well."'
   loft_stair_may_follow_r318_7:
     verdict: drafts_stricter
     why: >-
@@ -755,6 +763,7 @@ ids:
   "R318.7.5.2/draft/general.r318_7_5_2_stair_tread_variation_max#3/s1": loft_stair_may_follow_r318_7
   "R319.1/draft/general.r319_1_escape_opening_opens_to_public_way_or_yard#1/o1": opening_examples_without_a_room
   "R319.1/draft/general.r319_1_escape_opening_opens_to_public_way_or_yard#2/o1": opening_examples_without_a_room
+  "R319.4.1/key/general.r319_4_1_area_well_size#1/w1": r319_4_1_reach_not_in_the_example
   "R319.4.2/key/general.r319_4_2_area_well_ladder#1/w1": pass_or_not_applicable
   "R320.2/key/general.r320_2_handrail_height#5/none in s2": handrail_examples_without_a_stair
   "R320.2/draft/general.r320_2_handrail_height_34_38#1/the building": handrail_examples_without_a_stair
