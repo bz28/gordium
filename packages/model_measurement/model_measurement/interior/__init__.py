@@ -105,8 +105,9 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
     """Why "no stairs" (an empty list of stairs) can't be taken beside what the description shows, or None. A stair
     or a ramp joins floors, or each floor has its own way out at grade, which the model doesn't show, so where the
     building may have more than one floor the claim needs review, never a stair rule set aside:
-    - its rooms or enclosed spaces with no room drawn (`unknown_spaces`) are on two or more `level`s (as the Building
-      Code's description and the Revit add-in place them), named from `levels` where it names them;
+    - its rooms, enclosed spaces with no room drawn (`unknown_spaces`) or stories' exterior walls (`story_outlines`)
+      are on two or more `level`s (as the Building Code's description and the Revit add-in place them), named from
+      `levels` where it names them;
     - a level given that can't be read (it may be another floor);
     - its floors are more than 1/2 in apart (a room's `floor_elevation`, as a house's gives them; a room with none,
       and an enclosed space, at its level's height in `levels`; a change of floor that size is a step, or a ramp),
@@ -125,12 +126,17 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
     rooms = [r for r in whole.get("rooms") if isinstance(r, dict)] if isinstance(whole.get("rooms"), list) else []
     spaces = [u for u in whole.get("unknown_spaces") if isinstance(u, dict)] \
         if isinstance(whole.get("unknown_spaces"), list) else []
-    odd = next((p for p in rooms + spaces if p.get("level") is not None and _level_id(p["level"]) is None), None)
+    # each story's exterior walls (`story_outlines`, the Building Code's description): a story drawn with no room
+    # placed yet is a floor too (the merge with #231's stair rules: upper walls drawn, rooms not yet)
+    outlines = [o for o in whole.get("story_outlines") if isinstance(o, dict)] \
+        if isinstance(whole.get("story_outlines"), list) else []
+    odd = next((p for p in rooms + spaces + outlines if p.get("level") is not None and _level_id(p["level"]) is None),
+               None)
     if odd is not None:                    # a level given that can't be read may be another floor (round 3)
         return Stop("stairs_none_several_floors", what=f"{name_of(odd)}'s level can't be read, so it may be on "
                                                        "another floor").reason
     on_rooms = {_level_id(r.get("level")) for r in rooms} - {None}
-    levels = on_rooms | ({_level_id(u.get("level")) for u in spaces} - {None})
+    levels = on_rooms | ({_level_id(u.get("level")) for u in spaces + outlines} - {None})
     listed = {}                        # the description's levels by id (`levels`: {id, name, elevation})
     for lv in whole.get("levels") if isinstance(whole.get("levels"), list) else []:
         if isinstance(lv, dict) and _level_id(lv.get("id")) is not None:
@@ -144,7 +150,9 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
             return (0, z, name) if type(z) in (int, float) and math.isfinite(z) else (1, 0, name)
         order = [n for _, _, n in sorted(named(lv) for lv in levels)]
         shown = " and ".join(order) if len(order) <= 3 else ", ".join(order[:3]) + f" and {len(order) - 3} more"
-        who = "its rooms are" if levels == on_rooms else "its rooms, and enclosed spaces with no room drawn, are"
+        who = "its rooms are" if levels == on_rooms else \
+            "its rooms, and enclosed spaces with no room drawn, are" if not outlines else \
+            "its rooms, enclosed spaces with no room drawn and stories' exterior walls are"
         return Stop("stairs_none_several_floors", what=f"{who} on {len(order)} levels ({shown})").reason
     floors = []
     # a room with no floor given, or an enclosed space, stands at its level's height where `levels` gives one (rounds

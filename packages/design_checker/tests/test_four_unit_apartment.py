@@ -810,3 +810,22 @@ def test_a_story_whose_room_may_seat_people_served_by_aisles_never_passes_on_tra
             r["function"] = "business"
     sent = egress.check(laws, interior, {**VALUES, "occupancy_groups": ["A-2"]}, ALLOWED)["results"]
     assert sent["general.bc_table_1017_2_a_e_f1_m_r_s1"] == "needs_review"
+
+
+def test_no_stairs_on_its_upper_storys_walls_with_no_rooms_yet_never_sets_the_stair_rules_aside(laws):
+    """#279's merge review: with Section 1011's rules live, the apartment drawn with Level 2's exterior walls but its
+    rooms on Level 1 only (upper rooms not placed yet) and "no stairs" once had every stair rule not applicable. A
+    story's exterior walls (`story_outlines`) are a floor too: "no stairs" isn't taken, every 1011 rule needs
+    review, and each stair row says why. Its walls on Level 1 alone, the claim stands."""
+    desc = build.interior_of()
+    desc["stairs"] = []
+    desc["rooms"] = [r for r in desc["rooms"] if r["level"] == "L1"]
+    ids = {r["id"] for r in desc["rooms"]}
+    desc["doors"] = [d for d in desc["doors"] if all(v in ids or v is None for v in (d.get("from_room"), d.get("to_room")))]
+    got = egress.check(laws, copy.deepcopy(desc), VALUES, ALLOWED)
+    stair = {k: v for k, v in got["results"].items() if k.startswith("general.bc_1011_")}
+    assert len(stair) == 9 and set(stair.values()) == {present.REVIEW}, stair
+    assert any("exterior walls are on 2 levels" in p for p in got["interior"]["problems"]), got["interior"]["problems"]
+    one = dict(desc, story_outlines=[o for o in desc["story_outlines"] if o["level"] == "L1"])
+    got = egress.check(laws, one, VALUES, ALLOWED)
+    assert {v for k, v in got["results"].items() if k.startswith("general.bc_1011_")} == {"not_applicable"}

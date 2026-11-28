@@ -2385,6 +2385,10 @@ def test_no_stairs_beside_rooms_on_two_levels_as_the_building_code_places_them()
     named = [{"id": "u2", "name": "Level 2", "elevation": 120}, {"id": "u1", "name": "Level 1", "elevation": 0}]
     assert "(Level 1 and Level 2)" in _refused(measure(d, whole=whole("u2", "u1", levels=named)))
     assert "L1, L2, L3 and 2 more" in _refused(measure(d, whole=whole("L1", "L2", "L3", "L4", "L5")))
+    walls = whole("L1", story_outlines=[{"level": "L1"}, {"level": "L2"}])       # merge review: walls, no rooms yet
+    assert "stories' exterior walls are on 2 levels (L1 and L2)" in _refused(measure(d, whole=walls))
+    assert measure(d, whole=whole("L1", story_outlines=[{"level": "L1"}]))["parts"]["stair"] == []
+    assert "'s level can't be read" in _refused(measure(d, whole=whole("L1", story_outlines=[{"level": 2.5}])))
     upstairs = whole("L1", unknown_spaces=[{"id": "a2", "level": "L2"}])          # skeptic A: an upper floor undrawn
     assert "its rooms, and enclosed spaces with no room drawn, are on 2 levels (L1 and L2)" in \
         _refused(measure(d, whole=upstairs))
