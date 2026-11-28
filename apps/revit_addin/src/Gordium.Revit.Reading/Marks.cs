@@ -326,6 +326,19 @@ public static class Marks
         RoomFunctions.Listed + ". Leave it blank on an exit stair enclosure or exit passageway and on a room whose Gordium: Use is Corridor, Closet or Toilet. " +
         "Blank on any other room, or a word not in the list (sent as typed, and said): the room's occupant load and its story's need review.");
 
+    /// <summary>The dwelling unit a room belongs to (<c>rooms[].unit</c>), the architect's name for it ("1A", "Apt 2"):
+    /// where any room of a story has one, the story's dwelling units (BCNYS Table 1006.3.4(1)) are counted from the
+    /// marks, one unit per name, instead of grouped from the drawing (model_measurement/routes/dwelling_units.py). Sent
+    /// as typed, trimmed; blank is not stated. A mark naming two units, or a name the drawing disagrees with, leaves the
+    /// count at needs review (the checker says which).</summary>
+    public static readonly MarkDefinition RoomUnit = new(
+        "Gordium: Unit", new("631bdd26-d64d-4d89-b192-04321c4bc82e"), MarkValueKind.Text, MarkBinding.Instance,
+        [Rooms], "rooms[].unit",
+        "The name of the dwelling unit this room belongs to (1A, Apt 2), the same on every room of that unit, its halls, baths and closets included. " +
+        "Where any room on a level has one, Gordium counts that story's dwelling units (BCNYS Table 1006.3.4(1)) from these names, one unit per name, instead of working them out from the drawing. " +
+        "Leave it blank on a room shared between units (mark that room's Gordium: Use Corridor or Lobby) and on a room of no unit. One name per room: a room with two names, " +
+        "a unit's rooms not joined to each other, or a room left blank that may be a unit's, and the count needs review.");
+
     public static readonly MarkDefinition LotSurveyed = new(
         "Gordium: Lot surveyed", new("133d30e3-832f-4956-88c3-6b48989ac3f7"), MarkValueKind.YesNo, MarkBinding.Instance,
         [ProjectInformation], "facts.lot_surveyed",
@@ -751,6 +764,18 @@ public static class Marks
         [Levels], "unknown_spaces (an enclosed area with no Room on a level ticked Yes isn't one)",
         "Yes for a level with no rooms at all (a roof, the top of a turret). Its enclosed areas with no Room are then not treated as rooms nobody drew; a Room drawn on it is listed as a conflict. Blank or No: each enclosed area with no Room on it keeps every sleeping-room rule needing review.");
 
+    /// <summary>A level the architect says is no story (<c>all_levels[].not_a_story</c>): a reference or datum level, a
+    /// roof level. The Building Code's story places (model_measurement/routes/story_place.py) then never try it as a
+    /// story nobody drew rooms on, so a datum under a slab no longer unsettles which story is the first above grade
+    /// plane. Yes only: blank or No, the level is tried both ways as before. Rooms, or an enclosed area with no Room,
+    /// on a level ticked Yes disagree with it, and no story is placed.</summary>
+    public static readonly MarkDefinition NotAStory = new(
+        "Gordium: Not a story", new("0938c91d-d646-49f7-b072-465fecbb9325"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [Levels], "all_levels[].not_a_story",
+        "Yes for a level that is no story of the building: a reference or datum level (top of foundation, a sill height), or a roof level. " +
+        "Gordium then never counts it as a story nobody drew rooms on when it works out which story is the first, second or fourth above grade plane (BCNYS Tables 1006.3.4(1) and (2)). " +
+        "Blank or No: such a level with no rooms is tried both as a story and not, and the stories' places it could change need review. Rooms, or an enclosed area with no Room, on a level ticked Yes disagree with it: no story's place is measured (for a roof whose walls close off an area, tick Gordium: No rooms on this level too).");
+
     // ---- step 6: what the house has none of (design note, sections 2 and 4; HasNone) ------------------------------
     // One Yes/No on Project Information per kind: the three kinds the description lists itself (an empty list says
     // none) and every kind of the format's has_none (model_measurement.interior.has_none.KINDS). Yes is sent only when
@@ -851,8 +876,8 @@ public static class Marks
         SleepingRoom, EscapeOpening, ExitDoor, Operation, ClearWidth, ClearHeight, ClearOffset, ClearSource,
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards, Zone, Use, LotSurveyed, CornerLot, StreetEdge, GroundFrom,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
-        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
-        CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction,
+        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStory, NotAStair, SiteSlab, SiteObject,
+        CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction, RoomUnit,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
         EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased, OtherLevelsReachCorridors,

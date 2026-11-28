@@ -98,6 +98,10 @@ public static class RouteReader
             room["function"] = typed;
             notes.Add(new(r.Id, "function", $"{Marks.RoomFunction.Name} is \"{typed}\", not one of Table 1004.5's functions Gordium lists: sent as typed, so its occupant load and its story's need review"));
         }
+        // the dwelling unit it belongs to (Gordium: Unit): sent as typed, trimmed, so the route code counts a story's
+        // units from the names (one naming two units, or names the drawing disagrees with, it says); blank is left out
+        if (r.Unit is { } unit)
+            room["unit"] = unit;
         // a corridor's walls as the architect states them (the egress UI audit's finding 5): the rating in minutes, sent
         // in hours; a negative count is no rating Gordium reads (left out, and said); blank is left out (not stated)
         if (r.FireRatingMinutes is { } minutes)
@@ -200,10 +204,19 @@ public static class RouteReader
         // every level of the model, a level with nothing drawn on it too (an open parking story, a roof, a datum): which
         // story is the first above grade plane can't be told while one may be missing (story_place.py: every place
         // needs review without them)
+        // a level the architect ticks "not a story" (a datum, a roof) is sent so, never tried as a story; blank or No is
+        // left out (tried both ways)
+        var notStories = MarkReading.LevelsMarkedNotAStory(model).Select(e => e.UniqueId).ToHashSet(StringComparer.Ordinal);
         if (levels is not null && used.Count > 0)
-            interior["all_levels"] = new JsonArray(levels.Values.Select(l => (JsonNode)new JsonObject
+            interior["all_levels"] = new JsonArray(levels.Values.Select(l =>
             {
-                ["id"] = l.UniqueId, ["name"] = l.Name, ["elevation"] = model.InternalToShared.Apply(new Xyz(0, 0, l.Elevation)).Z,
+                var level = new JsonObject
+                {
+                    ["id"] = l.UniqueId, ["name"] = l.Name, ["elevation"] = model.InternalToShared.Apply(new Xyz(0, 0, l.Elevation)).Z,
+                };
+                if (notStories.Contains(l.UniqueId))
+                    level["not_a_story"] = true;
+                return (JsonNode)level;
             }).ToArray());
         if (levels is not null && used.Count > 0)
             interior["levels"] = new JsonArray(records.Levels!.Where(l => used.Remove(l.UniqueId)).Select(l => (JsonNode)new JsonObject

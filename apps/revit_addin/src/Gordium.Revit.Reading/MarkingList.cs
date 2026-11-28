@@ -14,7 +14,7 @@ public enum MarkedKind { Room, Window, Door, Level, SiteSlab, SiteObject }
 /// word not in <see cref="RoomUses"/>), <see cref="UseWord"/> what the architect typed.</summary>
 public sealed record RoomMarks(string Id, string? Name, bool? Sleeping, string? Use = null, string? UseWord = null,
                                bool? Lockable = null, bool? PassThrough = null, bool? NotOccupied = null,
-                               string? Function = null, string? FunctionWord = null,
+                               string? Function = null, string? FunctionWord = null, string? Unit = null,
                                int? FireRatingMinutes = null, bool? SmokePartitions = null);
 
 /// <summary>A window's or door's marks as an opening: null when not stated (an operation word not in the list, or a
@@ -63,6 +63,10 @@ public static class MarkReading
     public static IReadOnlyList<MarkedElement> LevelsMarkedNoRooms(RevitModel model) =>
         InDesign(model).Where(e => KindOf(e) == MarkedKind.Level && Marks.YesNo(Get(e, Marks.NoRoomsOnLevel)) is true).ToList();
 
+    /// <summary>The levels in the model the architect marked "not a story" Yes (unset or No: not stated).</summary>
+    public static IReadOnlyList<MarkedElement> LevelsMarkedNotAStory(RevitModel model) =>
+        InDesign(model).Where(e => KindOf(e) == MarkedKind.Level && Marks.YesNo(Get(e, Marks.NotAStory)) is true).ToList();
+
     private static MarkValue? Get(MarkedElement e, MarkDefinition m) =>
         (m.Binding == MarkBinding.Instance ? e.Instance : e.Type).TryGetValue(m.Guid, out var v) ? v : null;
 
@@ -77,6 +81,7 @@ public static class MarkReading
                                        Marks.YesNo(Get(e, Marks.CanBeLocked)), Marks.YesNo(Get(e, Marks.PassThrough)),
                                        Marks.YesNo(Get(e, Marks.NotOccupied)),
                                        RoomFunctions.Of(Marks.Text(Get(e, Marks.RoomFunction))), Marks.Text(Get(e, Marks.RoomFunction)),
+                                       Marks.Text(Get(e, Marks.RoomUnit)),
                                        Marks.Count(Get(e, Marks.CorridorFireRating)), Marks.YesNo(Get(e, Marks.SmokePartitionWalls)))).ToList();
 
     public static IReadOnlyList<OpeningMarks> Openings(RevitModel model) =>
@@ -156,7 +161,8 @@ public sealed record MarkingListResult(IReadOnlyList<string> SetupProblems, IRea
     /// <summary>Every "this house has none of" tick that disagrees with what is drawn (step 6): listed first of all.</summary>
     public IReadOnlyList<string> HasNoneConflicts { get; init; } = [];
 
-    /// <summary>Every level marked "no rooms on this level" with a Room drawn on it: listed first, with the ticks'.</summary>
+    /// <summary>Every level marked "no rooms on this level" or "not a story" with a Room drawn on it: listed first, with
+    /// the ticks'.</summary>
     public IReadOnlyList<string> LevelConflicts { get; init; } = [];
 
     /// <summary>Every Revit stair or railing marked <c>Gordium: Not a stair</c> Yes (the mark can't clear one): listed
@@ -205,7 +211,7 @@ public static class MarkingList
         // (objects.left_out, with the lot the check is given), never guessed here (review round 2), so the list asks for
         // each and says that one off the lot changes nothing
         var slabs = SiteSlabs.Find(model).Values.ToList();
-        // a level is listed when it has an enclosed area with no Room (whatever its mark), or its mark is set
+        // a level is listed when it has an enclosed area with no Room (whatever its marks), or either of its marks is set
         var unmarkedAreas = InteriorReader.UnknownAreas(model, levelMarks: false);
         var rows = MarkReading.InDesign(model)
             .Select(e => MarkReading.KindOf(e) == MarkedKind.Level ? LevelRow(e, unmarkedAreas) : Row(e)).OfType<MarkingRow>()
@@ -367,17 +373,31 @@ public static class MarkingList
     }
 
     /// <summary>A level's row: shown when it has an enclosed area with no Room (unset is then to mark: place the Rooms,
-    /// or fix the walls closing off one Revit can't locate, or say the level has none), or when its mark is set either way; never a suggestion (a suggested Yes could hide a
-    /// bedroom).</summary>
+    /// or fix the walls closing off one Revit can't locate, or say the level has none), or when either of its marks is set either way; never a suggestion (a suggested Yes could hide a
+    /// bedroom). Its two cells: <c>Gordium: No rooms on this level</c>, and <c>Gordium: Not a story</c>, whose blank
+    /// has a meaning of its own (the level is tried both as a story and not), so it is shown with that meaning and never
+    /// makes the row one to mark (#239's to-do: an unset cell must not mark every level row).</summary>
     private static MarkingRow? LevelRow(MarkedElement e, List<EnclosedArea> areas)
     {
         var cell = YesNo(e, Marks.NoRoomsOnLevel, null);
+        var story = YesNo(e, Marks.NotAStory, null) is { State: MarkState.Unset } blank
+            ? blank with { State = MarkState.LeftBlank, Words = NotAStoryBlank } : YesNo(e, Marks.NotAStory, null);
         var count = areas.Count(a => a.LevelId == e.UniqueId);
-        if (cell.State == MarkState.Unset && count == 0)
+        if (cell.State == MarkState.Unset && story.State == MarkState.LeftBlank && count == 0)
             return null;
+        // shown for its Not a story mark alone: with no enclosed area without a Room on it, a blank No rooms on this
+        // level asks nothing (the row is never one to mark for it)
+        if (cell.State == MarkState.Unset && count == 0)
+            cell = cell with { State = MarkState.LeftBlank, Words = NoRoomsBlank };
         var label = (e.Name ?? e.UniqueId) + (count == 0 ? "" : count == 1 ? " (1 enclosed area with no Room)" : $" ({count} enclosed areas with no Room)");
-        return new(e.UniqueId, MarkedKind.Level, label, [cell]);
+        return new(e.UniqueId, MarkedKind.Level, label, [cell, story]);
     }
+
+    /// <summary>What a blank <c>Gordium: Not a story</c> means, said in its cell (nothing to mark).</summary>
+    internal const string NotAStoryBlank = "not set: a level with no rooms is tried both as a story and not";
+
+    /// <summary>What a blank <c>Gordium: No rooms on this level</c> means on a level with no enclosed area without a Room.</summary>
+    internal const string NoRoomsBlank = "not set: no enclosed area without a Room is on this level";
 
     /// <summary>A floor outside the house, as a row: its one mark, what it is.</summary>
     private static MarkingRow SlabRow(SiteSlab s)

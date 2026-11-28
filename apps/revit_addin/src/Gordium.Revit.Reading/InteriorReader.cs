@@ -40,7 +40,8 @@ public sealed record InteriorReadResult(JsonObject Interior, IReadOnlyList<strin
     /// <summary>Each enclosed area with no Room sent as a space whose use isn't known (<c>unknown_spaces</c>), in words.</summary>
     public IReadOnlyList<string> UnknownSpaces { get; init; } = [];
 
-    /// <summary>Each level marked "no rooms on this level" with a Room drawn on it (the mark doesn't count).</summary>
+    /// <summary>Each level marked "no rooms on this level" (the mark then doesn't count) or "not a story" (no story is
+    /// then placed) with a Room drawn on it.</summary>
     public IReadOnlyList<string> LevelConflicts { get; init; } = [];
 
     /// <summary>Each element the architect cleared with <c>Gordium: Not a stair</c>, a line per category and type
@@ -394,17 +395,23 @@ public static class InteriorReader
 
     /// <summary>Each level marked "no rooms on this level" Yes with a Room drawn on it: the two disagree, so the mark
     /// doesn't count (its enclosed areas with no Room are sent as spaces whose use isn't known) and the Room is read as
-    /// any other; listed first in the marking list, never dropped in silence.</summary>
+    /// any other; then each level marked "not a story" Yes with a Room drawn on it: the two disagree, and no story's
+    /// place is measured (story_place.py). Listed first in the marking list, never dropped in silence.</summary>
     public static List<string> LevelConflicts(RevitModel model)
     {
         if (model.Interior is null)
             return [];
         var withRooms = RoomLevels(model);
+        string Rooms(MarkedElement l) => string.Join(", ", withRooms[l.UniqueId].Select(r => $"Room \"{RoomName(r)}\"")) +
+                                         (withRooms[l.UniqueId].Count == 1 ? " is" : " are");
         return MarkReading.LevelsMarkedNoRooms(model).Where(l => withRooms.ContainsKey(l.UniqueId))
-            .Select(l => $"Level \"{l.Name ?? l.UniqueId}\" is marked {Marks.NoRoomsOnLevel.Name} Yes, but " +
-                         string.Join(", ", withRooms[l.UniqueId].Select(r => $"Room \"{RoomName(r)}\"")) +
-                         (withRooms[l.UniqueId].Count == 1 ? " is" : " are") + " drawn on it: delete the Room or mark the level No " +
+            .Select(l => $"Level \"{l.Name ?? l.UniqueId}\" is marked {Marks.NoRoomsOnLevel.Name} Yes, but " + Rooms(l) +
+                         " drawn on it: delete the Room or mark the level No " +
                          "(until then the mark doesn't count, and its enclosed areas with no Room each keep the sleeping-room rules needing review)")
+            // a level said to be no story with Rooms on it: the two disagree, and no story's place is measured
+            .Concat(MarkReading.LevelsMarkedNotAStory(model).Where(l => withRooms.ContainsKey(l.UniqueId))
+                .Select(l => $"Level \"{l.Name ?? l.UniqueId}\" is marked {Marks.NotAStory.Name} Yes, but " + Rooms(l) +
+                             " drawn on it: delete the Room or mark the level No (until then no story's place above or below grade plane is measured)"))
             .ToList();
     }
 

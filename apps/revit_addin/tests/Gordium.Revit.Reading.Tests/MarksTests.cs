@@ -55,6 +55,8 @@ public sealed class MarksTests
             ("Gordium: This house has no deck or porch or cantilever over an escape opening", "820cd2d1-5b6d-416d-afa8-01cb1f0c4515", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // a real model (Pacific Continental, 2026-11-20): a roof or turret level whose enclosed areas aren't rooms
             ("Gordium: No rooms on this level", "c8cc09e8-00ce-4e4b-a27a-4c2d23410a02", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Levels"]),
+            // a level that is no story (the story facts' level mark: never tried as a story with no rooms drawn)
+            ("Gordium: Not a story", "0938c91d-d646-49f7-b072-465fecbb9325", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Levels"]),
             // the same model's wall niches, corbels and trim drawn as Generic Models (Q2): cleared one by one
             ("Gordium: Not a stair", "6f527562-6b18-467b-9e86-5a2c5489dbc2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_GenericModel", "OST_Stairs", "OST_StairsRailing"]),
             // what a floor outside the house is (reading design note, section 1, "Site slabs")
@@ -74,6 +76,8 @@ public sealed class MarksTests
             ("Gordium: Not occupied", "306bccbe-b2f7-4a73-9169-6be76fb46202", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
             // a room's Table 1004.5 function (the Building Code's occupant loads)
             ("Gordium: Function", "de595662-5386-4cab-9245-600eefb9462d", MarkValueKind.Text, MarkBinding.Instance, ["OST_Rooms"]),
+            // the dwelling unit a room belongs to (the story facts, step 3: the count from the marks)
+            ("Gordium: Unit", "631bdd26-d64d-4d89-b192-04321c4bc82e", MarkValueKind.Text, MarkBinding.Instance, ["OST_Rooms"]),
             // which New York code governs, and what the Building Code's rules read (docs/decisions/2026-11-22_which_ny_code.md)
             ("Gordium: Follows the Building Code", "01405f95-7061-47e2-b2a3-7706747c0817", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Stories above grade plane", "3f5ba80f-f877-49d9-bc47-a86de4a87a19", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),

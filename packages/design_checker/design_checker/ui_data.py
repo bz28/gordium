@@ -141,7 +141,8 @@ SITE_STOPS = {"corner_unknown": ["corner_lot"], "two_streets": ["corner_lot"], "
 SURVEY_STOPS = ("not_surveyed",)
 OPEN_STOPS = ("readings_differ", "all_street", "rear_on_street", "no_side_line", "no_rear_line",
               "corner_outside_residential", "lines_unclear")
-# the questions a by-hand check asks, for the measures Gordium doesn't measure yet (strings.md, Checker reasons)
+# the questions a by-hand check asks, for the measures Gordium doesn't measure yet, or couldn't on this model
+# (strings.md, Checker reasons)
 BY_HAND_QUESTIONS = {
     "space_egress_through_locked_room": "Check by hand: does the path pass through a room that can be locked?",
     "space_egress_through_other_room": "Check by hand: does the path pass through another room?",

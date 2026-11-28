@@ -21426,6 +21426,14 @@ rules:
     reason: 'One exit, allowed by 1006.3.4, in a building that may be an underground building (stated, or not ruled out: a
       floor level used for human occupancy more than 30 ft below the lowest level of exit discharge): 405.7.1 asks two exits
       on each floor level, and which floor levels it holds isn''t in the model: a person checks.'
+  - when: story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) and story_exit_count
+      > 0 and not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance <= 125
+      and not sprinklered_903_3_1_1 and sprinklered_903_3_1_2 and emergency_escape_openings_1031
+    reason: 'One exit, allowed by note a only through an NFPA 13R system (903.3.1.2): 903.3.1.2 permits one only where the
+      Group R occupancy is four stories or fewer above grade plane, its roof assembly (Group R-2) is less than 45 feet above
+      the lowest level of fire department vehicle access, and the floor of its lowest story is 30 feet or less below that
+      level; those heights aren''t in the model, nor are the building''s stories unless stated. Where 13R isn''t permitted the building isn''t sprinklered per 903.3.1.2 and note a isn''t met, so the 13R
+      statement alone never passes the row: a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -21512,6 +21520,22 @@ rules:
     quote: '[BE] 405.7.1 Number of exits. Each floor level shall be provided with not fewer than two exits. Where compartmentation
       is required by Section 405.4, each compartment shall have not fewer than one exit and not fewer than one exit access
       doorway into the adjoining compartment.'
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 26
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:
+      1. Four stories or fewer above grade plane. 2. For other than Group R-2 occupancies, the floor level of the highest
+      story is 30 feet (9144 mm) or less above the lowest level of fire department vehicle access. For Group R-2 occupancies,
+      the roof assembly is less than 45 feet (13 716 mm) above the lowest level of fire depart- ment vehicle access. The height
+      of the roof assembly shall be determined by measuring the distance from the lowest required fire vehicle access road
+      surface adjacent to the building to the eave of the highest pitched roof, the intersec- tion of the highest roof to
+      the exterior wall, or the top of the highest parapet, whichever yields the greatest distance. 3. The floor level of
+      the lowest story is 30 feet (9144 mm) or less below the lowest level of fire department vehicle access. The number of
+      stories of Group R occupancies constructed in accordance with Sections 510.2 and 510.4 shall be measured from grade
+      plane.'
   examples:
   - given:
       occupancy_group: R-2
@@ -21756,6 +21780,33 @@ rules:
     expect: needs_review
     note: 'A story with one exit, a pass where the building states it isn''t underground, where it states it is: 405.7.1 asks
       two exits on each floor level, so a person checks.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      underground_building: false
+    parts:
+      story:
+      - id: p1
+        name: Four apartments, one exit, an NFPA 13R system
+        measures:
+          story_assembly_seating_possible: false
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 18
+          egress_travel_distance: 125
+          story_fourth_or_higher_above_grade_plane: false
+          story_dwelling_units: 4
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The pass at the limits with an NFPA 13R system instead of NFPA 13: 903.3.1.2''s stories, roof height and lowest
+      floor aren''t known, so whether the building is sprinklered per 903.3.1.2 isn''t either: a person checks.'
   notes: 'Table 1006.3.4(1) for Group R-2 of dwelling units (note b; one of sleeping units is Table 1006.3.4(2)''s): a basement
     or the first, second or third story above grade plane may have one exit with at most 4 dwelling units and 125 ft of exit
     access travel, only in a building sprinklered per 903.3.1.1 or 903.3.1.2 with emergency escape and rescue openings per
@@ -21768,7 +21819,9 @@ rules:
     gives the same place, else needs review. A basement is never proven (review round 6). With spot grades, Gordium''s reading,
     shown to confirm: the ground between spots lies between their values, so the grade plane is at most the highest finished
     spot grade outside the building itself; the slope-away rule can only lower it, so a basement is never proven from spot
-    grades. No ground stated, or existing ground: needs review.'
+    grades. No ground stated, or existing ground: needs review.
+    The merge of the story facts (2026-11-28, the coordinator''s decision): the dwelling units now measured, a one-exit
+    pass resting on an NFPA 13R system alone needs review, since 903.3.1.2''s stories and heights aren''t known.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_1_remoteness
