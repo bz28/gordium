@@ -511,6 +511,7 @@ MEASURE_NAMES = {
     "high_rise_building": "high-rise (whether the building is one, or more than 420 ft high, per 403)",
     "underground_building": "underground building (whether a floor used for human occupancy is more than 30 ft below the lowest level of exit discharge, per 405.1)",
     "nfpa_13r_heights_within": "NFPA 13R heights (whether the building is within 903.3.1.2's heights of fire department access)",
+    "group_r_alone": "occupancy group (whether every group is a Group R)",
     "stages_or_platforms": "stages or platforms (whether the building has a stage, a platform or a technical production area, per 410)",
     "aircraft_related_occupancy": "aircraft-related occupancy (whether the building is or holds one, per 412)",
     "service_corridors": "service corridors (whether the building has a passage for transporting HPM, per 415.11.3)",

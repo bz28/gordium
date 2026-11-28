@@ -122,11 +122,12 @@ def test_the_building_measures_follow_the_groups_and_the_sprinkler_system():
         "occupancy_group_i4": False, "other_occupancy_present": True, "occupancy_group": "R-2",
         "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_3": False,     # 13R: its limits not stated, not known
         "group_r_present": True, "group_h_present": False, "group_i1_i2_i3_present": False,      # Chapter 9 part a's
-        "nfpa_13r_stated": True}
+        "nfpa_13r_stated": True, "group_r_alone": True}
     assert code_scope.building_measures({"occupancy_groups": ["I-4"], "sprinkler_system": "nfpa_13"}) == {
         "occupancy_group_i4": True, "other_occupancy_present": False, "occupancy_group": "I-4",
         "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False, "sprinklered_903_3_1_3": False,
-        "group_r_present": False, "group_h_present": False, "group_i1_i2_i3_present": False, "nfpa_13r_stated": False}
+        "group_r_present": False, "group_h_present": False, "group_i1_i2_i3_present": False, "nfpa_13r_stated": False,
+        "group_r_alone": False}
     assert code_scope.building_measures({"sprinkler_system": "nfpa_13d"}) == {
         "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": False,      # 903.3.1.3: neither limit's system,
         "sprinklered_903_3_1_3": True, "nfpa_13r_stated": False}                                       # but 1006.2.2.6's (review round 1)
@@ -608,6 +609,9 @@ def test_a_13r_systems_count_asks_the_limit_it_waits_on():
     stories = {**base, "occupancy_groups": ["R-2"], "stories_above_grade_plane": 3}
     assert asked(stories) == "building.nfpa_13r_heights_within"
     assert asked({"occupancy_groups": ["R-2"]}) == "building.sprinkler_system"         # no system stated: the system
+    # review round 2 of #288: two Group R occupancies are Group R alone, so its own limits settle it
+    assert asked({**base, "occupancy_groups": ["R-2", "R-3"], "stories_above_grade_plane": 3}) == \
+        "building.nfpa_13r_heights_within"
     for block in ({"occupancy_groups": ["R-2", "B"]}, {"occupancy_groups": ["I-1"]},          # no fact settles it:
                   {"occupancy_groups": ["R-1"], "stories_above_grade_plane": 3, "nfpa_13r_heights_within": True,
                    "high_rise_building": True}):                                             # a person checks

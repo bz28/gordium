@@ -1145,7 +1145,7 @@ def _with_stories_bound(values: dict, measured: dict, facts: dict | None = None,
                 aside.setdefault(k, why)
     out = {**values, code_scope.STORIES_DRAWN: drawn, code_scope.STORIES_HOW: how, code_scope.SET_ASIDE: aside}
     typed = (facts or {}).get("stories")
-    if type(typed) in (int, float) and math.isfinite(typed):     # the architect's own count, settled or not
+    if type(typed) is int or type(typed) is float and math.isfinite(typed):   # the architect's own count (any size)
         out[code_scope.STORIES_TYPED] = typed
     most = [r.get("value") for r in record.get("readings") or [] if isinstance(r, dict)]
     if values.get("stories") is not None or not most or not all(type(v) in (int, float) for v in most):

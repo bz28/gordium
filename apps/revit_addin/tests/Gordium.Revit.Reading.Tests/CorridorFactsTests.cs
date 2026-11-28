@@ -53,10 +53,10 @@ public sealed class CorridorFactsTests
         Assert.Contains("\"A fire-resistance rating is not required for corridors contained within a dwelling unit or sleeping unit in an occupancy in Groups I-1 and R.\"",
                         Marks.CorridorsWithinDwellingUnits.Description, StringComparison.Ordinal);
         // review round 1: the whole building's, never a system in part of it (the lower factors are for buildings
-        // "equipped throughout"); 13R only in Group R, as the capacity rule reads it
+        // "equipped throughout"); 13R only where it counts as a 903.3.1.2 system (the 13R limits PR), as the capacity rule reads it
         Assert.Contains("Yes only when the building is equipped throughout with an emergency voice/alarm communication system in accordance with BCNYS Section 907.5.2.2. A system in only part of the building: No.",
                         Marks.EmergencyVoiceAlarm.Description, StringComparison.Ordinal);
-        Assert.Contains("NFPA 13R in Group R only", Marks.EmergencyVoiceAlarm.Description, StringComparison.Ordinal);
+        Assert.Contains("NFPA 13R only where it counts as a 903.3.1.2 system: Group R alone, four or fewer stories and Gordium: 13R heights within limits Yes", Marks.EmergencyVoiceAlarm.Description, StringComparison.Ordinal);
         Assert.Contains("No: none does, so each corridor's load lies between none and its whole story's", Marks.OtherLevelsReachCorridors.Description, StringComparison.Ordinal);
         // the door size rules (#202) read it too: No holds a door onto a corridor to the full size (merge review)
         Assert.Contains("1010.1.1's exceptions for doors inside a dwelling unit", Marks.CorridorsWithinDwellingUnits.Description, StringComparison.Ordinal);

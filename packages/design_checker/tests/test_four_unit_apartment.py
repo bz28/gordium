@@ -727,7 +727,7 @@ R_RULE = "general.bc_903_2_8_group_r_sprinklers"
 def test_903_2_8_fails_the_apartment_as_stated_and_follows_each_sprinkler_system(got, routes):
     """The apartment, Group R-2 with no sprinkler system: 903.2.8 asks a system throughout every building with a
     Group R fire area, so it fails on each story, whatever its size. Stated NFPA 13 it passes; NFPA 13R needs review
-    at its two stories (903.3.1.2's heights aren't in the model) and fails at five, where it is no
+    at its two stories (903.3.1.2's heights not stated: the 13R limits PR) and fails at five, where it is no
     903.3.1.2 system (its flag, naming the four stories, still shown: review round 4); NFPA 13D fails in an R-2 of
     dwelling units, not townhouses (903.3.1.3), and needs review while either isn't stated. 903.3.1.2's two flags show
     only with a 13R system, 903.3.1.3's only with a 13D one; nothing outside Chapter 9 is compared here."""
@@ -940,6 +940,11 @@ def test_a_13r_systems_limit_is_asked_by_its_own_fact_and_a_person_checks_where_
     assert got and all(c["field"] == "building.nfpa_13r_heights_within" for c in got), got[:2]
     assert all(c["words"].startswith("sprinkler system (NFPA 13R): stated") and "not stated for the project"
                not in c["words"] for c in got), got[:2]
+    from design_checker import ui_data                  # review round 2 of #288: the ask the pane shows is it too
+    for c in got:
+        ask = ui_data._from_cause(c, "story")
+        assert (ask["field"], ask["headline"]) == ("building.nfpa_13r_heights_within",
+                                                   ui_data.FIELD_HEADLINES["building.nfpa_13r_heights_within"]), ask
     mixed = causes(sprinkler_system="nfpa_13r", stories_above_grade_plane=2, nfpa_13r_heights_within=True,
                    occupancy_groups=["R-2", "B"])
     assert mixed and all(c["key"] == "decide:sprinklered_903_3_1_2" and c["words"] == code_scope.NFPA_13R_BY_HAND

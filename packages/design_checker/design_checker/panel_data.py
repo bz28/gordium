@@ -319,7 +319,8 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
             if field:
                 what = {"building.occupancy_groups": "the occupancy groups", "building.stories_above_grade_plane":
                         "the stories above grade plane", "building.nfpa_13r_heights_within":
-                        "whether its heights are within 903.3.1.2's"}.get(field, field)
+                        "whether its heights are within 903.3.1.2's (Gordium: 13R heights within limits)"}.get(
+                field, field)
                 add({"kind": MARK, "key": f"fact:{m}", "words": code_scope.NFPA_13R_LIMIT_WORDS.format(what=what),
                      "elements": [], "measure": m, "field": field})
             else:

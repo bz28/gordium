@@ -39,10 +39,12 @@ public sealed class NfpaThirteenRHeightsTests
     }
 
     [Fact]
-    public void It_quotes_items_2_and_3_whole_and_says_what_yes_no_and_blank_do()
+    public void It_quotes_items_2_and_3_whole_with_how_the_roof_is_measured_and_says_what_yes_no_and_blank_do()
     {
         var d = Marks.NfpaThirteenRHeights.Description;
         Assert.Contains("\"For other than Group R-2 occupancies, the floor level of the highest story is 30 feet (9144 mm) or less above the lowest level of fire department vehicle access. For Group R-2 occupancies, the roof assembly is less than 45 feet (13 716 mm) above the lowest level of fire department vehicle access.\"", d, StringComparison.Ordinal);
+        // review round 2: the roof's height measured to the highest eave, roof-wall line or parapet top, never the deck
+        Assert.Contains("The height of the roof assembly shall be determined by measuring the distance from the lowest required fire vehicle access road surface adjacent to the building to the eave of the highest pitched roof, the intersection of the highest roof to the exterior wall, or the top of the highest parapet, whichever yields the greatest distance.", d, StringComparison.Ordinal);
         Assert.Contains("\"The floor level of the lowest story is 30 feet (9144 mm) or less below the lowest level of fire department vehicle access.\"", d, StringComparison.Ordinal);
         Assert.Contains("Gordium never decides it", d, StringComparison.Ordinal);
         Assert.Contains("Yes, with Group R alone and the stories above grade plane stated four or fewer, and not a Group R-2 high-rise", d, StringComparison.Ordinal);

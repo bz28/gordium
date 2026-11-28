@@ -486,6 +486,9 @@ DERIVED = {
     "group_h_present": ("occupancy_groups", lambda groups: any(g.startswith("H-") for g in groups)),
     "group_i1_i2_i3_present": ("occupancy_groups", lambda groups: any(g in ("I-1", "I-2", "I-3") for g in groups)),
     "stories_above_grade_plane": ("stories_above_grade_plane", lambda v: v),
+    # every stated group a Group R (R-1 to R-4: R-2 and R-3 together too): read by no rule, so field_of asks a 13R
+    # system's own limits only where they can settle it (nfpa_13r_counts' "Group R alone")
+    "group_r_alone": ("occupancy_groups", lambda groups: all(g.startswith("R-") for g in groups)),
     "townhouse_units": ("townhouse_units", lambda v: v),
     # Chapter 9 part e: a BCNYS 202 TOWNHOUSE UNIT "has a separate means of egress", read with townhouse_units where
     # 905.3's exception leaves standpipes out of "Group R-2 townhouses"
@@ -509,10 +512,9 @@ def field_of(measure: str, values: dict | None = None) -> str | None:
     another group, Group I-1, a high-rise of a Group R other than R-2, or every limit stated), None: a person checks
     (NFPA_13R_BY_HAND), never the system already stated."""
     if measure == "sprinklered_903_3_1_2" and isinstance(values, dict) and values.get("nfpa_13r_stated") is True:
-        group = values.get("occupancy_group")
-        if group is None:
+        if "group_r_alone" not in values:
             return "building.occupancy_groups"
-        if group not in ("R-1", "R-2", "R-3", "R-4") or values.get("high_rise_building") is True:
+        if values["group_r_alone"] is not True or values.get("high_rise_building") is True:
             return None
         return next((f"building.{f}" for f in NFPA_13R_LIMIT_FACTS[1:] if f not in values), None)
     return f"building.{DERIVED[measure][0]}" if measure in DERIVED else None
@@ -521,10 +523,11 @@ def field_of(measure: str, values: dict | None = None) -> str | None:
 # what a person checks where no fact settles whether a stated NFPA 13R system is a 903.3.1.2 system (field_of None)
 NFPA_13R_BY_HAND = ("whether the NFPA 13R system is permitted here isn't something the facts settle (903.3.1.2 permits "
                     "it in Group R occupancies four stories or fewer above grade plane, within its heights of fire "
-                    "department vehicle access): a person checks, or state an NFPA 13 system")
+                    "department vehicle access; 903.2.6 exception 1 in a Group I-1 Condition 1 facility too): a "
+                    "person checks, or state an NFPA 13 system")
 # the words of an ask for one of 903.3.1.2's limits (field_of's), the system itself stated
 NFPA_13R_LIMIT_WORDS = ("sprinkler system (NFPA 13R): stated, and counted only where 903.3.1.2's limits are known to hold; "
-                        "{what} isn't stated")
+                        "not stated yet: {what}")
 
 
 BY_HAND = ASK_BY_HAND.format(mark=MARK["follows_building_code"])
