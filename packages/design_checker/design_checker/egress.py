@@ -404,7 +404,11 @@ def _measured(law: dict, interior, readings: dict, ground: dict | None = None, v
                 problems += [str(p) for p in one["problems"] if str(p) not in problems]
                 parts.update(one["parts"])
             if escape:                                # each sleeping room linked to its story and doors (8a)
-                escape_openings.link(parts, interior, law.get("rules"))   # 8d: the law's limits, which comply
+                block = interior.get("building") if isinstance(interior, dict) else None
+                facts = {**{k: v for k, v in (values or {}).items() if k in code_scope.FACTS},
+                         **(block if isinstance(block, dict) else {})}       # as _law_values merges them
+                # 8d: the law's limits, which comply; 1007.1.1's separation with the law's own kinds (Chapter 9)
+                escape_openings.link(parts, interior, law.get("rules"), law.get("kinds"), facts)
             readings[kind] = {"parts": parts, "problems": problems, "not_checked": [], "has_none": {}}
         else:
             readings[kind] = measure_interior(interior)

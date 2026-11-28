@@ -106,9 +106,12 @@ def _count(v) -> bool:
     return v >= 0 and (isinstance(v, int) or (v - v == 0 and v.is_integer()))     # a float: finite and whole
 
 
-def link(parts: dict, description, rules=None) -> None:
+def link(parts: dict, description, rules=None, kinds=None, facts=None) -> None:
     """Add the four measures to every sleeping room part in `parts` (the routes' parts and the interior measuring's
-    sleeping rooms and openings, together), in place; with the law's `rules`, which openings comply (8d)."""
+    sleeping rooms and openings, together), in place; with the law's `rules`, which openings comply (8d). `kinds`:
+    the law's measure kinds (its published certificate's, egress.law["kinds"]), and `facts`: the building facts the
+    check states (its values' code_scope.FACTS beside the description's building block), both for 1007.1.1's
+    separation of a room's two exits (merge with Chapter 9: its check reads the occupancy group, a text)."""
     rooms = parts.get(KIND)
     if not isinstance(rooms, list):
         return
@@ -128,7 +131,9 @@ def link(parts: dict, description, rules=None) -> None:
     openings = parts.get(OPENINGS)
     doors = parts.get("means_of_egress_door")
     stray = isinstance(openings, list) and _stray(parts, openings)
-    separation = (_separation_check(rules), description.get("building") if isinstance(description, dict) else None)
+    block = description.get("building") if isinstance(description, dict) else None
+    separation = (_separation_check(rules), facts if isinstance(facts, dict) else block,
+                  kinds if isinstance(kinds, dict) else {})
     for part in rooms:
         if not isinstance(part, dict) or part.get("maybe"):
             continue                 # an enclosed space that may not be a room at all: every row of it needs review
@@ -417,7 +422,8 @@ RATIO = "exit_remoteness_ratio"      # the story's 1007.1.1 figure, which the la
 
 def _separation_check(rules):
     """The law's 1007.1.1 separation for a story's exits (the check of its one rule over stories reading
-    `exit_remoteness_ratio`: general.bc_1007_1_1_remoteness, half the diagonal, a third sprinklered), or None where
+    `exit_remoteness_ratio`: general.bc_1007_1_1_remoteness, half the diagonal, or a third with an NFPA 13 system or,
+    in Group R, an NFPA 13R one the building may count), or None where
     there isn't exactly one such check (merge review of #240: two exits count only where they are placed apart)."""
     found = {r["check"] for r in rules or [] if isinstance(r, dict) and r.get("for_each") == "story"
              and isinstance(r.get("check"), str) and RATIO in _names(r["check"])}
@@ -431,18 +437,33 @@ def _names(text) -> set:
         return set()
 
 
-def _apart(check, ratio, building):
+def _apart(check, ratio, building, law_kinds=None):
     """True where the law's separation check holds with the room's own ratio and the building's stated facts under
-    every value a fact not stated could take, False where it fails under every one, else None (never two on a guess)."""
+    every value a fact not stated could take, False where it fails under every one, else None (never two on a guess).
+    Each name's kind is the law's own (`law_kinds`: the occupancy group a text of its groups, a sprinkler system a
+    yes/no), else the story part's; a name with no kind, or an open one that isn't a yes/no or a few listed values, is
+    not this code's guess (None)."""
     facts = code_scope.building_measures(building if isinstance(building, dict) else None)
-    open_ = sorted(_names(check) - {RATIO} - set(facts))
-    if any(not n.startswith("sprinklered_") for n in open_):
-        return None                                     # a fact other than a sprinkler system: not this code's guess
+    names = _names(check)
+    story = measure_kinds("story")
+    kinds = {RATIO: "number"}
+    for n in names - {RATIO}:
+        kind = (law_kinds or {}).get(n, story.get(n, "boolean" if n.startswith("sprinklered_") else None))
+        if kind is None:
+            return None
+        kinds[n] = kind
+    open_ = sorted(names - {RATIO} - set(facts))
+    choices = []
+    for n in open_:                                     # every value a fact not stated could take
+        if kinds[n] == "boolean":
+            choices.append((True, False))
+        elif isinstance(kinds[n], (set, frozenset, list, tuple)) and 0 < len(kinds[n]) <= 64:
+            choices.append(tuple(sorted(kinds[n], key=str)))
+        else:
+            return None
     answers = set()
-    for combo in itertools.product((True, False), repeat=len(open_)):
+    for combo in itertools.product(*choices):
         values = {**facts, **dict(zip(open_, combo)), RATIO: ratio}
-        kinds = {n: ("number" if n == RATIO else "boolean") for n in _names(check)}
-        kinds.update({k: v for k, v in measure_kinds("story").items() if k in kinds})
         try:
             answers.add(bool(formula.evaluate(check, values, kinds)))
         except (formula.MissingMeasure, formula.EvaluationError, formula.FormulaError, ArithmeticError):
@@ -450,7 +471,7 @@ def _apart(check, ratio, building):
     return answers.pop() if len(answers) == 1 else None
 
 
-def _reach(found: list, name, separation=(None, None)):
+def _reach(found: list, name, separation=(None, None, None)):
     """(False, the doors and the exits each reaches) where the routes show every way out of the sleeping room reaches
     two or more separate and distinct exits, placed apart as the law's 1007.1.1 rule asks (`separation`: its check and
     the description's building block); (None, why not) otherwise. `found`: the routes' space parts for the room on its
@@ -465,13 +486,13 @@ def _reach(found: list, name, separation=(None, None)):
                      for v in got["doors"].values()))
     if not whole:
         return None, str(got.get("why") or "not every way out of it reaches two exits")
-    check, building = separation
+    check, building, law_kinds = separation
     ratio = got.get("remoteness_ratio")
     if check is None:
         return None, "the law's separation of two exits (BCNYS 1007.1.1) isn't read, so they aren't shown apart"
     if isinstance(ratio, bool) or not isinstance(ratio, (int, float)) or not math.isfinite(ratio) or ratio < 0:
         return None, "how far apart the exits it reaches are (BCNYS 1007.1.1) isn't measured"
-    ok = _apart(check, float(ratio), building)
+    ok = _apart(check, float(ratio), building, law_kinds)
     if ok is not True:
         return None, (f"the exits it reaches are {ratio:.3f} of the story's diagonal apart, "
                       + ("under" if ok is False else "not shown to meet")

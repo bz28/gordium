@@ -157,6 +157,14 @@ def test_a_room_id_two_rooms_share_counts_no_openings_and_no_doors():
         assert k not in p["measures"] and p["not_measured"][k], k
 
 
+@functools.lru_cache(maxsize=1)
+def _kinds():
+    """The law's measure kinds, as its published certificate gives them (egress: law["kinds"])."""
+    from rule_format.rulebook import Context
+    allowed = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/new_york_state_building").allowed()
+    return {k: v for k, v in allowed.items() if k not in ("use", "district")}
+
+
 def _separation():
     """The law's own 1007.1.1 rule alone (merge review of #240): two exits count only where placed apart as it asks."""
     return [r for r in _ny_rules() if r["id"] == "general.bc_1007_1_1_remoteness"]
@@ -170,7 +178,7 @@ def _with_space(more=None, confirm=None, within="L1", twice=False):
     if confirm:
         space["confirm"] = confirm
     parts["space"] = [space] + ([dict(space)] if twice else [])
-    escape_openings.link(parts, desc, _separation())
+    escape_openings.link(parts, desc, _separation(), _kinds())
     return parts["sleeping_room"][0]
 
 
@@ -234,7 +242,7 @@ def test_an_opening_set_aside_on_its_rooms_reading_is_never_a_pass():
         if confirm:
             space["confirm"] = {"space_exit_count": confirm}
         parts["space"] = [space]
-        escape_openings.link(parts, desc, _separation())
+        escape_openings.link(parts, desc, _separation(), _kinds())
         o = parts["emergency_escape_opening"][0]
         assert o["measures"]["opening_room_one_exit"] is False
         assert o["confirm"].get("opening_room_one_exit") == confirm
@@ -255,7 +263,7 @@ def test_a_room_whose_confirm_or_more_isnt_a_mapping_is_never_a_crash(bad):
         parts["space"] = [{"id": "b", "within": "L1", "measures": {}, "not_measured": {},
                            "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": 0.6}},
                            "confirm": {"space_exit_count": "Gordium's reading"}}]
-        escape_openings.link(parts, desc, _separation())
+        escape_openings.link(parts, desc, _separation(), _kinds())
         room = parts["sleeping_room"][0]
         assert room["confirm"]["sleeping_room_story_one_exit"] == "Gordium's reading", key
         assert room["more"]["exits_reached"] == {"d": ["x", "y"]}, key
@@ -280,7 +288,7 @@ def test_the_rooms_reach_decides_the_one_exit_question_only():
                                                         "story_fourth_or_higher_above_grade_plane": None}})
     parts["space"] = [{"id": "b", "within": "L1", "measures": {}, "not_measured": {},
                        "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": 0.6}}}]
-    escape_openings.link(parts, desc, _separation())
+    escape_openings.link(parts, desc, _separation(), _kinds())
     p = parts["sleeping_room"][0]
     assert p["measures"]["sleeping_room_story_one_exit"] is False
     assert "sleeping_room_fourth_or_higher" not in p["measures"] and p["not_measured"]["sleeping_room_fourth_or_higher"]
@@ -706,7 +714,7 @@ def test_an_opening_whose_room_isnt_text_is_never_a_crash():
 
 
 
-def _reach_check(openings, reading=None, ratio=0.6, system="none"):
+def _reach_check(openings, reading=None, ratio=0.6, system="none", building=None):
     """Merge review of #240 on 8d: a Group R-2 sleeping room on a story of two exits whose routes show every way out
     reaching two (no escape opening asked by 1031.2 item 1), with the law's own rules, ids as the pipeline gives them
     (the room's own id apart from the routes' space part). Returns 1031.2's outcome, each opening's outcomes over the
@@ -724,8 +732,8 @@ def _reach_check(openings, reading=None, ratio=0.6, system="none"):
              "story": [{"id": "L1", "measures": {"story_exit_count": 2, "story_fourth_or_higher_above_grade_plane": False}}],
              "emergency_escape_opening": [dict(o, within="b (sleeping room)") for o in openings],
              "means_of_egress_door": [{"id": "d", "more": {"sides": ["b", "c"]}}]}
-    building = {"sprinkler_system": system} if system else {}
-    escape_openings.link(parts, {"rooms": [{"id": "b", "level": "L1"}], "building": building}, rules)
+    building = {"occupancy_groups": ["R-2"], **({"sprinkler_system": system} if system else {}), **(building or {})}
+    escape_openings.link(parts, {"rooms": [{"id": "b", "level": "L1"}], "building": building}, rules, _kinds())
     given = {"occupancy_group": "R-2", **{f"sprinklered_903_3_1_{n}": False for n in (1, 2, 3)}}
     allowed = Context.for_jurisdiction(ny).allowed()
     by_id = {r["id"]: r for r in rules}
@@ -804,3 +812,19 @@ def test_without_the_laws_separation_rule_two_exits_are_never_two():
         "exits_reached": {"two": True, "doors": {"d": ["x", "y"]}, "remoteness_ratio": 0.9}}}]
     escape_openings.link(parts, desc)
     assert "sleeping_room_story_one_exit" not in parts["sleeping_room"][0]["measures"]
+
+
+def test_the_third_counts_only_where_the_building_may_count_its_13r_system():
+    """Merge with Chapter 9: 1007.1.1's check now reads the occupancy group (a third with NFPA 13, or with NFPA 13R in
+    Group R), and code_scope counts a 13R system only where 903.3.1.2 allows it (four stories at most, never a Group
+    R-2 high-rise). Held with the law's own kinds: a 5-story or high-rise R-2 with 13R at 0.4 of the diagonal is not
+    two (its one-exit question stays open), a 3-story one is; with the groups not stated, the separation holds only
+    where every group agrees (0.6: two; 0.4 with 13R: not)."""
+    assert _reach_check([], ratio=0.4, system="nfpa_13r", building={"stories_above_grade_plane": 3})[0] == "pass"
+    for more in ({"stories_above_grade_plane": 5}, {"high_rise_building": True}):
+        assert _reach_check([], ratio=0.4, system="nfpa_13r", building=more)[0] == "needs_review", more
+    from design_checker import escape_openings as eo
+    check = eo._separation_check(_ny_rules())
+    assert eo._apart(check, 0.6, {"sprinkler_system": "nfpa_13"}, _kinds()) is True
+    assert eo._apart(check, 0.4, {"sprinkler_system": "nfpa_13r"}, _kinds()) is None
+    assert eo._apart(check, 0.6, {"occupancy_groups": ["R-2"]}, None) is None       # no kinds: never a guess
