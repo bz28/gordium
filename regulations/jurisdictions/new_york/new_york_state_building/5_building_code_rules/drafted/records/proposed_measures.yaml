@@ -568,6 +568,7 @@ assembly_fixed_seating:
   - general.bc_1030_9_7_stairways_connecting_to_stepped_aisles
   - general.bc_1030_9_8_stairways_connecting_to_vomitories
   - general.bc_1030_9_assembly_aisles_required
+  - general.bc_903_2_1_5_1_under_grandstands
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -860,5 +861,6 @@ assembly_spaces:
   - general.bc_1030_9_7_stairways_connecting_to_stepped_aisles
   - general.bc_1030_9_8_stairways_connecting_to_vomitories
   - general.bc_1030_9_assembly_aisles_required
+  - general.bc_903_2_1_5_1_under_grandstands
   - general.bc_table_1030_13_2_1_smoke_protected_row_lengths
   - general.bc_table_1030_6_2_smoke_protected_aisle_factors

@@ -310,7 +310,7 @@ def building_measures(building: dict | None, interior=None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present, occupancy_group (the one group, or "mixed") and whether a
     Group R, H or I-1 to I-3 occupancy is among them (903.2's) from the groups, the three sprinkler systems the limits
-    name from the system, the stories above grade plane, and the twelve stated yes/no facts. A fact not stated is
+    name from the system, the stories above grade plane, and the fourteen stated yes/no facts. A fact not stated is
     left out (its rules need review). In a building stated as Group R alone (one or more of R-1 to R-4), a stated NFPA
     13R system counts as one per 903.3.1.2 only where the stated stories above grade plane don't exceed its four
     (903.3.1.2 item 1: the Group R occupancy's stories, here the building's): stated more, sprinklered_903_3_1_2 is no,

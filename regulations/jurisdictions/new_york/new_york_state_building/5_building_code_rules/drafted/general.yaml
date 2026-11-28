@@ -4019,7 +4019,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Enclosed spaces under grandstands or bleachers (BCNYS 903.2.1.5.1)
-  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "E", "mixed"]
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "E", "mixed"] or assembly_fixed_seating or assembly_spaces
   sources:
   - file: gov.ny.building.2025.pdf
     page: 269
@@ -4041,12 +4041,21 @@ rules:
     note: 'Enclosed spaces under grandstands or bleachers are sprinklered per 903.3.1.1 where they exceed 1,000 square feet,
       or are 1,000 square feet or less and not built per 1030.1.1.1: a person''s check.'
   - given:
+      occupancy_group: B
+      assembly_spaces: true
+    expect: needs_review
+    note: 'A Group B building with an assembly space, where grandstands or bleachers may stand: a person''s check.'
+  - given:
       occupancy_group: R-2
+      assembly_spaces: false
+      assembly_fixed_seating: false
     expect: not_applicable
-    note: 'Not this building''s group or fact, as stated: not applicable.'
+    note: 'Not this building''s group, and it states no assembly space or fixed seating: not applicable.'
   notes: '903.2.1.5.1: grandstands and bleachers aren''t in the model. Shown for Group E too: an assembly space associated
-    with Group E is part of it (303.1.3), so a school gym''s bleachers are Group E''s (review round 1). Hand-drafted in a Claude Code session (2026-11-27,
-    Chapter 9 part b).'
+    with Group E is part of it (303.1.3), so a school gym''s bleachers are Group E''s (review round 1). Hand-drafted in a
+    Claude Code session (2026-11-27, Chapter 9 part b). Shown also wherever the building has, or doesn''t rule out, an assembly
+    space or fixed seating (the facts main''s section group 9h reads for 1030.1.1''s grandstands and bleachers), so this sprinkler
+    check shows wherever 1030.1.1.1''s separation of the same spaces does (the merge review, 2026-11-27).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_903_2_1_6_assembly_on_roofs
@@ -34813,11 +34822,12 @@ rules:
       grade plane; nor where it is served by an exterior ramp or balcony connecting two remote exterior exit stairways or
       other approved exits, its perimeter at least 50 percent open (openings at least half the enclosing wall''s height, their
       tops at least 7 feet above the balcony); nor from an open-ended corridor where the building is sprinklered throughout
-      per 903.3.1.1 or 903.3.1.2, the corridors meet 1020 and connect at each end to an exterior exit stairway or ramp meeting
-      1027, the walls and openings beside it meet 1023.7, and each change of direction over 45 degrees has a clear opening
-      of at least 35 square feet or an exterior stairway or ramp; nor in Group R-3 of at most four stories where it serves
-      individual dwelling units and discharges directly to grade: exterior stairways, their separation and walls aren''t in
-      the model, so a person''s check.'
+      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories, and in Group I-1
+      Condition 1, 903.2.6 exception 1), the corridors meet 1020 and connect at each end to an exterior exit stairway or ramp
+      meeting 1027, the walls and openings beside it meet 1023.7, and each change of direction over 45 degrees has a clear
+      opening of at least 35 square feet or an exterior stairway or ramp; nor in Group R-3 of at most four stories where it
+      serves individual dwelling units and discharges directly to grade: exterior stairways, their separation and walls aren''t
+      in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 1020's heading isn't brought in, but its parts
     1020.1 to 1020.7 are (the corridor rules).
   drafted_by: claude_code/claude-opus-5-5
@@ -34874,15 +34884,18 @@ rules:
       of the number and the minimum width or required capacity of interior exit stairways and ramps may egress through areas
       on the level of exit discharge (a free and unobstructed path to a readily visible exterior exit door, the whole level
       separated from areas below as the enclosure is, the egress path sprinklered and the portions with access to it sprinklered
-      per 903.3.1.1 or 903.3.1.2 or separated from it, and an exit access stairway or ramp ending at least 30 feet, or a quarter
-      of the building''s greatest diagonal if less, from the exit stairway''s discharge door), or through a vestibule (separated
-      from areas below as the enclosure is, at most 10 feet deep and 30 feet long, separated from the rest of the level by
-      a fire partition per 708, used only for egress and exiting directly outside), the two together at most 50 percent of
-      the number and of the minimum width or required capacity of the required exits; and horizontal exits per 1026 need not
-      discharge directly outside: where each exit discharges isn''t worked out, so a person''s check.'
+      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories, and in Group I-1
+      Condition 1, 903.2.6 exception 1) or separated from it, and an exit access stairway or ramp ending at least 30 feet,
+      or a quarter of the building''s greatest diagonal if less, from the exit stairway''s discharge door), or through a vestibule
+      (separated from areas below as the enclosure is, at most 10 feet deep and 30 feet long, separated from the rest of the
+      level by a fire partition per 708, used only for egress and exiting directly outside), the two together at most 50 percent
+      of the number and of the minimum width or required capacity of the required exits; and horizontal exits per 1026 need
+      not discharge directly outside: where each exit discharges isn''t worked out, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 1028.1 (its scope, labeled reference) is quoted
-    here. 708 isn't brought in whole (only 708.1 and 708.3 to 708.9, Chapter 7 part c's flags). Exterior exit doors are marked in the model, but a door marked at the level of exit discharge
-    doesn't say which exits pass through the lobby or a vestibule before it. Of 1003 to 1015, which 1028.1 names, 1006.1, 1006.2's own words and 1006.3 to 1006.3.2, 1010.3 to 1010.5.4, 1014, 1015 and the rest of 1011 aren't brought in yet (1011's stairs are section group 7c's rules).
+    here. 708 isn't brought in whole (only 708.1 and 708.3 to 708.9, Chapter 7 part c's flags). Exterior exit doors are marked
+    in the model, but a door marked at the level of exit discharge doesn't say which exits pass through the lobby or a vestibule
+    before it. Of 1003 to 1015, which 1028.1 names, 1006.1, 1006.2's own words and 1006.3 to 1006.3.2, 1010.3 to 1010.5.4,
+    1014, 1015 and the rest of 1011 aren't brought in yet (1011's stairs are section group 7c's rules).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1028_3_exit_discharge_width

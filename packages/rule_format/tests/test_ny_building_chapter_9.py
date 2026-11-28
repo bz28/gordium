@@ -132,7 +132,8 @@ def test_every_chapter_9_flag_is_a_persons_check_never_a_pass(labels, book, ctx)
     by = {"occupancy_group", "group_h_present", "sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3",
           "nfpa_13r_stated", "occupied_outdoor_areas", "ambulatory_care_facility",   # part b: 903.2.1.6, 903.2.2.1
           "emergency_voice_alarm_system", "townhouse_units",              # part c: 907.2.1.1; part e: 905.3
-          "separate_means_of_egress"}
+          "separate_means_of_egress",
+          "assembly_spaces", "assembly_fixed_seating"}       # the merge of 9h: 903.2.1.5.1 with 1030.1.1.1
     for pid, v in labels.items():
         if v["label"] != "flag":
             continue
@@ -842,3 +843,17 @@ def test_a_line_a_13r_system_doesnt_spare_says_why(book):
         kinds = {(str(e["given"].get("occupancy_group", "")).startswith("R-"), e["expect"]) for e in r["examples"]
                  if e["given"].get("sprinklered_903_3_1_2") is True and not e["given"].get("sprinklered_903_3_1_1")}
         assert (True, "not_applicable") in kinds and (False, "needs_review") in kinds, r["id"]
+
+
+def test_the_grandstands_sprinklers_show_wherever_their_separation_does(book, ctx):
+    """The merge review of main's section group 9h (2026-11-27): 903.2.1.5.1's sprinklers under grandstands and
+    bleachers and 1030.1.1.1's separation of the same spaces show in the same buildings: wherever an assembly space or
+    fixed seating is stated or not ruled out, whatever the group."""
+    allowed = ctx.allowed()
+    sprinklers = _rule(book, "general.bc_903_2_1_5_1_under_grandstands")
+    separation = _rule(book, "general.bc_1030_1_1_1_spaces_under_grandstands")
+    for b in ({"occupancy_groups": ["B"], "assembly_spaces": True}, {"occupancy_groups": ["R-2"]},
+              {"occupancy_groups": ["M"], "assembly_fixed_seating": True},
+              {"occupancy_groups": ["R-2"], "assembly_spaces": False, "assembly_fixed_seating": False}, {}):
+        m = code_scope.building_measures(b)
+        assert (outcome(sprinklers, m, allowed) == "not_applicable") <= (outcome(separation, m, allowed) == "not_applicable"), b

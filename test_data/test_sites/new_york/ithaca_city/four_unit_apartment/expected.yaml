@@ -553,7 +553,7 @@ results:
   general.bc_903_2_1_3_group_a3_sprinklers: not_applicable
   general.bc_903_2_1_4_group_a4_sprinklers: not_applicable
   general.bc_903_2_1_5_a5_accessory_areas: not_applicable
-  general.bc_903_2_1_5_1_under_grandstands: not_applicable
+  general.bc_903_2_1_5_1_under_grandstands: needs_review   # an assembly space isn't ruled out (the merge review)
   general.bc_903_2_1_6_assembly_on_roofs: needs_review
   general.bc_903_2_1_7_multiple_a_fire_areas: not_applicable
   general.bc_903_2_2_1_ambulatory_care: needs_review

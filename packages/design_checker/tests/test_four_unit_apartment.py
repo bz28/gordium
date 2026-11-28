@@ -218,9 +218,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     fire alarm and smoke alarm sections, 907.2.11 and its six for Groups R and I-1, 907.2.11.8's portable alarms (a
     nontransient hotel is Group R-2, 310.3), 907.2.10.2's battery storage and 907.5.2.2's five while the voice/alarm
     system isn't stated (391). Part e adds the standpipe, smoke control, smokeproof enclosure and fire command center
-    flags but Group A's standpipes (418)."""
+    flags but Group A's standpipes (418). The merge of main's section group 9h shows 903.2.1.5.1's
+    grandstands too, an assembly space not ruled out (419)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 418 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 419 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
     # review round 4 of section group 9g: the docstring's per-section counts for 9g, pinned
     from collections import Counter
     assert Counter(i["code"]["section"].split(".")[0] for i in flags
@@ -250,6 +251,8 @@ def test_section_1030s_flags_show_on_residential_rooms_alone_and_hide_only_on_a_
     interior["building"] = {**interior["building"], "assembly_spaces": False, "assembly_fixed_seating": False}
     now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
     moved = {k for k in got["results"] if got["results"][k] != now[k]}
+    # 903.2.1.5.1's sprinklers under grandstands read the same facts as 1030.1.1.1's separation (the merge review)
+    moved -= {"general.bc_903_2_1_5_1_under_grandstands"}
     assert moved == set(shown) and {now[k] for k in moved} == {"not_applicable"}
     for fn, want in (("assembly_unconcentrated", "needs_review"), ("courtroom", "needs_review"),
                      ("business", "not_applicable"), ("assembly_fixed_seats", "needs_review")):

@@ -182,7 +182,7 @@ documents:
                  Table 1030.6.2, Table 1030.13.2.1, '1031.1', '1031.2', '1031.3', '1031.4', '1031.5', '1031.6']
       alone: ['407.4.2', '703.2.1.1', '707.3', '713.12', '716.2', '711.1', '711.2', '711.2.4', '711.3', '712.1',
               '903.2', '903.3', '903.3.1', '907.2', '909.1', '911.1', '903.3.1.1', '903.3.1.2', '1010.1', '1010.2', '1011.5',
-              '1011.5.4', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
+              '1011.5.4']   # brought in without the parts under them (exempt locations, balconies, attics)
       definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
           the rule measures the story's floor area by both of the book's own measures of floor area (README).
