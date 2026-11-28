@@ -258,9 +258,10 @@ def test_the_walks_oracle_catches_a_rule_changed(book, ctx):
     stories ignored, a building of two or more groups with no system let through) disagrees with the oracle."""
     allowed = ctx.allowed()
     mutants = {
-        "general.bc_903_2_5_1_group_h_sprinklers": {"check": "sprinklered_903_3_1_1 or sprinklered_903_3_1_2"},
+        # 13R taken as stated, not as counted (the 13R limits PR: the measure itself is no outside Group R)
+        "general.bc_903_2_5_1_group_h_sprinklers": {"check": "sprinklered_903_3_1_1 or nfpa_13r_stated"},
         "general.bc_903_2_6_group_i_sprinklers": {"applies_when": "group_i1_i2_i3_present"},
-        "general.bc_903_2_8_group_r_sprinklers": {"check": "sprinklered_903_3_1_1 or sprinklered_903_3_1_2"},
+        "general.bc_903_2_8_group_r_sprinklers": {"check": "sprinklered_903_3_1_1 or nfpa_13r_stated"},
     }
     for rid, change in mutants.items():
         rule = {**_rule(book, rid), **change}
@@ -409,6 +410,42 @@ def test_no_rule_passes_on_a_13r_system_outside_group_r(book, ctx):
     assert walked > 500 and not wrong, wrong[:5]
 
 
+def test_no_rule_passes_on_a_13r_system_whose_limits_arent_known(book, ctx):
+    """The 13R limits PR (2026-11-28), the class: in Group R, a stated NFPA 13R system whose 903.3.1.2 limits aren't
+    all known to hold (the stories or the heights not stated, a group beside R, the groups not stated) is no system a
+    rule may pass on: no part passes with it that doesn't pass with no system. Walked over every rule that reads the
+    13R fact (716.2.2.3, 903.2, 1006 to 1031 and the rest) and each worked example's parts."""
+    allowed, wrong, walked = ctx.allowed(), [], 0
+    unknown = [{"occupancy_groups": ["R-2"]}, {"occupancy_groups": ["R-1"], "stories_above_grade_plane": 3},
+               {"occupancy_groups": ["R-2"], "nfpa_13r_heights_within": True},
+               {"occupancy_groups": ["R-2", "B"], "stories_above_grade_plane": 2, "nfpa_13r_heights_within": True},
+               {"occupancy_groups": ["I-1"], "stories_above_grade_plane": 2, "nfpa_13r_heights_within": True},
+               {"stories_above_grade_plane": 2, "nfpa_13r_heights_within": True}]
+    for r in book:
+        reads = {n for t in [r.get("check"), r.get("applies_when")] + [w["when"] for w in r.get("review_when") or []]
+                 if t for n in formula.names(t)}
+        if r["kind"] != "rule" or "sprinklered_903_3_1_2" not in reads or not parts.is_part_rule(r):
+            continue
+        for e in r.get("examples") or []:
+            if not (e.get("parts") or {}).get(r["for_each"]):
+                continue
+            facts = {k: v for k, v in e["given"].items()
+                     if code_scope.DERIVED.get(k, (None,))[0] not in ("occupancy_groups", "sprinkler_system",
+                                                                    "stories_above_grade_plane")}
+            for block in unknown:
+                answers = {}
+                for system in ("nfpa_13r", "none"):
+                    m = code_scope.building_measures({**block, "sprinkler_system": system})
+                    if system == "nfpa_13r":
+                        assert "sprinklered_903_3_1_2" not in m, block      # not known: the walk's premise
+                    answers[system] = [row["outcome"] for row in parts.rows(r, e["parts"], {**facts, **m}, allowed)]
+                walked += 1
+                for with_13r, without in zip(answers["nfpa_13r"], answers["none"]):
+                    if with_13r == "pass" and without != "pass":
+                        wrong.append((r["id"], block, e.get("note", "")[:60]))
+    assert walked > 300 and not wrong, wrong[:5]
+
+
 
 def test_part_bs_label_reasons_name_their_own_group_and_limits(labels, book):
     """Part b review round 1: the eight per-room rules' labels shared one reason naming no group, and claimed an
@@ -475,26 +512,33 @@ def test_the_separation_thresholds_are_decided_with_the_groups_not_stated(book, 
 
 
 def test_the_13r_flag_says_what_chapter_10_counts(book, ctx):
-    """Review rounds 2 and 3: a stated NFPA 13R system counts in Chapter 10's allowances only in a building stated
-    Group R alone, and not where it states more than four stories above grade plane (903.3.1.2 item 1: a Group R
-    occupancy of six stories isn't one 13R is permitted in, so 1007.1.1's one-third doesn't apply); its heights are the
-    architect's statement. The flag's shown words say exactly that."""
+    """Review rounds 2 and 3, revised 2026-11-28: a stated NFPA 13R system counts in Chapter 10's allowances only in a
+    building stated Group R alone with four or fewer stories above grade plane stated and its heights stated within
+    903.3.1.2's (Gordium: 13R heights within limits); not where it states more than four (903.3.1.2 item 1: a Group R
+    occupancy of six stories isn't one 13R is permitted in, so 1007.1.1's one-third doesn't apply), and not known where
+    a limit isn't stated. The flag's shown words say exactly that."""
     note = _shown_note(_rule(book, "general.bc_903_3_1_2_nfpa_13r_limits"))
-    assert "only in a building stated Group R" in note and "more than four" in note and "nor one Chapter 10" not in note
+    assert "only in a building" in note and "stated Group R alone" in note and "four or fewer" in note
+    assert "Gordium: 13R heights within limits" in note and "needs review" in note
     allowed = ctx.allowed()
-    def story(stories, ratio):
+    def story(stories, ratio, heights=None):
         b = {"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r"}
         if stories is not None:
             b["stories_above_grade_plane"] = stories
+        if heights is not None:
+            b["nfpa_13r_heights_within"] = heights
         [row] = parts.rows(_rule(book, "general.bc_1007_1_1_remoteness"),
                            {"story": [{"id": "p1", "name": "L1", "measures": {"story_exit_count": 2,
                                                                              "exit_remoteness_ratio": ratio}}]},
                            code_scope.building_measures(b), allowed)
         return row["outcome"]
     assert story(6, 0.4) != "pass" and story(6, 0.6) == "pass"
-    assert story(4, 0.4) == "pass" and story(None, 0.4) == "pass"        # the stories stated within, or not stated
-    assert code_scope.building_measures({"occupancy_groups": ["M", "R-2"], "sprinkler_system": "nfpa_13r",
-                                         "stories_above_grade_plane": 6})["sprinklered_903_3_1_2"] is True
+    assert story(4, 0.4, heights=True) == "pass"                          # every limit stated within
+    for stories, heights in ((4, None), (None, True), (None, None), (4, False)):    # one not stated, or stated broken
+        assert story(stories, 0.4, heights) != "pass", (stories, heights)
+    assert "sprinklered_903_3_1_2" not in code_scope.building_measures(     # Group R beside another: not known
+        {"occupancy_groups": ["M", "R-2"], "sprinkler_system": "nfpa_13r", "stories_above_grade_plane": 3,
+         "nfpa_13r_heights_within": True})
 
 
 def test_the_vehicle_storage_flags_show_for_every_group(book, ctx):

@@ -9503,7 +9503,7 @@ rules:
   applies_when: group_h_present
   check: sprinklered_903_3_1_1
   review_when:
-  - when: occupancy_group in ["mixed"] and not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+  - when: occupancy_group in ["mixed"] and not sprinklered_903_3_1_1 and (nfpa_13r_stated or sprinklered_903_3_1_3)
     reason: 'A building of two or more groups with an NFPA 13R or 13D system stated: its Group H portion needs a system per
       903.3.1.1 (903.3.1 permits 13R only in Group R, 903.3.1.2, and 13D only in dwellings, Group R-3, Group R-4 Condition
       1 and townhouses, 903.3.1.3), and the one stated system can''t say which portion has which: a person checks.'
@@ -9549,6 +9549,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9565,6 +9566,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9581,6 +9583,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: true
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: true
     parts:
       story:
       - id: p1
@@ -9598,6 +9601,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9614,6 +9618,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: true
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: true
     parts:
       story:
       - id: p1
@@ -9630,6 +9635,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9643,6 +9649,7 @@ rules:
   - given:
       group_h_present: true
       occupancy_group: H-2
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9653,7 +9660,7 @@ rules:
       outcome: needs_review
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
-  - given: {group_h_present: true, occupancy_group: H-2, sprinklered_903_3_1_1: false, sprinklered_903_3_1_2: false,
+  - given: {nfpa_13r_stated: false, group_h_present: true, occupancy_group: H-2, sprinklered_903_3_1_1: false, sprinklered_903_3_1_2: false,
       sprinklered_903_3_1_3: false}
     parts:
       story: []
@@ -9750,14 +9757,14 @@ rules:
   applies_when: group_i1_i2_i3_present or occupancy_group_i4
   check: sprinklered_903_3_1_1
   review_when:
-  - when: occupancy_group in ["I-1"] and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1
+  - when: occupancy_group in ["I-1"] and nfpa_13r_stated and not sprinklered_903_3_1_1
     reason: 'Group I-1 with an NFPA 13R system: exception 1 permits one in a Condition 1 facility, and the condition isn''t
       stated: a person checks.'
   - when: occupancy_group in ["I-4"] and not sprinklered_903_3_1_1
     reason: 'Group I-4 day care: no system is required where the care is at the level of exit discharge and every room where
       care is provided has an exterior exit door (exception 2), and NFPA 13 on the floors where it is above or below that
       level (exception 3); neither is in the model: a person checks.'
-  - when: occupancy_group in ["mixed"] and not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3 or
+  - when: occupancy_group in ["mixed"] and not sprinklered_903_3_1_1 and (nfpa_13r_stated or sprinklered_903_3_1_3 or
       not group_i1_i2_i3_present)
     reason: 'A building of two or more groups whose Group I is I-4 alone (exceptions 2 and 3), or whose one stated NFPA 13R
       or 13D system can''t say which portion it covers: a person checks.'
@@ -9810,6 +9817,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9827,6 +9835,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9844,6 +9853,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: true
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: true
     parts:
       story:
       - id: p1
@@ -9861,6 +9871,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: true
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9878,6 +9889,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: true
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: true
     parts:
       story:
       - id: p1
@@ -9895,6 +9907,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9912,6 +9925,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9929,6 +9943,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9946,6 +9961,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -9967,7 +9983,7 @@ rules:
       outcome: needs_review
     expect: needs_review
     note: 'The groups aren''t stated: a person checks.'
-  - given: {group_i1_i2_i3_present: true, occupancy_group_i4: false, occupancy_group: I-1, sprinklered_903_3_1_1: false,
+  - given: {nfpa_13r_stated: false, group_i1_i2_i3_present: true, occupancy_group_i4: false, occupancy_group: I-1, sprinklered_903_3_1_1: false,
       sprinklered_903_3_1_2: false, sprinklered_903_3_1_3: false}
     parts:
       story: []
@@ -10212,14 +10228,8 @@ rules:
   topic: means_of_egress
   title: 'Sprinkler system required: Group R (BCNYS 903.2.8)'
   applies_when: group_r_present
-  check: sprinklered_903_3_1_1 or (occupancy_group in ["R-3"] and sprinklered_903_3_1_3)
+  check: sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or (occupancy_group in ["R-3"] and sprinklered_903_3_1_3)
   review_when:
-  - when: occupancy_group in ["R-1", "R-2", "R-3", "R-4"] and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and not
-      stories_above_grade_plane > 4
-    reason: 'An NFPA 13R system is permitted where the Group R occupancy is four stories or fewer above grade plane, its roof
-      (Group R-2) or highest floor (other Group R) within 903.3.1.2''s height above the lowest level of fire department vehicle
-      access and its lowest floor within 30 feet below it; the stories are the architect''s, the heights aren''t in the model:
-      a person checks.'
   - when: occupancy_group in ["R-4"] and sprinklered_903_3_1_3 and not sprinklered_903_3_1_1
     reason: 'Group R-4 with an NFPA 13D system: 903.2.8.2 permits one in Condition 1 only, and the condition isn''t stated:
       a person checks.'
@@ -10228,9 +10238,11 @@ rules:
     reason: 'An NFPA 13D system is permitted in one- and two-family dwellings and townhouses (903.3.1.3), which a Group R-1
       building, or a Group R-2 one of townhouse units or with sleeping units, may be, as the building states it or doesn''t
       rule out: a person checks.'
-  - when: occupancy_group in ["mixed"] and not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
-    reason: 'A building of two or more groups with an NFPA 13R or 13D system stated: 903.3.1.2 and 903.3.1.3 permit them only
-      in some groups, and the one stated system can''t say which portion has which: a person checks.'
+  - when: occupancy_group in ["mixed"] and not sprinklered_903_3_1_1 and sprinklered_903_3_1_3
+    reason: 'A building of two or more groups with an NFPA 13D system stated: 903.3.1.3 permits one only in some groups
+      (one- and two-family dwellings, Group R-3, Group R-4 Condition 1 and townhouses), and the one stated system can''t
+      say which portion has which: a person checks. (An NFPA 13R system is counted only where 903.3.1.2''s limits are
+      known to hold: not in a building of two or more groups, so this rule needs review there on the system itself.)'
   for_each: story
   when_none: needs_review
   sources:
@@ -10286,6 +10298,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -10302,6 +10315,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -10318,6 +10332,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: true
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -10335,6 +10350,25 @@ rules:
       sprinklered_903_3_1_2: true
       sprinklered_903_3_1_3: false
       stories_above_grade_plane: 4
+      nfpa_13r_stated: true
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13R in a four-story Group R-2 building whose heights are stated within 903.3.1.2''s: a system per 903.3
+      (Gordium counts it only where every limit is known to hold).'
+  - given:
+      group_r_present: true
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_3: false
+      nfpa_13r_stated: true
+      stories_above_grade_plane: 4
     parts:
       story:
       - id: p1
@@ -10344,14 +10378,15 @@ rules:
     - part: p1
       outcome: needs_review
     expect: needs_review
-    note: 'NFPA 13R in a four-story Group R-2 building: 903.3.1.2''s heights above fire department vehicle access aren''t
-      in the model.'
+    note: 'NFPA 13R stated, its heights against fire department vehicle access not stated: whether it is a 903.3.1.2 system
+      isn''t known, so a person checks.'
   - given:
       group_r_present: true
       occupancy_group: R-2
       sprinklered_903_3_1_1: false
-      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: true
       stories_above_grade_plane: 5
     parts:
       story:
@@ -10363,7 +10398,7 @@ rules:
       outcome: fail
     expect: fail
     note: 'NFPA 13R in a Group R-2 building of five stories above grade plane: 903.3.1.2 permits it only at four stories or
-      fewer.'
+      fewer, so it is no 903.3.1.2 system.'
   - given:
       group_r_present: true
       occupancy_group: R-2
@@ -10372,6 +10407,7 @@ rules:
       sprinklered_903_3_1_3: true
       townhouse_units: false
       r2_sleeping_units: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -10389,6 +10425,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: true
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -10405,6 +10442,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -10421,6 +10459,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      nfpa_13r_stated: false
     parts:
       story:
       - id: p1
@@ -10442,7 +10481,7 @@ rules:
       outcome: needs_review
     expect: needs_review
     note: 'The groups aren''t stated: a person checks.'
-  - given: {group_r_present: true, occupancy_group: R-2, sprinklered_903_3_1_1: false, sprinklered_903_3_1_2: false,
+  - given: {nfpa_13r_stated: false, group_r_present: true, occupancy_group: R-2, sprinklered_903_3_1_1: false, sprinklered_903_3_1_2: false,
       sprinklered_903_3_1_3: false}
     parts:
       story: []
@@ -10454,12 +10493,14 @@ rules:
     a building with a Group R occupancy among its stated groups, alone or with others. 903.3.1: NFPA 13 (903.3.1.1) unless
     903.3.1.2 (13R) or 903.3.1.3 (13D) permits otherwise. NFPA 13 passes; NFPA 13D passes in Group R-3 (903.2.8.1), needs
     review in R-4 (903.2.8.2: Condition 1 only) and in R-1 or R-2 where it may be a dwelling or of townhouse units (903.3.1.3),
-    and fails in an R-2 of dwelling units, not townhouses (310.3: more than two dwelling units); NFPA 13R needs review (903.3.1.2''s
-    heights aren''t in the model) and fails where the building states more than four stories above grade plane; a building
+    and fails in an R-2 of dwelling units, not townhouses (310.3: more than two dwelling units); NFPA 13R passes where it counts as a
+    903.3.1.2 system (Group R alone, four or fewer stories and its heights stated within), fails where a limit
+    is stated broken, and needs review where one isn''t stated (the measure isn''t known, revised 2026-11-28); a building
     of two or more groups with 13R or 13D needs review; no system fails. 903.2.8.3''s care facilities for five or fewer in
     a single-family dwelling are Group R-3 (308.2.4, 310.4.1). Read on each story the model holds (the system is "throughout"; the Building Code
     check reads its rules part by part), each story''s row the building''s answer. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part a).'
+    9 part a). Revised 2026-11-28 (the 13R limits PR): 13R counted only where 903.3.1.2''s limits are known to hold, so
+    the check reads it and its review condition is the measure''s own.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_903_2_9_group_s1_sprinklers
@@ -11124,10 +11165,11 @@ rules:
     note: 'An NFPA 13R system is permitted only in Group R occupancies four stories or fewer above grade plane (stories
       counted from grade plane where built per 510.2 or 510.4), the roof assembly less than 45 feet (Group R-2) or the highest
       floor 30 feet or less (other Group R) above the lowest level of fire department vehicle access, and the lowest floor 30
-      feet or less below it. Chapter 10''s sprinklered allowances count a stated 13R system only in a building stated Group
-      R, and not in a building stated Group R alone with more than four stories above grade plane (there it is no 903.3.1.2
-      system, and 903.2.8''s rule fails it), taking its heights on the architect''s statement: whether these limits are met is
-      a person''s check.'
+      feet or less below it. Gordium counts a stated 13R system in the sprinklered allowances (and 903.2.8) only in a building
+      stated Group R alone whose stories above grade plane are stated four or fewer and whose heights are stated within
+      (Gordium: 13R heights within limits); where a limit is stated broken (more than four stories above grade plane, the
+      heights not within) it is no 903.3.1.2 system, and where one isn''t
+      stated every rule resting on it needs review: whether these limits are met is a person''s check.'
   - given: {}
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
@@ -11136,12 +11178,13 @@ rules:
     expect: not_applicable
     note: 'No NFPA 13R system: not applicable.'
   notes: '903.3.1.2: an NFPA 13R system only in Group R, four stories or fewer above grade plane, within its heights of the
-    lowest level of fire department vehicle access (not in the model). Chapter 10''s rules count a stated 13R system only in
-    a building stated Group R (Chapter 10 plan, group 5a''s round 1; Chapter 9 part a''s review round 1 brought 1007.1.1,
-    1007.1.2 and Group I-4''s two exits in line), and not in a building stated Group R alone with more than four stories
-    above grade plane (review round 3: the stated stories make the sprinkler fact no), its heights taken on the architect''s
-    statement, as the Chapter 10 plan decided (group 4b); 903.2.8''s rule fails a 13R system above four stated stories. Hand-drafted in a Claude Code
-    session (2026-11-27, Chapter 9 part a).'
+    lowest level of fire department vehicle access (not in the model: the architect states them). A stated 13R system is
+    counted as a 903.3.1.2 system only where every limit is known to hold: the building stated Group R alone, four or fewer
+    stories above grade plane stated, its heights stated within; it is no 903.3.1.2 system where one is stated broken (more
+    than four stories, the heights not within, a Group R-2 high-rise, no Group R or I-1 among the groups), and not known
+    otherwise, so every rule resting on it needs review (revised 2026-11-28 from the Chapter 10 plan''s group 4b, which took
+    the heights, and unstated stories, on the architect''s statement: a limit not stated is unknown, never assumed met).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part a).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_903_3_1_2_2_corridors_balconies_13r

@@ -389,7 +389,7 @@ public static class Marks
         "Gordium: Emergency voice/alarm system", new("f4184d32-275e-4423-90c6-66a2e4d247ee"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "building.emergency_voice_alarm_system",
         "Yes only when the building is equipped throughout with an emergency voice/alarm communication system in accordance with BCNYS Section 907.5.2.2. A system in only part of the building: No. " +
-        "With an automatic sprinkler system throughout too (NFPA 13; NFPA 13R in Group R only, elsewhere a person checks), BCNYS 1005.3.1 and 1005.3.2 exception 1 lower the egress capacity factors (other than Groups H and I-2): 0.15 in per occupant for corridors and other components, 0.2 in for stairways. " +
+        "With an automatic sprinkler system throughout too (NFPA 13; NFPA 13R only where it counts as a 903.3.1.2 system: Group R alone, four or fewer stories and Gordium: 13R heights within limits Yes), BCNYS 1005.3.1 and 1005.3.2 exception 1 lower the egress capacity factors (other than Groups H and I-2): 0.15 in per occupant for corridors and other components, 0.2 in for stairways. " +
         "No: the full factors (0.2 in and 0.3 in). Blank: a capacity met only at the lower factor needs review.");
 
     /// <summary>Whether the building has a mezzanine (<c>building.mezzanines</c>, BCNYS 505.2): read by the occupant
@@ -425,6 +425,16 @@ public static class Marks
         MarkBinding.Instance, [ProjectInformation], "building.underground_building",
         "Yes when a floor level used for human occupancy is more than 30 ft below the finished floor of the lowest level of exit discharge. BCNYS 405.1: \"The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level used for human occupancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge.\" " +
         "Yes: Section 405's requirements are a person's check, and a story with one exit needs review (405.7.1: two exits on each floor level). No: none. Blank: as for Yes.");
+
+    /// <summary>Whether an NFPA 13R system's building is within 903.3.1.2's heights (<c>building.nfpa_13r_heights_within</c>,
+    /// BCNYS 903.3.1.2 items 2 and 3): with Group R alone and its stories above grade plane stated four or fewer, Yes
+    /// makes a stated 13R system count as one per 903.3.1.2 (code_scope.nfpa_13r_counts).</summary>
+    public static readonly MarkDefinition NfpaThirteenRHeights = new(
+        "Gordium: 13R heights within limits", new("fb542ab9-5869-4104-8996-2508dc05d9c6"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.nfpa_13r_heights_within",
+        "For a building with an NFPA 13R sprinkler system (Gordium: Sprinkler system nfpa_13r). Yes when its Group R occupancy meets BCNYS 903.3.1.2 items 2 and 3: \"For other than Group R-2 occupancies, the floor level of the highest story is 30 feet (9144 mm) or less above the lowest level of fire department vehicle access. For Group R-2 occupancies, the roof assembly is less than 45 feet (13 716 mm) above the lowest level of fire department vehicle access.\" and \"The floor level of the lowest story is 30 feet (9144 mm) or less below the lowest level of fire department vehicle access.\" " +
+        "The model can't show where fire trucks reach the building, so Gordium never decides it. " +
+        "Yes, with Group R alone and the stories above grade plane stated four or fewer, and not a Group R-2 high-rise: the 13R system counts as one per 903.3.1.2 (Chapter 10's sprinklered allowances). No, in a building of Group R alone: it doesn't, so no allowance counts it and 903.2.8 fails it. Blank, or a building of Group R beside another group, Group I-1, or a high-rise of a Group R other than R-2: whether it counts isn't known, so every rule resting on it needs review.");
 
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
     public static readonly MarkDefinition Atrium = new(
@@ -726,6 +736,7 @@ public static class Marks
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
         EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased, OtherLevelsReachCorridors,
         AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm, Mezzanines, LoadsNotByArea, HighRiseBuilding, UndergroundBuilding,
+        NfpaThirteenRHeights,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,

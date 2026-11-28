@@ -86,6 +86,7 @@ FIELD_HEADLINES = {
     "building.separate_means_of_egress": "Does each unit have a separate means of egress?",
     "building.townhouse_units": "Are the units townhouse units?",
     "building.stories_above_grade_plane": "Set the stories above grade plane",
+    "building.nfpa_13r_heights_within": "Say whether the NFPA 13R system is within 903.3.1.2's heights (roof, top floor and lowest floor against the fire department's access)",
     "facts.use": "Set the building's use",
     "facts.abuts_r1_district": "Does the lot abut R-1a or R-1b land? (§325-19E)",
     "facts.stream_near_lot": "Is a stream or inlet within 20 ft of the lot? (§325-26)",
@@ -201,7 +202,8 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
     kind = c.get("kind")
     if kind == "mark":
         if key.startswith("fact:") and isinstance(measure, str):
-            field = code_scope.field_of(measure) or c.get("field")
+            given = c.get("field") if isinstance(c.get("field"), str) and c["field"].startswith("building.") else None
+            field = given or code_scope.field_of(measure) or c.get("field")     # the cause's own: on its values
             name = _measure_name(measure, rule_kind)
             return {**base, "kind": MARK, "key": f"field:{field}", "field": field,
                     "headline": FIELD_HEADLINES.get(field) or f"Set the {name}"}

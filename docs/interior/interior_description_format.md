@@ -244,6 +244,12 @@ building:
   underground_building: false          # a floor level used for human occupancy more than 30 ft below the finished
                                        # floor of the lowest level of exit discharge (BCNYS 405.1): Section 405's flags
                                        # and each floor level's two exits (405.7.1)
+  nfpa_13r_heights_within: true        # an NFPA 13R system's building within BCNYS 903.3.1.2 items 2 and 3 (Group
+                                       # R-2's roof assembly under 45 ft, another Group R's highest floor 30 ft or
+                                       # less, above the lowest level of fire department vehicle access; the lowest
+                                       # floor 30 ft or less below it): with Group R alone and stories_above_grade_plane
+                                       # four or fewer, true makes a stated nfpa_13r count as 903.3.1.2's, false makes
+                                       # it not; left out, whether it counts isn't known (its rules need review)
   stages_or_platforms: false           # a stage, a platform or a technical production area (BCNYS 202): Section
                                        # 410.5's flags, and Table 1006.2.1's 125 ft rows (Groups R-2, R-3 and R-4)
                                        # held to 410.5.3.3's 100 ft common path

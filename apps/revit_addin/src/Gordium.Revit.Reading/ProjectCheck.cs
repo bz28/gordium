@@ -156,7 +156,9 @@ public static class BuildingFacts
                      // the occupant loads' ceiling: a mezzanine adds its occupants to the room below (1004.2.2)
                      (Marks.Mezzanines, "mezzanines"), (Marks.LoadsNotByArea, "loads_not_by_area"),
                      // Chapter 4 part b's: a high-rise (202, 403) and an underground building (405.1)
-                     (Marks.HighRiseBuilding, "high_rise_building"), (Marks.UndergroundBuilding, "underground_building") })
+                     (Marks.HighRiseBuilding, "high_rise_building"), (Marks.UndergroundBuilding, "underground_building"),
+                     // 903.3.1.2 items 2 and 3: an NFPA 13R system's heights against fire department access
+                     (Marks.NfpaThirteenRHeights, "nfpa_13r_heights_within") })
         {
             var v = Get(mark);
             if (Marks.YesNo(v) is { } yes)

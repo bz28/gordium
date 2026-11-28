@@ -120,7 +120,7 @@ def test_a_building_fact_gordium_cant_read_is_said_never_used():
 def test_the_building_measures_follow_the_groups_and_the_sprinkler_system():
     assert code_scope.building_measures({"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r"}) == {
         "occupancy_group_i4": False, "other_occupancy_present": True, "occupancy_group": "R-2",
-        "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True, "sprinklered_903_3_1_3": False,
+        "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_3": False,     # 13R: its limits not stated, not known
         "group_r_present": True, "group_h_present": False, "group_i1_i2_i3_present": False,      # Chapter 9 part a's
         "nfpa_13r_stated": True}
     assert code_scope.building_measures({"occupancy_groups": ["I-4"], "sprinkler_system": "nfpa_13"}) == {
@@ -565,3 +565,51 @@ def test_a_room_with_fixed_seats_makes_fixed_seating_yes_whatever_is_stated():
         "assembly_fixed_seating"] is False
     assert "assembly_fixed_seating" not in code_scope.building_measures({}, _rooms("assembly_concentrated"))
 
+
+@pytest.mark.parametrize("groups", [None, ["R-2"], ["R-1", "R-3"], ["B"], ["H-2"], ["I-1"], ["R-2", "B"], ["I-2", "B"]])
+def test_a_13r_system_counts_only_where_903_3_1_2s_limits_are_known_to_hold(groups):
+    """903.3.1.2 (p.274): NFPA 13R "in Group R occupancies" meeting all of its conditions: four stories or fewer above
+    grade plane (item 1), the heights against the lowest level of fire department vehicle access (items 2 and 3). The
+    2026-11-28 revision of Chapter 9 decision 4: a stated 13R system counts (sprinklered_903_3_1_2 yes) only where every
+    limit is known to hold, is no where one is stated broken, and is not known otherwise, never assumed met."""
+    import itertools
+    for stories, heights, high in itertools.product((None, 3, 4, 5), (None, True, False), (None, True, False)):
+        b = {"sprinkler_system": "nfpa_13r", "occupancy_groups": groups, "stories_above_grade_plane": stories,
+             "nfpa_13r_heights_within": heights, "high_rise_building": high}
+        got = code_scope.building_measures({k: v for k, v in b.items() if v is not None}).get("sprinklered_903_3_1_2")
+        all_r = bool(groups) and all(g.startswith("R-") for g in groups)
+        if not groups:
+            want = None
+        elif not any(g.startswith("R-") or g == "I-1" for g in groups):
+            want = False                                 # no Group R (nor I-1, 903.2.6 exception 1): not permitted
+        elif not all_r:
+            want = None                                  # a Group R beside another group, or I-1: not known
+        elif (stories or 0) > 4 or heights is False or (high is True and groups == ["R-2"]):
+            want = False                                 # a limit stated broken
+        elif stories is not None and heights is True and high is not True:
+            want = True                                  # every limit known to hold
+        else:
+            want = None
+        assert got is want, (b, got, want)
+    for system in ("nfpa_13", "none", "nfpa_13d"):      # only a stated 13R system is ever one
+        got = code_scope.building_measures({"sprinkler_system": system, "occupancy_groups": ["R-2"],
+                                            "stories_above_grade_plane": 3, "nfpa_13r_heights_within": True})
+        assert got["sprinklered_903_3_1_2"] is False, system
+
+
+def test_a_13r_systems_count_asks_the_limit_it_waits_on():
+    """The ask goes to the first of 903.3.1.2's limits not stated (field_of on the building's measures), so the
+    architect is asked once, for the fact that settles it, never to set the system already stated."""
+    def asked(block):
+        return code_scope.field_of("sprinklered_903_3_1_2", code_scope.building_measures(block))
+    base = {"sprinkler_system": "nfpa_13r"}
+    assert asked(base) == "building.occupancy_groups"
+    assert asked({**base, "occupancy_groups": ["R-2"]}) == "building.stories_above_grade_plane"
+    stories = {**base, "occupancy_groups": ["R-2"], "stories_above_grade_plane": 3}
+    assert asked(stories) == "building.nfpa_13r_heights_within"
+    assert asked({"occupancy_groups": ["R-2"]}) == "building.sprinkler_system"         # no system stated: the system
+    for block in ({"occupancy_groups": ["R-2", "B"]}, {"occupancy_groups": ["I-1"]},          # no fact settles it:
+                  {"occupancy_groups": ["R-1"], "stories_above_grade_plane": 3, "nfpa_13r_heights_within": True,
+                   "high_rise_building": True}):                                             # a person checks
+        assert asked({**base, **block}) is None, block
+    assert code_scope.MARK["nfpa_13r_heights_within"] == "Gordium: 13R heights within limits"

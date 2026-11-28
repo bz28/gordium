@@ -76,6 +76,11 @@ FACTS = {
     # has a floor level used for human occupancy more than 30 ft below the lowest level of exit discharge (405.1)
     "high_rise_building": "yes_no",
     "underground_building": "yes_no",
+    # 903.3.1.2 items 2 and 3: the Group R occupancy's heights against the lowest level of fire department vehicle
+    # access (Group R-2's roof assembly under 45 ft above it, another Group R's highest story's floor 30 ft or less
+    # above it; the lowest story's floor 30 ft or less below it), which the model can't show: the architect's
+    # statement, without which a stated NFPA 13R system isn't known to count (building_measures)
+    "nfpa_13r_heights_within": "yes_no",
     # Chapter 4 part f: the building has a stage, a platform or a technical production area (202; 410.5, and Table
     # 1006.2.1's 125 ft rows held to 410.5.3.3's 100 ft common path); and it is or holds an aircraft-related occupancy
     # (Section 412: an airport traffic control tower, an aircraft hangar, an aircraft paint hangar, an aircraft
@@ -183,7 +188,9 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         # the occupant loads' ceiling (occupant_load._bounds): a mezzanine's occupants add to the room below
         "mezzanines": "Gordium: Mezzanines", "loads_not_by_area": "Gordium: Loads not by area",
         # Chapter 4 part b's: a high-rise (202, or over 420 ft in building height) and an underground building (405.1)
-        "high_rise_building": "Gordium: High-rise building", "underground_building": "Gordium: Underground building"}
+        "high_rise_building": "Gordium: High-rise building", "underground_building": "Gordium: Underground building",
+        # 903.3.1.2 items 2 and 3: an NFPA 13R system's heights (building_measures)
+        "nfpa_13r_heights_within": "Gordium: 13R heights within limits"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise
@@ -334,33 +341,34 @@ def building_measures(building: dict | None, interior=None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present, occupancy_group (the one group, or "mixed") and whether a
     Group R, H or I-1 to I-3 occupancy is among them (903.2's) from the groups, the three sprinkler systems the limits
-    name from the system, the stories above grade plane, and the nineteen stated yes/no facts. A fact not stated is
-    left out (its rules need review). In a building stated as Group R alone (one or more of R-1 to R-4), a stated NFPA
-    13R system counts as one per 903.3.1.2 only where the stated stories above grade plane don't exceed its four
-    (903.3.1.2 item 1: the Group R occupancy's stories, here the building's): stated more, sprinklered_903_3_1_2 is no,
-    so no allowance counts it and 903.2.8 fails it (Chapter 9 part a's review round 3); not stated, it is the
-    architect's statement, as the Chapter 10 plan decided for 13R's limits (group 4b). In a building with another group
-    the Group R portion's stories aren't the building's, so the stories decide nothing there. `interior`, the
+    name from the system, the stories above grade plane, and the stated yes/no facts. A fact not stated is left out
+    (its rules need review).
+
+    A stated NFPA 13R system is a 903.3.1.2 system (sprinklered_903_3_1_2 yes) only where 903.3.1.2 permits it and
+    every one of its limits is known to hold (docs/decisions/2026-11-27_ny_building_chapter_9.md decision 4, revised
+    2026-11-28: a limit not stated is unknown, never assumed met): a building stated Group R alone (one or more of R-1
+    to R-4), its stated stories above grade plane four or fewer (item 1, the Group R occupancy's stories, here the
+    building's), and its heights stated within items 2 and 3 (nfpa_13r_heights_within yes: Group R-2's roof assembly
+    under 45 ft above the lowest level of fire department vehicle access, another Group R's highest story's floor 30
+    ft or less above it, the lowest story's floor 30 ft or less below it). No where a limit is stated broken: more
+    than four stories, the heights stated not within, a stated high-rise of Group R-2 alone (its roof is then more
+    than 75 ft up), or groups stated with no Group R and no I-1 (903.2.6 exception 1's Condition 1 may take one);
+    then no allowance counts the system and 903.2.8 fails it. Otherwise left out (not known): the groups not stated, a
+    Group R beside another group (the portion's stories and heights aren't the building's), I-1, the stories or the
+    heights not stated, a high-rise of another Group R (only an occupiable roof may be the high part), so every rule
+    resting on it needs review and asks the fact (field_of). `interior`, the
     interior description, settles one more: assembly_spaces is true wherever a room states a Table 1004.5 Assembly
     function, whatever the block says, and a stated false is left out (not stated) where a room states a function that
     may be an assembly use (assembly_spaces_from_rooms); and assembly_fixed_seating is true wherever a room states Table
     1004.5's "Assembly with fixed seats" (review round 1 of section group 9h)."""
     facts, _ = _given(building)
     out = {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
-    groups = facts.get("occupancy_groups") or []
-    all_r = bool(groups) and all(g.startswith("R-") for g in groups)
-    if out.get("sprinklered_903_3_1_2") and all_r and facts.get("stories_above_grade_plane", 0) > NFPA_13R_STORIES:
-        out["sprinklered_903_3_1_2"] = False
-    # 903.3.1.2 item 2 (p.274 lines 18-23): Group R-2's roof assembly under 45 feet, the other Group R's highest floor
-    # 30 feet or less, above the lowest level of fire department vehicle access; a stated high-rise (202: an occupied
-    # floor or occupiable roof more than 75 feet above that level) breaks it in Group R-2 outright, so a 13R system there
-    # is no 903.3.1.2 system; in the other Group R only an occupiable roof might be the high one, so it isn't known
-    # (the merge of Chapter 4's high_rise_building, 2026-11-28)
-    if out.get("sprinklered_903_3_1_2") and all_r and facts.get("high_rise_building") is True:
-        if all(g == "R-2" for g in groups):
-            out["sprinklered_903_3_1_2"] = False
-        else:
+    if out.get("sprinklered_903_3_1_2"):
+        counted = nfpa_13r_counts(facts)
+        if counted is None:
             del out["sprinklered_903_3_1_2"]
+        else:
+            out["sprinklered_903_3_1_2"] = counted
     seen = assembly_spaces_from_rooms(interior)
     if FIXED_SEATS in room_functions(interior):     # the rooms show fixed seating: never a stated no over them
         out["assembly_fixed_seating"] = True
@@ -373,6 +381,31 @@ def building_measures(building: dict | None, interior=None) -> dict:
 
 # 903.3.1.2 item 1 (p.274 line 17): "Four stories or fewer above grade plane"
 NFPA_13R_STORIES = 4
+# the facts 903.3.1.2's limits are known by, in the order the architect is asked them (field_of)
+NFPA_13R_LIMIT_FACTS = ("occupancy_groups", "stories_above_grade_plane", "nfpa_13r_heights_within")
+
+
+def nfpa_13r_counts(facts: dict) -> bool | None:
+    """Whether a stated NFPA 13R system is a 903.3.1.2 system in this building (building_measures' words): True only
+    where every limit is known to hold, False where one is stated broken, None where it isn't known. `facts`: the
+    building block as _given reads it."""
+    groups = facts.get("occupancy_groups")
+    if not groups:
+        return None
+    if not any(g.startswith("R-") or g == "I-1" for g in groups):
+        return False                                     # 903.3.1.2 "in Group R occupancies" (I-1: 903.2.6 exc. 1)
+    all_r = all(g.startswith("R-") for g in groups)
+    stories = facts.get("stories_above_grade_plane")
+    if all_r and isinstance(stories, (int, float)) and stories > NFPA_13R_STORIES:
+        return False                                     # item 1
+    if all_r and facts.get("nfpa_13r_heights_within") is False:
+        return False                                     # items 2 and 3, stated broken
+    if all_r and facts.get("high_rise_building") is True and all(g == "R-2" for g in groups):
+        return False                                     # a Group R-2 high-rise: its roof is over 75 ft up (item 2)
+    if all_r and isinstance(stories, (int, float)) and facts.get("nfpa_13r_heights_within") is True and \
+            facts.get("high_rise_building") is not True:
+        return True
+    return None
 
 
 # Table 1004.5's rows under its "Assembly" heading (p.312, lines 19-27, to "Business areas" on line 28), by their
@@ -459,6 +492,8 @@ DERIVED = {
     "separate_means_of_egress": ("separate_means_of_egress", lambda v: v),
     "high_rise_building": ("high_rise_building", lambda v: v),
     "underground_building": ("underground_building", lambda v: v),
+    # read by no rule: in the values so field_of can ask for it where a 13R system's count waits on it
+    "nfpa_13r_heights_within": ("nfpa_13r_heights_within", lambda v: v),
     "stages_or_platforms": ("stages_or_platforms", lambda v: v),
     "aircraft_related_occupancy": ("aircraft_related_occupancy", lambda v: v),
     "service_corridors": ("service_corridors", lambda v: v),
@@ -466,10 +501,30 @@ DERIVED = {
 }
 
 
-def field_of(measure: str) -> str | None:
+def field_of(measure: str, values: dict | None = None) -> str | None:
     """The description's field that answers a building measure ("building.occupancy_groups" for
-    occupancy_group_i4: Revit's Gordium: Occupancy groups feeds it), or None for a measure no building fact gives."""
+    occupancy_group_i4: Revit's Gordium: Occupancy groups feeds it), or None for a measure no building fact gives.
+    `values`, the building measures (building_measures'): where a stated NFPA 13R system's count waits on one of
+    903.3.1.2's limits, the first one not stated (NFPA_13R_LIMIT_FACTS); where no fact can settle it (a Group R beside
+    another group, Group I-1, a high-rise of a Group R other than R-2, or every limit stated), None: a person checks
+    (NFPA_13R_BY_HAND), never the system already stated."""
+    if measure == "sprinklered_903_3_1_2" and isinstance(values, dict) and values.get("nfpa_13r_stated") is True:
+        group = values.get("occupancy_group")
+        if group is None:
+            return "building.occupancy_groups"
+        if group not in ("R-1", "R-2", "R-3", "R-4") or values.get("high_rise_building") is True:
+            return None
+        return next((f"building.{f}" for f in NFPA_13R_LIMIT_FACTS[1:] if f not in values), None)
     return f"building.{DERIVED[measure][0]}" if measure in DERIVED else None
+
+
+# what a person checks where no fact settles whether a stated NFPA 13R system is a 903.3.1.2 system (field_of None)
+NFPA_13R_BY_HAND = ("whether the NFPA 13R system is permitted here isn't something the facts settle (903.3.1.2 permits "
+                    "it in Group R occupancies four stories or fewer above grade plane, within its heights of fire "
+                    "department vehicle access): a person checks, or state an NFPA 13 system")
+# the words of an ask for one of 903.3.1.2's limits (field_of's), the system itself stated
+NFPA_13R_LIMIT_WORDS = ("sprinkler system (NFPA 13R): stated, and counted only where 903.3.1.2's limits are known to hold; "
+                        "{what} isn't stated")
 
 
 BY_HAND = ASK_BY_HAND.format(mark=MARK["follows_building_code"])
