@@ -238,3 +238,18 @@ def test_a_mixed_result_says_its_open_question_in_words_never_a_tag(maine):
         assert {"question", "number", "answers"} <= set(parts.READING_QUESTIONS[tag])
     assert set(parts.READING_QUESTIONS[dead_ends.QUESTION]["answers"]) == {dead_ends.WITH, dead_ends.WITHOUT}
     assert outcome(rule, dead_end(30.0, 5.0), NEW_DAY_CARE, allowed)[0] == "needs_review"
+
+
+def test_the_rules_own_review_is_said_only_where_it_holds_under_every_reading(maine):
+    """A row needing review under every reading because the rule's own review_when holds whatever the answer says that
+    reason, not the question (the story facts' merge, 2026-11-28: parts._own_reviews). An entry holding under only some
+    readings never stands for the row: the question is said, as before (round 2 of its review: `any` for `all`)."""
+    rules, allowed = maine
+    rule = copy.deepcopy(rules["general.nfpa_16_2_5_2_dead_end"])
+    each = [{"when": "corridor_dead_end_length >= 30", "reason": "Held at 30 only."},
+            {"when": "corridor_dead_end_length < 30", "reason": "Held at 25 only."}]
+    result, why = outcome({**rule, "review_when": each}, dead_end(30.0, 25.0), NEW_DAY_CARE, allowed)
+    assert result == "needs_review" and parts.is_reading_words(why), why
+    both = each + [{"when": "corridor_dead_end_length > 1", "reason": "Held whatever the answer."}]
+    assert outcome({**rule, "review_when": both}, dead_end(30.0, 25.0), NEW_DAY_CARE, allowed) == \
+        ("needs_review", "Held whatever the answer.")
