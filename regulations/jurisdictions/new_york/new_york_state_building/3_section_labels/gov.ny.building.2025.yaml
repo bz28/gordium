@@ -12877,8 +12877,9 @@ labels:
   716.2.8:
     label: flag
     topic: means_of_egress
-    reason: 'Where rolling fire shutters are installed (as opening protectives in a rated corridor wall or an exterior wall,
-      Table 716.1(2) and 705.9.2), they include approved automatic-closing devices: a person''s check (general.bc_716_2_8_rolling_fire_shutters).'
+    reason: 'Wherever rolling fire shutters are installed (opening protectives in any wall Table 716.1(2) rates, fire walls, fire
+      barriers, fire partitions, corridor walls, smoke barriers and exterior walls among them, and those 705.9.2 sends to 716),
+      they include approved automatic-closing devices: a person''s check (general.bc_716_2_8_rolling_fire_shutters).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 189

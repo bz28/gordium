@@ -7926,9 +7926,9 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Where rolling fire shutters are installed (as opening protectives in a rated corridor wall or an exterior wall,
-      Table 716.1(2) and 705.9.2), they include approved automatic-closing devices: shutters aren''t in the model, so a person''s
-      check.'
+    note: 'Wherever rolling fire shutters are installed (opening protectives in any wall Table 716.1(2) rates, fire walls,
+      fire barriers, fire partitions, corridor walls, smoke barriers and exterior walls among them, and those 705.9.2 sends
+      to 716), they include approved automatic-closing devices: shutters aren''t in the model, so a person''s check.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e2. Brought in by part e2''s review round 1:
     a fire shutter is an opening protective Table 716.1(2) rates and 705.9.2 sends to 716. Shown for every building.'
   drafted_by: claude_code/claude-opus-5-5

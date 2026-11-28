@@ -753,6 +753,13 @@ def test_part_e2s_notes_keep_the_laws_limits(book, labels):
     for pid, words in (("716.2.7", "readily opened from the outside"), ("716.2.8", "approved automatic-closing devices")):
         assert labels[pid]["label"] == "flag" and words in " ".join(_shown_note(_flags(book, pid)[0]).split()), pid
     assert "716.2.6.3, chute intake doors, isn't brought in" in labels["716.2.6"]["reason"]
+    # review round 2: every rolling fire shutter, wherever installed (the bracket names examples, never a limit), and
+    # 716.3.2.1.3's '9 inch' recorded as UL 9's number, not a length
+    rolling = " ".join(_shown_note(_flags(book, "716.2.8")[0]).split())
+    assert rolling.startswith("Wherever rolling fire shutters are installed") and "smoke barriers" in rolling
+    assert "among them" in rolling and "among them" in labels["716.2.8"]["reason"]
+    tv = load(NY / "text_verification.yaml")["pieces"]
+    assert any("'9 inch'" in f and "UL 9" in f for f in tv["716.3.2.1.3"].get("flags") or [])
 
 
 # the definitions part e1 brought in by the italics of its pieces (sources.yaml names none by hand)
