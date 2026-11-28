@@ -33,7 +33,8 @@ regulations/     DATA: rule documents and rulebooks (no code)
     4_term_definitions/   how this place defines height, story, grade plane…
     5_zoning_rules/       THE RULEBOOK, one file per district; architects approve (deferred for now, principle 2)
     6_coverage_report/    generated proof nothing was skipped
-    7_published_rulebooks/ frozen versions the checker uses; never changed once made
+    7_published_rulebooks/ each rulebook's checks, frozen as a certificate the checker reads (python -m rule_format
+                          publish); generated and gitignored while rules are draft; once approved, never changed
 packages/        LOGIC: one package per job (rule_format, document_extraction, site_lookup,
                  model_labeling, model_measurement, envelope_builder, design_checker). A place's own code
                  has its own folder, chosen by its jurisdiction.yaml: site_lookup/adapters/<place>/ (its map

@@ -1,0 +1,3 @@
+# 7_published_rulebooks
+
+This state law's certificate, `general.published.json`: the result of every rule check on `5_building_code_rules`, frozen with the fingerprint of every file it was worked out from, written by `python -m rule_format publish`. A place that inherits this law reads it at every check; a missing or out-of-date one gives no rows of this law and one needs-review item saying so (never a pass). While rules are draft it is generated, not committed (`.gitignore`). How it works: [Ithaca's 7_published_rulebooks](../../../new_york/ithaca_city/7_published_rulebooks/README.md) and [the decision](../../../../../docs/decisions/2026-11-23_laws_validation_speed.md).
