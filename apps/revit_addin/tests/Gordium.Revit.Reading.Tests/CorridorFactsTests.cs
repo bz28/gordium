@@ -3,7 +3,7 @@ using Xunit;
 namespace Gordium.Revit.Reading.Tests;
 
 /// <summary>Groups 4 and 5's building facts (BCNYS 1020 corridors, 1005.3 egress capacity): whether another level's
-/// occupants reach the corridors (1004.2.2, 1004.2.3, 1005.6), an ambulatory care facility (Table 1020.3), corridors
+/// occupants reach the corridors (1004.2.2, 1004.2.3, 1005.6), an ambulatory care facility (Section 422, Tables 1020.2 and 1020.3), corridors
 /// within dwelling units (1020.2 exception 2), an emergency voice/alarm system (907.5.2.2). Each a Yes/No on Project
 /// Information sent in the building block only when set (blank is not stated, never No: No is each one's narrowing
 /// answer, so never assumed); the Setup form lists each; a card for each opens Project Information on its mark.</summary>
