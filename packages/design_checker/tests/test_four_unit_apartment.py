@@ -333,8 +333,8 @@ CH10_BUILDING_MARKS = ("assembly_fixed_seating", "special_egress_spaces", "merch
 
 @pytest.mark.parametrize("stated", [False, True])
 def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got, laws, stated):
-    """The apartment as built, with the five marks set: No moves exactly the 35 that wait on them (twelve of Chapter 10's, Chapter 4 part a's 21 flags and part f's
-    two of 411.4) (travel's
+    """The apartment as built, with the five marks set: No moves exactly the 36 that wait on them (twelve of Chapter 10's, Chapter 4 part a's 21 flags and part f's
+    two of 411.4, and Chapter 9's mall standpipes, 905.3.3) (travel's
     54 ft within Table 1017.2's 200 ft now passes; each flag of a space the building states it hasn't is not
     applicable), and Yes leaves every rule as it was with them blank (needs review: a person checks those spaces),
     never a pass. Left blank they are not sent (the add-in's BuildingFacts), so `got` is the unset reading."""
@@ -356,7 +356,9 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
                      # Chapter 4 part a: every flag of 402 (a mall: a space with its own exits) and 404 (an atrium);
                      # part f: 411.4's two (a special amusement area, a space with its own exits)
                      **{k: ("needs_review", "not_applicable") for k in got["results"]
-                        if re.match(r"general\.bc_(40[24]|411_4)_", k)}}
+                        if re.match(r"general\.bc_(40[24]|411_4)_", k)},
+                     # Chapter 9 part e: 905.3.3's standpipes in malls (the merge review of Chapter 4)
+                     "general.bc_905_3_3_mall_standpipes": ("needs_review", "not_applicable")}
 
 
 def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(no_mall, laws):
@@ -452,8 +454,10 @@ def test_chapter_4_part_fs_facts_stated_on_the_apartment(no_mall, laws):
     assert moved.pop(("stages_or_platforms", False)) == {
         k: ("needs_review", "not_applicable") for k in no_mall["results"] if k.startswith("general.bc_410_5")}
     assert moved.pop(("aircraft_related_occupancy", False)) == {
-        k: ("needs_review", "not_applicable") for k in no_mall["results"]
-        if k.startswith(("general.bc_412_", "general.bc_table_412_"))}
+        **{k: ("needs_review", "not_applicable") for k in no_mall["results"]
+           if k.startswith(("general.bc_412_", "general.bc_table_412_"))},
+        # Chapter 9 part e: 905.3.5's standpipes to a rooftop helistop or heliport (the merge review of Chapter 4)
+        "general.bc_905_3_5_helistop_standpipes": ("needs_review", "not_applicable")}
     assert len([k for k in no_mall["results"] if k.startswith("general.bc_410_5")]) == 9
     assert len([k for k in no_mall["results"] if k.startswith(("general.bc_412_", "general.bc_table_412_"))]) == 11
     assert all(m == {} for m in moved.values()), moved

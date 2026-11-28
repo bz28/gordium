@@ -716,6 +716,7 @@ special_egress_spaces:
   - general.bc_407_4_2_sleeping_room_travel
   - general.bc_411_4_1_photoluminescent_exit_signs
   - general.bc_411_4_exit_marking
+  - general.bc_905_3_3_mall_standpipes
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -827,6 +828,7 @@ underground_building:
   - general.bc_405_7_1_two_exits_on_each_floor_level
   - general.bc_405_7_2_smokeproof_enclosures
   - general.bc_405_7_means_of_egress
+  - general.bc_905_3_4_underground_standpipes
   - general.bc_table_1006_3_4_1__r2_dwelling_units
   - general.bc_table_1006_3_4_2__a_b_e_f_m_u
   - general.bc_table_1006_3_4_2__h_i_r
@@ -991,6 +993,7 @@ aircraft_related_occupancy:
   - general.bc_412_6_1_ancillary_areas
   - general.bc_412_6_aircraft_manufacturing_facilities
   - general.bc_412_7_3_heliports_and_helistops
+  - general.bc_905_3_5_helistop_standpipes
   - general.bc_table_1006_2_1_u
   - general.bc_table_412_6_aircraft_manufacturing_travel
 service_corridors:

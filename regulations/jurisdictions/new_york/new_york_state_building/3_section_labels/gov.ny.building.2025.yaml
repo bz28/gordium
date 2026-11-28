@@ -19841,8 +19841,8 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Where 403.5.4 (high-rise buildings), 405.7.2 (underground buildings) or 412.2.2.1 (airport traffic control towers)
-      requires it, an interior exit stairway or ramp is a smokeproof enclosure per 909.20: whether the building is one of
-      these isn''t a fact Gordium is given, so a person''s check.'
+      requires it, an interior exit stairway or ramp is a smokeproof enclosure per 909.20: smokeproof enclosures aren''t in
+      the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 347

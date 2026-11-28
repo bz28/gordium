@@ -11316,6 +11316,7 @@ rules:
   topic: means_of_egress
   title: Standpipes in covered and open mall buildings (BCNYS 905.3.3)
   applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
+    and special_egress_spaces
   sources:
   - file: gov.ny.building.2025.pdf
     page: 279
@@ -11347,9 +11348,16 @@ rules:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
+  - given:
+      occupancy_group: B
+      special_egress_spaces: false
+    expect: not_applicable
+    note: 'The building states it has no covered or open mall: not applicable.'
   notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
     so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
-    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+    Set aside also where the building states it is or has no a covered or open mall (stated among the spaces with their own
+    exits), as Chapter 4''s own lines for it are (the merge review of Chapter 4, 2026-11-28). Hand-drafted in a Claude Code
+    session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_3_4_underground_standpipes
@@ -11357,6 +11365,7 @@ rules:
   topic: means_of_egress
   title: Standpipes in underground buildings (BCNYS 905.3.4)
   applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
+    and underground_building
   sources:
   - file: gov.ny.building.2025.pdf
     page: 279
@@ -11373,9 +11382,15 @@ rules:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
+  - given:
+      occupancy_group: B
+      underground_building: false
+    expect: not_applicable
+    note: 'The building states it has no underground building: not applicable.'
   notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
     so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
-    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+    Set aside also where the building states it is or has no an underground building, as Chapter 4''s own lines for it are
+    (the merge review of Chapter 4, 2026-11-28). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_3_5_helistop_standpipes
@@ -11383,6 +11398,7 @@ rules:
   topic: means_of_egress
   title: Standpipes for rooftop helistops and heliports (BCNYS 905.3.5)
   applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
+    and aircraft_related_occupancy
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -11401,9 +11417,16 @@ rules:
       occupancy_group: R-3
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
+  - given:
+      occupancy_group: B
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The building states it has no heliport or helistop: not applicable.'
   notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
     so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
-    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+    Set aside also where the building states it is or has no a heliport or helistop (stated among the aircraft-related occupancies),
+    as Chapter 4''s own lines for it are (the merge review of Chapter 4, 2026-11-28). Hand-drafted in a Claude Code session
+    (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_3_6_marina_standpipes
@@ -13811,8 +13834,9 @@ rules:
       911.1.7 (approved location and access, a 1-hour separation, its size, an approved layout, no other storage, the features
       NFPA 72 and 911.1.6 list, from the voice/alarm control unit and stair door unlocking to the building information card,
       and its sign): a person''s check.'
-  notes: '911.1: whether the building is a high-rise or its footprint, and the room, aren''t in the model. Hand-drafted in
-    a Claude Code session (2026-11-27, Chapter 9 part e).'
+  notes: '911.1: whether the building is a high-rise is now the architect''s statement, but 911.1 also applies where another
+    section requires a fire command center and to large Group F-1 and S-1 footprints, which aren''t in the model, nor is the
+    room; so shown for every building. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1004_7_outdoor_areas
@@ -40055,11 +40079,11 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Where 403.5.4 (high-rise buildings), 405.7.2 (underground buildings) or 412.2.2.1 (airport traffic control towers)
-      requires it, an interior exit stairway or ramp is a smokeproof enclosure per 909.20: whether the building is one of
-      these isn''t a fact Gordium is given, so a person''s check.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 403.5.4 and 405.7.2 are flags of Chapter 4
-    part b, 412.2.2.1 of part f; 909.20 is, with its parts, brought in as Chapter 9 part e''s flags. Shown for every
-    building: nothing Gordium is given rules out a high-rise, underground building or control tower.'
+      requires it, an interior exit stairway or ramp is a smokeproof enclosure per 909.20: smokeproof enclosures aren''t in
+      the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 403.5.4 and 405.7.2 are flags of Chapter 4
+    part b, 412.2.2.1 of part f; 909.20 is, with its parts, brought in as Chapter 9 part e's flags. Shown for every building,
+    as 909.20's flags are (909.20.4 is reached by 1023.3.1's pressurized stairways too).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_12_1_smokeproof_termination

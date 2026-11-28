@@ -348,6 +348,16 @@ def building_measures(building: dict | None, interior=None) -> dict:
     all_r = bool(groups) and all(g.startswith("R-") for g in groups)
     if out.get("sprinklered_903_3_1_2") and all_r and facts.get("stories_above_grade_plane", 0) > NFPA_13R_STORIES:
         out["sprinklered_903_3_1_2"] = False
+    # 903.3.1.2 item 2 (p.274 lines 18-23): Group R-2's roof assembly under 45 feet, the other Group R's highest floor
+    # 30 feet or less, above the lowest level of fire department vehicle access; a stated high-rise (202: an occupied
+    # floor or occupiable roof more than 75 feet above that level) breaks it in Group R-2 outright, so a 13R system there
+    # is no 903.3.1.2 system; in the other Group R only an occupiable roof might be the high one, so it isn't known
+    # (the merge of Chapter 4's high_rise_building, 2026-11-28)
+    if out.get("sprinklered_903_3_1_2") and all_r and facts.get("high_rise_building") is True:
+        if all(g == "R-2" for g in groups):
+            out["sprinklered_903_3_1_2"] = False
+        else:
+            del out["sprinklered_903_3_1_2"]
     seen = assembly_spaces_from_rooms(interior)
     if FIXED_SEATS in room_functions(interior):     # the rooms show fixed seating: never a stated no over them
         out["assembly_fixed_seating"] = True

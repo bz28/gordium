@@ -133,7 +133,9 @@ def test_every_chapter_9_flag_is_a_persons_check_never_a_pass(labels, book, ctx)
           "nfpa_13r_stated", "occupied_outdoor_areas", "ambulatory_care_facility",   # part b: 903.2.1.6, 903.2.2.1
           "emergency_voice_alarm_system", "townhouse_units",              # part c: 907.2.1.1; part e: 905.3
           "separate_means_of_egress",
-          "assembly_spaces", "assembly_fixed_seating"}       # the merge of 9h: 903.2.1.5.1 with 1030.1.1.1
+          "assembly_spaces", "assembly_fixed_seating",       # the merge of 9h: 903.2.1.5.1 with 1030.1.1.1
+          "special_egress_spaces", "underground_building", "aircraft_related_occupancy",
+          "high_rise_building"}                  # the merge of Chapter 4: 905.3.3 to 905.3.5, 1023.12, 909.20
     for pid, v in labels.items():
         if v["label"] != "flag":
             continue
@@ -645,6 +647,8 @@ def test_part_es_standpipe_flags_follow_905_3s_exceptions(book, ctx):
     assert "four or more stories" in _shown_note(_rule(book, "general.bc_905_3_1_class_iii_by_height"))
     for r in book:
         if r["id"].startswith(("general.bc_909_", "general.bc_911_")):
+            # shown for every building: 909.20 is reached by 1023.12 and by 1023.3.1's and 909.6.3's pressurized
+            # stairways, whatever Chapter 4's facts (the skeptic of the merge review of Chapter 4)
             assert "applies_when" not in r and outcome(r, {}, allowed) == "needs_review", r["id"]
 
 
@@ -857,3 +861,57 @@ def test_the_grandstands_sprinklers_show_wherever_their_separation_does(book, ct
               {"occupancy_groups": ["R-2"], "assembly_spaces": False, "assembly_fixed_seating": False}, {}):
         m = code_scope.building_measures(b)
         assert (outcome(sprinklers, m, allowed) == "not_applicable") <= (outcome(separation, m, allowed) == "not_applicable"), b
+
+
+def test_a_13r_system_in_a_stated_high_rise_counts_in_no_rule(book, ctx):
+    """The merge review of Chapter 4 (2026-11-28), P0: 903.3.1.2 item 2 permits NFPA 13R in Group R-2 only where the roof
+    assembly is under 45 feet above the lowest level of fire department vehicle access, in other Group R where the
+    highest story's floor is 30 feet or less above it (p.274, lines 18-23); a high-rise (202) has an occupied floor or
+    occupiable roof more than 75 feet above that level. So in a building stated high-rise no rule may pass a part with
+    a 13R system stated that it doesn't pass with none, and no line may be set aside by it, in Group R too."""
+    allowed, wrong, walked = ctx.allowed(), [], 0
+    for r in book:
+        reads = {n for t in [r.get("check"), r.get("applies_when")] + [w["when"] for w in r.get("review_when") or []] if t
+                 for n in formula.names(t)}
+        if "sprinklered_903_3_1_2" not in reads:
+            continue
+        for groups in (["R-1"], ["R-2"], ["R-3"], ["R-4"], ["R-1", "R-2"]):
+            def values(system, facts=None):
+                return {**(facts or {}), **code_scope.building_measures({"occupancy_groups": groups, "sprinkler_system": system,
+                                                                         "high_rise_building": True})}
+            if r.get("applies_when"):
+                walked += 1
+                if outcome(r, values("nfpa_13r"), allowed) == "not_applicable" != outcome(r, values("none"), allowed):
+                    wrong.append((r["id"], groups, "set aside"))
+            if r["kind"] != "rule" or not parts.is_part_rule(r):
+                continue
+            for e in r.get("examples") or []:
+                if not (e.get("parts") or {}).get(r["for_each"]):
+                    continue
+                facts = {k: v for k, v in e["given"].items()
+                         if code_scope.DERIVED.get(k, (None,))[0] not in ("occupancy_groups", "sprinkler_system")}
+                with_13r = [row["outcome"] for row in parts.rows(r, e["parts"], values("nfpa_13r", facts), allowed)]
+                without = [row["outcome"] for row in parts.rows(r, e["parts"], values("none", facts), allowed)]
+                walked += 1
+                wrong += [(r["id"], groups, e.get("note", "")[:50]) for a, b in zip(with_13r, without) if a == "pass" != b]
+    assert walked > 100 and not wrong, wrong[:6]
+    m = code_scope.building_measures({"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r", "high_rise_building": True})
+    assert m["sprinklered_903_3_1_2"] is False
+    m = code_scope.building_measures({"occupancy_groups": ["R-1"], "sprinkler_system": "nfpa_13r", "high_rise_building": True})
+    assert "sprinklered_903_3_1_2" not in m          # only an occupiable roof may be the high one: not known
+
+
+def test_chapter_9s_lines_set_aside_on_chapter_4s_stated_facts(book, ctx):
+    """The merge review of Chapter 4 (P2): a line whose trigger is a Chapter 4 fact the architect states no is set aside
+    as Chapter 4's own lines are, and shows while it isn't stated: 905.3.3 (malls), 905.3.4 (underground buildings),
+    905.3.5 (helistops). 1023.12 and 909.20 stay shown for every building: 1023.3.1's and 909.6.3's pressurized
+    stairways send to 909.20.4 whatever the building is."""
+    allowed = ctx.allowed()
+    for rid, no in (("general.bc_905_3_3_mall_standpipes", {"special_egress_spaces": False}),
+                    ("general.bc_905_3_4_underground_standpipes", {"underground_building": False}),
+                    ("general.bc_905_3_5_helistop_standpipes", {"aircraft_related_occupancy": False}),
+):
+        r = _rule(book, rid)
+        assert outcome(r, code_scope.building_measures({"occupancy_groups": ["B"], **no}), allowed) == "not_applicable", rid
+        assert outcome(r, code_scope.building_measures({"occupancy_groups": ["B"]}), allowed) == "needs_review", rid
+    assert "high-rise is now the architect's statement" in _rule(book, "general.bc_911_1_fire_command_center")["notes"]
