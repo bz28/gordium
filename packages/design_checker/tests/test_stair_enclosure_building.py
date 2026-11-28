@@ -45,13 +45,14 @@ def test_the_compliant_stair_fails_nothing(checked):
     assert [k for k, o in got["results"].items() if o == "fail"] == []
     rows = _stair_rows(got)
     for f in ("f1", "f2"):
+        # 44 in passes: the building states NFPA 13 throughout (as Group R-2 needs, 903.2.8), so 1009.3.2's 48 in
+        # for a stair in an accessible means of egress doesn't apply (its exception 1)
         for rule in ("general.bc_1011_3_stair_headroom", "general.bc_1011_5_2_riser_height",
                      "general.bc_1011_5_2_tread_depth", "general.bc_1011_5_4_riser_uniformity",
-                     "general.bc_1011_11_stair_handrails"):
+                     "general.bc_1011_11_stair_handrails", "general.bc_1011_2_stair_width"):
             assert rows[(rule, f)] == "pass", (rule, f)
-        # 44 in but no sprinkler system: 1009.3 may ask more of a stair in an accessible means of egress; the
-        # treads' variation isn't given to the rules; landings and the rest of 1011 are flags
-        for rule in ("general.bc_1011_2_stair_width", "general.bc_1011_5_4_tread_uniformity",
+        # the treads' variation isn't given to the rules; landings and the rest of 1011 are flags
+        for rule in ("general.bc_1011_5_4_tread_uniformity",
                      "general.bc_1011_6_stair_landings", "general.bc_1011_1_stairways_general"):
             assert rows[(rule, f)] == "needs_review", (rule, f)
 
