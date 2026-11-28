@@ -44,6 +44,7 @@ otherwise.
 
 import math
 
+from design_checker.code_scope import ASSEMBLY_FUNCTIONS, ASSEMBLY_LIKE_FUNCTIONS
 from model_measurement.routes.stops import STOPS
 from rule_format.rulebook import load
 
@@ -54,6 +55,7 @@ LOWER, UPPER = "room_area", "grossed_up_or_increased"
 # PR #191), so the panel asks for that mark (ui_data: "Set the room's function"), never for an occupant load to mark
 FUNCTION_FIELD = "rooms[].function"
 FUNCTION_ROOMS = "room_ids_without_function"   # a story's `more`: the rooms its function ask is set on (never its level)
+FUNCTIONS_ONLY = "only_functions_wait"         # a story's `more`: true where its load waits on those functions alone
 FUNCTION_STATED = "set the room's Table 1004.5 function (the room mark Gordium: Function)"
 NOT_GIVEN = "the room's function (Table 1004.5) isn't stated, so its occupant load isn't worked out: " + FUNCTION_STATED
 # the same words for a load Gordium (or a person) must work out and no mark carries (round 6): a room others pass
@@ -100,6 +102,10 @@ CORRIDOR_OTHER_LEVELS = ("another level's occupants reach the building's corrido
                          "mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the "
                          "story's occupant load doesn't bound the corridor's: " + CORRIDOR_BY_HAND)
 CORRIDOR_NO_STORY = "the story's occupant load isn't worked out, so the corridor's isn't either: " + CORRIDOR_BY_HAND
+# the story's load waits on its rooms' functions (the model gives the rest): the corridor's ask is those functions, the
+# room mark Gordium: Function on the rooms that lack one (its `more`: FUNCTION_ROOMS), never a load worked out by hand
+CORRIDOR_NO_FUNCTION = ("the story's occupant load isn't worked out until its rooms' functions are set, so the "
+                        "corridor's isn't either" + STORY_FUNCTION)
 CORRIDOR_READINGS = ("given as two readings (none, the least it can serve; {load:.1f}, the whole story's, the most it "
                      "can serve): the routes don't split a story's occupants between its corridors, so a rule "
                      "reading it complies only if it complies at the whole story's load, fails only if it fails at "
@@ -219,10 +225,8 @@ def readable_rooms(description) -> tuple[dict, bool]:
 # rows under its "Assembly" heading (p.312, lines 20-27) name a room used for assembly purposes; its other rows a room
 # may be one of (303.1 "awaiting transportation", 303.4's courtrooms, gymnasiums, indoor swimming pools, libraries and
 # terminal waiting areas, 303.5's rinks and pools with spectator seating, 303.2's theaters' stages) may or may not be.
-ASSEMBLY_FUNCTIONS = ("gaming_floor", "exhibit_gallery_museum", "assembly_fixed_seats", "assembly_concentrated",
-                      "assembly_standing", "assembly_unconcentrated", "bowling_center")
-ASSEMBLY_LIKE_FUNCTIONS = ("courtroom", "library_reading_room", "exercise_room", "rink_pool", "pool_deck",
-                           "stage_platform", "airport_waiting")
+# The two lists are code_scope's ASSEMBLY_FUNCTIONS and ASSEMBLY_LIKE_FUNCTIONS (imported above), the same ones that
+# settle the building's assembly_spaces, so the seating and the building fact never read different rows.
 SEATING_STORY, SEATING_SPACE = "story_assembly_seating_possible", "space_assembly_seating_possible"
 
 
@@ -253,8 +257,10 @@ def assembly_seating(parts: dict, description: dict, factors: dict, building: di
     enclosed space with no room drawn in it (its use isn't known): never false on a room unseen. True on every story,
     too, where the building is stated Group A (an assembly use, 303.1 to 303.6) and no room but such a clashing one
     states an Assembly function or one that may be an assembly use: its assembly room isn't shown, so any room may be
-    it (review round 1). The story knows its rooms (it is in the model), so a floor the model leaves out doesn't matter
-    here."""
+    it (review round 1). The same where the building states it has assembly spaces (`assembly_spaces`, section group
+    9h: a room or space used for assembly purposes, whatever its group, 303.1.1 and 303.1.2) and none is shown (found
+    merging main into section group 9i). The story knows its rooms (it is in the model), so a floor the model leaves
+    out doesn't matter here."""
     rooms, every = readable_rooms(description)
     unknown = description.get("unknown_spaces") if isinstance(description, dict) else None
     spaces = [p for p in parts.get("space") or [] if isinstance(p, dict)]
@@ -268,7 +274,9 @@ def assembly_seating(parts: dict, description: dict, factors: dict, building: di
     groups = building.get("occupancy_groups") if isinstance(building, dict) else None
     shown = any(r.get("function") in ASSEMBLY_FUNCTIONS + ASSEMBLY_LIKE_FUNCTIONS for i, r in rooms.items()
                 if isinstance(r.get("function"), str) and i not in clash)
-    if isinstance(groups, list) and any(isinstance(g, str) and g.startswith("A-") for g in groups) and not shown:
+    group_a = isinstance(groups, list) and any(isinstance(g, str) and g.startswith("A-") for g in groups)
+    spaces_stated = isinstance(building, dict) and building.get("assembly_spaces") is True
+    if (group_a or spaces_stated) and not shown:
         unseen = True
     functions = factors["functions"]
     for story in parts.get("story") or []:
@@ -378,6 +386,9 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None, 
         if open_ or odd:
             if lacking:                               # the story's ask for a function names these rooms, not the level
                 story.setdefault("more", {}).setdefault("story_occupant_load", {})[FUNCTION_ROOMS] = lacking
+            if lacking and not odd and all(w == NOT_GIVEN for _, w in open_):
+                # only functions wait: setting them works the story's load out (a corridor's ask is them alone)
+                story["more"]["story_occupant_load"][FUNCTIONS_ONLY] = True
             story["not_measured"]["story_occupant_load"] = "; ".join(
                 ([STORY_OPEN.format(names=", ".join(n for n, _ in open_))
                   + (STORY_FUNCTION if any(w == NOT_GIVEN for _, w in open_) else
@@ -423,7 +434,11 @@ def _corridor_loads(story: dict, mine: list, building: dict | None) -> None:
                                                            building.get(OTHER_LEVELS) is True else
                                                            CORRIDOR_NOT_RULED_OUT)
         elif load is None:
-            c["not_measured"]["corridor_occupant_load"] = CORRIDOR_NO_STORY
+            held = (story.get("more") or {}).get("story_occupant_load") or {}
+            lacking = held.get(FUNCTION_ROOMS) if held.get(FUNCTIONS_ONLY) is True else None
+            c["not_measured"]["corridor_occupant_load"] = CORRIDOR_NO_FUNCTION if lacking else CORRIDOR_NO_STORY
+            if lacking:                               # the rooms the function ask is set on (never the corridor)
+                c.setdefault("more", {}).setdefault("corridor_occupant_load", {})[FUNCTION_ROOMS] = list(lacking)
         else:
             c.setdefault("readings", {})["corridor_occupant_load"] = [
                 {"value": 0, "named": {CORRIDOR_QUESTION: CORRIDOR_NONE}},

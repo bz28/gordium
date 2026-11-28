@@ -495,6 +495,7 @@ MEASURE_NAMES = {
     "stories_above_grade_plane": "stories above grade plane (the building's, as the architect counts them)",
     "townhouse_units": "townhouse units (whether every unit is a townhouse unit)",
     "separate_means_of_egress": "separate means of egress (whether every unit has its own)",
+    "assembly_spaces": "assembly spaces (whether any room or space is used for assembly purposes, whatever its group)",
     "mezzanines": "mezzanines (whether the building has any, per 505.2)",
     "loads_not_by_area": "loads not by area (whether any area is counted by its seats, lanes or actual load)",
     "space_is_exit": "exit status (whether the space is itself an exit)",
@@ -507,6 +508,10 @@ MEASURE_NAMES = {
     "story_dwelling_units": "dwelling units on the story",
     "space_exit_remoteness_ratio": "exit remoteness (the exits' distance apart over the diagonal)",
     "exit_remoteness_ratio": "exit remoteness (the exits' distance apart over the diagonal)",
+    # section group 7c: the Building Code's own values of a flight of stairs
+    "stair_in_exit_enclosure": "flight's room (whether it is an exit stair enclosure)",
+    "stair_headroom_past_bottom": "headroom past the bottom riser",
+    "stair_handrail_each_side": "handrail on each side",
 }
 # a key's leading word for its part kind, in words ("moe_door_latched": "door latched", never "moe latched")
 PREFIX_WORDS = (("moe_door_", "door "), ("atd_", "alternating tread device "), ("ladder_", "ship's ladder "),

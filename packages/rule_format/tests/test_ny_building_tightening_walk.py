@@ -37,8 +37,9 @@ SPRINKLERS = {"nfpa_13": (True, False, False), "nfpa_13r": (False, True, False),
 FACTS = ("assembly_fixed_seating", "special_egress_spaces", "merchandise_pads", "building_has_atrium",
          "egress_balcony_increase_taken", "r2_sleeping_units", "emergency_escape_openings_1031",
          "occupied_outdoor_areas", "ambulatory_care_facility", "corridors_within_dwelling_units",
-         "emergency_voice_alarm_system")   # the last: Table 1020.3's (the corridor walk's,
-# test_ny_building_corridor_walk.py, which varies it with every width and load; here for completeness)
+         "emergency_voice_alarm_system",   # Table 1020.3's (the corridor walk's,
+         # test_ny_building_corridor_walk.py, which varies it with every width and load; here for completeness)
+         "assembly_spaces")                # section group 9h: only Section 1030's flags read it
 DERIVED = ("occupancy_group", "occupancy_group_i4", "other_occupancy_present", "sprinklered_903_3_1_1",
            "sprinklered_903_3_1_2", "sprinklered_903_3_1_3",
            # Chapter 9 part a's, read only by 903.2's rules (none reads an affected measure: their own walk is

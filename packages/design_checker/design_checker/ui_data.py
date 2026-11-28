@@ -65,10 +65,13 @@ FIELD_HEADLINES = {
     "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Table 1020.3)",
     "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
     "building.emergency_voice_alarm_system": "Say whether the whole building has an emergency voice/alarm communication system (907.5.2.2)",
+    "building.assembly_spaces": "Say whether any room or space is used for assembly purposes, whatever the building's group (1030.1)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
     "building.mezzanines": "Say whether the building has a mezzanine (505.2)",
     "building.loads_not_by_area": "Say whether any area is counted by seats, lanes or actual load (fixed seats, bowling, call centers)",
     "doors[].leaves": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)",
+    "rooms[].fire_rating_hours": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)",
+    "rooms[].walls_smoke_partitions": "Say whether the corridor's walls are smoke partitions",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",
     "facts.ground_is_flat": "Say whether the ground is flat",
@@ -210,8 +213,7 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
             return {**base, "kind": MARK, "key": f"field:{f}", "field": f, "headline": FIELD_HEADLINES[f]}
         if key.startswith("mark:") and isinstance(measure, str) and stated in words:
             name = _measure_name(measure, rule_kind)
-            return {**base, "kind": MEASURE,
-                    "headline": f"Work out the {name} by hand: Gordium has no field for it yet"}
+            return {**base, "kind": MEASURE, "headline": f"Work out the {name} by hand (a person's check)"}
         if key.startswith("mark:") and isinstance(measure, str):
             return {**base, "kind": MARK, "headline": f"Mark the {_measure_name(measure, rule_kind)} in the model"}
         out = {**base, "kind": MARK, "headline": _clause_head(words) or "Set the mark this asks for"}

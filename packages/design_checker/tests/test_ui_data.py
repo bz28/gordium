@@ -32,7 +32,8 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "corridors_within_dwelling_units": False,
                                           "emergency_voice_alarm_system": False,             # group 5a's
                                           "stories_above_grade_plane": 3, "townhouse_units": False,  # Chapter 9's
-                                          "separate_means_of_egress": True})                 # part e's
+                                          "separate_means_of_egress": True,                  # part e's
+                                          "assembly_spaces": False})                         # group 9h's
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False
@@ -149,7 +150,7 @@ def test_a_row_not_in_review_has_no_asks():
     ({"kind": "mark", "key": "mark:space:space_occupant_load", "measure": "space_occupant_load",
       "words": "occupant load: stated by the architect (the space's occupant load), and Gordium has no mark for it "
                "in the model yet"}, ui_data.MEASURE,
-     "Work out the occupant load by hand: Gordium has no field for it yet"),
+     "Work out the occupant load by hand (a person's check)"),
     ({"kind": "measure_by_hand", "key": "gap:space:space_egress_through_locked_room",
       "words": "egress through locked room: Gordium doesn't measure this yet: measure it by hand"}, ui_data.MEASURE,
      "Check by hand: does the path pass through a room that can be locked?"),
@@ -292,12 +293,13 @@ def test_the_contents_list_every_chapter_and_never_hide_a_rows_section(apartment
     chapters = [c for c in bc["chapters"] if c["kind"] == "chapter"]
     assert [c["number"] for c in chapters] == [str(n) for n in range(1, 36)]
     egress = next(c for c in chapters if c["number"] == "10")
-    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 9   # section group 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009; 9d: 1019 (1018 left the count with 1018.4, round 1 of 2026-11-23); 9e: 1021, 1022 and 1023; 9f: 1024 and 1025
+    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 4   # section group 7c: 1011 (in parts); 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009; 9d: 1019 (1018 left the count with 1018.4, round 1 of 2026-11-23); 9e: 1021, 1022 and 1023; 9f: 1024 and 1025; 9g: 1026 to 1029
     sections = {s["number"]: s for s in egress["sections"]}
     assert sections["1018"]["whole"] is True and sections["1019"]["whole"] is True   # group 9d review round 1
-    assert all(sections[s]["whole"] is True for s in ("1021", "1022", "1023", "1024", "1025"))   # groups 9e and 9f
+    assert all(sections[s]["whole"] is True for s in ("1021", "1022", "1023", "1024", "1025", "1026", "1027", "1028", "1029"))   # groups 9e to 9g
     assert sections["1006"]["coverage"] == "rules" and sections["1006"]["whole"] is False
-    assert sections["1017"]["whole"] is True and sections["1011"]["coverage"] == "not_brought_in"
+    assert sections["1017"]["whole"] is True and sections["1014"]["coverage"] == "not_brought_in"   # handrails (1011: 7c's; 1012: 9a's)
+    assert sections["1011"]["coverage"] == "rules" and sections["1011"]["whole"] is False          # group 7c's stairs
     assert sections["1010"]["coverage"] == "rules" and sections["1010"]["whole"] is False   # group 6a: 1010.1, 1010.1.1
     # every row's section is in its book's contents, never as not brought in
     listed = {(b["key"], s["number"]): s for b in apartment["view"]["contents"] for c in b["chapters"]
@@ -403,9 +405,10 @@ _FIELDS = []
 
 def _known_fields() -> set:
     """Every field a host's description has, read from where it is defined, never copied: the Revit add-in's own
-    fields (every "building.…", "facts.…" and "kind[].flag" its C# names), the stated facts the start box and the
-    rows' Enter… ask for (host_core.facts.STATED_FACTS), the building block's facts (code_scope.FACTS) and the
-    site's own questions (ui_data.SITE_STOPS)."""
+    fields (every "building.…", "facts.…" and "kind[].flag" its C# names, and every whole list a mark's Feeds names
+    as the pane matches it: stairs, guards, buildings, unknown_spaces), the stated facts the start box and the rows'
+    Enter… ask for (host_core.facts.STATED_FACTS), the building block's facts (code_scope.FACTS) and the site's own
+    questions (ui_data.SITE_STOPS)."""
     if not _FIELDS:
         import re
         from design_checker.host_core.facts import STATED_FACTS
@@ -414,6 +417,10 @@ def _known_fields() -> set:
             if "obj" not in cs.parts:
                 found |= set(re.findall(r'"((?:building|facts)\.[a-z0-9_]+|[a-z]+\[\]\.[a-z0-9_]+)"',
                                         cs.read_text(encoding="utf-8")))
+                # a whole list a mark feeds, the first word of a part of its Feeds as CauseCards.Fields reads it
+                # ("stairs (sent only when Yes)": stairs, Gordium: These are all the stairs)
+                for feeds in re.findall(r'MarkBinding\.\w+,\s*\[[^\]]*\],\s*"([^"]+)"', cs.read_text(encoding="utf-8")):
+                    found |= {w for w in (p.split(" ")[0] for p in feeds.split(", ")) if re.fullmatch(r"[a-z_]+", w)}
         found |= {f"facts.{k}" for k in STATED_FACTS} | {f"building.{k}" for k in code_scope.FACTS}
         found |= {f"facts.{f}" for facts in ui_data.SITE_STOPS.values() for f in facts}
         _FIELDS.append(found)
@@ -581,9 +588,12 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # Revit-fields work. Groups 2 and 3's facts have theirs (PR #194).
     # and this branch's own: corridors_within_dwelling_units (their marks follow in the Revit-fields work)
     # and this branch's own: emergency_voice_alarm_system (their marks follow in the Revit-fields work)
-    # (groups 4 and 5's four have theirs too, the Revit-fields PR for them: the set is empty)
+    # (groups 4 and 5's four have theirs too, the Revit-fields PR for them)
     # (the occupant-load ceiling's mezzanines and loads not by area, 2026-11-26, came with their own)
-    assert keys - set(revit) == set()
+    # section group 9h's assembly_spaces has none yet (asked for by name, never by a mark: the Section 1030 flags
+    # that read it are a person's check whatever it is; its Project Information Yes/No follows in the Revit-fields work)
+    assert keys - set(revit) == {"assembly_spaces"}
+    assert "assembly_spaces" not in code_scope.MARK and code_scope.field_of("assembly_spaces") == "building.assembly_spaces"
     assert code_scope.MARK["mezzanines"] == revit["mezzanines"] == "Gordium: Mezzanines"
     assert code_scope.MARK["loads_not_by_area"] == revit["loads_not_by_area"] == "Gordium: Loads not by area"
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased",
@@ -668,6 +678,18 @@ def test_the_plan_never_says_a_marked_facts_revit_mark_is_still_to_come():
         if re.search(r"Revit mark\S* (is|are) a follow-up|marks? join group", sentence):
             named = [k for k in code_scope.MARK if k in sentence]
             assert not named, (named, sentence[:200])
+
+
+def test_the_corridor_rating_card_names_the_unit_its_revit_mark_takes():
+    # corridor asks review round 1 (P2): the card said "in hours" while the Revit mark it opens takes minutes, so an
+    # architect typing 1 for one hour sent 1/60 hour; the card and the mark both say minutes
+    import re
+    text = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
+    m = re.search(r'new\(\s*"(Gordium: [^"]+)", new\("[^"]+"\), MarkValueKind\.(\w+),\s*MarkBinding\.\w+, \[Rooms\], '
+                  r'"rooms\[\]\.fire_rating_hours"', text)
+    assert m and m.group(2) == "Integer" and "minutes" in m.group(1), m
+    headline = ui_data.FIELD_HEADLINES["rooms[].fire_rating_hours"]
+    assert "minutes" in headline and "in hours" not in headline
 
 
 def test_a_door_whose_leaves_arent_given_is_asked_for_by_the_field_its_type_mark_answers():

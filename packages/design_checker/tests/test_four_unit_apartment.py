@@ -202,22 +202,66 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     1010.1.6 and 1010.1.7 (42; 1010.1.3.2's is a door's row, not a building line); section group 6d 1010.2 to
     1010.2.6 and Table 1010.2.4 (50; 1010.2.7's is for Groups E, B and I-4); section group 6e 1010.2.8.1 to
     1010.2.12.1, 1010.2.14 and 1010.2.15 (61; 1010.2.13's is for Groups I-1 and I-2); section group 8a 1031.2's basements and public way and
-    1031.2.1 (64); section group 8c 1031.5.3's drainage and 1031.6's bars (66); section group 9a 1003.2 to 1003.7's nine and 1012's seventeen ramp flags (a building's ramps aren't a fact Gordium is given, so they show for every building) (92); section group 9b 1008's eight and 1013's nine lighting and exit-sign flags but 1008.2.2's (Group I-2) and 1013.2's (Group R-1) (107); section group 9c 1009's twenty-seven accessible-egress flags but 1009.3.3's (the building is Group R-2, exception 5) (133); section group 9d 1018.1's, 1018.5's and 1019.3's flags (1018.3's is for Groups B and M, 1019.4's for I-2 and I-3) (136); section group 9e 1021's four, 1022's three and 1023's nineteen flags, each shown for every building (162); section group 9f 1024's nine flags (1025's fifteen are for Groups A, B, E, I-1, M and R-1) (171). Chapter 7 (2026-11-26) adds 104 more: part a's 28
-    fire-barrier and shaft-enclosure flags, each shown for every building; part b its 23 building-wide
+    1031.2.1 (64); section group 8c 1031.5.3's drainage and 1031.6's bars (66); section group 9a 1003.2 to 1003.7's nine and 1012's seventeen ramp flags (a building's ramps aren't a fact Gordium is given, so they show for every building) (92); section group 9b 1008's eight and 1013's nine lighting and exit-sign flags but 1008.2.2's (Group I-2) and 1013.2's (Group R-1) (107); section group 9c 1009's twenty-seven accessible-egress flags but 1009.3.3's (the building is Group R-2, exception 5) (133); section group 9d 1018.1's, 1018.5's and 1019.3's flags (1018.3's is for Groups B and M, 1019.4's for I-2 and I-3) (136); section group 9e 1021's four, 1022's three and 1023's nineteen flags, each shown for every building (162); section group 9f 1024's nine flags (1025's fifteen are for Groups A, B, E, I-1, M and R-1) (171); section group 9g 1026's seven, 1027's five, 1028's four and 1029's two flags (18), each shown for every building but 1029.3's not for Group R-3 alone (189); section group 9h Section 1030's twenty-four
+    assembly flags but 1030.4's (Group A-1 only): the rooms are residential, but a description may hold only some floors,
+    so a room used for assembly purposes isn't ruled out until the building states none (213); section group 9i its
+    thirty-seven more, 1030.10 to 1030.17 and Table 1030.13.2.1, the same way (250). Chapter 7 (2026-11-26) adds 104
+    more: part a's 28 fire-barrier and shaft-enclosure flags, each shown for every building; part b its 23 building-wide
     opening-protective flags (Table 716.1(2)'s corridor doors are each corridor's row); part c 30 of its 31 fire
     partition, smoke barrier and smoke partition flags (710.5.3 is Group I-2's, not the stated R-2's); part d its 23
-    floor, vertical opening and penetration flags (275). Chapter 9 part a (2026-11-27) adds 903.1.1's alternative systems and 903.2.5.3's
-    pyroxylin plastics (277); its other flags are Group H-5's or a 13R or 13D system's, not this building's. Part b
+    floor, vertical opening and penetration flags (354). Chapter 9 part a (2026-11-27) adds 903.1.1's alternative systems and 903.2.5.3's
+    pyroxylin plastics (356); its other flags are Group H-5's or a 13R or 13D system's, not this building's. Part b
     adds 903.2.1.6's occupiable roofs, 903.2.2.1's ambulatory care floors (neither fact stated), 903.2.9.2's bulk tire
-    storage and 903.2.10.1's and 903.2.10.2's vehicle storage, any group's (282); its other flags are other groups'.
+    storage and 903.2.10.1's and 903.2.10.2's vehicle storage, any group's (361); its other flags are other groups'.
     Part c adds 903.2.11's nine specific areas and 903.2.12's construction (no NFPA 13 system stated), 907.1.3's listed
-    equipment, 907.2's fire alarm system and 907.2.2.1's ambulatory care detection (295). Part d adds Group R-2's three
+    equipment, 907.2's fire alarm system and 907.2.2.1's ambulatory care detection (374). Part d adds Group R-2's three
     fire alarm and smoke alarm sections, 907.2.11 and its six for Groups R and I-1, 907.2.11.8's portable alarms (a
     nontransient hotel is Group R-2, 310.3), 907.2.10.2's battery storage and 907.5.2.2's five while the voice/alarm
-    system isn't stated (312). Part e adds the standpipe, smoke control, smokeproof enclosure and fire command center
-    flags but Group A's standpipes (339)."""
+    system isn't stated (391). Part e adds the standpipe, smoke control, smokeproof enclosure and fire command center
+    flags but Group A's standpipes (418)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 339 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 418 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    # review round 4 of section group 9g: the docstring's per-section counts for 9g, pinned
+    from collections import Counter
+    assert Counter(i["code"]["section"].split(".")[0] for i in flags
+                   if i["code"]["section"][:4] in ("1026", "1027", "1028", "1029")) == {
+        "1026": 7, "1027": 5, "1028": 4, "1029": 2}
+    # section groups 9h and 9i: Section 1030's (Tables 1030.6.2's and 1030.13.2.1's among them), 1030.8's of
+    # 2026-11-23 counted with them
+    assert sum(i["code"]["section"].removeprefix("Table ").startswith("1030") for i in flags) == 24 + 1 + 37
+
+
+
+def _flags_1030(results):
+    return {k: v for k, v in results.items() if k.startswith(("general.bc_1030_", "general.bc_table_1030_"))}
+
+
+def test_section_1030s_flags_show_on_residential_rooms_alone_and_hide_only_on_a_stated_no(got, laws):
+    """Section group 9h: Section 1030 applies to any room or space used for assembly purposes, whatever the group
+    (303.1.1, 303.1.2). The apartment's rooms are all residential and its group R-2, yet its description may hold only
+    some floors, so with the fact unstated every 1030 flag shows but 1030.4's (Group A-1 only). Stated no (and no fixed
+    seating) they are not applicable, and nothing else moves. A room stating a Table 1004.5 Assembly function brings
+    them back whatever is stated; a room that may be an assembly use (a courtroom) keeps a stated no from standing."""
+    shown = _flags_1030(got["results"])
+    assert len(shown) == 26 + 37                    # section group 9i's thirty-seven too
+    assert shown.pop("general.bc_1030_4_foyers_and_lobbies") == "not_applicable"
+    assert set(shown.values()) == {"needs_review"}
+    interior = build.interior_of()
+    interior["building"] = {**interior["building"], "assembly_spaces": False, "assembly_fixed_seating": False}
+    now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
+    moved = {k for k in got["results"] if got["results"][k] != now[k]}
+    assert moved == set(shown) and {now[k] for k in moved} == {"not_applicable"}
+    for fn, want in (("assembly_unconcentrated", "needs_review"), ("courtroom", "needs_review"),
+                     ("business", "not_applicable"), ("assembly_fixed_seats", "needs_review")):
+        again = copy.deepcopy(interior)
+        again["rooms"][0]["function"] = fn
+        now = _flags_1030(egress.check(laws, again, VALUES, ALLOWED)["results"])
+        now.pop("general.bc_1030_4_foyers_and_lobbies")
+        # 1030.8 and 1030.8.1 read the fixed seating alone: stated no here, but a room stating fixed seats has it
+        # (review round 1: the room's yes wins over the stated no)
+        fixed = "needs_review" if fn == "assembly_fixed_seats" else "not_applicable"
+        assert {k: v for k, v in now.items() if "1030_8" not in k} == {k: want for k in shown if "1030_8" not in k}, fn
+        assert {v for k, v in now.items() if "1030_8" in k} == {fixed}, fn
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -284,7 +328,8 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
                          "bc_1010_2_8_1_refrigeration_machinery_rooms",
                          "bc_1006_2_2_3_refrigerated_rooms", "bc_1006_2_2_4_electrical_rooms",
                          "bc_1006_2_2_5_vehicular_ramps", "bc_table_1017_2_note_a", "bc_1017_2_1_balcony_increase",
-                         "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")}}
+                         "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path",
+                         "bc_1030_8_1_path_through_adjacent_row")}}
 
 
 def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(got, laws):
@@ -354,6 +399,83 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
         for k in ("voice_alarm_design", "1_voice_alarm_override", "2_voice_alarm_live_messages", "3_voice_alarm_other_uses",
                   "5_voice_alarm_standby_power")}
     assert all(m == {} for m in moved.values()), moved
+
+
+# ---- the corridor's facts and asks (2026-11-26: the egress UI audit's finding 5) ----------------------------------------
+
+RATING_R = "general.bc_table_1020_2_r"
+
+
+def _corridor_case(rating=None, functions=True, **building):
+    desc = build.interior_of()
+    for r in desc["rooms"]:
+        if not functions:
+            r.pop("function", None)
+        if r.get("use") == "corridor" and rating is not None:
+            r["fire_rating_hours"] = rating
+    desc["building"] = {**desc["building"], **building}
+    return desc
+
+
+def test_the_corridor_asks_are_the_rooms_functions_and_its_stated_rating_never_by_hand_for_want_of_a_field(routes):
+    """Before: with no room function stated, each corridor's occupant load said "work out by hand: Gordium has no
+    field for it yet", though the model gives the load once the rooms' functions are set (the story's load bounds
+    the corridor's where no other level reaches it, group 4a); and the corridor's fire rating had no way in at all.
+    Now the corridor rows ask for the rooms' functions (selecting the rooms that lack one, never the corridor), and
+    for the corridor walls' rating by the corridor room's own field; no ask says "field"."""
+    from design_checker import panel_data, ui_data
+    from design_checker.each_part import GORDIUM_GAPS
+    got = _check(_corridor_case(functions=False, other_level_egress_into_corridors=False), routes)
+    apartments = {p["id"] for p in got["interior"]["parts"]["space"] if p["name"].startswith("Apartment")}
+    items = [i for i in got["items"] if i["rule"] in (RATING_R, "general.bc_table_1020_3_corridor_width")]
+    assert len(items) == 4 and all(i["status"] == present.REVIEW for i in items)
+    for i in items:
+        asks = [ui_data._from_cause(c, "corridor") for c in i["causes"]]
+        assert not any("field" in a["headline"] for a in asks), asks
+        fn = [a for a in asks if a.get("field") == "rooms[].function"]
+        assert fn and set(fn[0]["elements"]) <= apartments and fn[0]["elements"], (i["name"], asks)
+    rated = [i for i in got["items"] if i["rule"] == "general.bc_1020_2_fire_partitions"]
+    assert rated and all(ui_data._from_cause(c, "corridor").get("field") == "rooms[].fire_rating_hours"
+                         for i in rated for c in i["causes"] if c.get("measure") == "corridor_fire_rating_hours")
+    assert panel_data.MEASURE_FIELDS["corridor_fire_rating_hours"] in ui_data.FIELD_HEADLINES and GORDIUM_GAPS
+
+
+def _rated(routes, desc):
+    """The building's routes as measured (`routes`) with each corridor's stated facts read again from `desc` by the
+    routes' own reader (model_measurement.routes._corridor_stated): a stated fact changes no geometry."""
+    from model_measurement.routes import CORRIDOR_STATED, _corridor_stated
+    got = copy.deepcopy(routes)
+    items = {r["id"]: r for r in desc["rooms"]}
+    for c in got["parts"]["corridor"]:
+        for m in CORRIDOR_STATED:
+            c["measures"].pop(m, None)
+            c["not_measured"].pop(m, None)
+        _corridor_stated(c, items.get(c["id"]))
+    return got
+
+
+@pytest.fixture(scope="module")
+def unrated(routes):
+    """The apartment with an NFPA 13R system and no other level reaching its corridors, no rating stated."""
+    return _check(_corridor_case(sprinkler_system="nfpa_13r", other_level_egress_into_corridors=False), routes)
+
+
+@pytest.mark.parametrize("rating, want", [(1, "pass"), (0.5, "pass"), (0, present.REVIEW), (None, present.REVIEW)])
+def test_a_stated_corridor_rating_moves_table_1020_2s_row(routes, unrated, rating, want):
+    """Group R-2 with an NFPA 13R system, no other level reaching the corridors: the corridor's load is two readings,
+    none and the story's (257.1); Table 1020.2's R row asks a 0.5-hour rating over 10 occupants with the sprinkler
+    system. A stated rating of 0.5 or 1 hour complies at both; 0 complies only at none (needs review, never a pass);
+    not stated, it needs review as before. Only the rows reading the rating move, and never to a fail here."""
+    base = unrated
+    desc = _corridor_case(rating, sprinkler_system="nfpa_13r", other_level_egress_into_corridors=False)
+    now = _check(desc, _rated(routes, desc))
+    assert all(c["measures"].get("corridor_fire_rating_hours") == rating for c in now["interior"]["parts"]["corridor"])
+    assert now["results"][RATING_R] == want, now["results"][RATING_R]
+    rules = {r["id"]: r for r in load(REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+                                      / "5_building_code_rules/drafted/general.yaml")["rules"]}
+    for k in (k for k in now["results"] if now["results"][k] != base["results"].get(k)):
+        assert "corridor_fire_rating_hours" in str([rules[k].get(f) for f in ("check", "review_when", "applies_when")]), k
+        assert base["results"][k] == present.REVIEW and now["results"][k] != "fail", (k, now["results"][k])
 
 
 # ---- the ceiling on an occupant load not worked out (occupant_load._bounds, 2026-11-26: the egress UI audit's 6) -------
@@ -561,6 +683,16 @@ def test_a_13r_system_above_four_stories_is_said_where_the_architect_reads(route
     assert "no sprinkler system stated" not in by_rule["general.bc_716_2_2_3_exit_enclosure_door_temperature_rise"]["reason"]
 
 
+# ---- section group 7c (2026-11-26): Section 1011's stairs --------------------------------------------------------------
+
+def test_its_stairs_are_not_described_so_every_stair_line_needs_review(got):
+    """Before: no rule read a stair. After: Section 1011's seven rules and two flags each give one line, and the
+    apartment's two stairs aren't described (its 9 by 6 ft enclosures can't hold a code-sized stair), so no flight is
+    read and every line needs review, never a pass; nothing else changes (expected.yaml holds every other line as it
+    was)."""
+    stair = {k: v for k, v in got["results"].items() if k.startswith("general.bc_1011_")}
+    assert len(stair) == 9 and set(stair.values()) == {present.REVIEW}
+    assert got["interior"]["parts"]["stair"] is None
 # ---- section group 6e (2026-11-26): panic and fire exit hardware ------------------------------------------------------
 
 PANIC = "general.bc_1010_2_8_panic_hardware"
