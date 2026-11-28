@@ -89,3 +89,20 @@ def test_a_rooms_assembly_function_outranks_the_mark():
     assert code_scope.building_measures({"assembly_spaces": False}, assembly)["assembly_spaces"] is True
     assert "assembly_spaces" not in code_scope.building_measures({"assembly_spaces": False}, maybe)
     assert "makes it Yes, whatever this says" in _description(PR_A["assembly_spaces"])
+
+
+@pytest.mark.parametrize("function, fact", [("stage_platform", "stages_or_platforms"),
+                                            ("aircraft_hangar", "aircraft_related_occupancy")])
+def test_a_room_stated_a_stage_or_a_hangar_outranks_a_stated_no(function, fact):
+    # review round 1 of PR A: a stated No beside a room whose Function is Table 1004.5's "Stages and platforms" or
+    # "Aircraft hangars" set 410.5's or Section 412's flags aside (and their bands), a false not applicable
+    rooms = {"rooms": [{"id": "r", "function": function}, {"id": "s", "function": "business"}]}
+    for stated in (False, True, None):
+        block = {"occupancy_groups": ["R-2"], **({} if stated is None else {fact: stated})}
+        assert code_scope.building_measures(block, rooms)[fact] is True, stated
+    # another room's function leaves the stated No as it is
+    other = {"rooms": [{"id": "r", "function": "business"}]}
+    assert code_scope.building_measures({fact: False}, other)[fact] is False
+    words = _description(PR_A[fact])
+    assert "makes it Yes, whatever this says" in words
+

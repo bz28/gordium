@@ -348,7 +348,9 @@ def building_measures(building: dict | None, interior=None) -> dict:
     interior description, settles one more: assembly_spaces is true wherever a room states a Table 1004.5 Assembly
     function, whatever the block says, and a stated false is left out (not stated) where a room states a function that
     may be an assembly use (assembly_spaces_from_rooms); and assembly_fixed_seating is true wherever a room states Table
-    1004.5's "Assembly with fixed seats" (review round 1 of section group 9h)."""
+    1004.5's "Assembly with fixed seats" (review round 1 of section group 9h); stages_or_platforms and
+    aircraft_related_occupancy are true wherever a room states Table 1004.5's "Stages and platforms" or "Aircraft
+    hangars" (ROOM_SHOWS), whatever the block says."""
     facts, _ = _given(building)
     out = {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
     groups = facts.get("occupancy_groups") or []
@@ -366,8 +368,12 @@ def building_measures(building: dict | None, interior=None) -> dict:
         else:
             del out["sprinklered_903_3_1_2"]
     seen = assembly_spaces_from_rooms(interior)
-    if FIXED_SEATS in room_functions(interior):     # the rooms show fixed seating: never a stated no over them
+    functions = room_functions(interior)
+    if FIXED_SEATS in functions:                    # the rooms show fixed seating: never a stated no over them
         out["assembly_fixed_seating"] = True
+    for function, fact in ROOM_SHOWS.items():       # a stage or a hangar the rooms show: never a stated no over it
+        if function in functions:
+            out[fact] = True
     if seen == ASSEMBLY_YES:
         out["assembly_spaces"] = True
     elif seen == ASSEMBLY_MAYBE and out.get("assembly_spaces") is False:
@@ -408,6 +414,10 @@ def room_functions(interior) -> set:
 # Table 1004.5's "Assembly with fixed seats" (p.312, line 22): a room stating it has fixed seating (Table 1006.2.1 note
 # c, 1030.7, 1030.8), whatever the building block says (review round 1 of section group 9h)
 FIXED_SEATS = "assembly_fixed_seats"
+# Table 1004.5's "Stages and platforms" (p.313, line 11) and "Aircraft hangars" (p.312, line 13): a room stating one is
+# a stage or platform (202, 410) or an aircraft hangar (Section 412), so the building has one whatever the block says
+# (review round 1 of the building facts' marks, PR A: a stated No beside such a room set 410.5's or 412's flags aside)
+ROOM_SHOWS = {"stage_platform": "stages_or_platforms", "aircraft_hangar": "aircraft_related_occupancy"}
 
 
 def assembly_spaces_from_rooms(interior) -> str | None:

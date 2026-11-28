@@ -57,8 +57,13 @@ public sealed class BuildingFactsMarksTests
         // design_checker/tests/test_building_fact_marks.py)
         Assert.Contains("\"A space within a building utilized for entertainment or presentations, which includes overhead hanging curtains, drops, scenery or stage effects other than lighting and sound.\"",
                         Marks.StagesOrPlatforms.Description, StringComparison.Ordinal);
-        Assert.Contains("TECHNICAL PRODUCTION AREA", Marks.StagesOrPlatforms.Description, StringComparison.Ordinal);
-        Assert.Contains("PLATFORM", Marks.StagesOrPlatforms.Description, StringComparison.Ordinal);
+        // each definition whole (review round 1: TECHNICAL PRODUCTION AREA's galleries and catwalks, PLATFORM's
+        // theater-in-the-round stages and horizontal sliding curtains, left out, could lead to a wrong No)
+        Assert.Contains("\"Open elevated areas or spaces intended for entertainment technicians to walk on and occupy for servicing and operating entertainment technology systems and equipment. Galleries, including fly and lighting galleries, gridirons, catwalks, and similar areas are designed for these purposes.\"",
+                        Marks.StagesOrPlatforms.Description, StringComparison.Ordinal);
+        foreach (var each in new[] { "worship", "head table", "lecturers and speakers", "boxing and wrestling rings",
+                                     "theater-in-the-round stages", "horizontal sliding curtains" })
+            Assert.Contains(each, Marks.StagesOrPlatforms.Description, StringComparison.Ordinal);
         foreach (var each in new[] { "airport traffic control tower", "aircraft hangar", "aircraft paint hangar",
                                      "aircraft manufacturing facility", "heliport", "helistop" })
             Assert.Contains(each, Marks.AircraftRelatedOccupancy.Description, StringComparison.Ordinal);
@@ -73,11 +78,16 @@ public sealed class BuildingFactsMarksTests
             Assert.Contains("Blank:", m.Description, StringComparison.Ordinal);
         }
         // blank never reads as No: for the three Chapter 4 facts every rule reading them is a flag or a band, so blank
-        // shows what Yes shows; the assembly checks are rules, so blank leaves them at needs review
+        // shows what Yes shows; the assembly checks are flags too, but Yes also makes seating possible on a story
+        // (occupant_load.py) where blank doesn't, so its words differ
         foreach (var m in new[] { Marks.StagesOrPlatforms, Marks.AircraftRelatedOccupancy, Marks.ServiceCorridors })
             Assert.Contains("Blank: as for Yes.", m.Description, StringComparison.Ordinal);
         Assert.Contains("Blank: the checks that turn on it need review.", Marks.AssemblySpaces.Description, StringComparison.Ordinal);
-        // a room's Function outranks the mark (code_scope.assembly_spaces_from_rooms): said in the tooltip
-        Assert.Contains("makes it Yes, whatever this says", Marks.AssemblySpaces.Description, StringComparison.Ordinal);
+        // a room's Function outranks the mark (code_scope.building_measures): said in each tooltip it applies to
+        foreach (var m in new[] { Marks.StagesOrPlatforms, Marks.AircraftRelatedOccupancy, Marks.AssemblySpaces })
+            Assert.Contains("makes it Yes, whatever this says", m.Description, StringComparison.Ordinal);
+        Assert.Contains("Function is Stage or platform", Marks.StagesOrPlatforms.Description, StringComparison.Ordinal);
+        Assert.Contains("Function is Aircraft hangar", Marks.AircraftRelatedOccupancy.Description, StringComparison.Ordinal);
+        Assert.Contains("any story may seat people served by aisles", Marks.AssemblySpaces.Description, StringComparison.Ordinal);
     }
 }

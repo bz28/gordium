@@ -461,6 +461,17 @@ def test_chapter_4_part_fs_facts_stated_on_the_apartment(no_mall, laws):
     assert len([k for k in no_mall["results"] if k.startswith("general.bc_410_5")]) == 9
     assert len([k for k in no_mall["results"] if k.startswith(("general.bc_412_", "general.bc_table_412_"))]) == 11
     assert all(m == {} for m in moved.values()), moved
+    # a room stated a stage or an aircraft hangar (Gordium: Function) outranks a stated No: the flags stay a person's
+    # check (review round 1 of the building facts' marks, PR A: the No set them aside beside the room)
+    for fact, function, prefixes in (("stages_or_platforms", "stage_platform", ("general.bc_410_5",)),
+                                     ("aircraft_related_occupancy", "aircraft_hangar",
+                                      ("general.bc_412_", "general.bc_table_412_"))):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], fact: False, **NO_MALL}
+        interior["rooms"][0]["function"] = function
+        now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
+        shown = {k: v for k, v in now.items() if k.startswith(prefixes)}
+        assert shown and set(shown.values()) == {"needs_review"}, (fact, shown)
     # with special egress spaces stated no (the fixture), 411.4's two are set aside already
     assert {k: v for k, v in no_mall["results"].items() if k.startswith("general.bc_411_4")} == {
         "general.bc_411_4_exit_marking": "not_applicable", "general.bc_411_4_1_photoluminescent_exit_signs": "not_applicable"}
