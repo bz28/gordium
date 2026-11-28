@@ -2339,7 +2339,7 @@ def test_no_stairs_beside_floors_a_landings_step_cant_reach_the_ground_from():
         return d
     assert measure(at(8.25, 0))["parts"]["stair"] == []
     assert measure(at(120, 112))["parts"]["stair"] == []                     # the ground near the floor: a step
-    assert "its lowest floor (Bedroom's, at 120 in) is more than 8 1/4 in above the ground outside an opening " \
+    assert "its floor (Bedroom's, at 120 in) is more than 8 1/4 in above the ground outside an opening " \
            "(at 0 in)" in _refused(measure(at(120, 0)))
     assert measure(at(120, None))["parts"]["stair"] == []                    # no ground given: nothing compared
 
@@ -2373,8 +2373,14 @@ def test_no_stairs_beside_a_floor_sunk_below_the_ground_or_sloped_ground_a_landi
         return d
     assert "is 0 in at one and 50 in at another" in _refused(measure(bare(0, 50)))
     assert "is 0 in at one and 9.76 in at another" in _refused(measure(bare(0, 9.76)))
-    for fine in ((0, 9.75), (0,), (), (0, "x")):            # 9.75 in: a floor 1.5 in under the higher meets both
+    for fine in ((0, 9.75), (0,), ()):                      # 9.75 in: a floor 1.5 in under the higher meets both
         assert measure(bare(*fine))["parts"]["stair"] == [], fine
+    for odd in ((0, "x"), ("x",), (0, [0, None])):          # round 2 (skeptic A): unreadable with no floor refuses
+        assert "the ground outside an opening can't be read" in _refused(measure(bare(*odd))), odd
+    # round 2: the floor above the ground is each floor's, the highest's (rooms within 1/2 in are one floor)
+    d = at(8.0, 0)
+    d["rooms"].append({"id": "k", "name": "Kitchen", "sleeping": False, "floor_elevation": 8.5})
+    assert "its floor (Kitchen's, at 8.5 in) is more than 8 1/4 in above" in _refused(measure(d))
 
 
 def test_no_stairs_beside_rooms_on_two_levels_as_the_building_code_places_them():
@@ -2402,7 +2408,7 @@ def test_no_stairs_beside_rooms_on_two_levels_as_the_building_code_places_them()
     # round 4: a room with no floor given stands at its level's height, against the ground as any floor
     up = {"rooms": [{"id": "r", "name": "Room", "level": "L2"}], "levels": [{"id": "L2", "elevation": 120}],
           "openings": [{"id": "w", "ground_outside": 0}]}
-    assert "its lowest floor (Room's, at 120 in)" in _refused(measure(d, whole=up))
+    assert "its floor (Room's, at 120 in)" in _refused(measure(d, whole=up))
     up["levels"][0]["elevation"] = 4
     assert measure(d, whole=up)["parts"]["stair"] == []
     for odd in (True, ["L2"], 2.0, {"id": "L2"}, " "):           # round 3: a level given that can't be read

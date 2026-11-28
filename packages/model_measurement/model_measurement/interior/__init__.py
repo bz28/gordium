@@ -191,8 +191,8 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
         if grounds is None:
             return Stop("stairs_none_several_floors", what="the ground outside an opening can't be read, so it may "
                                                            "be more than 8 1/4 in from the floor").reason
-        if grounds and low - min(grounds) > LANDING_STEP:
-            return Stop("stairs_none_several_floors", what=f"its lowest floor ({low_name}'s, at {tidy(low):g} in) is "
+        if grounds and high - min(grounds) > LANDING_STEP:      # the highest floor's way out, as any floor's
+            return Stop("stairs_none_several_floors", what=f"its floor ({high_name}'s, at {tidy(high):g} in) is "
                                                            f"more than 8 1/4 in above the ground outside an opening "
                                                            f"(at {tidy(min(grounds)):g} in)").reason
         if grounds and max(grounds) - low > GROUND_ABOVE:
@@ -201,7 +201,10 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
                                                            f"(at {tidy(max(grounds)):g} in)").reason
         return None
     grounds = _grounds(whole, reader)          # no floor height given: ground farther apart than any one floor can
-    if grounds and max(grounds) - min(grounds) > LANDING_STEP + GROUND_ABOVE:     # meet needs a stair or a ramp
+    if grounds is None:                        # meet needs a stair or a ramp; one that can't be read may be any
+        return Stop("stairs_none_several_floors", what="the ground outside an opening can't be read, so it may "
+                                                       "be farther from the floor than a landing can meet").reason
+    if grounds and max(grounds) - min(grounds) > LANDING_STEP + GROUND_ABOVE:
         return Stop("stairs_none_several_floors", what=f"the ground outside its openings is {tidy(min(grounds)):g} "
                                                        f"in at one and {tidy(max(grounds)):g} in at another, more "
                                                        "than any one floor can meet (8 1/4 in above, 1 1/2 in "
