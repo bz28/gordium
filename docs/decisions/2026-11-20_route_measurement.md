@@ -466,9 +466,10 @@ area need review.
    holds every room and every exit door's clear opening to within half an inch (`straight.held`); one drawn short (a
    wing only, a slip) would shrink the diagonal and make close exits read as placed apart, so the ratio isn't
    measured and 1007.1.1's rule needs review. Likewise where the inner outline doesn't hold every room, or the outer
-   one isn't at least 3.5 in (the thinnest exterior wall) outside the inner one all round: an outer outline drawn at
-   the walls' inside faces holds every room but is a wall short at each end (2 to 6 %), enough to lift exits just
-   under 1007.1.1's half over it.
+   one isn't at least 3.5 in (the thinnest exterior wall) beyond each wall side of the inner one (a side over 2 ft
+   long; a shorter one may be a wall's end kept where it is): an outer outline drawn at the walls' inside faces holds
+   every room but is about two wall thicknesses short (2 % in the test layout), enough to lift exits just under
+   1007.1.1's half over it.
 8. **Areas: two readings each, as the checker takes readings.** 502.1 measures building area "within surrounding
    exterior walls" without saying which face, and nothing says where a storage room's area stops. So
    `story_building_area` is given as two named readings for one open question (inside the exterior walls; to their

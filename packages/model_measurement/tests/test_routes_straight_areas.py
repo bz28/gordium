@@ -133,7 +133,8 @@ def test_an_outline_at_the_walls_inside_faces_gives_no_ratio():
     """Review of #281: an outer outline drawn at the walls' inside faces holds every room but is a wall short at each
     end, so exits just under 1007.1.1's half read as over it (0.496 to 0.506 here, an upper story whose exits are stair
     doors: no door to outside pins the outline to the outer face). The outer outline must be at least 3.5 in (the
-    thinnest exterior wall) outside the inner one all round, and the inner one must hold every room: else no ratio."""
+    thinnest exterior wall) beyond each wall side of the inner one, and the inner one must hold every room: else no
+    ratio."""
     true = straight.ratio(story(upper_story(rect(-0.5, -0.5, 60.5, 28.5))))
     assert true[2] < 0.5, true[2]
     inside = story(upper_story(rect(0, 0, 60, 28)))
@@ -160,6 +161,20 @@ def test_an_outline_at_the_walls_inside_faces_gives_no_ratio():
     with pytest.raises(Stop) as stop:
         straight.ratio(story(d))
     assert stop.value.key == "outline_needed", stop.value.reason
+    # one long side only drawn at its inside face: refused too
+    d = upper_story(rect(-0.5, -0.5, 60.5, 28.5))
+    d["story_outlines"][0]["outer"] = [list(p) for p in rect(-0.5, -0.5, 60.5, 28)]
+    with pytest.raises(Stop) as stop:
+        straight.ratio(story(d))
+    assert stop.value.key == "outline_not_outer", stop.value.reason
+    # a wall's end kept where it is, as Revit's reader does where two walls in line stand apart (a step up to 0.64 ft
+    # in the Children's Odyssey's ring): its short side brings the faces together, never a refusal (cold review)
+    for step in (0.1, 0.3, 0.64):
+        d = upper_story(rect(-0.5, -0.5, 60.5, 28.5))
+        d["story_outlines"][0]["outer"] = [[-0.5, -0.5], [60.5, -0.5], [60.5, 28.5], [30, 28.5], [30, 28.5 + step],
+                                           [-0.5, 28.5 + step]]
+        d["story_outlines"][0]["inner"] = [[0, 0], [60, 0], [60, 28], [30, 28], [30, 28 + step], [0, 28 + step]]
+        assert straight.ratio(story(d))[2] > 0, step
     # walls 4 in thick, drawn so (the outer outline 4 in outside the inner one): taken
     assert straight.ratio(story(upper_story(rect(-1 / 3, -1 / 3, 60 + 1 / 3, 28 + 1 / 3))))[2] > 0
 

@@ -102,7 +102,7 @@ STOPS = {
     "outline_needed": "the story's outline isn't read, so its diagonal and areas aren't measured: {reason}",
     "outline_short": "the story's outer or inner outline doesn't hold all of it (outside it: {names}), so its diagonal, "
                      "and how far apart its exits are against it, aren't measured",
-    "outline_not_outer": "the story's outer outline isn't at least {wall} in outside its inner one all round (drawn at the "
+    "outline_not_outer": "the story's outer outline isn't at least {wall} in outside its inner one along every wall (drawn at the "
                          "walls' inside faces?), so its diagonal, and how far apart its exits are against it, aren't "
                          "measured",
     # the parts handed to the rules (__init__.py)
