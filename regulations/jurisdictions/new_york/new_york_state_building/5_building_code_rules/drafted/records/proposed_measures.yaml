@@ -361,7 +361,84 @@ occupancy_group:
   - general.bc_1031_5_3_area_well_drainage
   - general.bc_1031_5_area_well_required
   - general.bc_1031_6_bars_grilles_covers_screens
+  - general.bc_404_1_atriums
+  - general.bc_406_4_3_vehicle_ramps
+  - general.bc_406_5_7_open_parking_garage_egress
+  - general.bc_407_10_secured_yards
+  - general.bc_407_1_group_i2
+  - general.bc_407_2_1_waiting_areas_open_to_a_corridor
+  - general.bc_407_2_2_care_providers_stations
+  - general.bc_407_2_3_psychiatric_treatment_areas
+  - general.bc_407_2_4_gift_shops
+  - general.bc_407_2_5_nursing_home_housing_units
+  - general.bc_407_2_6_nursing_home_cooking_facilities
+  - general.bc_407_2_7_domestic_cooking_appliances
+  - general.bc_407_2_corridor_continuity_and_separation
+  - general.bc_407_3_1_1_corridor_door_construction
+  - general.bc_407_3_1_corridor_doors
+  - general.bc_407_3_corridor_wall_construction
+  - general.bc_407_4_1_1_locking_devices
+  - general.bc_407_4_1_direct_access_to_a_corridor
   - general.bc_407_4_2_sleeping_room_travel
+  - general.bc_407_4_3_projections_in_nursing_home_corridors
+  - general.bc_407_4_4_1_exit_access_through_care_suites
+  - general.bc_407_4_4_2_care_suite_separation
+  - general.bc_407_4_4_3_care_suite_access_to_corridor
+  - general.bc_407_4_4_4_care_suite_circulation_paths
+  - general.bc_407_4_4_5_doors_within_care_suites
+  - general.bc_407_4_4_6_1_sleeping_care_suite_area
+  - general.bc_407_4_4_6_2_sleeping_care_suite_exit_access
+  - general.bc_407_4_4_6_care_suites_with_sleeping_rooms
+  - general.bc_407_4_4_7_1_treatment_care_suite_area
+  - general.bc_407_4_4_7_2_treatment_care_suite_exit_access
+  - general.bc_407_4_4_7_care_suites_without_sleeping_rooms
+  - general.bc_407_4_4_care_suites
+  - general.bc_407_4_means_of_egress
+  - general.bc_407_5_1_smoke_compartment_size
+  - general.bc_407_5_2_travel_to_a_smoke_barrier_door
+  - general.bc_407_5_3_refuge_area
+  - general.bc_407_5_4_independent_egress
+  - general.bc_407_5_5_horizontal_assemblies
+  - general.bc_407_5_smoke_barriers
+  - general.bc_407_6_1_activation_of_automatic_closing_doors
+  - general.bc_407_6_automatic_closing_doors
+  - general.bc_408_1_group_i3
+  - general.bc_408_2_other_occupancies
+  - general.bc_408_3_1_door_width
+  - general.bc_408_3_2_sliding_doors
+  - general.bc_408_3_3_guard_tower_doors
+  - general.bc_408_3_4_spiral_stairways
+  - general.bc_408_3_5_ships_ladders
+  - general.bc_408_3_6_exit_discharge_to_a_courtyard
+  - general.bc_408_3_7_sallyports
+  - general.bc_408_3_8_glazed_exit_stairway
+  - general.bc_408_3_means_of_egress
+  - general.bc_408_4_1_remote_release
+  - general.bc_408_4_2_power_operated_doors_and_locks
+  - general.bc_408_4_3_redundant_operation
+  - general.bc_408_4_4_relock_capability
+  - general.bc_408_4_locks
+  - general.bc_408_6_1_smoke_compartments
+  - general.bc_408_6_2_refuge_area
+  - general.bc_408_6_3_independent_egress
+  - general.bc_408_6_smoke_barrier
+  - general.bc_408_8_1_occupancy_conditions_3_and_4
+  - general.bc_408_8_2_occupancy_condition_5
+  - general.bc_408_8_3_openings_in_room_face
+  - general.bc_408_8_4_smoke_tight_doors
+  - general.bc_408_8_subdivision_of_resident_housing_areas
+  - general.bc_415_11_3_3_service_corridor_egress
+  - general.bc_415_11_3_4_service_corridor_width
+  - general.bc_415_11_6_6_hpm_room_exits
+  - general.bc_415_11_6_7_hpm_room_doors
+  - general.bc_420_1_groups_i1_and_r
+  - general.bc_420_2_separation_walls
+  - general.bc_420_3_horizontal_separation
+  - general.bc_420_6_1_refuge_area
+  - general.bc_420_6_smoke_barriers_in_group_i1_condition_2
+  - general.bc_420_7_assisted_living_housing_units
+  - general.bc_420_8_group_i1_cooking_facilities
+  - general.bc_420_9_domestic_cooking_appliances
   - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_710_5_3_i2_pass_through_openings
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
@@ -616,7 +693,29 @@ special_egress_spaces:
   - general.bc_1010_2_8_1_refrigeration_machinery_rooms
   - general.bc_1016_2_intervening_spaces_other_groups
   - general.bc_1017_2_travel_distance
+  - general.bc_1020_3_corridor_capacity
+  - general.bc_1020_5_dead_end
+  - general.bc_1020_5_dead_end_other_groups
+  - general.bc_402_1_mall_buildings
+  - general.bc_402_8_1_1_mall_minimum_width
+  - general.bc_402_8_1_mall_width
+  - general.bc_402_8_2_1_mall_occupant_formula
+  - general.bc_402_8_2_2_olf_range
+  - general.bc_402_8_2_3_anchor_buildings
+  - general.bc_402_8_2_4_food_courts
+  - general.bc_402_8_2_tenant_occupant_load
+  - general.bc_402_8_3_tenant_two_means_of_egress
+  - general.bc_402_8_4_1_anchor_building_egress
+  - general.bc_402_8_4_assembly_in_a_mall
+  - general.bc_402_8_5_distance_to_exits
+  - general.bc_402_8_6_1_exit_passageways
+  - general.bc_402_8_6_access_to_exits
+  - general.bc_402_8_7_service_areas_on_exit_passageways
+  - general.bc_402_8_8_security_grilles_and_doors
+  - general.bc_402_8_means_of_egress
   - general.bc_407_4_2_sleeping_room_travel
+  - general.bc_411_4_1_photoluminescent_exit_signs
+  - general.bc_411_4_exit_marking
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -644,6 +743,10 @@ special_egress_spaces:
   - general.bc_table_1017_2_i1
   - general.bc_table_1017_2_i2_i3
   - general.bc_table_1017_2_note_a
+  - general.bc_table_1020_2_a_b_e_f_m_s_u
+  - general.bc_table_1020_2_h4_h5
+  - general.bc_table_1020_2_r
+  - general.bc_table_1020_3_corridor_width
 merchandise_pads:
   meaning: 'The building holds Group M merchandise pads (2025 BCNYS 202 MERCHANDISE PAD; 1018.4: a common path of at most
     30 ft from any point in a pad, 75 ft for not more than 50 occupants), as the architect states it'
@@ -674,10 +777,60 @@ building_has_atrium:
   unit: yes_no
   needed_by:
   - general.bc_1017_3_2_3_atrium
+  - general.bc_404_10_exit_stairways_in_an_atrium
+  - general.bc_404_11_stairway_discharge_through_an_atrium
+  - general.bc_404_1_atriums
+  - general.bc_404_9_atrium_travel_distance
   - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1017_2_b
   - general.bc_table_1017_2_f2_s2_u
   - general.bc_table_1017_2_i1
+high_rise_building:
+  meaning: 'The building is a high-rise building (2025 BCNYS 202: an occupied floor or occupiable roof more than 75 feet above
+    the lowest level of fire department vehicle access) or more than 420 feet in building height, as the architect states
+    it: Section 403''s flags show, and the story exit rules can''t pass on 1006.3''s count alone where 403.5.2''s additional
+    interior exit stairway may be needed (other than Group R-2); left unstated, the same'
+  unit: yes_no
+  needed_by:
+  - general.bc_1006_3_3_story_exits
+  - general.bc_403_1_high_rise_buildings
+  - general.bc_403_2_2_1_enclosure_wall_panels
+  - general.bc_403_2_2_2_concrete_and_masonry_walls
+  - general.bc_403_2_2_3_other_wall_assemblies
+  - general.bc_403_2_2_4_glass_walls
+  - general.bc_403_2_2_exit_stairway_enclosure_strength
+  - general.bc_403_5_1_remoteness_of_exit_stairways
+  - general.bc_403_5_2_additional_exit_stairway
+  - general.bc_403_5_3_1_stairway_communication_system
+  - general.bc_403_5_3_stairway_door_operation
+  - general.bc_403_5_4_smokeproof_enclosures
+  - general.bc_403_5_5_luminous_egress_path_markings
+  - general.bc_403_5_means_of_egress_and_evacuation
+  - general.bc_403_6_1_fire_service_access_elevators
+  - general.bc_403_6_2_occupant_evacuation_elevators
+  - general.bc_403_6_elevators
+  - general.bc_table_1006_3_4_2__a_b_e_f_m_u
+  - general.bc_table_1006_3_4_2__h_i_r
+  - general.bc_table_1006_3_4_2__s
+underground_building:
+  meaning: 'The building has a floor level used for human occupancy more than 30 feet below the finished floor of the lowest
+    level of exit discharge (2025 BCNYS 405.1), as the architect states it: Section 405''s flags show, and a story with one
+    exit can''t pass the story exit rules (405.7.1: two exits on each floor level); left unstated, the same'
+  unit: yes_no
+  needed_by:
+  - general.bc_1006_3_3_story_exits
+  - general.bc_405_1_underground_buildings
+  - general.bc_405_4_1_number_of_compartments
+  - general.bc_405_4_2_smoke_barrier_between_compartments
+  - general.bc_405_4_3_compartment_elevators
+  - general.bc_405_4_compartmentation
+  - general.bc_405_7_1_two_exits_on_each_floor_level
+  - general.bc_405_7_2_smokeproof_enclosures
+  - general.bc_405_7_means_of_egress
+  - general.bc_table_1006_3_4_1__r2_dwelling_units
+  - general.bc_table_1006_3_4_2__a_b_e_f_m_u
+  - general.bc_table_1006_3_4_2__h_i_r
+  - general.bc_table_1006_3_4_2__s
 r2_sleeping_units:
   meaning: 'The building''s Group R-2 consists of sleeping units, not dwelling units (2025 BCNYS Table 1006.3.4(1) note b:
     dwelling units use Table 1006.3.4(1), sleeping units Table 1006.3.4(2)), as the architect states it'
@@ -704,12 +857,20 @@ occupied_outdoor_areas:
   - general.bc_903_2_1_6_assembly_on_roofs
 ambulatory_care_facility:
   meaning: 'The building is or holds an ambulatory care facility (2025 BCNYS 202, Section 422; Group B, 304.1), as the architect
-    states it: Table 1020.3 asks 72 inches of its corridors serving stretcher traffic'
+    states it: Section 422 asks its separation (422.2) and smoke compartments (422.3), so Table 1020.2''s Group B corridor
+    rating may not be all its corridors need, and Table 1020.3 asks 72 inches of its corridors serving stretcher traffic'
   unit: yes_no
   needed_by:
+  - general.bc_422_1_ambulatory_care_facilities
+  - general.bc_422_2_separation
+  - general.bc_422_3_1_means_of_egress
+  - general.bc_422_3_2_refuge_area
+  - general.bc_422_3_3_independent_egress
+  - general.bc_422_3_smoke_compartments
   - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_903_2_2_1_ambulatory_care
   - general.bc_907_2_2_1_ambulatory_care_detection
+  - general.bc_table_1020_2_a_b_e_f_m_s_u
   - general.bc_table_1020_3_corridor_width
 corridors_within_dwelling_units:
   meaning: 'The building has corridors within a dwelling unit or sleeping unit (2025 BCNYS 1020.2 exception 2: no rating
@@ -795,6 +956,58 @@ nfpa_13r_stated:
   needed_by:
   - general.bc_903_3_1_2_2_corridors_balconies_13r
   - general.bc_903_3_1_2_nfpa_13r_limits
+stages_or_platforms:
+  meaning: 'The building has a stage, a platform or a technical production area (2025 BCNYS 202), as the architect states
+    it: Section 410.5''s flags show, and a space''s common path over 100 feet can''t pass Table 1006.2.1''s 125 ft rows
+    (Groups R-2, R-3 and R-4; 410.5.3.3); left unstated, the same'
+  unit: yes_no
+  needed_by:
+  - general.bc_410_5_1_arrangement
+  - general.bc_410_5_2_stairway_and_ramp_enclosure
+  - general.bc_410_5_3_1_number_of_means_of_egress
+  - general.bc_410_5_3_2_exit_access_travel_distance
+  - general.bc_410_5_3_3_two_means_of_egress
+  - general.bc_410_5_3_4_path_of_egress_travel
+  - general.bc_410_5_3_5_width
+  - general.bc_410_5_3_technical_production_areas
+  - general.bc_410_5_means_of_egress
+  - general.bc_table_1006_2_1_r2
+  - general.bc_table_1006_2_1_r3_r4
+aircraft_related_occupancy:
+  meaning: 'The building is or holds an aircraft-related occupancy (2025 BCNYS Section 412: an airport traffic control
+    tower, an aircraft hangar or residential aircraft hangar, an aircraft paint hangar, an aircraft manufacturing
+    facility, a heliport or a helistop), as the architect states it: Section 412''s flags show, and a space with one exit
+    can''t pass Table 1006.2.1''s Group U row (412.4.2: a residential aircraft hangar''s two means of egress); left
+    unstated, the same'
+  unit: yes_no
+  needed_by:
+  - general.bc_412_2_2_1_stairways
+  - general.bc_412_2_2_2_exit_access
+  - general.bc_412_2_2_3_1_interior_finish
+  - general.bc_412_2_2_3_2_exit_separation
+  - general.bc_412_2_2_3_number_of_exits
+  - general.bc_412_2_2_airport_traffic_control_towers
+  - general.bc_412_4_2_residential_aircraft_hangar_egress
+  - general.bc_412_6_1_ancillary_areas
+  - general.bc_412_6_aircraft_manufacturing_facilities
+  - general.bc_412_7_3_heliports_and_helistops
+  - general.bc_table_1006_2_1_u
+  - general.bc_table_412_6_aircraft_manufacturing_travel
+service_corridors:
+  meaning: 'The building has a service corridor (2025 BCNYS 202: a fully enclosed passage used for transporting HPM and
+    purposes other than required means of egress), as the architect states it: in Group H-5 or two or more groups,
+    415.11.3''s flags show and 1020.3''s capacity rule can''t pass a corridor (415.11.3.4); in Group H-5, Table 1017.2''s
+    H-5 row can''t pass over 75 feet, Table 1006.3.4(2)''s rule a story with one exit, 1020.5''s rule a dead end over 4 feet
+    (415.11.3.3) and Table 1020.3''s rule any corridor width (415.11.3.4); left unstated, the same'
+  unit: yes_no
+  needed_by:
+  - general.bc_1020_3_corridor_capacity
+  - general.bc_1020_5_dead_end_other_groups
+  - general.bc_415_11_3_3_service_corridor_egress
+  - general.bc_415_11_3_4_service_corridor_width
+  - general.bc_table_1006_3_4_2__h_i_r
+  - general.bc_table_1017_2_h5
+  - general.bc_table_1020_3_corridor_width
 assembly_spaces:
   meaning: 'The building has a room or space used for assembly purposes, whatever its group (2025 BCNYS 1030.1; 303.1.1 and
     303.1.2 put a small one in Group B or the main occupancy): true where the architect states it or where any room states

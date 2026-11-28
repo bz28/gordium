@@ -61,7 +61,8 @@ FACTS = {
     "loads_not_by_area": "yes_no",
     # section group 4 (corridors): another level's occupants reach a corridor (an unenclosed stairway or ramp, a
     # mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's load doesn't
-    # bound the corridor's; and the building is (or holds) an ambulatory care facility (Table 1020.3's 72 in)
+    # bound the corridor's; and the building is (or holds) an ambulatory care facility (Section 422's flags, Table
+    # 1020.2's Group B corridor rating, Table 1020.3's 72 in)
     "other_level_egress_into_corridors": "yes_no",
     "ambulatory_care_facility": "yes_no",
     # section group 4b: the building has corridors within a dwelling or sleeping unit (1020.2 exception 2; Table
@@ -70,6 +71,20 @@ FACTS = {
     # section group 5a: an emergency voice/alarm communication system per 907.5.2.2 (1005.3.1 and 1005.3.2's
     # exception 1: the smaller capacity factors, with a sprinkler system per 903.3.1.1 or 903.3.1.2)
     "emergency_voice_alarm_system": "yes_no",
+    # Chapter 4 part b: the building is a high-rise (202: an occupied floor or occupiable roof more than 75 ft above the
+    # lowest level of fire department vehicle access) or more than 420 ft in building height (403.2.2, 403.5.2); and it
+    # has a floor level used for human occupancy more than 30 ft below the lowest level of exit discharge (405.1)
+    "high_rise_building": "yes_no",
+    "underground_building": "yes_no",
+    # Chapter 4 part f: the building has a stage, a platform or a technical production area (202; 410.5, and Table
+    # 1006.2.1's 125 ft rows held to 410.5.3.3's 100 ft common path); and it is or holds an aircraft-related occupancy
+    # (Section 412: an airport traffic control tower, an aircraft hangar, an aircraft paint hangar, an aircraft
+    # manufacturing facility, a heliport or helistop; 412.4.2's two means of egress from a residential hangar); and
+    # it has a service corridor (202: a fully enclosed passage for transporting HPM and purposes other than required
+    # means of egress; 415.11.3.3's 75 ft, 4 ft dead ends and two exits, 415.11.3.4's width in Group H-5)
+    "stages_or_platforms": "yes_no",
+    "aircraft_related_occupancy": "yes_no",
+    "service_corridors": "yes_no",
     # section group 9h: a room or space used for assembly purposes, whatever the building's group (303.1.1 and 303.1.2
     # put small assembly rooms in Group B or the main occupancy, so the group alone doesn't settle it): Section 1030's
     # flags show where it is true or not stated. True also from a room's Table 1004.5 Assembly function
@@ -124,7 +139,11 @@ CITES = {
               "enlargement, replacement, repair, equipment, use and occupancy, location, maintenance, removal and "
               "demolition of every building or structure"),
     "101.2 exception 1": (BCNYS, 22, "Application of the provisions of the Residential Code of New York State to"),
-    "202 LIVE/WORK UNIT": (BCNYS, 52, "A dwelling unit or sleeping unit in which a significant portion of the space "
+    # the underground building mark's quote, the line-break hyphen of "occu- pancy" joined (marks PR, review round 1)
+    "405.1": (BCNYS, 92, "The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level "
+              "used for human occupancy more than 30 feet (9144 mm) below the finished floor of the lowest level of "
+              "exit discharge."),
+    "202 LIVE/WORK UNIT": (BCNYS, 52,"A dwelling unit or sleeping unit in which a significant portion of the space "
                            "includes a nonresidential use that is operated by the tenant."),
     "308.2.4": (BCNYS, 78, "A facility with five or fewer persons receiving custodial care shall be classified as Group "
                 "R-3 or shall comply with the Residential Code of New York State provided an automatic sprinkler "
@@ -162,7 +181,9 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         "corridors_within_dwelling_units": "Gordium: Corridors within dwelling units",
         "emergency_voice_alarm_system": "Gordium: Emergency voice/alarm system",
         # the occupant loads' ceiling (occupant_load._bounds): a mezzanine's occupants add to the room below
-        "mezzanines": "Gordium: Mezzanines", "loads_not_by_area": "Gordium: Loads not by area"}
+        "mezzanines": "Gordium: Mezzanines", "loads_not_by_area": "Gordium: Loads not by area",
+        # Chapter 4 part b's: a high-rise (202, or over 420 ft in building height) and an underground building (405.1)
+        "high_rise_building": "Gordium: High-rise building", "underground_building": "Gordium: Underground building"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise
@@ -310,7 +331,7 @@ def building_measures(building: dict | None, interior=None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present, occupancy_group (the one group, or "mixed") and whether a
     Group R, H or I-1 to I-3 occupancy is among them (903.2's) from the groups, the three sprinkler systems the limits
-    name from the system, the stories above grade plane, and the fourteen stated yes/no facts. A fact not stated is
+    name from the system, the stories above grade plane, and the nineteen stated yes/no facts. A fact not stated is
     left out (its rules need review). In a building stated as Group R alone (one or more of R-1 to R-4), a stated NFPA
     13R system counts as one per 903.3.1.2 only where the stated stories above grade plane don't exceed its four
     (903.3.1.2 item 1: the Group R occupancy's stories, here the building's): stated more, sprinklered_903_3_1_2 is no,
@@ -423,6 +444,11 @@ DERIVED = {
     # Chapter 9 part e: a BCNYS 202 TOWNHOUSE UNIT "has a separate means of egress", read with townhouse_units where
     # 905.3's exception leaves standpipes out of "Group R-2 townhouses"
     "separate_means_of_egress": ("separate_means_of_egress", lambda v: v),
+    "high_rise_building": ("high_rise_building", lambda v: v),
+    "underground_building": ("underground_building", lambda v: v),
+    "stages_or_platforms": ("stages_or_platforms", lambda v: v),
+    "aircraft_related_occupancy": ("aircraft_related_occupancy", lambda v: v),
+    "service_corridors": ("service_corridors", lambda v: v),
     "assembly_spaces": ("assembly_spaces", lambda v: v),
 }
 

@@ -18,7 +18,22 @@ S1, S2 = "sprinklered_903_3_1_1", "sprinklered_903_3_1_2"
 NFPA13 = {S1: True, S2: False, "sprinklered_903_3_1_3": False}
 NONE = {S1: False, S2: False, "sprinklered_903_3_1_3": False}
 STATED = {"egress_balcony_increase_taken": False, "assembly_fixed_seating": False, "special_egress_spaces": False,
-          "building_has_atrium": False, "merchandise_pads": False}
+          "building_has_atrium": False, "merchandise_pads": False,
+          # Chapter 4 part f's three (NOT_PART_F, below)
+          "service_corridors": False, "aircraft_related_occupancy": False, "stages_or_platforms": False}
+# Chapter 4 part a: the building holds no covered or open mall (no space with its own exits or travel limit), so
+# 402.8, which governs over Chapter 10 there, can't change these rows (test_ny_building_chapter_4.py walks it)
+NO_MALL = {"special_egress_spaces": False}
+# Chapter 4 part b: neither a high-rise over 420 ft (403.5.2's additional stairway) nor an underground building
+# (405.7.1's two exits on each floor level), so neither can change the story rows
+NOT_TALL = {"high_rise_building": False, "underground_building": False}
+# Chapter 4 part e: no ambulatory care facility (422.2's fire partition between one and an adjacent corridor can't
+# change Table 1020.2's B row)
+NO_CARE = {"ambulatory_care_facility": False}
+# Chapter 4 part f: no service corridor (415.11.3.3's 75 ft, two exits and 4 ft dead ends, 415.11.3.4's width in Group
+# H-5), no aircraft-related occupancy (412.4.2's two means of egress from a Group U hangar) and no stage, platform or
+# technical production area (410.5.3.3's 100 ft common path), so none can change these rows
+NOT_PART_F = {"service_corridors": False, "aircraft_related_occupancy": False, "stages_or_platforms": False}
 
 # Table 1017.2, p.341: line -> (groups, without a sprinkler system (None: Not Permitted), with one, the rule)
 TABLE_1017_2 = {
@@ -187,7 +202,7 @@ def test_dead_ends_for_every_group_but_i4(ctx, rules):
     for g in groups:
         if g in ("I-4", "mixed"):
             continue
-        given = {"occupancy_group": g}
+        given = {"occupancy_group": g} | NO_MALL | NOT_PART_F
         limit = 50 if g in EXCEPTION_2 else 20
         assert _one(rule, "corridor", {"corridor_dead_end_length": limit, "corridor_dead_end_least_width": 5},
                     given | NFPA13, ctx) == "pass", g
@@ -708,7 +723,7 @@ TABLE_1006_3_4_2 = [
     (A + ["E", "M", "U"], FIRST, 49, 75, 75), (["B", "F-1", "F-2"], FIRST, 49, 75, 100),
     (["H-2", "H-3"], FIRST, 3, 25, 25), (["H-4", "H-5", "I-1", "I-2", "I-3", "R-1"], FIRST, 10, 75, 75),
     (["S-1"], FIRST, 29, 75, 100), (["M"], SECOND, 29, 75, 75), (["B", "F-1", "F-2", "S-1"], SECOND, 29, 75, 75)]
-STORY_FACTS = {"emergency_escape_openings_1031": True, "r2_sleeping_units": False} | STATED
+STORY_FACTS = {"emergency_escape_openings_1031": True, "r2_sleeping_units": False} | STATED | NOT_TALL
 
 
 def _story_rule(rules, g):
@@ -757,13 +772,13 @@ def test_group_i3_allowed_one_exit_by_its_travel_needs_review_and_a_measured_fai
 
 def test_two_exits_by_table_1006_3_3_and_r3_r4_with_one(ctx, rules):
     r = _story_rule(rules, "B")
-    b = {"occupancy_group": "B"} | NFPA13
+    b = {"occupancy_group": "B"} | NFPA13 | NO_MALL | NOT_TALL
     assert _one(r, "story", _story(FIRST, 500, 300, exits=2), b, ctx) == "pass"
     assert _one(r, "story", _story(FIRST, 500.5, 300, exits=2), b, ctx) == "fail"           # 501-1,000: three
     assert _one(r, "story", _story(FIRST, 1000, 300, exits=3), b, ctx) == "pass"
     assert _one(r, "story", _story(FIRST, 1000.5, 300, exits=3), b, ctx) == "fail"          # more: four
     h = rules["general.bc_table_1006_3_4_2__h_i_r"]
-    assert _one(h, "story", _story(SECOND, 40, 200), {"occupancy_group": "R-3"} | NFPA13 | STATED, ctx) == "pass"
+    assert _one(h, "story", _story(SECOND, 40, 200), {"occupancy_group": "R-3"} | NFPA13 | STATED | NOT_TALL, ctx) == "pass"
     assert _one(h, "story", _story(FIRST, 2, 10), {"occupancy_group": "H-1"} | NFPA13, ctx) == "fail"  # no H-1 row
 
 
@@ -771,7 +786,7 @@ def test_table_1006_3_4_1_group_r2_of_dwelling_units(ctx, rules):
     """p.317 lines 21-24: a basement or first to third story, 4 dwelling units, 125 ft, only with note a's system
     and escape openings; the fourth story and higher NP. Sleeping units are Table 1006.3.4(2)'s (note b)."""
     r = rules["general.bc_table_1006_3_4_1__r2_dwelling_units"]
-    du = {"occupancy_group": "R-2", "r2_sleeping_units": False, "emergency_escape_openings_1031": True} | STATED
+    du = {"occupancy_group": "R-2", "r2_sleeping_units": False, "emergency_escape_openings_1031": True} | STATED |         NOT_TALL
     one = {"story_exit_count": 1, "story_occupant_load": 16, "egress_travel_distance": 125, FOURTH: False,
            "story_dwelling_units": 4, "story_rooms_exit_directly_outside": False}
     assert _one(r, "story", one, du | NFPA13, ctx) == "pass"
@@ -1030,7 +1045,7 @@ def test_table_1020_3_every_row_passes_at_its_width_and_not_just_short_of_it(ctx
     lines 23-24; stretcher traffic in an ambulatory care facility, stated)."""
     r = rules["general.bc_table_1020_3_corridor_width"]
     assert all(_cites(r, 344, line) for line in TABLE_1020_3)
-    no_amb = {"ambulatory_care_facility": False}
+    no_amb = {"ambulatory_care_facility": False} | NO_MALL | NOT_PART_F
     for g in ONE_GROUP:
         given = {"occupancy_group": g} | no_amb
         if g == "I-2":
@@ -1054,7 +1069,7 @@ def test_table_1020_3_every_row_passes_at_its_width_and_not_just_short_of_it(ctx
                 _one(r, "corridor", _corridor(TABLE_1020_3[31] - 0.5, 100), given, ctx)) == want, g
     # line 32: stretcher traffic in an ambulatory care facility (Group B, 304.1), stated or not ruled out
     for amb in ({"ambulatory_care_facility": True}, {}):
-        b = {"occupancy_group": "B"} | amb
+        b = {"occupancy_group": "B"} | amb | NO_MALL
         assert _one(r, "corridor", _corridor(TABLE_1020_3[32], 60), b, ctx) == "pass"
         assert _one(r, "corridor", _corridor(TABLE_1020_3[32] - 0.5, 60), b, ctx) == "needs_review"
     # a building of two or more groups, or one whose group isn't stated, never passes
@@ -1070,12 +1085,12 @@ def test_a_corridors_capacity_is_1005_3_2s_factor_at_its_limit_and_just_past_it(
     own factors) needs review short of it. Was 4a's flag."""
     r = rules["general.bc_1020_3_corridor_capacity"]
     assert r["kind"] == "rule" and _cites(r, 314, 15) and _cites(r, 314, 20) and _cites(r, 344, 21)
-    plain = {S1: False, S2: False, "emergency_voice_alarm_system": False, "assembly_fixed_seating": False}
+    plain = {S1: False, S2: False, "emergency_voice_alarm_system": False, "assembly_fixed_seating": False} | NO_MALL | NOT_PART_F
     for g in ("B", "I-2", "H-3", "mixed"):
         given = {"occupancy_group": g} | plain
         assert _one(r, "corridor", _corridor(44, 220), given, ctx) == "pass", g      # 0.2 x 220 = 44
         assert _one(r, "corridor", _corridor(44, 220.5), given, ctx) == "fail", g
-    voice = {S1: True, S2: False, "emergency_voice_alarm_system": True, "assembly_fixed_seating": False}
+    voice = {S1: True, S2: False, "emergency_voice_alarm_system": True, "assembly_fixed_seating": False} | NO_MALL | NOT_PART_F
     # review round 1 of group 5a: a building of two or more groups is each portion's (1004.4): between the two
     # factors, a person's check, never a fail on 0.2 alone
     for g, want in (("B", "pass"), ("R-2", "pass"), ("I-2", "fail"), ("H-3", "fail"), ("mixed", "needs_review")):
@@ -1129,7 +1144,7 @@ def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ct
         many = (over or 0) + 0.5                                   # just past the row's load (any load for "All")
         for g in groups:
             for system, need in ((NFPA13, with_), (NONE, without)):
-                given = {"occupancy_group": g} | system | NO_UNITS
+                given = {"occupancy_group": g} | system | NO_UNITS | NO_MALL | NO_CARE
                 if need is None:                                  # Not Permitted
                     assert _one(r, "corridor", _rating(many, 5), given, ctx) == "fail", (g, line)
                     continue
@@ -1141,10 +1156,10 @@ def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ct
                 else:
                     assert _one(r, "corridor", _rating(many), given, ctx) == "pass", (g, line)    # 0: none asked
             if over is not None:                                  # at the row's load: no rating asked
-                assert _one(r, "corridor", _rating(over), {"occupancy_group": g} | NONE | NO_UNITS, ctx) == "pass", g
+                assert _one(r, "corridor", _rating(over), {"occupancy_group": g} | NONE | NO_UNITS | NO_MALL | NO_CARE, ctx) == "pass", g
     # note d (p.344 lines 17-18): Group R-3 and R-4 with 903.3.1.3 (NFPA 13D), 1 hour; R-1 and R-2 have no such cell
     r = rules["general.bc_table_1020_2_r"]
-    d13 = {S1: False, S2: False, "sprinklered_903_3_1_3": True} | NO_UNITS
+    d13 = {S1: False, S2: False, "sprinklered_903_3_1_3": True} | NO_UNITS | NO_MALL
     assert _cites(r, 344, 17)
     assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": "R-3"} | d13, ctx) == "pass"
     assert _one(r, "corridor", _rating(11, 0.75), {"occupancy_group": "R-3"} | d13, ctx) == "fail"
@@ -1155,7 +1170,7 @@ def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ct
     assert _one(r, "corridor", _rating(11, 0.75), {"occupancy_group": "R-4"} | d13, ctx) == "fail"
     assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": "R-2"} | d13, ctx) == "fail"
     # note c's 903.3.1.2 (NFPA 13R): Group R's 0.5 hour; elsewhere "where allowed", a person's check
-    s13r = {S1: False, S2: True, "sprinklered_903_3_1_3": False} | NO_UNITS
+    s13r = {S1: False, S2: True, "sprinklered_903_3_1_3": False} | NO_UNITS | NO_MALL
     assert _one(r, "corridor", _rating(11, 0.5), {"occupancy_group": "R-2"} | s13r, ctx) == "pass"
     for rid, g in (("h1_h2_h3", "H-1"), ("i1_i3", "I-1"), ("i2", "I-2"), ("i4", "I-4"), ("a_b_e_f_m_s_u", "M")):
         assert _one(rules[f"general.bc_table_1020_2_{rid}"], "corridor", _rating(31, 0.5),
@@ -1184,6 +1199,11 @@ def test_table_1020_3_within_a_dwelling_unit_needs_review_only_while_not_ruled_o
         assert _one(r, "corridor", _corridor(43.5, 50), base | units, ctx) == want, units
 
 
+# merging main into Chapter 4 part f: 407.4.4.6's care suite (Chapter 4 part c) is exit access "for more than eight"
+# beds at most; the comparisons reader marked the 'more than' alone (>), and its flag says the recorded words (<=) are right
+MARKED_ALONE = {("407.4.4.6", "not used as an exit access for more than eight"): ">"}
+
+
 def test_more_than_one_reads_the_same_comparison_in_every_piece():
     """Review round 1 of group 5b (P3): 1005.5's 'Where more than one exit ... is required' was read 'none' while
     1020.5's same words read '>': the second reading says what the printed sentence says of each number, so 'more
@@ -1206,6 +1226,10 @@ def test_more_than_one_reads_the_same_comparison_in_every_piece():
     for pid, e in pieces.items():
         for n, comp in zip(e["second_reading_numbers"], e["second_reading_comparisons"]):
             if re.search(r"\bnot\b.*\bmore than\b", str(n)):
+                if (pid, n) in MARKED_ALONE:     # the reader marked the 'more than' alone; its flag puts it right (<=)
+                    assert comp == MARKED_ALONE[(pid, n)], (pid, n, comp)
+                    assert any(f"'{n}' (<=)" in x for x in e.get("flags") or []), (pid, n)
+                    continue
                 assert comp == capped.get((pid, n), "<="), (pid, n, comp)
                 if (pid, n) in capped:
                     assert any(f"'{n}' ({comp})" in f for f in e.get("flags") or []), (pid, n)

@@ -41,6 +41,176 @@ egress_travel_distance_at_most: 60
 # Every rule's one answer (the check's `results`), with why. Pass only where the measured figures settle it; a figure
 # Gordium can't settle yet (a fact not stated, an open question) needs review, saying so.
 results:
+  # Chapter 4 part a (2026-11-26: docs/decisions/2026-11-26_ny_building_chapter_4_egress.md): one flag per piece of
+  # 402.1 and 402.8 (covered and open mall buildings), shown while the building doesn't rule out a space the code gives
+  # its own exits or travel limit (special egress spaces: not stated), and of 404.1 and 404.9 to 404.11 (atriums),
+  # shown while an atrium isn't ruled out (not stated): each a person's check. 402.8's review bands change nothing
+  # here: the story and corridor rows already wait on other facts, and the corridor has no dead end
+  general.bc_402_1_mall_buildings: needs_review
+  general.bc_402_8_means_of_egress: needs_review
+  general.bc_402_8_1_mall_width: needs_review
+  general.bc_402_8_1_1_mall_minimum_width: needs_review
+  general.bc_402_8_2_tenant_occupant_load: needs_review
+  general.bc_402_8_2_1_mall_occupant_formula: needs_review
+  general.bc_402_8_2_2_olf_range: needs_review
+  general.bc_402_8_2_3_anchor_buildings: needs_review
+  general.bc_402_8_2_4_food_courts: needs_review
+  general.bc_402_8_3_tenant_two_means_of_egress: needs_review
+  general.bc_402_8_4_assembly_in_a_mall: needs_review
+  general.bc_402_8_4_1_anchor_building_egress: needs_review
+  general.bc_402_8_5_distance_to_exits: needs_review
+  general.bc_402_8_6_access_to_exits: needs_review
+  general.bc_402_8_6_1_exit_passageways: needs_review
+  general.bc_402_8_7_service_areas_on_exit_passageways: needs_review
+  general.bc_402_8_8_security_grilles_and_doors: needs_review
+  general.bc_404_1_atriums: needs_review
+  general.bc_404_9_atrium_travel_distance: needs_review
+  general.bc_404_10_exit_stairways_in_an_atrium: needs_review
+  general.bc_404_11_stairway_discharge_through_an_atrium: needs_review
+  # Chapter 4 part b: one flag per piece of 403.1, 403.2.2, 403.5 and 403.6 (high-rise buildings), shown while the
+  # building doesn't rule out a high-rise or one over 420 ft (no Revit mark yet), and of 405.1, 405.4 and 405.7
+  # (underground buildings), shown while that isn't ruled out (no mark yet): each a person's check. 403.5.2's and
+  # 405.7.1's review bands change nothing here: the story rows already wait on other facts, and each story has two
+  # exits for a load under 500 (403.5.2 doesn't hold Group R-2)
+  general.bc_403_1_high_rise_buildings: needs_review
+  general.bc_403_2_2_exit_stairway_enclosure_strength: needs_review
+  general.bc_403_2_2_1_enclosure_wall_panels: needs_review
+  general.bc_403_2_2_2_concrete_and_masonry_walls: needs_review
+  general.bc_403_2_2_3_other_wall_assemblies: needs_review
+  general.bc_403_2_2_4_glass_walls: needs_review
+  general.bc_403_5_means_of_egress_and_evacuation: needs_review
+  general.bc_403_5_1_remoteness_of_exit_stairways: needs_review
+  general.bc_403_5_2_additional_exit_stairway: needs_review
+  general.bc_403_5_3_stairway_door_operation: needs_review
+  general.bc_403_5_3_1_stairway_communication_system: needs_review
+  general.bc_403_5_4_smokeproof_enclosures: needs_review
+  general.bc_403_5_5_luminous_egress_path_markings: needs_review
+  general.bc_403_6_elevators: needs_review
+  general.bc_403_6_1_fire_service_access_elevators: needs_review
+  general.bc_403_6_2_occupant_evacuation_elevators: needs_review
+  general.bc_405_1_underground_buildings: needs_review
+  general.bc_405_4_compartmentation: needs_review
+  general.bc_405_4_1_number_of_compartments: needs_review
+  general.bc_405_4_2_smoke_barrier_between_compartments: needs_review
+  general.bc_405_4_3_compartment_elevators: needs_review
+  general.bc_405_7_means_of_egress: needs_review
+  general.bc_405_7_1_two_exits_on_each_floor_level: needs_review
+  general.bc_405_7_2_smokeproof_enclosures: needs_review
+  # Chapter 4 part c: one flag per piece of 407.1 to 407.4 (Group I-2), not applicable to a building stated Group R-2
+  general.bc_407_1_group_i2: not_applicable
+  general.bc_407_2_corridor_continuity_and_separation: not_applicable
+  general.bc_407_2_1_waiting_areas_open_to_a_corridor: not_applicable
+  general.bc_407_2_2_care_providers_stations: not_applicable
+  general.bc_407_2_3_psychiatric_treatment_areas: not_applicable
+  general.bc_407_2_4_gift_shops: not_applicable
+  general.bc_407_2_5_nursing_home_housing_units: not_applicable
+  general.bc_407_2_6_nursing_home_cooking_facilities: not_applicable
+  general.bc_407_2_7_domestic_cooking_appliances: not_applicable
+  general.bc_407_3_corridor_wall_construction: not_applicable
+  general.bc_407_3_1_corridor_doors: not_applicable
+  general.bc_407_3_1_1_corridor_door_construction: not_applicable
+  general.bc_407_4_means_of_egress: not_applicable
+  general.bc_407_4_1_direct_access_to_a_corridor: not_applicable
+  general.bc_407_4_1_1_locking_devices: not_applicable
+  general.bc_407_4_3_projections_in_nursing_home_corridors: not_applicable
+  general.bc_407_4_4_care_suites: not_applicable
+  general.bc_407_4_4_1_exit_access_through_care_suites: not_applicable
+  general.bc_407_4_4_2_care_suite_separation: not_applicable
+  general.bc_407_4_4_3_care_suite_access_to_corridor: not_applicable
+  general.bc_407_4_4_4_care_suite_circulation_paths: not_applicable
+  general.bc_407_4_4_5_doors_within_care_suites: not_applicable
+  general.bc_407_4_4_6_care_suites_with_sleeping_rooms: not_applicable
+  general.bc_407_4_4_6_1_sleeping_care_suite_area: not_applicable
+  general.bc_407_4_4_6_2_sleeping_care_suite_exit_access: not_applicable
+  general.bc_407_4_4_7_care_suites_without_sleeping_rooms: not_applicable
+  general.bc_407_4_4_7_1_treatment_care_suite_area: not_applicable
+  general.bc_407_4_4_7_2_treatment_care_suite_exit_access: not_applicable
+  # Chapter 4 part d: one flag per piece of 407.5, 407.6 and 407.10 (Group I-2) and 408.1 to 408.4 (Group I-3), not
+  # applicable to a building stated Group R-2
+  general.bc_407_5_smoke_barriers: not_applicable
+  general.bc_407_5_1_smoke_compartment_size: not_applicable
+  general.bc_407_5_2_travel_to_a_smoke_barrier_door: not_applicable
+  general.bc_407_5_3_refuge_area: not_applicable
+  general.bc_407_5_4_independent_egress: not_applicable
+  general.bc_407_5_5_horizontal_assemblies: not_applicable
+  general.bc_407_6_automatic_closing_doors: not_applicable
+  general.bc_407_6_1_activation_of_automatic_closing_doors: not_applicable
+  general.bc_407_10_secured_yards: not_applicable
+  general.bc_408_1_group_i3: not_applicable
+  general.bc_408_2_other_occupancies: not_applicable
+  general.bc_408_3_means_of_egress: not_applicable
+  general.bc_408_3_1_door_width: not_applicable
+  general.bc_408_3_2_sliding_doors: not_applicable
+  general.bc_408_3_3_guard_tower_doors: not_applicable
+  general.bc_408_3_4_spiral_stairways: not_applicable
+  general.bc_408_3_5_ships_ladders: not_applicable
+  general.bc_408_3_6_exit_discharge_to_a_courtyard: not_applicable
+  general.bc_408_3_7_sallyports: not_applicable
+  general.bc_408_3_8_glazed_exit_stairway: not_applicable
+  general.bc_408_4_locks: not_applicable
+  general.bc_408_4_1_remote_release: not_applicable
+  general.bc_408_4_2_power_operated_doors_and_locks: not_applicable
+  general.bc_408_4_3_redundant_operation: not_applicable
+  general.bc_408_4_4_relock_capability: not_applicable
+  # Chapter 4 part e: 408.6 and 408.8 (Group I-3) and 420.6 to 420.9 (Group I-1) not applicable to a building stated
+  # Group R-2; 420.1 to 420.3 (Groups I-1 and R: its scope, the fire partitions between units and the horizontal
+  # assemblies between floors) apply, a person's check; 422 (ambulatory care) shows while the building doesn't rule
+  # out an ambulatory care facility (not stated)
+  general.bc_408_6_smoke_barrier: not_applicable
+  general.bc_408_6_1_smoke_compartments: not_applicable
+  general.bc_408_6_2_refuge_area: not_applicable
+  general.bc_408_6_3_independent_egress: not_applicable
+  general.bc_408_8_subdivision_of_resident_housing_areas: not_applicable
+  general.bc_408_8_1_occupancy_conditions_3_and_4: not_applicable
+  general.bc_408_8_2_occupancy_condition_5: not_applicable
+  general.bc_408_8_3_openings_in_room_face: not_applicable
+  general.bc_408_8_4_smoke_tight_doors: not_applicable
+  general.bc_420_1_groups_i1_and_r: needs_review
+  general.bc_420_2_separation_walls: needs_review
+  general.bc_420_3_horizontal_separation: needs_review
+  general.bc_420_6_smoke_barriers_in_group_i1_condition_2: not_applicable
+  general.bc_420_6_1_refuge_area: not_applicable
+  general.bc_420_7_assisted_living_housing_units: not_applicable
+  general.bc_420_8_group_i1_cooking_facilities: not_applicable
+  general.bc_420_9_domestic_cooking_appliances: not_applicable
+  general.bc_422_1_ambulatory_care_facilities: needs_review
+  general.bc_422_2_separation: needs_review
+  general.bc_422_3_smoke_compartments: needs_review
+  general.bc_422_3_1_means_of_egress: needs_review
+  general.bc_422_3_2_refuge_area: needs_review
+  general.bc_422_3_3_independent_egress: needs_review
+  # Chapter 4 part f: 406.4.3 and 406.5.7 (Group S-2 or U parking garages), 415.11.3.3, 415.11.3.4 (Group H-5 service
+  # corridors), 415.11.6.6 and 415.11.6.7 (HPM, gas and liquid storage rooms) not applicable to a building stated
+  # Group R-2; 410.5 (stages, platforms and technical production areas), 411.4 (special amusement areas) and 412's
+  # means of egress (aircraft-related occupancies) show while the building doesn't rule them out (not stated)
+  general.bc_406_4_3_vehicle_ramps: not_applicable
+  general.bc_406_5_7_open_parking_garage_egress: not_applicable
+  general.bc_410_5_means_of_egress: needs_review
+  general.bc_410_5_1_arrangement: needs_review
+  general.bc_410_5_2_stairway_and_ramp_enclosure: needs_review
+  general.bc_410_5_3_technical_production_areas: needs_review
+  general.bc_410_5_3_1_number_of_means_of_egress: needs_review
+  general.bc_410_5_3_2_exit_access_travel_distance: needs_review
+  general.bc_410_5_3_3_two_means_of_egress: needs_review
+  general.bc_410_5_3_4_path_of_egress_travel: needs_review
+  general.bc_410_5_3_5_width: needs_review
+  general.bc_411_4_exit_marking: needs_review
+  general.bc_411_4_1_photoluminescent_exit_signs: needs_review
+  general.bc_412_2_2_airport_traffic_control_towers: needs_review
+  general.bc_412_2_2_1_stairways: needs_review
+  general.bc_412_2_2_2_exit_access: needs_review
+  general.bc_412_2_2_3_number_of_exits: needs_review
+  general.bc_412_2_2_3_1_interior_finish: needs_review
+  general.bc_412_2_2_3_2_exit_separation: needs_review
+  general.bc_412_4_2_residential_aircraft_hangar_egress: needs_review
+  general.bc_412_6_aircraft_manufacturing_facilities: needs_review
+  general.bc_table_412_6_aircraft_manufacturing_travel: needs_review
+  general.bc_412_6_1_ancillary_areas: needs_review
+  general.bc_412_7_3_heliports_and_helistops: needs_review
+  general.bc_415_11_3_3_service_corridor_egress: not_applicable
+  general.bc_415_11_3_4_service_corridor_width: not_applicable
+  general.bc_415_11_6_6_hpm_room_exits: not_applicable
+  general.bc_415_11_6_7_hpm_room_doors: not_applicable
   general.bc_1007_1_1_remoteness: pass                 # 0.5992 >= 1/2 on both stories (above)
   general.bc_1007_1_1_space_remoteness: pass           # "space_exit_count < 2 or ...": every space has one doorway
   general.bc_1007_1_2_space_three_or_more: pass        # "space_exit_count < 3 or ...": none has three

@@ -161,8 +161,45 @@ documents:
       # 1026.5 send to), pp.279-280, with 905.5 after; 909.1 alone (smoke control systems' scope, which 1030.6.2.1 sends
       # to), p.296; 909.20 (smokeproof enclosures, which 1023.12 and 1023.3.1 send to), pp.301-303, with 909.21 after; 911.1
       # alone (where a fire command center is required, the high-rise egress features' control point), p.305.
-      pages: 32-68, 79, 99, 147, 160-161, 171-182, 184-188, 269-275, 279-280, 284-290, 293-294, 296, 301-303, 305, 310-329, 331-337, 340-362
-      sections: ['308.5', '508.2', '703.5', '707.1', '707.3.1', '707.3.2', '707.3.3', '707.3.4', '707.3.5', '707.4',
+      # Chapter 4 (special detailed requirements by use and occupancy), the parts that change the means of egress, in
+      # small PRs (docs/decisions/2026-11-26_ny_building_chapter_4_egress.md): 402.1 with 402.1.1 (covered and open mall
+      # buildings: where Section 402 applies, and the open mall's perimeter line, p.84, with 402.2 after) and 402.8
+      # whole (a mall building's means of egress, pp.86-87, with SECTION 403 after on p.88); 404.1 (buildings with an
+      # atrium, p.91, with 404.2 after), and 404.9, 404.10 and 404.11 (an atrium's travel, exit stairways and stairway
+      # discharge, p.92, with SECTION 405 after): Chapter 4 part a. 403.1 (high-rise buildings: where Section 403
+      # applies, p.88, with 403.2 after), 403.2.2 whole (the structural integrity of interior exit stairway and hoistway
+      # enclosures, p.88, with 403.2.3 after), 403.5 whole (a high-rise's means of egress: the stairways' remoteness, an
+      # additional stairway, stairway doors, smokeproof enclosures, luminous markings, pp.90-91) and 403.6 whole
+      # (elevators: fire service access and occupant evacuation, p.91, with SECTION 404 after); 405.1 (underground
+      # buildings, p.92, with 405.2 after), 405.4 whole (compartments, pp.92-93, with 405.5 after) and 405.7 whole (an
+      # underground building's means of egress, p.93, with 405.8 after): Chapter 4 part b. 407.1 (Group I-2, p.98),
+      # 407.2 whole (corridors continuous and separated, and the spaces open to them, pp.98-99), 407.3 whole (corridor
+      # walls and doors, p.99) and 407.4 whole (means of egress and care suites, pp.99-100, with 407.5 after; its 407.4.2
+      # was brought in alone in review round 1 of Chapter 10's plan): Chapter 4 part c. 407.5 whole (Group I-2 smoke
+      # barriers, pp.100-101), 407.6 whole (automatic-closing doors, p.101) and 407.10 (secured yards, p.101, with 407.11
+      # after); 408.1, 408.2, 408.3 whole and 408.4 whole (Group I-3: general, other occupancies, means of egress, locks,
+      # pp.101-102, with 408.5 after): Chapter 4 part d. 408.6 whole (Group I-3 smoke barriers, p.103, with 408.7 after)
+      # and 408.8 whole (subdivision of resident housing areas, p.103, with 408.9 after); 420.1, 420.2, 420.3 (Groups I-1
+      # and R: separation walls and floors, p.127, with 420.4 after), 420.6 whole, 420.7, 420.8 and 420.9 (Group I-1:
+      # smoke barriers, assisted living housing units, cooking, pp.127-128, with 420.10 after); 422.1, 422.2 and 422.3
+      # whole (ambulatory care facilities: separation, smoke compartments and their egress, p.129, with 422.4 after):
+      # Chapter 4 part e. 406.4.3 (a public parking garage's vehicle ramps, p.95, with 406.5 after) and 406.5.7 (an
+      # open parking garage's means of egress, p.96, with 406.5.8 after); 410.5 whole (stages, platforms and technical
+      # production areas, pp.105-106, with 410.6 after); 411.4 whole (a special amusement area's exit marking, p.107,
+      # with 411.5 after); of Section 412 its means of egress: 412.2.2 whole (airport traffic control towers,
+      # pp.107-108, with 412.2.3 after), 412.4.2 (a residential aircraft hangar's two means of egress, p.109, with
+      # 412.4.3 after), 412.6 whole with Table 412.6 (aircraft manufacturing facilities' travel, p.110, with 412.7
+      # after) and 412.7.3 (heliports and helistops, p.111, with 412.7.4 after); 415.11.3.3 and 415.11.3.4 (a Group
+      # H-5 service corridor's egress and width, p.122, with 415.11.4 after), 415.11.6.6 and 415.11.6.7 (the exits and
+      # doors of HPM rooms, gas rooms and liquid storage rooms, p.123, with 415.11.6.8 after); 428.3.5 (a higher
+      # education laboratory suite's means of egress, p.133, with 428.3.6 after): Chapter 4 part f.
+      pages: 32-68, 79, 84, 86-88, 90-93, 95-96, 98-103, 105-111, 122-123, 127-129, 133, 147, 160-161, 171-182, 184-188,
+             269-275, 279-280, 284-290, 293-294, 296, 301-303, 305, 310-329, 331-337, 340-362
+      sections: ['308.5', '402.1', '402.8', '403.1', '403.2.2', '403.5', '403.6', '404.1', '404.9', '404.10', '404.11',
+                 '405.1', '405.4', '405.7', '407.1', '407.2', '407.3', '407.4', '407.5', '407.6', '407.10', '408.1',
+                 '408.2', '408.3', '408.4', '408.6', '408.8', '420.1', '420.2', '420.3', '420.6', '420.7', '420.8',
+                 '420.9', '422.1', '422.2', '422.3', '406.4.3', '406.5.7', '410.5', '411.4', '412.2.2', '412.4.2', '412.6',
+                 Table 412.6, '412.7.3', '415.11.3.3', '415.11.3.4', '415.11.6.6', '415.11.6.7', '428.3.5', '508.2', '703.5', '707.1', '707.3.1', '707.3.2', '707.3.3', '707.3.4', '707.3.5', '707.4',
                  '707.5', '707.6', '707.7', '707.8', '707.9', '707.10', '713.1', '713.2', '713.4', '713.5', '713.6',
                  '713.7', '713.8', '713.9', '713.10', '713.11', '713.14', '716.1', Table 716.1(1), Table 716.1(2),
                  Table 716.1(3), '716.2.1', '716.2.2', '716.2.3', '716.2.4', '708.1', '708.3', '708.4', '708.5',
@@ -180,19 +217,25 @@ documents:
                  '1018', '1019', '1020.1', '1020.2', Table 1020.2, '1020.3', Table 1020.3, '1020.4', '1020.5',
                  '1020.6', '1020.7', '1021', '1022', '1023', '1024', '1025', '1026', '1027', '1028', '1029', '1030',
                  Table 1030.6.2, Table 1030.13.2.1, '1031.1', '1031.2', '1031.3', '1031.4', '1031.5', '1031.6']
-      alone: ['407.4.2', '703.2.1.1', '707.3', '713.12', '716.2', '711.1', '711.2', '711.2.4', '711.3', '712.1',
-              '903.2', '903.3', '903.3.1', '907.2', '909.1', '911.1', '903.3.1.1', '903.3.1.2', '1010.1', '1010.2', '1011.5',
-              '1011.5.4']   # brought in without the parts under them (exempt locations, balconies, attics)
-      definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
+      alone: ['703.2.1.1', '707.3', '713.12', '716.2', '711.1', '711.2', '711.2.4', '711.3', '712.1',
+              '903.2', '903.3', '903.3.1', '907.2', '909.1', '911.1', '903.3.1.1', '903.3.1.2', '1010.1',
+              '1010.2', '1011.5', '1011.5.4']   # brought in without the parts under them (exempt locations, balconies, attics)
+      definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics,
+                     # or one printed in italics in a number the italics reader doesn't match (201.2: the singular
+                     # includes the plural)
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
           the rule measures the story's floor area by both of the book's own measures of floor area (README).
         202:floor_area_net: As 202:floor_area_gross.
+        202:nursing_homes: 407.2.5 prints "nursing home" in italics (p.98, line 40), singular; 201.2 makes the singular
+          include the plural, so NURSING HOMES (p.55, line 20) is its definition, brought in by name (brought_in.
+          italic_not_defined says why the italics reader doesn't match it). It says which buildings 407.2.5, 407.2.6 and
+          407.4.3 are about (Chapter 4 part c, review round 1).
         202:initiating_device: The head of the italic "fire alarm-initiating device" in FIRE ALARM SIGNAL (p.44,
           line 56), which no single entry defines (brought_in.italic_not_defined); brought in so the reader sees
           the defined part. Used by no rule (section group 6d).
-        202:life_safety_systems: The plural entry for the italic "life safety system" in SUPERVISORY
-          SIGNAL-INITIATING DEVICE (p.64, line 15), which the italics reader pairs only with a plural; brought in
-          so the reader sees it. Used by no rule (section group 6d).
+        202:life_safety_systems: SUPERVISORY SIGNAL-INITIATING DEVICE prints "life safety system" in italics (p.64,
+          line 15), singular; 201.2 makes the singular include the plural, so LIFE SAFETY SYSTEMS (p.51, line 53) is
+          its definition, brought in by name. Read by no rule (section group 6d; Chapter 4 part c, review round 1).
         202:detector_heat: The definition of the heat detection system 1010.2.12 prints in italics with no entry of its
           own (brought_in.italic_not_defined); brought in so the reader sees it. Used by no rule (section group 6e).
         202:hospitals_and_psychiatric_hospitals: The entry for the italic "hospital" in 1010.2.13 (p.328, line 43),
@@ -207,6 +250,11 @@ documents:
           adjacent finished ground level), so it is brought in by name (section group 8b).
       tables:      # each table's lines, checked on the page image (the text doesn't say where a table ends); every
                    # table on the pages read is named, brought in or not
+        Table 406.5.4: p.95 lines 44-54
+        Table 412.2.1.1: p.107 lines 31-39
+        Table 412.3.6: p.109 lines 14-29
+        Table 412.6: p.110 lines 36-47
+        Table 428.3: p.133 lines 5-23
         Table 707.3.10: p.171 lines 48-54
         Table 716.1(1): p.184 lines 8-18
         Table 716.1(2): p.184 lines 19-74; p.185 lines 3-86; p.186 lines 3-29
@@ -331,6 +379,281 @@ documents:
         p.175 line 42: 710.5.2.2 prints the same kind of rate, "[0.015424 m3/(s × m2)]", the 3 and the 2 raised as
           powers of the unit; the slash divides units, not a fraction.
       italic_not_defined:    # by piece: italic words Section 202 doesn't define, each with why (any other is a problem)
+        202:gas_room:
+          used: 'The book prints "stored or used" with "used" in italics (p.48, line 21): USE (MATERIAL) (p.66, line
+            6, brought in, 202:use_material) is its term, whose inflected form the italics reader doesn''t match. A
+            definition read by no rule (Chapter 4 part f).'
+        202:hazardous_production_material_hpm:
+          used: 'As 202:gas_room ("which is used directly in research", p.49, line 22): the term is USE (MATERIAL),
+            brought in. A definition read by no rule (Chapter 4 part f).'
+        202:hpm_room:
+          used: 'As 202:gas_room ("where HPM is stored or used", p.50, line 20): the term is USE (MATERIAL), brought
+            in. A definition read by no rule (Chapter 4 part f).'
+        202:interior_finish:
+          interior: 'The book prints "Interior finish includes interior wall and ceiling finish and interior floor
+            finish" in italics (p.51, line 17): the words are INTERIOR FINISH itself, INTERIOR WALL AND CEILING
+            FINISH (p.51, line 23) and INTERIOR FLOOR FINISH (p.51, line 18), each brought in
+            (202:interior_wall_and_ceiling_finish, 202:interior_floor_finish), which the italics reader doesn''t
+            match whole within one italic run. A definition read by no rule (Chapter 4 part f).'
+          ceiling finish: 'As its "interior": the words "interior wall and ceiling finish" are INTERIOR WALL AND
+            CEILING FINISH (p.51, line 23), brought in (202:interior_wall_and_ceiling_finish). A definition read by
+            no rule (Chapter 4 part f).'
+        202:liquid_storage_room:
+          flammable: 'The book prints "flammable or combustible liquids" in italics (p.52, line 20): "flammable"
+            shares "liquids" with COMBUSTIBLE LIQUID (brought in, 202:combustible_liquid); FLAMMABLE LIQUID (p.46,
+            line 40) is a Fire Code term the shared words name but not whole, read by no brought-in rule (as
+            202:liquid''s "flammable"). A definition read by no rule (Chapter 4 part f).'
+        '410.5.3.3':
+          common path of travel: 'The book prints "common path of travel" in italics (p.105, line 57); the defined
+            term is COMMON PATH OF EGRESS TRAVEL (brought in, 202:common_path_of_egress_travel), which these words
+            shorten. A flag''s words (Chapter 4 part f).'
+        '412.7.3':
+          access: 'The book prints "exits or access to exits" in italics (p.111, line 8): "access to exits" is EXIT
+            ACCESS (brought in, 202:exit_access) in other words, which the italics reader matches only as printed. A
+            flag''s words (Chapter 4 part f).'
+          to: 'As its "access": "access to exits" is EXIT ACCESS (brought in, 202:exit_access). A flag''s words
+            (Chapter 4 part f).'
+        '408.4.2':
+          power-operated: 'The book prints "Power-operated sliding doors or power-operated locks" in italics (p.102,
+            line 35); the defined term is POWER-OPERATED DOOR (brought in, 202:power_operated_door), which the
+            adjective doesn''t name whole. A flag''s words (Chapter 4 part d).'
+        202:cell_masonry:
+          cross-sectional: 'The book prints "gross cross-sectional area" in italics (p.36, line 31); the words are
+            AREA (for masonry)''s sub-entry "Gross cross-sectional" (p.33, line 47), which the italics reader
+            doesn''t take as a term of its own. A masonry term, brought in with CELL, read by no rule (Chapter 4 part
+            c).'
+          gross: 'As "cross-sectional": AREA (for masonry)''s sub-entry "Gross cross-sectional" (p.33, line 47). Read
+            by no rule (Chapter 4 part c).'
+        '407.2.1':
+          public-use: 'The book prints "public-use areas" in italics (p.98, line 17); PUBLIC-USE AREAS is brought in
+            (202:public_use_areas), and the hyphenated word is left over by the italics reader. A flag''s words
+            (Chapter 4 part c).'
+        '407.2.5':
+          nursing home: 'The book prints "nursing home" in italics (p.98, line 40); Section 202 defines NURSING HOMES
+            (p.55, line 20), and 201.2 makes the singular include the plural, so it is brought in by name
+            (brought_in.definitions), the italics reader matching words only as printed. A flag''s words (Chapter 4 part
+            c, review round 1).'
+        202:concrete:
+          perlite: 'One of CONCRETE''s own sub-entries (p.38, lines 24-41: carbonate aggregate, cellular, lightweight
+            aggregate, perlite, sand-lightweight, siliceous aggregate, vermiculite), printed in italics; no term of
+            its own. A construction term, brought in by 403.2.2.2''s "Concrete" (Chapter 4 part b) and by the roman
+            "concrete" of 714.4.1''s exception 1 (Chapter 7 part d), read by no rule.'
+          vermiculite: 'One of CONCRETE''s own sub-entries (p.38, lines 24-41: carbonate aggregate, cellular,
+            lightweight aggregate, perlite, sand-lightweight, siliceous aggregate, vermiculite), printed in italics;
+            no term of its own. A construction term, brought in by 403.2.2.2''s "Concrete" (Chapter 4 part b) and by
+            the roman "concrete" of 714.4.1''s exception 1 (Chapter 7 part d), read by no rule.'
+        202:risk_category:
+          flood: '"flood" among the loads RISK CATEGORY is for (flood, wind, tornado, snow, ice and earthquake);
+            FLOOD LOADS is no Section 202 term here. A structural term, read by no rule (Chapter 4 part b: 403.2.2''s
+            Risk Category).'
+        '403.5.3.1':
+          attended: 'The book prints "constantly attended station" in italics (p.91, line 10), which the italics
+            reader takes word by word; Section 202 defines CONSTANTLY ATTENDED LOCATION (p.38, line 47), which the
+            phrase doesn''t name whole. A flag''s words (Chapter 4 part b), read by no rule.'
+          constantly: 'The book prints "constantly attended station" in italics (p.91, line 10), which the italics
+            reader takes word by word; Section 202 defines CONSTANTLY ATTENDED LOCATION (p.38, line 47), which the
+            phrase doesn''t name whole. A flag''s words (Chapter 4 part b), read by no rule.'
+          station: 'The book prints "constantly attended station" in italics (p.91, line 10), which the italics
+            reader takes word by word; Section 202 defines CONSTANTLY ATTENDED LOCATION (p.38, line 47), which the
+            phrase doesn''t name whole. A flag''s words (Chapter 4 part b), read by no rule.'
+        202:anchor_building:
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        202:covered_mall_building:
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          malls: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        202:food_court:
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.1':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.1.1':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.1':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          malls: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.1.1':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.2':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.2.1':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          factor: 'The last word of "occupant load factor", printed in italics (p.87, line 8, and "OLF = The occupant
+            load factor"); OCCUPANT LOAD is brought in, and the factor is Equation 4-1''s OLF (Chapter 4 part a).'
+          gla: 'Equation 4-1''s GLA, printed in italics: "The gross leasable area (square feet)", defined right under
+            the equation (p.87, line 12); GROSS LEASABLE AREA is brought in (202:gross_leasable_area) (Chapter 4 part
+            a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          olf: 'Equation 4-1''s OLF, printed in italics: "The occupant load factor (square feet per person)", defined
+            right under the equation (p.87, line 11); no Section 202 term (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.2.2':
+          olf: 'Equation 4-1''s OLF, printed in italics: "The occupant load factor (square feet per person)", defined
+            right under the equation (p.87, line 11); no Section 202 term (Chapter 4 part a).'
+        '402.8.2.3':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.2.4':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.3':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+        '402.8.4':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics;
+            the words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines,
+            under it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader
+            doesn''t take as terms of their own (Chapter 4 part a).'
+        '402.8.4.1':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          malls: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          nchor: 'The book prints "anchor buildings" with its first letter in roman and the rest in italics (p.87,
+            line 31, checked by each character''s font with pdfplumber); ANCHOR BUILDING is brought in
+            (202:anchor_building) (Chapter 4 part a).'
+        '402.8.5':
+          covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics;
+            the words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines,
+            under it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader
+            doesn''t take as terms of their own (Chapter 4 part a).'
+        '402.8.6':
+          mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
+            words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
+            it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader doesn''t
+            take as terms of their own (Chapter 4 part a).'
+          open mall: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics;
+            the words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines,
+            under it, "Mall", "Open mall" and "Open mall building" (p.39, lines 33-39), which the italics reader
+            doesn''t take as terms of their own (Chapter 4 part a).'
         202:area_for_masonry:
           specified: The book prints "specified dimensions" in italics across two lines (p.33, lines 48-49) with the
             first word on line 47's "out-to-out specified"; DIMENSIONS (Specified) is defined under DIMENSIONS, which
@@ -459,11 +782,6 @@ documents:
             defines COVERED MALL BUILDING (p.39, line 29; OPEN MALL BUILDING under it, p.53 line 9 pointing there), which
             the shared words name but not whole, so neither is brought in by them. Mall tenant separations are part of
             this piece''s flag (Chapter 7 part c), a person''s check.'
-        202:concrete:
-          perlite: 'A lightweight aggregate named in CONCRETE''s own sub-entries, printed in italics; Section 202 defines no
-            term PERLITE. CONCRETE is brought in by the roman "concrete" of 714.4.1''s exception 1 (Chapter 7 part d); used by
-            no rule.'
-          vermiculite: As perlite (no term VERMICULITE in Section 202).
         202:f_rating:
           continuity headof-wall system: 'The book prints "continuity head-" / "of-wall system" in italics broken across two
             lines (p.44, lines 19-20), which the text joins as "headof-wall"; CONTINUITY HEAD-OF-WALL SYSTEM is a joint term
@@ -481,10 +799,6 @@ documents:
         '714.5':
           fire-resistance-rated: 'The book prints "fire-resistance-rated floor" in italics (p.181, line 20); Section 202 defines
             FIRE-RESISTANCE RATING (brought in), which the adjective names but not whole. 714.5 is a flag (Chapter 7 part d).'
-        202:hazardous_production_material_hpm:
-          used: 'The book prints the one word "used" in italics (p.49, line 22: "which is used directly in research"); no
-            Section 202 term, ordinary meaning (201.4). Brought in by SERVICE CORRIDOR (Table 903.2.5.2, Chapter 9 part a);
-            used by no rule.'
         202:unstable_reactive_material:
           normal temperatures and pressures: 'The book prints "normal temperatures and pressures" in italics (p.66); Section
             202 defines NORMAL TEMPERATURE AND PRESSURE (NTP) (p.55, line 14), which the plural doesn''t name whole. A Fire
@@ -505,11 +819,6 @@ documents:
         '907.2.1':
           lowest: 'The book prints "lowest level of exit discharge" in italics (p.284); the term is LEVEL OF EXIT DISCHARGE
             (brought in), named by the rest of the phrase, so "lowest" is left over. Part of 907.2.1''s flag (Chapter 9 part c).'
-        202:cell_masonry:
-          cross-sectional: 'The book prints "gross cross-sectional area" in italics (p.36, line 31); Section 202 names AREA
-            terms (AREA, GROSS LEASABLE; FLOOR AREA, GROSS) but none of these words whole. A masonry term brought in by Group
-            I-3''s CELL, used by no rule.'
-          gross: As cross-sectional (the phrase's first word).
         202:lodging_house:
           guest rooms: 'The book prints "guest rooms" in italics (p.52, line 50); Section 202 defines GUESTROOM, one word, which
             the two words don''t name. A Group R term (907.2.11, Chapter 9 part d), used by no rule.'
@@ -539,14 +848,6 @@ documents:
         '907.5.2.2.4':
           fixed seats: 'The book prints "fixed seats" in italics; the defined term is FIXED SEATING, brought in, which "fixed
             seats" does not name whole (as 1004.6''s). Part of 907.5.2.2''s flag (Chapter 9 part d).'
-        202:anchor_building:
-          covered: 'The book prints "covered", "open" and "mall" ("covered mall and open mall buildings", "covered or open mall") in italics; Section 202 defines COVERED MALL BUILDING (p.39, line 29; OPEN MALL BUILDING under it), which the shared words name but not whole. Chapter 9 part e (905.3.3, 905.4: standpipes in malls), a flag.'
-          mall: 'The book prints "covered", "open" and "mall" ("covered mall and open mall buildings", "covered or open mall") in italics; Section 202 defines COVERED MALL BUILDING (p.39, line 29; OPEN MALL BUILDING under it), which the shared words name but not whole. Chapter 9 part e (905.3.3, 905.4: standpipes in malls), a flag.'
-          open: 'The book prints "covered", "open" and "mall" ("covered mall and open mall buildings", "covered or open mall") in italics; Section 202 defines COVERED MALL BUILDING (p.39, line 29; OPEN MALL BUILDING under it), which the shared words name but not whole. Chapter 9 part e (905.3.3, 905.4: standpipes in malls), a flag.'
-        202:covered_mall_building:
-          mall: 'The book prints "covered", "open" and "mall" ("covered mall and open mall buildings", "covered or open mall") in italics; Section 202 defines COVERED MALL BUILDING (p.39, line 29; OPEN MALL BUILDING under it), which the shared words name but not whole. Chapter 9 part e (905.3.3, 905.4: standpipes in malls), a flag.'
-          malls: 'The book prints "covered", "open" and "mall" ("covered mall and open mall buildings", "covered or open mall") in italics; Section 202 defines COVERED MALL BUILDING (p.39, line 29; OPEN MALL BUILDING under it), which the shared words name but not whole. Chapter 9 part e (905.3.3, 905.4: standpipes in malls), a flag.'
-          open: 'The book prints "covered", "open" and "mall" ("covered mall and open mall buildings", "covered or open mall") in italics; Section 202 defines COVERED MALL BUILDING (p.39, line 29; OPEN MALL BUILDING under it), which the shared words name but not whole. Chapter 9 part e (905.3.3, 905.4: standpipes in malls), a flag.'
         '905.3.1':
           standpipes: 'The book prints "standpipe", "standpipes" or "standpipe system" in italics; Section 202 defines STANDPIPE, TYPES OF and STANDPIPE SYSTEM, CLASSES OF (p.62), which the words don''t name whole. Chapter 9 part e (905), a flag.'
         '905.3.2':
@@ -691,21 +992,21 @@ documents:
             Section 202 has no entry for the whole phrase; it defines its head, INITIATING DEVICE (p.50, lines
             54-55), brought in by name (brought_in.definitions), and MANUAL FIRE ALARM BOX and FIRE DETECTOR,
             AUTOMATIC, the examples that follow. FIRE ALARM SIGNAL is brought in by 1010.2.6''s exception 3.2; used by
-            no rule (section group 6d).'
+            no rule (section group 6d; Chapter 4 part b too).'
         202:fire_alarm_system:
           fire alarm: 'The book prints "fire alarm" in italics within "fire alarm or supervisory signal-initiating
             devices" (p.44, line 59); Section 202 defines no FIRE ALARM alone (SUPERVISORY SIGNAL-INITIATING DEVICE is
-            defined and brought in). Used by no rule (section group 6d).'
+            defined and brought in). Used by no rule (section group 6d; Chapter 4 part c too).'
         202:supervisory_signal_initiating_device:
           life safety system: 'The book prints "life safety system" in italics (p.64, line 15), the singular of
             LIFE SAFETY SYSTEMS (p.51, lines 53-54), which the italics reader pairs only with a plural; brought in
             by name (brought_in.definitions). SUPERVISORY SIGNAL-INITIATING DEVICE is brought in by FIRE ALARM
-            SYSTEM''s words; used by no rule (section group 6d).'
+            SYSTEM''s words; used by no rule (section group 6d; Chapter 4 part c too).'
         202:permit:
           code enforcement program: 'The [NY] sub-definition "Operating permit" (p.56, lines 53-54) prints "Code
             Enforcement Program" in italics; the defined term is PART 1203-COMPLIANT CODE ENFORCEMENT PROGRAM (brought
             in), which the phrase doesn''t name whole. PERMIT is brought in by 1010.1.6''s roman "permits" (exception 2);
-            used by no rule (section group 6c; section group 7c brings PERMIT in too, through CONSTRUCTION DOCUMENTS).'
+            used by no rule (section group 6c; section group 7c brings PERMIT in too, through CONSTRUCTION DOCUMENTS; Chapter 4 part c too).'
         '1013.2':
           guest rooms: 'The book prints "guest rooms" in italics (p.336, line 47); Section 202 defines GUESTROOM (p.48,
             line 57), one word, which the two words don''t name; brought in by name (brought_in.definitions). Read by
