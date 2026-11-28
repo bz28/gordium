@@ -100,7 +100,7 @@ STOPS = {
     "too_few_exits": "the story has {count} distinct exit(s) (counted by the exit each exit door leads into): "
                      "remoteness needs two",
     "outline_needed": "the story's outline isn't read, so its diagonal and areas aren't measured: {reason}",
-    "outline_short": "the story's outer outline doesn't hold all of it ({names} reach outside it), so its diagonal, "
+    "outline_short": "the story's outer outline doesn't hold all of it (outside it: {names}), so its diagonal, "
                      "and how far apart its exits are against it, aren't measured",
     # the parts handed to the rules (__init__.py)
     "stated_not_given": "stated by the architect ({what}), and Gordium has no mark for it in the model yet",
