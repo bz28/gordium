@@ -641,6 +641,10 @@ public sealed class RouteTests
         // a wall running a hair past the outline where it steps (the Children's Odyssey's W2, 0.14 in past W74's face): fine
         floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-s", "W2", true, (5, -0.5), (25, -0.5), (25, -0.512), (5, -0.512))] } };
         Assert.Null(OutlineNote(InteriorReader.Read(floor.Model())));
+        // a thin cladding (3/8 in) not set Room Bounding, drawn tight to the west wall: within the half inch beyond the
+        // outline, but its inner face is a whole wall past the inside face: refused by the band (confirming review)
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-c", "C1", false, (-0.53, -0.5), (-0.5, -0.5), (-0.5, 26.5), (-0.53, 26.5))] } };
+        Assert.Contains("isn't set Room Bounding", OutlineNote(InteriorReader.Read(floor.Model())));
         // a partition that isn't room-bounding whose studs run half an inch into the exterior wall's lining: fine
         floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-t", "P2", false, (10, -0.04), (10.3, -0.04), (10.3, 5), (10, 5))] } };
         Assert.Null(OutlineNote(InteriorReader.Read(floor.Model())));
