@@ -33,6 +33,8 @@ import re
 from rule_format import formula, parts
 from rule_format.rulebook import _kinds
 
+from model_measurement.interior.openings import WELL_FIELDS
+
 from design_checker import present
 
 MARK, FIX_MODEL, BY_HAND, DECIDE = "mark", "fix_model", "measure_by_hand", "decide"
@@ -58,6 +60,24 @@ MEASURE_FIELDS = {"moe_door_leaves": "doors[].leaves",
                   # Gordium: Corridor rating minutes (sent in hours) and Gordium: Smoke partition walls
                   "corridor_fire_rating_hours": "rooms[].fire_rating_hours",
                   "corridor_walls_smoke_partitions": "rooms[].walls_smoke_partitions"}
+# a part's measure a field of the description states, as a host's mark gives it: {measure: (the field, the mark its
+# reasons name)}. Its cause is that mark only where the measuring's reason names the mark (its "not given" and "can't
+# read" reasons do; any other is the drawing's or Gordium's, as before: a latch's electric lock isn't asked, a drawn
+# well's floor isn't given): what latches or locks a door (1010.2.8, group 6e: Revit's Gordium: Hardware), and what the
+# architect states of an escape opening and its area well (model_measurement.interior.openings.stated_well: the
+# window's or door's own marks)
+STATED_FIELDS = {**{m: ("doors[].hardware", "a door's hardware mark")
+                    for m in ("moe_door_latched", "moe_door_panic_hardware", "moe_door_electric_lock")},
+                 **WELL_FIELDS}
+
+
+def field_of_why(measure: str, why: str) -> str | None:
+    """The description's field a host's mark answers for this measure's reason, or None (MEASURE_FIELDS always;
+    STATED_FIELDS only where the reason names its mark)."""
+    if measure in MEASURE_FIELDS:
+        return MEASURE_FIELDS[measure]
+    field, mark = STATED_FIELDS.get(measure, (None, None))
+    return field if field and isinstance(why, str) and mark in why else None
 
 
 # ---- how far off ------------------------------------------------------------------------------------------------
@@ -316,14 +336,15 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
         elif m not in own:                            # the building's: a fact the architect states for the project
             add({"kind": MARK, "key": f"fact:{m}", "words": f"{_words(rule, m)}: not stated for the project",
                  "elements": [], "measure": m, "field": f"facts.{m}"})
-        elif why and (MARK_WORD.search(why) or "stated by the architect" in why or m in MEASURE_FIELDS):
+        elif why and (MARK_WORD.search(why) or "stated by the architect" in why or m in MEASURE_FIELDS
+                      or field_of_why(m, why)):
             # a mark set on other elements than this row's (a story's occupant load waits on its rooms' function marks:
             # occupant_load.FUNCTION_ROOMS) names those elements, never the row's own (a level can't hold a room mark)
             held = (more or {}).get(m)
             on = held.get("room_ids_without_function") if isinstance(held, dict) else None
             add({"kind": MARK, "key": f"mark:{kind}:{m}", "words": f"{_words(rule, m)}: {why}",
                  "elements": list(on) if on else own_id,
-                 "measure": m, **({"field": MEASURE_FIELDS[m]} if m in MEASURE_FIELDS else {})})
+                 "measure": m, **({"field": field} if (field := field_of_why(m, why)) else {})})
         else:
             add({"kind": FIX_MODEL, "key": f"model:{kind}:{m}:{why or ''}",
                  "words": f"{_words(rule, m)} not measured" + (f": {why}" if why else " (or not usable)"),

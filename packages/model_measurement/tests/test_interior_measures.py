@@ -1983,6 +1983,36 @@ STOP_CASES = {
     "door_stated_no_source": _set(("doors", 0, "stated_clear"), {"width": 34, "height": 80}),
     "door_drawn_unread": _with(base, lambda d: d["doors"][0].update(
         stated_clear={"width": 34, "height": 80, "source": "A"}, head_stop_bottom=None)),
+    # what the architect states of an escape opening and its area well (stated_well, test_interior_stated_well.py)
+    "negative_area": _set(("openings", 0, "stated_well"), {"area": -9}),
+    "well_not_stated": _set(("openings", 0, "stated_well"), {}),
+    "well_stated_not_read": _set(("openings", 0, "stated_well"), {"below_grade": "yes"}),
+    "well_stated_bad": _set(("openings", 0, "stated_well"), {"width": -36}),
+    "well_disagree": _with(base, lambda d: d["openings"][0].update(
+        area_well={"floor_elevation": -10, "width": 36, "projection": 36}, stated_well={"width": 40})),
+    "well_area_over_size": _set(("openings", 0, "stated_well"), {"area": 2000, "width": 36, "projection": 36}),
+    "well_no_ladder_reaches": _set(("openings", 0, "stated_well"), {"ladder": "none", "ladder_encroachment": 3}),
+    "well_stated_unread": _set(("openings", 0, "stated_well"), {"depht": 50}),
+    "well_drawn_not_stated": _with(base, lambda d: d["openings"][0].update(
+        area_well={"floor_elevation": -10, "width": 36, "projection": 36}, stated_well={})),
+    "well_below_disagree": _with(base, lambda d: d["openings"][0].update(ground_outside=30,
+                                                                          stated_well={"below_grade": False})),
+    # what the ground given shows against the clear bottom (20 in): test_interior_ground_well.py
+    "well_above_disagree": _set(("openings", 0, "stated_well"), {"below_grade": True}),
+    "grade_floor_well_unknown": _with(base, lambda d: d["openings"][0].update(ground_outside=30, stated_well={})),
+    "well_ground_between": _with(base, lambda d: d["openings"][0].update(
+        frame=None, ground_outside=10, clear_bottom_between=[0, 20], stated_well={})),
+    "well_bottom_unread": _with(base, lambda d: d["openings"][0].update(
+        frame=None, ground_outside=10, clear_bottom_between=[20, 0], stated_well={})),
+    "bottom_between_bad": _with(base, lambda d: d["openings"][0].update(
+        frame=None, ground_outside=10, clear_bottom_between=[0], stated_well={})),
+    "well_ground_near": _with(base, lambda d: d["openings"][0].update(ground_outside=20, stated_well={})),
+    "well_ground_no_bottom": _with(base, lambda d: d["openings"][0].update(frame=None, ground_outside=30,
+                                                                            stated_well={})),
+    "well_ground_unread": _with(base, lambda d: d["openings"][0].update(ground_outside="high", stated_well={})),
+    "well_depth_least": _with(base, lambda d: d["openings"][0].update(ground_outside=50, stated_well={})),
+    "well_depth_disagree": _with(base, lambda d: d["openings"][0].update(ground_outside=50,
+                                                                          stated_well={"depth": 10})),
 }
 
 

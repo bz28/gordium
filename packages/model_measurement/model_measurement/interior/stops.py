@@ -167,6 +167,51 @@ STOPS = {
     "door_drawn_unread": "the door's clear {what} is drawn but can't be measured from the drawing ({reason}): the "
                          "maker's stated one alone could be more than the door as drawn, so neither counts",
     "not_positive": "{what} is {value} in: not more than zero",
+    "negative_area": "{what} is {value} sq ft: an area can't be less than zero",
+    # what the architect states of an escape opening and its area well (`stated_well`, openings.py: in Revit the
+    # window's or door's own marks); each reason names the marks, so a host's card opens them (design_checker.panel_data)
+    "well_not_stated": "the opening {name} doesn't state {what}, and the model doesn't give it ({mark})",
+    "well_stated_not_read": "the opening {name} states {what} as {got}, which Gordium can't read ({mark})",
+    "well_stated_bad": "for the opening {name}, {reason} ({mark})",
+    "well_disagree": "the opening {name}'s drawn area well gives {what} as {drawn}, and what is stated of it ({mark}) "
+                     "{stated}: which is right isn't clear",
+    "well_area_over_size": "the opening {name} states {what} as more than its width times its projection ({width} in "
+                           "by {projection} in, {rectangle} sq ft), which a well within them can't hold: one of the "
+                           "three is wrong ({mark})",
+    "well_no_ladder_reaches": "the opening {name}'s area well has no ladder or steps, yet {what} is stated as {got} "
+                              "({mark})",
+    "well_drawn_not_stated": "the opening {name}'s drawn area well gives {what}, but a drawn well's sizes aren't handed "
+                             "to the rules yet, and it isn't stated ({mark})",
+    "well_below_disagree": "the opening {name} is stated not to be below the adjacent grade, yet the model shows {shown}: "
+                           "which is right isn't clear ({mark})",
+    # what the ground given outside the opening (`ground_outside`: in Revit, a Toposolid marked as the finished ground,
+    # sampled at the wall's outer face) shows against its clear opening's bottom (openings.ground_shows)
+    "well_above_disagree": "the opening {name} is stated to be below the adjacent grade, yet the model shows the ground "
+                           "outside it at {ground} in, {gap} in below its clear opening's bottom: which is right isn't "
+                           "clear ({mark})",
+    "grade_floor_well_unknown": "it isn't settled that its clear opening's bottom is above the ground outside it, so it "
+                                "may stand in an area well whose floor isn't drawn, and whether the ground adjacent to "
+                                "it is the well's floor or the ground around the well is an open question (4.6)",
+    "well_ground_near": "the opening {name} doesn't state {what}, and the ground outside it (at {ground} in) is within "
+                        "1/16 in of its clear opening's bottom, so the model doesn't settle it ({mark})",
+    "well_ground_between": "the opening {name} doesn't state {what}, and the ground outside it (at {ground} in) lies "
+                           "between the lowest and the highest its clear opening's bottom could be ({low} in to {high} "
+                           "in: its threshold isn't drawn), so the model doesn't settle it ({mark})",
+    "well_bottom_unread": "the opening {name} doesn't state {what}, and where its clear opening's bottom lies can't be "
+                          "read ({reason}) ({mark})",
+    "bottom_between_bad": "the lowest and highest its clear opening's bottom could be aren't two elevations, the lower "
+                          "first: {got}",
+    "well_ground_no_bottom": "the opening {name} doesn't state {what}, and its clear opening's bottom isn't known, to "
+                             "compare with the ground outside it ({mark})",
+    "well_ground_unread": "the opening {name} doesn't state {what}, and the ground outside it can't be read ({reason}) "
+                          "({mark})",
+    "well_depth_least": "the opening {name} doesn't state {what}; the model shows the ground outside it {least} in above "
+                        "its clear opening's bottom, so the well is at least that deep, but its floor isn't drawn, so "
+                        "whether it is more than 44 in deep isn't known ({mark})",
+    "well_depth_disagree": "the opening {name} states {what} as {stated} in, yet the model shows the ground outside it "
+                           "{least} in above its clear opening's bottom, so the well, its floor at or below that bottom "
+                           "(Gordium's reading), is at least that deep: which is right isn't clear ({mark})",
+    "well_stated_unread": "the opening {name}'s stated area well isn't read: {what}",
 }
 
 

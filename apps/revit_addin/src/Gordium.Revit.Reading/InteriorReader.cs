@@ -146,8 +146,10 @@ public static class InteriorReader
         if (openingsNotRead.Count == 0 && records is not null)
         {
             var marked = MarkReading.InDesign(model).ToDictionary(e => e.UniqueId, StringComparer.Ordinal);
+            // the ground outside each window, only where a ground is drawn in the design checked (GroundReader)
+            var ground = GroundReader.Of(model) is { } grounds ? (grounds, UnknownSpaceList(model)) : ((GroundReader.Grounds, List<(EnclosedArea, string, List<P2>?)>)?)null;
             foreach (var o in MarkReading.Openings(model))
-                openings.Add(ReadOpening(model, records, marked[o.Id], o, notes, evidence));
+                openings.Add(ReadOpening(model, records, marked[o.Id], o, notes, evidence, plans, ground));
         }
         if (openingsNotRead.Count == 0 && openings.Count == 0)
             openingsNotRead = ["No windows or doors are drawn: no escape opening is read (never read as a house with none)"];
@@ -782,7 +784,8 @@ public static class InteriorReader
     // ---- a window or door ----------------------------------------------------------------------------------------
 
     private static JsonObject ReadOpening(RevitModel model, InteriorRecords records, MarkedElement e, OpeningMarks o,
-                                          List<InteriorNote> notes, JsonObject evidence)
+                                          List<InteriorNote> notes, JsonObject evidence, Dictionary<string, RoomPlan> plans,
+                                          (GroundReader.Grounds Set, List<(EnclosedArea Area, string Id, List<P2>? Outline)> Unknown)? ground)
     {
         var id = o.Id;
         void Out(string field, string why) => notes.Add(new(id, field, why));
@@ -813,8 +816,107 @@ public static class InteriorReader
         }
         else if (o.Kind == MarkedKind.Door)
             Out("stated_clear", "a door's maker's clear opening is sent with the door (doors); as an escape opening its " +
-                                "bottom isn't stated by a door's marks yet");
+                                "bottom isn't stated, only bounded where a ground is read (clear_bottom_between)");
+        opening["stated_well"] = StatedWell(e, o, Out);
+        // the ground just outside it, from a Toposolid stated to show the finished ground (GroundReader): below grade
+        // and the well's least depth are then measured; only an escape opening's reason why not is said (its rules
+        // read it), and nothing at all where no ground is drawn. A door's only beside the bounds of its clear bottom
+        // (DoorBottom: its threshold isn't drawn); without them its ground could only unsettle its Below grade mark
+        if (ground is { } g && rec is not null)
+        {
+            string? why = g.Set.Why;
+            JsonArray? between = null;
+            // the ground's own reason first (not stated, nor shown, finished: review round 3), then a door's bounds
+            if (why is not null || (o.Kind == MarkedKind.Door && (between = DoorBottom(model, e, rec, out why)) is null))
+            {
+                if (o.Escape is true)
+                    Out("ground_outside", why!);
+                return opening;
+            }
+            if (evidence[id] is not JsonObject seen)
+                evidence[id] = seen = new JsonObject();
+            var noun = o.Kind == MarkedKind.Door ? "door" : "window";
+            if (GroundReader.Outside(model, g.Set, rec, opening["room"]?.GetValue<string>(), noun, plans, g.Unknown, seen, out why) is { } at)
+            {
+                opening["ground_outside"] = at;
+                if (between is not null)
+                    opening["clear_bottom_between"] = between;
+            }
+            else if (o.Escape is true)
+                Out("ground_outside", why!);
+        }
         return opening;
+    }
+
+    /// <summary>The lowest and highest a door's clear opening's bottom could be (shared, ft; <c>clear_bottom_between</c>):
+    /// its threshold isn't drawn (door families don't model it consistently), but its clear opening lies within the
+    /// door as placed and the opening it cuts in its wall, so its bottom is at least the higher of their bottoms, and at
+    /// most the door's top less its stamp-confirmed clear height. Null, with why, without a confirmed clear height or the
+    /// door's drawn geometry, or where the clear height is more than the door as placed.</summary>
+    internal static JsonArray? DoorBottom(RevitModel model, MarkedElement e, OpeningRecord rec, out string? why)
+    {
+        why = null;
+        var now = ClearNow(e, rec, door: true);
+        if (ClearStamp.Why(Marks.Text(MarkReading.Value(e, Marks.ClearConfirmed)), now, rec.TypeLengths) is { } stamp
+            || now.ClearHeight is not { } clearHeight)
+        {
+            why = "its clear height isn't confirmed on its type, so how high its clear opening's bottom could be isn't known (its ground isn't read)";
+            return null;
+        }
+        if (rec.Placed is not { Count: > 0 } placed)
+        {
+            why = "its drawn geometry couldn't be read, so where its clear opening's bottom lies isn't known (its ground isn't read)";
+            return null;
+        }
+        var t = model.InternalToShared;
+        var z = placed.Select(t.Apply).Select(p => p.Z).ToList();
+        var low = z.Min();
+        if (rec.WallOpening is { Count: > 0 } cut)
+            low = Math.Max(low, cut.Select(t.Apply).Min(p => p.Z));
+        var high = z.Max() - clearHeight;
+        if (high < low - Sixteenth)
+        {
+            why = $"its clear height ({ClearStamp.Inches(clearHeight)}) is more than the door as placed leaves over its bottom, so where its clear opening's bottom lies isn't known (its ground isn't read)";
+            return null;
+        }
+        return new JsonArray(low, Math.Max(high, low));
+    }
+
+    /// <summary>What the architect states of the opening and its area well (<c>stated_well</c>, BCNYS 1031.5): every
+    /// <see cref="Marks.WellMarks"/> mark set, as typed (a length in feet and an area in square feet, the description's
+    /// units); one blank is left out, which the measuring reads as not stated (never 0 or No), naming the field and the
+    /// mark. Always sent, so a blank one is said by name. A word Gordium can't read is said here and not sent. Only an
+    /// escape opening's blanks are noted (its rules read them): every other window's would be noise.</summary>
+    private static JsonObject StatedWell(MarkedElement e, OpeningMarks o, Action<string, string> note)
+    {
+        var well = new JsonObject();
+        foreach (var (mark, key) in Marks.WellMarks)
+        {
+            var v = MarkReading.Value(e, mark);
+            switch (mark.Kind)
+            {
+                case MarkValueKind.YesNo when Marks.YesNo(v) is { } yes:
+                    well[key] = yes;
+                    break;
+                case MarkValueKind.Length when Marks.Length(v) is { } feet:
+                    well[key] = feet;
+                    break;
+                case MarkValueKind.Area when Marks.Area(v) is { } squareFeet:
+                    well[key] = squareFeet;
+                    break;
+                case MarkValueKind.Text when Marks.Text(v) is { } word:
+                    if (WellLadderWords.Table.Of(word) is { } said)
+                        well[key] = said;
+                    else
+                        note("stated_well." + key, $"{mark.Name} is \"{word}\", not one of: {WellLadderWords.Listed}");
+                    break;
+                default:
+                    if (o.Escape is true)
+                        note("stated_well." + key, mark.Name + " is not set");
+                    break;
+            }
+        }
+        return well;
     }
 
     /// <summary>The window's (or, with <paramref name="door"/>, the door's) values the stamp is checked against, read
@@ -855,6 +957,14 @@ public static class InteriorReader
             Out("leaves", d.Leaves is { } n
                 ? $"{Marks.DoorLeaves.Name} is {n.ToString(System.Globalization.CultureInfo.InvariantCulture)} on its type, not 1 or 2"
                 : Marks.DoorLeaves.Name + " is not set on its type");
+        // what latches or locks it (BCNYS 1010.2.8): sent only as one of the list's words; blank or another word is said
+        // and not sent, so the panic hardware rule needs review for it (never a pass)
+        if (d.Hardware is { } hardware)
+            door["hardware"] = hardware;
+        else
+            Out("hardware", d.HardwareWord is { } typed
+                ? $"{Marks.DoorHardware.Name} is \"{typed}\", not one of: {HardwareWords.Table.Listed}"
+                : Marks.DoorHardware.Name + " is not set");
         Out("threshold_top", "a door's drawn stops, hinge, leaf, threshold and head stop aren't read from its family (door " +
                              "families don't model them consistently): its maker's clear opening is read instead");
         if (records.Openings.FirstOrDefault(x => x.UniqueId == d.Id) is not { } rec)
@@ -892,12 +1002,13 @@ public static class InteriorReader
         var u = placed.Select(p => (p.X * along.X + p.Y * along.Y) / length).ToList();
         double width = u.Max() - u.Min(), height = placed.Max(p => p.Z) - placed.Min(p => p.Z);
         double clearWidth = now.ClearWidth!.Value, clearHeight = now.ClearHeight!.Value;
-        evidence[e.UniqueId] = new JsonObject
-        {
-            ["placed"] = new JsonObject { ["width"] = width, ["height"] = height },
-            ["wall_opening_by"] = rec.WallOpeningBy,
-            ["revit_layer"] = new JsonArray(rec.Diagnostics.Select(x => (JsonNode?)x).ToArray()),
-        };
+        // added to what is kept of the door already (its ground, read with it as an opening: review round 1), never in
+        // its place
+        if (evidence[e.UniqueId] is not JsonObject kept)
+            evidence[e.UniqueId] = kept = new JsonObject();
+        kept["placed"] = new JsonObject { ["width"] = width, ["height"] = height };
+        kept["wall_opening_by"] = rec.WallOpeningBy;
+        kept["revit_layer"] = new JsonArray(rec.Diagnostics.Select(x => (JsonNode?)x).ToArray());
         if (clearWidth > width + Sixteenth || clearHeight > height + Sixteenth)
         {
             why = $"its clear opening ({ClearStamp.Inches(clearWidth)} by {ClearStamp.Inches(clearHeight)}) doesn't fit inside the door " +
