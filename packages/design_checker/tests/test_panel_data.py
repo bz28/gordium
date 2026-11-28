@@ -97,16 +97,17 @@ def test_a_dead_end_that_fails_says_how_far_over_and_one_that_complies_its_room(
 
 def test_the_remoteness_limit_is_said_as_a_length(maine):
     """IBC 1015.2.1: exits at least 1/2 the diagonal apart (unsprinklered). day_care(branch=26) measures the exits 72
-    ft apart (nearest edges) against a 79.31 ft diagonal: the limit is 39.66 ft (79.31 / 2, rounded up), the room
-    72 - 39.655 = 32.345, said 32.34 (rounded down). A flag rule: never "complies", the room "if confirmed"."""
+    ft apart (nearest edges) against an 86.29 ft diagonal (its outline holds the corridor's branch, 2026-11-28): the
+    limit is 43.15 ft (86.29 / 2, rounded up), the room 72 - 43.145 = 28.855, said 28.85 (rounded down). A flag
+    rule: never "complies", the room "if confirmed"."""
     items = _items(maine, day_care(branch=26))
     row, = _of(items, "general.ibc_1015_2_1_remoteness")
     got = row["limit_length"]
     assert row["status"] == present.REVIEW
     assert got["measured"] / got["of"] == pytest.approx(got["measured"] / got["of"])
     assert got["limit"] == pytest.approx(got["of"] / 2) and got["ratio"] == 0.5 and got["unit"] == "ft"
-    assert got["words"] == "exits 72 ft apart, needs ≥ 39.66 ft (1/2 of the 79.31 ft diagonal)"
-    assert row["how_far"] == "32.34 ft to spare if confirmed"
+    assert got["words"] == "exits 72 ft apart, needs ≥ 43.15 ft (1/2 of the 86.29 ft diagonal)"
+    assert row["how_far"] == "28.85 ft to spare if confirmed"
 
 
 def test_no_length_is_made_from_a_ratio_its_lengths_dont_give():

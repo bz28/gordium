@@ -23,9 +23,9 @@ NEW_DAY_CARE = {"nfpa_day_care_occupancy": True, "day_care_existing": False, "sp
                 "sprinklered_903_3_1_2": False}
 
 
-def outlined(d, x1, y1):
-    d["story_outlines"] = [{"level": "L1", "outer": [list(p) for p in rect(-0.5, -0.5, x1 + 0.5, y1 + 0.5)],
-                            "inner": [list(p) for p in rect(0, 0, x1, y1)]}]
+def outlined(d, x1, y1, y0=0):
+    d["story_outlines"] = [{"level": "L1", "outer": [list(p) for p in rect(-0.5, y0 - 0.5, x1 + 0.5, y1 + 0.5)],
+                            "inner": [list(p) for p in rect(0, y0, x1, y1)]}]
     return d
 
 
@@ -55,7 +55,8 @@ def day_care(branch=None, classroom_in_branch=False, unknown=False):
     d = description([room("c", corridor, name="Corridor")] + rooms, doors)
     if unknown:
         d["unknown_spaces"] = [{"id": "q", "name": "Space 9", "level": "L1"}]
-    return outlined(d, 78 if classroom_in_branch else east, 30)
+    # the story's outline holds the branch too (a branch reaching south of y 0 lay outside it, a diagonal too short)
+    return outlined(d, 78 if classroom_in_branch else east, 30, min(0, 11 - branch) if branch is not None else 0)
 
 
 @pytest.fixture(scope="module")
