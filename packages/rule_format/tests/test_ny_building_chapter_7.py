@@ -19,7 +19,7 @@ LABELS = NY / "3_section_labels/gov.ny.building.2025.yaml"
 CHAPTER_7 = re.compile(r"(Table )?7\d\d(\.\d+)*(\(\d\))?$")       # 707.6, Table 716.1(2)
 # The only facts a Chapter 7 flag may be narrowed by, each one the architect states (never a fact the model could get
 # wrong): a corridor's stated rating (Table 716.1(2)'s corridor row), the sprinkler system and group (716.2.2.3's
-# exception), an ambulatory care facility (709.5.1)
+# and 705.9.5's exceptions), an ambulatory care facility (709.5.1)
 NARROWED_BY = {"corridor_fire_rating_hours", "sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "occupancy_group",
                "ambulatory_care_facility"}
 
@@ -166,7 +166,7 @@ def test_every_chapter_7_flag_is_a_persons_check_for_every_building(labels, book
                 assert row["outcome"] == "needs_review", r["id"]
             else:
                 assert outcome(r, {}, allowed) == "needs_review", r["id"]
-    assert sorted(narrowed) == ["general.bc_709_5_1_i2_smoke_barrier_doors", "general.bc_710_5_3_i2_pass_through_openings",
+    assert sorted(narrowed) == ["general.bc_705_9_5_vertical_separation", "general.bc_709_5_1_i2_smoke_barrier_doors", "general.bc_710_5_3_i2_pass_through_openings",
                                 "general.bc_716_2_2_3_exit_enclosure_door_temperature_rise",
                                 "general.bc_table_716_1_2__corridors"]
 
@@ -577,3 +577,106 @@ def test_part_d_review_round_4s_notes(book):
         assert not re.search(r"(?<!listed )putty pads", note), r["id"]                      # review round 5
         assert "cellulose" not in note or "cellulose loose-fill" in note, r["id"]
         assert not re.search(r"(?<!solid )fireblock", note), r["id"]
+
+
+# Tables 705.5 and 705.9, typed row by row from the page images (PDF pp.165-167; never from the rules or the extracted
+# text): each row's own words in the flag's note (an anchor that starts the row's clause) and what the page prints for
+# that row, each looked for only inside the row's own clause, as CHART_716
+CHART_705 = {
+    "general.bc_table_705_5_exterior_wall_ratings": [
+        ("in three columns", ["Group H (note e)", "Groups F-1, M and S-1 (note f)",
+                              "Groups A, B, E, F-2, I, R (note i), S-2 and U (note h)"]),
+        ("X less than 5 (note b)", ["every type 3, 2 and 1"]),
+        ("X 5 or more and less than 10", ["Types IA and IVA 3, 2 and 1", "other types 2, 1 and 1"]),
+        ("X 10 or more and less than 30", ["Types IA, IB, IVA and IVB 2, 1 and 1 (note c)", "Types IIB and VB 1, 0 and 0",
+                                           "other types 1, 1 and 1 (note c)"]),
+        ("X 30 or more", ["every type 0, 0 and 0"]),
+        ("Note a:", ["load-bearing exterior walls also meet Table 601"]),
+        ("Note c:", ["open parking garages complying with 406 need no rating"]),
+        ("Note g:", ["unlimited unprotected openings, the rating is 0 hours"]),
+        ("Note h:", ["only a Group U private garage or carport", "5 feet or more"]),
+        ("Note i:", ["Group R-3 building of Type II-B or V-B", "5 feet or more"])],
+    "general.bc_table_705_9_exterior_wall_openings": [
+        ("unprotected in a building not sprinklered", ["903.3.1.1 (UP, NS)"]),
+        ("unprotected in a building sprinklered", ["903.3.1.1 (UP, S, note i: not for Groups H-1, H-2 and H-3",
+                                                  "an NFPA 13R or 13D system is not 903.3.1.1's"]),
+        ("0 to less than 3 (notes b, c, k)", ["UP, NS, UP, S and P all not permitted (note k)"]),
+        ("3 to less than 5 (notes d, e)", ["UP, NS not permitted", "UP, S 15%", "P 15%"]),
+        ("5 to less than 10 (notes e, f, j)", ["UP, NS 10% (note h)", "UP, S 25%", "P 25%"]),
+        ("10 to less than 15 (notes e, f, g, j)", ["UP, NS 15% (note h)", "UP, S 45%", "P 45%"]),
+        ("15 to less than 20 (notes f, g, j)", ["UP, NS 25%", "UP, S 75%", "P 75%"]),
+        ("20 to less than 25 (notes f, g, j)", ["UP, NS 45%", "UP, S no limit", "P no limit"]),
+        ("25 to less than 30 (notes f, g, j)", ["UP, NS 70%", "UP, S no limit", "P no limit"]),
+        ("30 or greater", ["no limit for each"]),
+        ("Note d:", ["at most 25 percent", "Group R-3"]),
+        ("Note e:", ["less than 15 feet for Group H-2 and H-3"]),
+        ("Note f:", ["no limit", "Group R-3", "5 feet or more"]),
+        ("Note g:", ["open parking garage per 406.5", "10 feet or more"]),
+        ("Note j:", ["only a Group U private garage or carport", "5 feet or more"]),
+        ("Note k:", ["705.3 exception 2"])],
+}
+
+
+def _chart_705_misses(notes: dict) -> list:
+    out = []
+    for rid, rows in CHART_705.items():
+        note = " ".join(notes[rid].split())
+        for anchor, values in rows:
+            if anchor not in note:
+                out.append((rid, anchor))
+                continue
+            clause = _clause(note, anchor)
+            out += [(rid, anchor, v) for v in values if v not in clause]
+    return out
+
+
+def test_table_705s_flags_chart_match_the_page(book):
+    """Part e1: each row of Tables 705.5 and 705.9, typed from the page images, is in its flag's shown note with the
+    hours or percentages the page prints, inside that row's own clause; Table 705.9's sprinklered column is
+    903.3.1.1's alone (its UP, S key), so the note says an NFPA 13R system is not one."""
+    notes = {rid: _shown_note([r for r in book if r["id"] == rid][0]) for rid in CHART_705}
+    assert _chart_705_misses(notes) == []
+
+
+def test_the_705_chart_catches_a_row_changed(book):
+    """The pin: a cell, a note letter or a column changed in a copy of the notes is caught."""
+    notes = {rid: " ".join(_shown_note([r for r in book if r["id"] == rid][0]).split()) for rid in CHART_705}
+    ratings, openings = "general.bc_table_705_5_exterior_wall_ratings", "general.bc_table_705_9_exterior_wall_openings"
+    changes = [(ratings, "Types IA and IVA 3, 2 and 1", "Types IA and IVA 2, 2 and 1"),
+               (ratings, "other types 2, 1 and 1;", "other types 1, 1 and 1;"),
+               (ratings, "Types IIB and VB 1, 0 and 0", "Types IIB and VB 1, 1 and 0"),
+               (ratings, "IVB 2, 1 and 1 (note c)", "IVB 2, 1 and 1"),
+               (ratings, "every type 3, 2 and 1", "every type 2, 2 and 1"),
+               (ratings, "every type 0, 0 and 0", "every type 1, 0 and 0"),
+               (ratings, "R (note i), S-2", "R, S-2"),
+               (openings, "UP, NS 10% (note h)", "UP, NS 15% (note h)"),
+               (openings, "UP, S 45%, P 45%", "UP, S 45%, P 75%"),
+               (openings, "UP, NS 70%", "UP, NS 45%"),
+               (openings, "UP, NS not permitted, UP, S 15%", "UP, NS 15%, UP, S 15%"),
+               (openings, "UP, S 75%", "UP, S no limit"),
+               (openings, "an NFPA 13R or 13D system is not 903.3.1.1's", "an NFPA 13D system is not 903.3.1.1's")]
+    for rid, a, b in changes:
+        assert a in notes[rid], a
+        assert _chart_705_misses({**notes, rid: notes[rid].replace(a, b, 1)}), (rid, a)
+
+
+def test_705_9_5s_exceptions_need_a_stated_fact(book, ctx):
+    """705.9.5's vertical separation is set aside only where the architect states a sprinkler system throughout per
+    903.3.1.1, or per 903.3.1.2 in Group R (an NFPA 13R system counts only where 903.3.1.2 allows it); a 13R system in
+    another group or a building of two or more groups, no system, or nothing stated, leave it a person's check, never
+    not applicable. Exception 1 (three stories or less) stays in the flag's words: the stories set nothing aside."""
+    [r] = [r for r in book if r["id"] == "general.bc_705_9_5_vertical_separation"]
+    allowed = ctx.allowed()
+    for group in ("R-1", "R-2", "R-3", "R-4"):
+        assert outcome(r, {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True, "occupancy_group": group},
+                       allowed) == "not_applicable", group
+    for group in ("B", "M", "I-2", "mixed"):
+        assert outcome(r, {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True, "occupancy_group": group},
+                       allowed) == "needs_review", group
+        assert outcome(r, {"sprinklered_903_3_1_1": True, "occupancy_group": group}, allowed) == "not_applicable", group
+    for given in ({}, {"occupancy_group": "R-2"}, {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": False,
+                                                   "occupancy_group": "R-2"}, {"sprinklered_903_3_1_2": True},
+                  {"sprinklered_903_3_1_1": False, "occupancy_group": "B", "stories_above_grade_plane": 2}):
+        assert outcome(r, given, allowed) == "needs_review", given
+    note = " ".join(_shown_note(r).split())
+    assert "three stories or less above grade plane" in note and "open parking garages" in note

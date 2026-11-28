@@ -238,9 +238,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     nontransient hotel is Group R-2, 310.3), 907.2.10.2's battery storage and 907.5.2.2's five while the voice/alarm
     system isn't stated (467). Part e adds the standpipe, smoke control, smokeproof enclosure and fire command center
     flags but Group A's standpipes (494). The merge of main's section group 9h shows 903.2.1.5.1's
-    grandstands too, an assembly space not ruled out (495)."""
+    grandstands too, an assembly space not ruled out (495). Chapter 7 part e1 (2026-11-28) adds 705's nineteen exterior
+    wall flags, 705.9.5's vertical separation among them (no sprinkler system stated: its exception 2 isn't taken) (514)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 495 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 514 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
     # review round 4 of section group 9g: the docstring's per-section counts for 9g, pinned
     from collections import Counter
     assert Counter(i["code"]["section"].split(".")[0] for i in flags

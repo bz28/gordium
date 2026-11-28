@@ -5274,7 +5274,7 @@ rules:
       unless the building official accepts that it was tested with its weaker face to the fire; exterior walls go by 705.5
       instead: which walls are built so, and how they were tested, isn''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. Brought in alone because 713.4 says shaft enclosures
-    meet it; 705.5 is not brought in.
+    meet it; 705.5 is brought in (Chapter 7 part e1's flag).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_703_5_marking
@@ -5304,6 +5304,665 @@ rules:
       SMOKE BARRIER - PROTECT ALL OPENINGS": signs aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. A requirement for every rated wall, the exit
     enclosures' and rated corridors' among them; shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_3_buildings_on_the_same_lot
+  kind: flag
+  topic: means_of_egress
+  title: Buildings on the same lot, an imaginary line between them (BCNYS 705.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 164
+    lines:
+    - 23
+    - 37
+    quote: '705.3 Buildings on the same lot. For the purposes of determining the required wall and opening protection, projections
+      and roof- covering requirements, buildings on the same lot shall be assumed to have an imaginary line between them.
+      Where a new building is to be erected on the same lot as an existing building, the location of the assumed imaginary
+      line with rela- tion to the existing building shall be such that the exterior wall and opening protection of the existing
+      building meet the criteria as set forth in Sections 705.5 and 705.9. Exceptions: 1. Two or more buildings on the same
+      lot shall be either regulated as separate buildings or shall be considered as portions of one building if the aggregate
+      area of such buildings is within the limits specified in Chapter 5 for a single building. Where the buildings contain
+      different occupancy groups or are of different types of construction, the area shall be that allowed for the most restrictive
+      occupancy or construction. 2. Where an S-2 parking garage of Construction Type I or IIA is erected on the same lot as
+      a Group R-2 building, and there is no fire separation distance between these buildings, then the adjoining exterior
+      walls between the buildings are permitted to have occupant use openings in accordance with Section 706.8. However, opening
+      protectives in such openings shall only be required in the exterior wall of the S-2 parking garage, not in the exterior
+      wall openings in the R-2 building, and these open- ing protectives in the exterior wall of the S-2 parking garage shall
+      be not less than 1 1/2-hour fire protection rating.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Buildings on the same lot are assumed to have an imaginary line between them for their required wall and opening
+      protection, projections and roof coverings; where a new building is erected on the same lot as an existing one, the
+      line sits so that the existing building''s exterior wall and opening protection meet 705.5 and 705.9; but two or more
+      buildings on the same lot are either regulated as separate buildings or considered portions of one building where their
+      aggregate area is within Chapter 5''s limits for a single building (the most restrictive group''s or type of construction''s
+      area where they differ); and where an S-2 parking garage of Type I or IIA construction is on the same lot as a Group
+      R-2 building with no fire separation distance between them, the adjoining exterior walls may have occupant use openings
+      per 706.8, opening protectives required only in the garage''s exterior wall, rated at least 1 1/2 hours: the buildings
+      on the lot aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Chapter 5 and 706.8 aren't brought in. 1021.4's
+    and 1027.5's "other buildings on the same lot" turn on this line. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_5_exterior_wall_ratings
+  kind: flag
+  topic: means_of_egress
+  title: Exterior wall ratings by construction and separation distance (BCNYS 705.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 164
+    lines:
+    - 39
+    - 43
+    quote: 705.5 Fire-resistance ratings. Exterior walls shall be fire-resistance rated in accordance with Table 601, based
+      on the type of construction, and Table 705.5, based on the fire separation distance. The required fire-resistance rating
+      of exterior walls with a fire separation distance of greater than 10 feet (3048 mm) shall be rated for exposure to fire
+      from the inside. The required fire-resistance rating of exterior walls with a fire separation distance of less than
+      or equal to 10 feet (3048 mm) shall be rated for exposure to fire from both sides.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Exterior walls are rated per Table 601 by the type of construction and per Table 705.5 by the fire separation distance;
+      a wall with a fire separation distance of more than 10 feet is rated for exposure to fire from the inside, one of 10
+      feet or less for exposure to fire from both sides: the walls'' ratings, the type of construction and the distances aren''t
+      in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 601 isn''t brought in; Table 705.5
+    is (its own flag). Shown for every building: an exit stairway''s or exit passageway''s exterior walls meet 705 (1023.7,
+    1024.8).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_705_5_exterior_wall_ratings
+  kind: flag
+  topic: means_of_egress
+  title: Exterior wall ratings by fire separation distance (BCNYS Table 705.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 165
+    lines:
+    - 3
+    - 27
+    quote: 'TABLE 705.5—FIRE-RESISTANCE RATING REQUIREMENTS FOR EXTERIOR WALLS BASED ON FIRE SEPARATION DISTANCE [fna,] [fnd,]
+      [fng] FIRE SEPARATION TYPE OF OCCUPANCY GROUP OCCUPANCY GROUP A, OCCUPANCY GROUP H [fne] DISTANCE = X (feet) CONSTRUCTION
+      F-1, M, S-1 [fnf] B, E, F-2, I, R[fni], S-2, U [fnh] X < 5 [fnb] All 3 2 1 IA, IVA 3 2 1 5 ≤ X < 10 Others 2 1 1 IA,
+      IB, IVA, IVB 2 1 1 [fnc] 10 ≤ X < 30 IIB, VB 1 0 0 Others 1 1 1 [fnc] X ≥ 30 All 0 0 0 For SI: 1 foot = 304.8 mm. a.Load-bearing
+      exterior walls shall also comply with the fire-resistance rating requirements of Table 601. b.See Section 706.1.1 for
+      party walls. c. Open parking garages complying with Section 406 shall not be required to have a fire-resistance rating.
+      d.The fire-resistance rating of an exterior wall is determined based upon the fire separation distance of the exterior
+      wall and the story in which the wall is located. e.For special requirements for Group H occupancies, see Section 415.6.
+      f. For special requirements for Group S aircraft hangars, see Section 412.3.1. g.Where Section 705.9.1 permits nonbearing
+      exterior walls with unlimited area of unprotected openings, the required fire-resistance rating for the exterior walls
+      is 0 hours. h.For a building containing only a Group U occupancy private garage or carport, the exterior wall shall
+      not be required to have a fire-resistance rating where the fire separation distance is 5 feet (1523 mm) or greater.
+      i. For a Group R-3 building of Type II-B or Type V-B construction, the exterior wall shall not be required to have a
+      fire-resistance rating where the fire separation distance is 5 feet (1523 mm) or greater.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Table 705.5 (notes a, d and g on the whole table) gives an exterior wall''s rating in hours by its fire separation
+      distance X in feet, the type of construction and the group, in three columns: Group H (note e), Groups F-1, M and S-1
+      (note f), Groups A, B, E, F-2, I, R (note i), S-2 and U (note h). X less than 5 (note b): every type 3, 2 and 1; X 5
+      or more and less than 10: Types IA and IVA 3, 2 and 1, other types 2, 1 and 1; X 10 or more and less than 30: Types
+      IA, IB, IVA and IVB 2, 1 and 1 (note c), Types IIB and VB 1, 0 and 0, other types 1, 1 and 1 (note c); X 30 or more:
+      every type 0, 0 and 0. Note a: load-bearing exterior walls also meet Table 601''s ratings. Note b: see 706.1.1 for party
+      walls. Note c: open parking garages complying with 406 need no rating. Note d: a wall''s rating is set by its own fire
+      separation distance and the story it is in. Note e: Group H''s special requirements, 415.6. Note f: Group S aircraft
+      hangars'' special requirements, 412.3.1. Note g: where 705.9.1 permits nonbearing exterior walls with unlimited unprotected
+      openings, the rating is 0 hours. Note h: a building containing only a Group U private garage or carport needs no rating
+      where the fire separation distance is 5 feet or more. Note i: a Group R-3 building of Type II-B or V-B construction
+      needs no rating where the fire separation distance is 5 feet or more. The walls, their distances and the type of construction
+      aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 601, 706.1.1, 415.6 and 412.3.1 aren't
+    brought in; of Section 406 only 406.4.3 and 406.5.7 are (Chapter 4 part f). Typed row by row from the page image (p.165);
+    the walls' ratings are a person's check, so the table is used by no rule. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_6_exterior_wall_continuity
+  kind: flag
+  topic: means_of_egress
+  title: An exterior wall's rating continuous floor to floor (BCNYS 705.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 165
+    lines:
+    - 28
+    - 33
+    quote: '705.6 Continuity. The fire-resistance rating of exterior walls shall extend from the top of the foundation or
+      floor/ceiling assembly below to one of the following: 1. The underside of the floor sheathing, roof sheathing, deck
+      or slab above. 2. The underside of a floor/ceiling or roof/ceiling assembly having a fire-resistance rating equal to
+      or greater than the exterior wall and the fire separation distance is greater than 10 feet. Parapets shall be provided
+      as required by Section 705.12.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An exterior wall''s fire-resistance rating extends from the top of the foundation or the floor/ceiling assembly
+      below to the underside of the floor sheathing, roof sheathing, deck or slab above, or to the underside of a floor/ceiling
+      or roof/ceiling assembly rated equal to or more than the exterior wall where the fire separation distance is more than
+      10 feet; parapets are provided as 705.12 requires: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 705.12 is brought in (its own flag). Shown
+    for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_7_structural_stability
+  kind: flag
+  topic: means_of_egress
+  title: What braces an exterior wall has its rating (BCNYS 705.7)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 165
+    lines:
+    - 34
+    - 37
+    quote: 705.7 Structural stability. Interior structural elements that brace the exterior wall but that are not located
+      within the plane of the exterior wall shall have the minimum fire-resistance rating required in Table 601 for that structural
+      element. Structural elements that brace the exterior wall but are located outside of the exterior wall or within the
+      plane of the exterior wall shall have the minimum fire- resistance rating required in Table 601 and Table 705.5 for
+      the exterior wall.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Interior structural elements that brace an exterior wall but are not within its plane have the rating Table 601
+      requires for that element; structural elements that brace it from outside the wall or within its plane have the rating
+      Table 601 and Table 705.5 require for the exterior wall: the structure isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 601 isn't brought in; Table 705.5 is
+    (its own flag). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_7_1_type_iii_floor_assemblies
+  kind: flag
+  topic: means_of_egress
+  title: Floors carrying an exterior wall in Type III construction (BCNYS 705.7.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 165
+    lines:
+    - 38
+    - 44
+    quote: 705.7.1 Floor assemblies in Type III construction. In Type III construction where a floor assembly supports gravity
+      loads from an exterior wall, the fire-resistance rating of the portion of the floor assembly that supports the exterior
+      wall shall be not less than the fire-resistance rating required for the exterior wall in Table 601. The fire-resistance
+      rating provided by the portion of the floor assembly supporting and within the plane of the exterior wall shall be permitted
+      to include the contribution of the ceiling membrane when considering exposure to fire from the inside. Where a floor
+      assembly supports gravity loads from an exterior wall, the building elements of the floor construction within the plane
+      of the exterior wall, including but not limited to rim joists, rim boards and blocking, shall be in accordance with
+      the requirements for interior building elements of Type III construction.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In Type III construction, where a floor assembly carries gravity loads from an exterior wall, the part of the floor
+      assembly supporting the wall is rated at least as Table 601 requires for the exterior wall (the part supporting it and
+      within its plane may count the ceiling membrane for exposure to fire from the inside), and the building elements of
+      the floor within the wall''s plane, rim joists, rim boards and blocking among them, meet the requirements for interior
+      building elements of Type III construction: a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 601 isn''t brought in. Shown for every
+    building: the type of construction isn''t a stated fact.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_8_unexposed_surface_temperature
+  kind: flag
+  topic: means_of_egress
+  title: An exterior wall's unexposed surface temperature and Equation 7-1 (BCNYS 705.8)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 165
+    lines:
+    - 45
+    - 61
+    quote: '705.8 Unexposed surface temperature. Where protected openings are not limited by Section 705.9, the limitation
+      on the rise of temperature on the unexposed surface of exterior walls as required by ASTM E119 or UL 263 shall not apply.
+      Where protected open- ings are limited by Section 705.9, the limitation on the rise of temperature on the unexposed
+      surface of exterior walls as required by ASTM E119 or UL 263 shall not apply provided that a correction is made for
+      radiation from the unexposed exterior wall surface in accordance with the following formula: Equation 7-1 A = A + (A
+      × F ) e f eo where: A = Equivalent area of protected openings. e A = Actual area of protected openings. A = Area of
+      exterior wall surface in the story under consideration exclusive of openings, on which the temperature limitations f
+      of ASTM E119 or UL 263 for walls are exceeded. F = An “equivalent opening factor” derived from Figure 705.8 based on
+      the average temperature of the unexposed wall eo surface and the fire-resistance rating of the wall.'
+  - file: gov.ny.building.2025.pdf
+    page: 166
+    lines:
+    - 3
+    - 4
+    quote: FIGURE 705.8—EQUIVALENT OPENING FACTOR For SI:°C = [(°F) - 32]/1.8.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where protected openings are not limited by 705.9, the limit on the temperature rise of an exterior wall''s unexposed
+      surface required by ASTM E119 or UL 263 does not apply; where 705.9 limits them, it does not apply provided a correction
+      is made for radiation from the unexposed wall surface by Equation 7-1, Ae = A + (Af x Feo): Ae the equivalent area of
+      protected openings, A their actual area, Af the area of the wall surface in the story, openings excluded, on which ASTM
+      E119''s or UL 263''s temperature limits for walls are exceeded, and Feo the equivalent opening factor from Figure 705.8
+      by the unexposed surface''s average temperature and the wall''s rating: the walls and their openings aren''t in the
+      model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. ASTM E119 and UL 263 aren't brought in. Figure
+    705.8 (a chart of the equivalent opening factor against temperature, one curve per rating of 1 to 4 hours) is read on
+    the page. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_705_9_exterior_wall_openings
+  kind: flag
+  topic: means_of_egress
+  title: Exterior wall openings' area by fire separation distance (BCNYS Table 705.9)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 166
+    lines:
+    - 6
+    - 29
+    quote: TABLE 705.9—MAXIMUM AREA OF EXTERIOR WALL OPENINGS BASED ON FIRE SEPARATION DISTANCE AND DEGREE OF OPENING PROTECTION
+      FIRE SEPARATION DISTANCE (feet) DEGREE OF OPENING PROTECTION ALLOWABLE AREA[fna] Unprotected, Nonsprinklered (UP, NS)
+      Not Permitted[fnk] 0 to less than 3[fnb,] [fnc,] [fnk] Unprotected, Sprinklered (UP, S)[fni] Not Permitted[fnk] Protected
+      (P) Not Permitted[fnk] Unprotected, Nonsprinklered (UP, NS) Not Permitted 3 to less than 5[fnd,] [fne] Unprotected,
+      Sprinklered (UP, S)[fni] 15% Protected (P) 15% Unprotected, Nonsprinklered (UP, NS) 10%[fnh] 5 to less than 10[fne,]
+      [fnf,] [fnj] Unprotected, Sprinklered (UP, S)[fni] 25% Protected (P) 25% Unprotected, Nonsprinklered (UP, NS) 15%[fnh]
+      10 to less than 15[fne,] [fnf,] [fng,] [fnj] Unprotected, Sprinklered (UP, S)[fni] 45% Protected (P) 45% Unprotected,
+      Nonsprinklered (UP, NS) 25% 15 to less than 20[fnf,] [fng,] [fnj] Unprotected, Sprinklered (UP, S)[fni] 75% Protected
+      (P) 75% Unprotected, Nonsprinklered (UP, NS) 45% 20 to less than 25[fnf,] [fng,] [fnj] Unprotected, Sprinklered (UP,
+      S)[fni] No Limit Protected (P) No Limit Unprotected, Nonsprinklered (UP, NS) 70% 25 to less than 30[fnf,] [fng,] [fnj]
+      Unprotected, Sprinklered (UP, S)[fni] No Limit Protected (P) No Limit
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 3
+    - 23
+    quote: 'TABLE 705.9—MAXIMUM AREA OF EXTERIOR WALL OPENINGS BASED ON FIRE SEPARATION DISTANCE AND DEGREE OF OPENING PROTECTION
+      (Continued) FIRE SEPARATION DISTANCE (feet) DEGREE OF OPENING PROTECTION ALLOWABLE AREA[fna] Unprotected, Nonsprinklered
+      (UP, NS) No Limit 30 or greater Unprotected, Sprinklered (UP, S)[fni] No Limit Protected (P) No Limit For SI: 1 foot
+      = 304.8 mm. UP, NS = Unprotected openings in buildings not equipped throughout with an automatic sprinkler system in
+      accordance with Section 903.3.1.1. UP, S = Unprotected openings in buildings equipped throughout with an automatic sprinkler
+      system in accordance with Section 903.3.1.1. P = Openings protected with an opening protective assembly in accordance
+      with Section 705.9.2. a.Values indicated are the percentage of the area of the exterior wall, per story. b.For the requirements
+      for fire walls of buildings with differing heights, see Section 706.6.1. c. For openings in a fire wall for buildings
+      on the same lot, see Section 706.8. d.The maximum percentage of unprotected and protected openings shall be 25 percent
+      for Group R-3 occupancies. e.Unprotected openings shall not be permitted for openings with a fire separation distance
+      of less than 15 feet for Group H-2 and H-3 occupancies. f. The area of unprotected and protected openings shall not
+      be limited for Group R-3 occupancies, with a fire separation distance of 5 feet or greater. g.The area of openings in
+      an open parking garage in accordance with Section 406.5 with a fire separation distance of 10 feet or greater shall
+      not be limited. h.Includes buildings accessory to Group R-3. i. Not applicable to Group H-1, H-2 and H-3 occupancies.
+      j. The area of openings in a building containing only a Group U occupancy private garage or carport with a fire separation
+      distance of 5 feet or greater shall not be limited. k.For openings between S-2 parking garage and Group R-2 building,
+      see Section 705.3, Exception 2.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Table 705.9 gives the most area of openings in an exterior wall, as a percentage of the wall''s area per story
+      (note a), by the fire separation distance in feet and the openings'' protection: unprotected in a building not sprinklered
+      throughout per 903.3.1.1 (UP, NS), unprotected in a building sprinklered throughout per 903.3.1.1 (UP, S, note i: not
+      for Groups H-1, H-2 and H-3; an NFPA 13R or 13D system is not 903.3.1.1''s), and protected per 705.9.2 (P). 0 to less
+      than 3 (notes b, c, k): UP, NS, UP, S and P all not permitted (note k); 3 to less than 5 (notes d, e): UP, NS not permitted,
+      UP, S 15%, P 15%; 5 to less than 10 (notes e, f, j): UP, NS 10% (note h), UP, S 25%, P 25%; 10 to less than 15 (notes
+      e, f, g, j): UP, NS 15% (note h), UP, S 45%, P 45%; 15 to less than 20 (notes f, g, j): UP, NS 25%, UP, S 75%, P 75%;
+      20 to less than 25 (notes f, g, j): UP, NS 45%, UP, S no limit, P no limit; 25 to less than 30 (notes f, g, j): UP,
+      NS 70%, UP, S no limit, P no limit; 30 or greater: no limit for each. Note b: fire walls of buildings with differing
+      heights, 706.6.1. Note c: openings in a fire wall for buildings on the same lot, 706.8. Note d: at most 25 percent of
+      unprotected and protected openings for Group R-3 occupancies. Note e: unprotected openings are not permitted with a
+      fire separation distance of less than 15 feet for Group H-2 and H-3 occupancies. Note f: no limit on unprotected and
+      protected openings for Group R-3 occupancies with a fire separation distance of 5 feet or more. Note g: no limit on
+      the openings of an open parking garage per 406.5 with a fire separation distance of 10 feet or more. Note h: includes
+      buildings accessory to Group R-3. Note j: no limit on the openings of a building containing only a Group U private garage
+      or carport with a fire separation distance of 5 feet or more. Note k: openings between an S-2 parking garage and a Group
+      R-2 building, 705.3 exception 2. The walls, their openings and distances aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 706.6.1 and 706.8 aren't brought in; of 406.5
+    only 406.5.7 is (Chapter 4 part f). Typed row by row from the page images (pp.166-167); used by no rule. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_1_allowable_opening_area
+  kind: flag
+  topic: means_of_egress
+  title: Openings in each story within Table 705.9's area (BCNYS 705.9.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 24
+    - 35
+    quote: '705.9.1 Allowable area of openings. The maximum area of unprotected and protected openings permitted in an exterior
+      wall in any story of a building shall not exceed the percentages specified in Table 705.9 based on the fire separation
+      distance of each indi- vidual story. Exceptions: 1. In other than Group H occupancies, unlimited unprotected openings
+      are permitted in the first story above grade plane where the wall faces one of the following: 1.1. A street and has
+      a fire separation distance of more than 15 feet (4572 mm). 1.2. An unoccupied space. The unoccupied space shall be on
+      the same lot or dedicated for public use, shall be not less than 30 feet (9144 mm) in width and shall have access from
+      a street by a posted fire lane in accor- dance with the Fire Code of New York State. 2. Buildings whose exterior bearing
+      walls, exterior nonbearing walls and exterior primary structural frame are not required to be fire-resistance rated
+      shall be permitted to have unlimited unprotected openings.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The area of unprotected and protected openings in an exterior wall in any story is at most the percentage Table
+      705.9 gives for that story''s own fire separation distance; but, in other than Group H occupancies, unlimited unprotected
+      openings are permitted in the first story above grade plane where the wall faces a street and has a fire separation
+      distance of more than 15 feet, or faces an unoccupied space on the same lot or dedicated for public use, at least 30
+      feet wide, with access from a street by a posted fire lane per the Fire Code of New York State; and buildings whose
+      exterior bearing walls, exterior nonbearing walls and exterior primary structural frame need no rating may have unlimited
+      unprotected openings: the walls'' openings and distances aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. The Fire Code of New York State isn't brought
+    in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_2_protected_openings
+  kind: flag
+  topic: means_of_egress
+  title: Protected openings in exterior walls meet 716 (BCNYS 705.9.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 36
+    - 39
+    quote: '705.9.2 Protected openings. Where openings are required to be protected, opening protectives shall comply with
+      Section 716. Exception: Opening protectives are not required where the building is equipped throughout with an automatic
+      sprinkler system in accordance with Section 903.3.1.1 and the exterior openings are protected by a water curtain using
+      automatic sprin- klers approved for that use.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where openings in an exterior wall must be protected, their opening protectives meet Section 716; but none are
+      required where the building is equipped throughout with an automatic sprinkler system per 903.3.1.1 (an NFPA 13R or
+      13D system is not one) and the exterior openings are protected by a water curtain of automatic sprinklers approved for
+      that use: the openings and any water curtain aren''t in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Section 716 is brought in (Chapter 7 part
+    b''s flags). Shown for every building, a sprinklered one too: the water curtain isn''t a stated fact.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_3_unprotected_openings
+  kind: flag
+  topic: means_of_egress
+  title: Unprotected openings' windows and doors (BCNYS 705.9.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 40
+    - 41
+    quote: 705.9.3 Unprotected openings. Where unprotected openings are permitted, windows and doors shall be constructed
+      of any approved materials. Glazing shall conform to the requirements of Chapters 24 and 26.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where unprotected openings are permitted, their windows and doors are of any approved materials, the glazing per
+      Chapters 24 and 26: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Chapters 24 and 26 aren't brought in. Shown
+    for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_4_mixed_openings
+  kind: flag
+  topic: means_of_egress
+  title: Protected and unprotected openings together, Equation 7-2 (BCNYS 705.9.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 42
+    - 53
+    quote: '705.9.4 Mixed openings. Where both unprotected and protected openings are located in the exterior wall in any
+      story of a build- ing, the total area of openings shall be determined in accordance with the following: Equation 7-2
+      (A /a ) + (A /a ) ≤ 1 p p u u A = Actual area of protected openings, or the equivalent area of protected openings, A
+      (see Section 705.8). p e a = Allowable area of protected openings. p A = Actual area of unprotected openings. u a =
+      allowable area of unprotected openings. u'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where an exterior wall in any story has both unprotected and protected openings, their total area meets Equation
+      7-2, (Ap/ap) + (Au/au) at most 1: Ap the actual area of protected openings, or their equivalent area Ae (705.8), ap
+      the allowable area of protected openings, Au the actual area of unprotected openings, au the allowable area of unprotected
+      openings: the openings aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 705.8 is brought in (its own flag). Shown
+    for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_5_vertical_separation
+  kind: flag
+  topic: means_of_egress
+  title: Openings in adjacent stories separated vertically (BCNYS 705.9.5)
+  applies_when: not sprinklered_903_3_1_1 and not (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 167
+    lines:
+    - 54
+    - 65
+    quote: '705.9.5 Vertical separation of openings. Openings in exterior walls in adjacent stories shall be separated vertically
+      to protect against fire spread on the exterior of the buildings where the openings are within 5 feet (1524 mm) of each
+      other horizontally and the opening in the lower story is not a protected opening with a fire protection rating of not
+      less than 3/4 hour. Such openings shall be separated vertically not less than 3 feet (914 mm) by spandrel girders, exterior
+      walls or other similar assemblies that have a fire- resistance rating of not less than 1 hour, rated for exposure to
+      fire from both sides, or by flame barriers that extend horizontally not less than 30 inches (762 mm) beyond the exterior
+      wall. Flame barriers shall have a fire-resistance rating of not less than 1 hour. The unexposed surface temperature
+      limitations specified in ASTM E119 or UL 263 shall not apply to the flame barriers unless otherwise required by the
+      provisions of this code. Exceptions: 1. This section shall not apply to buildings that are three stories or less above
+      grade plane. 2. This section shall not apply to buildings equipped throughout with an automatic sprinkler system in
+      accordance with Section 903.3.1.1 or 903.3.1.2.'
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 3
+    - 3
+    quote: 3. Open parking garages.
+  examples:
+  - given:
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      occupancy_group: R-2
+    expect: needs_review
+    note: 'Openings in exterior walls in adjacent stories, within 5 feet of each other horizontally where the opening in the
+      lower story is not a protected opening rated at least 3/4 hour, are separated vertically at least 3 feet by spandrel
+      girders, exterior walls or other similar assemblies rated at least 1 hour for exposure to fire from both sides, or by
+      flame barriers extending at least 30 inches beyond the exterior wall, rated at least 1 hour (ASTM E119''s or UL 263''s
+      unexposed surface temperature limits don''t apply to flame barriers unless the code otherwise requires); but not in
+      buildings of three stories or less above grade plane, buildings equipped throughout with an automatic sprinkler system
+      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories, and in Group I-1
+      Condition 1, 903.2.6 exception 1), or open parking garages: with no such sprinkler system stated, a person''s check
+      (the openings and the stories above grade plane aren''t read here).'
+  - given:
+      sprinklered_903_3_1_1: true
+      occupancy_group: B
+    expect: not_applicable
+    note: 'A building stated sprinklered throughout per 903.3.1.1: exception 2 takes the section away.'
+  - given:
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'A Group R building stated sprinklered per 903.3.1.2 (NFPA 13R, which 903.3.1.2 allows in Group R): exception 2
+      applies.'
+  - given:
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      occupancy_group: B
+    expect: needs_review
+    note: 'An NFPA 13R system in a Group B building isn''t one 903.3.1.2 allows: exception 2 isn''t taken, a person''s check.'
+  - given:
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      occupancy_group: B
+    expect: needs_review
+    note: 'No sprinkler system: whether the building is three stories or less above grade plane, or an open parking garage,
+      is a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'No sprinkler system stated: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Exception 2 is read on the stated sprinkler
+    system (NFPA 13R counted only in Group R, as 716.2.2.3's flag reads it); exceptions 1 (three stories or less above grade
+    plane) and 3 (open parking garages) stay in the flag's words, a person's check. ASTM E119 and UL 263 aren't brought in;
+    903.3.1.1 and 903.3.1.2 are, alone.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_9_6_vertical_exposure
+  kind: flag
+  topic: means_of_egress
+  title: Openings above an adjacent roof on the same lot (BCNYS 705.9.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 4
+    - 14
+    quote: '705.9.6 Vertical exposure. For buildings on the same lot, opening protectives having a fire protection rating
+      of not less than 3/4 hour shall be provided in every opening that is less than 15 feet (4572 mm) vertically above the
+      roof of an adjacent building or structure based on assuming an imaginary line between them. The opening protectives
+      are required where the fire separation distances from the imaginary line to each building or structure are less than
+      15 feet (4572 mm). Exceptions: 1. Opening protectives are not required where the roof assembly of the adjacent building
+      or structure has a fire-resis- tance rating of not less than 1 hour for a minimum distance of 10 feet (3048 mm) from
+      the exterior wall facing the imaginary line and the entire length and span of the supporting elements for the fire-resistance-rated
+      roof assembly has a fire-resistance rating of not less than 1 hour. 2. Buildings on the same lot and considered as portions
+      of one building in accordance with Section 705.3 are not required to comply with Section 705.9.6.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'For buildings on the same lot, every opening less than 15 feet vertically above the roof of an adjacent building
+      or structure has an opening protective rated at least 3/4 hour, where the fire separation distances from the imaginary
+      line between them to each building or structure are less than 15 feet; but none is required where the adjacent roof
+      assembly is rated at least 1 hour for at least 10 feet from the exterior wall facing the imaginary line and the entire
+      length and span of its supporting elements are rated at least 1 hour, nor for buildings on the same lot considered portions
+      of one building per 705.3: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 705.3 is brought in (its own flag). Shown
+    for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_10_joints
+  kind: flag
+  topic: means_of_egress
+  title: Joints in rated exterior walls (BCNYS 705.10)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 15
+    - 17
+    quote: '705.10 Joints. Joints made in or between exterior walls required by this section to have a fire-resistance rating
+      shall comply with Section 715. Exception: Joints in exterior walls that are permitted to have unprotected openings.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Joints made in or between exterior walls this section requires to be rated meet Section 715, but not joints in
+      exterior walls permitted to have unprotected openings: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Section 715 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_10_1_voids
+  kind: flag
+  topic: means_of_egress
+  title: The void where a floor meets a curtain wall (BCNYS 705.10.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 18
+    - 19
+    quote: 705.10.1 Voids. The void created at the intersection of a floor/ceiling assembly and an exterior curtain wall assembly
+      shall be protected in accordance with Section 715.4.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The void where a floor/ceiling assembly meets an exterior curtain wall assembly is protected per 715.4: a person''s
+      check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. 715.4 isn't brought in. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_11_ducts
+  kind: flag
+  topic: means_of_egress
+  title: Ducts through rated exterior walls (BCNYS 705.11)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 20
+    - 22
+    quote: '705.11 Ducts and air transfer openings. Penetrations by air ducts and air transfer openings in fire-resistance-rated
+      exterior walls required to have protected openings shall comply with Section 717. Exception: Foundation vents installed
+      in accordance with this code are permitted.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Air ducts and air transfer openings penetrating rated exterior walls required to have protected openings meet Section
+      717; foundation vents installed per the code are permitted: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Section 717 isn't brought in. Shown for every
+    building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_12_parapets
+  kind: flag
+  topic: means_of_egress
+  title: Parapets on exterior walls, and when none is needed (BCNYS 705.12)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 23
+    - 48
+    quote: '705.12 Parapets. Parapets shall be provided on exterior walls of buildings. Exceptions: A parapet need not be
+      provided on an exterior wall where any of the following conditions exist: 1. The wall is not required to be fire-resistance
+      rated in accordance with Table 705.5 because of fire separation distance. 2. The building has an area of not more than
+      1,000 square feet (93 m[fn2]) on any floor. 3. Walls that terminate at roofs of not less than 2-hour fire-resistance-rated
+      construction or where the roof, including the deck or slab and supporting construction, is constructed entirely of noncombustible
+      materials. 4. One-hour fire-resistance-rated exterior walls that terminate at the underside of the roof sheathing, deck
+      or slab, provided that: 4.1. Where the roof/ceiling framing elements are parallel to the walls, such framing and elements
+      supporting such framing shall not be of less than 1-hour fire-resistance-rated construction for a width of 4 feet (1220
+      mm) for Groups R and U and 10 feet (3048 mm) for other occupancies, measured from the interior side of the wall. 4.2.
+      Where roof/ceiling framing elements are not parallel to the wall, the entire span of such framing and elements supporting
+      such framing shall not be of less than 1-hour fire-resistance-rated construction. 4.3. Openings in the roof shall not
+      be located within 5 feet (1524 mm) of the 1-hour fire-resistance-rated exterior wall for Groups R and U and 10 feet
+      (3048 mm) for other occupancies, measured from the interior side of the wall. 4.4. The entire building shall be provided
+      with not less than a Class B roof covering. 5. In Groups R-2 and R-3 where the entire building is provided with a Class
+      C roof covering, the exterior wall shall be permit- ted to terminate at the underside of the roof sheathing or deck
+      in Types III, IV and V construction, provided that one or both of the following criteria is met: 5.1. The roof sheathing
+      or deck is constructed of approved noncombustible materials or of fire-retardant-treated wood for a distance of 4 feet
+      (1220 mm). 5.2. The roof is protected with 0.625-inch (16 mm) Type X gypsum board directly beneath the underside of
+      the roof sheathing or deck, supported by not less than nominal 2-inch (51 mm) ledgers attached to the sides of the roof
+      framing members for a minimum distance of 4 feet (1220 mm). 6. Where the wall is permitted to have not less than 25
+      percent of the exterior wall areas containing unprotected openings based on fire separation distance as determined in
+      accordance with Section 705.9.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Exterior walls of buildings have parapets, except where: the wall needs no rating by Table 705.5 because of its
+      fire separation distance; the building has at most 1,000 square feet on any floor; the walls end at roofs of at least
+      2-hour rated construction, or at a roof (deck or slab and supporting construction included) entirely of noncombustible
+      materials; 1-hour rated exterior walls end at the underside of the roof sheathing, deck or slab, provided roof/ceiling
+      framing parallel to the wall, and what supports it, is at least 1-hour rated for a width of 4 feet (Groups R and U)
+      or 10 feet (other occupancies) from the wall''s interior side, framing not parallel to it, and what supports it, is
+      at least 1-hour rated for its entire span, no roof openings lie within 5 feet (Groups R and U) or 10 feet (other occupancies)
+      of the wall''s interior side, and the entire building has at least a Class B roof covering; in Groups R-2 and R-3 with
+      a Class C roof covering on the entire building, in Types III, IV and V, the wall ends at the underside of the roof sheathing
+      or deck where the sheathing or deck is of approved noncombustible materials or fire-retardant-treated wood for 4 feet,
+      or the roof is protected with 0.625-inch Type X gypsum board directly beneath the sheathing or deck, on ledgers of at
+      least nominal 2 inches attached to the sides of the roof framing, for at least 4 feet (one or both); or the wall is
+      permitted at least 25 percent of its area in unprotected openings by fire separation distance per 705.9: the walls,
+      roofs and distances aren''t in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Table 705.5 and 705.9 are brought in (their
+    own flags). Shown for every building: the floor areas a description holds may be only some floors''.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_12_1_parapet_construction
+  kind: flag
+  topic: means_of_egress
+  title: A required parapet's rating, faces and height (BCNYS 705.12.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 168
+    lines:
+    - 49
+    - 54
+    quote: 705.12.1 Parapet construction. Required parapets shall have the same fire-resistance rating as that required for
+      the supporting wall, and on any side adjacent to a roof surface, shall have noncombustible faces for the uppermost 18
+      inches (457 mm), including counterflashing and coping materials. The height of the parapet shall be not less than 30
+      inches (762 mm) above the point where the roof surface and the wall intersect. Where the roof slopes toward a parapet
+      at a slope greater than 2 units vertical in 12 units horizontal (16.7-percent slope), the parapet shall extend to the
+      same height as any portion of the roof within a fire separation distance where protection of wall openings is required,
+      but the height shall be not less than 30 inches (762 mm).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A required parapet has the same rating as the wall supporting it, noncombustible faces for its uppermost 18 inches
+      on any side next to a roof surface (counterflashing and coping materials included), and a height of at least 30 inches
+      above where the roof surface and the wall meet; where the roof slopes toward it at more than 2 units vertical in 12
+      horizontal (16.7 percent), it extends to the same height as any part of the roof within a fire separation distance where
+      wall openings must be protected, and at least 30 inches: a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_707_3_2_exit_stairway_fire_barriers
@@ -5405,7 +6064,7 @@ rules:
       egress balconies), 1023.7 (interior exit stairways and ramps), 1024.8 (exit passageways), 1027.6 (exterior exit stairways
       and ramps) or 1207 of the Fire Code of New York State (energy storage systems) asks the exterior wall itself to be rated:
       which enclosure walls are exterior walls, and their ratings, a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 705 and the Fire Code's 1207 aren't brought in (1027.6 is, section group 9g's flag). Shown
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. The Fire Code's 1207 isn't brought in; 705 is, its egress parts (Chapter 7 part e1's flags), and 1027.6 (section group 9g's flag). Shown
     for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -5739,7 +6398,7 @@ rules:
     note: 'An exterior wall that is part of a required shaft enclosure follows Section 705 for exterior walls instead of the
       enclosure''s rating, except where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or
       1027.6 (exterior exit stairways and ramps) asks the exterior wall itself to be rated: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 705 isn't brought in (1027.6 is, section group
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 705's egress parts are brought in (Chapter 7 part e1's flags), and 1027.6 (section group
     9g's flag). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6947,7 +7606,7 @@ rules:
     note: 'An exterior wall that is part of a required rated separation follows Section 705 for exterior walls instead, except
       where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways
       and ramps) asks the exterior wall itself to be rated: a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 705 isn't brought in (1027.6 is, section group
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part c. 705's egress parts are brought in (Chapter 7 part e1's flags), and 1027.6 (section group
     9g's flag). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -27842,7 +28501,7 @@ rules:
     note: 'No corridor: with none, the flag doesn''t apply.'
   notes: '1020.2''s second sentence: corridor walls required to be rated comply with Section 708 (fire partitions: continuity,
     openings, doors; Chapter 7 part c''s flags); exception 5 permits unprotected openings on unrated exterior walls (Tables 705.5 and
-    705.9, not brought in). Hand-drafted in a Claude Code session (2026-11-25).'
+    705.9, Chapter 7 part e1''s flags). Hand-drafted in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1020_2_1_hoistway_protection
@@ -39566,7 +40225,8 @@ rules:
       exterior edge, to adjacent lot lines, to other portions of the building (treated as separate buildings) and to other
       buildings on the same lot unless their exterior walls and openings are protected per 705: balconies and their distances
       aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 705 isn't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 705 isn't brought in whole, only its egress
+    parts (Chapter 7 part e1's flags).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1022_1_exits_general
@@ -39881,7 +40541,8 @@ rules:
       enclose its exterior and other parts of the building expose them at an angle under 180 degrees, construction within
       10 feet meets 1023.7.1 and 1023.7.2: walls'' ratings and the angles between them aren''t in the model, so a person''s
       check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 705 isn't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 705 isn't brought in whole, only its egress
+    parts (Chapter 7 part e1's flags).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_7_1_building_exterior_walls
@@ -40380,7 +41041,8 @@ rules:
       and other parts of the building expose them at an angle under 180 degrees, building exterior walls within 10 feet horizontally
       are rated at least 1 hour with openings protected at least 3/4 hour, from the ground to 10 feet above the passageway''s
       floor or to the roof line, whichever is lower: ratings and angles aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 705 isn't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 705 isn't brought in whole, only its egress
+    parts (Chapter 7 part e1's flags).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1024_9_exit_passageway_standpipes
@@ -41310,7 +41972,8 @@ rules:
       buildings) and to other buildings on the same lot unless their exterior walls and openings are protected per 705; but
       at least 5 feet for one serving individual dwelling units of Group R-3: exterior stairways and their distances aren''t
       in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 705 isn't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 705 isn't brought in whole, only its egress
+    parts (Chapter 7 part e1's flags).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1027_6_protection

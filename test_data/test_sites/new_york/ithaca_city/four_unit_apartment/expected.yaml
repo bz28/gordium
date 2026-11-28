@@ -586,6 +586,28 @@ results:
   # connects, its walls' construction, penetrations, joints), so each is a person's check for every building
   general.bc_703_2_1_1_nonsymmetrical_walls: needs_review
   general.bc_703_5_marking: needs_review
+  # Chapter 7 part e1 (2026-11-28, 19 flags): exterior walls (705), which an exit stairway's and passageway's exterior
+  # walls meet (1023.7, 1024.8): no wall's rating, fire separation distance or openings are in the model; 705.9.5's
+  # vertical separation needs review too (no sprinkler system: its exception 2 isn't taken)
+  general.bc_705_3_buildings_on_the_same_lot: needs_review
+  general.bc_705_5_exterior_wall_ratings: needs_review
+  general.bc_table_705_5_exterior_wall_ratings: needs_review
+  general.bc_705_6_exterior_wall_continuity: needs_review
+  general.bc_705_7_structural_stability: needs_review
+  general.bc_705_7_1_type_iii_floor_assemblies: needs_review
+  general.bc_705_8_unexposed_surface_temperature: needs_review
+  general.bc_table_705_9_exterior_wall_openings: needs_review
+  general.bc_705_9_1_allowable_opening_area: needs_review
+  general.bc_705_9_2_protected_openings: needs_review
+  general.bc_705_9_3_unprotected_openings: needs_review
+  general.bc_705_9_4_mixed_openings: needs_review
+  general.bc_705_9_5_vertical_separation: needs_review
+  general.bc_705_9_6_vertical_exposure: needs_review
+  general.bc_705_10_joints: needs_review
+  general.bc_705_10_1_voids: needs_review
+  general.bc_705_11_ducts: needs_review
+  general.bc_705_12_parapets: needs_review
+  general.bc_705_12_1_parapet_construction: needs_review
   general.bc_707_3_2_exit_stairway_fire_barriers: needs_review
   general.bc_707_3_4_exit_passageway_fire_barriers: needs_review
   general.bc_707_3_5_horizontal_exit_separation: needs_review

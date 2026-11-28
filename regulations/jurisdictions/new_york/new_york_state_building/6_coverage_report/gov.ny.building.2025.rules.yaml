@@ -810,6 +810,101 @@ pieces:
     heading: Marking and identification
     rules:
     - general.bc_703_5_marking
+  '705.3':
+    label: flag
+    heading: Buildings on the same lot
+    rules:
+    - general.bc_705_3_buildings_on_the_same_lot
+  '705.5':
+    label: flag
+    heading: Fire-resistance ratings
+    rules:
+    - general.bc_705_5_exterior_wall_ratings
+  Table 705.5:
+    label: flag
+    heading: Fire-resistance rating requirements for
+    rules:
+    - general.bc_table_705_5_exterior_wall_ratings
+  '705.6':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_705_6_exterior_wall_continuity
+  '705.7':
+    label: flag
+    heading: Structural stability
+    rules:
+    - general.bc_705_7_structural_stability
+  705.7.1:
+    label: flag
+    heading: Structural stability › Floor assemblies in Type III construction
+    rules:
+    - general.bc_705_7_1_type_iii_floor_assemblies
+  '705.8':
+    label: flag
+    heading: Unexposed surface temperature
+    rules:
+    - general.bc_705_8_unexposed_surface_temperature
+  Table 705.9:
+    label: flag
+    heading: Maximum area of exterior wall openings based on fire separation distance and degree of opening protection
+    rules:
+    - general.bc_table_705_9_exterior_wall_openings
+  705.9.1:
+    label: flag
+    heading: Openings › Allowable area of openings
+    rules:
+    - general.bc_705_9_1_allowable_opening_area
+  705.9.2:
+    label: flag
+    heading: Openings › Protected openings
+    rules:
+    - general.bc_705_9_2_protected_openings
+  705.9.3:
+    label: flag
+    heading: Openings › Unprotected openings
+    rules:
+    - general.bc_705_9_3_unprotected_openings
+  705.9.4:
+    label: flag
+    heading: Openings › Mixed openings
+    rules:
+    - general.bc_705_9_4_mixed_openings
+  705.9.5:
+    label: flag
+    heading: Openings › Vertical separation of openings
+    rules:
+    - general.bc_705_9_5_vertical_separation
+  705.9.6:
+    label: flag
+    heading: Openings › Vertical exposure
+    rules:
+    - general.bc_705_9_6_vertical_exposure
+  '705.10':
+    label: flag
+    heading: Joints
+    rules:
+    - general.bc_705_10_joints
+  705.10.1:
+    label: flag
+    heading: Joints › Voids
+    rules:
+    - general.bc_705_10_1_voids
+  '705.11':
+    label: flag
+    heading: Ducts and air transfer openings
+    rules:
+    - general.bc_705_11_ducts
+  '705.12':
+    label: flag
+    heading: Parapets
+    rules:
+    - general.bc_705_12_parapets
+  705.12.1:
+    label: flag
+    heading: Parapets › Parapet construction
+    rules:
+    - general.bc_705_12_1_parapet_construction
   707.3.2:
     label: flag
     heading: Fire-resistance rating › Interior exit stairway and ramp construction
