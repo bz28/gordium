@@ -146,12 +146,11 @@ documents:
       # based on fire separation distance"): 705.1, 705.2 alone with Table 705.2, 705.2.1, 705.2.2 and 705.2.3 (projections:
       # exterior egress balconies and exterior exit stairways are projections, so their distance from the line, their
       # materials and combustible balconies' rating and length are theirs too; review round 1), 705.3 (buildings on the
-      # same lot: the imaginary line), 705.5 with Table 705.5 (ratings by fire separation distance), 705.6 (continuity),
+      # same lot: the imaginary line), 705.4 (materials: an exit's exterior walls meet all of 705, review round 2), 705.5 with Table 705.5 (ratings by fire separation distance), 705.6 (continuity),
       # 705.7 (structural stability), 705.8 (unexposed surface temperature, Equation 7-1, Figure 705.8), 705.9 with Table
       # 705.9 (openings: their area, protection, mixed openings, vertical separation and exposure), 705.10 (joints, voids),
-      # 705.11 (ducts) and 705.12 (parapets), pp.163-168, with SECTION 706 after (705.2.4, bay and oriel windows, and
-      # 705.4, materials by type of construction, are no part of an exit's walls or its balconies and stairways: not
-      # brought in).
+      # 705.11 (ducts) and 705.12 (parapets), pp.163-168, with SECTION 706 after (705.2.4, bay and oriel windows, is no
+      # part of an exit's walls or its balconies and stairways: not brought in).
       # Chapter 7 part e2 (2026-11-28, the rest of Section 716 where it touches egress doors and windows, which 1023.4,
       # 1024.5, 1020.2.1 and 705.9.2 send to): 716.2.5 alone with 716.2.5.1 to 716.2.5.3 and 716.2.5.4 alone (glazing in
       # fire doors: sizes, stair doors' vision, corridor doors, transoms and sidelights), 716.2.6 alone with 716.2.6.1,
@@ -220,7 +219,7 @@ documents:
                  '405.1', '405.4', '405.7', '407.1', '407.2', '407.3', '407.4', '407.5', '407.6', '407.10', '408.1',
                  '408.2', '408.3', '408.4', '408.6', '408.8', '420.1', '420.2', '420.3', '420.6', '420.7', '420.8',
                  '420.9', '422.1', '422.2', '422.3', '406.4.3', '406.5.7', '410.5', '411.4', '412.2.2', '412.4.2', '412.6',
-                 Table 412.6, '412.7.3', '415.11.3.3', '415.11.3.4', '415.11.6.6', '415.11.6.7', '428.3.5', '508.2', '703.5', '705.1', Table 705.2, '705.2.1', '705.2.2', '705.2.3', '705.3', '705.5', Table 705.5, '705.6', '705.7', '705.8', '705.9', Table 705.9,
+                 Table 412.6, '412.7.3', '415.11.3.3', '415.11.3.4', '415.11.6.6', '415.11.6.7', '428.3.5', '508.2', '703.5', '705.1', Table 705.2, '705.2.1', '705.2.2', '705.2.3', '705.3', '705.4', '705.5', Table 705.5, '705.6', '705.7', '705.8', '705.9', Table 705.9,
                  '705.10', '705.11', '705.12', '707.1', '707.3.1', '707.3.2', '707.3.3', '707.3.4', '707.3.5', '707.4',
                  '707.5', '707.6', '707.7', '707.8', '707.9', '707.10', '713.1', '713.2', '713.4', '713.5', '713.6',
                  '713.7', '713.8', '713.9', '713.10', '713.11', '713.14', '716.1', Table 716.1(1), Table 716.1(2),

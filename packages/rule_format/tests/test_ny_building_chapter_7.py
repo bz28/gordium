@@ -708,7 +708,9 @@ def test_705_2s_projections_reach_egress_balconies_and_exterior_exit_stairways(b
     balconies = " ".join(_shown_note(rules["general.bc_705_2_3_1_balconies"]).split())
     assert "50 percent of the building's perimeter on each floor" in balconies
     assert "exterior stairways not used as required exits" in balconies
-    assert "1021 and 1027" in _shown_note(rules["general.bc_705_2_projections"])
+    projections = " ".join(_shown_note(rules["general.bc_705_2_projections"]).split())
+    assert "egress balconies also to 1021 and exterior exit stairways and ramps to 1027" in projections   # round 2
+    assert labels["705.4"]["label"] == "flag" and _flags(book, "705.4")          # round 2: an exit's walls meet all of 705
 
 
 def test_the_readmes_rule_count_is_the_rulebooks():
@@ -746,3 +748,25 @@ def test_part_e2s_notes_keep_the_laws_limits(book, labels):
     readme = (NY / "README.md").read_text(encoding="utf-8")
     left_out = readme.split("## References in the brought-in sections that are not brought in", 1)[1]
     assert "716.2.5.4.1, 716.2.6.3, 716.2.7, 716.2.8 and 716.3.2.1.1.1" in left_out
+
+
+# the definitions part e1 brought in by the italics of its pieces (sources.yaml names none by hand)
+E1_DEFINITIONS = {"202:cornice", "202:fire_lane", "202:fire_retardant_treated_wood", "202:plastic_composite",
+                  "202:plastic_lumber", "202:primary_structural_frame"}
+
+
+def test_the_plans_part_e1_counts_are_the_datas(labels):
+    """Review round 3 of part e1: the plan's status line for part e1 (pieces, definitions, numbers read a second time,
+    flags and pointers) is worked out from the data, so it can't drift again as it did in round 1."""
+    rows = [json.loads(line) for line in SECTIONS.read_text(encoding="utf-8").splitlines()]
+    ids = {p["id"] for p in rows[1:]}
+    assert E1_DEFINITIONS <= ids
+    pieces = {p for p in ids if re.match(r"(Table )?705\.", p)} | E1_DEFINITIONS
+    numbers = sum(len(load(NY / "text_verification.yaml")["pieces"][p]["numbers"]) for p in pieces)
+    e1 = {p: v for p, v in labels.items() if re.match(r"(Table )?705\.", p)}
+    flags = sum(v["label"] == "flag" for v in e1.values())
+    pointers = sum(v["label"] == "reference" for v in e1.values())
+    plan = " ".join((REPO / "docs/decisions/2026-11-26_ny_building_chapter_7.md").read_text(encoding="utf-8").split())
+    line = plan.split("Status, e1 drafted", 1)[1].split("Status, e2", 1)[0]
+    assert f"and {len(E1_DEFINITIONS)} definitions: {len(pieces)} pieces read a second time ({numbers} numbers" in line
+    assert f"{flags} flags and {pointers} pointers" in line

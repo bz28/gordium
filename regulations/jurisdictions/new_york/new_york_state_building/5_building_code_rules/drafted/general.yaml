@@ -5326,7 +5326,7 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Cornices, eave overhangs, exterior balconies and similar projections beyond the exterior wall conform to 705.2
-      and Section 1405, exterior egress balconies and exterior exit stairways and ramps also to 1021 and 1027; no projection
+      and Section 1405, exterior egress balconies also to 1021 and exterior exit stairways and ramps to 1027; no projection
       comes closer to the line used to determine the fire separation distance than Table 705.2 allows; but buildings on the
       same lot considered portions of one building per 705.3 need not comply for projections between them: the projections
       and their distances aren''t in the model, so a person''s check.'
@@ -5509,6 +5509,27 @@ rules:
       on the lot aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Chapter 5 and 706.8 aren't brought in. 1021.4's
     and 1027.5's "other buildings on the same lot" turn on this line. Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_705_4_exterior_wall_materials
+  kind: flag
+  topic: means_of_egress
+  title: Exterior walls of materials the type of construction permits (BCNYS 705.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 164
+    lines:
+    - 38
+    - 38
+    quote: 705.4 Materials. Exterior walls shall be of materials permitted by the building’s type of construction.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Exterior walls, an exit stairway''s and an exit passageway''s among them (1023.7, 1024.8), are of materials the
+      building''s type of construction permits: the walls'' materials and the type of construction aren''t in the model, so
+      a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-28), Chapter 7 part e1. Shown for every building (review round 2:
+    1023.7 and 1024.8 send an exit''s exterior walls to every requirement of 705).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_705_5_exterior_wall_ratings
