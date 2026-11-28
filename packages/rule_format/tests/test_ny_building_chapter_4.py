@@ -254,7 +254,7 @@ def test_no_rule_passes_on_a_figure_402_8_changes_where_a_mall_isnt_ruled_out(ct
                                     (False, False, False), None])
             if sprinkler:
                 given.update(zip(("sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3"), sprinkler))
-            for n in names:
+            for n in sorted(names):  # sorted: a set's order follows the hash seed, so the walk would differ by run
                 if n in own or n in given or n == "special_egress_spaces":
                     continue
                 if allowed.get(n) == "boolean":
@@ -264,7 +264,7 @@ def test_no_rule_passes_on_a_figure_402_8_changes_where_a_mall_isnt_ruled_out(ct
             if rng.random() < 0.5:
                 given["special_egress_spaces"] = True
             m = {}
-            for n in names & set(own):
+            for n in sorted(names & set(own)):
                 if own[n] == "boolean":
                     v = rng.choice([True, False, None])
                     if v is not None:
@@ -339,13 +339,13 @@ def test_no_story_passes_short_of_403_5_2_or_405_7_1_where_they_may_apply(ctx, r
                                     (False, False, False), None])
             if sprinkler:
                 given.update(zip(("sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3"), sprinkler))
-            for n in names:
+            for n in sorted(names):
                 if n not in own and n not in given and allowed.get(n) == "boolean":
                     v = rng.choice([True, False, None])
                     if v is not None:
                         given[n] = v
             m = {}
-            for n in names & set(own):
+            for n in sorted(names & set(own)):
                 if own[n] == "boolean":
                     v = rng.choice([True, False, None])
                     if v is not None:
@@ -852,13 +852,13 @@ def test_no_rule_passes_short_of_part_fs_limits_where_they_may_apply(ctx, rules,
                                     (False, False, False), None])
             if sprinkler:
                 given.update(zip(("sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3"), sprinkler))
-            for n in names:
+            for n in sorted(names):
                 if n not in own and n not in given and allowed.get(n) == "boolean":
                     v = rng.choice([True, False, None])
                     if v is not None:
                         given[n] = v
             m = {}
-            for n in names & set(own):
+            for n in sorted(names & set(own)):
                 if own[n] == "boolean":
                     v = rng.choice([True, False, None])
                     if v is not None:
