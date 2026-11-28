@@ -15,7 +15,9 @@ namespace Gordium.Revit.Reading;
 /// Cautious: a ring Room Revit doesn't close, more than one building outline (separate buildings), a loop with a
 /// curved side, a side not bounded by a wall (an area boundary line: its thickness unknown), or two walls of
 /// different thickness along one straight side: no outlines are sent, with the reason; the diagonal and the story's
-/// areas then need review.
+/// areas then need review. Likewise where a wall on the level lies beyond the outline (a veneer or cladding not set
+/// Room Bounding: the ring Room's boundary stops at the backup wall, the diagonal BCNYS 1007.1.1 measures short by it),
+/// where a wall in the exterior walls' band isn't room-bounding, or where a wall's footprint can't be read.
 /// </summary>
 public static class StoryOutlines
 {
@@ -103,7 +105,70 @@ public static class StoryOutlines
         var n2 = PlanGeometry.Clean(inner);
         if (o is null || n2 is null || !PlanGeometry.IsSimple(o) || !PlanGeometry.IsSimple(n2) || PlanGeometry.Area(n2) >= PlanGeometry.Area(o))
             return new(null, null, "the inside faces don't make a simple outline inside the outer one (a wall thicker than a side is long)");
+        // the outline is the walls' exterior face only where no wall lies beyond it: a veneer or cladding Revit doesn't
+        // count as room-bounding stands outside the ring Room's boundary, so the outline (and the diagonal BCNYS
+        // 1007.1.1 measures on it) would be short by it at each end; a wall in the exterior walls' band that isn't
+        // room-bounding may be one too. Either: no outlines, with the wall named (#281's review: a false pass)
+        foreach (var w in gross.Walls ?? [])
+        {
+            var corners = w.Corners.Select(c => P(t.Apply(c))).ToList();
+            var named = w.Mark is { Length: > 0 } mark ? $" (Mark {mark})" : "";
+            if (corners.Count == 0)
+                return new(null, null, $"a wall on the level{named} couldn't be read, so the outline can't be shown to hold it");
+            // beyond the outline: any room-bounding wall (a second building is two pieces, refused above); a wall that
+            // isn't room-bounding only near it (a veneer, cladding), not a garden wall standing apart
+            var beyond = corners.Where(c => !Within(c, o) && Distance(c, o) > Overlap && (w.RoomBounding || Distance(c, o) <= Apart)).ToList();
+            if (beyond.Count > 0)
+                return new(null, null, $"a wall on the level{named} lies outside the building's outline at " +
+                                       $"{Xy(beyond[0])} (a veneer or cladding not set Room Bounding?), " +
+                                       "so the outline isn't the exterior walls' outside face");
+            // in the exterior walls' band and not room-bounding (more than a finish's thickness past their inside face:
+            // a partition's studs run into the exterior wall's lining at a T-join)
+            if (!w.RoomBounding && corners.Any(c => Within(c, o) && !Within(c, n2) && Distance(c, n2) > Lining))
+                return new(null, null, $"a wall in the building's exterior walls{named} isn't set Room Bounding, so the " +
+                                       "building's outline may stop short of it");
+        }
         return new(o, n2, null);
+    }
+
+    /// <summary>How far a wall may run past the outline and still be the walls it follows, ft: half an inch. Walls in a
+    /// real model overlap at their joins by a hair (the Children's Odyssey's W2 runs 0.14 in past W74's face, where the
+    /// outline steps by as much); a veneer or cladding stands out by its own thickness, inches.</summary>
+    public const double Overlap = 0.5 / 12;
+
+    /// <summary>How far beyond the outline a wall that isn't room-bounding is still the building's (a veneer, cladding,
+    /// an air gap), ft; one farther out stands apart (a garden wall).</summary>
+    public const double Apart = 3.0;
+
+    /// <summary>How far past the exterior walls' inside face a wall that isn't room-bounding may run without being one
+    /// of them (a partition's studs into the wall's lining at a T-join), ft: an inch.</summary>
+    public const double Lining = 1.0 / 12;
+
+    /// <summary>How far p is from the polygon's edge.</summary>
+    private static double Distance(P2 p, IReadOnlyList<P2> poly) =>
+        Enumerable.Range(0, poly.Count).Min(i => DistanceToSegment(p, poly[i], poly[(i + 1) % poly.Count]));
+
+    /// <summary>Whether p is inside the polygon or within 1/16 in of its edge.</summary>
+    private static bool Within(P2 p, IReadOnlyList<P2> poly)
+    {
+        var inside = false;
+        for (int i = 0, j = poly.Count - 1; i < poly.Count; j = i++)
+        {
+            var (a, b) = (poly[i], poly[j]);
+            if (DistanceToSegment(p, a, b) <= Eps)
+                return true;
+            if ((a.Y > p.Y) != (b.Y > p.Y) && p.X < (b.X - a.X) * (p.Y - a.Y) / (b.Y - a.Y) + a.X)
+                inside = !inside;
+        }
+        return inside;
+    }
+
+    private static double DistanceToSegment(P2 p, P2 a, P2 b)
+    {
+        var d = b - a;
+        var len2 = d.X * d.X + d.Y * d.Y;
+        var s = len2 <= 0 ? 0 : Math.Clamp(((p.X - a.X) * d.X + (p.Y - a.Y) * d.Y) / len2, 0, 1);
+        return Length(p - new P2(a.X + d.X * s, a.Y + d.Y * s));
     }
 
     private static P2 P(Xyz p) => new(p.X, p.Y);
