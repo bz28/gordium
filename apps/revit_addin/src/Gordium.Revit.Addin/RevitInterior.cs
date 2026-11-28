@@ -512,6 +512,9 @@ internal static class RevitInterior
             // not set Room Bounding) or one in the exterior walls that isn't room-bounding keeps the outline from being
             // sent (StoryOutlines.Of)
             var footprints = ReadSteps.Time("inside.gross_areas.walls", () => standing.Select(w => FootprintOf(w, level)).ToList());
+            diagnostics.Add($"outer outline of {level.Name}: {footprints.Count} walls read against it " +
+                            $"({footprints.Count(f => f.RoomBounding)} bounding, {footprints.Count(f => f.Corners.Count == 0)} unread); " +
+                            $"Building Story {level.get_Parameter(BuiltInParameter.LEVEL_IS_BUILDING_STORY)?.AsInteger().ToString() ?? "not given"}");
             return new GrossArea(building, widths, null, footprints);
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
