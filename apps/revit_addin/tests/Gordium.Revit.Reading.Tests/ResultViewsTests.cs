@@ -422,30 +422,31 @@ public sealed class ResultViewsTests
     }
 
     /// <summary>A section with no rows is "nothing to check" only when all of it was brought in and none of its pieces
-    /// waits for rules (review round 2): BCNYS 903 (sprinkler systems) is a reference section only partly brought in,
-    /// so the rest of it (903.2, where sprinklers are required) is not checked yet, and so is its chapter.</summary>
+    /// waits for rules (review round 2): BCNYS 202 (definitions) is a reference section only partly brought in, so the
+    /// rest of it is not checked yet, and so is its chapter. (It was 903 until Chapter 9 brought 903 in with rules of
+    /// its own, whose rows the apartment has: a chapter with no rows is now Chapter 2.)</summary>
     [Fact]
     public void A_section_only_partly_brought_in_is_not_checked_yet_even_with_no_rows()
     {
-        // BCNYS chapter 9 as if every section in it were a whole reference section, then with 903 only partly brought in
-        static JsonNode Chapter9(bool whole903)
+        // BCNYS chapter 2 as if every section in it were a whole reference section, then with 202 only partly brought in
+        static JsonNode Chapter2(bool whole202)
         {
             var result = Answer();
             var bc = result["view"]!["contents"]!.AsArray().Single(d => ((string?)d!["document"])!.StartsWith("2025 Building Code", StringComparison.Ordinal))!;
-            var ch9 = bc["chapters"]!.AsArray().Single(c => (string?)c!["number"] == "9")!;
-            foreach (var sec in ch9["sections"]!.AsArray())
+            var ch2 = bc["chapters"]!.AsArray().Single(c => (string?)c!["number"] == "2")!;
+            foreach (var sec in ch2["sections"]!.AsArray())
             {
                 sec!["coverage"] = "not_for_checking";
-                sec["whole"] = (string?)sec["number"] != "903" || whole903;
+                sec["whole"] = (string?)sec["number"] != "202" || whole202;
                 sec["pieces"] = new JsonArray();
             }
             return result;
         }
-        CodeNode Ch9(bool whole903) => Walk(ResultViews.Build(Parse(Chapter9(whole903))).Code[1].Children)
-                                           .Single(n => n.Level == CodeLevel.Chapter && n.Number == "9");
-        Assert.Equal(CodeState.NothingToCheck, Ch9(true).State);
-        Assert.Equal(CodeState.NotCheckedYet, Ch9(false).State);
-        Assert.Equal("Not checked yet by Gordium", Ch9(false).Line);
+        CodeNode Ch2(bool whole202) => Walk(ResultViews.Build(Parse(Chapter2(whole202))).Code[1].Children)
+                                           .Single(n => n.Level == CodeLevel.Chapter && n.Number == "2");
+        Assert.Equal(CodeState.NothingToCheck, Ch2(true).State);
+        Assert.Equal(CodeState.NotCheckedYet, Ch2(false).State);
+        Assert.Equal("Not checked yet by Gordium", Ch2(false).Line);
     }
 
     /// <summary>A fold's title says only what is true of every part in it (review round 2): chapters and appendices are
