@@ -100,7 +100,8 @@ def held(story: Story) -> None:
         inside = story.inner.buffer(SLACK)
         out += [name for name, shape in shapes if not inside.covers(shape) and name not in out]
     if out:
-        raise Stop("outline_short", names=", ".join(sorted(out)[:3]) + (" and others" if len(out) > 3 else ""))
+        out = sorted(set(out))                           # each name once (two rooms may share one)
+        raise Stop("outline_short", names=", ".join(out[:3]) + (" and others" if len(out) > 3 else ""))
     if story.inner is None:                              # its inner outline not read: that reason, not a guess
         raise Stop("outline_needed", reason=story.outline_stop or "its inner outline isn't read")
     if not story.outer.buffer(SLACK).covers(
