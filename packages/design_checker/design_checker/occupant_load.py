@@ -44,6 +44,7 @@ otherwise.
 
 import math
 
+from design_checker.code_scope import ASSEMBLY_FUNCTIONS, ASSEMBLY_LIKE_FUNCTIONS
 from model_measurement.routes.stops import STOPS
 from rule_format.rulebook import load
 
@@ -224,10 +225,8 @@ def readable_rooms(description) -> tuple[dict, bool]:
 # rows under its "Assembly" heading (p.312, lines 20-27) name a room used for assembly purposes; its other rows a room
 # may be one of (303.1 "awaiting transportation", 303.4's courtrooms, gymnasiums, indoor swimming pools, libraries and
 # terminal waiting areas, 303.5's rinks and pools with spectator seating, 303.2's theaters' stages) may or may not be.
-ASSEMBLY_FUNCTIONS = ("gaming_floor", "exhibit_gallery_museum", "assembly_fixed_seats", "assembly_concentrated",
-                      "assembly_standing", "assembly_unconcentrated", "bowling_center")
-ASSEMBLY_LIKE_FUNCTIONS = ("courtroom", "library_reading_room", "exercise_room", "rink_pool", "pool_deck",
-                           "stage_platform", "airport_waiting")
+# The two lists are code_scope's ASSEMBLY_FUNCTIONS and ASSEMBLY_LIKE_FUNCTIONS (imported above), the same ones that
+# settle the building's assembly_spaces, so the seating and the building fact never read different rows.
 SEATING_STORY, SEATING_SPACE = "story_assembly_seating_possible", "space_assembly_seating_possible"
 
 
@@ -258,8 +257,10 @@ def assembly_seating(parts: dict, description: dict, factors: dict, building: di
     enclosed space with no room drawn in it (its use isn't known): never false on a room unseen. True on every story,
     too, where the building is stated Group A (an assembly use, 303.1 to 303.6) and no room but such a clashing one
     states an Assembly function or one that may be an assembly use: its assembly room isn't shown, so any room may be
-    it (review round 1). The story knows its rooms (it is in the model), so a floor the model leaves out doesn't matter
-    here."""
+    it (review round 1). The same where the building states it has assembly spaces (`assembly_spaces`, section group
+    9h: a room or space used for assembly purposes, whatever its group, 303.1.1 and 303.1.2) and none is shown (found
+    merging main into section group 9i). The story knows its rooms (it is in the model), so a floor the model leaves
+    out doesn't matter here."""
     rooms, every = readable_rooms(description)
     unknown = description.get("unknown_spaces") if isinstance(description, dict) else None
     spaces = [p for p in parts.get("space") or [] if isinstance(p, dict)]
@@ -273,7 +274,9 @@ def assembly_seating(parts: dict, description: dict, factors: dict, building: di
     groups = building.get("occupancy_groups") if isinstance(building, dict) else None
     shown = any(r.get("function") in ASSEMBLY_FUNCTIONS + ASSEMBLY_LIKE_FUNCTIONS for i, r in rooms.items()
                 if isinstance(r.get("function"), str) and i not in clash)
-    if isinstance(groups, list) and any(isinstance(g, str) and g.startswith("A-") for g in groups) and not shown:
+    group_a = isinstance(groups, list) and any(isinstance(g, str) and g.startswith("A-") for g in groups)
+    spaces_stated = isinstance(building, dict) and building.get("assembly_spaces") is True
+    if (group_a or spaces_stated) and not shown:
         unseen = True
     functions = factors["functions"]
     for story in parts.get("story") or []:

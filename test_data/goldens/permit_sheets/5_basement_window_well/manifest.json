@@ -1,15 +1,15 @@
 {
  "files": {
-  "A-601.svg": "6c0f4aee6a6a3e199b54f6b84257569551b9f0c3b45b988a9546a9efa2ad8218",
-  "G-001.svg": "429e18f13d71ffe0f26e307e02806ea8d09ba2b864b77f09d04476600be4ead5",
-  "G-002.svg": "5e0c1f015ceb5b423e14aac1b1a31e8e401396dbd3ad9a90e92ce9bf9a96b2fb",
-  "LS-101.svg": "a2119c784b6eec44642935ace799a1726ba0c55fb973c1f88e8eac107b3b51a1",
-  "code_analysis.csv": "cc179dab70da4a97e449588abc98208960a47218c7d4a1c6f456eb0d9ad5a4bb",
+  "A-601.svg": "d8a4c9d51545cca1714afbbb1a6879e7668844098245069a173afcb6ef66cfb6",
+  "G-001.svg": "bf4f9ce9e89e44c822123ac24cd1a3e3f5b5a692b4e02969672340d4846342f8",
+  "G-002.svg": "266381b47ed9a32daddfd8d7f03ed6e636994629fca349ee91ac674217ba3ae9",
+  "LS-101.svg": "0ae138f9c2b14670f8213c7e189359f45b6e3ad47b5cb59431b66ee5463f1db5",
+  "code_analysis.csv": "d3ad3a014f6ae307fb5e81e05bf57c6adf1cc94f118c5d230aae3118a41cc3d0",
   "escape_window_schedule.csv": "751cfb66765a4289cc32f8df6cc315e7fd016d4877b3b3f3172571e28096ea25",
-  "permit_sheets.pdf": "8ad70e79329fe493bebc6df1cf63692c1a1dd194851a19cf26049daf971b9ede"
+  "permit_sheets.pdf": "8312f57e388c8f379742e95ff381a4b3bec2f420214e8717c41bc02e4de43257"
  },
  "rules_fingerprints": {
-  "new_york/ithaca_city": "dec99f4abe818da1d5e24ed0fe50a5b417461d8d0fdeed7adc395c1c7f33a53f"
+  "new_york/ithaca_city": "12638d6a5e2ce91253cc2a653a9590e88606fe3891f7c582a377a63e2c435884"
  },
- "worker_fingerprint": "83d1a1eab3682f7be8bbbda8e520f1f4ac5d4eafd11be3ba0e22b0f50bee8981"
+ "worker_fingerprint": "a1bcef77354c74e4eb096a06b4c7322d1043225419653cc8e5abcb250ba396f9"
 }

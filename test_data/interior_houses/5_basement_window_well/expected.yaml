@@ -38,6 +38,8 @@ parts:
         stair_tread_depth: 10.0
         stair_headroom: 76.0                # main floor's edge at s = 2.5: -10 - (-88 + 0.8 x 2.5) = 76
         stair_clear_width: 36.0
+        stair_clear_width_at_handrail: 36.0 # no handrails: wall to wall
+        stair_handrail_sides: 0
       more:
         stair_tread_variation: 0.0
         stair_clear_width_at_handrail: 36.0 # no handrails: wall to wall

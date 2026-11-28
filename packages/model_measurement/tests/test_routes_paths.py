@@ -406,8 +406,9 @@ LATER_KEYS = {"corridor_not_legs", "corridor_end_only", "door_off_legs", "dead_e
 def test_every_reason_has_a_case():
     from test_routes_doors import DOOR_KEYS                                  # test_routes_doors.py (section group 6a)
     from test_routes_floor import FLOOR_CASES
+    from test_routes_stair_rooms import STAIR_KEYS                           # test_routes_stair_rooms.py (group 7c)
     from test_routes_story_place import PLACE_KEYS                           # test_routes_story_place.py
-    assert set(FLOOR_CASES) | PATH_KEYS | LATER_KEYS | DOOR_KEYS | PLACE_KEYS == set(STOPS)
+    assert set(FLOOR_CASES) | PATH_KEYS | LATER_KEYS | DOOR_KEYS | STAIR_KEYS | PLACE_KEYS == set(STOPS)
 
 
 @pytest.mark.parametrize("layout", [room_on_corridor, lambda: column_room(north_exit=True), table_room])
