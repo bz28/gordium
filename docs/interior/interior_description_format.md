@@ -219,6 +219,7 @@ building:
                                        # furnace room (1006.2.2.1), a refrigeration machinery room (1006.2.2.2), a
                                        # refrigerated room (1006.2.2.3), an electrical room (1006.2.2.4), a vehicular
                                        # ramp (1006.2.2.5), a temporary structure (3103.4), a pedestrian walkway (3104.9)
+                                       # Also true where any room states mall, whatever is stated
   merchandise_pads: false              # Group M merchandise pads (BCNYS 1018.4: their own common path)
   occupant_load_increased: false       # the design takes BCNYS 1004.5.1's increased occupant load (up to one per
                                        # 7 sq ft); not stated, the occupant loads' upper reading is at least that
@@ -250,11 +251,13 @@ building:
                                        # and each floor level's two exits (405.7.1)
   stages_or_platforms: false           # a stage, a platform or a technical production area (BCNYS 202): Section
                                        # 410.5's flags, and Table 1006.2.1's 125 ft rows (Groups R-2, R-3 and R-4)
-                                       # held to 410.5.3.3's 100 ft common path
+                                       # held to 410.5.3.3's 100 ft common path. Also true where any room
+                                       # states stage_platform, whatever is stated
   aircraft_related_occupancy: false    # an airport traffic control tower, an aircraft hangar (a residential one
                                        # too), an aircraft paint hangar, an aircraft manufacturing facility, a
                                        # heliport or a helistop (BCNYS Section 412): its flags, and Table
-                                       # 1006.2.1's Group U row held to 412.4.2's two means of egress
+                                       # 1006.2.1's Group U row held to 412.4.2's two means of egress. Also
+                                       # true where any room states aircraft_hangar, whatever is stated
   service_corridors: false             # a service corridor (BCNYS 202: a fully enclosed passage used for
                                        # transporting HPM and purposes other than required means of egress): in
                                        # Group H-5 or two or more groups, 415.11.3's flags and 1020.3's capacity

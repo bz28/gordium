@@ -107,6 +107,11 @@ public sealed class MarksTests
             // Chapter 4 part b's (403 high-rise, 405 underground)
             ("Gordium: High-rise building", "50749eaa-b331-40c1-af60-c1bf02acbc28", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Underground building", "0b116213-0d7e-4e3c-b03b-e71a9f387d05", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // Chapter 4 part f's (410.5 stages, Section 412, 415.11.3 service corridors) and section group 9h's (1030.1)
+            ("Gordium: Stages or platforms", "5ce6a3b6-e5f6-4e2f-9493-04a3317962a0", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Aircraft-related occupancy", "ee2e811c-ae68-49d3-9423-adabbc484b10", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Service corridors", "dbfc23b8-3106-4f5e-a9bb-e40da891f5c8", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Assembly spaces", "ed28622b-f010-4974-be91-5fabeaf65a6f", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // the dwelling's own facts the code decision reads (review round 1: an ask named marks Revit didn't have)
             ("Gordium: Dwelling units", "aa32131a-e757-47a3-abf8-9deb81d7a09a", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Units in the attached building", "bccb088a-c087-475f-9ff9-53fd10133d0e", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),

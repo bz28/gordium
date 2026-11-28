@@ -183,7 +183,11 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         # the occupant loads' ceiling (occupant_load._bounds): a mezzanine's occupants add to the room below
         "mezzanines": "Gordium: Mezzanines", "loads_not_by_area": "Gordium: Loads not by area",
         # Chapter 4 part b's: a high-rise (202, or over 420 ft in building height) and an underground building (405.1)
-        "high_rise_building": "Gordium: High-rise building", "underground_building": "Gordium: Underground building"}
+        "high_rise_building": "Gordium: High-rise building", "underground_building": "Gordium: Underground building",
+        # Chapter 4 part f's (410.5 stages, Section 412, 415.11.3 service corridors) and section group 9h's (1030.1)
+        "stages_or_platforms": "Gordium: Stages or platforms",
+        "aircraft_related_occupancy": "Gordium: Aircraft-related occupancy",
+        "service_corridors": "Gordium: Service corridors", "assembly_spaces": "Gordium: Assembly spaces"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise
@@ -344,7 +348,9 @@ def building_measures(building: dict | None, interior=None) -> dict:
     interior description, settles one more: assembly_spaces is true wherever a room states a Table 1004.5 Assembly
     function, whatever the block says, and a stated false is left out (not stated) where a room states a function that
     may be an assembly use (assembly_spaces_from_rooms); and assembly_fixed_seating is true wherever a room states Table
-    1004.5's "Assembly with fixed seats" (review round 1 of section group 9h)."""
+    1004.5's "Assembly with fixed seats" (review round 1 of section group 9h); stages_or_platforms and
+    aircraft_related_occupancy are true wherever a room states Table 1004.5's "Stages and platforms" or "Aircraft
+    hangars", and special_egress_spaces wherever one states its mall buildings (ROOM_SHOWS), whatever the block says."""
     facts, _ = _given(building)
     out = {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
     groups = facts.get("occupancy_groups") or []
@@ -362,8 +368,12 @@ def building_measures(building: dict | None, interior=None) -> dict:
         else:
             del out["sprinklered_903_3_1_2"]
     seen = assembly_spaces_from_rooms(interior)
-    if FIXED_SEATS in room_functions(interior):     # the rooms show fixed seating: never a stated no over them
+    functions = room_functions(interior)
+    if FIXED_SEATS in functions:                    # the rooms show fixed seating: never a stated no over them
         out["assembly_fixed_seating"] = True
+    for function, fact in ROOM_SHOWS.items():       # a stage or a hangar the rooms show: never a stated no over it
+        if function in functions:
+            out[fact] = True
     if seen == ASSEMBLY_YES:
         out["assembly_spaces"] = True
     elif seen == ASSEMBLY_MAYBE and out.get("assembly_spaces") is False:
@@ -404,6 +414,13 @@ def room_functions(interior) -> set:
 # Table 1004.5's "Assembly with fixed seats" (p.312, line 22): a room stating it has fixed seating (Table 1006.2.1 note
 # c, 1030.7, 1030.8), whatever the building block says (review round 1 of section group 9h)
 FIXED_SEATS = "assembly_fixed_seats"
+# Table 1004.5's "Stages and platforms" (p.313, line 11), "Aircraft hangars" (p.312, line 13) and "Mall buildings—covered
+# and open" (p.312, line 49): a room stating one is a stage or platform (202, 410), an aircraft hangar (Section 412) or a
+# covered or open mall (402.8, one of special_egress_spaces' spaces), so the building has one whatever the block says
+# (review rounds 1 and 2 of the building facts' marks, PR A: a stated No beside such a room set 410.5's, 412's or 402's
+# flags aside)
+ROOM_SHOWS = {"stage_platform": "stages_or_platforms", "aircraft_hangar": "aircraft_related_occupancy",
+              "mall": "special_egress_spaces"}
 
 
 def assembly_spaces_from_rooms(interior) -> str | None:
