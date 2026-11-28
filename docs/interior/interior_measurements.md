@@ -144,6 +144,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `has_none_below_ground` | the model says the house has no basements, yet {what}: which is right is unclear, so their rules need review |
 | `has_none_room_within` | the model says the house has no sleeping lofts, yet {what}: which is right is unclear, so their rules need review |
 | `has_none_unknown_space` | the model says the house has no {words}, yet it gives {count} enclosed space(s) whose use isn't known (no room drawn in them), any of which could be one: it isn't taken, so their rules need review |
+| `stairs_none_several_floors` | the model says there are no stairs, yet {what}: a stair or a ramp joins its floors or leads down to the ground, unless each floor has its own way out at grade, which the model doesn't show, so 'no stairs' isn't taken and the stair rules need review |
 | `has_none_contradicted` | the model says the house has no {words}, yet it also gives {key}, and not an empty list: which is right is unclear, so their rules need review |
 | `missing` | {what} isn't given |
 | `not_a_length` | {what} isn't a length (a number) |

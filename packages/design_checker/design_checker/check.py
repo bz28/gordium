@@ -1130,9 +1130,10 @@ def _with_stories_bound(values: dict, measured: dict, facts: dict | None = None,
     is below the ground: places/ithaca_city/measure.py _stories_whole), never where it is a typed count kept because
     nothing countable is drawn (no parts named) or any measurement hit a geometry error; code_scope.STORIES_HOW, typed
     (the architect's count kept within what the drawing allows) or read; the most stories the drawing allows
-    (code_scope.STORIES_AT_MOST) where the count is an open question between readings; and code_scope.SET_ASIDE, each
+    (code_scope.STORIES_AT_MOST) where the count is an open question between readings; code_scope.SET_ASIDE, each
     stated fact the measuring set aside for contradicting another ({name: its reason}: the place's own
-    `conflicts`, its measuring's fact_conflicts), never read as unstated."""
+    `conflicts`, its measuring's fact_conflicts), never read as unstated; and code_scope.STORIES_TYPED, the story
+    count the architect typed (a number), settled or not, which egress reads against "no stairs"."""
     record = measured.get("stories") or {}
     drawn = bool(record.get("objects")) and not any(isinstance(r, dict) and r.get("geometry_error")
                                                    for r in measured.values())
@@ -1143,6 +1144,9 @@ def _with_stories_bound(values: dict, measured: dict, facts: dict | None = None,
             if k in code_scope.READS:
                 aside.setdefault(k, why)
     out = {**values, code_scope.STORIES_DRAWN: drawn, code_scope.STORIES_HOW: how, code_scope.SET_ASIDE: aside}
+    typed = (facts or {}).get("stories")
+    if type(typed) in (int, float) and math.isfinite(typed):     # the architect's own count, settled or not
+        out[code_scope.STORIES_TYPED] = typed
     most = [r.get("value") for r in record.get("readings") or [] if isinstance(r, dict)]
     if values.get("stories") is not None or not most or not all(type(v) in (int, float) for v in most):
         return out
