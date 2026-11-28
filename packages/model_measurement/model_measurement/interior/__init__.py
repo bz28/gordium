@@ -92,8 +92,8 @@ def _given(description: dict, kind: str, problems: list):
 
 
 SAME_FLOOR = 0.5      # in: rooms' floors this close are one floor (a threshold's change in level, never a step)
-LANDING_STEP = 8.25   # in: RCNYS R318.3.2, the most a door's outside landing may be below it; a floor higher above
-#                       every ground given is reached by a stair or a ramp (or its own way out at grade, not shown)
+LANDING_STEP = 8.25   # in: RCNYS R318.3.2, the most a door's outside landing may be below it; a floor farther from
+#                       any ground given is reached by a stair or a ramp (or its own way out at grade, not shown)
 
 
 def _level_id(value):
@@ -112,8 +112,10 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
     - its floors are more than 1/2 in apart (a room's `floor_elevation`, as a house's gives them; a room with none,
       and an enclosed space, at its level's height in `levels`; a change of floor that size is a step, or a ramp),
       or a floor or level height given can't be read (it may be on another floor);
-    - every room's floor is more than 8 1/4 in above the highest ground given outside the openings (`ground_outside`:
-      only an upper floor drawn, or a floor a landing's step can't reach the ground from, R318.3.2);
+    - a ground given outside the openings (`ground_outside`) is more than 8 1/4 in above or below the lowest floor
+      (only an upper floor drawn, a floor sunk below the ground, or sloped ground a landing's step can't meet,
+      R318.3.2): which ground the way out is on isn't known, so every ground given must allow no stair; a ground
+      given that can't be read may be any, so it refuses too;
     - the check gives two or more stories (`stated_stories`: a count, or (count, whose words with {n}),
       design_checker.egress._stated_stories).
     Rooms with neither level nor floor given show nothing against it (not given is never a second floor)."""
@@ -180,19 +182,25 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
             return Stop("stairs_none_several_floors", what=f"its rooms' floors are at different heights ({low_name}'s "
                                                            f"at {tidy(low):g} in, {high_name}'s at {tidy(high):g} "
                                                            "in)").reason
-        ground = _highest_ground(whole, reader)
-        if ground is not None and low - ground > LANDING_STEP:
+        grounds = _grounds(whole, reader)
+        if grounds is None:
+            return Stop("stairs_none_several_floors", what="the ground outside an opening can't be read, so it may "
+                                                           "be more than 8 1/4 in from the floor").reason
+        if grounds and low - min(grounds) > LANDING_STEP:
             return Stop("stairs_none_several_floors", what=f"its lowest floor ({low_name}'s, at {tidy(low):g} in) is "
-                                                           f"more than 8 1/4 in above the ground outside its openings "
-                                                           f"(at most {tidy(ground):g} in)").reason
+                                                           f"more than 8 1/4 in above the ground outside an opening "
+                                                           f"(at {tidy(min(grounds)):g} in)").reason
+        if grounds and max(grounds) - low > LANDING_STEP:
+            return Stop("stairs_none_several_floors", what=f"its lowest floor ({low_name}'s, at {tidy(low):g} in) is "
+                                                           f"more than 8 1/4 in below the ground outside an opening "
+                                                           f"(at {tidy(max(grounds)):g} in)").reason
     return None
 
 
-def _highest_ground(whole: dict, reader):
-    """The highest ground given outside any opening that can be read (`ground_outside`, one value or a list), in
-    inches; None where none can. One that can't be read is left out (round 3: never all of them dropped for it):
-    leaving out a ground can only make a floor look higher above the rest, so "no stairs" is refused more, never
-    less; the opening's own rules say its ground isn't read."""
+def _grounds(whole: dict, reader):
+    """Every ground given outside an opening (`ground_outside`, one value or a list), in inches ([] where none is
+    given); None where one given can't be read: then any ground may be there, so "no stairs" is never taken beside
+    it (every ground must allow no stair, above or below the floor)."""
     got = []
     for o in whole.get("openings") if isinstance(whole.get("openings"), list) else []:
         if not isinstance(o, dict) or o.get("ground_outside") is None:
@@ -201,8 +209,8 @@ def _highest_ground(whole: dict, reader):
             try:
                 got.append(reader.length(g, "the ground outside an opening"))
             except Stop:
-                continue
-    return max(got) if got else None
+                return None
+    return got
 
 
 def _unknown_spaces(description: dict, problems: list):

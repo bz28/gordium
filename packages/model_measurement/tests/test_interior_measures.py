@@ -2339,15 +2339,30 @@ def test_no_stairs_beside_floors_a_landings_step_cant_reach_the_ground_from():
         return d
     assert measure(at(8.25, 0))["parts"]["stair"] == []
     assert measure(at(120, 112))["parts"]["stair"] == []                     # the ground near the floor: a step
-    assert "its lowest floor (Bedroom's, at 120 in) is more than 8 1/4 in above the ground outside its openings " \
-           "(at most 0 in)" in _refused(measure(at(120, 0)))
-    assert "(at most 3 in)" in _refused(measure(at(12, [0, 3])))
+    assert "its lowest floor (Bedroom's, at 120 in) is more than 8 1/4 in above the ground outside an opening " \
+           "(at 0 in)" in _refused(measure(at(120, 0)))
     assert measure(at(120, None))["parts"]["stair"] == []                    # no ground given: nothing compared
-    assert measure(at(120, "x"))["parts"]["stair"] == []                     # unreadable: the opening's rules say so
-    d2 = at(120, 0)                                   # round 3: one ground unreadable never drops the others
-    d2["openings"].append(dict(d2["openings"][0], id="w9", ground_outside="abc"))
-    d2["openings"].append(dict(d2["openings"][0], id="w8", ground_outside=[0, None]))
-    assert "(at most 0 in)" in _refused(measure(d2))
+
+
+def test_no_stairs_beside_a_floor_sunk_below_the_ground_or_sloped_ground_a_landing_cant_meet():
+    """Line D's review of #279: "no stairs" was refused only for a floor more than 8 1/4 in above the highest ground,
+    never one more than 8 1/4 in below the ground (a floor at 0, the ground at 50 in: steps up to the ground, or a
+    ramp). Which ground the way out is on isn't known, so on sloped ground every ground given must allow no stair:
+    each within 8 1/4 in of the lowest floor, above or below; a ground given that can't be read may be any, so it
+    refuses too (once left out: never kinder)."""
+    def at(floor, *grounds):
+        d = _no_stairs()
+        d["rooms"][0]["floor_elevation"] = floor
+        d["openings"] = [dict(d["openings"][0], id=f"w{n}", ground_outside=g) for n, g in enumerate(grounds)]
+        return d
+    for flat in ((0, 0), (0, -8.25), (0, 8.25), (0, -8, 8, [0, 5])):
+        assert measure(at(*flat))["parts"]["stair"] == [], flat
+    assert "more than 8 1/4 in below the ground outside an opening (at 50 in)" in _refused(measure(at(0, 50)))
+    assert "below the ground outside an opening (at 8.26 in)" in _refused(measure(at(0, 8.26)))
+    for sloped in ((0, -8, 30), (0, -30, 0), (0, [0, 40])):                 # some ground meets it, some doesn't
+        _refused(measure(at(*sloped)))
+    for odd in ("x", [0, None], float("nan")):
+        assert "the ground outside an opening can't be read" in _refused(measure(at(0, 0, odd))), odd
 
 
 def test_no_stairs_beside_rooms_on_two_levels_as_the_building_code_places_them():
