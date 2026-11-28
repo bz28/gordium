@@ -75,3 +75,33 @@ def test_a_checks_verdicts_come_from_the_checked_rulebook_never_a_second_read_in
     monkeypatch.setattr(check, "load", edited)
     after = check.check_site(copy.deepcopy(site), dict(FACTS))["view"]["items"]
     assert [(i["id"], i["status"]) for i in after] == [(i["id"], i["status"]) for i in before]
+
+
+def test_the_worker_publishes_before_its_first_answer(monkeypatch):
+    """Review round 3 of PR 4 (F1): a missing zoning certificate refuses the whole check, and nothing published for a
+    worker started by the Rhino plugin or by hand. `python -m design_checker serve` makes the certificates current
+    (published.ensure: the fresh-process publish, never a live check) before it reads a request."""
+    from design_checker import __main__ as worker
+
+    class Stop(Exception):
+        pass
+    asked = []
+    monkeypatch.setattr(published, "ensure", lambda missing_only=False: asked.append(missing_only) or _stop())
+    monkeypatch.setattr(worker, "serve", lambda **kw: asked.append("served"))
+
+    def _stop():
+        raise Stop
+    with pytest.raises(Stop):
+        worker.main(["serve"])
+    assert asked == [False]
+
+
+def test_ensure_on_current_certificates_hashes_each_file_once(monkeypatch):
+    """Review round 3 of PR 4 (F2): Ithaca's 21 districts share their inputs, and ensure() hashed them again for each,
+    about 25 times slower than before PR 4. Within one ensure, each file is hashed once."""
+    published.ensure()
+    seen = []
+    real = published._sha
+    monkeypatch.setattr(published, "_sha", lambda p: seen.append(str(p)) or real(p))
+    assert published.ensure() == []
+    assert seen and len(seen) == len(set(seen))

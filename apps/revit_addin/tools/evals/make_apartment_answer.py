@@ -29,7 +29,7 @@ OUT = REPO / "apps/revit_addin/tests/Gordium.Revit.Reading.Tests/answers/four_un
 
 
 class CheckerFailed(RuntimeError):
-    """The checker answered the request with an error, not a result, or a state law couldn't be published."""
+    """The checker answered the request with an error, not a result, or a rulebook (a state law or a zoning district) couldn't be published."""
 
 
 def own_checkout() -> None:
@@ -54,7 +54,7 @@ def text(request: dict, answer=None, publish=None) -> str:
         from rule_format.published import ensure as publish
     unpublished = publish()
     if unpublished:
-        raise CheckerFailed("a state law isn't published, so the checker would answer without its rules: "
+        raise CheckerFailed("a rulebook (a state law or a zoning district) isn't published, so the checker would answer without its rules: "
                             + "; ".join(unpublished))
     if answer is None:
         from design_checker.__main__ import answer

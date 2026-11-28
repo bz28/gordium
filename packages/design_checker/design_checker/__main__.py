@@ -183,6 +183,12 @@ class _Steps:
 
 def main(argv: list[str]) -> int:
     if argv == ["serve"]:
+        # compile, then freeze: the law certificates current before the first answer (a missing or stale zoning one
+        # refuses every check; review round 3 of PR 4). Only the fresh-process publish, never a live check; what
+        # can't be published is logged, and its checks then say so
+        from rule_format import published
+        for note in published.ensure():
+            print(f"not published: {note}", file=sys.stderr)
         # The plugin reads one answer per line. Anything else written to stdout (a library's print, C code writing
         # to file descriptor 1) would put every later answer one request behind, so answers go out on a copy of
         # the real stdout, and stdout itself, at the file-descriptor level, now goes to the log (stderr).
