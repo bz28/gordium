@@ -463,11 +463,13 @@ def test_chapter_4_part_fs_facts_stated_on_the_apartment(no_mall, laws):
     assert all(m == {} for m in moved.values()), moved
     # a room stated a stage or an aircraft hangar (Gordium: Function) outranks a stated No: the flags stay a person's
     # check (review round 1 of the building facts' marks, PR A: the No set them aside beside the room)
+    # review round 2: a room stated a mall building outranks Gordium: Special egress spaces No (402's flags)
     for fact, function, prefixes in (("stages_or_platforms", "stage_platform", ("general.bc_410_5",)),
                                      ("aircraft_related_occupancy", "aircraft_hangar",
-                                      ("general.bc_412_", "general.bc_table_412_"))):
+                                      ("general.bc_412_", "general.bc_table_412_")),
+                                     ("special_egress_spaces", "mall", ("general.bc_402_",))):
         interior = build.interior_of()
-        interior["building"] = {**interior["building"], fact: False, **NO_MALL}
+        interior["building"] = {**interior["building"], **NO_MALL, fact: False}
         interior["rooms"][0]["function"] = function
         now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
         shown = {k: v for k, v in now.items() if k.startswith(prefixes)}

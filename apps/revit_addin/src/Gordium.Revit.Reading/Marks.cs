@@ -448,6 +448,7 @@ public static class Marks
         "Yes when the building holds any space the Building Code gives its own exits or exit access travel limit: a covered or open mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing facility (412.6), " +
         "a boiler, incinerator or furnace room, a refrigeration machinery room, a refrigerated room or an electrical room (1006.2.2.1 to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). " +
         "BCNYS 1006.2.2: \"The numbers, configuration and types of components of exits or access to exits shall be provided in the uses described in Sections 1006.2.2.1 through 1006.2.2.6.\" " +
+        "A room whose Gordium: Function is Mall building (covered or open) makes it Yes, whatever this says. " +
         "Yes: a person checks the limits those spaces change. No: the building has none of them. Blank: the rules that turn on it need review.");
 
     /// <summary>Whether a Group M store has merchandise pads (<c>building.merchandise_pads</c>, BCNYS 1018.4).</summary>
@@ -609,7 +610,7 @@ public static class Marks
         "Gordium: Assembly spaces", new("ed28622b-f010-4974-be91-5fabeaf65a6f"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "building.assembly_spaces",
         "Yes when any room or space of the building is used for assembly purposes, whatever the building's occupancy group (BCNYS 303.1.1 and 303.1.2 put a small assembly room in Group B or in the main occupancy). BCNYS 1030.1: \"A room or space used for assembly purposes that contains seats, tables, displays, equipment or other material shall comply with this section.\" " +
-        "Yes: Section 1030's assembly checks are a person's check whatever the group, and where no room's Gordium: Function shows an assembly use, any story may seat people served by aisles, so the common path, travel distance and exit count rows that turn on seating need review. " +
+        "Yes: Section 1030's assembly checks are a person's check whatever the group, and where no room's Gordium: Function shows an assembly use or one that may be (below), any story may seat people served by aisles, so the common path, travel distance and exit count rows that turn on seating need review. " +
         "No: the building has none; then, in a building stated as one group other than Group A, with Gordium: Fixed assembly seating No too, Section 1030's checks are set aside (Group E keeps 903.2.1.5.1's). A room whose Gordium: Function is one of Table 1004.5's Assembly rows makes it Yes, whatever this says; one that may be used for assembly (a courtroom, a library reading room, an exercise room, a rink or pool, a stage or platform, an airport waiting area) means a No is not read. " +
         "Blank: the checks that turn on it need review.");
 

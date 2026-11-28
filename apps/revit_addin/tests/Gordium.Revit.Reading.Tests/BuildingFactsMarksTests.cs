@@ -84,10 +84,11 @@ public sealed class BuildingFactsMarksTests
             Assert.Contains("Blank: as for Yes.", m.Description, StringComparison.Ordinal);
         Assert.Contains("Blank: the checks that turn on it need review.", Marks.AssemblySpaces.Description, StringComparison.Ordinal);
         // a room's Function outranks the mark (code_scope.building_measures): said in each tooltip it applies to
-        foreach (var m in new[] { Marks.StagesOrPlatforms, Marks.AircraftRelatedOccupancy, Marks.AssemblySpaces })
+        foreach (var m in new[] { Marks.StagesOrPlatforms, Marks.AircraftRelatedOccupancy, Marks.AssemblySpaces, Marks.SpecialEgressSpaces })
             Assert.Contains("makes it Yes, whatever this says", m.Description, StringComparison.Ordinal);
         Assert.Contains("Function is Stage or platform", Marks.StagesOrPlatforms.Description, StringComparison.Ordinal);
         Assert.Contains("Function is Aircraft hangar", Marks.AircraftRelatedOccupancy.Description, StringComparison.Ordinal);
+        Assert.Contains("Function is Mall building (covered or open)", Marks.SpecialEgressSpaces.Description, StringComparison.Ordinal);
         Assert.Contains("any story may seat people served by aisles", Marks.AssemblySpaces.Description, StringComparison.Ordinal);
     }
 }

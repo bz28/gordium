@@ -350,7 +350,7 @@ def building_measures(building: dict | None, interior=None) -> dict:
     may be an assembly use (assembly_spaces_from_rooms); and assembly_fixed_seating is true wherever a room states Table
     1004.5's "Assembly with fixed seats" (review round 1 of section group 9h); stages_or_platforms and
     aircraft_related_occupancy are true wherever a room states Table 1004.5's "Stages and platforms" or "Aircraft
-    hangars" (ROOM_SHOWS), whatever the block says."""
+    hangars", and special_egress_spaces wherever one states its mall buildings (ROOM_SHOWS), whatever the block says."""
     facts, _ = _given(building)
     out = {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
     groups = facts.get("occupancy_groups") or []
@@ -414,10 +414,13 @@ def room_functions(interior) -> set:
 # Table 1004.5's "Assembly with fixed seats" (p.312, line 22): a room stating it has fixed seating (Table 1006.2.1 note
 # c, 1030.7, 1030.8), whatever the building block says (review round 1 of section group 9h)
 FIXED_SEATS = "assembly_fixed_seats"
-# Table 1004.5's "Stages and platforms" (p.313, line 11) and "Aircraft hangars" (p.312, line 13): a room stating one is
-# a stage or platform (202, 410) or an aircraft hangar (Section 412), so the building has one whatever the block says
-# (review round 1 of the building facts' marks, PR A: a stated No beside such a room set 410.5's or 412's flags aside)
-ROOM_SHOWS = {"stage_platform": "stages_or_platforms", "aircraft_hangar": "aircraft_related_occupancy"}
+# Table 1004.5's "Stages and platforms" (p.313, line 11), "Aircraft hangars" (p.312, line 13) and "Mall buildings—covered
+# and open" (p.312, line 49): a room stating one is a stage or platform (202, 410), an aircraft hangar (Section 412) or a
+# covered or open mall (402.8, one of special_egress_spaces' spaces), so the building has one whatever the block says
+# (review rounds 1 and 2 of the building facts' marks, PR A: a stated No beside such a room set 410.5's, 412's or 402's
+# flags aside)
+ROOM_SHOWS = {"stage_platform": "stages_or_platforms", "aircraft_hangar": "aircraft_related_occupancy",
+              "mall": "special_egress_spaces"}
 
 
 def assembly_spaces_from_rooms(interior) -> str | None:

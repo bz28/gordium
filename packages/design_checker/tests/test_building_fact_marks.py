@@ -92,7 +92,8 @@ def test_a_rooms_assembly_function_outranks_the_mark():
 
 
 @pytest.mark.parametrize("function, fact", [("stage_platform", "stages_or_platforms"),
-                                            ("aircraft_hangar", "aircraft_related_occupancy")])
+                                            ("aircraft_hangar", "aircraft_related_occupancy"),
+                                            ("mall", "special_egress_spaces")])      # review round 2
 def test_a_room_stated_a_stage_or_a_hangar_outranks_a_stated_no(function, fact):
     # review round 1 of PR A: a stated No beside a room whose Function is Table 1004.5's "Stages and platforms" or
     # "Aircraft hangars" set 410.5's or Section 412's flags aside (and their bands), a false not applicable
@@ -103,6 +104,6 @@ def test_a_room_stated_a_stage_or_a_hangar_outranks_a_stated_no(function, fact):
     # another room's function leaves the stated No as it is
     other = {"rooms": [{"id": "r", "function": "business"}]}
     assert code_scope.building_measures({fact: False}, other)[fact] is False
-    words = _description(PR_A[fact])
+    words = _description({**PR_A, "special_egress_spaces": "Gordium: Special egress spaces"}[fact])
     assert "makes it Yes, whatever this says" in words
 
