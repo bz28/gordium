@@ -21,7 +21,7 @@ import math
 from dataclasses import dataclass
 from itertools import combinations
 
-from shapely.geometry import Polygon
+from shapely.geometry import LineString, Point, Polygon
 
 from model_measurement.routes.floor import Door, Story
 from model_measurement.routes.stops import Stop
@@ -78,7 +78,83 @@ def diagonal(story: Story) -> Diagonal:
     return Diagonal(length, (a, b))
 
 
+SLACK = 0.5      # in: the outer outline holds every room and exit door to within this (rounding only)
+WALL_MIN = 3.5   # in: the thinnest an exterior wall can be (a 2x4 stud wall alone): the outer outline is at least this
+                 # far outside the inner one everywhere, as the walls' outer faces are outside their inside ones
+
+
+def held(story: Story) -> None:
+    """Refuse (Stop) outlines that could give a diagonal shorter than the story's: an outer outline that doesn't hold
+    every room's outline and every exit door's clear opening (to within SLACK: drawn short, a wing only, a slip, a
+    reader's bug); an inner outline that doesn't hold every room (the walls' inside faces are outside the rooms); and
+    an outer outline that isn't at least WALL_MIN beyond every wall side of the inner one (drawn at the walls' inside
+    faces, it holds every room but is a wall short at each end). Any of them would make close exits read as placed apart
+    (BCNYS 1007.1.1, a false pass): never a diagonal from them."""
+    if story.outer is None:
+        return                                           # diagonal() says why
+    shapes = [(r.name, r.outline) for r in story.rooms.values() if r is not None]
+    exits = [(d.name, opening(d)) for d in story.exits()]
+    bound = story.outer.buffer(SLACK)
+    out = [name for name, shape in shapes + exits if not bound.covers(shape)]
+    if story.inner is not None:
+        inside = story.inner.buffer(SLACK)
+        out += [name for name, shape in shapes if not inside.covers(shape) and name not in out]
+    if out:
+        out = sorted(set(out))                           # each name once (two rooms may share one)
+        raise Stop("outline_short", names=", ".join(out[:3]) + (" and others" if len(out) > 3 else ""))
+    if story.inner is None:                              # its inner outline not read: that reason, not a guess
+        raise Stop("outline_needed", reason=story.outline_stop or "its inner outline isn't read")
+    if not _walled(story.outer.buffer(SLACK), story.inner):
+        raise Stop("outline_not_outer", wall=f"{WALL_MIN:g}")
+
+
+WALL_SIDE = 36.0  # in: a side of the inner outline longer than this is a wall's inside face (a shorter one may be a
+                  # wall's end where two walls in line stand apart, kept where it is: StoryOutlines.cs WallEnd, 2 ft on
+                  # the outer outline, its inner side longer by the walls' difference in thickness, a foot here: a
+                  # bigger difference is checked, and so refused, never a pass)
+
+
+def _walled(bound, inner) -> bool:
+    """Whether the outer outline (`bound`: grown by SLACK, rounding only) is at least WALL_MIN beyond the inner one
+    along every wall: each wall side of the inner outline (longer than WALL_SIDE, its pieces in line joined), less
+    WALL_MIN at each end, moved out by WALL_MIN, lies inside it, and so does each outside corner between two wall sides
+    moved out by WALL_MIN along both (the corners the diagonal runs between, never cut back), whichever way the outline
+    runs. An outline with no wall side long enough to check isn't shown to be outside it (False). An outer outline at
+    the inside faces, on any wall or corner, fails."""
+    pts = list(inner.simplify(SLACK / 8).exterior.coords)[:-1]   # pieces in line joined (a side given in short pieces)
+    sides = []                                           # each side: (a, b, its length, its outward normal)
+    for i, a in enumerate(pts):
+        b = pts[(i + 1) % len(pts)]
+        length = math.dist(a, b)
+        if length <= 0:
+            continue
+        ux, uy = (b[0] - a[0]) / length, (b[1] - a[1]) / length
+        nx, ny = uy, -ux                                 # one normal; flipped where it points into the inner outline
+        mid = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+        if inner.contains(Point(mid[0] + nx, mid[1] + ny)):
+            nx, ny = -nx, -ny
+        sides.append((a, b, length, (ux, uy), (nx, ny)))
+    d, checked = WALL_MIN, 0
+    for k, (a, b, length, (ux, uy), (nx, ny)) in enumerate(sides):
+        if length <= WALL_SIDE:
+            continue
+        checked += 1
+        side = LineString([(a[0] + ux * d + nx * d, a[1] + uy * d + ny * d), (b[0] - ux * d + nx * d, b[1] - uy * d + ny * d)])
+        if not bound.covers(side):
+            return False
+        a2, b2, length2, _, (mx, my) = sides[(k + 1) % len(sides)]
+        dot = nx * mx + ny * my                          # where an outline WALL_MIN out puts the corner (a mitre:
+        if dot <= -1 + 1e-9:                             # d (n + m) / (1 + n.m), d (n + m) at a square corner)
+            continue
+        corner = (b[0] + (nx + mx) * d / (1 + dot), b[1] + (ny + my) * d / (1 + dot))
+        if length2 > WALL_SIDE and not inner.contains(Point(corner)) and not bound.covers(Point(corner)):
+            return False                                 # an outside corner between two walls, cut back
+    return checked > 0
+
+
 def ratio(story: Story) -> tuple:
-    """(remoteness, diagonal, their ratio): the branch's `exit_remoteness_ratio`."""
+    """(remoteness, diagonal, their ratio): the branch's `exit_remoteness_ratio`, from outlines that hold the story
+    (held)."""
     far, across = remoteness(story), diagonal(story)
+    held(story)
     return far, across, far.length / across.length

@@ -693,6 +693,49 @@ public sealed class RouteTests
     }
 
     [Fact]
+    public void An_outline_a_wall_lies_beyond_or_a_non_room_bounding_exterior_wall_is_never_sent()
+    {
+        // #281's review (a false pass): a brick veneer set Room Bounding = No stands outside the ring Room's boundary, so
+        // the outline stops at the backup wall, short by the veneer at each end, and close exits read as placed apart
+        // under BCNYS 1007.1.1. Every wall on the level is read with its footprint; one beyond the outline, or one in the
+        // exterior walls' band that isn't room-bounding, or one that can't be read: no outlines, the wall named
+        var floor = new FakeFloor();
+        WallFootprint W(string id, string? mark, bool bounding, params (double X, double Y)[] at) =>
+            new(id, mark, bounding, at.Select(p => floor.Fake.Place(p.X, p.Y, 0)).ToList());
+        var inside = W("wall-in", "P1", false, (10, 5), (10.3, 5), (10.3, 15), (10, 15));        // a partition, not bounding: fine
+        var west = W("wall-w", "EW1", true, (-0.5, -0.5), (0, -0.5), (0, 26.5), (-0.5, 26.5));    // the west wall itself: fine
+        var g = Gross(floor);
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [inside, west] } };
+        Assert.Null(OutlineNote(InteriorReader.Read(floor.Model())));
+        var veneer = W("wall-v", "V1", false, (-0.85, -0.85), (-0.5, -0.85), (-0.5, 26.85), (-0.85, 26.85));
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [inside, west, veneer] } };
+        Assert.Contains("lies outside the building's outline", OutlineNote(InteriorReader.Read(floor.Model())));
+        Assert.Contains("Mark V1", OutlineNote(InteriorReader.Read(floor.Model())));
+        // a wall running a hair past the outline where it steps (the Children's Odyssey's W2, 0.14 in past W74's face): fine
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-s", "W2", true, (5, -0.5), (25, -0.5), (25, -0.512), (5, -0.512))] } };
+        Assert.Null(OutlineNote(InteriorReader.Read(floor.Model())));
+        // a thin cladding (3/8 in) not set Room Bounding, drawn tight to the west wall: within the half inch beyond the
+        // outline, but its inner face is a whole wall past the inside face: refused by the band (confirming review)
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-c", "C1", false, (-0.53, -0.5), (-0.5, -0.5), (-0.5, 26.5), (-0.53, 26.5))] } };
+        Assert.Contains("isn't set Room Bounding", OutlineNote(InteriorReader.Read(floor.Model())));
+        // a partition that isn't room-bounding whose studs run half an inch into the exterior wall's lining: fine
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-t", "P2", false, (10, -0.04), (10.3, -0.04), (10.3, 5), (10, 5))] } };
+        Assert.Null(OutlineNote(InteriorReader.Read(floor.Model())));
+        // a garden wall that isn't room-bounding standing 10 ft off: not the building's, fine
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-gd", null, false, (55, 0), (70, 0), (70, 0.5), (55, 0.5))] } };
+        Assert.Null(OutlineNote(InteriorReader.Read(floor.Model())));
+        // a bounding wall beyond it too (a garden wall on the level): never guessed which is the building's face
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-g", null, true, (45, 0), (60, 0), (60, 0.5), (45, 0.5))] } };
+        Assert.Contains("lies outside the building's outline", OutlineNote(InteriorReader.Read(floor.Model())));
+        // an exterior wall (in the band between the outer and inner outlines) that isn't room-bounding
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [W("wall-e2", "E2", false, (40.1, 2), (40.4, 2), (40.4, 8), (40.1, 8))] } };
+        Assert.Contains("isn't set Room Bounding", OutlineNote(InteriorReader.Read(floor.Model())));
+        // a wall whose footprint couldn't be read
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Walls = [new WallFootprint("wall-x", null, true, [])] } };
+        Assert.Contains("couldn't be read", OutlineNote(InteriorReader.Read(floor.Model())));
+    }
+
+    [Fact]
     public void A_short_side_no_element_bounds_is_a_walls_end_kept_where_it_is()
     {
         // the Children's Odyssey's ring (2026-11-21): steps of 0.006 to 0.64 ft where two walls in line stand apart, or
