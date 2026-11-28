@@ -143,14 +143,15 @@ documents:
       # Chapter 7 part e1 (2026-11-28, exterior walls, which 1023.7 and 1024.8 send an exit stairway's and an exit
       # passageway's exterior walls to, 1027.6 through 1023.7, 707.4, 708.5 and 713.6 an enclosure's, and 1021.4 and
       # 1027.5 the walls and openings of other buildings on the same lot, "protected in accordance with Section 705
-      # based on fire separation distance"): 705.1, 705.3 (buildings on the same lot: the imaginary line), 705.5 with
-      # Table 705.5 (ratings by fire separation distance), 705.6 (continuity), 705.7 (structural stability), 705.8
-      # (unexposed surface temperature, Equation 7-1, Figure 705.8), 705.9 with Table 705.9 (openings: their area,
-      # protection, mixed openings, vertical separation and exposure), 705.10 (joints, voids), 705.11 (ducts) and
-      # 705.12 (parapets), pp.163-168, with SECTION 706 after (705.2 and Table 705.2, projections, which 705.2 itself
-      # sends to 1021 and 1027 for egress balconies and exterior exit stairways, whose 10-foot and R-3's 5-foot
-      # separations are more than Table 705.2's distances, and 705.4, materials by type of construction, are not
-      # means of egress: not brought in).
+      # based on fire separation distance"): 705.1, 705.2 alone with Table 705.2, 705.2.1, 705.2.2 and 705.2.3 (projections:
+      # exterior egress balconies and exterior exit stairways are projections, so their distance from the line, their
+      # materials and combustible balconies' rating and length are theirs too; review round 1), 705.3 (buildings on the
+      # same lot: the imaginary line), 705.5 with Table 705.5 (ratings by fire separation distance), 705.6 (continuity),
+      # 705.7 (structural stability), 705.8 (unexposed surface temperature, Equation 7-1, Figure 705.8), 705.9 with Table
+      # 705.9 (openings: their area, protection, mixed openings, vertical separation and exposure), 705.10 (joints, voids),
+      # 705.11 (ducts) and 705.12 (parapets), pp.163-168, with SECTION 706 after (705.2.4, bay and oriel windows, and
+      # 705.4, materials by type of construction, are no part of an exit's walls or its balconies and stairways: not
+      # brought in).
       # Chapter 9 part a (2026-11-27, docs/decisions/2026-11-27_ny_building_chapter_9.md: where a sprinkler system is
       # required and which system, the fact Chapter 10's allowances turn on): 903.1 with 903.1.1 (general, alternative
       # protection) and 903.2 alone (where required, p.269), 903.2.5 with Table 903.2.5.2 (Group H, pp.270-271),
@@ -210,7 +211,7 @@ documents:
                  '405.1', '405.4', '405.7', '407.1', '407.2', '407.3', '407.4', '407.5', '407.6', '407.10', '408.1',
                  '408.2', '408.3', '408.4', '408.6', '408.8', '420.1', '420.2', '420.3', '420.6', '420.7', '420.8',
                  '420.9', '422.1', '422.2', '422.3', '406.4.3', '406.5.7', '410.5', '411.4', '412.2.2', '412.4.2', '412.6',
-                 Table 412.6, '412.7.3', '415.11.3.3', '415.11.3.4', '415.11.6.6', '415.11.6.7', '428.3.5', '508.2', '703.5', '705.1', '705.3', '705.5', Table 705.5, '705.6', '705.7', '705.8', '705.9', Table 705.9,
+                 Table 412.6, '412.7.3', '415.11.3.3', '415.11.3.4', '415.11.6.6', '415.11.6.7', '428.3.5', '508.2', '703.5', '705.1', Table 705.2, '705.2.1', '705.2.2', '705.2.3', '705.3', '705.5', Table 705.5, '705.6', '705.7', '705.8', '705.9', Table 705.9,
                  '705.10', '705.11', '705.12', '707.1', '707.3.1', '707.3.2', '707.3.3', '707.3.4', '707.3.5', '707.4',
                  '707.5', '707.6', '707.7', '707.8', '707.9', '707.10', '713.1', '713.2', '713.4', '713.5', '713.6',
                  '713.7', '713.8', '713.9', '713.10', '713.11', '713.14', '716.1', Table 716.1(1), Table 716.1(2),
@@ -229,7 +230,7 @@ documents:
                  '1018', '1019', '1020.1', '1020.2', Table 1020.2, '1020.3', Table 1020.3, '1020.4', '1020.5',
                  '1020.6', '1020.7', '1021', '1022', '1023', '1024', '1025', '1026', '1027', '1028', '1029', '1030',
                  Table 1030.6.2, Table 1030.13.2.1, '1031.1', '1031.2', '1031.3', '1031.4', '1031.5', '1031.6']
-      alone: ['703.2.1.1', '707.3', '713.12', '716.2', '711.1', '711.2', '711.2.4', '711.3', '712.1',
+      alone: ['703.2.1.1', '705.2', '707.3', '713.12', '716.2', '711.1', '711.2', '711.2.4', '711.3', '712.1',
               '903.2', '903.3', '903.3.1', '907.2', '909.1', '911.1', '903.3.1.1', '903.3.1.2', '1010.1',
               '1010.2', '1011.5', '1011.5.4']   # brought in without the parts under them (exempt locations, balconies, attics)
       definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics,
@@ -744,6 +745,12 @@ documents:
           automatically: 'The book prints "automati-" / "cally" in italics broken across two lines (p.37, lines 40-41);
             the defined term is AUTOMATIC (p.34, line 12: "as applied to fire protection devices"), which the adverb
             names but not whole, so it is not brought in by it. A damper term (ducts, 707.10 and 713.10), used by no rule.'
+        705.2.3.1:
+          fireretardant-treated wood: 'The book prints "fire-" / "retardant-treated wood" in italics broken across two lines
+            (p.164, lines 5-6), which the text joins as "fireretardant-treated wood"; the term is FIRE-RETARDANT-TREATED
+            WOOD, brought in (202:fire_retardant_treated_wood). 705.2.3.1 is a flag (Chapter 7 part e1, review round 1).'
+          wood: 'What the italics reader leaves of "fire-retardant-treated wood" (p.164, line 10, exception 1) once it has
+            matched the term''s other words; the term is FIRE-RETARDANT-TREATED WOOD, brought in.'
         '705.3':
           roofcovering: 'The book prints "roof-" / "covering requirements" broken across two lines (p.164, lines 23-24),
             "roof-covering" in italics, which the text joins as "roofcovering"; Section 202 defines ROOF COVERING, which the

@@ -233,3 +233,21 @@ def test_a_two_column_books_title_under_its_number_is_read_with_it():
     # a hyphen ending a line runs on into the next ("SMOKE-" "PROTECTED")
     assert icc_sections.joined_title([_row(1, 1, "AISLES FOR SMOKE-"), _row(1, 2, "PROTECTED ASSEMBLY")]) == \
         "AISLES FOR SMOKE-PROTECTED ASSEMBLY"
+
+
+def test_a_titles_second_line_ending_in_raised_note_letters_is_read_whole():
+    """Review round 1 of Chapter 7 part e1: Table 705.5 (p.165) prints its title on two lines, the second ending in its
+    raised note letters a, d and g, which make that line 0.8 point taller and are roman; its title stopped at the first
+    line. Its own words are measured, never the marks; a line taller than the marks can make is still no title."""
+    first = _at(_row(2, 9, "TABLE 705.5—FIRE-RESISTANCE RATING REQUIREMENTS FOR",
+                     bold="TABLE 705.5—FIRE-RESISTANCE RATING REQUIREMENTS FOR"), 176.3, 48.9, 417.7, 57.9)
+    text = "EXTERIOR WALLS BASED ON FIRE SEPARATION DISTANCE [fna,] [fnd,] [fng]"
+    second = {**_at(_row(2, 10, text), 176.9, 58.1, 417.1, 67.9),
+              "bold": [[0, 48], [52, 54], [59, 61], [66, 67]]}
+    whole = "FIRE-RESISTANCE RATING REQUIREMENTS FOR EXTERIOR WALLS BASED ON FIRE SEPARATION DISTANCE"
+    assert icc_sections._table_title([first, second]) == whole
+    cut = "FIRE-RESISTANCE RATING REQUIREMENTS FOR"
+    assert icc_sections._table_title([first, {**second, "top": 56.0}]) == cut              # taller than marks make
+    unmarked = {**second, "text": "EXTERIOR WALLS BASED ON FIRE SEPARATION DISTANCE", "bold": [[0, 48]]}
+    assert icc_sections._table_title([first, unmarked]) == cut                   # 0.8 taller with no marks: no title
+    assert icc_sections._table_title([first, {**second, "bold": [[0, 20]]}]) == cut    # its words not bold throughout
