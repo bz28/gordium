@@ -194,6 +194,12 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
             return Stop("stairs_none_several_floors", what=f"its lowest floor ({low_name}'s, at {tidy(low):g} in) is "
                                                            f"more than 8 1/4 in below the ground outside an opening "
                                                            f"(at {tidy(max(grounds)):g} in)").reason
+        return None
+    grounds = _grounds(whole, reader)          # no floor height given: ground farther apart than any one floor can
+    if grounds and max(grounds) - min(grounds) > 2 * LANDING_STEP:    # meet within 8 1/4 in needs a stair or a ramp
+        return Stop("stairs_none_several_floors", what=f"the ground outside its openings is {tidy(min(grounds)):g} "
+                                                       f"in at one and {tidy(max(grounds)):g} in at another, more "
+                                                       "than any one floor can meet within 8 1/4 in").reason
     return None
 
 

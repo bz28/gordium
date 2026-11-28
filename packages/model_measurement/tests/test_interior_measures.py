@@ -2363,6 +2363,14 @@ def test_no_stairs_beside_a_floor_sunk_below_the_ground_or_sloped_ground_a_landi
         _refused(measure(at(*sloped)))
     for odd in ("x", [0, None], float("nan")):
         assert "the ground outside an opening can't be read" in _refused(measure(at(0, 0, odd))), odd
+    # skeptic A: no floor height given, ground farther apart than one floor can meet within 8 1/4 in either way
+    def bare(*grounds):
+        d = at(0, *grounds)
+        del d["rooms"][0]["floor_elevation"]
+        return d
+    assert "is 0 in at one and 50 in at another" in _refused(measure(bare(0, 50)))
+    for fine in ((0, 16.5), (0,), (), (0, "x")):            # 16.5 in: a floor midway meets both; unreadable: not given
+        assert measure(bare(*fine))["parts"]["stair"] == [], fine
 
 
 def test_no_stairs_beside_rooms_on_two_levels_as_the_building_code_places_them():
