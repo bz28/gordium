@@ -9,17 +9,21 @@ design: docs/decisions/2026-11-20_route_measurement.md.
 """
 
 # what settles a stair that may be anywhere (routes._stair_points), said with the story facts it stops
-STAIRS_TO_DO = ("A stair, ramp or ladder drawn in it leaves this to a person. One not drawn may be anywhere unless "
-                "the model rules it out: every stair drawn and Gordium: These are all the "
-                "stairs ticked, or Gordium: This house has no stairs ticked; and Gordium: This house has no ramps, "
-                "Gordium: This house has no alternating tread devices and Gordium: This house has no ship ladders "
-                "ticked. \"No stairs\" isn't taken where the building may have another story: a second level not "
-                "marked Gordium: Not a story, a floor drawn a story's height above or below the ground stated, rooms "
-                "on two floors, or a story count of two or more, or one that can't be read")
+STAIRS_TO_DO = ("Gordium rules a way to another story out of a space only where every stair is drawn (with Gordium: "
+                "These are all the stairs ticked) and each stands in a shared hall or exit, or in another space "
+                "opening onto one, or where the model says there is none (Gordium: This house has no stairs); and "
+                "only where it says there are no ramps, alternating tread devices or ship ladders (Gordium: This "
+                "house has no ramps, Gordium: This house has no alternating tread devices, Gordium: This house has "
+                "no ship ladders), since where one of those stands isn't read yet. A \"none\" isn't taken where the "
+                "building may have another story: a second level not marked Gordium: Not a story, a floor drawn a "
+                "story's height above or below the ground stated, rooms on two floors, or a story count of two or "
+                "more (stated with Gordium: Stories above grade plane, or the most the drawing allows), or one that "
+                "can't be read. Otherwise a person checks")
 # the marks it names (Revit's Gordium.Revit.Reading/Marks.cs; test_routes_dwelling_units checks each is defined)
 STAIRS_TO_DO_MARKS = ("Gordium: These are all the stairs", "Gordium: This house has no stairs",
                       "Gordium: This house has no ramps", "Gordium: This house has no alternating tread devices",
-                      "Gordium: This house has no ship ladders", "Gordium: Not a story")
+                      "Gordium: This house has no ship ladders", "Gordium: Not a story",
+                      "Gordium: Stories above grade plane")
 
 STOPS = {
     # the room a flight of stairs stands in (stair_rooms.py: the Building Code's stair rules, section group 7c)

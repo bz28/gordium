@@ -93,7 +93,7 @@ def _listed(description, key) -> list:
 def measure(description, clearance: float = CLEARANCE, ground: dict | None = None, stated_stories=None) -> dict:
     """`ground`: the ground the architect stated, story_place.ground_of's (None: none stated), for where each story
     sits against the grade plane (story_place.py). `stated_stories`: the most stories the check gives the building
-    (a count, or (count, whose words with {n}): design_checker.egress._stated_stories), against which "no stairs"
+    (a count, or (count, whose words with {n}): design_checker.egress._routes_stories), against which "no stairs"
     isn't taken (_stair_points)."""
     out = {"format": MEASURED_FORMAT, "units": {"travel": "ft", "corridor_width": "in", "area": "sf"},
            "parts": {k: None for k in KINDS}, "problems": []}

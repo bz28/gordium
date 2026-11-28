@@ -314,7 +314,8 @@ def test_no_stairs_beside_another_floor_is_never_taken():
         STAIRS_TO_DO.count("Gordium: ") == len(STAIRS_TO_DO_MARKS)     # every mark it names is listed
     marks = (REPO_ROOT / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
     defined = set(re.findall(r'"(Gordium: [^"]+)", new\(', marks))
-    defined |= {"Gordium: This house has no " + n for n in re.findall(r'NoneTick\(\s*"([^"]+)"', marks)}
+    prefix = re.search(r'NoneTick\(string name.*?=> new\(\s*"([^"]+)" \+ name', marks, re.S).group(1)
+    defined |= {prefix + n for n in re.findall(r'NoneTick\(\s*"([^"]+)"', marks)}
     assert set(STAIRS_TO_DO_MARKS) <= defined, set(STAIRS_TO_DO_MARKS) - defined   # each named as Revit shows it
     both = fresh()                                       # the description says 2, the check 1: the larger is taken
     both["building"] = {"stories_above_grade_plane": 2}

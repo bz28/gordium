@@ -315,13 +315,21 @@ def test_no_reason_shows_a_python_value():
 def test_reasons_are_lower_case_mid_sentence():
     """A reason starts lower case (the presenter capitalises where one opens a sentence): after a colon, a semicolon
     or a parenthesis, and at its start, only a proper name (Gordium, a code section) is capitalised; a Revit mark's
-    own name after "Gordium: " is one (Gordium: Not a story)."""
+    own name after "Gordium: " is one (Gordium: Not a story), only where it is a mark the Revit add-in defines."""
+    from pathlib import Path
     from model_measurement.routes.stops import STOPS as ROUTES
+    marks = (Path(__file__).resolve().parents[3] / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(
+        encoding="utf-8")
+    prefix = re.search(r'NoneTick\(string name.*?=> new\(\s*"([^"]+)" \+ name', marks, re.S).group(1)
+    names = set(re.findall(r'"(Gordium: [^"]+)", new\(', marks)) | \
+        {prefix + n for n in re.findall(r'NoneTick\(\s*"([^"]+)"', marks)}
     said = _broken_reasons() + list(INTERIOR_STOPS.values()) + list(ROUTES.values())
     for w in said:
-        for piece in [w] + re.split(r"(?:(?<!Gordium): |; |\()", w)[1:]:
-            if piece[:1].isupper():
-                assert PROPER.match(piece), (piece, w)
+        cuts = [m.end() for m in re.finditer(r": |; |\(", w)]
+        for at, piece in [(0, w)] + [(c, w[c:]) for c in cuts]:
+            if piece[:1].isupper() and not PROPER.match(piece):
+                assert w[:at].endswith("Gordium: ") and any(("Gordium: " + piece).startswith(n) for n in names), \
+                    (piece, w)
 
 
 
