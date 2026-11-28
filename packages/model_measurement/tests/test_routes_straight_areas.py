@@ -147,6 +147,12 @@ def test_an_outline_at_the_walls_inside_faces_gives_no_ratio():
     with pytest.raises(Stop) as stop:
         straight.ratio(story(d))
     assert stop.value.key == "outline_short", stop.value.reason
+    # an inner outline that can't be read: that reason, not "drawn at the inside faces"
+    d = upper_story(rect(-0.5, -0.5, 60.5, 28.5))
+    d["story_outlines"][0]["inner"] = [[0, 0], [1, 0]]
+    with pytest.raises(Stop) as stop:
+        straight.ratio(story(d))
+    assert stop.value.key == "outline_needed", stop.value.reason
     # walls 4 in thick, drawn so (the outer outline 4 in outside the inner one): taken
     assert straight.ratio(story(upper_story(rect(-1 / 3, -1 / 3, 60 + 1 / 3, 28 + 1 / 3))))[2] > 0
 

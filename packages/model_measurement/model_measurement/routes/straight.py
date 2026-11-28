@@ -101,7 +101,9 @@ def held(story: Story) -> None:
         out += [name for name, shape in shapes if not inside.covers(shape) and name not in out]
     if out:
         raise Stop("outline_short", names=", ".join(sorted(out)[:3]) + (" and others" if len(out) > 3 else ""))
-    if story.inner is None or not story.outer.buffer(SLACK).covers(
+    if story.inner is None:                              # its inner outline not read: that reason, not a guess
+        raise Stop("outline_needed", reason=story.outline_stop or "its inner outline isn't read")
+    if not story.outer.buffer(SLACK).covers(
             story.inner.buffer(WALL_MIN, join_style="mitre", mitre_limit=10.0)):
         raise Stop("outline_not_outer", wall=f"{WALL_MIN:g}")
 
