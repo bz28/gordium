@@ -326,6 +326,17 @@ def _architect_stated(part, mine, shown) -> list[str]:
     return [str(given[m]) for m in sorted(shown) if m in mine and m in given]
 
 
+def _rests_on(part, mine, shown) -> list[str]:
+    """The words a part gives (`rests_on`: {measure: words}) for the measures this row reads that it has a value for:
+    Gordium's reading the figure stands on and the requirement that must hold for it (the dwelling units counted on a
+    story stand on 1016.2.1, a person's check shown in the same answer). Shown with the row, never hidden; it never
+    holds a pass (the requirement it rests on is checked, or flagged, on its own)."""
+    given = part.get("rests_on")
+    if not isinstance(given, dict):
+        return []
+    return [str(given[m]) for m in sorted(shown) if m in mine and m in given]
+
+
 def _row(rule, result, part=None, within=None, reason=None, values=None, none=False, unknown=None) -> dict:
     """One row. `none`: the row is the rule's when_none answer (nothing to check). `unknown`: the part's measures
     that weren't given, for a part that fails whatever they are (the 2026-10-21 proof)."""
@@ -433,6 +444,9 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
         said = list(dict.fromkeys(_architect_stated(part, mine, shown))) if result != "not_applicable" else []
         if said:                                 # the architect's statement the figure stands on, said beside it
             row["architect_stated"] = said
+        rests = list(dict.fromkeys(_rests_on(part, mine, shown))) if result != "not_applicable" else []
+        if rests:                                # the reading and the requirement the figure stands on, said beside it
+            row["rests_on"] = rests
         return row
 
     if not parent:
@@ -606,9 +620,29 @@ def _under_readings(rule: dict, known: dict, allowed: dict, combos: list) -> tup
     results = {r for _, r in got}
     if results in ({"pass"}, {"fail"}, {"not_applicable"}):
         return results.pop(), None
+    if results == {"needs_review"} and (own := _own_reviews(rule, known, allowed, combos)):
+        return "needs_review", "; ".join(own)    # the rule's own review holds whatever the answers: its reason, never
+    #                                              the question (check.py's _why does the same for a site's rows)
     bad = [a for a, r in got if r != "pass"]
     good = [a for a, r in got if r == "pass"]
     return "needs_review", reading_words([a for a, _ in got], good, bad)
+
+
+def _own_reviews(rule: dict, known: dict, allowed: dict, combos: list) -> list:
+    """The reasons of the rule's review_when entries that hold (true, not merely possible) under every combination of
+    the readings, in the rule's order: the needs-review the rule itself asks for, which no answer to the open
+    questions changes (the story facts' merge, 2026-11-28: a one-exit R-2 story resting on NFPA 13R said only its
+    occupant load question)."""
+    from .rulebook import _condition, _kinds
+    kinds = _kinds(allowed, measure_kinds(rule.get("for_each")))
+    held = []
+    for r in rule.get("review_when") or []:
+        try:
+            if all(_condition(r["when"], {**known, **values}, kinds) for _, values in combos):
+                held.append(r.get("reason"))
+        except (MissingMeasure, EvaluationError, FormulaError, ArithmeticError):
+            continue
+    return [r for r in dict.fromkeys(held) if isinstance(r, str) and r]
 
 
 # A part's ceilings on measures it has no value for (`bounds`: {measure: {"at_most": n, "why": words, "if_stated"?:

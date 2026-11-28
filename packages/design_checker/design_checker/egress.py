@@ -340,6 +340,24 @@ def _stated_stories(interior, values: dict | None):
     return max(counts, key=lambda c: c[0]) if counts else None
 
 
+
+def _routes_stories(interior, values: dict | None):
+    """_stated_stories, and the most stories the drawing allows where Ithaca's count is an open question
+    (code_scope.STORIES_AT_MOST, check.py): the routes' story facts never take "no stairs" beside a building that may
+    have two or more (the story facts' merge review of #279). A count the check gives that can't be read (text, not
+    a finite number) may be two: so it is taken."""
+    values = values if isinstance(values, dict) else {}
+    keys = ("stories_above_grade_plane", code_scope.STORIES_TYPED, "stories", code_scope.STORIES_AT_MOST)
+    number = lambda v: type(v) is int or type(v) is float and math.isfinite(v)
+    if any(values.get(k) is not None and not number(values.get(k)) for k in keys):
+        return 2, "a story count the check gives can't be read, so the building may have {n} stories"
+    stated = _stated_stories(interior, values)
+    most = values.get(code_scope.STORIES_AT_MOST)
+    if number(most) and (stated is None or most > stated[0]):
+        return most, "the building may have {n} stories, as the place counts them"
+    return stated
+
+
 def _stairs_and_guards(interior, stated_stories=None) -> dict:
     """The interior measuring of the description's stairs and guards alone (BUILDING_INTERIOR_KINDS): the measuring
     run on the description with its rooms, openings and doors given as none and no `has_none` (a house's claims), so
@@ -414,7 +432,7 @@ def _measured(law: dict, interior, readings: dict, ground: dict | None = None, v
         kind = f"{kind} and the interior's {ESCAPE}"          # its own readings key (section group 8a)
     if kind not in readings:
         if kind.startswith(ROUTES):
-            got = measure_routes(interior, ground=ground)
+            got = measure_routes(interior, ground=ground, stated_stories=_routes_stories(interior, values))
             factors = Path(law["folder"]) / OCCUPANT_LOAD_FACTORS
             if factors.exists() and isinstance(interior, dict):      # 1004.5: each room's function's load
                 block = interior.get("building")
@@ -435,7 +453,11 @@ def _measured(law: dict, interior, readings: dict, ground: dict | None = None, v
                 parts.update(one["parts"])
                 refused.update(one.get("refused") or {})
             if escape:                                # each sleeping room linked to its story and doors (8a)
-                escape_openings.link(parts, interior, law.get("rules"))   # 8d: the law's limits, which comply
+                block = interior.get("building") if isinstance(interior, dict) else None
+                facts = {**{k: v for k, v in (values or {}).items() if k in code_scope.FACTS},
+                         **(block if isinstance(block, dict) else {})}       # as _law_values merges them
+                # 8d: the law's limits, which comply; 1007.1.1's separation with the law's own kinds (Chapter 9)
+                escape_openings.link(parts, interior, law.get("rules"), law.get("kinds"), facts)
             readings[kind] = {"parts": parts, "problems": problems, "not_checked": [], "has_none": {},
                               "refused": refused}
         else:

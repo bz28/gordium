@@ -10,7 +10,12 @@ Building Code's own reading of the building already knows of it, with no new geo
 - `sleeping_room_story_one_exit`: yes where the room's story has one exit (its `story_exit_count` under two:
   1031.2 item 1, Group R-2 "in stories with only one exit or access to only one exit"); a story with two or more
   doesn't show that the room's occupants have access to more than one (each dwelling unit may reach only one, as
-  Table 1006.3.4(1) permits: review round 1), so not measured there.
+  Table 1006.3.4(1) permits: review round 1), so there it is no only where the routes show every way out of the
+  room reaches two or more separate and distinct exits that surely lead the story out, through its own space and,
+  where the building states no corridor is within a dwelling unit, the corridors only (the routes' space part,
+  `exits_reached`: 1006.3, 202 COMMON PATH OF EGRESS TRAVEL, 1016.2.1) and are placed apart as the law's own
+  1007.1.1 rule asks (the room's `remoteness_ratio` held to `general.bc_1007_1_1_remoteness`'s check: merge review),
+  else not measured. A `confirm` the routes give the room's exit count is said beside it too.
 - `sleeping_room_door_to_outside`: whether any door of the room (the routes' door parts whose sides name it) has
   outside on its other side (1031.2 exception 2: an exit door or exit access door that opens directly into a public
   way, yard, court or exterior egress balcony); no, only where every door of the description has both its sides
@@ -35,6 +40,10 @@ Then:
 The limits are the rulebook's (never a size written in this code). Plain code, no AI.
 """
 
+import itertools
+import math
+
+from design_checker import code_scope
 from rule_format import formula
 from rule_format import parts as part_rules
 from rule_format.parts import measure_kinds
@@ -55,7 +64,7 @@ WHY = {
     "door_sides_not_read": "a door's sides aren't read, so whether the sleeping room {name} has a door to outside "
                            "isn't known",
     "two_exits": "the sleeping room {name}'s story has two or more exits, but whether its occupants have access to "
-                 "more than one (not only one, as Table 1006.3.4(1) permits) isn't worked out",
+                 "more than one (not only one, as Table 1006.3.4(1) permits) isn't worked out: {why}",
     "opening_stray": "an emergency escape and rescue opening of the description is within no sleeping room read (none "
                      "named, a room not read, or one that can't be read), so it may be this room's",
     "room_id_shared": "the sleeping room {name}'s id is more than one room's, so which openings and doors are its "
@@ -97,9 +106,12 @@ def _count(v) -> bool:
     return v >= 0 and (isinstance(v, int) or (v - v == 0 and v.is_integer()))     # a float: finite and whole
 
 
-def link(parts: dict, description, rules=None) -> None:
+def link(parts: dict, description, rules=None, kinds=None, facts=None) -> None:
     """Add the four measures to every sleeping room part in `parts` (the routes' parts and the interior measuring's
-    sleeping rooms and openings, together), in place; with the law's `rules`, which openings comply (8d)."""
+    sleeping rooms and openings, together), in place; with the law's `rules`, which openings comply (8d). `kinds`:
+    the law's measure kinds (its published certificate's, egress.law["kinds"]), and `facts`: the building facts the
+    check states (its values' code_scope.FACTS beside the description's building block), both for 1007.1.1's
+    separation of a room's two exits (merge with Chapter 9: its check reads the occupancy group, a text)."""
     rooms = parts.get(KIND)
     if not isinstance(rooms, list):
         return
@@ -112,9 +124,16 @@ def link(parts: dict, description, rules=None) -> None:
     for s in parts.get("story") if isinstance(parts.get("story"), list) else []:
         if isinstance(s, dict) and isinstance(s.get("id"), str):
             stories.setdefault(s["id"], []).append(s)
+    spaces = {}                                          # the routes' space parts, by (room id, level)
+    for s in _list(parts.get("space")):
+        if isinstance(s, dict) and isinstance(s.get("id"), str) and isinstance(s.get("within"), str):
+            spaces.setdefault((s["id"], s["within"]), []).append(s)
     openings = parts.get(OPENINGS)
     doors = parts.get("means_of_egress_door")
     stray = isinstance(openings, list) and _stray(parts, openings)
+    block = description.get("building") if isinstance(description, dict) else None
+    separation = (_separation_check(rules), facts if isinstance(facts, dict) else block,
+                  kinds if isinstance(kinds, dict) else {})
     for part in rooms:
         if not isinstance(part, dict) or part.get("maybe"):
             continue                 # an enclosed space that may not be a room at all: every row of it needs review
@@ -127,6 +146,8 @@ def link(parts: dict, description, rules=None) -> None:
         for k in NEW_MEASURES:           # the house measuring's "not measured yet" for these, and any value a part
             why.pop(k, None)             # arrives with: this link decides them, never a stale one beside its reason
             m.pop(k, None)
+            if isinstance(part.get("confirm"), dict):      # nor a reading it arrives with for one (merge review)
+                part["confirm"].pop(k, None)
         name = part.get("name") or part.get("id")
         pid = part.get("id")
         more = part.get("more") if isinstance(part.get("more"), dict) else {}
@@ -157,16 +178,27 @@ def link(parts: dict, description, rules=None) -> None:
             raw = given.get(theirs) if isinstance(given, dict) else None
             known = isinstance(given, dict) and theirs in given
             if known and mine == "sleeping_room_story_one_exit" and not _count(raw):
-                why[mine] = WHY["story_not_measured"].format(name=name, reason=f"its {theirs} is not a count")
+                # a count that isn't a whole count (null, text, NaN, 1.5, -3): not known, never a crash or two exits
+                why[mine] = WHY["story_not_measured"].format(name=name, reason=f"its {theirs} is not a number")
             elif known:
                 value = worked(raw)
-                if value is None:
-                    why[mine] = WHY["two_exits"].format(name=name)
+                if value is None and mine == "sleeping_room_story_one_exit":    # two or more exits: the room's reach
+                    value, said = _reach(spaces.get((rid, level)) or [], name, separation)
+                    if value is None:
+                        why[mine] = WHY["two_exits"].format(name=name, why=said)
+                    else:
+                        m[mine] = value
+                        _own_map(part, "more")["exits_reached"] = said
+                        confirm = _map(spaces[(rid, level)][0].get("confirm")).get("space_exit_count")
+                        if confirm:                      # its routes run through the room it serves: the reading
+                            _own_map(part, "confirm")[mine] = confirm
+                elif value is None:                      # a story value that settles nothing (null): never a value
+                    why[mine] = WHY["story_not_measured"].format(name=name, reason=f"its {theirs} is not given")
                 else:
                     m[mine] = value
             elif story is not None:
-                said = story.get("not_measured") if isinstance(story.get("not_measured"), dict) else {}
-                why[mine] = WHY["story_not_measured"].format(name=name, reason=said.get(theirs, "not measured"))
+                why[mine] = WHY["story_not_measured"].format(
+                    name=name, reason=_map(story.get("not_measured")).get(theirs, "not measured"))
             else:
                 why[mine] = reason
         # a door of its own to outside
@@ -185,8 +217,10 @@ def link(parts: dict, description, rules=None) -> None:
                 why["sleeping_room_door_to_outside"] = WHY["door_sides_not_read"].format(name=name)
             continue
         m["sleeping_room_door_to_outside"] = any(rid in s and OUTSIDE in s for s in sides)
-    _to_openings(rooms, openings)
+    # which openings comply first, on the openings as given (a `confirm` an opening arrives with that isn't a mapping
+    # leaves it not known: 8d review round 2), then the room's facts and readings copied onto them (merge review)
     _compliance(parts, rooms, openings, rules)
+    _to_openings(rooms, openings)
 
 
 def _when(rule) -> str:
@@ -241,15 +275,24 @@ def complies(opening: dict, held: list[str]):
 
 def _missing(opening, held) -> list[str]:
     """The figures an opening doesn't give that its limits read (for a reason a person can act on)."""
-    values = opening.get("measures") if isinstance(opening, dict) else None
+    values = opening.get("measures", {}) if isinstance(opening, dict) else None    # none given: every figure missing
     if not isinstance(values, dict):
         return []
+    if any(opening.get(k) is not None and not isinstance(opening.get(k), dict) for k in ("confirm", "readings")):
+        return []                                        # its readings can't be read, not a figure missing
     unsure = [t for t in held if complies(opening, [t]) is None]       # only the limits it isn't known on
     return sorted({n for t in unsure for n in formula.names(t)} & set(measure_kinds(OPENINGS)) - set(values))
 
 
+def _unread(opening) -> str:
+    """Why an opening giving every figure isn't known: its readings can't be read (not a mapping), or a reading to
+    confirm stands on a figure a limit reads."""
+    bad = [k for k in ("confirm", "readings") if opening.get(k) is not None and not isinstance(opening.get(k), dict)]
+    return f"its {' and '.join(bad)} can't be read" if bad else "a reading to confirm"
+
+
 def _unknown_why(answers, held) -> str:
-    names = [f"{o.get('name') or o.get('id')} ({', '.join(_missing(o, held)) or 'a reading to confirm'})"
+    names = [f"{o.get('name') or o.get('id')} ({', '.join(_missing(o, held)) or _unread(o)})"
              for o, a in answers if a is None and isinstance(o, dict)]
     return ("whether its escape openings comply isn't known: " + "; ".join(names)) if names else \
         "whether its escape openings comply isn't known (one of them can't be read)"
@@ -338,15 +381,124 @@ def _to_openings(rooms: list, openings) -> None:
         if room is not None and not (isinstance(room.get("measures"), dict)
                                      and isinstance(room.get("not_measured", {}), dict)):
             room = None                                    # a room that can't be read gives its openings nothing
+        if isinstance(o.get("confirm"), dict):             # a reading of the room's is only ever the room's
+            for mine in FROM_ROOM:
+                o["confirm"].pop(mine, None)
         for mine, theirs in FROM_ROOM.items():
             why.pop(mine, None)
             given, said = (room["measures"], room.get("not_measured") or {}) if room is not None else ({}, {})
             if room is not None and theirs in given and theirs not in said:     # its own value, no reason beside it
                 m[mine] = given[theirs]
+                read = _map(room.get("confirm")).get(theirs)
+                if read:                                   # the room's value stands on a reading (its routes run
+                    if not isinstance(o.get("confirm"), dict):     # through a room it serves): said on the opening
+                        o["confirm"] = {}                  # too, so a size rule set aside on it is never a pass
+                    o["confirm"][mine] = read
             elif room is not None:
                 why[mine] = said.get(theirs, "its room's isn't known")
             else:
                 why[mine] = "the room it is in isn't one sleeping room read"
+
+
+def _map(x) -> dict:
+    """A part's field as a mapping, or none where it isn't one (parts built by hand: never a crash)."""
+    return x if isinstance(x, dict) else {}
+
+
+def _own_map(part: dict, key: str) -> dict:
+    """The part's own mapping under `key`, made one where it is missing or isn't one (parts built by hand: never a
+    crash; merge review of the R-2 reach)."""
+    if not isinstance(part.get(key), dict):
+        part[key] = {}
+    return part[key]
+
+
+def _list(x) -> list:
+    return x if isinstance(x, list) else []
+
+
+RATIO = "exit_remoteness_ratio"      # the story's 1007.1.1 figure, which the law's rule holds (routes/straight.py)
+
+
+def _separation_check(rules):
+    """The law's 1007.1.1 separation for a story's exits (the check of its one rule over stories reading
+    `exit_remoteness_ratio`: general.bc_1007_1_1_remoteness, half the diagonal, or a third with an NFPA 13 system or,
+    in Group R, an NFPA 13R one the building may count), or None where
+    there isn't exactly one such check (merge review of #240: two exits count only where they are placed apart)."""
+    found = {r["check"] for r in rules or [] if isinstance(r, dict) and r.get("for_each") == "story"
+             and isinstance(r.get("check"), str) and RATIO in _names(r["check"])}
+    return next(iter(found)) if len(found) == 1 else None
+
+
+def _names(text) -> set:
+    try:
+        return set(formula.names(text))
+    except formula.FormulaError:
+        return set()
+
+
+def _apart(check, ratio, building, law_kinds=None):
+    """True where the law's separation check holds with the room's own ratio and the building's stated facts under
+    every value a fact not stated could take, False where it fails under every one, else None (never two on a guess).
+    Each name's kind is the law's own (`law_kinds`: the occupancy group a text of its groups, a sprinkler system a
+    yes/no), else the story part's; a name with no kind, or an open one that isn't a yes/no or a few listed values, is
+    not this code's guess (None)."""
+    facts = code_scope.building_measures(building if isinstance(building, dict) else None)
+    names = _names(check)
+    story = measure_kinds("story")
+    kinds = {RATIO: "number"}
+    for n in names - {RATIO}:
+        kind = (law_kinds or {}).get(n, story.get(n, "boolean" if n.startswith("sprinklered_") else None))
+        if kind is None:
+            return None
+        kinds[n] = kind
+    open_ = sorted(names - {RATIO} - set(facts))
+    choices = []
+    for n in open_:                                     # every value a fact not stated could take
+        if kinds[n] == "boolean":
+            choices.append((True, False))
+        elif isinstance(kinds[n], (set, frozenset, list, tuple)) and 0 < len(kinds[n]) <= 64:
+            choices.append(tuple(sorted(kinds[n], key=str)))
+        else:
+            return None
+    answers = set()
+    for combo in itertools.product(*choices):
+        values = {**facts, **dict(zip(open_, combo)), RATIO: ratio}
+        try:
+            answers.add(bool(formula.evaluate(check, values, kinds)))
+        except (formula.MissingMeasure, formula.EvaluationError, formula.FormulaError, ArithmeticError):
+            return None
+    return answers.pop() if len(answers) == 1 else None
+
+
+def _reach(found: list, name, separation=(None, None, None)):
+    """(False, the doors and the exits each reaches) where the routes show every way out of the sleeping room reaches
+    two or more separate and distinct exits, placed apart as the law's 1007.1.1 rule asks (`separation`: its check and
+    the description's building block); (None, why not) otherwise. `found`: the routes' space parts for the room on its
+    level (one expected)."""
+    if len(found) != 1:
+        return None, f"the routes give {'no' if not found else len(found)} space part(s) for {name}"
+    got = _map(found[0].get("more")).get("exits_reached")
+    if not isinstance(got, dict):
+        return None, str(_map(found[0].get("not_measured")).get("space_exit_count") or "its routes aren't measured")
+    whole = (got.get("two") is True and isinstance(got.get("doors"), dict) and bool(got["doors"])
+             and all(isinstance(v, list) and all(isinstance(x, str) for x in v) and len(set(v)) >= 2
+                     for v in got["doors"].values()))
+    if not whole:
+        return None, str(got.get("why") or "not every way out of it reaches two exits")
+    check, building, law_kinds = separation
+    ratio = got.get("remoteness_ratio")
+    if check is None:
+        return None, "the law's separation of two exits (BCNYS 1007.1.1) isn't read, so they aren't shown apart"
+    if isinstance(ratio, bool) or not isinstance(ratio, (int, float)) or not math.isfinite(ratio) or ratio < 0:
+        return None, "how far apart the exits it reaches are (BCNYS 1007.1.1) isn't measured"
+    ok = _apart(check, float(ratio), building, law_kinds)
+    if ok is not True:
+        return None, (f"the exits it reaches are {ratio:.3f} of the story's diagonal apart, "
+                      + ("under" if ok is False else "not shown to meet")
+                      + f" BCNYS 1007.1.1's separation ({check}), so they aren't shown to be two separate and "
+                        "distinct exits")
+    return False, got["doors"]
 
 
 __all__ = ["link", "NEW_MEASURES", "complies", "limits"]

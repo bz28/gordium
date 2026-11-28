@@ -33,11 +33,13 @@ PLACE_KEYS = {"no_ground", "ground_existing", "ground_assumed", "ground_spots_no
               "place_level_not_read", "place_split_level", "place_either", "place_either_levels",
               "place_too_many_levels", "ground_buildings_apart", "place_levels_not_all", "place_description",
               "ground_spots_not_finished", "ground_disagrees", "ground_openings_not_read", "ground_disagrees_spots",
-              "place_story_spread", "place_level_inside_story", "place_under_lowest", "place_levels_disagree"}
+              "place_story_spread", "place_level_inside_story", "place_under_lowest", "place_levels_disagree",
+              "place_not_a_story_not_read", "place_not_a_story_has_rooms"}    # the level mark: tests at the end
 
 
-def building(floors, extra_levels=(), outline=BOX):
-    """A description and its stories: `floors` a list of lists of room floor elevations (feet), one per story."""
+def building(floors, extra_levels=(), outline=BOX, not_stories=False):
+    """A description and its stories: `floors` a list of lists of room floor elevations (feet), one per story;
+    `not_stories`: the levels with no rooms (`extra_levels`) marked not a story (all_levels[].not_a_story)."""
     levels = [{"id": f"L{i}", "name": f"Level {i}", "elevation": min(f)} for i, f in enumerate(floors)]
     levels += [{"id": f"X{i}", "name": f"Datum {i}", "elevation": z} for i, z in enumerate(extra_levels)]
     rooms = [{"id": f"L{i}r{k}", "name": f"Room {i}.{k}", "level": f"L{i}", "floor_elevation": z}
@@ -48,7 +50,8 @@ def building(floors, extra_levels=(), outline=BOX):
         s.outer = outline
         s.rooms = {r["id"]: _Room(outline) for r in rooms if r["level"] == lv["id"]}
         stories[lv["id"]] = s
-    return {"units": "ft", "levels": levels, "all_levels": [dict(lv) for lv in levels], "rooms": rooms}, stories
+    every = [dict(lv, **({"not_a_story": True} if not_stories and lv["id"].startswith("X") else {})) for lv in levels]
+    return {"units": "ft", "levels": levels, "all_levels": every, "rooms": rooms}, stories
 
 
 class _Room:
@@ -327,6 +330,7 @@ def test_each_reason_a_place_isnt_measured():
     desc, stories = building([[0]])
     desc["rooms"] = []
     said("place_no_rooms", _reason(places(desc, Reader("ft"), {"L0": "Level 0"}, stories, {"flat": 0})))
+    seen |= {"place_not_a_story_not_read", "place_not_a_story_has_rooms"}    # the level mark's tests at the end
     desc, stories = building([[-20], [1]])
     desc["levels"][1]["elevation"] = -1                # the stories' levels say -1 ft, every level's list 1 ft
     said("place_levels_disagree", _reason(places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})))
@@ -370,7 +374,7 @@ def test_a_level_with_no_rooms_under_the_lowest_story_may_be_a_story():
 def test_a_datum_under_the_slab_may_be_a_story():
     """A level with no rooms 4 ft under a slab on flat ground: if it is a story, a basement is never proven, so it
     may be the first story above grade plane, and the slab's story the second: neither the slab's place nor the
-    one above it is placed. (A level the architect marks as no story would settle it: a follow-up.)"""
+    one above it is placed. (A level the architect marks as no story settles it: the level mark's tests at the end.)"""
     got = placed([[0], [10]], {"flat": 0}, extra_levels=(-4,))
     assert FIRST not in got["L0"]["measures"] and SECOND not in got["L1"]["measures"]
     assert placed([[0], [10]], {"flat": 0})["L1"]["measures"][SECOND] is True       # with no such level
@@ -666,6 +670,61 @@ def test_lower_ground_stated_at_an_opening_is_the_lowest_ground(ground, opening)
     got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, ground)
     assert not set(FACTS) & set(got["L0"]["measures"]) and not set(FACTS) & set(got["L1"]["measures"])
     assert got["L0"]["not_measured"][FIRST] == STOPS["place_under_lowest"].format(gap="8 ft")
+
+
+# --- the level mark "not a story" (Gordium: Not a story, all_levels[].not_a_story) ----------------------------------
+
+@pytest.mark.parametrize("floors", STACKS, ids=lambda f: "_".join(str(min(x)) for x in f))
+def test_levels_marked_not_a_story_place_as_if_they_werent_there(floors):
+    """Every stack, every set of levels with no rooms (a garage under, a datum, a roof, a gap, one within a story's
+    floors), every ground: marked not a story, each place measured is exactly the one measured with those levels
+    gone (which the walk above checks against the oracle), and nothing more: never tried as a story, never a gap."""
+    for extra in EXTRAS + [(1.5,)]:
+        for ground in GROUNDS + [None]:
+            g = ground or {"none": "none stated"}
+            got, alone = placed(floors, g, extra_levels=extra, not_stories=True), placed(floors, g)
+            for lid in (f"L{k}" for k in range(len(floors))):
+                assert got[lid]["measures"] == alone[lid]["measures"], (floors, extra, ground, lid)
+                if extra and got[lid]["measures"]:
+                    assert got[lid]["more"]["story_place"]["levels_not_stories"] == \
+                        sorted(f"Datum {i}" for i in range(len(extra)))
+
+
+def test_a_datum_marked_not_a_story_settles_the_slab_and_the_story_above():
+    """The case step 1 left for this mark: a datum 4 ft under a slab on flat ground unsettled both stories (it may be
+    a story); marked not a story, the slab is the first story above grade plane and the next the second. Unmarked,
+    or marked false or null, it is still tried both ways."""
+    got = placed([[0], [10]], {"flat": 0}, extra_levels=(-4,), not_stories=True)
+    assert got["L0"]["measures"][FIRST] is True and got["L1"]["measures"][SECOND] is True
+    for said in (False, None):
+        desc, stories = building([[0], [10]], extra_levels=(-4,))
+        desc["all_levels"][-1]["not_a_story"] = said
+        got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+        assert FIRST not in got["L0"]["measures"] and SECOND not in got["L1"]["measures"], said
+
+
+@pytest.mark.parametrize("said", ["yes", 1, 0, [True], "true"])
+def test_a_not_a_story_mark_that_isnt_true_or_false_places_nothing(said):
+    desc, stories = building([[0], [10]], extra_levels=(-4,))
+    desc["all_levels"][-1]["not_a_story"] = said
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert not got["L0"]["measures"] and not got["L1"]["measures"]
+    assert _reason(got).startswith(STOPS["place_not_a_story_not_read"].split("{")[0]), said
+
+
+@pytest.mark.parametrize("what", ["rooms", "space"])
+def test_a_level_marked_not_a_story_with_rooms_or_a_space_on_it_places_nothing(what):
+    """The mark and the drawing disagree: rooms drawn on the level, or an enclosed space with no room (a room nobody
+    drew) on it. Which is right isn't known, so no story is placed."""
+    if what == "rooms":
+        desc, stories = building([[0], [10]])
+        desc["all_levels"][1]["not_a_story"] = True
+    else:
+        desc, stories = building([[0], [10]], extra_levels=(20,), not_stories=True)
+        desc["unknown_spaces"] = [{"id": "u", "level": "X0", "outline": []}]
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert not got["L0"]["measures"] and not got["L1"]["measures"]
+    assert _reason(got).startswith(STOPS["place_not_a_story_has_rooms"].split("{")[0]), what
 
 
 @pytest.mark.parametrize("openings", [5, True, {"w": {"id": "w", "ground_outside": 2}}, [[{"id": "w", "ground_outside": 2}]],

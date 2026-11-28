@@ -197,6 +197,28 @@ def test_the_architects_statement_is_said_beside_the_row_and_never_holds_a_pass(
     assert row["outcome"] == "needs_review" and "architect_stated" not in row
 
 
+RESTS = "Gordium's reading, to confirm: ... This count holds only if BCNYS 1016.2.1 (p.341) is met"
+
+
+def test_a_figure_resting_on_another_requirement_is_said_beside_the_row_and_never_holds_a_pass(maine):
+    """`rests_on` (the dwelling units on a story stand on 1016.2.1, a person's check shown in the same answer): a pass
+    stays a pass and a fail a fail, each with the words beside it; words for a measure the row doesn't read, or with
+    no value behind them, aren't said."""
+    rules, allowed = maine
+    rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
+    for value, outcome in ((40.0, "pass"), (140.0, "fail")):
+        part = {"id": "L1", "measures": {"common_path_of_travel_occupied": value},
+                "rests_on": {"common_path_of_travel_occupied": RESTS}}
+        row = row_of(rule, {"story": [part]}, SPRINKLERED_NEW, allowed)
+        assert (row["outcome"], row["rests_on"]) == (outcome, [RESTS])
+        assert "confirm" not in row
+    part = {"id": "L1", "measures": {"common_path_of_travel_occupied": 40.0},
+            "rests_on": {"egress_travel_distance_occupied": RESTS}}
+    assert "rests_on" not in row_of(rule, {"story": [part]}, SPRINKLERED_NEW, allowed)
+    part = {"id": "L1", "measures": {}, "rests_on": {"common_path_of_travel_occupied": RESTS}}
+    assert "rests_on" not in row_of(rule, {"story": [part]}, SPRINKLERED_NEW, allowed)
+
+
 def test_a_mixed_result_says_its_open_question_in_words_never_a_tag(maine):
     """The reason an architect reads (the Revit pane's cause card and row): the question's own title and number
     from the open questions list (docs/decisions/2026-11-20_route_measurement.md), never "tag = answer"."""
@@ -216,3 +238,18 @@ def test_a_mixed_result_says_its_open_question_in_words_never_a_tag(maine):
         assert {"question", "number", "answers"} <= set(parts.READING_QUESTIONS[tag])
     assert set(parts.READING_QUESTIONS[dead_ends.QUESTION]["answers"]) == {dead_ends.WITH, dead_ends.WITHOUT}
     assert outcome(rule, dead_end(30.0, 5.0), NEW_DAY_CARE, allowed)[0] == "needs_review"
+
+
+def test_the_rules_own_review_is_said_only_where_it_holds_under_every_reading(maine):
+    """A row needing review under every reading because the rule's own review_when holds whatever the answer says that
+    reason, not the question (the story facts' merge, 2026-11-28: parts._own_reviews). An entry holding under only some
+    readings never stands for the row: the question is said, as before (round 2 of its review: `any` for `all`)."""
+    rules, allowed = maine
+    rule = copy.deepcopy(rules["general.nfpa_16_2_5_2_dead_end"])
+    each = [{"when": "corridor_dead_end_length >= 30", "reason": "Held at 30 only."},
+            {"when": "corridor_dead_end_length < 30", "reason": "Held at 25 only."}]
+    result, why = outcome({**rule, "review_when": each}, dead_end(30.0, 25.0), NEW_DAY_CARE, allowed)
+    assert result == "needs_review" and parts.is_reading_words(why), why
+    both = each + [{"when": "corridor_dead_end_length > 1", "reason": "Held whatever the answer."}]
+    assert outcome({**rule, "review_when": both}, dead_end(30.0, 25.0), NEW_DAY_CARE, allowed) == \
+        ("needs_review", "Held whatever the answer.")

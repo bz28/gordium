@@ -134,6 +134,53 @@ public sealed class RouteTests
         Assert.Equal(-10.0, all[1]!["elevation"]!.GetValue<double>(), 9);
     }
 
+    /// <summary>A level ticked Gordium: Not a story (a datum, a roof) is sent with <c>not_a_story</c> true, so the story
+    /// places never try it as a story; No or blank is left out (tried both ways), and the route code reads that key.</summary>
+    [Theory]
+    [InlineData(1, true)]
+    [InlineData(0, false)]
+    [InlineData(null, false)]
+    public void A_level_marked_not_a_story_is_sent_so_and_only_yes(int? tick, bool sent)
+    {
+        var floor = new FakeFloor();
+        floor.Levels!.Add(new LevelRecord("level-datum", "T.O. Footing", floor.Fake.Place(0, 0, -4).Z));
+        floor.Marked.Add(new MarkedElement
+        {
+            UniqueId = "level-datum", BuiltInCategory = Marks.Levels, Name = "T.O. Footing",
+            Instance = tick is { } v ? new Dictionary<Guid, MarkValue> { [Marks.NotAStory.Guid] = new(true, v) } : [],
+        });
+        var all = InteriorReader.Read(floor.Model()).Interior["all_levels"]!.AsArray();
+        var datum = all.Single(l => l!["id"]!.GetValue<string>() == "level-datum")!;
+        Assert.Equal(sent, datum["not_a_story"] is not null);
+        if (sent)
+            Assert.True(datum["not_a_story"]!.GetValue<bool>());
+        Assert.Null(all.Single(l => l!["id"]!.GetValue<string>() == FakeFloor.Level)!["not_a_story"]);
+        Assert.Equal((MarkValueKind.YesNo, "all_levels[].not_a_story"), (Marks.NotAStory.Kind, Marks.NotAStory.Feeds));
+        Assert.Equal([Marks.Levels], Marks.NotAStory.Categories);
+        Assert.Equal("not_a_story", JsonNode.Parse(Env.RunCode(
+            "import json; from model_measurement.routes import story_place as s; print(json.dumps(s.NOT_A_STORY))"))!.GetValue<string>());
+    }
+
+    /// <summary>Review round 1 (PR 2): a level ticked Not a story with Rooms on it disagrees with the mark, so no story is
+    /// placed; the reader lists it first among the level conflicts (as for No rooms on this level), and the tooltip names
+    /// an enclosed area with no Room too.</summary>
+    [Fact]
+    public void A_level_marked_not_a_story_with_rooms_on_it_is_a_conflict_said_first()
+    {
+        var floor = new FakeFloor();
+        floor.Marked.Add(new MarkedElement
+        {
+            UniqueId = FakeFloor.Level, BuiltInCategory = Marks.Levels, Name = "Level 1",
+            Instance = new Dictionary<Guid, MarkValue> { [Marks.NotAStory.Guid] = new(true, 1) },
+        });
+        var read = InteriorReader.Read(floor.Model());
+        var conflict = Assert.Single(read.LevelConflicts);
+        Assert.StartsWith($"Level \"Level 1\" is marked {Marks.NotAStory.Name} Yes, but Room \"", conflict, StringComparison.Ordinal);
+        Assert.Contains("no story's place above or below grade plane is measured", conflict, StringComparison.Ordinal);
+        Assert.Contains("an enclosed area with no Room", Marks.NotAStory.Description, StringComparison.Ordinal);
+        Assert.Contains(Marks.NoRoomsOnLevel.Name, Marks.NotAStory.Description, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void The_story_under_turned_and_moved_shared_coordinates_reads_the_same()
     {
@@ -192,6 +239,32 @@ public sealed class RouteTests
         Assert.True(json[U("A")]!.GetValue<bool>());
         Assert.False(json[U("B")]!.GetValue<bool>());
         Assert.False(json[U("C")]!.GetValue<bool>());
+    }
+
+    /// <summary>The dwelling unit a room belongs to (Gordium: Unit): sent as typed, trimmed, as <c>rooms[].unit</c>,
+    /// which the route code counts a story's dwelling units from (one per name); blank or never set is left out (no
+    /// mark), and a mark naming two units is sent as typed, so the route code says so and the count needs review.</summary>
+    [Fact]
+    public void A_rooms_unit_mark_is_sent_as_typed_and_blank_is_left_out()
+    {
+        var floor = new FakeFloor();
+        floor.SetMark("A", Marks.RoomUnit, new(true, Text: " Apt 1 "));
+        floor.SetMark("B", Marks.RoomUnit, new(true, Text: "1A, 1B"));
+        floor.SetMark("C", Marks.RoomUnit, new(true, Text: "   "));
+        floor.SetMark("L", Marks.RoomUnit, new(false, Text: ""));              // never set
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Equal("Apt 1", Room(read, "A")["unit"]!.GetValue<string>());
+        Assert.Equal("1A, 1B", Room(read, "B")["unit"]!.GetValue<string>());
+        Assert.Null(Room(read, "C")["unit"]);
+        Assert.Null(Room(read, "L")["unit"]);
+        Assert.Contains(Marks.RoomUnit, Marks.All);
+        Assert.Equal((MarkValueKind.Text, MarkBinding.Instance, "rooms[].unit"), (Marks.RoomUnit.Kind, Marks.RoomUnit.Binding, Marks.RoomUnit.Feeds));
+        Assert.Equal([Marks.Rooms], Marks.RoomUnit.Categories);
+        // the route code reads the same key, and the words it says beside a count from the marks name the mark
+        var json = JsonNode.Parse(Env.RunCode(
+            "import json; from model_measurement.routes import dwelling_units as d; print(json.dumps({'key': d.UNIT, 'words': d.MARKED}))"))!;
+        Assert.Equal("unit", json["key"]!.GetValue<string>());
+        Assert.Contains(Marks.RoomUnit.Name, json["words"]!.GetValue<string>(), StringComparison.Ordinal);
     }
 
     [Fact]

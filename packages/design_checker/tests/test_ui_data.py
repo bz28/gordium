@@ -797,6 +797,36 @@ def test_every_restatement_of_the_leaves_rule_carries_the_mullioned_pair():
     assert "narrower leaf" in next(line for line in fmt.splitlines() if line.startswith("| `leaves`"))
 
 
+def test_a_door_whose_hardware_isnt_given_is_asked_for_by_the_field_its_mark_answers():
+    # the door mark (Revit's Gordium: Hardware, doors[].hardware): before it, "Mark the ... in the model" with no mark
+    # named; now the ask names the field, so the host's card opens its mark. A latch's electric lock not asked is
+    # no mark's to give: it keeps the drawing's words
+    from model_measurement.routes.stops import STOPS
+    for stop in ("door_hardware_not_given", "door_hardware_not_read"):
+        why = "hardware: " + STOPS[stop].format(name="D01", got="the text 'bar'")
+        for m in ("moe_door_latched", "moe_door_panic_hardware", "moe_door_electric_lock"):
+            got = ui_data._from_cause({"kind": "mark", "key": f"mark:means_of_egress_door:{m}", "words": why,
+                                       "measure": m}, "means_of_egress_door")
+            assert (got["kind"], got["field"], got["key"]) == ("mark", "doors[].hardware", "field:doors[].hardware"), m
+            assert got["headline"] == ui_data.FIELD_HEADLINES["doors[].hardware"]
+        assert "no mark for it" not in STOPS[stop]
+    assert panel_data.field_of_why("moe_door_electric_lock", STOPS["door_electric_lock_not_asked"].format(name="D")) is None
+
+
+def test_an_escape_openings_well_not_stated_is_asked_for_by_the_field_its_mark_answers_and_a_drawn_wells_isnt():
+    from model_measurement.interior.openings import STATED_WELL, WELL_FIELDS
+    from model_measurement.interior.stops import STOPS
+    for measure, (field, mark) in WELL_FIELDS.items():
+        why = STOPS["well_not_stated"].format(name="W1", what="it", mark=mark)
+        got = ui_data._from_cause({"kind": "mark", "key": f"mark:emergency_escape_opening:{measure}", "words": why,
+                                   "measure": measure}, "emergency_escape_opening")
+        assert (got["kind"], got["field"]) == ("mark", field), measure
+        assert got["headline"] == ui_data.FIELD_HEADLINES[field] and len(got["headline"]) <= 100
+    assert set(WELL_FIELDS) >= {m for m, _, _, _ in STATED_WELL.values() if m}
+    # a drawn well's own reason (a host that draws one) names no mark: never sent to a mark that isn't there
+    drawn = STOPS["missing"].format(what="the area well's floor elevation")
+    assert panel_data.field_of_why("area_well_depth", drawn) is None
+
 def test_the_high_rise_question_asks_the_whole_definition():
     """Review round 1 of Chapter 4 part b: the question once left out 202's occupiable roof, so a building whose roof
     deck is the high part could be answered No and lose every Section 403 flag."""

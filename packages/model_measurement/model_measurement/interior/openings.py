@@ -21,8 +21,8 @@ import math
 from shapely.geometry import box
 from shapely.ops import unary_union
 
-from model_measurement.interior.read import choice, number, tidy
-from model_measurement.interior.stops import Stop
+from model_measurement.interior.read import choice, name_of, number, tidy
+from model_measurement.interior.stops import Stop, Words, given_as
 
 SLIDING = ("double_hung", "single_hung", "horizontal_slider", "sliding_door")
 HINGED = ("casement", "side_hinged_door")
@@ -33,6 +33,15 @@ GRADE_FLOOR = 44.0      # in: the definition of a grade-floor emergency escape a
 CLEAR = ("opening_net_clear_area", "opening_net_clear_height", "opening_net_clear_width")
 NONE = "none"           # the opening doesn't open
 BELOW = 1 / 16          # in: a sill this far under the floor is drawing noise (read as 0); more is a wrong floor
+LADDER_DEPTH = 44.0     # in: the one area well depth the rules read (BCNYS 1031.5.2, RCNYS R319.4.2: "more than 44
+#                         inches" needs a ladder or steps); a least depth past it settles every one of them
+# the least depth handed to the rules stands on this reading (rule_format.parts.rows: a row that would comply on it
+# needs review until it is confirmed; a fail keeps the reading beside it)
+DEPTH_READING = ("Gordium's reading: an area well's floor is at or below the bottom of the clear opening it serves "
+                 "(a clear opening whose bottom is under the well's floor isn't clear, and BCNYS 1031.5.1 and RCNYS "
+                 "R319.4.1 ask the well to let the opening be fully opened), so the well is at least as deep as the "
+                 "ground outside stands above that bottom: {least} in, from the ground the model gives (its floor "
+                 "isn't drawn)")
 # whether an opening is a door, read from its operation: these name a door or a window; fixed glass, pivot and
 # tilt-turn units and `other` are made as doors and as windows, so they don't say
 IS_DOOR = {"side_hinged_door": True, "sliding_door": True, "casement": False, "double_hung": False,
@@ -162,15 +171,17 @@ def at_grade(bottom: float, levels: list[float]):
     return True if all(near) else False if not any(near) else None
 
 
-def measure_opening(o: dict, reader, floor_of) -> tuple[dict, dict, dict]:
-    """(measures, more, not_measured) for one escape opening. floor_of(room id): its finished floor elevation (Stop
-    if the room isn't known)."""
-    measures, more, stopped = {}, {}, {}
+def measure_opening(o: dict, reader, floor_of) -> tuple[dict, dict, dict, dict]:
+    """(measures, more, not_measured, confirm) for one escape opening. floor_of(room id): its finished floor elevation
+    (Stop if the room isn't known). `confirm`, {measure: words}: a measure that stands on Gordium's reading
+    (rule_format.parts.rows shows it with each row reading it; a row that would comply on it needs review)."""
+    measures, more, stopped, confirm = {}, {}, {}, {}
 
     def stop_all(names, reason):
         for n in names:
             stopped[n] = reason
 
+    bottoms = []
     try:
         clear, bottoms = clear_opening(o, reader)
     except Stop as s:
@@ -212,7 +223,20 @@ def measure_opening(o: dict, reader, floor_of) -> tuple[dict, dict, dict]:
             more.update(area_well(o, reader))
         except Stop as s:
             stop_all(("area_well_area", "area_well_width", "area_well_projection", "area_well_depth"), s.reason)
-    return measures, more, stopped
+    if "stated_well" in o:
+        given, why, reading = stated_well(o, reader, more, bottoms if clear not in (None, NONE) else [])
+        measures.update(given)
+        stopped.update(why)
+        confirm.update(reading)
+        # an opening that is, or may be, below the ground (stated so, shown so, within 1/16 in of it, or a statement
+        # the ground contradicts) with no well drawn may stand in a well whose floor isn't known, and either may be
+        # "the finished ground level adjacent to the opening" (open question 4.6): a host that sends what it states of
+        # the well (the Revit reader, its ground read from a Toposolid) gets a grade-floor answer only where below
+        # grade is settled as no (to do: every host, which changes test house 5's second window)
+        if o.get("area_well") is None and "opening_at_grade" in measures and measures.get("opening_below_grade") is not False:
+            del measures["opening_at_grade"]
+            stopped["opening_at_grade"] = Stop("grade_floor_well_unknown").reason
+    return measures, more, stopped, confirm
 
 
 def grade_floor(o: dict, reader, bottoms: list[float]) -> bool:
@@ -249,3 +273,264 @@ def area_well(o: dict, reader) -> dict:
     depth = max(grounds(o, reader)) - floor          # deepest: R319.4.2's ladder turns on the depth
     return {"area_well_area": tidy(width * projection / 144), "area_well_width": tidy(width),
             "area_well_projection": tidy(projection), "area_well_depth": tidy(depth)}
+
+
+# ---- what the architect states of the opening and its area well (`stated_well`; in Revit, the window's or door's own
+# marks: a well isn't in Revit's vocabulary), and what the ground given outside it shows ---------------------------------
+
+# the description's key -> (the measure it gives, what it says in a reason, its kind: yes_no; size, a length that can't
+# be less than zero, in inches; area, in square feet; word, the ladder's), and the marks its reasons name, in plain
+# words (in Revit, Gordium: Below grade and the Gordium: Well marks on the window or door)
+STATED_WELL = {
+    "below_grade": ("opening_below_grade", "whether the bottom of its clear opening is below the adjacent grade",
+                    "yes_no", "its below-grade mark"),
+    "area": ("area_well_area", "its area well's horizontal area", "area", "its area well marks"),
+    "width": ("area_well_width", "its area well's width along the wall", "size", "its area well marks"),
+    "projection": ("area_well_projection", "its area well's projection out from the wall", "size",
+                   "its area well marks"),
+    "depth": ("area_well_depth", "its area well's vertical depth", "size", "its area well marks"),
+    "ladder": (None, "what its area well has to climb out by (a ladder, steps or none)", "word",
+               "its area well marks"),
+    "ladder_width": ("area_well_ladder_width", "the inside width of its area well's ladder or steps", "size",
+                     "its area well marks"),
+    "ladder_projection": ("area_well_ladder_projection", "how far its area well ladder's rungs stand out from the wall",
+                          "size", "its area well marks"),
+    "rung_spacing": ("area_well_rung_spacing", "the spacing of its area well ladder's rungs", "size",
+                     "its area well marks"),
+    "step_tread": ("area_well_step_tread", "the tread depth of its area well's steps", "size", "its area well marks"),
+    "step_riser": ("area_well_step_riser", "the riser height of its area well's steps", "size",
+                   "its area well marks"),
+    "full_height": ("area_well_ladder_full_height", "whether its area well's ladder or steps run its full height",
+                    "yes_no", "its area well marks"),
+    "ladder_encroachment": ("area_well_ladder_encroachment",
+                            "how far its area well's ladder or steps reach into the well's required dimensions", "size",
+                            "its area well marks"),
+    "other_encroachment": ("area_well_other_encroachment",
+                           "how far anything else in its area well reaches into the well's required dimensions", "size",
+                           "its area well marks"),
+}
+# `ladder`'s words -> (area_well_ladder, area_well_steps). A ladder or steps the opening blocks when open is no ladder
+# 1031.5.2 accepts ("The ladder or steps shall not be obstructed by the emergency escape and rescue opening when the
+# window or door is in the open position."), but steps are still steps
+LADDER_WORDS = {"ladder": (True, False), "steps": (True, True), "ladder_blocked": (False, False),
+                "steps_blocked": (False, True), "none": (False, False)}
+LADDER_MEASURES = ("area_well_ladder", "area_well_steps")
+
+
+def well_field(key: str) -> str:
+    """The description's field a stated measure comes from (a host's mark answers it: design_checker.panel_data)."""
+    return f"openings[].stated_well.{key}"
+
+
+# {measure: (the field that states it, the marks its reasons name)}: what panel_data names in a mark's cause
+WELL_FIELDS = {**{m: (well_field(k), mark) for k, (m, _, _, mark) in STATED_WELL.items() if m},
+               **{m: (well_field("ladder"), STATED_WELL["ladder"][3]) for m in LADDER_MEASURES}}
+
+
+def stated_well(o: dict, reader, more: dict, bottoms=()) -> tuple[dict, dict, dict]:
+    """(measures, not_measured, confirm) from what the architect states of the opening and its area well
+    (`stated_well`, a host's marks), and what the ground given outside it (`ground_outside`) shows. Each one given is
+    handed to the rules as the architect's statement; one left out is not stated (its reason names the mark that
+    states it), never 0 or no. Where the drawn well (`area_well`, kept in `more`) gives the same measure, the two must
+    agree within 1/16 in (1/16 sq ft for the area), else neither is used; a stated area over the stated width times
+    projection can't be. With no drawn well, the ground given measures what isn't stated (`ground_shows`): below grade
+    where it stands more than 1/16 in above the clear opening's bottom (`bottoms`, every bottom it could have), not
+    below where every bottom stands more than 1/16 in above it, else no value; and, below grade, the well's least depth
+    (the ground over the highest bottom), handed to the rules only past 44 in and on Gordium's reading (`confirm`:
+    DEPTH_READING). A statement wins over the ground, unless the two disagree by more than 1/16 in: then neither is
+    used. Not below grade can't stand beside a drawn well, a ground given above a bottom, or a ground given where no
+    bottom is known; below grade can't stand beside a ground given below every bottom; a stated depth can't be less
+    than the least depth. What reaches into the well's required dimensions is two facts of its own, which both codes'
+    size rules read (BCNYS 1031.5.1, RCNYS R319.4.1). A key the format doesn't know, or `stated_well` not a mapping,
+    refuses every stated measure (a mistyped key must never read as settled)."""
+    name = name_of(o)
+    s = o.get("stated_well")
+    if not isinstance(s, dict) or (extra := sorted(str(k) for k in s if k not in STATED_WELL)):
+        what = "it isn't a mapping" if not isinstance(s, dict) else ("it gives " + ", ".join(extra) +
+                                                                      ", which the format doesn't know")
+        return {}, {m: Stop("well_stated_unread", name=name, what=Words(what)).reason for m in WELL_FIELDS}, {}
+
+    def stop(which, key, **more_blanks):
+        _, words, _, mark = STATED_WELL[key]
+        return Stop(which, name=name, what=Words(words), mark=Words(mark), **more_blanks)
+
+    # what the ground given shows, used only with no drawn well (whose own floor and depth are the drawing's)
+    shown, top, low, high = ("none", None, None, None) if o.get("area_well") is not None else ground_shows(o, reader, bottoms)
+    least = tidy(top - high) if shown == "below" else None
+    measures, stopped, confirm = {}, {}, {}
+    for key, (measure, words, kind, _) in STATED_WELL.items():
+        if kind == "word":
+            continue
+        got = s.get(key)
+        try:
+            if key == "below_grade":
+                measures[measure] = _below_grade(got, shown, top, o, reader, bottoms, lambda w, **b: stop(w, key, **b),
+                                                 low=low, high=high)
+                continue
+            if got is None:
+                drawn = more.get(measure)
+                if isinstance(drawn, (int, float)) and not isinstance(drawn, bool):
+                    raise stop("well_drawn_not_stated", key)
+                if key == "depth" and least is not None:
+                    if least > LADDER_DEPTH + AGREE:      # deeper than 44 in whatever its floor (at or below the bottom)
+                        measures[measure] = least
+                        confirm[measure] = DEPTH_READING.format(least=f"{least:g}")
+                        continue
+                    raise stop("well_depth_least", key, least=Words(f"{least:g}"))
+                raise stop("well_not_stated", key)
+            if kind == "yes_no":
+                if not isinstance(got, bool):
+                    raise stop("well_stated_not_read", key, got=given_as(got))
+                measures[measure] = got
+                continue
+            try:
+                value = reader.size(got, words) if kind == "size" else _area(reader, got, words)
+            except Stop as bad:
+                raise stop("well_stated_bad", key, reason=Words(bad.reason)) from None
+            drawn = more.get(measure)
+            if isinstance(drawn, (int, float)) and not isinstance(drawn, bool) and abs(drawn - value) > AGREE:
+                unit = " sq ft" if kind == "area" else " in"
+                raise stop("well_disagree", key, drawn=Words(f"{tidy(drawn):g}{unit}"),
+                           stated=Words(f"{tidy(value):g}{unit}"))
+            if key == "depth" and least is not None and value < least - AGREE:
+                raise stop("well_depth_disagree", key, stated=Words(f"{tidy(value):g}"), least=Words(f"{least:g}"))
+            measures[measure] = tidy(value)
+        except Stop as s_:
+            stopped[measure] = s_.reason
+    area, w, p = (measures.get(k) for k in ("area_well_area", "area_well_width", "area_well_projection"))
+    if area is not None and w is not None and p is not None and area > w * p / 144 + AGREE:
+        # a well within its width and projection holds no more than their rectangle: one of the three is wrong
+        why = stop("well_area_over_size", "area", width=w, projection=p, rectangle=tidy(w * p / 144)).reason
+        for m in ("area_well_area", "area_well_width", "area_well_projection"):
+            measures.pop(m)
+            stopped[m] = why
+    word = s.get("ladder")
+    climb = LADDER_MEASURES
+    try:
+        if word is None:
+            raise stop("well_not_stated", "ladder")
+        if not isinstance(word, str) or word not in LADDER_WORDS:
+            raise stop("well_stated_not_read", "ladder", got=Words(f"{given_as(word)}, not one of " +
+                                                                 ", ".join(LADDER_WORDS)))
+        if word == "none":
+            # nothing to climb, so no ladder or steps reach into the well (parts.yaml: 0 where there are none); a
+            # reach stated besides, other than 0 (or one that can't be read), leaves which is right unclear
+            if s.get("ladder_encroachment") is not None and measures.get("area_well_ladder_encroachment") != 0:
+                climb = LADDER_MEASURES + ("area_well_ladder_encroachment",)
+                reach = measures.get("area_well_ladder_encroachment")
+                raise stop("well_no_ladder_reaches", "ladder_encroachment",
+                           got=Words(f"{reach:g} in" if reach is not None else "a value Gordium can't read"))
+            measures["area_well_ladder_encroachment"] = 0.0
+            stopped.pop("area_well_ladder_encroachment", None)
+        measures.update(zip(LADDER_MEASURES, LADDER_WORDS[word]))
+    except Stop as s_:
+        for m in climb:
+            measures.pop(m, None)
+            stopped[m] = s_.reason
+    return measures, stopped, confirm
+
+
+def ground_shows(o: dict, reader, bottoms) -> tuple[str, float | str | None, float | None, float | None]:
+    """What the ground given outside the opening (`ground_outside`) shows of its clear opening's bottom, as (what,
+    ground, low, high): `bottoms`, every bottom it could have (low and high their least and greatest), else, with none,
+    the bounds the description gives (`clear_bottom_between`: a door's, its threshold not drawn). ("none", None) no
+    ground given; ("unread", why) a ground that can't be read; ("no_bottom", top) no bottom known; ("bounds_bad", why)
+    bounds that can't be read; ("below", top) the ground stands more than 1/16 in above a bottom (bounds: above the
+    highest); ("above", top) every bottom stands more than 1/16 in above it (bounds: the lowest does); ("near", top)
+    within 1/16 in; ("between", top) between the bounds. `top`, the highest ground given, in inches: grade is the
+    finished ground "adjoining the building" (RCNYS R202 GRADE), so the ground over any part of the opening's bottom
+    puts it below grade there."""
+    if o.get("ground_outside") is None:
+        return "none", None, None, None
+    try:
+        top = max(grounds(o, reader))
+    except Stop as s:
+        return "unread", s.reason, None, None
+    if not bottoms:
+        try:
+            bounds = bottom_bounds(o, reader)
+        except Stop as s:
+            return "bounds_bad", s.reason, None, None
+        if bounds is None:
+            return "no_bottom", top, None, None
+        low, high = bounds
+        if high < top - AGREE:
+            return "below", top, low, high
+        if low > top + AGREE:
+            return "above", top, low, high
+        return "between", top, low, high
+    low, high = min(bottoms), max(bottoms)
+    if any(b < top - AGREE for b in bottoms):
+        return "below", top, low, high
+    if all(b > top + AGREE for b in bottoms):
+        return "above", top, low, high
+    return "near", top, low, high
+
+
+def bottom_bounds(o: dict, reader) -> tuple[float, float] | None:
+    """The lowest and highest its clear opening's bottom could be (`clear_bottom_between`, in inches: a door's, its
+    threshold not drawn), None where not given; Stop where they aren't two elevations, the lower first."""
+    given = o.get("clear_bottom_between")
+    if given is None:
+        return None
+    if not isinstance(given, list) or len(given) != 2:
+        raise Stop("bottom_between_bad", got=given_as(given))
+    low = reader.length(given[0], "the lowest its clear opening's bottom could be")
+    high = reader.length(given[1], "the highest its clear opening's bottom could be")
+    if high < low:
+        raise Stop("bottom_between_bad", got=Words(f"{tidy(low):g} in over {tidy(high):g} in"))
+    return low, high
+
+
+def _below_grade(got, shown, top, o, reader, bottoms, stop, low=None, high=None) -> bool:
+    """Whether the opening is below grade: the architect's statement, else what the ground given shows; a statement
+    the ground contradicts by more than 1/16 in gives no value (Stop), naming both."""
+    if got is None:
+        if shown == "below":
+            return True
+        if shown == "above":
+            return False
+        if shown == "near":
+            raise stop("well_ground_near", ground=Words(f"{tidy(top):g}"))
+        if shown == "between":
+            raise stop("well_ground_between", ground=Words(f"{tidy(top):g}"), low=Words(f"{tidy(low):g}"),
+                       high=Words(f"{tidy(high):g}"))
+        if shown == "bounds_bad":
+            raise stop("well_bottom_unread", reason=Words(top))
+        if shown == "no_bottom":
+            raise stop("well_ground_no_bottom")
+        if shown == "unread":
+            raise stop("well_ground_unread", reason=Words(top))
+        raise stop("well_not_stated")
+    if not isinstance(got, bool):
+        raise stop("well_stated_not_read", got=given_as(got))
+    if got is False and (said := _drawn_below(o, reader, bottoms)):
+        raise stop("well_below_disagree", shown=Words(said))
+    if got is True and shown == "above":
+        raise stop("well_above_disagree", ground=Words(f"{tidy(top):g}"), gap=Words(f"{tidy(low - top):g}"))
+    return got
+
+
+def _drawn_below(o: dict, reader, bottoms) -> str | None:
+    """What the drawing shows of an opening below the ground, or None: a drawn area well, or a ground given outside it
+    more than 1/16 in above a bottom its clear opening could have (ground_shows), or one that can't be compared."""
+    if o.get("area_well") is not None:
+        return "a drawn area well"
+    shown, top, _, _ = ground_shows(o, reader, bottoms)
+    if shown == "unread":
+        return "a ground outside it Gordium can't read"
+    if shown == "no_bottom":
+        return "a ground outside it, while its clear opening's bottom isn't known"
+    if shown == "bounds_bad":
+        return "a ground outside it, while where its clear opening's bottom lies can't be read"
+    return f"the ground outside it at {tidy(top):g} in, above its clear opening's bottom" if shown == "below" else None
+
+
+def _area(reader, value, what: str) -> float:
+    """An area in the description's units squared (square feet where `units` is ft), as square feet; never less than
+    zero."""
+    got = number(value, what)
+    if got < 0:
+        raise Stop("negative_area", what=what, value=tidy(got))
+    per = reader.times / reader.per                  # inches in one of the description's units
+    return got * per * per / 144

@@ -420,9 +420,10 @@ def line(row: dict, rule: dict, values: dict, allowed: dict, why_not: dict | Non
     `why_not`: the part's measuring's reason for each measure it has no value for (its `not_measured`), said
     wherever the line names that measure as not measured. A row whose measures stand on a reading to confirm
     (`confirm`, parts.rows) says it after the line, never in place of its comparison; so does one whose figure stands
-    on the architect's statement (`architect_stated`: the rooms marked not occupied a travel figure leaves out)."""
+    on the architect's statement (`architect_stated`: the rooms marked not occupied a travel figure leaves out), and
+    one whose figure rests on a reading and another requirement (`rests_on`: the dwelling units on a story, 1016.2.1)."""
     text = _line(row, rule, values, allowed, why_not)
-    said = [str(c) for c in row.get("confirm") or []] + [str(c) for c in row.get("architect_stated") or []]
+    said = [str(c) for key in ("confirm", "architect_stated", "rests_on") for c in row.get(key) or []]
     return f"{text} ({'; '.join(said)})" if said else text
 
 

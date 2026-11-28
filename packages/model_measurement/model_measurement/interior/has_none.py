@@ -88,6 +88,16 @@ def below_ground(description: dict) -> str | None:
             continue
         if o.get("area_well") is not None:
             return f"opening {_name(o)} has an area well"
+        if "stated_well" in o:
+            # what the architect states of the opening (a host's marks, openings.stated_well): below grade, or a well
+            # given at all, shows a space below the ground; a statement that can't be read could say either
+            s = o["stated_well"]
+            if not isinstance(s, dict) or s.get("below_grade") not in (None, True, False):
+                return f"what opening {_name(o)} states of its area well can't be read"
+            if s.get("below_grade") is True:
+                return f"opening {_name(o)} is stated to be below the adjacent grade"
+            if any(s.get(k) is not None for k in ("area", "width", "projection", "depth")):
+                return f"opening {_name(o)} is stated to have an area well"
         ground = o.get("ground_outside")
         if ground is None:
             continue
