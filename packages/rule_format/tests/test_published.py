@@ -361,7 +361,7 @@ def test_ensure_publishes_only_what_is_missing_or_stale(monkeypatch, tmp_path):
     monkeypatch.setattr(published, "published_folders", lambda repo=REPO: [(Path("a"), Path("a.yaml")),
                                                                            (Path("b"), Path("b.yaml"))])
     state = {"a": [], "b": ["stale (input changed: x)"]}
-    monkeypatch.setattr(published, "stale", lambda f, b, repo=REPO: state[str(f)])
+    monkeypatch.setattr(published, "stale", lambda f, b, repo=REPO, memo=None: state[str(f)])
     monkeypatch.setattr(published, "publish", lambda f: calls.append(str(f)) or {})
     monkeypatch.setattr(published, "certificate_path", lambda f, b: tmp_path / str(f))
     assert published.ensure() == [] and calls == ["b"]

@@ -484,7 +484,7 @@ def differences(old: dict, new: dict) -> list[str]:
     return out
 
 
-def stale(folder: Path, book: Path | None = None, repo: Path = REPO) -> list[str]:
+def stale(folder: Path, book: Path | None = None, repo: Path = REPO, memo: dict | None = None) -> list[str]:
     """[] when a law's certificate still matches its files, else why not, by name (no compile: every input and
     validator file hashed again, every folder listed again, and the law folder and shared files globbed again for a
     file that appeared)."""
@@ -492,7 +492,7 @@ def stale(folder: Path, book: Path | None = None, repo: Path = REPO) -> list[str
     book = book or building_code_rulebook(folder)
     if book is None:
         return []
-    return _read(folder, book, repo)[0]
+    return _read(folder, book, repo, memo)[0]
 
 
 def frozen(folder: Path, book: Path, repo: Path = REPO) -> dict:
@@ -516,7 +516,17 @@ def frozen(folder: Path, book: Path, repo: Path = REPO) -> dict:
     return {"problems": [], "documents": result["documents"], "kinds": result["kinds"], "book": book_bytes}
 
 
-def _read(folder: Path, book: Path, repo: Path) -> tuple[list[str], dict | None, bytes | None]:
+def _read(folder: Path, book: Path, repo: Path, memo: dict | None = None) -> tuple[list[str], dict | None, bytes | None]:
+    """`memo`: within one ensure() call only, each file hashed and each folder listed once for all the certificates it
+    checks (a place's districts share their inputs; review round 3 of PR 4). Never kept between calls."""
+    memo = {} if memo is None else memo
+
+    def sha(p):
+        return memo[("sha", p)] if ("sha", p) in memo else memo.setdefault(("sha", p), _sha(p))
+
+    def listing(p):
+        return memo[("ls", p)] if ("ls", p) in memo else memo.setdefault(("ls", p), _listing(p))
+
     """(why the certificate doesn't match its files, or [], the certificate, the rulebook's bytes)."""
     path = certificate_path(folder, book)
     try:
@@ -534,20 +544,21 @@ def _read(folder: Path, book: Path, repo: Path) -> tuple[list[str], dict | None,
         if cert["law"] != _rel(folder, repo) or cert["book"] != now:
             out.append(f"the rulebook changed: {_rel(book, repo)}")
         for key, what in (("inputs", "input"), ("validator", "validator file")):
-            for name, sha in cert[key].items():
-                now = _sha(Path(repo) / name)
-                if now != sha:
-                    out.append(f"{what} " + ("appeared" if sha is None else "gone" if now is None else "changed")
+            for name, kept in cert[key].items():
+                now = sha(Path(repo) / name)
+                if now != kept:
+                    out.append(f"{what} " + ("appeared" if kept is None else "gone" if now is None else "changed")
                                + f": {name}")
-        for name, sha in cert["listed"].items():
-            if _listing(Path(repo) / name) != sha:
+        for name, kept in cert["listed"].items():
+            if listing(Path(repo) / name) != kept:
                 out.append(f"a name appeared in or went from the folder {name}")
         if cert["repo_names"]:
-            names = repo_file_names(repo)
+            names = memo[("names",)] if ("names",) in memo else memo.setdefault(("names",), repo_file_names(repo))
             for name, found in cert["repo_names"].items():
                 if (name in names) != found:
                     out.append(f"a file named {name} " + ("went from" if found else "appeared in") + " the repo")
-        for name in sorted(_folder_inputs(folder, Path(repo)) - set(cert["inputs"])):
+        found = memo[("in", folder)] if ("in", folder) in memo else memo.setdefault(("in", folder), _folder_inputs(folder, Path(repo)))
+        for name in sorted(found - set(cert["inputs"])):
             out.append(f"new file: {name}")
         out += refusals(cert)
     except (KeyError, TypeError, AttributeError, ValueError) as e:
@@ -561,9 +572,9 @@ def ensure(missing_only: bool = False, repo: Path = REPO) -> list[str]:
     across processes (pytest-xdist workers). Returns what couldn't be published, and with missing_only the
     certificates left stale; never raises for a law's problem."""
     def todo():
-        out = []
+        out, memo = [], {}              # one memo per look: files changed by a publish are hashed again next time
         for folder, book in published_folders(repo):
-            why = stale(folder, book, repo)
+            why = stale(folder, book, repo, memo)
             if why and (not missing_only or not certificate_path(folder, book).is_file()) and folder not in out:
                 out.append(folder)
         return out
@@ -580,7 +591,8 @@ def ensure(missing_only: bool = False, repo: Path = REPO) -> list[str]:
 
 
 def _left_stale(repo: Path) -> list[str]:
-    return [w for folder, book in published_folders(repo) for w in stale(folder, book, repo)]
+    memo = {}
+    return [w for folder, book in published_folders(repo) for w in stale(folder, book, repo, memo)]
 
 
 class _lock:
