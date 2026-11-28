@@ -61,7 +61,8 @@ def _one_exit_building(interior, sprinkler):
     i["building"] = {**i["building"], "occupancy_groups": ["R-2"], "sprinkler_system": sprinkler,
                      "assembly_fixed_seating": False, "special_egress_spaces": False, "occupant_load_increased": False,
                      "r2_sleeping_units": False, "emergency_escape_openings_1031": True,
-                     "corridors_within_dwelling_units": False}
+                     "corridors_within_dwelling_units": False,
+                     "underground_building": False}    # 405.7.1 (main's Chapter 4): no floor 30 ft below discharge
     i["stairs"] = [{"id": "flight west", "nosings": [[[4.5, 13, 0], [4.5, 17, 0]]]}]    # within the west enclosure
     i["has_none"] = [{"kind": k, "source": "the eval building: none drawn"}
                      for k in ("ramp", "alternating_tread_device", "ships_ladder")]
