@@ -393,7 +393,7 @@ PATH_KEYS = {"story_not_measured", "not_on_floor", "no_route", "route_reenters",
              "inside_ring", "too_narrow", "cluster_shut", "walk_shut", "nothing_to_sample"}   # the last three: test_routes_remote.py
 LATER_KEYS = {"corridor_not_legs", "corridor_end_only", "door_off_legs", "dead_end_unbounded",   # test_routes_dead_ends.py
               "corridor_width_stepped",
-              "too_few_exits", "outline_needed", "outline_short", "area_room_not_read", "area_no_use", "area_unknown_space",
+              "too_few_exits", "outline_needed", "outline_short", "outline_not_outer", "area_room_not_read", "area_no_use", "area_unknown_space",
               "area_rooms_overlap",                                                  # test_routes_straight_areas.py
               "stated_not_given", "corridor_fact_not_stated", "corridor_fact_not_read", "not_measured_yet", "readings",
               "room_not_measured", "maybe_kind",

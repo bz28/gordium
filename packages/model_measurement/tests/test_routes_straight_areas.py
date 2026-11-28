@@ -129,18 +129,26 @@ def upper_story(outer):
     return outlined(description(rooms, doors), outer, rect(0, 0, 60, 28))
 
 
-def test_an_outline_at_the_walls_inside_faces_never_shortens_the_diagonal():
-    """Review of #281: an outer outline drawn at the walls' inside faces holds every room (held() takes it) but is a
-    wall short at each end, so exits just under 1007.1.1's half read as over it (0.496 to 0.506 here: a false pass).
-    The diagonal is never shorter than the rooms and their walls give (bounded: the rooms' hull grown by the thickest
-    wall, mitred): the inside-face outline gives the outer one's ratio, under half; the outer-face outline is
-    unchanged (its own diagonal is the longer)."""
+def test_an_outline_at_the_walls_inside_faces_gives_no_ratio():
+    """Review of #281: an outer outline drawn at the walls' inside faces holds every room but is a wall short at each
+    end, so exits just under 1007.1.1's half read as over it (0.496 to 0.506 here, an upper story whose exits are stair
+    doors: no door to outside pins the outline to the outer face). The outer outline must be at least 3.5 in (the
+    thinnest exterior wall) outside the inner one all round, and the inner one must hold every room: else no ratio."""
     true = straight.ratio(story(upper_story(rect(-0.5, -0.5, 60.5, 28.5))))
+    assert true[2] < 0.5, true[2]
     inside = story(upper_story(rect(0, 0, 60, 28)))
-    got = straight.ratio(inside)
-    assert true[2] < 0.5 and got[2] == pytest.approx(true[2], abs=1e-3) and got[2] < 0.5, (true[2], got[2])
-    assert straight.remoteness(inside).length / straight.diagonal(inside).length > 0.5      # the outline's own: over
-    assert true[1].length == straight.diagonal(story(upper_story(rect(-0.5, -0.5, 60.5, 28.5)))).length
+    assert straight.remoteness(inside).length / straight.diagonal(inside).length > 0.5      # its own: over half
+    with pytest.raises(Stop) as stop:
+        straight.ratio(inside)
+    assert stop.value.key == "outline_not_outer" and "3.5 in" in stop.value.reason
+    # the inner outline drawn inside the rooms too (both a wall short): the rooms outside it
+    d = upper_story(rect(0, 0, 60, 28))
+    d["story_outlines"][0]["inner"] = [list(p) for p in rect(0.5, 0.5, 59.5, 27.5)]
+    with pytest.raises(Stop) as stop:
+        straight.ratio(story(d))
+    assert stop.value.key == "outline_short", stop.value.reason
+    # walls 4 in thick, drawn so (the outer outline 4 in outside the inner one): taken
+    assert straight.ratio(story(upper_story(rect(-1 / 3, -1 / 3, 60 + 1 / 3, 28 + 1 / 3))))[2] > 0
 
 
 # --- test 9: storage on the line -----------------------------------------------------------------------------------
