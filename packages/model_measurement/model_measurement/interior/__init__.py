@@ -92,8 +92,12 @@ def _given(description: dict, kind: str, problems: list):
 
 
 SAME_FLOOR = 0.5      # in: rooms' floors this close are one floor (a threshold's change in level, never a step)
-LANDING_STEP = 8.25   # in: RCNYS R318.3.2, the most a door's outside landing may be below it; a floor farther from
-#                       any ground given is reached by a stair or a ramp (or its own way out at grade, not shown)
+LANDING_STEP = 8.25   # in: RCNYS R318.3.1's exception and R318.3.2, the most a door's outside landing may be below
+#                       it; a floor farther above any ground given is reached by a stair or a ramp (or its own way
+#                       out at grade, not shown)
+GROUND_ABOVE = 1.5    # in: R318.3.1, the inside floor at most 1 1/2 in below the threshold, and no landing above it
+#                       (a landing over the threshold is a riser, R202 STAIR): ground higher above the floor than this
+#                       puts the landing below grade, so a ramp or a stairway to grade (R318.3.1's last sentence)
 
 
 def _level_id(value):
@@ -112,10 +116,11 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
     - its floors are more than 1/2 in apart (a room's `floor_elevation`, as a house's gives them; a room with none,
       and an enclosed space, at its level's height in `levels`; a change of floor that size is a step, or a ramp),
       or a floor or level height given can't be read (it may be on another floor);
-    - a ground given outside the openings (`ground_outside`) is more than 8 1/4 in above or below the lowest floor
-      (only an upper floor drawn, a floor sunk below the ground, or sloped ground a landing's step can't meet,
-      R318.3.2): which ground the way out is on isn't known, so every ground given must allow no stair; a ground
-      given that can't be read may be any, so it refuses too;
+    - a ground given outside the openings (`ground_outside`) is more than 8 1/4 in below the lowest floor or more
+      than 1 1/2 in above it (only an upper floor drawn, a floor sunk below the ground, or sloped ground a landing
+      can't meet: R318.3.1, R318.3.2): which ground the way out is on isn't known, so every ground given must allow
+      no stair; a ground given that can't be read may be any, so it refuses too (with no floor given, grounds
+      farther apart than 9 3/4 in, which no one floor can meet);
     - the check gives two or more stories (`stated_stories`: a count, or (count, whose words with {n}),
       design_checker.egress._stated_stories).
     Rooms with neither level nor floor given show nothing against it (not given is never a second floor)."""
@@ -190,16 +195,17 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
             return Stop("stairs_none_several_floors", what=f"its lowest floor ({low_name}'s, at {tidy(low):g} in) is "
                                                            f"more than 8 1/4 in above the ground outside an opening "
                                                            f"(at {tidy(min(grounds)):g} in)").reason
-        if grounds and max(grounds) - low > LANDING_STEP:
+        if grounds and max(grounds) - low > GROUND_ABOVE:
             return Stop("stairs_none_several_floors", what=f"its lowest floor ({low_name}'s, at {tidy(low):g} in) is "
-                                                           f"more than 8 1/4 in below the ground outside an opening "
+                                                           f"more than 1 1/2 in below the ground outside an opening "
                                                            f"(at {tidy(max(grounds)):g} in)").reason
         return None
     grounds = _grounds(whole, reader)          # no floor height given: ground farther apart than any one floor can
-    if grounds and max(grounds) - min(grounds) > 2 * LANDING_STEP:    # meet within 8 1/4 in needs a stair or a ramp
+    if grounds and max(grounds) - min(grounds) > LANDING_STEP + GROUND_ABOVE:     # meet needs a stair or a ramp
         return Stop("stairs_none_several_floors", what=f"the ground outside its openings is {tidy(min(grounds)):g} "
                                                        f"in at one and {tidy(max(grounds)):g} in at another, more "
-                                                       "than any one floor can meet within 8 1/4 in").reason
+                                                       "than any one floor can meet (8 1/4 in above, 1 1/2 in "
+                                                       "below)").reason
     return None
 
 

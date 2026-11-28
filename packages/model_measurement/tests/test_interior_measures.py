@@ -2355,10 +2355,13 @@ def test_no_stairs_beside_a_floor_sunk_below_the_ground_or_sloped_ground_a_landi
         d["rooms"][0]["floor_elevation"] = floor
         d["openings"] = [dict(d["openings"][0], id=f"w{n}", ground_outside=g) for n, g in enumerate(grounds)]
         return d
-    for flat in ((0, 0), (0, -8.25), (0, 8.25), (0, -8, 8, [0, 5])):
+    for flat in ((0, 0), (0, -8.25), (0, 1.5), (0, -8, 1, [0, 1.5])):
         assert measure(at(*flat))["parts"]["stair"] == [], flat
-    assert "more than 8 1/4 in below the ground outside an opening (at 50 in)" in _refused(measure(at(0, 50)))
-    assert "below the ground outside an opening (at 8.26 in)" in _refused(measure(at(0, 8.26)))
+    assert "more than 1 1/2 in below the ground outside an opening (at 50 in)" in _refused(measure(at(0, 50)))
+    # skeptic B: ground above the floor is bounded by R318.3.1's 1 1/2 in (no landing above the threshold), never
+    # by the 8 1/4 in a landing may drop below it: ground 2 or 8 in above the floor refuses
+    for above in (1.51, 2, 8):
+        assert f"below the ground outside an opening (at {above:g} in)" in _refused(measure(at(0, above))), above
     for sloped in ((0, -8, 30), (0, -30, 0), (0, [0, 40])):                 # some ground meets it, some doesn't
         _refused(measure(at(*sloped)))
     for odd in ("x", [0, None], float("nan")):
@@ -2369,7 +2372,8 @@ def test_no_stairs_beside_a_floor_sunk_below_the_ground_or_sloped_ground_a_landi
         del d["rooms"][0]["floor_elevation"]
         return d
     assert "is 0 in at one and 50 in at another" in _refused(measure(bare(0, 50)))
-    for fine in ((0, 16.5), (0,), (), (0, "x")):            # 16.5 in: a floor midway meets both; unreadable: not given
+    assert "is 0 in at one and 9.76 in at another" in _refused(measure(bare(0, 9.76)))
+    for fine in ((0, 9.75), (0,), (), (0, "x")):            # 9.75 in: a floor 1.5 in under the higher meets both
         assert measure(bare(*fine))["parts"]["stair"] == [], fine
 
 
