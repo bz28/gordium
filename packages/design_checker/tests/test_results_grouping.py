@@ -39,7 +39,7 @@ FAILING = {"2_two_story_small_window": 1, "4_loft": 2, "5_basement_window_well":
 def checked():
     out = {}
     for name in goldens.names():
-        out[name] = check_site(goldens.site(), dict(goldens.FACTS), name=name, today=goldens.DATE,
+        out[name] = check_site(goldens.site(), goldens.facts_of(name), name=name, today=goldens.DATE,
                                interior=goldens.interior_of(name))
     return out
 
