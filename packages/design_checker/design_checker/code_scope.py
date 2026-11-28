@@ -332,15 +332,35 @@ def _given(building) -> tuple[dict, list[str]]:
 
 def building_measures(building: dict | None, interior=None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
-    states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the three sprinkler systems the limits name from the system, and the seventeen stated yes/no facts. A fact
-    not stated is left out (its rules need review). `interior`, the interior description, settles one more:
-    assembly_spaces is true wherever a room states a Table 1004.5 Assembly function, whatever the block says, and a
-    stated false is left out (not stated) where a room states a function that may be an assembly use
-    (assembly_spaces_from_rooms); and assembly_fixed_seating is true wherever a room states Table 1004.5's "Assembly
-    with fixed seats" (review round 1 of section group 9h)."""
+    states: occupancy_group_i4, other_occupancy_present, occupancy_group (the one group, or "mixed") and whether a
+    Group R, H or I-1 to I-3 occupancy is among them (903.2's) from the groups, the three sprinkler systems the limits
+    name from the system, the stories above grade plane, and the nineteen stated yes/no facts. A fact not stated is
+    left out (its rules need review). In a building stated as Group R alone (one or more of R-1 to R-4), a stated NFPA
+    13R system counts as one per 903.3.1.2 only where the stated stories above grade plane don't exceed its four
+    (903.3.1.2 item 1: the Group R occupancy's stories, here the building's): stated more, sprinklered_903_3_1_2 is no,
+    so no allowance counts it and 903.2.8 fails it (Chapter 9 part a's review round 3); not stated, it is the
+    architect's statement, as the Chapter 10 plan decided for 13R's limits (group 4b). In a building with another group
+    the Group R portion's stories aren't the building's, so the stories decide nothing there. `interior`, the
+    interior description, settles one more: assembly_spaces is true wherever a room states a Table 1004.5 Assembly
+    function, whatever the block says, and a stated false is left out (not stated) where a room states a function that
+    may be an assembly use (assembly_spaces_from_rooms); and assembly_fixed_seating is true wherever a room states Table
+    1004.5's "Assembly with fixed seats" (review round 1 of section group 9h)."""
     facts, _ = _given(building)
     out = {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
+    groups = facts.get("occupancy_groups") or []
+    all_r = bool(groups) and all(g.startswith("R-") for g in groups)
+    if out.get("sprinklered_903_3_1_2") and all_r and facts.get("stories_above_grade_plane", 0) > NFPA_13R_STORIES:
+        out["sprinklered_903_3_1_2"] = False
+    # 903.3.1.2 item 2 (p.274 lines 18-23): Group R-2's roof assembly under 45 feet, the other Group R's highest floor
+    # 30 feet or less, above the lowest level of fire department vehicle access; a stated high-rise (202: an occupied
+    # floor or occupiable roof more than 75 feet above that level) breaks it in Group R-2 outright, so a 13R system there
+    # is no 903.3.1.2 system; in the other Group R only an occupiable roof might be the high one, so it isn't known
+    # (the merge of Chapter 4's high_rise_building, 2026-11-28)
+    if out.get("sprinklered_903_3_1_2") and all_r and facts.get("high_rise_building") is True:
+        if all(g == "R-2" for g in groups):
+            out["sprinklered_903_3_1_2"] = False
+        else:
+            del out["sprinklered_903_3_1_2"]
     seen = assembly_spaces_from_rooms(interior)
     if FIXED_SEATS in room_functions(interior):     # the rooms show fixed seating: never a stated no over them
         out["assembly_fixed_seating"] = True
@@ -349,6 +369,10 @@ def building_measures(building: dict | None, interior=None) -> dict:
     elif seen == ASSEMBLY_MAYBE and out.get("assembly_spaces") is False:
         del out["assembly_spaces"]
     return out
+
+
+# 903.3.1.2 item 1 (p.274 line 17): "Four stories or fewer above grade plane"
+NFPA_13R_STORIES = 4
 
 
 # Table 1004.5's rows under its "Assembly" heading (p.312, lines 19-27, to "Business areas" on line 28), by their
@@ -407,6 +431,9 @@ DERIVED = {
     "sprinklered_903_3_1_1": ("sprinkler_system", lambda system: system == "nfpa_13"),
     "sprinklered_903_3_1_2": ("sprinkler_system", lambda system: system == "nfpa_13r"),
     "sprinklered_903_3_1_3": ("sprinkler_system", lambda system: system == "nfpa_13d"),
+    # the system as stated, whether it counts or not (903.3.1.2's flags show wherever a 13R system is stated, above
+    # its four stories too, where sprinklered_903_3_1_2 is no: Chapter 9 part a's review round 4)
+    "nfpa_13r_stated": ("sprinkler_system", lambda system: system == "nfpa_13r"),
     "egress_balcony_increase_taken": ("egress_balcony_increase_taken", lambda v: v),
     "building_has_atrium": ("building_has_atrium", lambda v: v),
     "assembly_fixed_seating": ("assembly_fixed_seating", lambda v: v),
@@ -418,6 +445,18 @@ DERIVED = {
     "ambulatory_care_facility": ("ambulatory_care_facility", lambda v: v),
     "corridors_within_dwelling_units": ("corridors_within_dwelling_units", lambda v: v),
     "emergency_voice_alarm_system": ("emergency_voice_alarm_system", lambda v: v),
+    # Chapter 9 part a (docs/decisions/2026-11-27_ny_building_chapter_9.md): the groups 903.2 requires a sprinkler
+    # system for whatever the building's size (903.2.8 "all buildings with a Group R fire area", 903.2.5.1 Group H,
+    # 903.2.6 Group I but I-4's exceptions), each read in a building of two or more groups too; the stories 903.3.1.2's
+    # NFPA 13R is limited to; townhouses, where 903.3.1.3 permits NFPA 13D
+    "group_r_present": ("occupancy_groups", lambda groups: any(g.startswith("R-") for g in groups)),
+    "group_h_present": ("occupancy_groups", lambda groups: any(g.startswith("H-") for g in groups)),
+    "group_i1_i2_i3_present": ("occupancy_groups", lambda groups: any(g in ("I-1", "I-2", "I-3") for g in groups)),
+    "stories_above_grade_plane": ("stories_above_grade_plane", lambda v: v),
+    "townhouse_units": ("townhouse_units", lambda v: v),
+    # Chapter 9 part e: a BCNYS 202 TOWNHOUSE UNIT "has a separate means of egress", read with townhouse_units where
+    # 905.3's exception leaves standpipes out of "Group R-2 townhouses"
+    "separate_means_of_egress": ("separate_means_of_egress", lambda v: v),
     "high_rise_building": ("high_rise_building", lambda v: v),
     "underground_building": ("underground_building", lambda v: v),
     "stages_or_platforms": ("stages_or_platforms", lambda v: v),

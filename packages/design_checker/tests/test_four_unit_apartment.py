@@ -228,9 +228,19 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     underground building) (+24); Chapter 4 part e, 420.1 to 420.3 (Group R-2's scope and separations) and 422's six (an
     ambulatory care facility isn't ruled out) (+9); Chapter 4 part f, 410.5's nine (a stage, platform or technical
     production area isn't ruled out), 411.4's two (nor a special amusement area) and 412's eleven (nor an
-    aircraft-related occupancy) (+22): 430."""
+    aircraft-related occupancy) (+22): 430. Chapter 9 part a (2026-11-27) adds 903.1.1's alternative systems and 903.2.5.3's
+    pyroxylin plastics (432); its other flags are Group H-5's or a 13R or 13D system's, not this building's. Part b
+    adds 903.2.1.6's occupiable roofs, 903.2.2.1's ambulatory care floors (neither fact stated), 903.2.9.2's bulk tire
+    storage and 903.2.10.1's and 903.2.10.2's vehicle storage, any group's (437); its other flags are other groups'.
+    Part c adds 903.2.11's nine specific areas and 903.2.12's construction (no NFPA 13 system stated), 907.1.3's listed
+    equipment, 907.2's fire alarm system and 907.2.2.1's ambulatory care detection (450). Part d adds Group R-2's three
+    fire alarm and smoke alarm sections, 907.2.11 and its six for Groups R and I-1, 907.2.11.8's portable alarms (a
+    nontransient hotel is Group R-2, 310.3), 907.2.10.2's battery storage and 907.5.2.2's five while the voice/alarm
+    system isn't stated (467). Part e adds the standpipe, smoke control, smokeproof enclosure and fire command center
+    flags but Group A's standpipes (494). The merge of main's section group 9h shows 903.2.1.5.1's
+    grandstands too, an assembly space not ruled out (495)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 430 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 495 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
     # review round 4 of section group 9g: the docstring's per-section counts for 9g, pinned
     from collections import Counter
     assert Counter(i["code"]["section"].split(".")[0] for i in flags
@@ -260,6 +270,8 @@ def test_section_1030s_flags_show_on_residential_rooms_alone_and_hide_only_on_a_
     interior["building"] = {**interior["building"], "assembly_spaces": False, "assembly_fixed_seating": False}
     now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
     moved = {k for k in got["results"] if got["results"][k] != now[k]}
+    # 903.2.1.5.1's sprinklers under grandstands read the same facts as 1030.1.1.1's separation (the merge review)
+    moved -= {"general.bc_903_2_1_5_1_under_grandstands"}
     assert moved == set(shown) and {now[k] for k in moved} == {"not_applicable"}
     for fn, want in (("assembly_unconcentrated", "needs_review"), ("courtroom", "needs_review"),
                      ("business", "not_applicable"), ("assembly_fixed_seats", "needs_review")):
@@ -321,8 +333,8 @@ CH10_BUILDING_MARKS = ("assembly_fixed_seating", "special_egress_spaces", "merch
 
 @pytest.mark.parametrize("stated", [False, True])
 def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got, laws, stated):
-    """The apartment as built, with the five marks set: No moves exactly the 35 that wait on them (twelve of Chapter 10's, Chapter 4 part a's 21 flags and part f's
-    two of 411.4) (travel's
+    """The apartment as built, with the five marks set: No moves exactly the 36 that wait on them (twelve of Chapter 10's, Chapter 4 part a's 21 flags and part f's
+    two of 411.4, and Chapter 9's mall standpipes, 905.3.3) (travel's
     54 ft within Table 1017.2's 200 ft now passes; each flag of a space the building states it hasn't is not
     applicable), and Yes leaves every rule as it was with them blank (needs review: a person checks those spaces),
     never a pass. Left blank they are not sent (the add-in's BuildingFacts), so `got` is the unset reading."""
@@ -344,7 +356,9 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
                      # Chapter 4 part a: every flag of 402 (a mall: a space with its own exits) and 404 (an atrium);
                      # part f: 411.4's two (a special amusement area, a space with its own exits)
                      **{k: ("needs_review", "not_applicable") for k in got["results"]
-                        if re.match(r"general\.bc_(40[24]|411_4)_", k)}}
+                        if re.match(r"general\.bc_(40[24]|411_4)_", k)},
+                     # Chapter 9 part e: 905.3.3's standpipes in malls (the merge review of Chapter 4)
+                     "general.bc_905_3_3_mall_standpipes": ("needs_review", "not_applicable")}
 
 
 def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(no_mall, laws):
@@ -368,7 +382,7 @@ def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(no
 
 
 def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got, laws):
-    """The two Revit marks for group 3's building facts on the apartment: Gordium: Occupied outdoor areas No makes 1004.7's
+    """The two Revit marks for group 3's building facts on the apartment: Gordium: Occupied outdoor areas No makes 1004.7's (and 903.2.1.6's)
     flag not applicable and moves nothing else (Yes leaves it a person's check); Gordium: Occupant load increased, either
     way, moves nothing here (an increase not ruled out keeps each room's larger reading at its area / 7 or more:
     occupant_load.py)."""
@@ -379,7 +393,10 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
         interior["building"] = {**interior["building"], fact: value}
         now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
         moved[(fact, value)] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
-    assert moved[("occupied_outdoor_areas", False)] == {"general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable")}
+    assert moved[("occupied_outdoor_areas", False)] == {"general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable"),
+                                                        # Chapter 9 part b: an occupiable roof's assembly use
+                                                        "general.bc_903_2_1_6_assembly_on_roofs": ("needs_review",
+                                                                                                   "not_applicable")}
     assert moved[("occupied_outdoor_areas", True)] == moved[("occupant_load_increased", False)] == \
         moved[("occupant_load_increased", True)] == {}
 
@@ -408,7 +425,14 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(no_mall, laws):
     # smoke barrier doors flag too
     assert moved.pop(("ambulatory_care_facility", False)) == {
         **{k: ("needs_review", "not_applicable") for k in no_mall["results"] if k.startswith("general.bc_422_")},
-        "general.bc_709_5_1_i2_smoke_barrier_doors": ("needs_review", "not_applicable")}
+        "general.bc_709_5_1_i2_smoke_barrier_doors": ("needs_review", "not_applicable"),
+        "general.bc_903_2_2_1_ambulatory_care": ("needs_review", "not_applicable"),      # Chapter 9 part b
+        "general.bc_907_2_2_1_ambulatory_care_detection": ("needs_review", "not_applicable")}   # and part c
+    # Chapter 9 part d: no voice/alarm system stated sets aside 907.5.2.2's design flags (captions are Group A's)
+    assert moved.pop(("emergency_voice_alarm_system", False)) == {
+        f"general.bc_907_5_2_2_{k}": ("needs_review", "not_applicable")
+        for k in ("voice_alarm_design", "1_voice_alarm_override", "2_voice_alarm_live_messages", "3_voice_alarm_other_uses",
+                  "5_voice_alarm_standby_power")}
     assert all(m == {} for m in moved.values()), moved
 
 
@@ -430,8 +454,10 @@ def test_chapter_4_part_fs_facts_stated_on_the_apartment(no_mall, laws):
     assert moved.pop(("stages_or_platforms", False)) == {
         k: ("needs_review", "not_applicable") for k in no_mall["results"] if k.startswith("general.bc_410_5")}
     assert moved.pop(("aircraft_related_occupancy", False)) == {
-        k: ("needs_review", "not_applicable") for k in no_mall["results"]
-        if k.startswith(("general.bc_412_", "general.bc_table_412_"))}
+        **{k: ("needs_review", "not_applicable") for k in no_mall["results"]
+           if k.startswith(("general.bc_412_", "general.bc_table_412_"))},
+        # Chapter 9 part e: 905.3.5's standpipes to a rooftop helistop or heliport (the merge review of Chapter 4)
+        "general.bc_905_3_5_helistop_standpipes": ("needs_review", "not_applicable")}
     assert len([k for k in no_mall["results"] if k.startswith("general.bc_410_5")]) == 9
     assert len([k for k in no_mall["results"] if k.startswith(("general.bc_412_", "general.bc_table_412_"))]) == 11
     assert all(m == {} for m in moved.values()), moved
@@ -631,7 +657,7 @@ def test_door_swing_as_sent_and_with_each_doors_swing_stated(got):
     assert {k for k, v in rows.items() if v != "pass"} == {"L1WO", "L1EO", "L1W", "L1E"}
     assert {rows[k] for k in ("L1WO", "L1EO")} == {present.REVIEW} and stated["results"][SWING] == present.REVIEW
     assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {
-        "general.bc_1004_7_outdoor_areas"}
+        "general.bc_1004_7_outdoor_areas", "general.bc_903_2_1_6_assembly_on_roofs"}     # Chapter 9 part b's too
     for d in desc["doors"]:
         d["swings_into"] = d["sides"][0]
     wrong = _check(desc, egress.measure_routes(desc))
@@ -670,6 +696,54 @@ def test_a_door_to_outside_asks_whether_the_occupants_use_outdoor_areas(got):
         for i in items:
             asks = [ui_data._from_cause(c, "means_of_egress_door") for c in i.get("causes") or []]
             assert "building.occupied_outdoor_areas" in {a.get("field") for a in asks}, i["name"]
+
+
+# ---- Chapter 9 part a (2026-11-27): where a sprinkler system is required, 903.2.8 for Group R -----------------------
+
+R_RULE = "general.bc_903_2_8_group_r_sprinklers"
+
+
+def test_903_2_8_fails_the_apartment_as_stated_and_follows_each_sprinkler_system(got, routes):
+    """The apartment, Group R-2 with no sprinkler system: 903.2.8 asks a system throughout every building with a
+    Group R fire area, so it fails on each story, whatever its size. Stated NFPA 13 it passes; NFPA 13R needs review
+    at its two stories (903.3.1.2's heights aren't in the model) and fails at five, where it is no
+    903.3.1.2 system (its flag, naming the four stories, still shown: review round 4); NFPA 13D fails in an R-2 of
+    dwelling units, not townhouses (903.3.1.3), and needs review while either isn't stated. 903.3.1.2's two flags show
+    only with a 13R system, 903.3.1.3's only with a 13D one; nothing outside Chapter 9 is compared here."""
+    rows = [r for r in got["rows"] if r["rule"] == R_RULE]
+    assert len(rows) == 2 and {r["outcome"] for r in rows} == {"fail"} and got["results"][R_RULE] == "fail"
+    cases = [({"sprinkler_system": "nfpa_13"}, "pass"),
+             ({"sprinkler_system": "nfpa_13r", "stories_above_grade_plane": 2}, "needs_review"),
+             ({"sprinkler_system": "nfpa_13r", "stories_above_grade_plane": 5}, "fail"),
+             ({"sprinkler_system": "nfpa_13r"}, "needs_review"),
+             ({"sprinkler_system": "nfpa_13d", "townhouse_units": False, "r2_sleeping_units": False}, "fail"),
+             ({"sprinkler_system": "nfpa_13d", "r2_sleeping_units": False}, "needs_review")]
+    for stated, want in cases:
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], **stated}
+        now = _check(interior, routes)["results"]
+        assert now[R_RULE] == want, stated
+        system = stated["sprinkler_system"]
+        # review round 4: 903.3.1.2's flag shows wherever 13R is stated, above four stories too (where it isn't one)
+        assert now["general.bc_903_3_1_2_nfpa_13r_limits"] == ("needs_review" if system == "nfpa_13r"
+                                                                else "not_applicable"), stated
+        assert now["general.bc_903_3_1_3_nfpa_13d_scope"] == ("needs_review" if system == "nfpa_13d"
+                                                               else "not_applicable"), stated
+        assert now["general.bc_903_2_5_1_group_h_sprinklers"] == "not_applicable"
+        assert now["general.bc_903_2_6_group_i_sprinklers"] == "not_applicable"
+
+
+def test_a_13r_system_above_four_stories_is_said_where_the_architect_reads(routes):
+    """Review round 4: with NFPA 13R stated above four stories the sprinkler fact is no (it isn't a 903.3.1.2 system),
+    so the lines the architect reads must say why: 903.3.1.2's flag still shows, naming the four stories, and 716.2.2.3's
+    flag never says no sprinkler system is stated."""
+    interior = build.interior_of()
+    interior["building"] = {**interior["building"], "sprinkler_system": "nfpa_13r", "stories_above_grade_plane": 5}
+    got = _check(interior, routes)
+    by_rule = {i["rule"]: i for i in got["items"] if i.get("rule")}
+    assert got["results"]["general.bc_903_3_1_2_nfpa_13r_limits"] == present.REVIEW
+    assert "more than four stories" in by_rule["general.bc_903_3_1_2_nfpa_13r_limits"]["reason"]
+    assert "no sprinkler system stated" not in by_rule["general.bc_716_2_2_3_exit_enclosure_door_temperature_rise"]["reason"]
 
 
 # ---- section group 7c (2026-11-26): Section 1011's stairs --------------------------------------------------------------

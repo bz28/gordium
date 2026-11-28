@@ -134,7 +134,9 @@ def _variant(failing: bool) -> dict:
         "passages": [],
         "stairs": [flight1, flight2],
         "guards": [guard],
-        "building": {"occupancy_groups": ["R-2"], "sprinkler_system": "none"},
+        # NFPA 13 throughout: an R-2 building needs a sprinkler system whatever its size (903.2.8, Chapter 9 part a),
+        # so a compliant building states one
+        "building": {"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13"},
     }
 
 

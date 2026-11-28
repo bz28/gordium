@@ -17,6 +17,7 @@ occupancy_group_i4:
   - general.bc_1016_2_intervening_spaces
   - general.bc_1017_2_travel_distance
   - general.bc_1020_5_dead_end
+  - general.bc_903_2_6_group_i_sprinklers
 sprinklered_903_3_1_1:
   meaning: The building is equipped throughout with an automatic sprinkler system in accordance with 2025 BCNYS Section 903.3.1.1
     (NFPA 13), as the architect states it
@@ -50,6 +51,22 @@ sprinklered_903_3_1_1:
   - general.bc_1031_5_2_area_well_ladder_over_44
   - general.bc_1031_5_area_well_required
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
+  - general.bc_903_2_11_1_1_opening_dimensions
+  - general.bc_903_2_11_1_2_openings_on_one_side
+  - general.bc_903_2_11_1_3_basements
+  - general.bc_903_2_11_1_stories_without_openings
+  - general.bc_903_2_11_3_buildings_55_feet
+  - general.bc_903_2_1_1_group_a1_sprinklers
+  - general.bc_903_2_1_2_group_a2_sprinklers
+  - general.bc_903_2_1_3_group_a3_sprinklers
+  - general.bc_903_2_1_4_group_a4_sprinklers
+  - general.bc_903_2_3_group_e_sprinklers
+  - general.bc_903_2_4_group_f1_sprinklers
+  - general.bc_903_2_5_1_group_h_sprinklers
+  - general.bc_903_2_6_group_i_sprinklers
+  - general.bc_903_2_7_group_m_sprinklers
+  - general.bc_903_2_8_group_r_sprinklers
+  - general.bc_903_2_9_group_s1_sprinklers
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -84,8 +101,10 @@ sprinklered_903_3_1_1:
   - general.bc_table_1020_2_i4
   - general.bc_table_1020_2_r
 sprinklered_903_3_1_2:
-  meaning: The building is equipped throughout with an automatic sprinkler system in accordance with 2025 BCNYS Section 903.3.1.2
-    (NFPA 13R, permitted in some Group R occupancies), as the architect states it
+  meaning: 'The building is equipped throughout with an automatic sprinkler system in accordance with 2025 BCNYS Section 903.3.1.2
+    (NFPA 13R, permitted in some Group R occupancies), as the architect states it; no where the building is stated Group R
+    alone and states more than four stories above grade plane (903.3.1.2 item 1: "Four stories or fewer above grade plane"),
+    its heights above fire department vehicle access taken on the architect''s statement'
   unit: yes_no
   needed_by:
   - general.bc_1006_2_1_two_exits
@@ -114,6 +133,9 @@ sprinklered_903_3_1_2:
   - general.bc_1031_5_2_area_well_ladder_over_44
   - general.bc_1031_5_area_well_required
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
+  - general.bc_903_2_5_1_group_h_sprinklers
+  - general.bc_903_2_6_group_i_sprinklers
+  - general.bc_903_2_8_group_r_sprinklers
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -155,6 +177,10 @@ sprinklered_903_3_1_3:
   - general.bc_1031_5_2_2_area_well_steps
   - general.bc_1031_5_2_area_well_ladder_over_44
   - general.bc_1031_5_area_well_required
+  - general.bc_903_2_5_1_group_h_sprinklers
+  - general.bc_903_2_6_group_i_sprinklers
+  - general.bc_903_2_8_group_r_sprinklers
+  - general.bc_903_3_1_3_nfpa_13d_scope
   - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1020_2_a_b_e_f_m_s_u
   - general.bc_table_1020_2_i2
@@ -204,14 +230,20 @@ occupancy_group:
   - mixed
   needed_by:
   - general.bc_1004_9_posting
+  - general.bc_1006_2_1_two_exits
   - general.bc_1006_2_2_6_r3_r4_nfpa_13d
   - general.bc_1006_3_3_story_exits
   - general.bc_1006_3_4_1_mixed_occupancies
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
+  - general.bc_1007_1_2_space_three_or_more
   - general.bc_1008_2_2_group_i2_exterior_landings
   - general.bc_1008_2_illumination_required
+  - general.bc_1009_3_2_stairway_width
   - general.bc_1009_3_3_area_of_refuge_at_stairways
+  - general.bc_1009_4_2_elevator_area_of_refuge
+  - general.bc_1009_7_2_assisted_rescue_separation
+  - general.bc_1009_7_4_assisted_rescue_stairways
   - general.bc_1009_8_two_way_communication
   - general.bc_1010_1_1_door_width
   - general.bc_1010_1_2_1_direction_of_swing
@@ -410,6 +442,95 @@ occupancy_group:
   - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_710_5_3_i2_pass_through_openings
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
+  - general.bc_903_2_10_parking_garages
+  - general.bc_903_2_11_1_1_opening_dimensions
+  - general.bc_903_2_11_1_2_openings_on_one_side
+  - general.bc_903_2_11_1_3_basements
+  - general.bc_903_2_11_1_stories_without_openings
+  - general.bc_903_2_11_2_chutes
+  - general.bc_903_2_11_3_buildings_55_feet
+  - general.bc_903_2_11_4_hazardous_exhaust_ducts
+  - general.bc_903_2_11_5_commercial_cooking
+  - general.bc_903_2_11_6_other_required_systems
+  - general.bc_903_2_1_1_group_a1_sprinklers
+  - general.bc_903_2_1_2_group_a2_sprinklers
+  - general.bc_903_2_1_3_group_a3_sprinklers
+  - general.bc_903_2_1_4_group_a4_sprinklers
+  - general.bc_903_2_1_5_1_under_grandstands
+  - general.bc_903_2_1_5_a5_accessory_areas
+  - general.bc_903_2_1_7_multiple_a_fire_areas
+  - general.bc_903_2_2_2_battery_laboratories
+  - general.bc_903_2_3_group_e_sprinklers
+  - general.bc_903_2_4_1_woodworking
+  - general.bc_903_2_4_2_distilled_spirits
+  - general.bc_903_2_4_3_upholstered_furniture
+  - general.bc_903_2_4_group_f1_sprinklers
+  - general.bc_903_2_5_1_group_h_sprinklers
+  - general.bc_903_2_5_2_h5_sprinkler_design
+  - general.bc_903_2_6_group_i_sprinklers
+  - general.bc_903_2_7_1_high_piled_storage
+  - general.bc_903_2_7_2_upholstered_furniture
+  - general.bc_903_2_7_3_battery_storage
+  - general.bc_903_2_7_group_m_sprinklers
+  - general.bc_903_2_8_group_r_sprinklers
+  - general.bc_903_2_9_1_repair_garages
+  - general.bc_903_2_9_3_distilled_spirits_wine
+  - general.bc_903_2_9_4_upholstered_furniture
+  - general.bc_903_2_9_group_s1_sprinklers
+  - general.bc_903_2_mixed_occupancies
+  - general.bc_903_3_1_3_nfpa_13d_scope
+  - general.bc_905_3_1_class_iii_by_height
+  - general.bc_905_3_2_group_a_standpipes
+  - general.bc_905_3_3_mall_standpipes
+  - general.bc_905_3_4_underground_standpipes
+  - general.bc_905_3_5_helistop_standpipes
+  - general.bc_905_3_standpipes_required
+  - general.bc_907_2_10_1_storage_fire_alarm
+  - general.bc_907_2_11_1_group_r1_smoke_alarm_locations
+  - general.bc_907_2_11_2_group_r_smoke_alarm_locations
+  - general.bc_907_2_11_3_smoke_alarms_near_cooking
+  - general.bc_907_2_11_4_smoke_alarms_near_bathrooms
+  - general.bc_907_2_11_5_smoke_alarm_interconnection
+  - general.bc_907_2_11_6_smoke_alarm_power
+  - general.bc_907_2_11_7_smoke_detection_instead
+  - general.bc_907_2_11_8_portable_smoke_alarms
+  - general.bc_907_2_11_smoke_alarms
+  - general.bc_907_2_1_1_group_a_voice_alarm
+  - general.bc_907_2_1_1_mixed_voice_alarm
+  - general.bc_907_2_1_2_captions
+  - general.bc_907_2_1_3_group_a_smoke_detection
+  - general.bc_907_2_1_group_a_fire_alarm
+  - general.bc_907_2_2_2_battery_laboratory_detection
+  - general.bc_907_2_2_group_b_fire_alarm
+  - general.bc_907_2_3_group_e_manual_fire_alarm
+  - general.bc_907_2_3_group_e_voice_alarm
+  - general.bc_907_2_4_1_battery_manufacturing
+  - general.bc_907_2_4_group_f_fire_alarm
+  - general.bc_907_2_5_group_h_fire_alarm
+  - general.bc_907_2_6_1_1_group_i1_smoke_alarms
+  - general.bc_907_2_6_1_group_i1_smoke_detection
+  - general.bc_907_2_6_2_group_i2_smoke_detection
+  - general.bc_907_2_6_3_1_group_i3_initiation
+  - general.bc_907_2_6_3_2_1_group_i3_locked_boxes
+  - general.bc_907_2_6_3_2_group_i3_alarm_boxes
+  - general.bc_907_2_6_3_3_group_i3_smoke_detection
+  - general.bc_907_2_6_3_group_i3_fire_alarm
+  - general.bc_907_2_6_group_i_fire_alarm
+  - general.bc_907_2_7_1_1_group_m_notification
+  - general.bc_907_2_7_1_group_m_fire_alarm
+  - general.bc_907_2_7_2_group_m_battery_storage
+  - general.bc_907_2_8_1_group_r1_fire_alarm
+  - general.bc_907_2_8_2_group_r1_corridor_detection
+  - general.bc_907_2_8_3_group_r1_smoke_alarms
+  - general.bc_907_2_9_1_group_r2_fire_alarm
+  - general.bc_907_2_9_2_group_r2_smoke_alarms
+  - general.bc_907_2_9_3_group_r2_college_detection
+  - general.bc_907_5_2_2_1_voice_alarm_override
+  - general.bc_907_5_2_2_2_voice_alarm_live_messages
+  - general.bc_907_5_2_2_3_voice_alarm_other_uses
+  - general.bc_907_5_2_2_4_voice_alarm_captions
+  - general.bc_907_5_2_2_5_voice_alarm_standby_power
+  - general.bc_907_5_2_2_voice_alarm_design
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -524,6 +645,7 @@ assembly_fixed_seating:
   - general.bc_1030_9_7_stairways_connecting_to_stepped_aisles
   - general.bc_1030_9_8_stairways_connecting_to_vomitories
   - general.bc_1030_9_assembly_aisles_required
+  - general.bc_903_2_1_5_1_under_grandstands
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -594,6 +716,7 @@ special_egress_spaces:
   - general.bc_407_4_2_sleeping_room_travel
   - general.bc_411_4_1_photoluminescent_exit_signs
   - general.bc_411_4_exit_marking
+  - general.bc_905_3_3_mall_standpipes
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -705,6 +828,7 @@ underground_building:
   - general.bc_405_7_1_two_exits_on_each_floor_level
   - general.bc_405_7_2_smokeproof_enclosures
   - general.bc_405_7_means_of_egress
+  - general.bc_905_3_4_underground_standpipes
   - general.bc_table_1006_3_4_1__r2_dwelling_units
   - general.bc_table_1006_3_4_2__a_b_e_f_m_u
   - general.bc_table_1006_3_4_2__h_i_r
@@ -714,6 +838,7 @@ r2_sleeping_units:
     dwelling units use Table 1006.3.4(1), sleeping units Table 1006.3.4(2)), as the architect states it'
   unit: yes_no
   needed_by:
+  - general.bc_903_2_8_group_r_sprinklers
   - general.bc_table_1006_3_4_1__r2_dwelling_units
   - general.bc_table_1006_3_4_2__h_i_r
 emergency_escape_openings_1031:
@@ -731,6 +856,7 @@ occupied_outdoor_areas:
   - general.bc_1004_7_outdoor_areas
   - general.bc_1010_1_2_1_direction_of_swing
   - general.bc_1010_2_8_panic_hardware
+  - general.bc_903_2_1_6_assembly_on_roofs
 ambulatory_care_facility:
   meaning: 'The building is or holds an ambulatory care facility (2025 BCNYS 202, Section 422; Group B, 304.1), as the architect
     states it: Section 422 asks its separation (422.2) and smoke compartments (422.3), so Table 1020.2''s Group B corridor
@@ -744,6 +870,8 @@ ambulatory_care_facility:
   - general.bc_422_3_3_independent_egress
   - general.bc_422_3_smoke_compartments
   - general.bc_709_5_1_i2_smoke_barrier_doors
+  - general.bc_903_2_2_1_ambulatory_care
+  - general.bc_907_2_2_1_ambulatory_care_detection
   - general.bc_table_1020_2_a_b_e_f_m_s_u
   - general.bc_table_1020_3_corridor_width
 corridors_within_dwelling_units:
@@ -763,6 +891,73 @@ emergency_voice_alarm_system:
   unit: yes_no
   needed_by:
   - general.bc_1020_3_corridor_capacity
+  - general.bc_907_2_1_1_group_a_voice_alarm
+  - general.bc_907_2_1_1_mixed_voice_alarm
+  - general.bc_907_2_3_group_e_voice_alarm
+  - general.bc_907_5_2_2_1_voice_alarm_override
+  - general.bc_907_5_2_2_2_voice_alarm_live_messages
+  - general.bc_907_5_2_2_3_voice_alarm_other_uses
+  - general.bc_907_5_2_2_4_voice_alarm_captions
+  - general.bc_907_5_2_2_5_voice_alarm_standby_power
+  - general.bc_907_5_2_2_voice_alarm_design
+group_r_present:
+  meaning: 'The building has a Group R occupancy (R-1 to R-4) among the groups the architect states, alone or with others
+    (2025 BCNYS 903.2.8: a sprinkler system "throughout all buildings with a Group R fire area")'
+  unit: yes_no
+  needed_by:
+  - general.bc_903_2_8_group_r_sprinklers
+group_h_present:
+  meaning: 'The building has a Group H occupancy (H-1 to H-5) among the groups the architect states, alone or with others
+    (2025 BCNYS 903.2.5.1: "An automatic sprinkler system shall be installed in Group H occupancies")'
+  unit: yes_no
+  needed_by:
+  - general.bc_903_2_5_1_group_h_sprinklers
+  - general.bc_903_2_5_2_h5_sprinkler_design
+group_i1_i2_i3_present:
+  meaning: 'The building has a Group I-1, I-2 or I-3 occupancy among the groups the architect states, alone or with others
+    (2025 BCNYS 903.2.6: a sprinkler system "throughout buildings with a Group I fire area", its exceptions 2 and 3 for
+    Group I-4 only)'
+  unit: yes_no
+  needed_by:
+  - general.bc_903_2_6_group_i_sprinklers
+stories_above_grade_plane:
+  meaning: 'The building''s stories above grade plane (2025 BCNYS 202 STORY ABOVE GRADE PLANE), as the architect counts
+    them: 903.3.1.2 permits an NFPA 13R system only in a Group R occupancy of four stories or fewer above grade plane'
+  unit: count
+  needed_by:
+  - general.bc_903_2_8_group_r_sprinklers
+townhouse_units:
+  meaning: 'Every dwelling unit of the building is a townhouse unit (2025 BCNYS 202 TOWNHOUSE UNIT: a single-family dwelling
+    unit in a townhouse that extends from the foundation to the roof, that has a yard or public way on not fewer than two sides and a separate means of egress),
+    as the architect states it: 903.3.1.3 permits an NFPA 13D system in townhouses, and 905.3''s exception needs no standpipe
+    system in Group R-2 townhouses (read with separate_means_of_egress)'
+  unit: yes_no
+  needed_by:
+  - general.bc_903_2_8_group_r_sprinklers
+  - general.bc_905_3_1_class_iii_by_height
+  - general.bc_905_3_3_mall_standpipes
+  - general.bc_905_3_4_underground_standpipes
+  - general.bc_905_3_5_helistop_standpipes
+  - general.bc_905_3_standpipes_required
+separate_means_of_egress:
+  meaning: 'Every dwelling unit of the building has a separate means of egress, as the architect states it (2025 BCNYS 202
+    TOWNHOUSE UNIT: "has a separate means of egress"): read with townhouse_units, as 905.3''s exception leaves standpipes
+    out of Group R-2 townhouses'
+  unit: yes_no
+  needed_by:
+  - general.bc_905_3_1_class_iii_by_height
+  - general.bc_905_3_3_mall_standpipes
+  - general.bc_905_3_4_underground_standpipes
+  - general.bc_905_3_5_helistop_standpipes
+  - general.bc_905_3_standpipes_required
+nfpa_13r_stated:
+  meaning: 'The architect states an NFPA 13R sprinkler system, whether or not it counts as one per 2025 BCNYS 903.3.1.2
+    (sprinklered_903_3_1_2 is no in a building stated Group R alone above four stories): 903.3.1.2''s own flags show wherever
+    one is stated'
+  unit: yes_no
+  needed_by:
+  - general.bc_903_3_1_2_2_corridors_balconies_13r
+  - general.bc_903_3_1_2_nfpa_13r_limits
 stages_or_platforms:
   meaning: 'The building has a stage, a platform or a technical production area (2025 BCNYS 202), as the architect states
     it: Section 410.5''s flags show, and a space''s common path over 100 feet can''t pass Table 1006.2.1''s 125 ft rows
@@ -798,6 +993,7 @@ aircraft_related_occupancy:
   - general.bc_412_6_1_ancillary_areas
   - general.bc_412_6_aircraft_manufacturing_facilities
   - general.bc_412_7_3_heliports_and_helistops
+  - general.bc_905_3_5_helistop_standpipes
   - general.bc_table_1006_2_1_u
   - general.bc_table_412_6_aircraft_manufacturing_travel
 service_corridors:
@@ -881,5 +1077,6 @@ assembly_spaces:
   - general.bc_1030_9_7_stairways_connecting_to_stepped_aisles
   - general.bc_1030_9_8_stairways_connecting_to_vomitories
   - general.bc_1030_9_assembly_aisles_required
+  - general.bc_903_2_1_5_1_under_grandstands
   - general.bc_table_1030_13_2_1_smoke_protected_row_lengths
   - general.bc_table_1030_6_2_smoke_protected_aisle_factors
