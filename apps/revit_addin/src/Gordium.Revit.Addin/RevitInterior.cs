@@ -333,6 +333,43 @@ internal static class RevitInterior
     /// the rectangle's loop dropped. The lines and the Room are each made in a committed transaction (Revit works a
     /// plan's enclosed areas out again only on a commit) inside the transaction group <see cref="GrossAreasOf"/> rolls
     /// back. Each loop's corners and area, and each side with what bounds it, are logged.</summary>
+    /// <summary>A wall's plan footprint (<see cref="WallFootprint"/>): the end points of its solids' edges, tessellated,
+    /// so a wall's true extent whatever its location line; its bounding box where it has no solid; no corners where
+    /// neither can be read (StoryOutlines then sends no outline: it can't show the wall is inside it). Never a crash.</summary>
+    private static WallFootprint FootprintOf(Wall w)
+    {
+        string? mark = null;
+        var bounding = false;
+        try
+        {
+            mark = w.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString();
+            bounding = w.get_Parameter(BuiltInParameter.WALL_ATTR_ROOM_BOUNDING)?.AsInteger() != 0;
+            var points = new List<Xyz>();
+            if (w.get_Geometry(new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false }) is { } geometry)
+                foreach (var solid in WallSolids(geometry))
+                    foreach (Edge edge in solid.Edges)
+                        points.AddRange(edge.Tessellate().Select(P));
+            if (points.Count == 0 && w.get_BoundingBox(null) is { } box)
+                points = [P(box.Min), P(new XYZ(box.Max.X, box.Min.Y, box.Min.Z)), P(box.Max), P(new XYZ(box.Min.X, box.Max.Y, box.Min.Z))];
+            return new WallFootprint(w.UniqueId, mark, bounding, points);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return new WallFootprint(w.UniqueId, mark, bounding, []);
+        }
+    }
+
+    private static IEnumerable<Solid> WallSolids(GeometryElement geometry)
+    {
+        foreach (var obj in geometry)
+            if (obj is Solid { Volume: > 0 } s)
+                yield return s;
+            else if (obj is GeometryInstance gi)
+                foreach (var inner in WallSolids(gi.GetInstanceGeometry()))
+                    yield return inner;
+    }
+
     private static GrossArea RingOf(Document doc, Phase phase, Level level, List<Wall> walls, ViewFamilyType? planType, List<string> diagnostics)
     {
         GrossArea No(string why) => new(null, new Dictionary<string, double>(), why);
@@ -415,7 +452,10 @@ internal static class RevitInterior
                     return $"({c.GetEndPoint(0).X:0.###},{c.GetEndPoint(0).Y:0.###})-({c.GetEndPoint(1).X:0.###},{c.GetEndPoint(1).Y:0.###}) " +
                            $"{by?.Category?.BuiltInCategory.ToString().Replace("OST_", "") ?? "none"} {by?.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString()};";
                 })));
-            return new GrossArea(building, widths);
+            // every wall on the level with its footprint: one beyond the outline (a veneer not set Room Bounding) or one
+            // in the exterior walls that isn't room-bounding keeps the outline from being sent (StoryOutlines.Of)
+            var footprints = ReadSteps.Time("inside.gross_areas.walls", () => walls.Select(FootprintOf).ToList());
+            return new GrossArea(building, widths, null, footprints);
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
                                        or Autodesk.Revit.Exceptions.InvalidOperationException)

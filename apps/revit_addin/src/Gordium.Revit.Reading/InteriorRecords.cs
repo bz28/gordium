@@ -68,9 +68,15 @@ public sealed record InteriorRecords
 /// room separation lines drawn as a rectangle 20 ft round the level's walls, a Room placed in the ring, its boundary at
 /// the finished faces read (<c>GetBoundarySegments</c>: each loop's segments and the element bounding each, by
 /// <c>UniqueId</c>), the rectangle's loop dropped, all rolled back. <see cref="WallWidths"/>: each bounding wall's full
-/// thickness (<c>Wall.Width</c>). <see cref="Why"/>: why there is none (the ring Room not enclosed, Revit refused).</summary>
+/// thickness (<c>Wall.Width</c>). <see cref="Why"/>: why there is none (the ring Room not enclosed, Revit refused).
+/// <see cref="Walls"/>: every wall on the level with its plan footprint, so an outline that stops short of a wall (a
+/// veneer Revit doesn't count as room-bounding) is never sent; null where they weren't read.</summary>
 public sealed record GrossArea(IReadOnlyList<IReadOnlyList<BoundarySegmentRecord>>? Loops, IReadOnlyDictionary<string, double> WallWidths,
-                               string? Why = null);
+                               string? Why = null, IReadOnlyList<WallFootprint>? Walls = null);
+
+/// <summary>A wall on a level, for the story's outlines: its <c>UniqueId</c>, its Mark, whether Revit counts it
+/// room-bounding (<c>WALL_ATTR_ROOM_BOUNDING</c>), and the corners of its plan footprint (its solid's edges, internal).</summary>
+public sealed record WallFootprint(string UniqueId, string? Mark, bool RoomBounding, IReadOnlyList<Xyz> Corners);
 
 /// <summary>A level (<c>Level</c>): its <c>UniqueId</c>, <c>Name</c> and <c>ProjectElevation</c> (internal).</summary>
 public sealed record LevelRecord(string UniqueId, string Name, double Elevation);
