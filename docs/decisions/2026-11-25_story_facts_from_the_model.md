@@ -196,3 +196,7 @@ One more undercount on a model marked wrong: the hall check fired only on the ex
 ## Review round 11 of step 3 (2026-11-26)
 
 No undercount found. A hall's function given as a list or dict crashed the round-10 check (now it stops the count); a corridor marked residential beside units stating no function now gets those units' own reason (mark their function); the step's paragraph names the hall check as it now stands. Pins for each.
+
+## Merging main into the line (2026-11-28)
+
+Two pass paths closed in the merge review. A one-exit Group R-2 story whose Table 1006.3.4(1) pass rests on an NFPA 13R system alone needs review (903.3.1.2 permits 13R only four stories or fewer above grade plane, with the roof and lowest floor within its heights of fire department access, which the model doesn't show), saying that reason, not an open question its readings leave (`rule_format/parts.py` `_own_reviews`); the class fix for every 13R allowance is its own PR. And "no stairs" (an empty stairs list) is never taken where the building has more than one floor, drawn or stated (`interior._stairs_against_floors`, #279's refusal): a stair left undrawn may be anywhere, so neither the dwelling units nor the rooms exiting outside are measured on it. Pins in `test_dwelling_units_check.py`, `test_part_readings.py`, `test_routes_dwelling_units.py` and `test_routes_rooms_exit_outside.py`.

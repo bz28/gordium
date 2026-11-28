@@ -405,7 +405,7 @@ def _measured(law: dict, interior, readings: dict, ground: dict | None = None, v
         kind = f"{kind} and the interior's {ESCAPE}"          # its own readings key (section group 8a)
     if kind not in readings:
         if kind.startswith(ROUTES):
-            got = measure_routes(interior, ground=ground)
+            got = measure_routes(interior, ground=ground, stated_stories=_stated_stories(interior, values))
             factors = Path(law["folder"]) / OCCUPANT_LOAD_FACTORS
             if factors.exists() and isinstance(interior, dict):      # 1004.5: each room's function's load
                 block = interior.get("building")

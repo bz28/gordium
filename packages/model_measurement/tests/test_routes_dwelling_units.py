@@ -246,7 +246,6 @@ def test_a_stair_in_a_group_or_not_read_never_counts_it_as_one_unit():
         units_on(read(desc).stories["L1"], {}, _is_exit, lambda g: False)
 
 
-
 def test_no_stairs_beside_another_floor_is_never_taken():
     """"No stairs" (an empty list) beside rooms on a second level: a stair left undrawn may stand in any group, so the
     count isn't measured (#279's refusal of the same claim for the house's stair rules, merged into the story facts);
@@ -258,6 +257,11 @@ def test_no_stairs_beside_another_floor_is_never_taken():
                           "level": "L2", "floor_elevation": 10, "function": "residential"})
     got = count(desc)
     assert isinstance(got, Stop) and got.key == "units_stair", got
+    one = layout([("residential", 1, 1), ("residential", 1, 1), ("business", 1, 1)], (False, False))
+    one["building"] = {"stories_above_grade_plane": 2}   # one floor drawn, two stated (review of the merge: the
+    got = count(one)                                     # stated count is #279's trigger too)
+    assert isinstance(got, Stop) and got.key == "units_stair", got
+
 
 def test_a_closet_between_two_rooms_of_a_group_may_be_shared():
     """Two residential rooms (one with a door to the corridor) each opening into a closet that sits between them:

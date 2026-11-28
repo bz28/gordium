@@ -90,16 +90,18 @@ def _listed(description, key) -> list:
     return got if isinstance(got, list) else []
 
 
-def measure(description, clearance: float = CLEARANCE, ground: dict | None = None) -> dict:
+def measure(description, clearance: float = CLEARANCE, ground: dict | None = None, stated_stories=None) -> dict:
     """`ground`: the ground the architect stated, story_place.ground_of's (None: none stated), for where each story
-    sits against the grade plane (story_place.py)."""
+    sits against the grade plane (story_place.py). `stated_stories`: the most stories the check gives the building
+    (a count, or (count, whose words with {n}): design_checker.egress._stated_stories), against which "no stairs"
+    isn't taken (_stair_points)."""
     out = {"format": MEASURED_FORMAT, "units": {"travel": "ft", "corridor_width": "in", "area": "sf"},
            "parts": {k: None for k in KINDS}, "problems": []}
     floor = read(description)
     out["problems"] = list(floor.stops)
     if not floor.stories:
         return out
-    stairs = _stair_points(description)
+    stairs = _stair_points(description, stated_stories)
     placed = story_place.places(description, Reader(description["units"]),
                                 {lid: s.name for lid, s in floor.stories.items()}, floor.stories, ground,
                                 floor.stops)
@@ -133,13 +135,26 @@ OTHER_WAYS = (("ramps", "ramp"), ("alternating_tread_devices", "alternating_trea
               ("ships_ladders", "ships_ladder"))
 
 
-def _stair_points(description) -> list:
+def _stories_of(description, stated_stories):
+    """The stories the check gives the building (egress._stated_stories' count or (count, words)), else the
+    description's own building block's stories above grade plane where it is a number, else None."""
+    if stated_stories is not None:
+        return stated_stories
+    block = description.get("building") if isinstance(description, dict) else None
+    n = block.get("stories_above_grade_plane") if isinstance(block, dict) else None
+    if type(n) in (int, float) and math.isfinite(n):
+        return n, "the architect states {n} stories above grade plane"
+    return None
+
+
+def _stair_points(description, stated_stories=None) -> list:
     """Every way to another story the description gives or doesn't rule out, each {"points": plan points of its
     nosings' ends in inches}, or ANYWHERE: the stairs (`stairs`, house egress) read entry by entry, one that can't be
     read anywhere; no `stairs` list at all (not read, the format's silence) one anywhere, and so an empty list where
-    the description shows more than one floor (interior._stairs_against_floors, #279); a ramp, alternating tread
-    device or ship's ladder anywhere unless the description gives its list empty or says it has none (`has_none`
-    with a source), since none is said, never inferred."""
+    the description shows more than one floor, or the check gives the building two or more stories (`stated_stories`,
+    else the description's own `building.stories_above_grade_plane`; interior._stairs_against_floors, #279); a ramp,
+    alternating tread device or ship's ladder anywhere unless the description gives its list empty or says it has
+    none (`has_none` with a source), since none is said, never inferred."""
     reader = Reader(description["units"])
     out = []
     stairs = description.get("stairs")
@@ -149,7 +164,7 @@ def _stair_points(description) -> list:
     elif not stairs:                                     # "no stairs" beside more than one floor isn't taken: a stair
         from model_measurement.interior import _stairs_against_floors    # left undrawn may be anywhere (#279's
         try:                                                              # refusal, the same for the routes)
-            refused = _stairs_against_floors(description, reader)
+            refused = _stairs_against_floors(description, reader, _stories_of(description, stated_stories))
         except (InteriorStop, TypeError, AttributeError, KeyError, ValueError):
             refused = "unread"
         if refused is not None:

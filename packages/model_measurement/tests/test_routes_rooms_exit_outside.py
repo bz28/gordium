@@ -579,3 +579,19 @@ def test_a_stair_within_an_inch_of_the_space_may_be_its_own(y, expect_no):
     desc["building"] = {"corridors_within_dwelling_units": False}
     got = _story(desc)["measures"].get(OUTSIDE_FACT)
     assert (got is False) is expect_no, (y, got)
+
+
+def test_no_stairs_beside_more_than_one_story_never_settles_the_space():
+    """"No stairs" (an empty list) isn't taken where the building has more than one floor (#279's refusal, merged into
+    the story facts): a stair left undrawn may stand within the space, its own way out to another story, so the "no"
+    a shared corridor gives (above) isn't measured, whether the second floor is drawn or only stated."""
+    from model_measurement.routes import measure
+    stated = row(("marked", "none", "none"), ("wall", "wall"), corridor=[0, 1, 2], function="residential",
+                 within=False)
+    assert _story(stated)["measures"][OUTSIDE_FACT] is False
+    two = {**stated, "building": {**stated["building"], "stories_above_grade_plane": 2}}
+    got = _story(two)
+    assert OUTSIDE_FACT not in got["measures"] and "said to be none where the building has more than one floor" in \
+        got["not_measured"][OUTSIDE_FACT], got
+    story = next(s for s in measure(stated, stated_stories=(2, "the check gives {n}"))["parts"]["story"])
+    assert OUTSIDE_FACT not in story["measures"] and OUTSIDE_FACT in story["not_measured"], story
