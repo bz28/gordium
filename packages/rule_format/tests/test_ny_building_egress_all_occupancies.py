@@ -1216,7 +1216,9 @@ def test_more_than_one_reads_the_same_comparison_in_every_piece():
     denied = {("1003.3.2", "more than 4 inch"): "shall not overhang that post or pylon more than 4 inches"}
     seen = []
     for pid, e in pieces.items():
-        for n, comp in zip(e["second_reading_numbers"], e["second_reading_comparisons"]):
+        # the comparisons are given for the recorded numbers (verif: one per number); where the two readings
+        # differ (Table 716.1(2), HIGHLY TOXIC: Chapter 9 part c) only those line up with them
+        for n, comp in zip(e["numbers"], e["second_reading_comparisons"]):
             if str(n).startswith("more than ") and (pid, n) not in denied:
                 seen.append((pid, n, comp))
     assert seen and all(comp == ">" for _, _, comp in seen), [x for x in seen if x[2] != ">"]
@@ -1699,17 +1701,22 @@ def test_no_title_puts_a_bare_apostrophe_after_a_word_not_ending_in_s():
 # law, never from the rules: where each section group 9 flag with a condition is NOT applicable (its exception spares the
 # whole building, or its own words exclude the group); everywhere else, the unstated cases included, it shows.
 SPRINKLED = ("nfpa_13", "nfpa_13r", "nfpa_13 alone", "nfpa_13r alone")
+# the merge of Chapter 9 (2026-11-27): an exception for a building "equipped throughout with an automatic sprinkler
+# system in accordance with Section 903.3.1.1 or 903.3.1.2" is met by a 13R system only in Group R, where
+# 903.3.1.2 permits one (two or more groups, or none stated: a person's check)
+def _sprinkled(g, s):
+    return s in ("nfpa_13", "nfpa_13 alone") or (s in ("nfpa_13r", "nfpa_13r alone") and g in ("R-1", "R-2", "R-3", "R-4"))
 LUMINOUS_HIDDEN = lambda g, s: g not in ("A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "I-1", "M", "R-1", "mixed", None)       # 1025.1   # 903.3.1.1 or 903.3.1.2 stated, "equipped throughout"
 HIDDEN_WHERE = {
     "general.bc_1008_2_illumination_required": lambda g, s: g == "U",                       # exception 1
     "general.bc_1013_1_exit_signs_where_required": lambda g, s: g == "U",                   # exception 3
     "general.bc_1008_2_2_group_i2_exterior_landings": lambda g, s: g not in ("I-2", "mixed", None),
-    "general.bc_1013_2_low_level_exit_signs_group_r1": lambda g, s: g not in ("R-1", "mixed", None) or s in SPRINKLED,
-    "general.bc_1009_3_2_stairway_width": lambda g, s: s in SPRINKLED,                      # exception 1
-    "general.bc_1009_3_3_area_of_refuge_at_stairways": lambda g, s: s in SPRINKLED or g == "R-2",   # exceptions 2, 5
-    "general.bc_1009_4_2_elevator_area_of_refuge": lambda g, s: s in SPRINKLED,             # exception 2
-    "general.bc_1009_7_2_assisted_rescue_separation": lambda g, s: s in SPRINKLED,
-    "general.bc_1009_7_4_assisted_rescue_stairways": lambda g, s: s in SPRINKLED,
+    "general.bc_1013_2_low_level_exit_signs_group_r1": lambda g, s: g not in ("R-1", "mixed", None) or _sprinkled(g, s),
+    "general.bc_1009_3_2_stairway_width": lambda g, s: _sprinkled(g, s),                      # exception 1
+    "general.bc_1009_3_3_area_of_refuge_at_stairways": lambda g, s: _sprinkled(g, s) or g == "R-2",   # exceptions 2, 5
+    "general.bc_1009_4_2_elevator_area_of_refuge": lambda g, s: _sprinkled(g, s),             # exception 2
+    "general.bc_1009_7_2_assisted_rescue_separation": lambda g, s: _sprinkled(g, s),
+    "general.bc_1009_7_4_assisted_rescue_stairways": lambda g, s: _sprinkled(g, s),
     "general.bc_1009_8_two_way_communication": lambda g, s: g in ("I-2", "I-3"),            # exception 6
     "general.bc_1018_3_aisles_groups_b_m": lambda g, s: g not in ("B", "M", "mixed", None),
     "general.bc_1018_5_aisles_other_occupancies": lambda g, s: g in ("B", "M"),             # "other than ... B and M"
