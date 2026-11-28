@@ -513,6 +513,12 @@ def test_the_odyssey_answer_maker_loads_maines_law_with_no_model_description():
     assert found["place"] == "Portland, ME (the eval)" and found["folder"] == maker.MAINE
     assert [law["key"] for law in found["laws"]] == ["maine/maine_state"] and found["laws"][0]["rules"]
     assert egress.place_of is real                                     # the patching undone
+    # the stand-in for the interior measuring takes the measuring's keywords (no-stairs PR, round 2: it crashed once
+    # egress passed whole= and stated_stories=)
+    with maker.as_the_eval():
+        got = egress.measure_interior({"format": "gordium.interior/1", "units": "in", "rooms": [], "stairs": []},
+                                      whole=None, stated_stories=2)
+    assert got["parts"]["stair"] is None
 
 
 def test_the_odyssey_answers_route_join_never_adds_the_building_codes_door_parts():
