@@ -711,3 +711,25 @@ def test_the_readmes_rule_count_is_the_rulebooks():
     flags = sum(r["kind"] == "flag" for r in rules)
     readme = " ".join((NY / "README.md").read_text(encoding="utf-8").split())
     assert f"{len(rules)} hand-drafted (drafts: approval is deferred): {len(rules) - flags} rules and {flags} flags" in readme
+
+
+# the definitions part e1 brought in by the italics of its pieces (sources.yaml names none by hand)
+E1_DEFINITIONS = {"202:cornice", "202:fire_lane", "202:fire_retardant_treated_wood", "202:plastic_composite",
+                  "202:plastic_lumber", "202:primary_structural_frame"}
+
+
+def test_the_plans_part_e1_counts_are_the_datas(labels):
+    """Review round 3 of part e1: the plan's status line for part e1 (pieces, definitions, numbers read a second time,
+    flags and pointers) is worked out from the data, so it can't drift again as it did in round 1."""
+    rows = [json.loads(line) for line in SECTIONS.read_text(encoding="utf-8").splitlines()]
+    ids = {p["id"] for p in rows[1:]}
+    assert E1_DEFINITIONS <= ids
+    pieces = {p for p in ids if re.match(r"(Table )?705\.", p)} | E1_DEFINITIONS
+    numbers = sum(len(load(NY / "text_verification.yaml")["pieces"][p]["numbers"]) for p in pieces)
+    e1 = {p: v for p, v in labels.items() if re.match(r"(Table )?705\.", p)}
+    flags = sum(v["label"] == "flag" for v in e1.values())
+    pointers = sum(v["label"] == "reference" for v in e1.values())
+    plan = " ".join((REPO / "docs/decisions/2026-11-26_ny_building_chapter_7.md").read_text(encoding="utf-8").split())
+    line = plan.split("Status, e1 drafted", 1)[1].split("Status, e2", 1)[0]
+    assert f"and {len(E1_DEFINITIONS)} definitions: {len(pieces)} pieces read a second time ({numbers} numbers" in line
+    assert f"{flags} flags and {pointers} pointers" in line
